@@ -5,8 +5,11 @@
 
 package codedriver.module.process.sla.handler;
 
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.SlaStatus;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeCostVo;
 import codedriver.framework.process.dto.ProcessTaskStepTimeAuditVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.sla.core.SlaCalculateHandlerBase;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -31,6 +34,45 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
                 "2.如果一个步骤处理过程有暂停操作，则从暂停到恢复之间的时间段不算耗时。<br>" +
                 "3.如果一个步骤被多次重新激活，则每次处理时间段都累计为耗时。<br>" +
                 "4.如果两个或两个以上步骤的处理时间段有重合部分的话，则重合部分去重，只取一份时间。";
+    }
+
+    @Override
+    public SlaStatus getStatus(List<ProcessTaskStepVo> processTaskStepList) {
+        int doing = 0;
+        int pause = 0;
+        int done = 0;
+        int size = processTaskStepList.size();
+        for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+            String status = processTaskStepVo.getStatus();
+            if (Objects.equals(processTaskStepVo.getIsActive(),1)) {
+                // 未处理、处理中和挂起的步骤才需要计算SLA
+                if (ProcessTaskStatus.PENDING.getValue().equals(status)) {
+                    doing++;
+                    continue;
+                } else if (ProcessTaskStatus.RUNNING.getValue().equals(status)) {
+                    doing++;
+                    continue;
+                } else if (ProcessTaskStatus.HANG.getValue().equals(status)) {
+                    pause++;
+                    continue;
+                }
+            } else if (ProcessTaskStatus.SUCCEED.getValue().equals(status) || ProcessTaskStatus.ABORTED.getValue().equals(status)) {
+                done++;
+            }
+        }
+        if (doing > 0) {
+            return SlaStatus.DOING;
+        } else if (pause > 0) {
+            return SlaStatus.PAUSE;
+        } else if (done == size){
+            return SlaStatus.DONE;
+        }
+        return null;
+    }
+
+    @Override
+    public boolean needDelete(List<ProcessTaskStepVo> processTaskStepList) {
+        return false;
     }
 
     @Override

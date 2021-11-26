@@ -11,6 +11,7 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.dto.condition.ConditionConfigVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.SlaStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.sla.SlaCalculateHandlerNotFoundException;
 import codedriver.framework.process.sla.core.ISlaCalculateHandler;
@@ -30,6 +31,7 @@ import codedriver.module.process.sla.handler.DefaultSlaCalculateHandler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -279,40 +281,69 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
         TransactionStatus transactionStatus = transactionUtil.openTx();
         try {
             Long processTaskId = null;
-            List<Long> slaIdList = null;
+            List<Long> allSlaIdList = null;
             if (currentProcessTaskStepVo != null) {
-                slaIdList = processTaskMapper.getSlaIdListByProcessTaskStepId(currentProcessTaskStepVo.getId());
+//                System.out.println("processTaskStepId=" + currentProcessTaskStepVo.getId());
+                allSlaIdList = processTaskMapper.getSlaIdListByProcessTaskStepId(currentProcessTaskStepVo.getId());
                 processTaskId = currentProcessTaskStepVo.getProcessTaskId();
             } else if (currentProcessTaskVo != null) {
-                slaIdList = processTaskMapper.getSlaIdListByProcessTaskId(currentProcessTaskVo.getId());
-                /** 遍历删除不需要计算的slaId **/
-                Iterator<Long> iterator = slaIdList.iterator();
-                while (iterator.hasNext()) {
-                    Long slaId = iterator.next();
-                    if (processTaskMapper.getProcessTaskSlaTimeBySlaId(slaId) == null) {
-                        List<ProcessTaskStepVo> processTaskStepList =
-                                processTaskMapper.getProcessTaskStepBaseInfoBySlaId(slaId);
-                        Iterator<ProcessTaskStepVo> it = processTaskStepList.iterator();
-                        while (it.hasNext()) {
-                            ProcessTaskStepVo processTaskStepVo = it.next();
-                            // 未处理、处理中和挂起的步骤才需要计算SLA
-                            if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
-                                continue;
-                            } else if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
-                                continue;
-                            } else if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.HANG.getValue())) {
-                                continue;
-                            }
-                            it.remove();
-                        }
-                        if (CollectionUtils.isEmpty(processTaskStepList)) {
-                            iterator.remove();
-                        }
-                    }
-                }
+//                System.out.println("processTaskId=" + currentProcessTaskVo.getId());
+                allSlaIdList = processTaskMapper.getSlaIdListByProcessTaskId(currentProcessTaskVo.getId());
                 processTaskId = currentProcessTaskVo.getId();
             }
-
+//            System.out.println("************************start*****************************************");
+//            System.out.println(allSlaIdList);
+            List<Long> slaIdList = new ArrayList<>();
+            /** 遍历删除不需要计算的slaId **/
+            for (Long slaId : allSlaIdList) {
+                String config = processTaskMapper.getProcessTaskSlaConfigById(slaId);
+                String calculateHandler = (String) JSONPath.read(config, "calculateHandler");
+                if (StringUtils.isBlank(calculateHandler)) {
+                    calculateHandler = DefaultSlaCalculateHandler.class.getSimpleName();
+                }
+                ISlaCalculateHandler handler = SlaCalculateHandlerFactory.getHandler(calculateHandler);
+                if (handler == null) {
+                    throw new SlaCalculateHandlerNotFoundException(calculateHandler);
+                }
+                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoBySlaId(slaId);
+                SlaStatus status = handler.getStatus(processTaskStepList);
+                ProcessTaskSlaTimeVo slaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(slaId);
+//                System.out.println("slaId=" + slaId);
+//                String name = (String) JSONPath.read(config, "name");
+//                System.out.println("name=" + name);
+//                System.out.println("calculateHandler=" + calculateHandler);
+//                System.out.println("status=" + status);
+//                if (slaTimeVo == null) {
+//                    System.out.println("slaTimeVo.status=null");
+//                } else {
+//                    System.out.println("slaTimeVo.status=" + slaTimeVo.getStatus());
+//                }
+                if (slaTimeVo == null) {
+                    /** 当SLA未激活时，判断现在是否满足激活条件，不满足条件就删除 **/
+                    if (SlaStatus.DOING == status) {
+                        slaIdList.add(slaId);
+                    }
+                } else if (SlaStatus.DOING.name().toLowerCase().equals(slaTimeVo.getStatus())) {
+                    slaIdList.add(slaId);
+                } else if (SlaStatus.DONE.name().toLowerCase().equals(slaTimeVo.getStatus())) {
+                    /** 当SLA已完成时，判断现在是否满足激活条件，不满足条件就删除 **/
+                    if (status != null && SlaStatus.DONE != status) {
+                        slaIdList.add(slaId);
+                    } else if (handler.needDelete(processTaskStepList)) {
+                        deleteSlaById(slaId);
+                    }
+                } else if (SlaStatus.PAUSE.name().toLowerCase().equals(slaTimeVo.getStatus())) {
+                    /** 当SLA已暂停时，判断现在是否满足激活条件，不满足条件就删除 **/
+                    if (SlaStatus.PAUSE != status) {
+                        slaIdList.add(slaId);
+                    } else if (handler.needDelete(processTaskStepList)) {
+                        deleteSlaById(slaId);
+                    }
+                }
+//                System.out.println("-------------------------------------------");
+            }
+//            System.out.println(slaIdList);
+//            System.out.println("************************end*****************************************");
             if (CollectionUtils.isNotEmpty(slaIdList)) {
                 ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
                 processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId));
@@ -326,6 +357,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                         /* 旧的超时时间点 **/
                         Date oldExpireTime = null;
                         Long oldTimeSum = null;
+                        String oldSlaStatus = null;
                         boolean isSlaTimeExists = false;
                         /* 如果没有超时时间，证明第一次进入SLA标签范围，开始计算超时时间 **/
                         ProcessTaskSlaTimeVo oldSlaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(slaId);
@@ -333,6 +365,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                             /* 记录旧的超时时间点 **/
                             oldExpireTime = oldSlaTimeVo.getExpireTime();
                             oldTimeSum = oldSlaTimeVo.getTimeSum();
+                            oldSlaStatus = oldSlaTimeVo.getStatus();
                             isSlaTimeExists = true;
                         }
                         Long timeSum = getSlaTimeSumBySlaConfig(slaConfigObj, processTaskVo);
@@ -350,7 +383,16 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                             long currentTimeMillis = System.currentTimeMillis();
                             ProcessTaskSlaTimeCostVo timeCostVo = handler.calculateTimeCost(slaId, currentTimeMillis, worktimeUuid);
                             ProcessTaskSlaTimeVo slaTimeVo = getSlaTime(slaId, timeSum, currentTimeMillis, worktimeUuid, timeCostVo);
-                            System.out.println(slaTimeVo);
+                            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoBySlaId(slaId);
+                            SlaStatus status = handler.getStatus(processTaskStepList);
+                            if (status != null) {
+                                slaTimeVo.setStatus(status.name().toLowerCase());
+//                                System.out.println("status=" + status.name().toLowerCase());
+                            } else {
+                                slaTimeVo.setStatus(oldSlaStatus);
+//                                System.out.println("status=null");
+                            }
+//                            System.out.println("slaTimeVo=" + slaTimeVo);
                             if (Objects.equals(timeSum, oldTimeSum)) {
                                 long expireTimeLong = 0L;
                                 long oldExpireTimeLong = 0L;
@@ -362,6 +404,9 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                                 }
                                 /* 由于Date类型数据保存到MySql数据库时会丢失毫秒数值，只保留到秒的精度，所以两次计算超时时间点的差值小于1000时，说明时效没有被条件改变，不用更新 **/
                                 if (expireTimeLong - oldExpireTimeLong < 1000) {
+                                    if (!Objects.equals(slaTimeVo.getStatus(), oldSlaStatus)) {
+                                        processTaskMapper.updateProcessTaskSlaTimeStatus(slaTimeVo);
+                                    }
                                     continue;
                                 }
                             }
@@ -373,9 +418,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                             }
                             adjustJob(slaTimeVo, slaConfigObj, oldExpireTime);
                         } else if (isSlaTimeExists) {
-                            processTaskMapper.deleteProcessTaskSlaTimeBySlaId(slaId);
-                            processTaskMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
-                            processTaskMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
+                            deleteSlaById(slaId);
                         }
                     }
                 }
@@ -387,5 +430,11 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
             /** 回滚事务 **/
             transactionUtil.rollbackTx(transactionStatus);
         }
+    }
+
+    private void deleteSlaById(Long slaId) {
+        processTaskMapper.deleteProcessTaskSlaTimeBySlaId(slaId);
+        processTaskMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
+        processTaskMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
     }
 }
