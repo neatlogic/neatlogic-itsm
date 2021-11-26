@@ -65,7 +65,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
     public void fieldDispatcherInit() {
         buildWhereMap.put(FieldTypeEnum.FIELD.getValue(), (workcenterVo, sqlSb) -> {
             //根据column获取需要的表
-            sqlSb.append(String.format(" and %s.%s in ( %s ) ", new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.ID.getValue(), workcenterVo.getProcessTaskIdList().stream().map(Object::toString).collect(Collectors.joining(","))));
+            sqlSb.append(String.format(" %s.%s in ( %s ) ", new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.ID.getValue(), workcenterVo.getProcessTaskIdList().stream().map(Object::toString).collect(Collectors.joining(","))));
         });
 
         buildWhereMap.put(FieldTypeEnum.LIMIT_COUNT.getValue(), (workcenterVo, sqlSb) -> {
@@ -217,47 +217,49 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
     @Override
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         sqlSb.append(" where ");
-        //上报时间
-        ProcessTaskStartTimeCondition startTimeSqlCondition = (ProcessTaskStartTimeCondition) ConditionHandlerFactory.getHandler("starttime");
-        startTimeSqlCondition.getDateSqlWhere(workcenterVo.getStartTimeCondition(), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.START_TIME.getValue());
-        //我的待办
-        if (workcenterVo.getIsProcessingOfMine() == 1) {
-            sqlSb.append(" and ");
-            IProcessTaskCondition sqlCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler("processingofmine");
-            sqlCondition.getSqlConditionWhere(null, 0, sqlSb);
-        }
-        //keyword搜索框搜索 idList 过滤
-        if (CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList())) {
-            for(Object obj : workcenterVo.getKeywordConditionList()){
-                JSONObject condition = JSONObject.parseObject(obj.toString());
-                //title serialNumber 全词匹配
-                if(ProcessTaskSqlTable.FieldEnum.TITLE.getValue().equals(condition.getString("name"))){
-                    sqlSb.append(String.format(" AND pt.title in ('%s') ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("','"))));
-                }else if(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue().equals(condition.getString("name"))){
-                    sqlSb.append(String.format(" AND pt.serial_number in (%s) ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining(","))));
-                }else {
-                    try {
-                        List<FullTextIndexWordOffsetVo> wordOffsetVoList = FullTextIndexUtil.sliceWord(condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("")));
-                        String contentWord = wordOffsetVoList.stream().map(FullTextIndexWordOffsetVo::getWord).collect(Collectors.joining("','"));
-                        sqlSb.append(String.format("  AND EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word IN ('%s') )", condition.getString("name"), contentWord));
-                    } catch (IOException e) {
-                        logger.error(e.getMessage(), e);
+        if(!Objects.equals(workcenterVo.getSqlFieldType(),FieldTypeEnum.FIELD.getValue())) {
+            //上报时间
+            ProcessTaskStartTimeCondition startTimeSqlCondition = (ProcessTaskStartTimeCondition) ConditionHandlerFactory.getHandler("starttime");
+            startTimeSqlCondition.getDateSqlWhere(workcenterVo.getStartTimeCondition(), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.START_TIME.getValue());
+            //我的待办
+            if (workcenterVo.getIsProcessingOfMine() == 1) {
+                sqlSb.append(" and ");
+                IProcessTaskCondition sqlCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler("processingofmine");
+                sqlCondition.getSqlConditionWhere(null, 0, sqlSb);
+            }
+            //keyword搜索框搜索 idList 过滤
+            if (CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList())) {
+                for (Object obj : workcenterVo.getKeywordConditionList()) {
+                    JSONObject condition = JSONObject.parseObject(obj.toString());
+                    //title serialNumber 全词匹配
+                    if (ProcessTaskSqlTable.FieldEnum.TITLE.getValue().equals(condition.getString("name"))) {
+                        sqlSb.append(String.format(" AND pt.title in ('%s') ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("','"))));
+                    } else if (ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue().equals(condition.getString("name"))) {
+                        sqlSb.append(String.format(" AND pt.serial_number in (%s) ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining(","))));
+                    } else {
+                        try {
+                            List<FullTextIndexWordOffsetVo> wordOffsetVoList = FullTextIndexUtil.sliceWord(condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("")));
+                            String contentWord = wordOffsetVoList.stream().map(FullTextIndexWordOffsetVo::getWord).collect(Collectors.joining("','"));
+                            sqlSb.append(String.format("  AND EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word IN ('%s') )", condition.getString("name"), contentWord));
+                        } catch (IOException e) {
+                            logger.error(e.getMessage(), e);
+                        }
                     }
                 }
             }
-        }
-        //隐藏工单 过滤
-        Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
-        if (!isHasProcessTaskAuth) {
-            sqlSb.append(" and pt.is_show = 1 ");
+            //隐藏工单 过滤
+            Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
+            if (!isHasProcessTaskAuth) {
+                sqlSb.append(" and pt.is_show = 1 ");
+            }
+
+            //只有”我的草稿“分类才显示工单状态”未提交“的工单
+            if (!Objects.equals(ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue(), workcenterVo.getUuid()) && !sqlSb.toString().contains("draft") && Arrays.asList(FieldTypeEnum.DISTINCT_ID.getValue(), FieldTypeEnum.TOTAL_COUNT.getValue(), FieldTypeEnum.LIMIT_COUNT.getValue()).contains(workcenterVo.getSqlFieldType())) {
+                sqlSb.append(" and pt.status != 'draft' ");
+            }
         }
         //其它条件过滤
         buildWhereMap.get(workcenterVo.getSqlFieldType()).build(workcenterVo, sqlSb);
-        //只有”我的草稿“分类才显示工单状态”未提交“的工单
-        if(!Objects.equals(ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue(),workcenterVo.getUuid()) && !sqlSb.toString().contains("draft")&&Arrays.asList(FieldTypeEnum.DISTINCT_ID.getValue(),FieldTypeEnum.TOTAL_COUNT.getValue(),FieldTypeEnum.LIMIT_COUNT.getValue()).contains(workcenterVo.getSqlFieldType())){
-            sqlSb.append(" and pt.status != 'draft' ");
-        }
-
     }
 
     @Override

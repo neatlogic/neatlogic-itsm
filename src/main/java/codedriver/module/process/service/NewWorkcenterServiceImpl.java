@@ -454,11 +454,6 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
     @Override
     public void getStepTaskWorkerList(JSONArray workerArray, ProcessTaskStepVo stepVo) {
-        Map<Long, List<ProcessTaskStepWorkerVo>> stepMinorWorkerListMap = new HashMap<>();
-        List<IProcessStepHandler> handlerList = ProcessStepHandlerFactory.getHandlerList();
-        for (IProcessStepHandler stepHandler : handlerList) {
-            stepMinorWorkerListMap.put(stepVo.getId(), stepHandler.getMinorWorkerList(stepVo));
-        }
         if (ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
                 ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
                 ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1
@@ -467,6 +462,14 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             if (majorWorker != null) {
                 JSONObject workerJson = new JSONObject();
                 getWorkerInfo(majorWorker, workerJson, workerArray);
+            }
+            Map<Long, List<ProcessTaskStepWorkerVo>> stepMinorWorkerListMap = new HashMap<>();
+            List<IProcessStepHandler> handlerList = ProcessStepHandlerFactory.getHandlerList();
+            for (IProcessStepHandler stepHandler : handlerList) {
+                List<ProcessTaskStepWorkerVo> stepWorkerVos = stepHandler.getMinorWorkerList(stepVo);
+                if (CollectionUtils.isNotEmpty(stepWorkerVos)) {
+                    stepMinorWorkerListMap.put(stepVo.getId(), stepWorkerVos);
+                }
             }
             List<String> workerUuidTypeList = new ArrayList<>();
             for (ProcessTaskStepWorkerVo workerVo : stepVo.getWorkerList()) {
@@ -493,7 +496,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             List<ProcessTaskStepTaskVo> stepTaskVoList = processTaskStepTaskMapper.getStepTaskWithUserByProcessTaskStepId(stepVo.getId());
             for (ProcessTaskStepTaskVo stepTaskVo : stepTaskVoList) {
                 for (ProcessTaskStepTaskUserVo userVo : stepTaskVo.getStepTaskUserVoList()) {
-                    if (Objects.equals(userVo.getUserUuid(), workerVo.getUuid())) {
+                    if (Objects.equals(userVo.getUserUuid(), workerVo.getUuid()) && !Objects.equals(ProcessTaskStatus.SUCCEED.getValue(), userVo.getStatus())) {
                         String workerUuidType = workerVo.getUuid() + stepTaskVo.getTaskConfigName();
                         if (!workerUuidTypeList.contains(workerUuidType)) {
                             JSONObject workerJson = new JSONObject();
