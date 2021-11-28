@@ -56,8 +56,8 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 
     @Override
     public Boolean isHealthy(JobObject jobObject) {
-        Long slaTransferId = (Long) jobObject.getData("slaNotifyId");
-        ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskSlaNotifyById(slaTransferId);
+        Long slaNotifyId = (Long) jobObject.getData("slaNotifyId");
+        ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskSlaNotifyById(slaNotifyId);
         if (processTaskSlaNotifyVo == null) {
             return false;
         } else {
@@ -88,9 +88,9 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                         String unit = policyObj.getString("unit");
                         String executeType = policyObj.getString("executeType");
                         int intervalTime = policyObj.getIntValue("intervalTime");
-                        String intervalUnit = policyObj.getString("intervalUnit");
                         Integer repeatCount = null;
                         if ("loop".equals(executeType) && intervalTime > 0) {// 周期执行
+                            String intervalUnit = policyObj.getString("intervalUnit");
                             if (intervalUnit.equalsIgnoreCase("day")) {
                                 intervalTime = intervalTime * 24 * 60 * 60;
                             } else {
@@ -116,6 +116,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                         }
                         /** 如果触发时间在当前时间之前 **/
                         if (notifyDate.before(Calendar.getInstance())) {
+                            System.out.println("触发时间在当前时间之前");
                             if ("loop".equals(executeType)) {
                                 /** 如果是循环触发，则将触发时间改为当前时间 **/
                                 notifyDate = Calendar.getInstance();

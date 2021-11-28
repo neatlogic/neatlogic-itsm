@@ -528,14 +528,17 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                 boolean expireTimeHasChanged = true;
                 long expireTimeLong = slaTimeVo.getExpireTimeLong();
                 /* 由于Date类型数据保存到MySql数据库时会丢失毫秒数值，只保留到秒的精度，所以两次计算超时时间点的差值小于1000时，说明时效没有被条件改变，不用更新 **/
-                if (expireTimeLong - oldExpireTimeLong < 1000) {
-                    System.out.println("oldExpireTimeLong=" + oldExpireTimeLong);
-                    System.out.println("expireTimeLong=" + expireTimeLong);
-                    expireTimeHasChanged = false;
-                }
+//                if (expireTimeLong - oldExpireTimeLong < 1000) {
+//                    expireTimeHasChanged = false;
+//                }
+                System.out.println("oldExpireTimeLong=" + oldExpireTimeLong);
+                System.out.println("expireTimeLong=" + expireTimeLong);
+                System.out.println("oldExpireTime=" + new Date(oldExpireTimeLong));
+                System.out.println("expireTime=" + new Date(expireTimeLong));
                 if (expireTimeLong == oldExpireTimeLong) {
                     expireTimeHasChanged = false;
                 }
+                System.out.println("expireTimeHasChanged=" + expireTimeHasChanged);
                 slaTimeVo.setProcessTaskId(processTaskVo.getId());
                 if (oldSlaTimeVo != null) {
                     processTaskMapper.updateProcessTaskSlaTime(slaTimeVo);

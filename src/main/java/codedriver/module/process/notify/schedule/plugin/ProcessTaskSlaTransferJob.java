@@ -10,6 +10,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
@@ -79,48 +80,54 @@ public class ProcessTaskSlaTransferJob extends JobBase {
 		TenantContext.get().switchTenant(tenantUuid);
 		Long slaTransferId = (Long) jobObject.getData("slaTransferId");
 		ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskMapper.getProcessTaskSlaTransferById(slaTransferId);
+		if (processTaskSlaTransferVo == null) {
+			return;
+		}
+		ProcessTaskSlaTimeVo slaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(processTaskSlaTransferVo.getSlaId());
+		if (slaTimeVo == null) {
+			return;
+		}
 		boolean isJobLoaded = false;
-		if (processTaskSlaTransferVo != null) {
-			ProcessTaskSlaTimeVo slaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(processTaskSlaTransferVo.getSlaId());
-			if (slaTimeVo != null) {
-				if (processTaskSlaTransferVo != null && processTaskSlaTransferVo.getConfigObj() != null) {
-					JSONObject policyObj = processTaskSlaTransferVo.getConfigObj();
-					String expression = policyObj.getString("expression");
-					int time = policyObj.getIntValue("time");
-					String unit = policyObj.getString("unit");
-					String transferTo = policyObj.getString("transferTo");
-					if (StringUtils.isNotBlank(expression) && StringUtils.isNotBlank(transferTo)) {
-						Calendar transferDate = Calendar.getInstance();
-						transferDate.setTime(slaTimeVo.getExpireTime());
-						if (expression.equalsIgnoreCase("before")) {
-							time = -time;
-						}
-						if (StringUtils.isNotBlank(unit) && time != 0) {
-							if (unit.equalsIgnoreCase("day")) {
-								transferDate.add(Calendar.DAY_OF_MONTH, time);
-							} else if (unit.equalsIgnoreCase("hour")) {
-								transferDate.add(Calendar.HOUR, time);
-							} else {
-								transferDate.add(Calendar.MINUTE, time);
-							}
-						}
-	                    /** 如果触发时间在当前时间之前，则将触发时间改为当前时间 **/
-	                    if(transferDate.before(Calendar.getInstance())) {
-	                        transferDate = Calendar.getInstance();
-	                    }
-						JobObject.Builder newJobObjectBuilder = new JobObject.Builder(processTaskSlaTransferVo.getId().toString(), this.getGroupName(), this.getClassName(), TenantContext.get().getTenantUuid())
-								.withBeginTime(transferDate.getTime())
-								.withIntervalInSeconds(INTERVAL_IN_SECONDS)
-								.addData("slaTransferId", processTaskSlaTransferVo.getId());
-						JobObject newJobObject = newJobObjectBuilder.build();
-						Date triggerDate = schedulerManager.loadJob(newJobObject);
-						if (triggerDate != null) {
-							// 更新通知记录时间
-							processTaskSlaTransferVo.setTriggerTime(triggerDate);
-							processTaskMapper.updateProcessTaskSlaTransfer(processTaskSlaTransferVo);
-							isJobLoaded = true;
-						}
+		JSONObject policyObj = processTaskSlaTransferVo.getConfigObj();
+		if (MapUtils.isNotEmpty(policyObj)) {
+			String transferTo = policyObj.getString("transferTo");
+			if (StringUtils.isNotBlank(transferTo)) {
+				String expression = policyObj.getString("expression");
+				int time = policyObj.getIntValue("time");
+				String unit = policyObj.getString("unit");
+				Calendar transferDate = Calendar.getInstance();
+				transferDate.setTime(slaTimeVo.getExpireTime());
+				if (expression.equalsIgnoreCase("before")) {
+					time = -time;
+				}
+				if (StringUtils.isNotBlank(unit) && time != 0) {
+					if (unit.equalsIgnoreCase("day")) {
+						transferDate.add(Calendar.DAY_OF_MONTH, time);
+					} else if (unit.equalsIgnoreCase("hour")) {
+						transferDate.add(Calendar.HOUR, time);
+					} else {
+						transferDate.add(Calendar.MINUTE, time);
 					}
+				}
+				/** 如果触发时间在当前时间之前，则将触发时间改为当前时间 **/
+				if(transferDate.before(Calendar.getInstance())) {
+					transferDate = Calendar.getInstance();
+				}
+				JobObject.Builder newJobObjectBuilder = new JobObject.Builder(
+						slaTransferId.toString(),
+						this.getGroupName(),
+						this.getClassName(),
+						TenantContext.get().getTenantUuid()
+				).withBeginTime(transferDate.getTime())
+						.withIntervalInSeconds(INTERVAL_IN_SECONDS)
+						.addData("slaTransferId", slaTransferId);
+				JobObject newJobObject = newJobObjectBuilder.build();
+				Date triggerDate = schedulerManager.loadJob(newJobObject);
+				if (triggerDate != null) {
+					// 更新通知记录时间
+					processTaskSlaTransferVo.setTriggerTime(triggerDate);
+					processTaskMapper.updateProcessTaskSlaTransfer(processTaskSlaTransferVo);
+					isJobLoaded = true;
 				}
 			}
 		}
@@ -134,7 +141,11 @@ public class ProcessTaskSlaTransferJob extends JobBase {
 	public void initJob(String tenantUuid) {
 		List<ProcessTaskSlaTransferVo> slaTransferList = processTaskMapper.getAllProcessTaskSlaTransfer();
 		for (ProcessTaskSlaTransferVo processTaskSlaTransferVo : slaTransferList) {
-			JobObject.Builder jobObjectBuilder = new JobObject.Builder(processTaskSlaTransferVo.getSlaId().toString(), this.getGroupName(), this.getClassName(), TenantContext.get().getTenantUuid()).addData("slaTransferId", processTaskSlaTransferVo.getId());
+			JobObject.Builder jobObjectBuilder = new JobObject.Builder(
+					processTaskSlaTransferVo.getId().toString(),
+					this.getGroupName(), this.getClassName(),
+					TenantContext.get().getTenantUuid()
+			).addData("slaTransferId", processTaskSlaTransferVo.getId());
 			JobObject jobObject = jobObjectBuilder.build();
 			this.reloadJob(jobObject);
 		}
@@ -148,10 +159,9 @@ public class ProcessTaskSlaTransferJob extends JobBase {
 			if (processTaskSlaTransferVo != null) {
 				Long slaId = processTaskSlaTransferVo.getSlaId();
 				ProcessTaskSlaTimeVo processTaskSlaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(slaId);
-				List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoBySlaId(slaId);
 				ProcessTaskSlaVo processTaskSlaVo = processTaskMapper.getProcessTaskSlaById(slaId);
-				if (processTaskSlaVo != null && processTaskSlaTimeVo != null && processTaskSlaTransferVo.getConfigObj() != null) {
-					JSONObject policyObj = processTaskSlaTransferVo.getConfigObj();
+				JSONObject policyObj = processTaskSlaTransferVo.getConfigObj();
+				if (processTaskSlaVo != null && processTaskSlaTimeVo != null && MapUtils.isNotEmpty(policyObj)) {
 					String transferTo = policyObj.getString("transferTo");
 					if (StringUtils.isNotBlank(transferTo) && transferTo.contains("#")) {
 						boolean transferToIsExists = true;//转交对象是否存在、合法
@@ -177,6 +187,9 @@ public class ProcessTaskSlaTransferJob extends JobBase {
 							workerVo.setType(split[0]);
 							workerVo.setUuid(split[1]);
 							workerVo.setUserType(ProcessUserType.MAJOR.getValue());
+							/** 执行转交前，设置当前用户为system,用于权限校验 **/
+							UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
+							List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoBySlaId(slaId);
 							for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
 								// 激活步骤才需要转交
 								if (processTaskStepVo.getIsActive().equals(1)) {
@@ -185,8 +198,6 @@ public class ProcessTaskSlaTransferJob extends JobBase {
 									workerList.add(workerVo);
 									IProcessStepHandler stepHandler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
 									if (stepHandler != null) {
-										/** 执行转交前，设置当前用户为system,用于权限校验 **/
-										UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
 										stepHandler.transfer(processTaskStepVo, workerList);
 									}
 								}
