@@ -64,16 +64,16 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 
     @Override
     public void reloadJob(JobObject jobObject) {
-        System.out.println("开始加载sla通知策略job");
+//        System.out.println("开始加载sla通知策略job");
         String tenantUuid = jobObject.getTenantUuid();
         TenantContext.get().switchTenant(tenantUuid);
         Long slaNotifyId = (Long) jobObject.getData("slaNotifyId");
-        System.out.println("slaNotifyId=" + slaNotifyId);
-        ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskSlaNotifyById(slaNotifyId);
-        ProcessTaskSlaVo processTaskSlaVo = processTaskMapper.getProcessTaskSlaById(processTaskSlaNotifyVo.getSlaId());
-        System.out.println("时效id=" + processTaskSlaNotifyVo.getSlaId());
-        System.out.println("时效name=" + processTaskSlaVo.getName());
+//        System.out.println("slaNotifyId=" + slaNotifyId);
+//        ProcessTaskSlaVo processTaskSlaVo = processTaskMapper.getProcessTaskSlaById(processTaskSlaNotifyVo.getSlaId());
+//        System.out.println("时效id=" + processTaskSlaNotifyVo.getSlaId());
+//        System.out.println("时效name=" + processTaskSlaVo.getName());
         boolean isJobLoaded = false;
+        ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskSlaNotifyById(slaNotifyId);
         try {
             if (processTaskSlaNotifyVo != null) {
                 ProcessTaskSlaTimeVo slaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(processTaskSlaNotifyVo.getSlaId());
@@ -113,7 +113,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                         }
                         /** 如果触发时间在当前时间之前 **/
                         if (notifyDate.before(Calendar.getInstance())) {
-                            System.out.println("触发时间在当前时间之前");
+//                            System.out.println("触发时间在当前时间之前");
                             if ("loop".equals(executeType)) {
                                 /** 如果是循环触发，则将触发时间改为当前时间 **/
                                 notifyDate = Calendar.getInstance();
@@ -138,14 +138,14 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                             processTaskSlaNotifyVo.setTriggerTime(triggerDate);
                             processTaskMapper.updateProcessTaskSlaNotify(processTaskSlaNotifyVo);
                             isJobLoaded = true;
-                            System.out.println("加载成功，triggerDate：" + triggerDate);
+//                            System.out.println("加载成功，triggerDate：" + triggerDate);
                         }
                     }
                 }
             }
         } finally {
             if (!isJobLoaded) {
-                System.out.println("加载失败");
+//                System.out.println("加载失败");
                 // 没有加载到作业，则删除通知记录
                 processTaskMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
             }
@@ -163,16 +163,16 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                     TenantContext.get().getTenantUuid()
             ).addData("slaNotifyId", processTaskSlaNotifyVo.getId());
             JobObject jobObject = jobObjectBuilder.build();
-            System.out.println("initJob....");
+//            System.out.println("initJob....");
             this.reloadJob(jobObject);
         }
     }
 
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {
-        System.out.println("开始执行sla通知策略逻辑...");
+//        System.out.println("开始执行sla通知策略逻辑...");
         Long slaNotifyId = (Long) jobObject.getData("slaNotifyId");
-        System.out.println("slaNotifyId=" + slaNotifyId);
+//        System.out.println("slaNotifyId=" + slaNotifyId);
         ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskSlaNotifyById(slaNotifyId);
         if (processTaskSlaNotifyVo != null) {
             Long slaId = processTaskSlaNotifyVo.getSlaId();
@@ -205,14 +205,14 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 //            }
             ProcessTaskSlaTimeVo processTaskSlaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(slaId);
             ProcessTaskSlaVo processTaskSlaVo = processTaskMapper.getProcessTaskSlaById(slaId);
-            System.out.println("时效id=" + slaId);
-            System.out.println("时效name=" + processTaskSlaVo.getName());
+//            System.out.println("时效id=" + slaId);
+//            System.out.println("时效name=" + processTaskSlaVo.getName());
             /** 存在未完成步骤才发超时通知，否则清除通知作业 **/
             if (processTaskSlaVo != null && processTaskSlaTimeVo != null
                     && MapUtils.isNotEmpty(processTaskSlaNotifyVo.getConfigObj()) && needNotifyStepList.size() > 0) {
                 JSONObject policyObj = processTaskSlaNotifyVo.getConfigObj();
                 JSONObject notifyPolicyConfig = policyObj.getJSONObject("notifyPolicyConfig");
-                System.out.println("发送通知");
+//                System.out.println("发送通知");
                 if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
                     Long policyId = notifyPolicyConfig.getLong("policyId");
                     NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
@@ -247,17 +247,17 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                 } else {
                     // 删除通知记录
                     processTaskMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-                    System.out.println("由于不需要下次执行，删除processTaskSlaNotify");
+//                    System.out.println("由于不需要下次执行，删除processTaskSlaNotify");
                 }
             } else {
                 schedulerManager.unloadJob(jobObject);
                 // 删除通知记录
                 processTaskMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-                System.out.println("由于不满足执行条件，卸载job");
+//                System.out.println("由于不满足执行条件，卸载job");
             }
         } else {
             schedulerManager.unloadJob(jobObject);
-            System.out.println("由于processTaskSlaNotifyVo为null，卸载job");
+//            System.out.println("由于processTaskSlaNotifyVo为null，卸载job");
         }
     }
 
