@@ -29,8 +29,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -40,7 +38,6 @@ import java.util.stream.Collectors;
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskSlaNotifyJob extends JobBase {
-    static Logger logger = LoggerFactory.getLogger(ProcessTaskSlaNotifyJob.class);
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
@@ -179,55 +176,70 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
         ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskSlaNotifyById(slaNotifyId);
         if (processTaskSlaNotifyVo != null) {
             Long slaId = processTaskSlaNotifyVo.getSlaId();
+            List<ProcessTaskStepVo> needNotifyStepList = new ArrayList<>();
             List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoBySlaId(slaId);
-            Iterator<ProcessTaskStepVo> it = processTaskStepList.iterator();
-            while (it.hasNext()) {
-                ProcessTaskStepVo processTaskStepVo = it.next();
-                // 未处理、处理中和挂起的步骤才需要计算SLA
-                if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())
-                        || processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())
-                        || processTaskStepVo.getStatus().equals(ProcessTaskStatus.HANG.getValue())) {
-                } else {
-                    it.remove();
+            for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+                // 未处理、处理中和挂起的步骤才需要发送通知
+                if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
+                    if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
+                        needNotifyStepList.add(processTaskStepVo);
+                    }
+                    if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
+                        needNotifyStepList.add(processTaskStepVo);
+                    }
+                    if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.HANG.getValue())) {
+                        needNotifyStepList.add(processTaskStepVo);
+                    }
                 }
             }
+//            Iterator<ProcessTaskStepVo> it = processTaskStepList.iterator();
+//            while (it.hasNext()) {
+//                ProcessTaskStepVo processTaskStepVo = it.next();
+//                // 未处理、处理中和挂起的步骤才需要计算SLA
+//                if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())
+//                        || processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())
+//                        || processTaskStepVo.getStatus().equals(ProcessTaskStatus.HANG.getValue())) {
+//                } else {
+//                    it.remove();
+//                }
+//            }
             ProcessTaskSlaTimeVo processTaskSlaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(slaId);
             ProcessTaskSlaVo processTaskSlaVo = processTaskMapper.getProcessTaskSlaById(slaId);
             System.out.println("时效id=" + slaId);
             System.out.println("时效name=" + processTaskSlaVo.getName());
             /** 存在未完成步骤才发超时通知，否则清除通知作业 **/
             if (processTaskSlaVo != null && processTaskSlaTimeVo != null
-                    && MapUtils.isNotEmpty(processTaskSlaNotifyVo.getConfigObj()) && processTaskStepList.size() > 0) {
+                    && MapUtils.isNotEmpty(processTaskSlaNotifyVo.getConfigObj()) && needNotifyStepList.size() > 0) {
                 JSONObject policyObj = processTaskSlaNotifyVo.getConfigObj();
                 JSONObject notifyPolicyConfig = policyObj.getJSONObject("notifyPolicyConfig");
                 System.out.println("发送通知");
-//                if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
-//                    Long policyId = notifyPolicyConfig.getLong("policyId");
-//                    NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
-//                    if (notifyPolicyVo != null) {
-//                        List<ParamMappingVo> paramMappingList = new ArrayList<>();
-//                        JSONArray paramMappingArray = notifyPolicyConfig.getJSONArray("paramMappingList");
-//                        if (CollectionUtils.isNotEmpty(paramMappingArray)) {
-//                            paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
-//                        }
-//                        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskSlaVo.getProcessTaskId());
-//                        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
-//                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
-////                        JSONObject templateParamData = ProcessTaskUtil.getProcessTaskParamData(processTaskVo);
-//                        Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
-//                        for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-//                            processTaskService.getReceiverMap(processTaskStepVo, receiverMap);
-//                        }
-//                        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-//                        processTaskStepVo.setProcessTaskId(processTaskSlaVo.getProcessTaskId());
-//                        List<FileVo> fileList = fileMapper.getFileListByProcessTaskId(processTaskSlaVo.getProcessTaskId());
-//                        if (CollectionUtils.isNotEmpty(fileList)) {
-//                            fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
-//                        }
-//                        NotifyPolicyUtil.execute(notifyPolicyVo.getHandler(), SlaNotifyTriggerType.TIMEOUT, ProcessTaskMessageHandler.class, notifyPolicyVo.getConfig(), paramMappingList,
-//                                conditionParamData, receiverMap, processTaskStepVo, fileList);
-//                    }
-//                }
+                if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
+                    Long policyId = notifyPolicyConfig.getLong("policyId");
+                    NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
+                    if (notifyPolicyVo != null) {
+                        List<ParamMappingVo> paramMappingList = new ArrayList<>();
+                        JSONArray paramMappingArray = notifyPolicyConfig.getJSONArray("paramMappingList");
+                        if (CollectionUtils.isNotEmpty(paramMappingArray)) {
+                            paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
+                        }
+                        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskSlaVo.getProcessTaskId());
+                        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
+                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
+//                        JSONObject templateParamData = ProcessTaskUtil.getProcessTaskParamData(processTaskVo);
+                        Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
+                        for (ProcessTaskStepVo processTaskStepVo : needNotifyStepList) {
+                            processTaskService.getReceiverMap(processTaskStepVo, receiverMap);
+                        }
+                        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+                        processTaskStepVo.setProcessTaskId(processTaskSlaVo.getProcessTaskId());
+                        List<FileVo> fileList = fileMapper.getFileListByProcessTaskId(processTaskSlaVo.getProcessTaskId());
+                        if (CollectionUtils.isNotEmpty(fileList)) {
+                            fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
+                        }
+                        NotifyPolicyUtil.execute(notifyPolicyVo.getHandler(), SlaNotifyTriggerType.TIMEOUT, ProcessTaskMessageHandler.class, notifyPolicyVo.getConfig(), paramMappingList,
+                                conditionParamData, receiverMap, processTaskStepVo, fileList);
+                    }
+                }
                 Date nextFireTime = context.getNextFireTime();
                 if (nextFireTime != null) {
                     processTaskSlaNotifyVo.setTriggerTime(nextFireTime);
