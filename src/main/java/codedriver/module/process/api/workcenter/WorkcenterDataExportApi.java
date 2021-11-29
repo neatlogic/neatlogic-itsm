@@ -2,7 +2,6 @@ package codedriver.module.process.api.workcenter;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
@@ -146,7 +145,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                             }
                         }
                         for (String head : headList) {
-                            content.append(map.get(head) != null ? map.get(head) : StringUtils.EMPTY).append(",");
+                            content.append(map.get(head) != null ? map.get(head).toString().replaceAll("\n", "").replaceAll(",", "，") : StringUtils.EMPTY).append(",");
                         }
                         content.append("\n");
                     }
