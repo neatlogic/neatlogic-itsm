@@ -10,6 +10,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import codedriver.framework.process.dao.mapper.ProcessTaskSlaMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
@@ -44,6 +46,8 @@ import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.scheduler.core.JobBase;
 import codedriver.framework.scheduler.dto.JobObject;
 
+import javax.annotation.Resource;
+
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskSlaTransferJob extends JobBase {
@@ -53,6 +57,9 @@ public class ProcessTaskSlaTransferJob extends JobBase {
 
     @Autowired
     private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private ProcessTaskSlaMapper processTaskSlaMapper;
 
     @Autowired
     private UserMapper userMapper;
@@ -66,7 +73,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
     @Override
     public Boolean isHealthy(JobObject jobObject) {
         Long slaTransferId = (Long) jobObject.getData("slaTransferId");
-        ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskMapper.getProcessTaskSlaTransferById(slaTransferId);
+        ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskSlaMapper.getProcessTaskSlaTransferById(slaTransferId);
         if (processTaskSlaTransferVo == null) {
             return false;
         } else {
@@ -79,11 +86,11 @@ public class ProcessTaskSlaTransferJob extends JobBase {
         String tenantUuid = jobObject.getTenantUuid();
         TenantContext.get().switchTenant(tenantUuid);
         Long slaTransferId = (Long) jobObject.getData("slaTransferId");
-        ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskMapper.getProcessTaskSlaTransferById(slaTransferId);
+        ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskSlaMapper.getProcessTaskSlaTransferById(slaTransferId);
         if (processTaskSlaTransferVo == null) {
             return;
         }
-        ProcessTaskSlaTimeVo slaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(processTaskSlaTransferVo.getSlaId());
+        ProcessTaskSlaTimeVo slaTimeVo = processTaskSlaMapper.getProcessTaskSlaTimeBySlaId(processTaskSlaTransferVo.getSlaId());
         if (slaTimeVo == null) {
             return;
         }
@@ -126,20 +133,20 @@ public class ProcessTaskSlaTransferJob extends JobBase {
                 if (triggerDate != null) {
                     // 更新通知记录时间
                     processTaskSlaTransferVo.setTriggerTime(triggerDate);
-                    processTaskMapper.updateProcessTaskSlaTransfer(processTaskSlaTransferVo);
+                    processTaskSlaMapper.updateProcessTaskSlaTransfer(processTaskSlaTransferVo);
                     isJobLoaded = true;
                 }
             }
         }
         if (!isJobLoaded) {
             // 没有加载到作业，则删除通知记录
-            processTaskMapper.deleteProcessTaskSlaTransferById(slaTransferId);
+            processTaskSlaMapper.deleteProcessTaskSlaTransferById(slaTransferId);
         }
     }
 
     @Override
     public void initJob(String tenantUuid) {
-        List<ProcessTaskSlaTransferVo> slaTransferList = processTaskMapper.getAllProcessTaskSlaTransfer();
+        List<ProcessTaskSlaTransferVo> slaTransferList = processTaskSlaMapper.getAllProcessTaskSlaTransfer();
         for (ProcessTaskSlaTransferVo processTaskSlaTransferVo : slaTransferList) {
             JobObject.Builder jobObjectBuilder = new JobObject.Builder(
                     processTaskSlaTransferVo.getId().toString(),
@@ -154,12 +161,12 @@ public class ProcessTaskSlaTransferJob extends JobBase {
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
         Long slaTransferId = (Long) jobObject.getData("slaTransferId");
-        ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskMapper.getProcessTaskSlaTransferById(slaTransferId);
+        ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskSlaMapper.getProcessTaskSlaTransferById(slaTransferId);
         try {
             if (processTaskSlaTransferVo != null) {
                 Long slaId = processTaskSlaTransferVo.getSlaId();
-                ProcessTaskSlaTimeVo processTaskSlaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(slaId);
-                ProcessTaskSlaVo processTaskSlaVo = processTaskMapper.getProcessTaskSlaById(slaId);
+                ProcessTaskSlaTimeVo processTaskSlaTimeVo = processTaskSlaMapper.getProcessTaskSlaTimeBySlaId(slaId);
+                ProcessTaskSlaVo processTaskSlaVo = processTaskSlaMapper.getProcessTaskSlaById(slaId);
                 JSONObject policyObj = processTaskSlaTransferVo.getConfigObj();
                 if (processTaskSlaVo != null && processTaskSlaTimeVo != null && MapUtils.isNotEmpty(policyObj)) {
                     String transferTo = policyObj.getString("transferTo");
@@ -189,16 +196,19 @@ public class ProcessTaskSlaTransferJob extends JobBase {
                             workerVo.setUserType(ProcessUserType.MAJOR.getValue());
                             /** 执行转交前，设置当前用户为system,用于权限校验 **/
                             UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
-                            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoBySlaId(slaId);
-                            for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-                                // 激活步骤才需要转交
-                                if (processTaskStepVo.getIsActive().equals(1)) {
-                                    List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
-                                    workerVo.setProcessTaskStepId(processTaskStepVo.getId());
-                                    workerList.add(workerVo);
-                                    IProcessStepHandler stepHandler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
-                                    if (stepHandler != null) {
-                                        stepHandler.transfer(processTaskStepVo, workerList);
+                            List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
+                            if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
+                                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
+                                for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+                                    // 激活步骤才需要转交
+                                    if (processTaskStepVo.getIsActive().equals(1)) {
+                                        List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
+                                        workerVo.setProcessTaskStepId(processTaskStepVo.getId());
+                                        workerList.add(workerVo);
+                                        IProcessStepHandler stepHandler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+                                        if (stepHandler != null) {
+                                            stepHandler.transfer(processTaskStepVo, workerList);
+                                        }
                                     }
                                 }
                             }
@@ -212,7 +222,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
             schedulerManager.unloadJob(jobObject);
             if (processTaskSlaTransferVo != null) {
                 // 删除转交记录
-                processTaskMapper.deleteProcessTaskSlaTransferById(processTaskSlaTransferVo.getId());
+                processTaskSlaMapper.deleteProcessTaskSlaTransferById(processTaskSlaTransferVo.getId());
             }
         }
     }

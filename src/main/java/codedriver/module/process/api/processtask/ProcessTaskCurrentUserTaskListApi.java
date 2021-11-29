@@ -7,8 +7,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskAgentMapper;
+import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.agent.ProcessTaskAgentVo;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.service.ProcessTaskAgentService;
@@ -23,8 +22,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ChannelVo;
@@ -45,6 +42,9 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private ProcessTaskSlaMapper processTaskSlaMapper;
 
     @Resource
     private AuthenticationInfoService authenticationInfoService;
@@ -146,7 +146,7 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
                 List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
                 Map<Long, ProcessTaskVo> processTaskMap = processTaskList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
                 Map<Long, ProcessTaskSlaTimeVo> stepSlaTimeMap = new HashMap<>();
-                List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskMapper.getProcessTaskSlaTimeByProcessTaskStepIdList(currentPageProcessTaskStepIdList);
+                List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskSlaMapper.getProcessTaskSlaTimeByProcessTaskStepIdList(currentPageProcessTaskStepIdList);
                 for (ProcessTaskSlaTimeVo processTaskSlaTimeVo : processTaskSlaTimeList) {
                     if (!stepSlaTimeMap.containsKey(processTaskSlaTimeVo.getProcessTaskStepId())) {
                         stepSlaTimeMap.put(processTaskSlaTimeVo.getProcessTaskStepId(), processTaskSlaTimeVo);
