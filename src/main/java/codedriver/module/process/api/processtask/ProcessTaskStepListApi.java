@@ -160,9 +160,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         processTaskService.setProcessTaskStepUser(startProcessTaskStepVo);
 
         // 时效列表
-        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
-        startProcessTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(
-                processTaskId, processTaskVo.getWorktimeUuid()));
+        startProcessTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepId(startProcessTaskStepVo.getId()));
         // 步骤评论列表
         startProcessTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(
                 startProcessTaskStepVo.getId(), Arrays.asList(ProcessTaskOperationType.STEP_COMMENT.getValue())));
@@ -214,9 +212,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         //任务列表
         processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
         // 时效列表
-        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskStepVo.getProcessTaskId());
-        processTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(
-                processTaskStepVo.getId(), processTaskVo.getWorktimeUuid()));
+        processTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepId(processTaskStepVo.getId()));
         // automatic processtaskStepData
         ProcessTaskStepDataVo stepDataVo = processTaskStepDataMapper
                 .getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),

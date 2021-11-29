@@ -11,6 +11,7 @@ import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskSlaMapper;
 import codedriver.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
 import codedriver.framework.process.dto.ProcessTaskSlaVo;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @Service
@@ -38,6 +40,9 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
 
     @Autowired
     ProcessTaskMapper taskMapper;
+
+    @Resource
+    private ProcessTaskSlaMapper processTaskSlaMapper;
 
     @Autowired
     ProcessTaskScoreMapper scoreMapper;
@@ -74,12 +79,12 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         // 步骤附件 processtask_file
         taskMapper.deleteProcessTaskStepFileByProcessTaskId(processTaskId);
         // sla processtask_sla_transfer processtask_sla_notify processtask_sla_time
-        List<ProcessTaskSlaVo> processTaskSlaList = taskMapper.getProcessTaskSlaByProcessTaskId(processTaskId);
-        for (ProcessTaskSlaVo processTaskSla : processTaskSlaList) {
-            taskMapper.deleteProcessTaskSlaTransferBySlaId(processTaskSla.getId());
-            taskMapper.deleteProcessTaskSlaNotifyById(processTaskSla.getId());
-            taskMapper.deleteProcessTaskSlaTimeBySlaId(processTaskId);
+        List<Long> slaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskId(processTaskId);
+        for (Long slaId : slaIdList) {
+            processTaskSlaMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
+            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaId);
         }
+        processTaskSlaMapper.deleteProcessTaskSlaTimeBySlaId(processTaskId);
         // 关系 processtask_relation
         List<ProcessTaskRelationVo> relationList =
             taskMapper.getProcessTaskRelationList(new ProcessTaskRelationVo(processTaskId));

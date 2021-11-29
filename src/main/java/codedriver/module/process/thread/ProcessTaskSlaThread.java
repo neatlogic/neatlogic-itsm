@@ -10,15 +10,15 @@ import codedriver.framework.asynchronization.threadlocal.ConditionParamContext;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.dto.condition.ConditionConfigVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.SlaStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskSlaMapper;
 import codedriver.framework.process.exception.sla.SlaCalculateHandlerNotFoundException;
 import codedriver.framework.process.sla.core.ISlaCalculateHandler;
 import codedriver.framework.process.sla.core.SlaCalculateHandlerFactory;
 import codedriver.framework.process.dto.*;
-import codedriver.module.process.notify.schedule.plugin.ProcessTaskSlaNotifyJob;
-import codedriver.module.process.notify.schedule.plugin.ProcessTaskSlaTransferJob;
+import codedriver.module.process.schedule.plugin.ProcessTaskSlaNotifyJob;
+import codedriver.module.process.schedule.plugin.ProcessTaskSlaTransferJob;
 import codedriver.framework.util.WorkTimeUtil;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
@@ -47,6 +47,7 @@ import java.util.*;
 public class ProcessTaskSlaThread extends CodeDriverThread {
     private static final Logger logger = LoggerFactory.getLogger(ProcessTaskSlaThread.class);
     private static ProcessTaskMapper processTaskMapper;
+    private static ProcessTaskSlaMapper processTaskSlaMapper;
     private static TransactionUtil transactionUtil;
     private static ProcessTaskService processTaskService;
 
@@ -58,6 +59,11 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
     @Resource
     public void setProcessTaskMapper(ProcessTaskMapper _processTaskMapper) {
         processTaskMapper = _processTaskMapper;
+    }
+
+    @Resource
+    public void setProcessTaskSlaMapper(ProcessTaskSlaMapper _processTaskSlaMapper) {
+        processTaskSlaMapper = _processTaskSlaMapper;
     }
 
     @Resource
@@ -192,8 +198,8 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
         Long slaId = slaTimeVo.getSlaId();
         /* 作业是否已启动 **/
         boolean jobStarted = false;
-        List<ProcessTaskSlaNotifyVo> processTaskSlaNotifyList = processTaskMapper.getProcessTaskSlaNotifyBySlaId(slaId);
-        List<ProcessTaskSlaTransferVo> processTaskSlaTransferList = processTaskMapper.getProcessTaskSlaTransferBySlaId(slaId);
+        List<ProcessTaskSlaNotifyVo> processTaskSlaNotifyList = processTaskSlaMapper.getProcessTaskSlaNotifyBySlaId(slaId);
+        List<ProcessTaskSlaTransferVo> processTaskSlaTransferList = processTaskSlaMapper.getProcessTaskSlaTransferBySlaId(slaId);
         if (CollectionUtils.isNotEmpty(processTaskSlaNotifyList) || CollectionUtils.isNotEmpty(processTaskSlaTransferList)) {
             jobStarted = true;
         }
@@ -202,8 +208,8 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
             if (jobStarted) {
                 if (expireTimeHasChanged) {
 //                    System.out.println("删除时效id=" + slaId + "的job，因为超时时间点变了");
-                    processTaskMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
-                    processTaskMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
+                    processTaskSlaMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
+                    processTaskSlaMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
                     loadJobNotifyAndtransfer(slaId, slaConfigObj);
                 }
             } else {
@@ -212,8 +218,8 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
         } else {
             if (jobStarted) {
 //                System.out.println("删除时效id=" + slaId + "的job，因为status=" + status);
-                processTaskMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
-                processTaskMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
+                processTaskSlaMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
+                processTaskSlaMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
             }
         }
     }
@@ -228,7 +234,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                 processTaskSlaNotifyVo.setSlaId(slaId);
                 processTaskSlaNotifyVo.setConfig(notifyPolicyObj.toJSONString());
                 // 需要发通知时写入数据，执行完毕后清除
-                processTaskMapper.insertProcessTaskSlaNotify(processTaskSlaNotifyVo);
+                processTaskSlaMapper.insertProcessTaskSlaNotify(processTaskSlaNotifyVo);
                 IJob jobHandler = SchedulerManager.getHandler(ProcessTaskSlaNotifyJob.class.getName());
                 if (jobHandler != null) {
                     JobObject.Builder jobObjectBuilder =
@@ -255,7 +261,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                 processTaskSlaTransferVo.setSlaId(slaId);
                 processTaskSlaTransferVo.setConfig(transferPolicyObj.toJSONString());
                 // 需要转交时写入数据，执行完毕后清除
-                processTaskMapper.insertProcessTaskSlaTransfer(processTaskSlaTransferVo);
+                processTaskSlaMapper.insertProcessTaskSlaTransfer(processTaskSlaTransferVo);
                 IJob jobHandler = SchedulerManager.getHandler(ProcessTaskSlaTransferJob.class.getName());
                 if (jobHandler != null) {
                     JobObject.Builder jobObjectBuilder =
@@ -274,96 +280,6 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
         }
     }
 
-    private void adjustJob(ProcessTaskSlaTimeVo slaTimeVo, JSONObject slaConfigObj, Date oldExpireTime) {
-        /* 有超时时间点 **/
-        if (slaTimeVo.getExpireTime() != null) {
-            /* 是否需要启动作业 **/
-            boolean isStartJob = false;
-            List<Long> processTaskStepIdList = processTaskMapper.getProcessTaskStepIdListBySlaId(slaTimeVo.getSlaId());
-            if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
-                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
-                for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-                    if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
-                        if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())
-                                || ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-                            isStartJob = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            /* 作业是否已启动 **/
-            boolean jobStarted = false;
-            List<ProcessTaskSlaNotifyVo> processTaskSlaNotifyList = processTaskMapper.getProcessTaskSlaNotifyBySlaId(slaTimeVo.getSlaId());
-            List<ProcessTaskSlaTransferVo> processTaskSlaTransferList = processTaskMapper.getProcessTaskSlaTransferBySlaId(slaTimeVo.getSlaId());
-            if (CollectionUtils.isNotEmpty(processTaskSlaNotifyList) || CollectionUtils.isNotEmpty(processTaskSlaTransferList)) {
-                jobStarted = true;
-            }
-            if (jobStarted) {
-                if (!isStartJob || !slaTimeVo.getExpireTime().equals(oldExpireTime)) {
-                    processTaskMapper.deleteProcessTaskSlaTransferBySlaId(slaTimeVo.getSlaId());
-                    processTaskMapper.deleteProcessTaskSlaNotifyBySlaId(slaTimeVo.getSlaId());
-                    jobStarted = false;
-                }
-            }
-            /* 作业需要启动，且未启动时，加载定时作业 **/
-            if (isStartJob && !jobStarted) {
-                // 加载定时作业，执行超时通知操作
-                JSONArray notifyPolicyList = slaConfigObj.getJSONArray("notifyPolicyList");
-                if (CollectionUtils.isNotEmpty(notifyPolicyList)) {
-                    for (int i = 0; i < notifyPolicyList.size(); i++) {
-                        JSONObject notifyPolicyObj = notifyPolicyList.getJSONObject(i);
-                        ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = new ProcessTaskSlaNotifyVo();
-                        processTaskSlaNotifyVo.setSlaId(slaTimeVo.getSlaId());
-                        processTaskSlaNotifyVo.setConfig(notifyPolicyObj.toJSONString());
-                        // 需要发通知时写入数据，执行完毕后清除
-                        processTaskMapper.insertProcessTaskSlaNotify(processTaskSlaNotifyVo);
-                        IJob jobHandler = SchedulerManager.getHandler(ProcessTaskSlaNotifyJob.class.getName());
-                        if (jobHandler != null) {
-                            JobObject.Builder jobObjectBuilder =
-                                    new JobObject.Builder(
-                                            processTaskSlaNotifyVo.getId().toString(),
-                                            jobHandler.getGroupName(),
-                                            jobHandler.getClassName(),
-                                            TenantContext.get().getTenantUuid()
-                                    ).addData("slaNotifyId", processTaskSlaNotifyVo.getId());
-                            JobObject jobObject = jobObjectBuilder.build();
-                            jobHandler.reloadJob(jobObject);
-                        } else {
-                            throw new ScheduleHandlerNotFoundException(ProcessTaskSlaNotifyJob.class.getName());
-                        }
-                    }
-                }
-                // 加载定时作业，执行超时转交操作
-                JSONArray transferPolicyList = slaConfigObj.getJSONArray("transferPolicyList");
-                if (CollectionUtils.isNotEmpty(transferPolicyList)) {
-                    for (int i = 0; i < transferPolicyList.size(); i++) {
-                        JSONObject transferPolicyObj = transferPolicyList.getJSONObject(i);
-                        ProcessTaskSlaTransferVo processTaskSlaTransferVo = new ProcessTaskSlaTransferVo();
-                        processTaskSlaTransferVo.setSlaId(slaTimeVo.getSlaId());
-                        processTaskSlaTransferVo.setConfig(transferPolicyObj.toJSONString());
-                        // 需要转交时写入数据，执行完毕后清除
-                        processTaskMapper.insertProcessTaskSlaTransfer(processTaskSlaTransferVo);
-                        IJob jobHandler = SchedulerManager.getHandler(ProcessTaskSlaTransferJob.class.getName());
-                        if (jobHandler != null) {
-                            JobObject.Builder jobObjectBuilder =
-                                    new JobObject.Builder(
-                                            processTaskSlaTransferVo.getId().toString(),
-                                            jobHandler.getGroupName(),
-                                            jobHandler.getClassName(),
-                                            TenantContext.get().getTenantUuid()
-                                    ).addData("slaTransferId", processTaskSlaTransferVo.getId());
-                            JobObject jobObject = jobObjectBuilder.build();
-                            jobHandler.reloadJob(jobObject);
-                        } else {
-                            throw new ScheduleHandlerNotFoundException(ProcessTaskSlaTransferVo.class.getName());
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     @Override
     public void execute() {
         // 开始事务
@@ -373,11 +289,11 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
             List<Long> allSlaIdList = null;
             if (currentProcessTaskStepVo != null) {
 //                System.out.println("processTaskStepId=" + currentProcessTaskStepVo.getId());
-                allSlaIdList = processTaskMapper.getSlaIdListByProcessTaskStepId(currentProcessTaskStepVo.getId());
+                allSlaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskStepId(currentProcessTaskStepVo.getId());
                 processTaskId = currentProcessTaskStepVo.getProcessTaskId();
             } else if (currentProcessTaskVo != null) {
 //                System.out.println("processTaskId=" + currentProcessTaskVo.getId());
-                allSlaIdList = processTaskMapper.getSlaIdListByProcessTaskId(currentProcessTaskVo.getId());
+                allSlaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskId(currentProcessTaskVo.getId());
                 processTaskId = currentProcessTaskVo.getId();
             }
 //            System.out.println("************************start*****************************************");
@@ -412,9 +328,9 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
     }
 
     private void deleteSlaById(Long slaId) {
-        processTaskMapper.deleteProcessTaskSlaTimeBySlaId(slaId);
-        processTaskMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
-        processTaskMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
+        processTaskSlaMapper.deleteProcessTaskSlaTimeBySlaId(slaId);
+        processTaskSlaMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
+        processTaskSlaMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
     }
 
     /**
@@ -425,7 +341,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
      */
     private SlaStatus slaNeedRecalculate(Long slaId) {
 //        System.out.println("slaNeedRecalculate start...");
-        String config = processTaskMapper.getProcessTaskSlaConfigById(slaId);
+        String config = processTaskSlaMapper.getProcessTaskSlaConfigById(slaId);
         String calculateHandler = (String) JSONPath.read(config, "calculateHandler");
         if (StringUtils.isBlank(calculateHandler)) {
             calculateHandler = DefaultSlaCalculateHandler.class.getSimpleName();
@@ -434,9 +350,13 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
         if (handler == null) {
             throw new SlaCalculateHandlerNotFoundException(calculateHandler);
         }
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoBySlaId(slaId);
+        List<ProcessTaskStepVo> processTaskStepList = new ArrayList<>();
+        List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
+        if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
+            processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
+        }
         SlaStatus status = handler.getStatus(processTaskStepList);
-        ProcessTaskSlaTimeVo oldSlaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(slaId);
+        ProcessTaskSlaTimeVo oldSlaTimeVo = processTaskSlaMapper.getProcessTaskSlaTimeBySlaId(slaId);
 //        System.out.println("slaId=" + slaId);
 //        String name = (String) JSONPath.read(config, "name");
 //        System.out.println("name=" + name);
@@ -488,14 +408,14 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
 //        System.out.println("recalculateSla start ...");
 //        System.out.println("slaId=" + slaId);
 //        System.out.println("status=" + status);
-        processTaskMapper.getProcessTaskSlaLockById(slaId);
-        String config = processTaskMapper.getProcessTaskSlaConfigById(slaId);
+        processTaskSlaMapper.getProcessTaskSlaLockById(slaId);
+        String config = processTaskSlaMapper.getProcessTaskSlaConfigById(slaId);
         JSONObject slaConfigObj = JSON.parseObject(config);
         if (MapUtils.isNotEmpty(slaConfigObj)) {
             /* 旧的超时时间点 **/
             long oldExpireTimeLong = 0L;
             /* 如果没有超时时间，证明第一次进入SLA标签范围，开始计算超时时间 **/
-            ProcessTaskSlaTimeVo oldSlaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(slaId);
+            ProcessTaskSlaTimeVo oldSlaTimeVo = processTaskSlaMapper.getProcessTaskSlaTimeBySlaId(slaId);
             if (oldSlaTimeVo != null) {
                 /* 记录旧的超时时间点 **/
                 oldExpireTimeLong = oldSlaTimeVo.getExpireTimeLong();
@@ -526,7 +446,10 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
 //                    slaTimeVo.setStatus(oldSlaStatus);
 ////                                System.out.println("status=null");
 //                }
-//                            System.out.println("slaTimeVo=" + slaTimeVo);
+//                System.out.println("-----------------------------------------");
+//                System.out.println("currentTimeMillis=" + currentTimeMillis);
+//                System.out.println("slaTimeVo=" + slaTimeVo);
+//                System.out.println("-----------------------------------------");
                 boolean expireTimeHasChanged = true;
                 long expireTimeLong = slaTimeVo.getExpireTimeLong();
                 if (expireTimeLong == oldExpireTimeLong) {
@@ -539,9 +462,9 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
 //                System.out.println("expireTime=" + new Date(expireTimeLong));
                 slaTimeVo.setProcessTaskId(processTaskVo.getId());
                 if (oldSlaTimeVo != null) {
-                    processTaskMapper.updateProcessTaskSlaTime(slaTimeVo);
+                    processTaskSlaMapper.updateProcessTaskSlaTime(slaTimeVo);
                 } else {
-                    processTaskMapper.insertProcessTaskSlaTime(slaTimeVo);
+                    processTaskSlaMapper.insertProcessTaskSlaTime(slaTimeVo);
                 }
                 adjustJob(slaTimeVo, slaConfigObj, expireTimeHasChanged);
 //                adjustJob(slaTimeVo, slaConfigObj, oldExpireTime);

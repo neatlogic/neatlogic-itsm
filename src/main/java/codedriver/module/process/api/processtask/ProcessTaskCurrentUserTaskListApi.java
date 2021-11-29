@@ -7,8 +7,8 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskAgentMapper;
+import codedriver.framework.process.constvalue.SlaStatus;
+import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.agent.ProcessTaskAgentVo;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.service.ProcessTaskAgentService;
@@ -23,9 +23,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
@@ -47,10 +44,10 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
     private ProcessTaskMapper processTaskMapper;
 
     @Resource
-    private AuthenticationInfoService authenticationInfoService;
+    private ProcessTaskSlaMapper processTaskSlaMapper;
 
     @Resource
-    private WorktimeMapper worktimeMapper;
+    private AuthenticationInfoService authenticationInfoService;
 
     @Resource
     private ChannelMapper channelMapper;
@@ -102,12 +99,14 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
         List<ProcessTaskStepVo> currentProcessTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(currentProcessTaskId);
         List<Long> currentProcessTaskStepIdList = currentProcessTaskStepList.stream().map(ProcessTaskStepVo::getId).collect(Collectors.toList());
         Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap = new ProcessAuthManager.Builder().addProcessTaskStepId(currentProcessTaskStepIdList).build().getOperateMap();
+        Set<ProcessTaskOperationType> processableOperationSet = new HashSet<>();
+        processableOperationSet.add(ProcessTaskOperationType.STEP_COMPLETE);
+        processableOperationSet.add(ProcessTaskOperationType.STEP_RECOVER);
+        processableOperationSet.add(ProcessTaskOperationType.STEP_ACCEPT);
+        processableOperationSet.add(ProcessTaskOperationType.STEP_START);
         for (Map.Entry<Long, Set<ProcessTaskOperationType>> entry : operationTypeSetMap.entrySet()) {
-            for (ProcessTaskOperationType operationType : entry.getValue()) {
-                if (ProcessTaskOperationType.STEP_COMPLETE.getValue().equals(operationType.getValue())) {
-                    currentProcessTaskProcessableStepIdList.add(entry.getKey());
-                    break;
-                }
+            if (entry.getValue().removeAll(processableOperationSet)) {
+                currentProcessTaskProcessableStepIdList.add(entry.getKey());
             }
         }
         JSONObject resultObj = new JSONObject();
@@ -146,10 +145,12 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
                 List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
                 Map<Long, ProcessTaskVo> processTaskMap = processTaskList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
                 Map<Long, ProcessTaskSlaTimeVo> stepSlaTimeMap = new HashMap<>();
-                List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskMapper.getProcessTaskSlaTimeByProcessTaskStepIdList(currentPageProcessTaskStepIdList);
+                List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskSlaMapper.getProcessTaskSlaTimeByProcessTaskStepIdList(currentPageProcessTaskStepIdList);
                 for (ProcessTaskSlaTimeVo processTaskSlaTimeVo : processTaskSlaTimeList) {
-                    if (!stepSlaTimeMap.containsKey(processTaskSlaTimeVo.getProcessTaskStepId())) {
-                        stepSlaTimeMap.put(processTaskSlaTimeVo.getProcessTaskStepId(), processTaskSlaTimeVo);
+                    if (processTaskSlaTimeVo.getStatus().equals(SlaStatus.DOING.toString().toLowerCase())) {
+                        if (!stepSlaTimeMap.containsKey(processTaskSlaTimeVo.getProcessTaskStepId())) {
+                            stepSlaTimeMap.put(processTaskSlaTimeVo.getProcessTaskStepId(), processTaskSlaTimeVo);
+                        }
                     }
                 }
                 JSONArray taskList = new JSONArray();
@@ -173,7 +174,6 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
 
                     ProcessTaskSlaTimeVo processTaskSlaTimeVo = stepSlaTimeMap.get(processTaskStep.getId());
                     if (processTaskSlaTimeVo != null) {
-                        parse(processTaskSlaTimeVo, processTask.getWorktimeUuid());
                         task.put("slaTimeVo", processTaskSlaTimeVo);
                     }
                     taskList.add(task);
@@ -182,24 +182,5 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
             }
         }
         return resultObj;
-    }
-
-    private void parse(ProcessTaskSlaTimeVo processTaskSlaTimeVo, String worktimeUuid) {
-        Long expireTimeLong = processTaskSlaTimeVo.getExpireTimeLong();
-        if (expireTimeLong != null) {
-            long timeLeft = 0L;
-            long nowTime = System.currentTimeMillis();
-            if (nowTime < expireTimeLong) {
-                timeLeft = worktimeMapper.calculateCostTime(worktimeUuid, nowTime, expireTimeLong);
-            } else if (nowTime > expireTimeLong) {
-                timeLeft = -worktimeMapper.calculateCostTime(worktimeUuid, expireTimeLong, nowTime);
-            }
-            processTaskSlaTimeVo.setTimeLeft(timeLeft);
-        }
-        Long realExpireTimeLong = processTaskSlaTimeVo.getRealExpireTimeLong();
-        if (realExpireTimeLong != null) {
-            long realTimeLeft = realExpireTimeLong - System.currentTimeMillis();
-            processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
-        }
     }
 }

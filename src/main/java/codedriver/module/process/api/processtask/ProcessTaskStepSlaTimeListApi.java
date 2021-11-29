@@ -64,11 +64,7 @@ public class ProcessTaskStepSlaTimeListApi extends PrivateApiComponentBase {
         if(processTaskStepVo == null) {
             throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
         }
-        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskStepVo.getProcessTaskId());
-        if(processTaskVo == null) {
-            throw new ProcessTaskNotFoundException(processTaskStepVo.getProcessTaskId().toString());
-        }
-        List<ProcessTaskSlaTimeVo> slaTimeList = processTaskService.getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(processTaskStepId, processTaskVo.getWorktimeUuid());
+        List<ProcessTaskSlaTimeVo> slaTimeList = processTaskService.getSlaTimeListByProcessTaskStepId(processTaskStepId);
         JSONObject resultObj = new JSONObject();
         resultObj.put("slaTimeList", slaTimeList);
         return resultObj;
