@@ -3,11 +3,12 @@ package codedriver.module.process.elasticsearch.handler;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.elasticsearch.core.ElasticSearchHandlerBase;
 import codedriver.framework.form.dao.mapper.FormMapper;
-import codedriver.framework.process.dao.mapper.*;
+import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
-import codedriver.module.process.service.WorkcenterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,6 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
     CatalogMapper catalogMapper;
     @Autowired
     WorktimeMapper worktimeMapper;
-    @Autowired
-    WorkcenterService workcenterService;
     @Autowired
     UserMapper userMapper;
 

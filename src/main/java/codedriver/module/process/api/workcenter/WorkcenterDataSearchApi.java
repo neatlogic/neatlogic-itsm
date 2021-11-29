@@ -9,7 +9,6 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.NewWorkcenterService;
-import codedriver.module.process.service.WorkcenterService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,8 +22,6 @@ import java.util.List;
 public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
 	@Autowired
 	WorkcenterMapper workcenterMapper;
-	@Autowired
-	WorkcenterService workcenterService;
 
 	@Autowired
 	NewWorkcenterService newWorkcenterService;
