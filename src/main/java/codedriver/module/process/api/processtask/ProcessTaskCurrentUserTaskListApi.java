@@ -185,19 +185,20 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
     }
 
     private void parse(ProcessTaskSlaTimeVo processTaskSlaTimeVo, String worktimeUuid) {
-        if (processTaskSlaTimeVo.getExpireTime() != null) {
+        Long expireTimeLong = processTaskSlaTimeVo.getExpireTimeLong();
+        if (expireTimeLong != null) {
             long timeLeft = 0L;
             long nowTime = System.currentTimeMillis();
-            long expireTime = processTaskSlaTimeVo.getExpireTime().getTime();
-            if (nowTime < expireTime) {
-                timeLeft = worktimeMapper.calculateCostTime(worktimeUuid, nowTime, expireTime);
-            } else if (nowTime > expireTime) {
-                timeLeft = -worktimeMapper.calculateCostTime(worktimeUuid, expireTime, nowTime);
+            if (nowTime < expireTimeLong) {
+                timeLeft = worktimeMapper.calculateCostTime(worktimeUuid, nowTime, expireTimeLong);
+            } else if (nowTime > expireTimeLong) {
+                timeLeft = -worktimeMapper.calculateCostTime(worktimeUuid, expireTimeLong, nowTime);
             }
             processTaskSlaTimeVo.setTimeLeft(timeLeft);
         }
-        if (processTaskSlaTimeVo.getRealExpireTime() != null) {
-            long realTimeLeft = processTaskSlaTimeVo.getExpireTime().getTime() - System.currentTimeMillis();
+        Long realExpireTimeLong = processTaskSlaTimeVo.getRealExpireTimeLong();
+        if (realExpireTimeLong != null) {
+            long realTimeLeft = realExpireTimeLong - System.currentTimeMillis();
             processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
         }
     }
