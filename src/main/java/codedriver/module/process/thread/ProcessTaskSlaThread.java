@@ -537,7 +537,10 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
 //                    slaTimeVo.setStatus(oldSlaStatus);
 ////                                System.out.println("status=null");
 //                }
-//                            System.out.println("slaTimeVo=" + slaTimeVo);
+//                System.out.println("-----------------------------------------");
+//                System.out.println("currentTimeMillis=" + currentTimeMillis);
+//                System.out.println("slaTimeVo=" + slaTimeVo);
+//                System.out.println("-----------------------------------------");
                 boolean expireTimeHasChanged = true;
                 long expireTimeLong = slaTimeVo.getExpireTimeLong();
                 if (expireTimeLong == oldExpireTimeLong) {

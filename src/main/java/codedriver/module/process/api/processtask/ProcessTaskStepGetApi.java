@@ -233,9 +233,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                     processTaskStepVo.getProcessTaskId(), processTaskStepVo.getProcessStepUuid()));
 
             // 时效列表
-            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
-            processTaskStepVo.setSlaTimeList(processTaskService
-                    .getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(processTaskStepId, processTaskVo.getWorktimeUuid()));
+            processTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepId(processTaskStepId));
 
             // 补充 automatic processtaskStepData
             ProcessTaskStepDataVo stepDataVo = processTaskStepDataMapper
