@@ -37,6 +37,11 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
     }
 
     @Override
+    public boolean getMultiple() {
+        return true;
+    }
+
+    @Override
     public SlaStatus getStatus(List<ProcessTaskStepVo> processTaskStepList) {
         int doing = 0;
         int pause = 0;

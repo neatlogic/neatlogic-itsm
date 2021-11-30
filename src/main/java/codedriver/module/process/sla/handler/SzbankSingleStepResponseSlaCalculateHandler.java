@@ -35,6 +35,11 @@ public class SzbankSingleStepResponseSlaCalculateHandler extends SlaCalculateHan
     }
 
     @Override
+    public boolean getMultiple() {
+        return false;
+    }
+
+    @Override
     public SlaStatus getStatus(List<ProcessTaskStepVo> processTaskStepList) {
         ProcessTaskStepVo processTaskStepVo = processTaskStepList.get(0);
 //        System.out.println("步骤id=" + processTaskStepVo.getId());
