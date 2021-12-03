@@ -18,8 +18,6 @@ import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import com.alibaba.fastjson.JSONPath;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +25,6 @@ import java.util.Objects;
 
 @Service
 public class ProcessTaskAutoScoreThread extends CodeDriverThread {
-    private static Logger logger = LoggerFactory.getLogger(ProcessTaskActionThread.class);
     private static ProcessTaskMapper processTaskMapper;
     private static SelectContentByHashMapper selectContentByHashMapper;
     private static ProcessTaskScoreMapper processTaskScoreMapper;
@@ -77,8 +74,7 @@ public class ProcessTaskAutoScoreThread extends CodeDriverThread {
                     processTaskScoreMapper.insertProcessTaskAutoScore(processTaskAutoScoreVo);
                     JobObject.Builder jobObjectBuilder =
                             new JobObject.Builder(currentProcessTaskVo.getId().toString(), jobHandler.getGroupName(),
-                                    jobHandler.getClassName(), TenantContext.get().getTenantUuid()).addData("processTaskId",
-                                    currentProcessTaskVo.getId());
+                                    jobHandler.getClassName(), TenantContext.get().getTenantUuid());
                     JobObject jobObject = jobObjectBuilder.build();
                     jobHandler.reloadJob(jobObject);
                 } else {

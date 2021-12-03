@@ -13,8 +13,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +43,6 @@ import codedriver.framework.scheduler.dto.JobObject;
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskAutoScoreJob extends JobBase {
-	static Logger logger = LoggerFactory.getLogger(ProcessTaskAutoScoreJob.class);
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -61,7 +58,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 
 	@Override
     public Boolean isHealthy(JobObject jobObject) {
-        Long processTaskId = (Long) jobObject.getData("processTaskId");
+        Long processTaskId = Long.valueOf(jobObject.getJobName());
         List<ProcessTaskScoreVo> processtaskScoreVos = processTaskScoreMapper.searchProcessTaskScoreByProcesstaskId(processTaskId);
         if (CollectionUtils.isEmpty(processtaskScoreVos)) {
             return true;
@@ -74,7 +71,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 	public void reloadJob(JobObject jobObject) {
 		String tenantUuid = jobObject.getTenantUuid();
 		TenantContext.get().switchTenant(tenantUuid);
-		Long processTaskId = (Long) jobObject.getData("processTaskId");
+		Long processTaskId = Long.valueOf(jobObject.getJobName());
 		List<ProcessTaskScoreVo> processtaskScoreVos = processTaskScoreMapper.searchProcessTaskScoreByProcesstaskId(processTaskId);
 		if(CollectionUtils.isEmpty(processtaskScoreVos)){
 		    /** 如果没有评分记录，那么读取评分配置 */
@@ -102,8 +99,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 	                JobObject.Builder newJobObjectBuilder = new JobObject.Builder(processTaskId.toString(), this.getGroupName(), this.getClassName(), TenantContext.get().getTenantUuid())
 	                    .withBeginTime(autoScoreDate)
 	                    .withIntervalInSeconds(60 * 60)
-	                    .withRepeatCount(0)
-	                    .addData("processTaskId", processTaskId);
+	                    .withRepeatCount(0);
 	                JobObject newJobObject = newJobObjectBuilder.build();
 	                schedulerManager.loadJob(newJobObject);
 	            }
@@ -115,7 +111,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 	public void initJob(String tenantUuid) {
 	    List<Long> processTaskIdList = processTaskScoreMapper.getAllProcessTaskAutoScoreProcessTaskIdList();
 	    for(Long processTaskId : processTaskIdList) {
-	        JobObject.Builder jobObjectBuilder = new JobObject.Builder(processTaskId.toString(), this.getGroupName(), this.getClassName(), TenantContext.get().getTenantUuid()).addData("processTaskId", processTaskId);
+	        JobObject.Builder jobObjectBuilder = new JobObject.Builder(processTaskId.toString(), this.getGroupName(), this.getClassName(), TenantContext.get().getTenantUuid());
             JobObject jobObject = jobObjectBuilder.build();
             this.reloadJob(jobObject);
 	    }
@@ -123,7 +119,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 
 	@Override
 	public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {	        	    
-        Long processTaskId = (Long) jobObject.getData("processTaskId");
+        Long processTaskId = Long.valueOf(jobObject.getJobName());
 	    List<ProcessTaskScoreVo> processTaskScoreVos = processTaskScoreMapper.searchProcessTaskScoreByProcesstaskId(processTaskId);
 	    if(CollectionUtils.isEmpty(processTaskScoreVos)) {
 	        ProcessTaskVo task = processTaskMapper.getProcessTaskById(processTaskId);
