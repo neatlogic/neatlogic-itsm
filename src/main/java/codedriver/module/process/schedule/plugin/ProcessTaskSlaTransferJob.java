@@ -72,7 +72,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
 
     @Override
     public Boolean isHealthy(JobObject jobObject) {
-        Long slaTransferId = (Long) jobObject.getData("slaTransferId");
+        Long slaTransferId = Long.valueOf(jobObject.getJobName());
         ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskSlaMapper.getProcessTaskSlaTransferById(slaTransferId);
         if (processTaskSlaTransferVo == null) {
             return false;
@@ -85,7 +85,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
     public void reloadJob(JobObject jobObject) {
         String tenantUuid = jobObject.getTenantUuid();
         TenantContext.get().switchTenant(tenantUuid);
-        Long slaTransferId = (Long) jobObject.getData("slaTransferId");
+        Long slaTransferId = Long.valueOf(jobObject.getJobName());
         ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskSlaMapper.getProcessTaskSlaTransferById(slaTransferId);
         if (processTaskSlaTransferVo == null) {
             return;
@@ -126,8 +126,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
                         this.getClassName(),
                         TenantContext.get().getTenantUuid()
                 ).withBeginTime(transferDate.getTime())
-                        .withIntervalInSeconds(INTERVAL_IN_SECONDS)
-                        .addData("slaTransferId", slaTransferId);
+                        .withIntervalInSeconds(INTERVAL_IN_SECONDS);
                 JobObject newJobObject = newJobObjectBuilder.build();
                 Date triggerDate = schedulerManager.loadJob(newJobObject);
                 if (triggerDate != null) {
@@ -152,7 +151,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
                     processTaskSlaTransferVo.getId().toString(),
                     this.getGroupName(), this.getClassName(),
                     TenantContext.get().getTenantUuid()
-            ).addData("slaTransferId", processTaskSlaTransferVo.getId());
+            );
             JobObject jobObject = jobObjectBuilder.build();
             this.reloadJob(jobObject);
         }
@@ -160,7 +159,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
 
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
-        Long slaTransferId = (Long) jobObject.getData("slaTransferId");
+        Long slaTransferId = Long.valueOf(jobObject.getJobName());
         ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskSlaMapper.getProcessTaskSlaTransferById(slaTransferId);
         try {
             if (processTaskSlaTransferVo != null) {

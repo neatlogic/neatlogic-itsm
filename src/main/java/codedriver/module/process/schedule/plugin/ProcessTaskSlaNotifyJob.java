@@ -57,7 +57,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 
     @Override
     public Boolean isHealthy(JobObject jobObject) {
-        Long slaNotifyId = (Long) jobObject.getData("slaNotifyId");
+        Long slaNotifyId = Long.valueOf(jobObject.getJobName());
         ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskSlaMapper.getProcessTaskSlaNotifyById(slaNotifyId);
         if (processTaskSlaNotifyVo == null) {
             return false;
@@ -71,7 +71,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 //        System.out.println("开始加载sla通知策略job");
         String tenantUuid = jobObject.getTenantUuid();
         TenantContext.get().switchTenant(tenantUuid);
-        Long slaNotifyId = (Long) jobObject.getData("slaNotifyId");
+        Long slaNotifyId = Long.valueOf(jobObject.getJobName());
 //        System.out.println("slaNotifyId=" + slaNotifyId);
 //        ProcessTaskSlaVo processTaskSlaVo = processTaskMapper.getProcessTaskSlaById(processTaskSlaNotifyVo.getSlaId());
 //        System.out.println("时效id=" + processTaskSlaNotifyVo.getSlaId());
@@ -133,8 +133,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                                 TenantContext.get().getTenantUuid()
                         ).withBeginTime(notifyDate.getTime())
                                 .withIntervalInSeconds(intervalTime)
-                                .withRepeatCount(repeatCount)
-                                .addData("slaNotifyId", slaNotifyId);
+                                .withRepeatCount(repeatCount);
                         JobObject newJobObject = newJobObjectBuilder.build();
                         Date triggerDate = schedulerManager.loadJob(newJobObject);
                         if (triggerDate != null) {
@@ -165,7 +164,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                     this.getGroupName(),
                     this.getClassName(),
                     TenantContext.get().getTenantUuid()
-            ).addData("slaNotifyId", processTaskSlaNotifyVo.getId());
+            );
             JobObject jobObject = jobObjectBuilder.build();
 //            System.out.println("initJob....");
             this.reloadJob(jobObject);
@@ -175,7 +174,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {
 //        System.out.println("开始执行sla通知策略逻辑...");
-        Long slaNotifyId = (Long) jobObject.getData("slaNotifyId");
+        Long slaNotifyId = Long.valueOf(jobObject.getJobName());
 //        System.out.println("slaNotifyId=" + slaNotifyId);
         ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskSlaMapper.getProcessTaskSlaNotifyById(slaNotifyId);
         if (processTaskSlaNotifyVo != null) {

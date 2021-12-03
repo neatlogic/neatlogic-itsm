@@ -243,7 +243,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                                     jobHandler.getGroupName(),
                                     jobHandler.getClassName(),
                                     TenantContext.get().getTenantUuid()
-                            ).addData("slaNotifyId", processTaskSlaNotifyVo.getId());
+                            );
                     JobObject jobObject = jobObjectBuilder.build();
 //                    System.out.println("loadJobNotifyAndtransfer....");
                     jobHandler.reloadJob(jobObject);
@@ -270,7 +270,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                                     jobHandler.getGroupName(),
                                     jobHandler.getClassName(),
                                     TenantContext.get().getTenantUuid()
-                            ).addData("slaTransferId", processTaskSlaTransferVo.getId());
+                            );
                     JobObject jobObject = jobObjectBuilder.build();
                     jobHandler.reloadJob(jobObject);
                 } else {

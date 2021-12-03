@@ -5,23 +5,16 @@
 
 package codedriver.module.process.processtaskserialnumberpolicy.handler;
 
-import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dao.mapper.TenantMapper;
-import codedriver.framework.dto.TenantVo;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
 import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
-import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.JobBase;
-import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
-import codedriver.framework.util.UuidUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.quartz.CronExpression;
@@ -34,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -48,9 +40,6 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
     @Autowired
     private ProcessTaskMapper processTaskMapper;
-
-    @Autowired
-    private TenantMapper tenantMapper;
 
     @Override
     public String getName() {
@@ -175,7 +164,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
         } finally {
             processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyEndTimeByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
         }
-        System.out.println("------------");
+//        System.out.println("------------");
         return 0;
     }
 
@@ -216,11 +205,10 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
         public void reloadJob(JobObject jobObject) {
             String tenantUuid = jobObject.getTenantUuid();
             TenantContext.get().switchTenant(tenantUuid);
-            String handler = (String) jobObject.getData("handler");
             if (CronExpression.isValidExpression(cron)) {
                 JobObject.Builder newJobObjectBuilder =
                         new JobObject.Builder(jobObject.getJobName(), this.getGroupName(), this.getClassName(),
-                                TenantContext.get().getTenantUuid()).withCron(cron).addData("handler", handler);
+                                TenantContext.get().getTenantUuid()).withCron(cron);
                 JobObject newJobObject = newJobObjectBuilder.build();
                 schedulerManager.loadJob(newJobObject);
             }
@@ -232,15 +220,14 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
                     this.getGroupName(),
                     this.getGroupName(),
                     this.getClassName(),
-                    TenantContext.get().getTenantUuid())
-                    .addData("handler", DateTimeAndAutoIncrementPolicy.class.getName());
+                    TenantContext.get().getTenantUuid());
             JobObject jobObject = jobObjectBuilder.build();
             this.reloadJob(jobObject);
         }
 
         @Override
         public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
-            String handler = (String) jobObject.getData("handler");
+            String handler = DateTimeAndAutoIncrementPolicy.class.getName();
             List<ProcessTaskSerialNumberPolicyVo> processTaskSerialNumberPolicyList =
                     processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyListByHandler(handler);
             for (ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo : processTaskSerialNumberPolicyList) {
