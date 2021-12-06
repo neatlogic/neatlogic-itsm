@@ -2,7 +2,9 @@ package codedriver.module.process.api.processtask;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.exception.type.ParamNotExistsException;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
@@ -10,7 +12,7 @@ import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
-import codedriver.framework.process.dto.ChannelPriorityVo;
+import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -19,6 +21,7 @@ import codedriver.framework.process.exception.priority.PriorityNotFoundException
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.MyApiComponent;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import com.alibaba.fastjson.JSONArray;
@@ -50,6 +53,9 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
     @Resource
     private PriorityMapper priorityMapper;
 
+    @Resource
+    private UserMapper userMapper;
+
     @Override
     public String getName() {
         return "上报工单(供第三方使用)";
@@ -62,12 +68,11 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 
     @SuppressWarnings("unchecked")
     @Input({
-            @Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务uuid"),
+            @Param(name = "channel", type = ApiParamType.STRING, isRequired = true, desc = "支持channelUuid和channelName入参"),
             @Param(name = "title", type = ApiParamType.STRING, isRequired = true, maxLength = 80, desc = "标题"),
-            @Param(name = "owner", type = ApiParamType.STRING, isRequired = true, desc = "请求人"),
+            @Param(name = "owner", type = ApiParamType.STRING, isRequired = true, desc = "上报人uuid和上报人id入参"),
             @Param(name = "reporter", type = ApiParamType.STRING, desc = "代报人"),
-            @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "优先级uuid"),
-            @Param(name = "priorityName", type = ApiParamType.STRING, desc = "优先级名"),
+            @Param(name = "priority", type = ApiParamType.STRING, isRequired = true, desc = "优先级"),
             @Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "表单属性数据列表"),
             @Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, desc = "隐藏表单属性列表"),
             @Param(name = "readcomponentList", type = ApiParamType.JSONARRAY, desc = "只读表单属性列表"),
@@ -83,15 +88,41 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject result = new JSONObject();
-        String channelUuid = jsonObj.getString("channelUuid");
-        if (channelMapper.checkChannelIsExists(channelUuid) == 0) {
-            throw new ChannelNotFoundException(channelUuid);
+        //上报人，支持上报人uuid和上报人id入参
+        String owner = jsonObj.getString("owner");
+        UserVo userVo = userMapper.getUserByUuid(owner);
+        if (userVo == null) {
+            userVo = userMapper.getUserByUserId(owner);
+            if (userVo == null) {
+                throw new UserNotFoundException(owner);
+            }
         }
-        String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
+        //处理channel，支持channelUuid和channelName入参
+        String channel = jsonObj.getString("channel");
+        ChannelVo channelVo = channelMapper.getChannelByUuid(channel);
+        if (channelVo == null) {
+            channelVo = channelMapper.getChannelByName(channel);
+            if (channelVo == null) {
+                throw new ChannelNotFoundException(channel);
+            }
+            jsonObj.put("channelUuid", channelVo.getUuid());
+        }
+        //优先级
+        String priority = jsonObj.getString("priority");
+        PriorityVo priorityVo = priorityMapper.getPriorityByUuid(priority);
+        if(priorityVo == null){
+            priorityVo = priorityMapper.getPriorityByName(priority);
+            if(priorityVo == null){
+                throw new PriorityNotFoundException(priority);
+            }
+            jsonObj.put("priorityUuid", priorityVo.getUuid());
+        }
+        //流程
+        String processUuid = channelMapper.getProcessUuidByChannelUuid(channelVo.getUuid());
         if (processMapper.checkProcessIsExists(processUuid) == 0) {
             throw new ProcessNotFoundException(processUuid);
         }
-        /** 如果表单属性数据列表，使用的唯一标识是label时，需要转换成attributeUuid **/
+        //如果表单属性数据列表，使用的唯一标识是label时，需要转换成attributeUuid
         JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");
         if (CollectionUtils.isNotEmpty(formAttributeDataList)) {
             int count = 0;
@@ -129,32 +160,15 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
                 }
             }
         }
-        /** 如果优先级使用名称时，需要转换成uuid **/
-        List<ChannelPriorityVo> priorityVos = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
-        if(CollectionUtils.isNotEmpty(priorityVos)){
-            String priorityUuid = jsonObj.getString("priorityUuid");
-            if (StringUtils.isBlank(priorityUuid)) {
-                String priorityName = jsonObj.getString("priorityName");
-                if (StringUtils.isBlank(priorityName)) {
-                    throw new ParamNotExistsException("priorityUuid", "priorityName");
-                }else {
-                    PriorityVo priorityVo = priorityMapper.getPriorityByName(priorityName);
-                    if (priorityVo == null) {
-                        throw new PriorityNotFoundException(priorityName);
-                    }
-                    jsonObj.put("priorityUuid", priorityVo.getUuid());
-                }
-            }
-        }
 
         //暂存
         jsonObj.put("isNeedValid", 1);
-        ProcessTaskDraftSaveApi drafSaveApi = (ProcessTaskDraftSaveApi) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
-        JSONObject saveResultObj = JSONObject.parseObject(drafSaveApi.myDoService(jsonObj).toString());
+        MyApiComponent draftSaveApi = (MyApiComponent) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
+        JSONObject saveResultObj = JSONObject.parseObject(draftSaveApi.myDoService(jsonObj).toString());
         saveResultObj.put("action", "start");
 
-        //查询可执行下一步骤
-        ProcessTaskProcessableStepList stepListApi = (ProcessTaskProcessableStepList) PrivateApiComponentFactory.getInstance(ProcessTaskProcessableStepList.class.getName());
+        //查询可执行下一 步骤
+        MyApiComponent stepListApi = (MyApiComponent) PrivateApiComponentFactory.getInstance(ProcessTaskProcessableStepList.class.getName());
         Object nextStepListObj = stepListApi.myDoService(saveResultObj);
         List<ProcessTaskStepVo> nextStepList = (List<ProcessTaskStepVo>) nextStepListObj;
         if (CollectionUtils.isEmpty(nextStepList) && nextStepList.size() != 1) {
@@ -163,7 +177,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
         saveResultObj.put("nextStepId", nextStepList.get(0).getId());
 
         //流转
-        ProcessTaskStartProcessApi startProcessApi = (ProcessTaskStartProcessApi) PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
+        MyApiComponent startProcessApi = (MyApiComponent) PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
         startProcessApi.myDoService(saveResultObj);
 
         result.put("processTaskId", saveResultObj.getString("processTaskId"));
