@@ -1,24 +1,19 @@
 package codedriver.module.process.api.processtask;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.constvalue.FormHandlerType;
-import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
-import codedriver.framework.matrix.constvalue.MatrixType;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
-import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -31,13 +26,14 @@ import codedriver.framework.process.exception.priority.PriorityNotFoundException
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.IApiComponent;
 import codedriver.framework.restful.core.MyApiComponent;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.restful.dto.ApiVo;
+import codedriver.module.framework.form.attribute.handler.SelectHandler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.nacos.common.utils.Objects;
 import org.apache.commons.collections4.CollectionUtils;
@@ -53,7 +49,6 @@ import java.util.Map;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-@AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 
     @Resource
@@ -176,13 +171,27 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 
                                     }
                                     formAttributeData.put("attributeUuid", formAttributeVo.getUuid());
-                                    JSONArray dataArray = formAttributeData.getJSONArray("dataList");
+                                    formAttributeData.put("handler",formAttributeVo.getHandler());
+                                    //目前仅需要转换formselect
+                                    if(!Objects.equals((new SelectHandler()).getHandler(),formAttributeVo.getHandler())){
+                                        continue;
+                                    }
+                                    JSONObject config = JSONObject.parseObject(formAttributeVo.getConfig());
+                                    JSONArray dataArray = new JSONArray();
+                                    if(config.getBooleanValue("isMultiple")){
+                                        try {
+                                            dataArray = formAttributeData.getJSONArray("dataList");
+                                        }catch (JSONException ex){
+                                            throw new ParamIrregularException(label+":dataList");
+                                        }
+                                    }else{
+                                        String dataListStr = formAttributeData.getString("dataList");
+                                        dataArray.add(dataListStr);
+                                    }
                                     if (CollectionUtils.isEmpty(dataArray)) {
                                         continue;
                                     }
                                     List<String> dataList = dataArray.toJavaList(String.class);
-                                    String configStr = formAttributeVo.getConfig();
-                                    JSONObject config = JSONObject.parseObject(configStr);
                                     Object data = textConversionValue(dataList, config);
                                     if (data != null) {
                                         formAttributeData.put("dataList", data);
@@ -231,14 +240,19 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
         return result;
     }
 
+    /**
+     * 通过text 转换为实际的value
+     * @param values text
+     * @param config form config
+     * @return 转换后的值
+     */
     private Object textConversionValue(List<String> values, JSONObject config) {
         Object result = null;
         if (CollectionUtils.isNotEmpty(values)) {
             boolean isMultiple = config.getBooleanValue("isMultiple");
             String dataSource = config.getString("dataSource");
             if ("static".equals(dataSource)) {
-                List<ValueTextVo> dataList =
-                        JSON.parseArray(JSON.toJSONString(config.getJSONArray("dataList")), ValueTextVo.class);
+                List<ValueTextVo> dataList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("dataList")), ValueTextVo.class);
                 if (CollectionUtils.isNotEmpty(dataList)) {
                     Map<String, Object> valueTextMap = new HashMap<>();
                     for (ValueTextVo data : dataList) {
@@ -254,7 +268,6 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
                         result = valueTextMap.get(values.get(0));
                     }
                 }
-
             } else if ("matrix".equals(dataSource)) {
                 ValueTextVo mapping = JSON.toJavaObject(config.getJSONObject("mapping"), ValueTextVo.class);
                 if (Objects.equals(mapping.getText(), mapping.getValue())) {
