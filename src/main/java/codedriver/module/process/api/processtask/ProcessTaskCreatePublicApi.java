@@ -11,6 +11,7 @@ import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
+import codedriver.framework.form.exception.FormAttributeNotFoundException;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
@@ -174,7 +175,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
                                 if (StringUtils.isBlank(attributeUuid) && StringUtils.isNotBlank(label)) {
                                     FormAttributeVo formAttributeVo = labelAttributeMap.get(label);
                                     if (formAttributeVo == null) {
-
+                                        throw new FormAttributeNotFoundException(label);
                                     }
                                     formAttributeData.put("attributeUuid", formAttributeVo.getUuid());
                                     formAttributeData.put("handler",formAttributeVo.getHandler());
