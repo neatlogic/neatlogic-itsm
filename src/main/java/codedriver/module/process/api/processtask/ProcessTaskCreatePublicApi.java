@@ -1,13 +1,23 @@
 package codedriver.module.process.api.processtask;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.FormHandlerType;
+import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.SystemUser;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.user.UserNotFoundException;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
+import codedriver.framework.matrix.constvalue.MatrixType;
+import codedriver.framework.matrix.dao.mapper.MatrixMapper;
+import codedriver.framework.matrix.dto.MatrixVo;
+import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
@@ -21,17 +31,22 @@ import codedriver.framework.process.exception.priority.PriorityNotFoundException
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.IApiComponent;
 import codedriver.framework.restful.core.MyApiComponent;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
+import codedriver.framework.restful.dto.ApiVo;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.nacos.common.utils.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +70,9 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private MatrixMapper matrixMapper;
 
     @Override
     public String getName() {
@@ -96,6 +114,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
             if (userVo == null) {
                 throw new UserNotFoundException(owner);
             }
+            jsonObj.put("owner", userVo.getUuid());
         }
         //处理channel，支持channelUuid和channelName入参
         String channel = jsonObj.getString("channel");
@@ -105,8 +124,8 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
             if (channelVo == null) {
                 throw new ChannelNotFoundException(channel);
             }
-            jsonObj.put("channelUuid", channelVo.getUuid());
         }
+        jsonObj.put("channelUuid", channelVo.getUuid());
         //优先级
         String priority = jsonObj.getString("priority");
         PriorityVo priorityVo = priorityMapper.getPriorityByUuid(priority);
@@ -115,8 +134,8 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
             if(priorityVo == null){
                 throw new PriorityNotFoundException(priority);
             }
-            jsonObj.put("priorityUuid", priorityVo.getUuid());
         }
+        jsonObj.put("priorityUuid", priorityVo.getUuid());
         //流程
         String processUuid = channelMapper.getProcessUuidByChannelUuid(channelVo.getUuid());
         if (processMapper.checkProcessIsExists(processUuid) == 0) {
@@ -142,9 +161,9 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
                     FormVersionVo actionFormVersionVo = formMapper.getActionFormVersionByFormUuid(processFormVo.getFormUuid());
                     List<FormAttributeVo> formAttributeVoList = actionFormVersionVo.getFormAttributeList();
                     if (CollectionUtils.isNotEmpty(formAttributeVoList)) {
-                        Map<String, String> labelAttributeUuidMap = new HashMap<>();
+                        Map<String, FormAttributeVo> labelAttributeMap = new HashMap<>();
                         for (FormAttributeVo formAttributeVo : formAttributeVoList) {
-                            labelAttributeUuidMap.put(formAttributeVo.getLabel(), formAttributeVo.getUuid());
+                            labelAttributeMap.put(formAttributeVo.getLabel(), formAttributeVo);
                         }
                         for (int i = 0; i < formAttributeDataList.size(); i++) {
                             JSONObject formAttributeData = formAttributeDataList.getJSONObject(i);
@@ -152,7 +171,22 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
                                 String attributeUuid = formAttributeData.getString("attributeUuid");
                                 String label = formAttributeData.getString("label");
                                 if (StringUtils.isBlank(attributeUuid) && StringUtils.isNotBlank(label)) {
-                                    formAttributeData.put("attributeUuid", labelAttributeUuidMap.get(label));
+                                    FormAttributeVo formAttributeVo = labelAttributeMap.get(label);
+                                    if (formAttributeVo == null) {
+
+                                    }
+                                    formAttributeData.put("attributeUuid", formAttributeVo.getUuid());
+                                    JSONArray dataArray = formAttributeData.getJSONArray("dataList");
+                                    if (CollectionUtils.isEmpty(dataArray)) {
+                                        continue;
+                                    }
+                                    List<String> dataList = dataArray.toJavaList(String.class);
+                                    String configStr = formAttributeVo.getConfig();
+                                    JSONObject config = JSONObject.parseObject(configStr);
+                                    Object data = textConversionValue(dataList, config);
+                                    if (data != null) {
+                                        formAttributeData.put("dataList", data);
+                                    }
                                 }
                             }
                         }
@@ -161,10 +195,23 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
             }
         }
 
+        String reporter = jsonObj.getString("reporter");
+        if (StringUtils.isNotBlank(reporter)) {
+            UserVo reporterUserVo = userMapper.getUserByUuid(reporter);
+            if (reporterUserVo == null) {
+                reporterUserVo = userMapper.getUserByUserId(reporter);
+                if (reporterUserVo == null) {
+                    throw new UserNotFoundException(reporter);
+                }
+                reporterUserVo = userMapper.getUserByUuid(reporterUserVo.getUuid());
+            }
+            UserContext.init(reporterUserVo, SystemUser.SYSTEM.getTimezone());
+        }
         //暂存
+        //TODO isNeedValid 参数是否需要？？？
         jsonObj.put("isNeedValid", 1);
         MyApiComponent draftSaveApi = (MyApiComponent) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
-        JSONObject saveResultObj = JSONObject.parseObject(draftSaveApi.myDoService(jsonObj).toString());
+        JSONObject saveResultObj = (JSONObject) draftSaveApi.myDoService(jsonObj);
         saveResultObj.put("action", "start");
 
         //查询可执行下一 步骤
@@ -184,4 +231,89 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
         return result;
     }
 
+    private Object textConversionValue(List<String> values, JSONObject config) {
+        Object result = null;
+        if (CollectionUtils.isNotEmpty(values)) {
+            boolean isMultiple = config.getBooleanValue("isMultiple");
+            String dataSource = config.getString("dataSource");
+            if ("static".equals(dataSource)) {
+                List<ValueTextVo> dataList =
+                        JSON.parseArray(JSON.toJSONString(config.getJSONArray("dataList")), ValueTextVo.class);
+                if (CollectionUtils.isNotEmpty(dataList)) {
+                    Map<String, Object> valueTextMap = new HashMap<>();
+                    for (ValueTextVo data : dataList) {
+                        valueTextMap.put(data.getText(), data.getValue());
+                    }
+                    if (isMultiple) {
+                        JSONArray jsonArray = new JSONArray();
+                        for (String value : values) {
+                            jsonArray.add(valueTextMap.get(value));
+                        }
+                        result = jsonArray;
+                    } else {
+                        result = valueTextMap.get(values.get(0));
+                    }
+                }
+
+            } else if ("matrix".equals(dataSource)) {
+                ValueTextVo mapping = JSON.toJavaObject(config.getJSONObject("mapping"), ValueTextVo.class);
+                if (Objects.equals(mapping.getText(), mapping.getValue())) {
+                    List<String> dataList = new ArrayList<>();
+                    for (String value : values) {
+                        dataList.add(value + "&=&" + value);
+                    }
+                    return dataList;
+                }
+                String matrixUuid = config.getString("matrixUuid");
+                if (StringUtils.isNotBlank(matrixUuid)) {
+                    MatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
+                    if (matrixVo == null) {
+                        throw new MatrixNotFoundException(matrixUuid);
+                    }
+                    if ("cmdbci".equals(matrixVo.getType())) {
+                        ApiVo api = PrivateApiComponentFactory.getApiByToken("matrix/column/data/search/forselect/new");
+                        if (api != null) {
+                            MyApiComponent myApiComponent = (MyApiComponent) PrivateApiComponentFactory.getInstance(api.getHandler());
+                            if (myApiComponent != null) {
+                                List<String> dataLsit = new ArrayList<>();
+                                for (String value : values) {
+                                    String compose = getValue(matrixUuid, mapping, value, myApiComponent);
+                                    if (StringUtils.isNotBlank(compose)) {
+                                        dataLsit.add(compose);
+                                    }
+                                }
+                                return dataLsit;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    private String getValue(String matrixUuid, ValueTextVo mapping, String value, MyApiComponent myApiComponent) {
+        if (StringUtils.isBlank(value)) {
+            return value;
+        }
+        try {
+            JSONObject paramObj = new JSONObject();
+            paramObj.put("matrixUuid", matrixUuid);
+            JSONArray columnList = new JSONArray();
+            columnList.add(mapping.getValue());
+            columnList.add(mapping.getText());
+            paramObj.put("columnList", columnList);
+            paramObj.put("keyword", value);
+            paramObj.put("keywordColumn", mapping.getText());
+            JSONObject resultObj = (JSONObject) myApiComponent.myDoService(paramObj);
+            JSONArray tbodyList = resultObj.getJSONArray("tbodyList");
+            for (int i = 0; i < tbodyList.size(); i++) {
+                JSONObject firstObj = tbodyList.getJSONObject(i);
+                JSONObject valueObj = firstObj.getJSONObject((String) mapping.getValue());
+                return valueObj.getString("compose");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
