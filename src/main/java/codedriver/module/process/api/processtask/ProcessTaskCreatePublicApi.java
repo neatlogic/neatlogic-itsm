@@ -70,6 +70,11 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
     private MatrixMapper matrixMapper;
 
     @Override
+    public String getToken() {
+        return "processtask/create/public";
+    }
+
+    @Override
     public String getName() {
         return "上报工单(供第三方使用)";
     }
@@ -97,6 +102,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
     @Output({
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id")
     })
+    @Example(example="{\"title\":\"test上报2\",\"channel\":\"linbq_1206_1119\",\"owner\":\"admin\",\"priority\":\"普通\",\"formAttributeDataList\":[{\"label\":\"下拉框_1\",\"dataList\":[\"ezproxy\",\"balantflow\"]},{\"label\":\"下拉框_2\",\"dataList\":[\"a2\",\"a1\"]},{\"label\":\"下拉框_3\",\"dataList\":[\"子系统描述_1\",\"子系统描述_2\",\"子系统描述_3\"]},{\"label\":\"下拉框_4\",\"dataList\":[\"闫雅\",\"陈宁\",\"蒋琪\"]}]}")
     @Description(desc = "上报工单(供第三方使用)")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -271,11 +277,16 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
             } else if ("matrix".equals(dataSource)) {
                 ValueTextVo mapping = JSON.toJavaObject(config.getJSONObject("mapping"), ValueTextVo.class);
                 if (Objects.equals(mapping.getText(), mapping.getValue())) {
-                    List<String> dataList = new ArrayList<>();
-                    for (String value : values) {
-                        dataList.add(value + "&=&" + value);
+                    if (isMultiple) {
+                        List<String> dataList = new ArrayList<>();
+                        for (String value : values) {
+                            dataList.add(value + "&=&" + value);
+                        }
+                        return dataList;
+                    } else {
+                        String value = values.get(0);
+                        return value + "&=&" + value;
                     }
-                    return dataList;
                 }
                 String matrixUuid = config.getString("matrixUuid");
                 if (StringUtils.isNotBlank(matrixUuid)) {
@@ -283,22 +294,26 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
                     if (matrixVo == null) {
                         throw new MatrixNotFoundException(matrixUuid);
                     }
-                    if ("cmdbci".equals(matrixVo.getType())) {
+//                    if ("cmdbci".equals(matrixVo.getType())) {
                         ApiVo api = PrivateApiComponentFactory.getApiByToken("matrix/column/data/search/forselect/new");
                         if (api != null) {
                             MyApiComponent myApiComponent = (MyApiComponent) PrivateApiComponentFactory.getInstance(api.getHandler());
                             if (myApiComponent != null) {
-                                List<String> dataLsit = new ArrayList<>();
-                                for (String value : values) {
-                                    String compose = getValue(matrixUuid, mapping, value, myApiComponent);
-                                    if (StringUtils.isNotBlank(compose)) {
-                                        dataLsit.add(compose);
+                                if (isMultiple) {
+                                    List<String> dataLsit = new ArrayList<>();
+                                    for (String value : values) {
+                                        String compose = getValue(matrixUuid, mapping, value, myApiComponent);
+                                        if (StringUtils.isNotBlank(compose)) {
+                                            dataLsit.add(compose);
+                                        }
                                     }
+                                    return dataLsit;
+                                } else {
+                                    return getValue(matrixUuid, mapping, values.get(0), myApiComponent);
                                 }
-                                return dataLsit;
                             }
                         }
-                    }
+//                    }
                 }
             }
         }
