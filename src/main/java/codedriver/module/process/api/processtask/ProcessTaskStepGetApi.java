@@ -12,12 +12,15 @@ import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessCommentTemplateMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.*;
+import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskViewDeniedException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
@@ -69,6 +72,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     @Resource
     private ProcessTaskStepTaskService processTaskStepTaskService;
 
+    @Resource
+    private ChannelMapper channelMapper;
+
     @Override
     public String getToken() {
         return "processtask/step/get";
@@ -93,9 +99,19 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().checkAndNoPermissionThrowException();
-        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        if (!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
+            if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+                throw new ProcessTaskViewDeniedException();
+            } else {
+                ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+                if (channelVo == null) {
+                    throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
+                }
+                throw new ProcessTaskViewDeniedException(channelVo.getName());
+            }
+        }
+        processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
 
         if (new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_SCORE).build().check()) {
             ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskId);
