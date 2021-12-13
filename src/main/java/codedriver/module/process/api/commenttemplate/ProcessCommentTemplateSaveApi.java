@@ -80,7 +80,7 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
             /** 没有权限则不允许编辑系统模版 */
             ProcessCommentTemplateVo _vo = commentTemplateMapper.getTemplateById(id);
             if(ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(_vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())){
-                throw new PermissionDeniedException(AuthFactory.getAuthInstance(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName()).getAuthDisplayName());
+                throw new PermissionDeniedException(PROCESS_COMMENT_TEMPLATE_MODIFY.class);
             }
             vo.setType(_vo.getType());
             commentTemplateMapper.updateTemplate(vo);
@@ -89,7 +89,7 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
             vo.setType(type);
             /** 没有权限则不允许创建系统模版 */
             if(ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())){
-                throw new PermissionDeniedException(AuthFactory.getAuthInstance(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName()).getAuthDisplayName());
+                throw new PermissionDeniedException(PROCESS_COMMENT_TEMPLATE_MODIFY.class);
             }
             vo.setFcu(UserContext.get().getUserUuid(true));
             commentTemplateMapper.insertTemplate(vo);
