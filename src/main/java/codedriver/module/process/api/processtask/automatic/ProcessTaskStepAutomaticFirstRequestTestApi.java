@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-//@AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskStepAutomaticFirstRequestTestApi extends PublicApiComponentBase {
 
     @Override
