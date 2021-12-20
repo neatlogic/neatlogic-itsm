@@ -21,6 +21,7 @@ import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.module.process.service.NewWorkcenterService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,73 +78,76 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
         String userUuid = UserContext.get().getUserUuid(true);
         AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
         int isHasModifiedAuth = AuthActionChecker.check(WORKCENTER_MODIFY.class)?1:0;
+        List<WorkcenterVo> workcenterList = new ArrayList<>();
+        String viewType = "table";//默认table展示
         //根据用户（用户、组、角色）授权、支持设备和是否拥有工单中心管理权限，查出工单分类列表
         List<String> workcenterUuidList = workcenterMapper.getAuthorizedWorkcenterUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CommonUtil.getDevice(),isHasModifiedAuth);
-        List<WorkcenterVo> workcenterList = workcenterMapper.getAuthorizedWorkcenterListByUuidList(workcenterUuidList);
-        WorkcenterUserProfileVo userProfile = workcenterMapper.getWorkcenterUserProfileByUserUuid(userUuid);
-        Map<String, Integer> workcenterUserSortMap = new HashMap<String, Integer>();
-        boolean isWorkcenterManager = AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName());
-        String viewType = "table";//默认table展示
-        if (userProfile != null) {
-            JSONObject userConfig = JSONObject.parseObject(userProfile.getConfig());
-            if (userConfig.containsKey("viewType")) {
-                viewType = userConfig.getString("viewType");
-            }
-            if (userConfig.containsKey("workcenterList")) {
-                JSONArray workcenterSortList = userConfig.getJSONArray("workcenterList");
-                for (Object workcenterSort : workcenterSortList) {
-                    JSONObject workcenterSortJson = (JSONObject) workcenterSort;
-                    workcenterUserSortMap.put(workcenterSortJson.getString("uuid"), workcenterSortJson.getInteger("sort"));
+        if(CollectionUtils.isNotEmpty(workcenterUuidList)) {
+            workcenterList = workcenterMapper.getAuthorizedWorkcenterListByUuidList(workcenterUuidList);
+            WorkcenterUserProfileVo userProfile = workcenterMapper.getWorkcenterUserProfileByUserUuid(userUuid);
+            Map<String, Integer> workcenterUserSortMap = new HashMap<String, Integer>();
+            boolean isWorkcenterManager = AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName());
+            if (userProfile != null) {
+                JSONObject userConfig = JSONObject.parseObject(userProfile.getConfig());
+                if (userConfig.containsKey("viewType")) {
+                    viewType = userConfig.getString("viewType");
+                }
+                if (userConfig.containsKey("workcenterList")) {
+                    JSONArray workcenterSortList = userConfig.getJSONArray("workcenterList");
+                    for (Object workcenterSort : workcenterSortList) {
+                        JSONObject workcenterSortJson = (JSONObject) workcenterSort;
+                        workcenterUserSortMap.put(workcenterSortJson.getString("uuid"), workcenterSortJson.getInteger("sort"));
+                    }
                 }
             }
-        }
-        for (WorkcenterVo workcenter : workcenterList) {
-            if (workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
-                workcenter.setIsCanEdit(0);
-                if(Arrays.asList(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()).contains(workcenter.getUuid()) && isWorkcenterManager) {
-                    workcenter.setIsCanRole(1);
-                }
-            }
-            if (workcenter.getType().equals(ProcessWorkcenterType.SYSTEM.getValue()) && isWorkcenterManager) {
-                workcenter.setIsCanEdit(1);
-                workcenter.setIsCanRole(1);
-            } else if (workcenter.getType().equals(ProcessWorkcenterType.CUSTOM.getValue())) {
-                if (UserContext.get().getUserUuid(true).equalsIgnoreCase(workcenter.getOwner())) {
-                    workcenter.setIsCanEdit(1);
-                    if (AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName())) {
+            for (WorkcenterVo workcenter : workcenterList) {
+                if (workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
+                    workcenter.setIsCanEdit(0);
+                    if (Arrays.asList(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()).contains(workcenter.getUuid()) && isWorkcenterManager) {
                         workcenter.setIsCanRole(1);
+                    }
+                }
+                if (workcenter.getType().equals(ProcessWorkcenterType.SYSTEM.getValue()) && isWorkcenterManager) {
+                    workcenter.setIsCanEdit(1);
+                    workcenter.setIsCanRole(1);
+                } else if (workcenter.getType().equals(ProcessWorkcenterType.CUSTOM.getValue())) {
+                    if (UserContext.get().getUserUuid(true).equalsIgnoreCase(workcenter.getOwner())) {
+                        workcenter.setIsCanEdit(1);
+                        if (AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName())) {
+                            workcenter.setIsCanRole(1);
+                        } else {
+                            workcenter.setIsCanRole(0);
+                        }
                     } else {
+                        workcenter.setIsCanEdit(0);
                         workcenter.setIsCanRole(0);
                     }
-                } else {
-                    workcenter.setIsCanEdit(0);
-                    workcenter.setIsCanRole(0);
                 }
-            }
 
-            //查询数量
-            if (isAll == 1) {
-                try {
-                    JSONObject conditionJson = JSONObject.parseObject(workcenter.getConditionConfig());
-                    JSONObject conditionConfig = conditionJson.getJSONObject("conditionConfig");
-                    conditionConfig.put("isProcessingOfMine", 1);
-                    conditionJson.put("pageSize", 100);
-                    WorkcenterVo wcProcessingOfMine = new WorkcenterVo(conditionJson);
-                    Integer ProcessingOfMineCount = newWorkcenterService.doSearchLimitCount(wcProcessingOfMine);
-                    workcenter.setProcessingOfMineCount(ProcessingOfMineCount > 99 ? "99+" : ProcessingOfMineCount.toString());
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
+                //查询数量
+                if (isAll == 1) {
+                    try {
+                        JSONObject conditionJson = JSONObject.parseObject(workcenter.getConditionConfig());
+                        JSONObject conditionConfig = conditionJson.getJSONObject("conditionConfig");
+                        conditionConfig.put("isProcessingOfMine", 1);
+                        conditionJson.put("pageSize", 100);
+                        WorkcenterVo wcProcessingOfMine = new WorkcenterVo(conditionJson);
+                        Integer ProcessingOfMineCount = newWorkcenterService.doSearchLimitCount(wcProcessingOfMine);
+                        workcenter.setProcessingOfMineCount(ProcessingOfMineCount > 99 ? "99+" : ProcessingOfMineCount.toString());
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                    }
                 }
+                workcenter.setConditionConfig(null);
+                //排序 用户设置的排序优先
+                if (workcenterUserSortMap.containsKey(workcenter.getUuid())) {
+                    workcenter.setSort(workcenterUserSortMap.get(workcenter.getUuid()));
+                }
+                //去除返回前端的多余字段
+                workcenter.setConditionGroupList(null);
+                workcenter.setConditionGroupRelList(null);
+                workcenter.setIsProcessingOfMine(null);
             }
-            workcenter.setConditionConfig(null);
-            //排序 用户设置的排序优先
-            if (workcenterUserSortMap.containsKey(workcenter.getUuid())) {
-                workcenter.setSort(workcenterUserSortMap.get(workcenter.getUuid()));
-            }
-            //去除返回前端的多余字段
-            workcenter.setConditionGroupList(null);
-            workcenter.setConditionGroupRelList(null);
-            workcenter.setIsProcessingOfMine(null);
         }
         workcenterJson.put("viewType", viewType);
         workcenterJson.put("workcenterList", workcenterList.stream().sorted(Comparator.comparing(WorkcenterVo::getSort)).collect(Collectors.toList()));
