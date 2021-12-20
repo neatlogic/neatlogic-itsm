@@ -18,6 +18,7 @@ import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import com.alibaba.nacos.common.utils.CollectionUtils;
+import com.alibaba.nacos.common.utils.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -511,8 +512,8 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
             List<String> deviceTypeList = Stream.of(DeviceType.values()).map(DeviceType::getValue).collect(Collectors.toList());
             List<WorkcenterVo> replaceList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(oldVoList)) {
-                List<String> uuidList = oldVoList.stream().filter(s -> deviceTypeList.contains(s.getSupport())).collect(Collectors.toList()).stream().map(WorkcenterVo::getUuid).collect(Collectors.toList());
-                replaceList = workcenterList.stream().filter(s ->!uuidList.contains(s.getUuid())).collect(Collectors.toList());
+                List<String> uuidList = oldVoList.stream().filter(s -> StringUtils.isBlank(s.getSupport())).collect(Collectors.toList()).stream().map(WorkcenterVo::getUuid).collect(Collectors.toList());
+                replaceList = workcenterList.stream().filter(s ->uuidList.contains(s.getUuid())).collect(Collectors.toList());
             }
             if (CollectionUtils.isNotEmpty(replaceList)) {
                 for (WorkcenterVo workcenterVo : replaceList) {
