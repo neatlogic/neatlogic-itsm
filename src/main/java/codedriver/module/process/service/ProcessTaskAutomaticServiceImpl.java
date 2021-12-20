@@ -394,7 +394,6 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
         JSONObject requestAudit = data.getJSONObject("requestAudit");
 //        requestAudit.put("startTime", System.currentTimeMillis());
         IntegrationResultVo resultVo = null;
-        boolean loadJob = false;
         try {
             IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(integrationUuid);
             requestAudit.put("integrationName", integrationVo.getName());
@@ -422,7 +421,28 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 //                    System.out.println("需要回调");
                     // 回调请求
                     if (CallbackType.INTERVAL.getValue().equals(automaticConfigVo.getCallbackType())) {
-                        loadJob = true;
+                        JSONObject callbackAudit = getCallbackAudit(automaticConfigVo);
+                        data.put("callbackAudit", callbackAudit);
+                        auditDataVo.setData(data.toJSONString());
+                        auditDataVo.setFcu(SystemUser.SYSTEM.getUserUuid());
+                        processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
+                        IJob jobHandler = SchedulerManager.getHandler(ProcessTaskAutomaticJob.class.getName());
+                        if (jobHandler == null) {
+                            throw new ScheduleHandlerNotFoundException(ProcessTaskAutomaticJob.class.getName());
+                        }
+                        ProcessTaskStepAutomaticRequestVo processTaskStepAutomaticRequestVo = new ProcessTaskStepAutomaticRequestVo();
+                        processTaskStepAutomaticRequestVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+                        processTaskStepAutomaticRequestVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+                        processTaskStepAutomaticRequestVo.setType("callback");
+                        processTaskMapper.insertProcessTaskStepAutomaticRequest(processTaskStepAutomaticRequestVo);
+                        JobObject.Builder jobObjectBuilder = new JobObject.Builder(
+                                processTaskStepAutomaticRequestVo.getId().toString(),
+                                jobHandler.getGroupName(),
+                                jobHandler.getClassName(),
+                                TenantContext.get().getTenantUuid()
+                        );
+                        JobObject jobObject = jobObjectBuilder.build();
+                        jobHandler.reloadJob(jobObject);
                     }
                 } else { //流转到下一步
 //                    System.out.println("不需要回调");
@@ -450,6 +470,9 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 }
                 requestAudit.put("failedReason", failedReason);
                 failPolicy(automaticConfigVo, currentProcessTaskStepVo, failedReason);
+                auditDataVo.setData(data.toJSONString());
+                auditDataVo.setFcu(SystemUser.SYSTEM.getUserUuid());
+                processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
             }
 
         } catch (Exception ex) {
@@ -464,33 +487,9 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 ex.printStackTrace(pw);
                 requestAudit.put("failedReason", sw.toString());
             }
-        } finally {
-            if (loadJob) {
-                JSONObject callbackAudit = getCallbackAudit(automaticConfigVo);
-                data.put("callbackAudit", callbackAudit);
-            }
             auditDataVo.setData(data.toJSONString());
             auditDataVo.setFcu(SystemUser.SYSTEM.getUserUuid());
             processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
-            if (loadJob) {
-                IJob jobHandler = SchedulerManager.getHandler(ProcessTaskAutomaticJob.class.getName());
-                if (jobHandler == null) {
-                    throw new ScheduleHandlerNotFoundException(ProcessTaskAutomaticJob.class.getName());
-                }
-                ProcessTaskStepAutomaticRequestVo processTaskStepAutomaticRequestVo = new ProcessTaskStepAutomaticRequestVo();
-                processTaskStepAutomaticRequestVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-                processTaskStepAutomaticRequestVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-                processTaskStepAutomaticRequestVo.setType("callback");
-                processTaskMapper.insertProcessTaskStepAutomaticRequest(processTaskStepAutomaticRequestVo);
-                JobObject.Builder jobObjectBuilder = new JobObject.Builder(
-                        processTaskStepAutomaticRequestVo.getId().toString(),
-                        jobHandler.getGroupName(),
-                        jobHandler.getClassName(),
-                        TenantContext.get().getTenantUuid()
-                );
-                JobObject jobObject = jobObjectBuilder.build();
-                jobHandler.reloadJob(jobObject);
-            }
         }
 //        System.out.println("firstRequest end");
     }
