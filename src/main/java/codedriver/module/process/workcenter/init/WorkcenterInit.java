@@ -509,7 +509,6 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
             TenantContext.get().switchTenant(tenantUuid).setUseDefaultDatasource(false);
             List<String> initWoekcenterUUidList = Stream.of(ProcessWorkcenterInitType.values()).map(ProcessWorkcenterInitType::getValue).collect(Collectors.toList());
             List<WorkcenterVo> oldVoList= workcenterMapper.getWorkcenterVoListByUuidList(initWoekcenterUUidList);
-            List<String> deviceTypeList = Stream.of(DeviceType.values()).map(DeviceType::getValue).collect(Collectors.toList());
             List<WorkcenterVo> replaceList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(oldVoList)) {
                 List<String> uuidList = oldVoList.stream().filter(s -> StringUtils.isBlank(s.getSupport())).collect(Collectors.toList()).stream().map(WorkcenterVo::getUuid).collect(Collectors.toList());
