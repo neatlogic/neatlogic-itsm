@@ -63,6 +63,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 		@Param(name="uuid", type = ApiParamType.STRING, desc="分类uuid"),
 		@Param(name="name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc="分类名" ,xss = true),
 		@Param(name="type", type = ApiParamType.STRING, desc="分类类型，system|custom 默认custom"),
+		@Param(name="suport",type = ApiParamType.ENUM, rule = "all,mobile,pc", isRequired = true, desc="使用范围，pc|mobile 默认所有"),
 		@Param(name="conditionConfig", type = ApiParamType.JSONOBJECT, desc="分类过滤配置，json格式",isRequired = true),
 		@Param(name="valueList", type = ApiParamType.JSONARRAY, desc="授权列表，如果是system,则必填", isRequired = false)
 	})

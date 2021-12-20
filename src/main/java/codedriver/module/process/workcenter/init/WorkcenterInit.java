@@ -10,6 +10,7 @@ import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.bootstrap.CodedriverWebApplicationContext;
+import codedriver.framework.common.constvalue.DeviceType;
 import codedriver.framework.dao.mapper.TenantMapper;
 import codedriver.framework.dto.TenantVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterInitType;
@@ -67,6 +68,7 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                 "    }\n" +
                 "}");
         workcenterVo.setType(ProcessWorkcenterType.FACTORY.getValue());
+        workcenterVo.setSuport(DeviceType.ALL.getValue());
         workcenterVo.setSort(1);
         return workcenterVo;
     }
@@ -477,6 +479,7 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                 "    }\n" +
                 "}");
         workcenterVo.setType(ProcessWorkcenterType.FACTORY.getValue());
+        workcenterVo.setSuport(DeviceType.ALL.getValue());
         workcenterVo.setSort(2);
         return workcenterVo;
     }
