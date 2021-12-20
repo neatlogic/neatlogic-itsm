@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import codedriver.framework.common.constvalue.SystemUser;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.processconfig.*;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.module.process.notify.handler.AutomaticNotifyPolicyHandler;
 import org.apache.commons.collections4.CollectionUtils;
@@ -22,8 +27,12 @@ import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
 
+import javax.annotation.Resource;
+
 @Service
 public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase {
+    @Resource
+    private ProcessTaskStepDataMapper processTaskStepDataMapper;
 
     @Override
     public String getHandler() {
@@ -38,8 +47,35 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 
     @Override
     public Object getHandlerStepInitInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
-        // TODO Auto-generated method stub
-        return null;
+        ProcessTaskStepDataVo stepDataVo = processTaskStepDataMapper
+                .getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),
+                        currentProcessTaskStepVo.getId(), currentProcessTaskStepVo.getHandler(), SystemUser.SYSTEM.getUserUuid()));
+        JSONObject stepDataJson = stepDataVo.getData();
+        boolean hasComplete =
+                new ProcessAuthManager.StepOperationChecker(currentProcessTaskStepVo.getId(), ProcessTaskOperationType.STEP_COMPLETE)
+                        .build().check();
+        if (hasComplete) {// 有处理权限
+            stepDataJson.put("isStepUser", 1);
+            if (currentProcessTaskStepVo.getHandler().equals(ProcessStepHandlerType.AUTOMATIC.getHandler())) {
+                JSONObject requestAuditJson = stepDataJson.getJSONObject("requestAudit");
+                if (requestAuditJson.containsKey("status") && requestAuditJson.getJSONObject("status")
+                        .getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
+                    requestAuditJson.put("isRetry", 1);
+                } else {
+                    requestAuditJson.put("isRetry", 0);
+                }
+                JSONObject callbackAuditJson = stepDataJson.getJSONObject("callbackAudit");
+                if (callbackAuditJson != null) {
+                    if (callbackAuditJson.containsKey("status") && callbackAuditJson.getJSONObject("status")
+                            .getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
+                        callbackAuditJson.put("isRetry", 1);
+                    } else {
+                        callbackAuditJson.put("isRetry", 0);
+                    }
+                }
+            }
+        }
+        return stepDataJson;
     }
 
     @Override
