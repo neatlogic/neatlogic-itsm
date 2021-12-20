@@ -23,7 +23,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -507,16 +509,23 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
         protected void execute() {
             // 切换租户数据源
             TenantContext.get().switchTenant(tenantUuid).setUseDefaultDatasource(false);
-            List<String> initWoekcenterUUidList = Stream.of(ProcessWorkcenterInitType.values()).map(ProcessWorkcenterInitType::getValue).collect(Collectors.toList());
-            List<WorkcenterVo> oldVoList= workcenterMapper.getWorkcenterVoListByUuidList(initWoekcenterUUidList);
-            List<WorkcenterVo> replaceList = new ArrayList<>();
+            List<String> initWorkcenterUUidList = Stream.of(ProcessWorkcenterInitType.values()).map(ProcessWorkcenterInitType::getValue).collect(Collectors.toList());
+            List<WorkcenterVo> oldVoList = workcenterMapper.getWorkcenterVoListByUuidList(initWorkcenterUUidList);
+            Map<String, WorkcenterVo> workcenterVoMap=new HashMap<>();
             if (CollectionUtils.isNotEmpty(oldVoList)) {
-                List<String> uuidList = oldVoList.stream().filter(s -> StringUtils.isBlank(s.getSupport())).collect(Collectors.toList()).stream().map(WorkcenterVo::getUuid).collect(Collectors.toList());
-                replaceList = workcenterList.stream().filter(s ->uuidList.contains(s.getUuid())).collect(Collectors.toList());
+                workcenterVoMap = oldVoList.stream().collect(Collectors.toMap(e -> e.getUuid(), e -> e));
             }
-            if (CollectionUtils.isNotEmpty(replaceList)) {
-                for (WorkcenterVo workcenterVo : replaceList) {
+            if (CollectionUtils.isNotEmpty(workcenterList)) {
+                for (WorkcenterVo workcenterVo : workcenterList) {
                     //TODO 刚开始需要控制授权
+                    String uuid = workcenterVo.getUuid();
+                    if (workcenterVoMap.containsKey(uuid)) {
+                        WorkcenterVo tmpWorkcenterVo = workcenterVoMap.get(uuid);
+                        if (StringUtils.isNotBlank(tmpWorkcenterVo.getSupport())) {
+                            workcenterVo.setSupport(tmpWorkcenterVo.getSupport());
+                        }
+                    }
+
                     workcenterMapper.insertWorkcenter(workcenterVo);
                 }
             }
