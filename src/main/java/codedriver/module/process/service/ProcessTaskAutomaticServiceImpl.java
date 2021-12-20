@@ -376,6 +376,10 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
         return result;
     }
 
+    /**
+     * 第一次请求
+     * @param currentProcessTaskStepVo
+     */
     @Override
     public void firstRequest(ProcessTaskStepVo currentProcessTaskStepVo) {
 //        System.out.println("firstRequest start");
@@ -494,6 +498,11 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 //        System.out.println("firstRequest end");
     }
 
+    /**
+     * 回调请求
+     * @param currentProcessTaskStepVo
+     * @return
+     */
     @Override
     public boolean callbackRequest(ProcessTaskStepVo currentProcessTaskStepVo) {
 //        System.out.println("callbackRequest start");
@@ -596,6 +605,11 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
         return isUnloadJob;
     }
 
+    /**
+     * 获取流程步骤自动处理配置信息
+     * @param processTaskStepId
+     * @return
+     */
     @Override
     public AutomaticConfigVo getAutomaticConfigVoByProcessTaskStepId(Long processTaskStepId) {
         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
@@ -605,6 +619,13 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
         return new AutomaticConfigVo(automaticConfig);
     }
 
+    /**
+     * 组装请求参数
+     * @param currentProcessTaskStepVo
+     * @param paramList
+     * @param resultJson
+     * @return
+     */
     private JSONObject getIntegrationParam(ProcessTaskStepVo currentProcessTaskStepVo, JSONArray paramList, JSONObject resultJson) {
         ProcessTaskStepVo stepVo = processTaskService.getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
         ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
@@ -630,6 +651,11 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
         return integrationParam;
     }
 
+    /**
+     * 获取回调信息
+     * @param automaticConfigVo
+     * @return
+     */
     private JSONObject getCallbackAudit(AutomaticConfigVo automaticConfigVo) {
         JSONObject failConfig = new JSONObject();
         JSONObject successConfig = new JSONObject();
@@ -653,6 +679,12 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
         return callbackAudit;
     }
 
+    /**
+     * 失败策略
+     * @param automaticConfigVo
+     * @param currentProcessTaskStepVo
+     * @param failedReason
+     */
     private void failPolicy(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo, String failedReason) {
         IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
         if (FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
