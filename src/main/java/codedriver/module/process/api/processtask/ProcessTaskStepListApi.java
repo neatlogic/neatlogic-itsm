@@ -216,7 +216,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         // automatic processtaskStepData
         ProcessTaskStepDataVo stepDataVo = processTaskStepDataMapper
                 .getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),
-                        processTaskStepVo.getId(), processTaskStepVo.getHandler(), SystemUser.SYSTEM.getUserId()));
+                        processTaskStepVo.getId(), processTaskStepVo.getHandler(), SystemUser.SYSTEM.getUserUuid()));
         if (stepDataVo != null) {
             JSONObject stepDataJson = stepDataVo.getData();
             stepDataJson.put("isStepUser",

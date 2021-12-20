@@ -16,13 +16,15 @@ import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
-import codedriver.framework.process.exception.processtask.AutomaticConfigException;
+import codedriver.framework.process.dto.automatic.ProcessTaskStepAutomaticRequestVo;
 import codedriver.framework.scheduler.core.JobBase;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.service.ProcessTaskAutomaticService;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -35,6 +37,7 @@ import java.util.List;
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskAutomaticJob extends JobBase {
+
 	@Resource
 	ProcessTaskAutomaticService processTaskAutomaticService;
 	
@@ -46,7 +49,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 
     @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
-	
+
 	@Override
 	public String getGroupName() {
 		return TenantContext.get().getTenantUuid() + "-PROCESSTASK-AUTOMATIC";
@@ -59,129 +62,147 @@ public class ProcessTaskAutomaticJob extends JobBase {
 
 	@Override
 	public void reloadJob(JobObject jobObject) {
-		AutomaticConfigVo automaticConfigVo = (AutomaticConfigVo) jobObject.getData("automaticConfigVo");
-		if(automaticConfigVo == null){
-			throw new AutomaticConfigException(jobObject.getJobName());
+		Long requestId = Long.valueOf(jobObject.getJobName());
+		ProcessTaskStepAutomaticRequestVo requestVo = processTaskMapper.getProcessTaskStepAutomaticRequestById(requestId);
+		if (requestVo == null) {
+			return;
 		}
-		JSONObject data = (JSONObject) jobObject.getData("data");
-		JobObject.Builder newJobObjectBuilder = null;
-		JSONObject audit = null;
-		//默认以当前时间为开始时间
-		Date startTime = new Date(System.currentTimeMillis());
-		/** 计算开始时间 **/
-		JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
-		if(MapUtils.isNotEmpty(timeWindowConfig)) {
-			int isTimeToRun = TimeUtil.isInTimeWindow(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
-			startTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("startTime"),isTimeToRun>0?1:0);
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(requestVo.getProcessTaskStepId());
+		if (processTaskStepVo == null) {
+			processTaskMapper.deleteProcessTaskStepAutomaticRequestById(requestId);
+			return;
 		}
-		String groupName = automaticConfigVo.getIsRequest()?"-REQUEST":"-CALLBACK";
-		ProcessTaskStepVo  currentProcessTaskStepVo = (ProcessTaskStepVo) jobObject.getData("currentProcessTaskStepVo");
-		newJobObjectBuilder = new JobObject.Builder(jobObject.getJobName(), this.getGroupName()+groupName, this.getClassName(), TenantContext.get().getTenantUuid())
-				.withBeginTime(startTime)
-			    .addData("data", data)
-				.addData("automaticConfigVo", automaticConfigVo)
-				.addData("currentProcessTaskStepVo", currentProcessTaskStepVo);
-		if(automaticConfigVo.getIsRequest()) {
-			newJobObjectBuilder.withIntervalInSeconds(5)
-			                   .withRepeatCount(0);
-			audit = data.getJSONObject("requestAudit");
-		}else {
-			newJobObjectBuilder.withIntervalInSeconds(automaticConfigVo.getCallbackInterval()*60);
-			audit = data.getJSONObject("callbackAudit");
+		String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+		if (StringUtils.isBlank(stepConfig)) {
+			processTaskMapper.deleteProcessTaskStepAutomaticRequestById(requestId);
+			return;
 		}
-		Date nextFireTime = schedulerManager.loadJob(newJobObjectBuilder.build());
-		audit.put("nextFireTime",nextFireTime);
+		JSONObject automaticConfig = (JSONObject) JSONPath.read(stepConfig, "automaticConfig");
+		AutomaticConfigVo automaticConfigVo = new AutomaticConfigVo(automaticConfig);
+		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(
+				requestVo.getProcessTaskId(),
+				requestVo.getProcessTaskStepId(),
+				ProcessTaskStepDataType.AUTOMATIC.getValue(),
+				SystemUser.SYSTEM.getUserUuid()
+		);
+		ProcessTaskStepDataVo stepData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+		JSONObject data = stepData.getData();
+		String type = requestVo.getType();
+		JobObject.Builder newJobObjectBuilder = new JobObject.Builder(
+				jobObject.getJobName(),
+				this.getGroupName() + "-" + type.toUpperCase(), this.getClassName(),
+				TenantContext.get().getTenantUuid()
+		);
+		if("request".equals(type)) {
+//			System.out.println("定时请求");
+			JSONObject requestAudit = data.getJSONObject("requestAudit");
+			newJobObjectBuilder.withBeginTime(requestAudit.getDate("startTime"))
+					.withIntervalInSeconds(5)
+					.withRepeatCount(0);
+			Date nextFireTime = schedulerManager.loadJob(newJobObjectBuilder.build());
+			requestAudit.put("nextFireTime",nextFireTime);
+			requestVo.setTriggerTime(nextFireTime);
+		} else {
+//			System.out.println("定时回调");
+			newJobObjectBuilder.withBeginTime(new Date())
+					.withIntervalInSeconds(automaticConfigVo.getCallbackInterval()*60);
+			Date nextFireTime = schedulerManager.loadJob(newJobObjectBuilder.build());
+			JSONObject callbackAudit = data.getJSONObject("callbackAudit");
+			callbackAudit.put("nextFireTime",nextFireTime);
+			requestVo.setTriggerTime(nextFireTime);
+		}
+		processTaskMapper.updateProcessTaskStepAutomaticRequestTriggerTimeById(requestVo);
 	}
 
 	@Override
 	public void initJob(String tenantUuid) {
-		List<ProcessTaskStepDataVo> dataList = processTaskStepDataMapper.searchProcessTaskStepData(new ProcessTaskStepDataVo(null,null,ProcessTaskStepDataType.AUTOMATIC.getValue(),SystemUser.SYSTEM.getUserId()));
-		AutomaticConfigVo automaticConfigVo = null;
-		for(ProcessTaskStepDataVo dataVo : dataList) {
-			JSONObject dataObject = dataVo.getData();
-			if(dataObject != null && dataObject.containsKey("requestAudit")) {
-				JSONObject requestStatus = dataObject.getJSONObject("requestAudit").getJSONObject("status");
-				if(ProcessTaskStatus.PENDING.getValue().equals(requestStatus.getString("value"))) {
-					//load第一次请求job
-					initReloadJob(automaticConfigVo,dataVo,tenantUuid,true);
-				}else if(ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))&&dataObject.containsKey("callbackAudit")){
-					JSONObject callbackStatus = dataObject.getJSONObject("callbackAudit").getJSONObject("status");
-					if(ProcessTaskStatus.PENDING.getValue().equals(callbackStatus.getString("value"))) {
-						initReloadJob(automaticConfigVo,dataVo,tenantUuid,false);
-					}
-				}
-			}
-			
+		List<ProcessTaskStepAutomaticRequestVo> requestList = processTaskMapper.getAllProcessTaskStepAutomaticRequestList();
+		for (ProcessTaskStepAutomaticRequestVo requestVo : requestList) {
+			JobObject.Builder jobObjectBuilder = new JobObject.Builder(
+					requestVo.getId().toString(),
+					this.getGroupName(),
+					this.getClassName(),
+					TenantContext.get().getTenantUuid()
+			);
+			JobObject jobObject = jobObjectBuilder.build();
+			this.reloadJob(jobObject);
 		}
 	}
 
 	@Override
 	public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
-		AutomaticConfigVo automaticConfigVo = (AutomaticConfigVo) jobObject.getData("automaticConfigVo");
+		Long requestId = Long.valueOf(jobObject.getJobName());
+		ProcessTaskStepAutomaticRequestVo requestVo = processTaskMapper.getProcessTaskStepAutomaticRequestById(requestId);
+		if (requestVo == null) {
+			schedulerManager.unloadJob(jobObject);
+			return;
+		}
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(requestVo.getProcessTaskStepId());
+		if (processTaskStepVo == null) {
+			processTaskMapper.deleteProcessTaskStepAutomaticRequestById(requestId);
+			schedulerManager.unloadJob(jobObject);
+			return;
+		}
+		if (!ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+			processTaskMapper.deleteProcessTaskStepAutomaticRequestById(requestId);
+			schedulerManager.unloadJob(jobObject);
+			return;
+		}
+		String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+		if (StringUtils.isBlank(stepConfig)) {
+			processTaskMapper.deleteProcessTaskStepAutomaticRequestById(requestId);
+			schedulerManager.unloadJob(jobObject);
+			return;
+		}
+		JSONObject automaticConfig = (JSONObject) JSONPath.read(stepConfig, "automaticConfig");
+		AutomaticConfigVo automaticConfigVo = new AutomaticConfigVo(automaticConfig);
 		JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
-		Integer isTimeToRun = 0;
+		int isTimeToRun = 0;
 		//判断是否在时间窗口内
-		if(timeWindowConfig != null) {
-			isTimeToRun = TimeUtil.isInTimeWindow(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
+		if(MapUtils.isNotEmpty(timeWindowConfig)) {
+			String startTime = timeWindowConfig.getString("startTime");
+			String endTime = timeWindowConfig.getString("endTime");
+			if (StringUtils.isNotBlank(startTime) && StringUtils.isNotBlank(endTime)) {
+				isTimeToRun = TimeUtil.isInTimeWindow(startTime, endTime);
+			}
 		}
 		if(isTimeToRun == 0) {
 			//避免后续获取用户异常
 			UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
-			ProcessTaskStepVo currentProcessTaskStepVo = (ProcessTaskStepVo) jobObject.getData("currentProcessTaskStepVo");
-			//excute
-			Boolean isUnloadJob = processTaskAutomaticService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
-			//update nextFireTime
-			ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue(),SystemUser.SYSTEM.getUserId());
-			ProcessTaskStepDataVo stepData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
-			JSONObject data = stepData.getData();// (JSONObject) jobObject.getData("data");
-			if(data != null) {
-				JSONObject audit = null;
-				if(automaticConfigVo.getIsRequest()) {
-					audit = data.getJSONObject("requestAudit");
-				}else {
-					audit = data.getJSONObject("callbackAudit");
-				}
-				if(context.getNextFireTime() != null) {
-					audit.put("nextFireTime",context.getNextFireTime());
-				}
-				if(isUnloadJob){
-					audit.remove("nextFireTime");
-				}
+			ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue(),SystemUser.SYSTEM.getUserUuid());
+			String type = requestVo.getType();
+			if ("request".equals(type)) {
+				processTaskAutomaticService.firstRequest(processTaskStepVo);
+				processTaskMapper.deleteProcessTaskStepAutomaticRequestById(requestId);
+				ProcessTaskStepDataVo stepData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+				JSONObject data = stepData.getData();
+				JSONObject requestAudit = data.getJSONObject("requestAudit");
+				requestAudit.remove("nextFireTime");
 				processTaskStepDataVo.setData(data.toJSONString());
-				processTaskStepDataVo.setFcu(SystemUser.SYSTEM.getUserId());
+				processTaskStepDataVo.setFcu(SystemUser.SYSTEM.getUserUuid());
+				processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
+			} else {
+				boolean isUnloadJob = processTaskAutomaticService.callbackRequest(processTaskStepVo);
+				ProcessTaskStepDataVo stepData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+				JSONObject data = stepData.getData();
+				JSONObject callbackAudit = data.getJSONObject("callbackAudit");
+				if(isUnloadJob){
+					callbackAudit.remove("nextFireTime");
+					processTaskMapper.deleteProcessTaskStepAutomaticRequestById(requestId);
+					schedulerManager.unloadJob(jobObject);
+				} else {
+					Date nextFireTime = context.getNextFireTime();
+					if(nextFireTime != null) {
+						callbackAudit.put("nextFireTime",nextFireTime);
+						requestVo.setTriggerTime(nextFireTime);
+						processTaskMapper.updateProcessTaskStepAutomaticRequestTriggerTimeById(requestVo);
+					}
+				}
+
+				processTaskStepDataVo.setData(data.toJSONString());
+				processTaskStepDataVo.setFcu(SystemUser.SYSTEM.getUserUuid());
 				processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
 			}
-			//
-			if(data == null || isUnloadJob) {
-				schedulerManager.unloadJob(jobObject);
-			}
 		}
 	}
-	
-	/**
-	 * reload 请求/回调job
-	 * @param automaticConfigVo
-	 * @param dataVo
-	 * @param tenantUuid
-	 * @param isRequest
-	 */
-	private void initReloadJob(AutomaticConfigVo automaticConfigVo ,ProcessTaskStepDataVo dataVo,String tenantUuid,Boolean isRequest) {
-		ProcessTaskStepVo  processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(dataVo.getProcessTaskStepId());
-		String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-		JSONObject configJson = JSONObject.parseObject(config);
-		if(configJson.containsKey("automaticConfig")) {
-			automaticConfigVo = new AutomaticConfigVo(configJson.getJSONObject("automaticConfig"));
-			automaticConfigVo.setIsRequest(isRequest);
-			JobObject.Builder jobObjectBuilder = new JobObject.Builder(dataVo.getProcessTaskId()+"-"+dataVo.getProcessTaskStepId(),
-					this.getGroupName(),
-					this.getClassName(), 
-					tenantUuid)
-					.addData("data", dataVo.getData())
-					.addData("automaticConfigVo", automaticConfigVo)
-					.addData("currentProcessTaskStepVo", processTaskStepVo);
-			JobObject jobObject = jobObjectBuilder.build();
-			this.reloadJob(jobObject);
-		}
-	}
-	
 }

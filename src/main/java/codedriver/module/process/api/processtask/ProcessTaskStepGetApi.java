@@ -254,7 +254,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             // 补充 automatic processtaskStepData
             ProcessTaskStepDataVo stepDataVo = processTaskStepDataMapper
                     .getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),
-                            processTaskStepVo.getId(), processTaskStepVo.getHandler(), SystemUser.SYSTEM.getUserId()));
+                            processTaskStepVo.getId(), processTaskStepVo.getHandler(), SystemUser.SYSTEM.getUserUuid()));
             boolean hasComplete =
                     new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_COMPLETE)
                             .build().check();

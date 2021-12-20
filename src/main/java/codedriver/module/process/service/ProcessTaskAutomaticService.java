@@ -14,10 +14,16 @@ import com.alibaba.fastjson.JSONObject;
  * @since 2021/8/16 15:47
  **/
 public interface ProcessTaskAutomaticService {
-    Boolean runRequest(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo);
+//    Boolean runRequest(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo);
+//
+//    JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo, AutomaticConfigVo automaticConfigVo, JSONObject data, String type);
+//
+//    void initJob(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo, JSONObject data);
 
-    JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo, AutomaticConfigVo automaticConfigVo, JSONObject data, String type);
+    void firstRequest(ProcessTaskStepVo currentProcessTaskStepVo);
 
-    void initJob(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo, JSONObject data);
+    boolean callbackRequest(ProcessTaskStepVo currentProcessTaskStepVo);
+
+    AutomaticConfigVo getAutomaticConfigVoByProcessTaskStepId(Long processTaskStepId);
 
 }

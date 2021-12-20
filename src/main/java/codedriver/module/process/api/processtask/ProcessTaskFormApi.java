@@ -68,27 +68,6 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
                     processTaskStepVo.setId(processTaskStepId);
                     processTaskStepVo.setProcessTaskId(processTaskId);
                     processTaskService.setTemporaryData(processTaskVo, processTaskStepVo);
-//                    ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
-//                    processTaskStepDataVo.setProcessTaskId(processTaskId);
-//                    processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
-//                    processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
-//                    processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
-//                    ProcessTaskStepDataVo stepDraftSaveData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
-//                    if (stepDraftSaveData != null) {
-//                        JSONObject dataObj = stepDraftSaveData.getData();
-//                        if (MapUtils.isNotEmpty(dataObj)) {
-//                            JSONArray formAttributeDataList = dataObj.getJSONArray("formAttributeDataList");
-//                            if (CollectionUtils.isNotEmpty(formAttributeDataList)) {
-//                                Map<String, Object> formAttributeDataMap = new HashMap<>();
-//                                for (int i = 0; i < formAttributeDataList.size(); i++) {
-//                                    JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
-//                                    formAttributeDataMap.put(formAttributeDataObj.getString("attributeUuid"),
-//                                        formAttributeDataObj.get("dataList"));
-//                                }
-//                                processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
-//                            }
-//                        }
-//                    }
                 }
             }
 
