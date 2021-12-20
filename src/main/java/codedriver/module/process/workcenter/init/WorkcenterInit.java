@@ -17,11 +17,14 @@ import codedriver.framework.process.constvalue.ProcessWorkcenterInitType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import com.alibaba.nacos.common.utils.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @Title: 工单中心默认分类
@@ -68,7 +71,7 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                 "    }\n" +
                 "}");
         workcenterVo.setType(ProcessWorkcenterType.FACTORY.getValue());
-        workcenterVo.setSuport(DeviceType.ALL.getValue());
+        workcenterVo.setSupport(DeviceType.ALL.getValue());
         workcenterVo.setSort(1);
         return workcenterVo;
     }
@@ -479,7 +482,7 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                 "    }\n" +
                 "}");
         workcenterVo.setType(ProcessWorkcenterType.FACTORY.getValue());
-        workcenterVo.setSuport(DeviceType.ALL.getValue());
+        workcenterVo.setSupport(DeviceType.ALL.getValue());
         workcenterVo.setSort(2);
         return workcenterVo;
     }
@@ -503,9 +506,19 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
         protected void execute() {
             // 切换租户数据源
             TenantContext.get().switchTenant(tenantUuid).setUseDefaultDatasource(false);
-            for (WorkcenterVo workcenterVo : workcenterList) {
-                //TODO 刚开始需要控制授权
-                workcenterMapper.insertWorkcenter(workcenterVo);
+            List<String> initWoekcenterUUidList = Stream.of(ProcessWorkcenterInitType.values()).map(ProcessWorkcenterInitType::getValue).collect(Collectors.toList());
+            List<WorkcenterVo> oldVoList= workcenterMapper.getWorkcenterVoListByUuidList(initWoekcenterUUidList);
+            List<String> deviceTypeList = Stream.of(DeviceType.values()).map(DeviceType::getValue).collect(Collectors.toList());
+            List<WorkcenterVo> replaceList = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(oldVoList)) {
+                List<String> uuidList = oldVoList.stream().filter(s -> deviceTypeList.contains(s.getSupport())).collect(Collectors.toList()).stream().map(WorkcenterVo::getUuid).collect(Collectors.toList());
+                replaceList = workcenterList.stream().filter(s ->!uuidList.contains(s.getUuid())).collect(Collectors.toList());
+            }
+            if (CollectionUtils.isNotEmpty(replaceList)) {
+                for (WorkcenterVo workcenterVo : replaceList) {
+                    //TODO 刚开始需要控制授权
+                    workcenterMapper.insertWorkcenter(workcenterVo);
+                }
             }
         }
     }
