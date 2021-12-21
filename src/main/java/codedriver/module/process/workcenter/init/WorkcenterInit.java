@@ -513,7 +513,12 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
             if (CollectionUtils.isNotEmpty(workcenterList)) {
                 // 切换租户数据源
                 TenantContext.get().switchTenant(tenantUuid).setUseDefaultDatasource(false);
+                //获取工单中心需要初始化的分类的uuidList
                 List<String> initWorkcenterUUidList = Stream.of(ProcessWorkcenterInitType.values()).map(ProcessWorkcenterInitType::getValue).collect(Collectors.toList());
+
+                /**
+                 * 工单中心分类初始化分为分类初始化、分类权限初始化
+                 */
                 List<WorkcenterVo> oldWorkcenterVoList = workcenterMapper.getWorkcenterVoListByUuidList(initWorkcenterUUidList);
                 List<WorkcenterAuthorityVo> oldAuthorityVoList = workcenterMapper.getWorkcenterAuthorityVoListByUuidList(initWorkcenterUUidList);
                 Map<String, WorkcenterVo> workcenterVoMap = new HashMap<>();
