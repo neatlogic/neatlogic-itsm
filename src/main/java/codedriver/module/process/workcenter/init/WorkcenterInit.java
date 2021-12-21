@@ -520,15 +520,16 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                  * 工单中心分类初始化分为分类初始化、分类权限初始化
                  */
                 List<WorkcenterVo> oldWorkcenterVoList = workcenterMapper.getWorkcenterVoListByUuidList(initWorkcenterUUidList);
-                List<WorkcenterAuthorityVo> oldAuthorityVoList = workcenterMapper.getWorkcenterAuthorityVoListByUuidList(initWorkcenterUUidList);
                 Map<String, WorkcenterVo> workcenterVoMap = new HashMap<>();
-                Map<String, WorkcenterAuthorityVo> workcenterAuthorityVoMap = new HashMap<>();
                 if (CollectionUtils.isNotEmpty(oldWorkcenterVoList)) {
                     workcenterVoMap = oldWorkcenterVoList.stream().collect(Collectors.toMap(e -> e.getUuid(), e -> e));
                 }
+                List<WorkcenterAuthorityVo> oldAuthorityVoList = workcenterMapper.getWorkcenterAuthorityVoListByUuidList(initWorkcenterUUidList);
+                Map<String, WorkcenterAuthorityVo> workcenterAuthorityVoMap = new HashMap<>();
                 if (CollectionUtils.isNotEmpty(oldAuthorityVoList)) {
                     workcenterAuthorityVoMap = oldAuthorityVoList.stream().collect(Collectors.toMap(e -> e.getWorkcenterUuid(), e -> e));
                 }
+
                 for (WorkcenterVo workcenterVo : workcenterList) {
                     String uuid = workcenterVo.getUuid();
 
@@ -539,7 +540,7 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                             workcenterVo.setSupport(tmpWorkcenterVo.getSupport());
                         }
                     }
-                    workcenterMapper.insertWorkcenter(workcenterVo);
+                    workcenterMapper.replaceWorkcenter(workcenterVo);
 
                     //初始化工单中心分类权限
                     WorkcenterAuthorityVo tmpWorkcenterAuthorityVo = workcenterAuthorityVoMap.get(uuid);
