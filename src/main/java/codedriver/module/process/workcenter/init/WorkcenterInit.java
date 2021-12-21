@@ -14,11 +14,11 @@ import codedriver.framework.common.constvalue.DeviceType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dao.mapper.TenantMapper;
-import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.dto.TenantVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterInitType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import codedriver.framework.process.workcenter.dto.WorkcenterAuthorityVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.alibaba.nacos.common.utils.StringUtils;
@@ -514,16 +514,21 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                 // 切换租户数据源
                 TenantContext.get().switchTenant(tenantUuid).setUseDefaultDatasource(false);
                 List<String> initWorkcenterUUidList = Stream.of(ProcessWorkcenterInitType.values()).map(ProcessWorkcenterInitType::getValue).collect(Collectors.toList());
-                List<WorkcenterVo> oldVoList = workcenterMapper.getWorkcenterVoListByUuidList(initWorkcenterUUidList);
+                List<WorkcenterVo> oldWorkcenterVoList = workcenterMapper.getWorkcenterVoListByUuidList(initWorkcenterUUidList);
+                List<WorkcenterAuthorityVo> oldAuthorityVoList = workcenterMapper.getWorkcenterAuthorityVoListByUuidList(initWorkcenterUUidList);
                 Map<String, WorkcenterVo> workcenterVoMap = new HashMap<>();
-                if (CollectionUtils.isNotEmpty(oldVoList)) {
-                    workcenterVoMap = oldVoList.stream().collect(Collectors.toMap(e -> e.getUuid(), e -> e));
+                Map<String, WorkcenterAuthorityVo> workcenterAuthorityVoMap = new HashMap<>();
+                if (CollectionUtils.isNotEmpty(oldWorkcenterVoList)) {
+                    workcenterVoMap = oldWorkcenterVoList.stream().collect(Collectors.toMap(e -> e.getUuid(), e -> e));
+                }
+                if (CollectionUtils.isNotEmpty(oldAuthorityVoList)) {
+                    workcenterAuthorityVoMap = oldAuthorityVoList.stream().collect(Collectors.toMap(e -> e.getWorkcenterUuid(), e -> e));
                 }
                 for (WorkcenterVo workcenterVo : workcenterList) {
                     String uuid = workcenterVo.getUuid();
-                    WorkcenterVo tmpWorkcenterVo = workcenterVoMap.get(uuid);
 
                     //初始化工单中心分类
+                    WorkcenterVo tmpWorkcenterVo = workcenterVoMap.get(uuid);
                     if (workcenterVoMap.containsKey(uuid)) {
                         if (StringUtils.isNotBlank(tmpWorkcenterVo.getSupport())) {
                             workcenterVo.setSupport(tmpWorkcenterVo.getSupport());
@@ -532,9 +537,9 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                     workcenterMapper.insertWorkcenter(workcenterVo);
 
                     //初始化工单中心分类权限
-                    List<AuthorityVo> authorityVoList = workcenterMapper.getAuthoritiesListByUuid(uuid);
-                    if (CollectionUtils.isEmpty(authorityVoList)) {
-                        workcenterMapper.insertWorkcenterAuthority(new AuthorityVo(GroupSearch.COMMON.getValue(),UserType.ALL.getValue()),uuid);
+                    WorkcenterAuthorityVo tmpWorkcenterAuthorityVo = workcenterAuthorityVoMap.get(uuid);
+                    if (tmpWorkcenterAuthorityVo == null) {
+                        workcenterMapper.insertWorkcenterAuthority(new WorkcenterAuthorityVo(uuid, GroupSearch.COMMON.getValue(), UserType.ALL.getValue()));
                     }
 
                 }

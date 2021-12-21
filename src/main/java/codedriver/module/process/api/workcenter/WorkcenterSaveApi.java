@@ -7,18 +7,18 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.auth.WORKCENTER_MODIFY;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
 import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
+import codedriver.framework.process.workcenter.dto.WorkcenterAuthorityVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.process.auth.WORKCENTER_MODIFY;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -113,7 +113,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 			workcenterVo.setType(type);
 			//更新角色
 			for(Object value:valueList) {
-				AuthorityVo authorityVo = new AuthorityVo();
+				WorkcenterAuthorityVo authorityVo = new WorkcenterAuthorityVo();
 				if(value.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
 					authorityVo.setType(GroupSearch.ROLE.getValue());
 					authorityVo.setUuid(value.toString().replaceAll(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
@@ -126,7 +126,8 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 				}else{
 					throw new WorkcenterParamException("valueList");
 				}
-				workcenterMapper.insertWorkcenterAuthority(authorityVo,workcenterVo.getUuid());
+				authorityVo.setWorkcenterUuid(workcenterVo.getUuid());
+				workcenterMapper.insertWorkcenterAuthority(authorityVo);
 			}
 		}else {
 			workcenterVo.setType(type);
