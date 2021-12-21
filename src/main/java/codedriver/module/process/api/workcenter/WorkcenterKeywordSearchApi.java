@@ -3,11 +3,10 @@ package codedriver.module.process.api.workcenter;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.Expression;
+import codedriver.framework.common.dto.BaseEditorVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
-import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
-import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -17,9 +16,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -28,10 +27,10 @@ import java.util.UUID;
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
-    @Autowired
-    WorkcenterMapper workcenterMapper;
+    @Resource
+    ProcessTaskMapper processTaskMapper;
 
-    @Autowired
+    @Resource
     NewWorkcenterService newWorkcenterService;
 
     @Override
@@ -62,10 +61,13 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
             return CollectionUtils.EMPTY_COLLECTION;
         }
         if (isCombine != null && isCombine == 0) {
-            List<IProcessTaskCondition> conditionList = new ArrayList<IProcessTaskCondition>();
-            conditionList.add(ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.TITLE.getValue()));
-            conditionList.add(ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.SERIAL_NUMBER.getValue()));
-            return getKeywordOptionMB(conditionList, keyword, jsonObj.getInteger("pageSize"));
+            if(StringUtils.isNotBlank(keyword)){
+                BaseEditorVo baseEditorVo = new BaseEditorVo();
+                baseEditorVo.setKeyword(keyword);
+                baseEditorVo.setPageSize(jsonObj.getInteger("pageSize"));
+                return processTaskMapper.getProcessTaskIdAndTitleByIndexKeyword(new ArrayList<>(baseEditorVo.getKeywordList()),baseEditorVo.getPageSize());
+            }
+            return CollectionUtils.EMPTY_COLLECTION;
         }
         return newWorkcenterService.getKeywordOptionsPCNew(new WorkcenterVo(jsonObj));
     }
