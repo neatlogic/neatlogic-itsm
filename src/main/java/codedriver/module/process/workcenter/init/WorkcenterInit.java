@@ -11,7 +11,10 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.bootstrap.CodedriverWebApplicationContext;
 import codedriver.framework.common.constvalue.DeviceType;
+import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dao.mapper.TenantMapper;
+import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.dto.TenantVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterInitType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
@@ -57,7 +60,7 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
     private WorkcenterVo all() {
         WorkcenterVo workcenterVo = new WorkcenterVo();
         workcenterVo.setUuid(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue());
-        workcenterVo.setName("所有工单");
+        workcenterVo.setName(ProcessWorkcenterInitType.ALL_PROCESSTASK.getName());
         workcenterVo.setConditionConfig("{\n" +
                 "    \"handlerType\":\"simple\",\n" +
                 "    \"conditionConfig\":{\n" +
@@ -82,7 +85,7 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
     private WorkcenterVo draft() {
         WorkcenterVo workcenterVo = new WorkcenterVo();
         workcenterVo.setUuid(ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue());
-        workcenterVo.setName("我的草稿");
+        workcenterVo.setName(ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getName());
         workcenterVo.setConditionConfig("{\n" +
                 "    \"valueList\":[\n" +
                 "        \"common#alluser\"\n" +
@@ -507,26 +510,33 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
 
         @Override
         protected void execute() {
-            // 切换租户数据源
-            TenantContext.get().switchTenant(tenantUuid).setUseDefaultDatasource(false);
-            List<String> initWorkcenterUUidList = Stream.of(ProcessWorkcenterInitType.values()).map(ProcessWorkcenterInitType::getValue).collect(Collectors.toList());
-            List<WorkcenterVo> oldVoList = workcenterMapper.getWorkcenterVoListByUuidList(initWorkcenterUUidList);
-            Map<String, WorkcenterVo> workcenterVoMap=new HashMap<>();
-            if (CollectionUtils.isNotEmpty(oldVoList)) {
-                workcenterVoMap = oldVoList.stream().collect(Collectors.toMap(e -> e.getUuid(), e -> e));
-            }
             if (CollectionUtils.isNotEmpty(workcenterList)) {
+                // 切换租户数据源
+                TenantContext.get().switchTenant(tenantUuid).setUseDefaultDatasource(false);
+                List<String> initWorkcenterUUidList = Stream.of(ProcessWorkcenterInitType.values()).map(ProcessWorkcenterInitType::getValue).collect(Collectors.toList());
+                List<WorkcenterVo> oldVoList = workcenterMapper.getWorkcenterVoListByUuidList(initWorkcenterUUidList);
+                Map<String, WorkcenterVo> workcenterVoMap = new HashMap<>();
+                if (CollectionUtils.isNotEmpty(oldVoList)) {
+                    workcenterVoMap = oldVoList.stream().collect(Collectors.toMap(e -> e.getUuid(), e -> e));
+                }
                 for (WorkcenterVo workcenterVo : workcenterList) {
-                    //TODO 刚开始需要控制授权
                     String uuid = workcenterVo.getUuid();
+                    WorkcenterVo tmpWorkcenterVo = workcenterVoMap.get(uuid);
+
+                    //初始化工单中心分类
                     if (workcenterVoMap.containsKey(uuid)) {
-                        WorkcenterVo tmpWorkcenterVo = workcenterVoMap.get(uuid);
                         if (StringUtils.isNotBlank(tmpWorkcenterVo.getSupport())) {
                             workcenterVo.setSupport(tmpWorkcenterVo.getSupport());
                         }
                     }
-
                     workcenterMapper.insertWorkcenter(workcenterVo);
+
+                    //初始化工单中心分类权限
+                    List<AuthorityVo> authorityVoList = workcenterMapper.getAuthoritiesListByUuid(uuid);
+                    if (CollectionUtils.isEmpty(authorityVoList)) {
+                        workcenterMapper.insertWorkcenterAuthority(new AuthorityVo(GroupSearch.COMMON.getValue(),UserType.ALL.getValue()),uuid);
+                    }
+
                 }
             }
         }
