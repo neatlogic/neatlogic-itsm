@@ -244,7 +244,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         if (CollectionUtils.isNotEmpty(workcenterVo.getKeywordList())) {
             keywordList = new ArrayList<>(workcenterVo.getKeywordList());
         }
-        return processTaskMapper.getProcessTaskByIndexKeyword(keywordList, workcenterVo.getPageSize(), workcenterVo.getKeywordColumn(), workcenterVo.getKeywordPro());
+        return processTaskMapper.getProcessTaskColumnByIndexKeyword(keywordList, workcenterVo.getPageSize(), workcenterVo.getKeywordColumn(), workcenterVo.getKeywordPro());
     }
 
     @Override
