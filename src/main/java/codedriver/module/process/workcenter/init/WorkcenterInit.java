@@ -25,10 +25,7 @@ import com.alibaba.nacos.common.utils.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -522,29 +519,23 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                 List<WorkcenterVo> oldWorkcenterVoList = workcenterMapper.getWorkcenterVoListByUuidList(initWorkcenterUUidList);
                 Map<String, WorkcenterVo> workcenterVoMap = new HashMap<>();
                 if (CollectionUtils.isNotEmpty(oldWorkcenterVoList)) {
-                    workcenterVoMap = oldWorkcenterVoList.stream().collect(Collectors.toMap(e -> e.getUuid(), e -> e));
+                    workcenterVoMap = oldWorkcenterVoList.stream().collect(Collectors.toMap(WorkcenterVo::getUuid, e -> e));
                 }
                 List<WorkcenterAuthorityVo> oldAuthorityVoList = workcenterMapper.getWorkcenterAuthorityVoListByUuidList(initWorkcenterUUidList);
-                Map<String, WorkcenterAuthorityVo> workcenterAuthorityVoMap = new HashMap<>();
-                if (CollectionUtils.isNotEmpty(oldAuthorityVoList)) {
-                    workcenterAuthorityVoMap = oldAuthorityVoList.stream().collect(Collectors.toMap(e -> e.getWorkcenterUuid(), e -> e));
-                }
 
                 for (WorkcenterVo workcenterVo : workcenterList) {
                     String uuid = workcenterVo.getUuid();
-
                     //初始化工单中心分类
-                    WorkcenterVo tmpWorkcenterVo = workcenterVoMap.get(uuid);
-                    if (workcenterVoMap.containsKey(uuid)) {
-                        if (StringUtils.isNotBlank(tmpWorkcenterVo.getSupport())) {
-                            workcenterVo.setSupport(tmpWorkcenterVo.getSupport());
+                    WorkcenterVo oldWorkcenterVo = workcenterVoMap.get(uuid);
+                    if (oldWorkcenterVo != null) {
+                        if (StringUtils.isNotBlank(oldWorkcenterVo.getSupport())) {
+                            workcenterVo.setSupport(oldWorkcenterVo.getSupport());
                         }
                     }
                     workcenterMapper.replaceWorkcenter(workcenterVo);
 
                     //初始化工单中心分类权限
-                    WorkcenterAuthorityVo tmpWorkcenterAuthorityVo = workcenterAuthorityVoMap.get(uuid);
-                    if (tmpWorkcenterAuthorityVo == null) {
+                    if (oldAuthorityVoList.stream().noneMatch(o-> Objects.equals(o.getWorkcenterUuid(),uuid))) {
                         workcenterMapper.insertWorkcenterAuthority(new WorkcenterAuthorityVo(uuid, GroupSearch.COMMON.getValue(), UserType.ALL.getValue()));
                     }
 
