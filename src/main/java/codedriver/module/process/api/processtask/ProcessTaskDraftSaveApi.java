@@ -113,6 +113,7 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
     })
     @Description(desc = "工单上报暂存接口")
     @Override
+    @ResubmitInterval(5)
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String channelUuid = jsonObj.getString("channelUuid");
         if (channelMapper.checkChannelIsExists(channelUuid) == 0) {
