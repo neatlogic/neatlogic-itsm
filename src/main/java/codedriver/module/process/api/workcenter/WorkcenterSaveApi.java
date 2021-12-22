@@ -7,18 +7,18 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.auth.WORKCENTER_MODIFY;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
 import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
+import codedriver.framework.process.workcenter.dto.WorkcenterAuthorityVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.process.auth.WORKCENTER_MODIFY;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -63,6 +63,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 		@Param(name="uuid", type = ApiParamType.STRING, desc="分类uuid"),
 		@Param(name="name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc="分类名" ,xss = true),
 		@Param(name="type", type = ApiParamType.STRING, desc="分类类型，system|custom 默认custom"),
+		@Param(name="support",type = ApiParamType.ENUM, rule = "all,mobile,pc",  desc="使用范围，pc|mobile 默认所有"),
 		@Param(name="conditionConfig", type = ApiParamType.JSONOBJECT, desc="分类过滤配置，json格式",isRequired = true),
 		@Param(name="valueList", type = ApiParamType.JSONARRAY, desc="授权列表，如果是system,则必填", isRequired = false)
 	})
@@ -112,7 +113,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 			workcenterVo.setType(type);
 			//更新角色
 			for(Object value:valueList) {
-				AuthorityVo authorityVo = new AuthorityVo();
+				WorkcenterAuthorityVo authorityVo = new WorkcenterAuthorityVo();
 				if(value.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
 					authorityVo.setType(GroupSearch.ROLE.getValue());
 					authorityVo.setUuid(value.toString().replaceAll(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
@@ -125,7 +126,8 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 				}else{
 					throw new WorkcenterParamException("valueList");
 				}
-				workcenterMapper.insertWorkcenterAuthority(authorityVo,workcenterVo.getUuid());
+				authorityVo.setWorkcenterUuid(workcenterVo.getUuid());
+				workcenterMapper.insertWorkcenterAuthority(authorityVo);
 			}
 		}else {
 			workcenterVo.setType(type);
@@ -136,7 +138,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 		
 		if(StringUtils.isBlank(uuid)) {
 			workcenterVo.setConditionConfig(jsonObj.toJSONString());
-			workcenterMapper.insertWorkcenter(workcenterVo);
+			workcenterMapper.replaceWorkcenter(workcenterVo);
 		}else { 
 			workcenterVo.setName(name);
 			workcenterMapper.updateWorkcenter(workcenterVo);
