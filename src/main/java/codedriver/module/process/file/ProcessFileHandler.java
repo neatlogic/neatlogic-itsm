@@ -57,7 +57,7 @@ public class ProcessFileHandler extends FileTypeHandlerBase {
 
     @Override
     public String getName() {
-        return "PROCESS";
+        return "ITSM";
     }
 
     @Override
