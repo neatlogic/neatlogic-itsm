@@ -3,6 +3,7 @@ package codedriver.module.process.api.workcenter;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.CommonUtil;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -149,6 +150,7 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
                 workcenter.setIsProcessingOfMine(null);
             }
         }
+        workcenterJson.put("mobileIsOnline", Config.MOBILE_IS_ONLINE());
         workcenterJson.put("viewType", viewType);
         workcenterJson.put("workcenterList", workcenterList.stream().sorted(Comparator.comparing(WorkcenterVo::getSort)).collect(Collectors.toList()));
         return workcenterJson;
