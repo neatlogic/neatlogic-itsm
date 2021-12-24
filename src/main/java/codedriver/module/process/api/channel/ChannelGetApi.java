@@ -2,6 +2,7 @@ package codedriver.module.process.api.channel;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
@@ -109,7 +110,10 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 //			}
 //			channel.setAllowTranferReport(1);
 //		}
-		return channel;
+		JSONObject returnObj = new JSONObject();
+		returnObj.put("mobileIsOnline", Config.MOBILE_IS_ONLINE());
+		returnObj.put("channel", channel);
+		return returnObj;
 	}
 
 }
