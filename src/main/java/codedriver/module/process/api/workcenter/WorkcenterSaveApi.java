@@ -134,7 +134,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
             }
         } else {
             workcenterVo.setType(type);
-            workcenterVo.setSupport(support);
+            workcenterVo.setSupport(DeviceType.ALL.getValue());
             if (StringUtils.isBlank(workcenterVo.getOwner())) {
                 workcenterMapper.insertWorkcenterOwner(userUuid, workcenterVo.getUuid());
             }
