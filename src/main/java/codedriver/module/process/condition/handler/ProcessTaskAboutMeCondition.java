@@ -266,10 +266,11 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
             MyProcessTask<StringBuilder> result = mapSql.get(value);
             if (result != null) {
                 // 拼接条件
-                result.build(sqlSb);
                 if (i != 0) {
                     sqlSb.append(" or ");
                 }
+                result.build(sqlSb);
+
             }
             i++;
         }
