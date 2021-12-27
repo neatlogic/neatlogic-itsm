@@ -13,6 +13,7 @@ import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
+import codedriver.framework.process.crossover.IProcessTaskCompleteApiCrossoverService;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
 import codedriver.framework.process.dto.*;
@@ -43,7 +44,7 @@ import java.util.List;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_BASE.class)
-public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
+public class ProcessTaskCompleteApi extends PrivateApiComponentBase implements IProcessTaskCompleteApiCrossoverService {
 
 //    @Resource
 //    private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
