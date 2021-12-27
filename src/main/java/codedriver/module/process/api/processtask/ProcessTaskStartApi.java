@@ -6,6 +6,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
+import codedriver.framework.process.crossover.IProcessTaskStartApiCrossoverService;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
@@ -26,7 +27,7 @@ import org.springframework.stereotype.Service;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_BASE.class)
-public class ProcessTaskStartApi extends PrivateApiComponentBase {
+public class ProcessTaskStartApi extends PrivateApiComponentBase implements IProcessTaskStartApiCrossoverService {
     
     @Autowired
     private ProcessTaskService processTaskService;

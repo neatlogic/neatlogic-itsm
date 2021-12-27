@@ -6,6 +6,7 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.crossover.IProcessTaskTransferApiCrossoverService;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -29,7 +30,7 @@ import java.util.List;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_BASE.class)
-public class ProcessTaskTransferApi extends PrivateApiComponentBase {
+public class ProcessTaskTransferApi extends PrivateApiComponentBase implements IProcessTaskTransferApiCrossoverService {
     
     @Autowired
     private ProcessTaskService processTaskService;

@@ -10,6 +10,7 @@ import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
+import codedriver.framework.process.crossover.IProcessTaskCommentApiCrossoverService;
 import codedriver.framework.process.dao.mapper.ProcessCommentTemplateMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
@@ -37,7 +38,7 @@ import java.util.List;
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
 @AuthAction(action = PROCESS_BASE.class)
-public class ProcessTaskCommentApi extends PrivateApiComponentBase {
+public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IProcessTaskCommentApiCrossoverService {
 
     @Autowired
     private ProcessTaskMapper processTaskMapper;

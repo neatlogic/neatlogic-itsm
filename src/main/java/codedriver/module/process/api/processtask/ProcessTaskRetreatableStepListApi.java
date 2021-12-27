@@ -2,6 +2,7 @@ package codedriver.module.process.api.processtask;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.crossover.IProcessTaskRetreatableStepListApiCrossoverService;
 import codedriver.framework.process.service.ProcessTaskAgentService;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -25,7 +26,7 @@ import javax.annotation.Resource;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessTaskRetreatableStepListApi extends PrivateApiComponentBase {
+public class ProcessTaskRetreatableStepListApi extends PrivateApiComponentBase implements IProcessTaskRetreatableStepListApiCrossoverService {
     
     @Resource
     private ProcessTaskService processTaskService;

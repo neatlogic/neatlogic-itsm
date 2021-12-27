@@ -15,6 +15,7 @@ import codedriver.framework.form.exception.FormAttributeNotFoundException;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.process.crossover.IProcessTaskCreatePublicApiCrossoverService;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -50,7 +51,7 @@ import java.util.Map;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
+public class ProcessTaskCreatePublicApi extends PublicApiComponentBase implements IProcessTaskCreatePublicApiCrossoverService {
 
     @Resource
     private ChannelMapper channelMapper;
