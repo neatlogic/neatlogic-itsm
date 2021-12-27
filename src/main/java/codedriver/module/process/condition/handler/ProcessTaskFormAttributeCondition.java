@@ -33,7 +33,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -156,12 +155,12 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
         ConditionVo conditionVo = conditionList.get(index);
-        if(StringUtils.isBlank(conditionVo.getHandler())){
-            throw new ParamIrregularException("ConditionGroup"," lost handler");
+        if (StringUtils.isBlank(conditionVo.getHandler())) {
+            throw new ParamIrregularException("ConditionGroup", " lost handler");
         }
         IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(conditionVo.getHandler());
-        if(formAttributeHandler == null){
-            throw new ParamIrregularException("ConditionGroup"," handler illegal");
+        if (formAttributeHandler == null) {
+            throw new ParamIrregularException("ConditionGroup", " handler illegal");
         }
         JSONArray valueArray = JSONArray.parseArray(conditionVo.getValueList().toString());
 
@@ -217,11 +216,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                 //如果需要分词，则搜索的时候关键字也需分词搜索
                 if (formAttributeHandler.isNeedSliceWord()) {
                     Set<String> sliceKeySet = null;
-                    try {
-                        sliceKeySet = FullTextIndexUtil.sliceKeyword(valueTmp);
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex.getMessage());
-                    }
+                    sliceKeySet = FullTextIndexUtil.sliceKeyword(valueTmp);
                     if (CollectionUtils.isNotEmpty(sliceKeySet)) {
                         valueList.addAll(new ArrayList<>(sliceKeySet));
                     }
