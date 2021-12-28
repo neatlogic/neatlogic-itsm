@@ -143,23 +143,27 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                     }
                 }
                 if (triggerTime != null) {
-                    IJob jobHandler = SchedulerManager.getHandler(ProcessTaskStepTimerCompleteJob.class.getName());
-                    if (jobHandler == null) {
-                        throw new ScheduleHandlerNotFoundException(ProcessTaskStepTimerCompleteJob.class.getName());
+                    if (triggerTime.after(new Date())) {
+                        IJob jobHandler = SchedulerManager.getHandler(ProcessTaskStepTimerCompleteJob.class.getName());
+                        if (jobHandler == null) {
+                            throw new ScheduleHandlerNotFoundException(ProcessTaskStepTimerCompleteJob.class.getName());
+                        }
+                        ProcessTaskStepTimerVo processTaskStepTimerVo = new ProcessTaskStepTimerVo();
+                        processTaskStepTimerVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+                        processTaskStepTimerVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+                        processTaskStepTimerVo.setTriggerTime(triggerTime);
+                        processTaskMapper.insertProcessTaskStepTimer(processTaskStepTimerVo);
+                        JobObject.Builder jobObjectBuilder = new JobObject.Builder(
+                                processTaskStepTimerVo.getId().toString(),
+                                jobHandler.getGroupName(),
+                                jobHandler.getClassName(),
+                                TenantContext.get().getTenantUuid()
+                        );
+                        JobObject jobObject = jobObjectBuilder.build();
+                        jobHandler.reloadJob(jobObject);
+                    } else {
+                        currentProcessTaskStepVo.setIsAllDone(true);
                     }
-                    ProcessTaskStepTimerVo processTaskStepTimerVo = new ProcessTaskStepTimerVo();
-                    processTaskStepTimerVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-                    processTaskStepTimerVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-                    processTaskStepTimerVo.setTriggerTime(triggerTime);
-                    processTaskMapper.insertProcessTaskStepTimer(processTaskStepTimerVo);
-                    JobObject.Builder jobObjectBuilder = new JobObject.Builder(
-                            processTaskStepTimerVo.getId().toString(),
-                            jobHandler.getGroupName(),
-                            jobHandler.getClassName(),
-                            TenantContext.get().getTenantUuid()
-                    );
-                    JobObject jobObject = jobObjectBuilder.build();
-                    jobHandler.reloadJob(jobObject);
                 }
             }
         }
