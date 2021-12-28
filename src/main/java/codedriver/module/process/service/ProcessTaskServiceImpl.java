@@ -8,6 +8,7 @@ package codedriver.module.process.service;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.constvalue.TeamLevel;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dao.mapper.RoleMapper;
@@ -25,6 +26,7 @@ import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.*;
+import codedriver.framework.process.crossover.IProcessTaskCrossoverService;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
@@ -51,6 +53,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -62,7 +65,7 @@ import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toCollection;
 
 @Service
-public class ProcessTaskServiceImpl implements ProcessTaskService {
+public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskCrossoverService {
 
     private final static Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
 
@@ -118,6 +121,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     private ChannelTypeMapper channelTypeMapper;
     @Resource
     private CatalogMapper catalogMapper;
+    @Resource
+    private ProcessCommentTemplateMapper commentTemplateMapper;
+    @Resource
+    private ProcessTaskStepTaskService processTaskStepTaskService;
     @Resource
     private ProcessTaskAgentService processTaskAgentService;
 //    @Override
@@ -1643,5 +1650,183 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         for (ProcessTaskStepUserVo stepUserVo : stepUserVoList) {
             processTaskMapper.insertIgnoreProcessTaskStepUser(stepUserVo);
         }
+    }
+
+    /**
+     * @param processTaskStepId 步骤id
+     * @return ProcessTaskStepVo
+     * @Author: linbq
+     * @Time:2020年8月21日
+     * @Description: 获取当前步骤信息
+     */
+    @Override
+    public ProcessTaskStepVo getCurrentProcessTaskStepById(Long processTaskStepId) {
+        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+        Long processTaskId = processTaskStepVo.getProcessTaskId();
+        if (new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_VIEW).build()
+                .check()) {
+            // 处理人列表
+            setProcessTaskStepUser(processTaskStepVo);
+
+            /** 当前步骤特有步骤信息 **/
+            IProcessStepInternalHandler processStepUtilHandler =
+                    ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
+            if (processStepUtilHandler == null) {
+                throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+            }
+            processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
+            // 步骤评论列表
+            List<String> typeList = new ArrayList<>();
+            typeList.add(ProcessTaskOperationType.STEP_COMMENT.getValue());
+            typeList.add(ProcessTaskOperationType.STEP_COMPLETE.getValue());
+            typeList.add(ProcessTaskOperationType.STEP_BACK.getValue());
+            typeList.add(ProcessTaskOperationType.STEP_RETREAT.getValue());
+            typeList.add(ProcessTaskOperationType.STEP_TRANSFER.getValue());
+            processTaskStepVo.setCommentList(
+                    getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, typeList));
+
+            // 获取当前用户有权限的所有子任务
+            // 子任务列表
+//            if (processTaskStepVo.getIsActive() == 1
+//                    && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+//                List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList =
+//                        processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
+//                if (CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
+//                    Map<String, String> customButtonMap = processStepUtilHandler.getCustomButtonMapByConfigHashAndHandler(
+//                            processTaskStepVo.getConfigHash(), processTaskStepVo.getHandler());
+//                    for (ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+//                        String currentUser = UserContext.get().getUserUuid(true);
+//                        if ((currentUser.equals(processTaskStepSubtask.getMajorUser())
+//                                && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
+//                                || (currentUser.equals(processTaskStepSubtask.getUserUuid())
+//                                && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
+//                            if (processTaskStepSubtask.getIsAbortable() == 1) {
+//                                String value = ProcessTaskOperationType.SUBTASK_ABORT.getValue();
+//                                String text = customButtonMap.get(value);
+//                                if (StringUtils.isBlank(text)) {
+//                                    text = ProcessTaskOperationType.SUBTASK_ABORT.getText();
+//                                }
+//                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+//                            }
+//                            if (processTaskStepSubtask.getIsCommentable() == 1) {
+//                                String value = ProcessTaskOperationType.SUBTASK_COMMENT.getValue();
+//                                String text = customButtonMap.get(value);
+//                                if (StringUtils.isBlank(text)) {
+//                                    text = ProcessTaskOperationType.SUBTASK_COMMENT.getText();
+//                                }
+//                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+//                            }
+//                            if (processTaskStepSubtask.getIsCompletable() == 1) {
+//                                String value = ProcessTaskOperationType.SUBTASK_COMPLETE.getValue();
+//                                String text = customButtonMap.get(value);
+//                                if (StringUtils.isBlank(text)) {
+//                                    text = ProcessTaskOperationType.SUBTASK_COMPLETE.getText();
+//                                }
+//                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+//                            }
+//                            if (processTaskStepSubtask.getIsEditable() == 1) {
+//                                String value = ProcessTaskOperationType.SUBTASK_EDIT.getValue();
+//                                String text = customButtonMap.get(value);
+//                                if (StringUtils.isBlank(text)) {
+//                                    text = ProcessTaskOperationType.SUBTASK_EDIT.getText();
+//                                }
+//                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+//                            }
+//                            if (processTaskStepSubtask.getIsRedoable() == 1) {
+//                                String value = ProcessTaskOperationType.SUBTASK_REDO.getValue();
+//                                String text = customButtonMap.get(value);
+//                                if (StringUtils.isBlank(text)) {
+//                                    text = ProcessTaskOperationType.SUBTASK_REDO.getText();
+//                                }
+//                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+//                            }
+//                            processTaskStepVo.getProcessTaskStepSubtaskList().add(processTaskStepSubtask);
+//                        }
+//                    }
+//                }
+//            }
+            //任务列表
+            if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
+            }
+
+            // 获取可分配处理人的步骤列表
+            processTaskStepVo.setAssignableWorkerStepList(getAssignableWorkerStepList(
+                    processTaskStepVo.getProcessTaskId(), processTaskStepVo.getProcessStepUuid()));
+
+            // 时效列表
+            processTaskStepVo.setSlaTimeList(getSlaTimeListByProcessTaskStepId(processTaskStepId));
+
+            // 补充 automatic processtaskStepData
+            ProcessTaskStepDataVo stepDataVo = processTaskStepDataMapper
+                    .getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),
+                            processTaskStepVo.getId(), processTaskStepVo.getHandler(), SystemUser.SYSTEM.getUserUuid()));
+            boolean hasComplete =
+                    new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_COMPLETE)
+                            .build().check();
+            if (stepDataVo != null) {
+                JSONObject stepDataJson = stepDataVo.getData();
+                processTaskStepVo.setProcessTaskStepData(stepDataJson);
+                if (hasComplete) {// 有处理权限
+                    stepDataJson.put("isStepUser", 1);
+                    if (processTaskStepVo.getHandler().equals(ProcessStepHandlerType.AUTOMATIC.getHandler())) {
+                        JSONObject requestAuditJson = stepDataJson.getJSONObject("requestAudit");
+                        if (requestAuditJson.containsKey("status") && requestAuditJson.getJSONObject("status")
+                                .getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
+                            requestAuditJson.put("isRetry", 1);
+                        } else {
+                            requestAuditJson.put("isRetry", 0);
+                        }
+                        JSONObject callbackAuditJson = stepDataJson.getJSONObject("callbackAudit");
+                        if (callbackAuditJson != null) {
+                            if (callbackAuditJson.containsKey("status") && callbackAuditJson.getJSONObject("status")
+                                    .getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
+                                callbackAuditJson.put("isRetry", 1);
+                            } else {
+                                callbackAuditJson.put("isRetry", 0);
+                            }
+                        }
+                    }
+                }
+            }
+            /** 下一步骤列表 **/
+            processTaskStepVo.setForwardNextStepList(
+                    getForwardNextStepListByProcessTaskStepId(processTaskStepVo.getId()));
+            processTaskStepVo.setBackwardNextStepList(
+                    getBackwardNextStepListByProcessTaskStepId(processTaskStepVo.getId()));
+            ;
+            /** 提醒列表 **/
+            List<ProcessTaskStepRemindVo> processTaskStepRemindList =
+                    getProcessTaskStepRemindListByProcessTaskStepId(processTaskStepId);
+            processTaskStepVo.setProcessTaskStepRemindList(processTaskStepRemindList);
+
+            ProcessTaskStepAgentVo processTaskStepAgentVo =
+                    processTaskMapper.getProcessTaskStepAgentByProcessTaskStepId(processTaskStepId);
+            if (processTaskStepAgentVo != null) {
+                processTaskStepVo.setOriginalUser(processTaskStepAgentVo.getUserUuid());
+                UserVo userVo = userMapper.getUserBaseInfoByUuid(processTaskStepAgentVo.getUserUuid());
+                if (userVo != null) {
+                    UserVo vo = new UserVo();
+                    BeanUtils.copyProperties(userVo, vo);
+                    processTaskStepVo.setOriginalUserVo(vo);
+//                    processTaskStepVo.setOriginalUserName(userVo.getUserName());
+                }
+            }
+            /** 如果当前用户有处理权限，则获取其有权看到的配置的回复模版 */
+            if (hasComplete) {
+                List<String> authList = new ArrayList<>();
+                AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+                authList.addAll(authenticationInfoVo.getTeamUuidList());
+                authList.addAll(authenticationInfoVo.getRoleUuidList());
+                authList.add(UserType.ALL.getValue());
+                authList.add(UserContext.get().getUserUuid());
+                ProcessCommentTemplateVo commentTemplate = commentTemplateMapper
+                        .getTemplateByStepUuidAndAuth(processTaskStepVo.getProcessStepUuid(), authList);
+                processTaskStepVo.setCommentTemplate(commentTemplate);
+            }
+            processTaskStepVo.setReplaceableTextList(getReplaceableTextList(processTaskStepVo));
+            return processTaskStepVo;
+        }
+        return null;
     }
 }
