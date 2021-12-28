@@ -62,7 +62,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public int getSort() {
-		return 0;
+		return 4;
 	}
 
 	@Override
