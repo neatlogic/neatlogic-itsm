@@ -8,6 +8,7 @@ package codedriver.module.process.stephandler.component;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepMode;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepTimerCompleteVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -89,6 +90,22 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+        return 1;
+    }
+
+    @Override
+    protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, Set<ProcessTaskStepWorkerVo> workerSet) throws ProcessTaskException {
+        return 0;
+    }
+
+    @Override
+    protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) {
+        return 0;
+    }
+
+    @Override
+    protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
         String configHash = currentProcessTaskStepVo.getConfigHash();
         String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(configHash);
 //        {
@@ -147,22 +164,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                 }
             }
         }
-        return 0;
-    }
-
-    @Override
-    protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, Set<ProcessTaskStepWorkerVo> workerSet) throws ProcessTaskException {
-        return 0;
-    }
-
-    @Override
-    protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) {
-        return 0;
-    }
-
-    @Override
-    protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-        return 0;
+        return 1;
     }
 
     @Override
