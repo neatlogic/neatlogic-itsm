@@ -174,5 +174,23 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
     protected int myPause(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
         return 0;
     }
+	/**
+	 * 正向输出路径数量
+	 * -1代表不限制
+	 * @return
+	 */
+	@Override
+	public int getForwardOutnputQuantity() {
+		return 0;
+	}
+	/**
+	 * 回退输入路径数量
+	 * -1代表不限制
+	 * @return
+	 */
+	@Override
+	public int getBackwardInputQuantity() {
+		return 0;
+	}
 
 }

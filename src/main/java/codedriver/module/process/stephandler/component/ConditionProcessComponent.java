@@ -350,4 +350,14 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
         return 0;
     }
 
+    /**
+     * 回退输出路径数量
+     * -1代表不限制
+     * @return
+     */
+    @Override
+    public int getBackwardOutputQuantity() {
+        return 0;
+    }
+
 }
