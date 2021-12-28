@@ -22,7 +22,7 @@ import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskViewDeniedException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
-import codedriver.framework.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.restful.annotation.*;

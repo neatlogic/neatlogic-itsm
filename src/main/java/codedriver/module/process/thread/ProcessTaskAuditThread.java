@@ -14,7 +14,7 @@ import codedriver.framework.process.audithandler.core.ProcessTaskAuditDetailType
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.*;
-import codedriver.framework.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.util.FreemarkerUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;

@@ -26,7 +26,7 @@ import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import codedriver.framework.transaction.util.TransactionUtil;
 import codedriver.framework.util.RunScriptUtil;
-import codedriver.framework.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskService;
 import codedriver.module.process.sla.handler.DefaultSlaCalculateHandler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;

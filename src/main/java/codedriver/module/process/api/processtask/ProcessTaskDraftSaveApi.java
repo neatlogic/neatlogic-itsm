@@ -26,7 +26,7 @@ import codedriver.framework.process.exception.core.ProcessTaskPriorityNotMatchEx
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
-import codedriver.framework.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.*;
