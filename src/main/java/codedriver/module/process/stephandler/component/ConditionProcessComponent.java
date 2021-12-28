@@ -287,7 +287,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     public int getSort() {
-        return 1;
+        return 3;
     }
 
     @Override
