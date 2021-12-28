@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import codedriver.framework.service.AuthenticationInfoService;
-import codedriver.framework.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;

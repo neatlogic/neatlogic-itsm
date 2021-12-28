@@ -22,7 +22,7 @@ import codedriver.framework.notify.dto.job.NotifyJobVo;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
-import codedriver.framework.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskService;
 import codedriver.module.framework.message.handler.TimedTaskMessgeHandler;
 import codedriver.module.framework.notify.handler.MessageNotifyHandler;
 import codedriver.module.process.notify.constvalue.TimedTaskTriggerType;
