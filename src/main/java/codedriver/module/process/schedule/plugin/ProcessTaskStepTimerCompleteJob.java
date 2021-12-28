@@ -8,7 +8,7 @@ package codedriver.module.process.schedule.plugin;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskStepTimerCompleteVo;
+import codedriver.framework.process.dto.ProcessTaskStepTimerVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -42,8 +42,8 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
     @Override
     public Boolean isHealthy(JobObject jobObject) {
         Long id = Long.valueOf(jobObject.getJobName());
-        ProcessTaskStepTimerCompleteVo processTaskStepTimerCompleteVo = processTaskMapper.getProcessTaskStepTimerCompleteById(id);
-        if (processTaskStepTimerCompleteVo != null) {
+        ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerById(id);
+        if (processTaskStepTimerVo != null) {
             return true;
         }
         return false;
@@ -52,17 +52,17 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
     @Override
     public void reloadJob(JobObject jobObject) {
         Long id = Long.valueOf(jobObject.getJobName());
-        ProcessTaskStepTimerCompleteVo processTaskStepTimerCompleteVo = processTaskMapper.getProcessTaskStepTimerCompleteById(id);
-        if (processTaskStepTimerCompleteVo == null) {
+        ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerById(id);
+        if (processTaskStepTimerVo == null) {
             return;
         }
-        Date beginTime = processTaskStepTimerCompleteVo.getTriggerTime();
+        Date beginTime = processTaskStepTimerVo.getTriggerTime();
         Date newDate = new Date();
         if (newDate.after(beginTime)) {
             beginTime = newDate;
         }
         JobObject.Builder jobObjectBuilder = new JobObject.Builder(
-                processTaskStepTimerCompleteVo.getId().toString(),
+                processTaskStepTimerVo.getId().toString(),
                 this.getGroupName(),
                 this.getClassName(),
                 TenantContext.get().getTenantUuid()
@@ -70,14 +70,14 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
                 .withIntervalInSeconds(5)
                 .withRepeatCount(0);
         Date nextFireTime = schedulerManager.loadJob(jobObjectBuilder.build());
-        processTaskStepTimerCompleteVo.setTriggerTime(nextFireTime);
-        processTaskMapper.updateProcessTaskStepTimerCompleteTriggerTimeById(processTaskStepTimerCompleteVo);
+        processTaskStepTimerVo.setTriggerTime(nextFireTime);
+        processTaskMapper.updateProcessTaskStepTimerTriggerTimeById(processTaskStepTimerVo);
     }
 
     @Override
     public void initJob(String tenantUuid) {
-        List<ProcessTaskStepTimerCompleteVo> processTaskStepTimerCompleteList = processTaskMapper.getAllProcessTaskStepTimerCompleteList();
-        for (ProcessTaskStepTimerCompleteVo timerCompleteVo : processTaskStepTimerCompleteList) {
+        List<ProcessTaskStepTimerVo> processTaskStepTimerCompleteList = processTaskMapper.getAllProcessTaskStepTimerList();
+        for (ProcessTaskStepTimerVo timerCompleteVo : processTaskStepTimerCompleteList) {
             JobObject.Builder jobObjectBuilder = new JobObject.Builder(
                     timerCompleteVo.getId().toString(),
                     this.getGroupName(),
@@ -92,12 +92,12 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {
         Long id = Long.valueOf(jobObject.getJobName());
-        ProcessTaskStepTimerCompleteVo processTaskStepTimerCompleteVo = processTaskMapper.getProcessTaskStepTimerCompleteById(id);
-        if (processTaskStepTimerCompleteVo == null) {
+        ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerById(id);
+        if (processTaskStepTimerVo == null) {
             schedulerManager.unloadJob(jobObject);
             return;
         }
-        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepTimerCompleteVo.getProcessTaskStepId());
+        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepTimerVo.getProcessTaskStepId());
         if (processTaskStepVo == null) {
             processTaskMapper.deleteProcessTaskStepAutomaticRequestById(id);
             schedulerManager.unloadJob(jobObject);
@@ -113,7 +113,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }
         processStepHandler.complete(processTaskStepVo);
-        processTaskMapper.deleteProcessTaskStepTimerCompleteById(id);
+        processTaskMapper.deleteProcessTaskStepTimerById(id);
         schedulerManager.unloadJob(jobObject);
     }
 }

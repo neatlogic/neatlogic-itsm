@@ -10,7 +10,7 @@ import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepTimerCompleteVo;
+import codedriver.framework.process.dto.ProcessTaskStepTimerVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
@@ -19,7 +19,6 @@ import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
-import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 import codedriver.module.process.schedule.plugin.ProcessTaskStepTimerCompleteJob;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.MapUtils;
@@ -148,13 +147,13 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                     if (jobHandler == null) {
                         throw new ScheduleHandlerNotFoundException(ProcessTaskStepTimerCompleteJob.class.getName());
                     }
-                    ProcessTaskStepTimerCompleteVo processTaskStepTimerCompleteVo = new ProcessTaskStepTimerCompleteVo();
-                    processTaskStepTimerCompleteVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-                    processTaskStepTimerCompleteVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-                    processTaskStepTimerCompleteVo.setTriggerTime(triggerTime);
-                    processTaskMapper.insertProcessTaskStepTimerComplete(processTaskStepTimerCompleteVo);
+                    ProcessTaskStepTimerVo processTaskStepTimerVo = new ProcessTaskStepTimerVo();
+                    processTaskStepTimerVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+                    processTaskStepTimerVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+                    processTaskStepTimerVo.setTriggerTime(triggerTime);
+                    processTaskMapper.insertProcessTaskStepTimer(processTaskStepTimerVo);
                     JobObject.Builder jobObjectBuilder = new JobObject.Builder(
-                            processTaskStepTimerCompleteVo.getId().toString(),
+                            processTaskStepTimerVo.getId().toString(),
                             jobHandler.getGroupName(),
                             jobHandler.getClassName(),
                             TenantContext.get().getTenantUuid()
