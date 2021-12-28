@@ -244,4 +244,32 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
     protected int myRedo(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
         return 0;
     }
+
+    /**
+     * 正向输出路径数量
+     * -1代表不限制
+     * @return
+     */
+    @Override
+    public int getForwardOutnputQuantity() {
+        return 1;
+    }
+    /**
+     * 回退输入路径数量
+     * -1代表不限制
+     * @return
+     */
+    @Override
+    public  int getBackwardInputQuantity() {
+        return 0;
+    }
+    /**
+     * 回退输出路径数量
+     * -1代表不限制
+     * @return
+     */
+    @Override
+    public  int getBackwardOutputQuantity() {
+        return 0;
+    }
 }
