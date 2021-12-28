@@ -329,4 +329,13 @@ public interface ProcessTaskService {
      * @param processTaskStepTaskVo 步骤任务入参
      */
     void refreshStepMinorUser(ProcessTaskStepVo processTaskStepVo, ProcessTaskStepTaskVo processTaskStepTaskVo);
+
+    /**
+     * @param processTaskStepId 步骤id
+     * @return ProcessTaskStepVo
+     * @Author: linbq
+     * @Time:2020年8月21日
+     * @Description: 获取当前步骤信息
+     */
+    ProcessTaskStepVo getCurrentProcessTaskStepById(Long processTaskStepId);
 }
