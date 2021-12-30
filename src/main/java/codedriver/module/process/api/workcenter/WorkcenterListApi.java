@@ -10,6 +10,7 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.auth.WORKCENTER_MODIFY;
+import codedriver.framework.process.auth.WORKCENTER_NEW_TYPE;
 import codedriver.framework.process.constvalue.ProcessWorkcenterInitType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
@@ -78,12 +79,13 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
         JSONObject workcenterJson = new JSONObject();
         String userUuid = UserContext.get().getUserUuid(true);
         AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
-        int isHasModifiedAuth = AuthActionChecker.check(WORKCENTER_MODIFY.class)?1:0;
+        int isHasModifiedAuth = AuthActionChecker.check(WORKCENTER_MODIFY.class) ? 1 : 0;
+        int isHasNewTypeAuth = AuthActionChecker.check(WORKCENTER_NEW_TYPE.class) ? 1 : 0;
         List<WorkcenterVo> workcenterList = new ArrayList<>();
         String viewType = "table";//默认table展示
         //根据用户（用户、组、角色）授权、支持设备和是否拥有工单中心管理权限，查出工单分类列表
-        List<String> workcenterUuidList = workcenterMapper.getAuthorizedWorkcenterUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CommonUtil.getDevice(),isHasModifiedAuth);
-        if(CollectionUtils.isNotEmpty(workcenterUuidList)) {
+        List<String> workcenterUuidList = workcenterMapper.getAuthorizedWorkcenterUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CommonUtil.getDevice(), isHasModifiedAuth, isHasNewTypeAuth);
+        if (CollectionUtils.isNotEmpty(workcenterUuidList)) {
             workcenterList = workcenterMapper.getAuthorizedWorkcenterListByUuidList(workcenterUuidList);
             WorkcenterUserProfileVo userProfile = workcenterMapper.getWorkcenterUserProfileByUserUuid(userUuid);
             Map<String, Integer> workcenterUserSortMap = new HashMap<String, Integer>();
