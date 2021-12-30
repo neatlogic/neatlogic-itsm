@@ -1,13 +1,11 @@
 package codedriver.module.process.api.form;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -15,9 +13,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
-@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessTaskFormDataPublicApi extends PrivateApiComponentBase {
+public class ProcessTaskFormDataPublicApi extends PublicApiComponentBase {
 
     @Resource
     private ProcessTaskService processTaskService;
