@@ -1,29 +1,29 @@
 package codedriver.module.process.api.workcenter;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.process.auth.WORKCENTER_MODIFY;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+
 @Transactional
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
-@AuthAction(action = WORKCENTER_MODIFY.class)
+@AuthAction(action = PROCESS_BASE.class)
 public class WorkcenterTheadSaveApi extends PrivateApiComponentBase {
 
-	@Autowired
+	@Resource
 	WorkcenterMapper workcenterMapper;
 	
 	@Override
