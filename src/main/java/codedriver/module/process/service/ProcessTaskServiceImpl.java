@@ -18,6 +18,7 @@ import codedriver.framework.dto.*;
 import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.exception.FormActiveVersionNotFoundExcepiton;
@@ -29,7 +30,9 @@ import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.crossover.IProcessTaskCrossoverService;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
+import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.file.ProcessTaskFileDownloadException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
@@ -1828,5 +1831,26 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             return processTaskStepVo;
         }
         return null;
+    }
+
+    @Override
+    public boolean getProcessFileHasDownloadAuth(FileVo fileVo) {
+        /*
+         * 1、根据fileId 反找工单id
+         * 2、校验该用户是否工单干系人或拥有该工单服务的上报权限，满足才允许下载
+         */
+        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepByFileId(fileVo.getId());
+        if(processTaskStepVo == null){
+            throw new ProcessTaskFileDownloadException(fileVo.getId());
+        }
+        if (!new ProcessAuthManager.TaskOperationChecker(processTaskStepVo.getProcessTaskId(), ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
+            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskStepVo.getProcessTaskId());
+            ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+            if (channelVo == null) {
+                throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
+            }
+            throw new ProcessTaskFileDownloadException(fileVo.getId(),channelVo.getName());
+        }
+        return true;
     }
 }
