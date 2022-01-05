@@ -24,12 +24,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 @Transactional
@@ -38,11 +37,11 @@ import java.util.Objects;
 @OperationType(type = OperationTypeEnum.CREATE)
 public class WorkcenterSaveApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     WorkcenterMapper workcenterMapper;
-    @Autowired
+    @Resource
     UserMapper userMapper;
-    @Autowired
+    @Resource
     RoleMapper roleMapper;
 
     @Override
@@ -82,11 +81,9 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
         JSONArray valueList = jsonObj.getJSONArray("valueList");
         String userUuid = UserContext.get().getUserUuid(true);
         WorkcenterVo workcenterVo = new WorkcenterVo(name);
-        List<WorkcenterVo> workcenterList = null;
         if (StringUtils.isNotBlank(uuid)) {
-            workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
-            if (CollectionUtils.isNotEmpty(workcenterList)) {
-                workcenterVo = workcenterList.get(0);
+            workcenterVo = workcenterMapper.getWorkcenterByUuid(uuid);
+            if (workcenterVo != null) {
                 originType = workcenterVo.getType();
                 if (Objects.equals(originType, ProcessWorkcenterType.FACTORY.getValue())) {//如果是出厂类型，则不允许修改类型
                     type = ProcessWorkcenterType.FACTORY.getValue();

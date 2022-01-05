@@ -6,7 +6,6 @@ import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.CommonUtil;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.auth.WORKCENTER_MODIFY;
@@ -38,11 +37,8 @@ import java.util.stream.Collectors;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class WorkcenterListApi extends PrivateApiComponentBase {
     private static final Logger logger = LoggerFactory.getLogger(WorkcenterListApi.class);
-    @Autowired
+    @Resource
     WorkcenterMapper workcenterMapper;
-
-    @Autowired
-    UserMapper userMapper;
 
     @Resource
     private AuthenticationInfoService authenticationInfoService;

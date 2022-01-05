@@ -81,10 +81,10 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
         String title = "";
         String uuid = jsonObj.getString("uuid");
         if (StringUtils.isNotBlank(uuid)) {
-            List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
-            if (CollectionUtils.isNotEmpty(workcenterList)) {
-                title = workcenterList.get(0).getName();
-                jsonObj = JSONObject.parseObject(workcenterList.get(0).getConditionConfig());
+            WorkcenterVo workcenter = workcenterMapper.getWorkcenterByUuid(uuid);
+            if (workcenter != null) {
+                title = workcenter.getName();
+                jsonObj = JSONObject.parseObject(workcenter.getConditionConfig());
                 jsonObj.put("uuid", uuid);
             }
         }
