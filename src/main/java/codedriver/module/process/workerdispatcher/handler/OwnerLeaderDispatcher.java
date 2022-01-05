@@ -61,7 +61,7 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
 
     @Override
     public String getHelp() {
-        return "在上报人所在的组及父级组中，找出与选择头衔相同的用户作为当前步骤的处理人";
+        return "在上报人所在的组及父组中，找出与选择头衔相同的用户作为当前步骤的处理人";
     }
 
     @Override
@@ -76,11 +76,12 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
             ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
             List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(processTask.getOwner());
             if (CollectionUtils.isNotEmpty(teamList)) {
-                //需要逐级分组往上找，找到第一个符合的头衔的用户s
+                //循环穿透当前用户所在分组列表，找到第一个符合的头衔的用户s
                 for (TeamVo teamVo : teamList) {
                     List<TeamUserTitleVo> teamUserTitleVoList = teamMapper.getTeamUserTitleListByTeamlrAndTitleId(teamVo.getLft(), teamVo.getRht(), userTitleVo.getId());
                     if (CollectionUtils.isNotEmpty(teamUserTitleVoList)) {
                         resultList.addAll(teamUserTitleVoList.get(0).getUserList());
+                        break;
                     }
                 }
             }

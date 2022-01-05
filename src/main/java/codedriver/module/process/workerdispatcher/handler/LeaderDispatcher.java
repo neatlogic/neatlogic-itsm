@@ -74,7 +74,7 @@ public class LeaderDispatcher extends WorkerDispatcherBase {
 
     @Override
     public String getHelp() {
-        return "在选择的组及父级组中，找出与选择头衔相同的用户作为当前步骤的处理人";
+        return "在选择的组中，找出与选择头衔相同的用户作为当前步骤的处理人";
     }
 
     @Override
