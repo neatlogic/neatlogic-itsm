@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
+public class HandlerLeaderDispatcher extends WorkerDispatcherBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
@@ -35,19 +35,28 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
 
     @Override
     public String getName() {
-        return "上报人领导分派器";
+        return "处理人领导分派器";
     }
 
     @Override
     public JSONArray getConfig() {
         JSONArray resultArray = new JSONArray();
+        /** 前置步骤 **/
+        JSONObject preStepJsonObj = new JSONObject();
+        preStepJsonObj.put("type", "select");
+        preStepJsonObj.put("name", "preStepList");
+        preStepJsonObj.put("label", "前置步骤");
+        preStepJsonObj.put("validateList", Collections.singletonList("required"));
+        preStepJsonObj.put("multiple", true);
+        preStepJsonObj.put("policy", "preStepList");
+        resultArray.add(preStepJsonObj);
         /** 选择头衔 **/
         JSONObject jsonObj = new JSONObject();
         jsonObj.put("type", "select");
         jsonObj.put("name", "teamUserTitle");
         jsonObj.put("search", true);
         jsonObj.put("dynamicUrl", "api/rest/user/title/search");
-        jsonObj.put("label", "职务");
+        jsonObj.put("label", "头衔");
         jsonObj.put("validateList", Collections.singletonList("required"));
         jsonObj.put("multiple", false);
         jsonObj.put("textName", "name");
