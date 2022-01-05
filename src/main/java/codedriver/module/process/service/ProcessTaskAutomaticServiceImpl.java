@@ -449,6 +449,9 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     }
                 } else { //流转到下一步
 //                    System.out.println("不需要回调");
+                    auditDataVo.setData(data.toJSONString());
+                    auditDataVo.setFcu(SystemUser.SYSTEM.getUserUuid());
+                    processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
                     //补充下一步骤id
                     List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
                     currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepIdList.get(0));
