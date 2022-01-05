@@ -96,7 +96,7 @@ public class ProcessTaskIsShowCondition extends ProcessTaskConditionBase impleme
 
     @Override
     public ParamType getParamType() {
-        return ParamType.NUMBER;
+        return ParamType.ENUM;
     }
 
     @Override
