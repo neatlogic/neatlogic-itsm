@@ -20,7 +20,7 @@ public class ProcessFileHandler extends FileTypeHandlerBase {
 
     @Override
     public boolean valid(String userUuid, FileVo fileVo, JSONObject jsonObj) {
-        return processTaskService.getProcessFileHasDownloadAuth(fileVo);
+        return processTaskService.getProcessFileHasDownloadAuthWithFileId(fileVo.getId());
     }
 
     @Override

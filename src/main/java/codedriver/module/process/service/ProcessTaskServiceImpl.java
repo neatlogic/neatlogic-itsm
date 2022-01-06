@@ -18,7 +18,6 @@ import codedriver.framework.dto.*;
 import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.file.dao.mapper.FileMapper;
-import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.exception.FormActiveVersionNotFoundExcepiton;
@@ -1833,15 +1832,27 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         return null;
     }
 
+    /*
+     * 1、根据fileId 反找工单id
+     * 2、校验该用户是否工单干系人或拥有该工单服务的上报权限，满足才允许下载
+     */
     @Override
-    public boolean getProcessFileHasDownloadAuth(FileVo fileVo) {
-        /*
-         * 1、根据fileId 反找工单id
-         * 2、校验该用户是否工单干系人或拥有该工单服务的上报权限，满足才允许下载
-         */
-        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepByFileId(fileVo.getId());
+    public boolean getProcessFileHasDownloadAuthWithFileId(Long fileId) {
+        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepByFileId(fileId);
+        return getProcessFileHasDownloadAuthWithFileIdAndProcessTaskStepVo(fileId,processTaskStepVo);
+    }
+
+
+    /**
+     * 根据fileId 和 processTaskStepVo 获取对应是否有该工单附件的下载权限
+     * @param fileId
+     * @param processTaskStepVo
+     * @return true：有权限   false：没有权限
+     */
+    @Override
+    public boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskStepVo(Long fileId,ProcessTaskStepVo processTaskStepVo ) {
         if(processTaskStepVo == null){
-            throw new ProcessTaskFileDownloadException(fileVo.getId());
+            throw new ProcessTaskFileDownloadException(fileId);
         }
         if (!new ProcessAuthManager.TaskOperationChecker(processTaskStepVo.getProcessTaskId(), ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskStepVo.getProcessTaskId());
@@ -1849,7 +1860,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             if (channelVo == null) {
                 throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
             }
-            throw new ProcessTaskFileDownloadException(fileVo.getId(),channelVo.getName());
+            throw new ProcessTaskFileDownloadException(fileId,channelVo.getName());
         }
         return true;
     }
