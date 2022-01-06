@@ -73,7 +73,7 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
                     IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
                     List<String> dataList = handler.indexFieldContentList(attributeDataVo.getData());
                     for (String data : dataList) {
-                        fullTextIndexVo.addFieldContent(attributeDataVo.getAttributeUuid(), new FullTextIndexVo.WordVo(handler.isNeedSliceWord(), data));
+                        fullTextIndexVo.addFieldContent(attributeDataVo.getAttributeLabel(), new FullTextIndexVo.WordVo(handler.isNeedSliceWord(), data));//target_field 改为用表单的label，为了兼容换表单控件，只要名字相同也支持搜索
                     }
                 }
             }
