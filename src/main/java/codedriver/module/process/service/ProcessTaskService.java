@@ -344,5 +344,5 @@ public interface ProcessTaskService {
      * @param fileId 文件入参
      * @return true：有权限   false：没有权限
      */
-    boolean getProcessFileHasDownloadAuthWithFileId(Long fileId);
+    boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskId(Long fileId,Long processTaskId);
 }

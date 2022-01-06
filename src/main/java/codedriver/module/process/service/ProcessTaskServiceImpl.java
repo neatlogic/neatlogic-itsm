@@ -1072,7 +1072,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     public ProcessTaskVo getProcessTaskDetailById(Long processTaskId) {
         // 获取工单基本信息(title、channel_uuid、config_hash、priority_uuid、status、start_time、end_time、expire_time、owner、ownerName、reporter、reporterName)
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
-        if (processTaskVo == null){
+        if (processTaskVo == null) {
             throw new ProcessTaskNotFoundException(processTaskId.toString());
         }
 
@@ -1093,7 +1093,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 }
                 processTaskVo.setPriority(priorityVo);
                 processTaskVo.setIsNeedPriority(1);
-            }else{
+            } else {
                 processTaskVo.setIsNeedPriority(0);
             }
         }
@@ -1632,7 +1632,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<ProcessTaskStepUserVo> stepUserVoList = new ArrayList<>();
         //如果存在子任务已完成的用户,且该用户为succeed， 则更新到 processtask_step_user ，且status 为 done，type 为minor
         List<ProcessTaskStepTaskUserVo> taskUserVoList = processTaskStepTaskMapper.getStepTaskUserListByProcessTaskStepId(processTaskStepVo.getId());
-        taskUserVoList = taskUserVoList.stream().filter(user->Objects.equals(ProcessTaskStatus.SUCCEED.getValue(),user.getStatus())).collect(collectingAndThen(toCollection(() -> new TreeSet<>( Comparator.comparing(ProcessTaskStepTaskUserVo::getUserUuid))), ArrayList::new));
+        taskUserVoList = taskUserVoList.stream().filter(user -> Objects.equals(ProcessTaskStatus.SUCCEED.getValue(), user.getStatus())).collect(collectingAndThen(toCollection(() -> new TreeSet<>(Comparator.comparing(ProcessTaskStepTaskUserVo::getUserUuid))), ArrayList::new));
         for (ProcessTaskStepTaskUserVo taskUserVo : taskUserVoList) {
             if (taskUserVo.getIsDelete() != 1) {
                 String status = ProcessTaskStepUserStatus.DOING.getValue();
@@ -1832,35 +1832,22 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         return null;
     }
 
-    /*
-     * 1、根据fileId 反找工单id
-     * 2、校验该用户是否工单干系人或拥有该工单服务的上报权限，满足才允许下载
-     */
-    @Override
-    public boolean getProcessFileHasDownloadAuthWithFileId(Long fileId) {
-        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepByFileId(fileId);
-        return getProcessFileHasDownloadAuthWithFileIdAndProcessTaskStepVo(fileId,processTaskStepVo);
-    }
-
-
     /**
-     * 根据fileId 和 processTaskStepVo 获取对应用户是否有该工单附件的下载权限
+     * 根据fileId 和 processTaskId 获取对应用户是否有该工单附件的下载权限
+     *
      * @param fileId
-     * @param processTaskStepVo
+     * @param processTaskId
      * @return true：有权限   false：没有权限
      */
     @Override
-    public boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskStepVo(Long fileId,ProcessTaskStepVo processTaskStepVo ) {
-        if(processTaskStepVo == null){
-            throw new ProcessTaskFileDownloadException(fileId);
-        }
-        if (!new ProcessAuthManager.TaskOperationChecker(processTaskStepVo.getProcessTaskId(), ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
-            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskStepVo.getProcessTaskId());
+    public boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskId(Long fileId, Long processTaskId) {
+        if (!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
+            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
             ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
             if (channelVo == null) {
                 throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
             }
-            throw new ProcessTaskFileDownloadException(fileId,channelVo.getName());
+            throw new ProcessTaskFileDownloadException(fileId, channelVo.getName());
         }
         return true;
     }
