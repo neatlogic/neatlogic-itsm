@@ -1844,7 +1844,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
 
     /**
-     * 根据fileId 和 processTaskStepVo 获取对应是否有该工单附件的下载权限
+     * 根据fileId 和 processTaskStepVo 获取对应用户是否有该工单附件的下载权限
      * @param fileId
      * @param processTaskStepVo
      * @return true：有权限   false：没有权限
