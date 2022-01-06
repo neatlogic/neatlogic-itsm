@@ -19,6 +19,8 @@ import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.framework.form.attribute.handler.CheckboxHandler;
+import codedriver.module.framework.form.attribute.handler.RadioHandler;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -97,6 +100,10 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
             ListIterator<FormAttributeVo> formIterator = formAttributeList.listIterator();
             while (formIterator.hasNext()) {
                 FormAttributeVo formAttributeVo = formIterator.next();
+                //如果是radio 则改为 checkbox，前端解决多选，取消选择问题
+                if(Objects.equals(formAttributeVo.getHandler(),new RadioHandler().getHandler())){
+                    formAttributeVo.setHandler(new CheckboxHandler().getHandler());
+                }
                 IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                 if (handler == null || !handler.isConditionable()) {
                     formIterator.remove();
