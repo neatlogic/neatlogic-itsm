@@ -458,8 +458,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
                 ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1
         ) {
-            ProcessTaskStepWorkerVo majorWorker = stepVo.getWorkerList().stream().filter(o -> Objects.equals(o.getUserType(), ProcessUserType.MAJOR.getValue())).findFirst().orElse(null);
-            if (majorWorker != null) {
+            List<ProcessTaskStepWorkerVo> majorWorkerList = stepVo.getWorkerList().stream().filter(o -> Objects.equals(o.getUserType(), ProcessUserType.MAJOR.getValue())).collect(Collectors.toList());
+            for (ProcessTaskStepWorkerVo majorWorker : majorWorkerList) {
                 JSONObject workerJson = new JSONObject();
                 getWorkerInfo(majorWorker, workerJson, workerArray);
             }
