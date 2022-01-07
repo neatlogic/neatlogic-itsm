@@ -1843,6 +1843,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     public boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskId(Long fileId, Long processTaskId) {
         if (!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
+            if (processTaskVo == null) {
+                throw new ProcessTaskNotFoundException();
+            }
             ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
             if (channelVo == null) {
                 throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
