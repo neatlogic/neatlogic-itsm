@@ -6,7 +6,6 @@
 package codedriver.module.process.service;
 
 import codedriver.framework.dto.AuthenticationInfoVo;
-import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.notify.dto.NotifyReceiverVo;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.*;
@@ -341,9 +340,10 @@ public interface ProcessTaskService {
     ProcessTaskStepVo getCurrentProcessTaskStepById(Long processTaskStepId);
 
     /**
-     * 根据fileVo 获取对应是否有该工单附件的下载权限
-     * @param fileVo 文件入参
+     * 根据fileId  processTaskId 获取对应用户是否有该工单附件的下载权限
+     * @param fileId 文件id
+     * @param processTaskId 工单id
      * @return true：有权限   false：没有权限
      */
-    boolean getProcessFileHasDownloadAuth(FileVo fileVo);
+    boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskId(Long fileId,Long processTaskId);
 }

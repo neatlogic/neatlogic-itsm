@@ -7,6 +7,9 @@ package codedriver.module.process.file;
 
 import codedriver.framework.file.core.FileTypeHandlerBase;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.exception.file.ProcessTaskFileDownloadException;
 import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
@@ -15,12 +18,21 @@ import javax.annotation.Resource;
 
 @Component
 public class ProcessFileHandler extends FileTypeHandlerBase {
+
+    @Resource
+    ProcessTaskMapper processTaskMapper;
+
     @Resource
     ProcessTaskService processTaskService;
 
     @Override
     public boolean valid(String userUuid, FileVo fileVo, JSONObject jsonObj) {
-        return processTaskService.getProcessFileHasDownloadAuth(fileVo);
+        Long fileId = fileVo.getId();
+        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepByFileId(fileId);
+        if(processTaskStepVo == null){
+            throw new ProcessTaskFileDownloadException(fileId);
+        }
+        return processTaskService.getProcessFileHasDownloadAuthWithFileIdAndProcessTaskId(fileVo.getId(),processTaskStepVo.getProcessTaskId());
     }
 
     @Override
