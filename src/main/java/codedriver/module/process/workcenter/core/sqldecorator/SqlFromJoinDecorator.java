@@ -54,15 +54,15 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
         //根据column获取需要的表
         buildFromJoinMap.put(FieldTypeEnum.FIELD.getValue(), this::getJoinTableOfColumn);
 
-        buildFromJoinMap.put(FieldTypeEnum.LIMIT_COUNT.getValue(),this::getJoinTableOfCondition);
+        buildFromJoinMap.put(FieldTypeEnum.LIMIT_COUNT.getValue(), this::getJoinTableOfCondition);
         //如果是distinct id 则 只需要 根据条件获取需要的表
-        buildFromJoinMap.put(FieldTypeEnum.DISTINCT_ID.getValue(),this::getJoinTableOfCondition);
+        buildFromJoinMap.put(FieldTypeEnum.DISTINCT_ID.getValue(), this::getJoinTableOfCondition);
 
-        buildFromJoinMap.put(FieldTypeEnum.TOTAL_COUNT.getValue(),this::getJoinTableOfCondition);
+        buildFromJoinMap.put(FieldTypeEnum.TOTAL_COUNT.getValue(), this::getJoinTableOfCondition);
 
-        buildFromJoinMap.put(FieldTypeEnum.FULL_TEXT.getValue(),this::getJoinTableOfCondition);
+        buildFromJoinMap.put(FieldTypeEnum.FULL_TEXT.getValue(), this::getJoinTableOfCondition);
 
-        buildFromJoinMap.put(FieldTypeEnum.GROUP_COUNT.getValue(),this::getJoinTableOfGroupColumn);
+        buildFromJoinMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), this::getJoinTableOfGroupColumn);
     }
 
     /**
@@ -76,8 +76,8 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         List<String> joinTableKeyList = new ArrayList<>();
         List<JoinTableColumnVo> joinTableColumnList = new ArrayList<>();
-        if(buildFromJoinMap.containsKey(workcenterVo.getSqlFieldType())){
-            buildFromJoinMap.get(workcenterVo.getSqlFieldType()).build(workcenterVo,joinTableKeyList,joinTableColumnList);
+        if (buildFromJoinMap.containsKey(workcenterVo.getSqlFieldType())) {
+            buildFromJoinMap.get(workcenterVo.getSqlFieldType()).build(workcenterVo, joinTableKeyList, joinTableColumnList);
         }
         //补充排序需要的表
         getJoinTableOfOrder(workcenterVo, joinTableKeyList, joinTableColumnList);
@@ -174,6 +174,8 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
     }
 
     private void getJoinTableOfGroupColumn(WorkcenterVo workcenterVo, List<String> joinTableKeyList, List<JoinTableColumnVo> joinTableColumnList) {
+        //先根据条件补充join table
+        getJoinTableOfCondition(workcenterVo, joinTableKeyList, joinTableColumnList);
         //根据接口入参的返回需要的columnList,然后获取需要关联的tableList
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         //循环所有需要展示的字段
