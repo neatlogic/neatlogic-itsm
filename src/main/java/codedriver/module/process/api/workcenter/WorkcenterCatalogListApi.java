@@ -41,7 +41,7 @@ public class WorkcenterCatalogListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "类型名")
+            @Param(name = "name", type = ApiParamType.STRING, desc = "类型名")
     })
     @Output({
             @Param(explode = WorkcenterCatalogVo.class,desc = "工单中心菜单类型列表")
