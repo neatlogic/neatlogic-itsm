@@ -4,6 +4,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import codedriver.framework.process.workcenter.dto.WorkcenterCatalogVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -40,9 +41,10 @@ public class WorkcenterCatalogListApi extends PrivateApiComponentBase {
     }
 
     @Input({
+            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "类型名")
     })
     @Output({
-            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "类型名")
+            @Param(explode = WorkcenterCatalogVo.class,desc = "工单中心菜单类型列表")
     })
     @Description(desc = "查询工单中心菜单类型列表接口")
     @Override
