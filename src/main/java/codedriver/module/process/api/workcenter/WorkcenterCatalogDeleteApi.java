@@ -5,6 +5,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.exception.workcenter.WorkcenterCatalogIdNotFoundException;
+import codedriver.framework.process.exception.workcenter.WorkcenterCatalogIsUsedException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -51,6 +52,9 @@ public class WorkcenterCatalogDeleteApi extends PrivateApiComponentBase {
         Long id = paramObj.getLong("id");
         if (workcenterMapper.checkWorkcenterCatalogIsExists(id) == 0) {
             throw new WorkcenterCatalogIdNotFoundException(id);
+        }
+        if (workcenterMapper.checkWorkcenterCatalogIsUsed(id) > 0) {
+            throw new WorkcenterCatalogIsUsedException(id);
         }
         workcenterMapper.deleteWorkcenterCatalogById(paramObj.getLong("id"));
         return null;
