@@ -45,7 +45,7 @@ public class WorkcenterCatalogSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.STRING, desc = "类型id"),
+            @Param(name = "id", type = ApiParamType.LONG, desc = "类型id"),
             @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "类型名")
     })
     @Output({
@@ -62,10 +62,8 @@ public class WorkcenterCatalogSaveApi extends PrivateApiComponentBase {
             if (workcenterMapper.checkWorkcenterCatalogIsExists(id) == 0) {
                 throw new WorkcenterCatalogIdNotFoundException(id);
             }
-            workcenterMapper.updateWorkcenterCatalog(catalogVo);
-        } else {
-            workcenterMapper.insertWorkcenterCatalog(catalogVo);
         }
+        workcenterMapper.insertWorkcenterCatalog(catalogVo);
         return null;
     }
 }

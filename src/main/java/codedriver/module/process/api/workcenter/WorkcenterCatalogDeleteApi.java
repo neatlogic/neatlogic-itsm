@@ -42,7 +42,7 @@ public class WorkcenterCatalogDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.STRING, isRequired = true, desc = "类型id")
+            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "类型id")
     })
     @Output({
     })
@@ -56,7 +56,7 @@ public class WorkcenterCatalogDeleteApi extends PrivateApiComponentBase {
         if (workcenterMapper.checkWorkcenterCatalogIsUsed(id) > 0) {
             throw new WorkcenterCatalogIsUsedException(id);
         }
-        workcenterMapper.deleteWorkcenterCatalogById(paramObj.getLong("id"));
+        workcenterMapper.deleteWorkcenterCatalogById(id);
         return null;
     }
 
