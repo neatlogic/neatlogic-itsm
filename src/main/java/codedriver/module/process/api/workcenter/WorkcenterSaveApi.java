@@ -6,8 +6,6 @@ import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.DeviceType;
 import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.dao.mapper.RoleMapper;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.auth.WORKCENTER_MODIFY;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
@@ -39,10 +37,6 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 
     @Resource
     WorkcenterMapper workcenterMapper;
-    @Resource
-    UserMapper userMapper;
-    @Resource
-    RoleMapper roleMapper;
 
     @Override
     public String getToken() {
@@ -63,6 +57,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid"),
             @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "分类名", xss = true),
             @Param(name = "type", type = ApiParamType.STRING, desc = "分类类型，system|custom 默认custom"),
+            @Param(name = "catalogId", type = ApiParamType.LONG, desc = "菜单类型id"),
             @Param(name = "support", type = ApiParamType.ENUM, rule = "all,mobile,pc", desc = "使用范围，pc|mobile 默认所有"),
             @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "分类过滤配置，json格式", isRequired = true),
             @Param(name = "valueList", type = ApiParamType.JSONARRAY, desc = "授权列表，如果是system,则必填", isRequired = false)
@@ -77,6 +72,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
         String name = jsonObj.getString("name");
         String type = StringUtils.isBlank(jsonObj.getString("type")) ? ProcessWorkcenterType.CUSTOM.getValue() : jsonObj.getString("type");
         String support = StringUtils.isBlank(jsonObj.getString("support")) ? DeviceType.ALL.getValue() : jsonObj.getString("support");
+        Long catalogId = jsonObj.getLong("catalogId");
         String originType = null;
         JSONArray valueList = jsonObj.getJSONArray("valueList");
         String userUuid = UserContext.get().getUserUuid(true);
@@ -136,7 +132,9 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
                 workcenterMapper.insertWorkcenterOwner(userUuid, workcenterVo.getUuid());
             }
         }
-
+        if (!Objects.isNull(catalogId)) {
+            workcenterVo.setCatalogId(catalogId);
+        }
         if (StringUtils.isBlank(uuid)) {
             workcenterVo.setConditionConfig(jsonObj.toJSONString());
             workcenterMapper.replaceWorkcenter(workcenterVo);
@@ -144,6 +142,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
             workcenterVo.setName(name);
             workcenterMapper.updateWorkcenter(workcenterVo);
         }
+
 
         return null;
     }
