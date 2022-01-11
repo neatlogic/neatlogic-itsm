@@ -6,7 +6,6 @@
 package codedriver.module.process.dependency.handler;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dependency.constvalue.FromType;
 import codedriver.framework.dependency.core.CustomTableDependencyHandlerBase;
 import codedriver.framework.dependency.core.IFromType;
@@ -41,7 +40,7 @@ public class FormProcessDependencyHandler extends CustomTableDependencyHandlerBa
     }
 
     /**
-     * 被调用者字段
+     * 被引用者（上游）字段
      *
      * @return
      */
@@ -51,7 +50,7 @@ public class FormProcessDependencyHandler extends CustomTableDependencyHandlerBa
     }
 
     /**
-     * 调用者字段
+     * 引用者（下游）字段
      *
      * @return
      */
@@ -68,13 +67,13 @@ public class FormProcessDependencyHandler extends CustomTableDependencyHandlerBa
     /**
      * 解析数据，拼装跳转url，返回引用下拉列表一个选项数据结构
      *
-     * @param caller 调用者值
+     * @param dependencyObj 引用关系数据
      * @return
      */
     @Override
-    protected DependencyInfoVo parse(Object caller) {
-        if (caller instanceof Map) {
-            Map<String, Object> map = (Map)caller;
+    protected DependencyInfoVo parse(Object dependencyObj) {
+        if (dependencyObj instanceof Map) {
+            Map<String, Object> map = (Map) dependencyObj;
             String processUuid =  (String) map.get("process_uuid");
             ProcessVo processVo = processMapper.getProcessByUuid(processUuid);
             if (processVo != null) {
@@ -88,7 +87,7 @@ public class FormProcessDependencyHandler extends CustomTableDependencyHandlerBa
     }
 
     /**
-     * 被调用方名
+     * 被引用者（上游）类型
      *
      * @return
      */

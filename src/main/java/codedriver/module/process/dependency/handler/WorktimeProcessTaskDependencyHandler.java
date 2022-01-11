@@ -32,7 +32,7 @@ public class WorktimeProcessTaskDependencyHandler extends CustomTableDependencyH
     }
 
     /**
-     * 被调用者字段
+     * 被引用者（上游）字段
      *
      * @return
      */
@@ -42,7 +42,7 @@ public class WorktimeProcessTaskDependencyHandler extends CustomTableDependencyH
     }
 
     /**
-     * 调用者字段
+     * 引用者（下游）字段
      *
      * @return
      */
@@ -59,16 +59,16 @@ public class WorktimeProcessTaskDependencyHandler extends CustomTableDependencyH
     /**
      * 解析数据，拼装跳转url，返回引用下拉列表一个选项数据结构
      *
-     * @param to 调用者值
+     * @param dependencyObj 引用关系数据
      * @return
      */
     @Override
-    protected DependencyInfoVo parse(Object to) {
+    protected DependencyInfoVo parse(Object dependencyObj) {
         return null;
     }
 
     /**
-     * 被调用方名
+     * 被引用者（上游）类型
      *
      * @return
      */

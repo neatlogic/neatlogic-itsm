@@ -41,7 +41,7 @@ public class NotifyPolicyProcessStepDependencyHandler extends CustomTableDepende
     }
 
     /**
-     * 被调用者字段
+     * 被引用者（上游）字段
      *
      * @return
      */
@@ -51,7 +51,7 @@ public class NotifyPolicyProcessStepDependencyHandler extends CustomTableDepende
     }
 
     /**
-     * 调用者字段
+     * 引用者（下游）字段
      *
      * @return
      */
@@ -68,13 +68,13 @@ public class NotifyPolicyProcessStepDependencyHandler extends CustomTableDepende
     /**
      * 解析数据，拼装跳转url，返回引用下拉列表一个选项数据结构
      *
-     * @param to 调用者值
+     * @param dependencyObj 引用关系数据
      * @return
      */
     @Override
-    protected DependencyInfoVo parse(Object to) {
-        if (to instanceof Map) {
-            Map<String, Object> map = (Map) to;
+    protected DependencyInfoVo parse(Object dependencyObj) {
+        if (dependencyObj instanceof Map) {
+            Map<String, Object> map = (Map) dependencyObj;
             String processStepUuid =  (String) map.get("process_step_uuid");
             ProcessStepVo processStepVo = processMapper.getProcessStepByUuid(processStepUuid);
             if (processStepVo != null) {
@@ -91,7 +91,7 @@ public class NotifyPolicyProcessStepDependencyHandler extends CustomTableDepende
     }
 
     /**
-     * 被调用方名
+     * 被引用者（上游）类型
      *
      * @return
      */
