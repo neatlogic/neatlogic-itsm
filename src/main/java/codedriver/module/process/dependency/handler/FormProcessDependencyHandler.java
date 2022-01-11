@@ -7,9 +7,10 @@ package codedriver.module.process.dependency.handler;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.dependency.constvalue.CalleeType;
-import codedriver.framework.dependency.core.DependencyHandlerBase;
-import codedriver.framework.dependency.core.ICalleeType;
+import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.core.CustomTableDependencyHandlerBase;
+import codedriver.framework.dependency.core.IFromType;
+import codedriver.framework.dependency.dto.DependencyInfoVo;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessVo;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ import java.util.Map;
  * @since: 2021/4/1 18:10
  **/
 @Service
-public class FormProcessDependencyHandler extends DependencyHandlerBase {
+public class FormProcessDependencyHandler extends CustomTableDependencyHandlerBase {
     @Resource
     private ProcessMapper processMapper;
 
@@ -45,7 +46,7 @@ public class FormProcessDependencyHandler extends DependencyHandlerBase {
      * @return
      */
     @Override
-    protected String getCalleeField() {
+    protected String getFromField() {
         return "form_uuid";
     }
 
@@ -55,12 +56,12 @@ public class FormProcessDependencyHandler extends DependencyHandlerBase {
      * @return
      */
     @Override
-    protected String getCallerField() {
+    protected String getToField() {
         return "process_uuid";
     }
 
     @Override
-    protected List<String> getCallerFieldList() {
+    protected List<String> getToFieldList() {
         return null;
     }
 
@@ -71,13 +72,13 @@ public class FormProcessDependencyHandler extends DependencyHandlerBase {
      * @return
      */
     @Override
-    protected ValueTextVo parse(Object caller) {
+    protected DependencyInfoVo parse(Object caller) {
         if (caller instanceof Map) {
             Map<String, Object> map = (Map)caller;
             String processUuid =  (String) map.get("process_uuid");
             ProcessVo processVo = processMapper.getProcessByUuid(processUuid);
             if (processVo != null) {
-                ValueTextVo valueTextVo = new ValueTextVo();
+                DependencyInfoVo valueTextVo = new DependencyInfoVo();
                 valueTextVo.setValue(processVo.getUuid());
                 valueTextVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName()));
                 return valueTextVo;
@@ -92,7 +93,7 @@ public class FormProcessDependencyHandler extends DependencyHandlerBase {
      * @return
      */
     @Override
-    public ICalleeType getCalleeType() {
-        return CalleeType.FORM;
+    public IFromType getFromType() {
+        return FromType.FORM;
     }
 }

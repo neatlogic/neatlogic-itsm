@@ -6,10 +6,10 @@
 package codedriver.module.process.dependency.handler;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.dependency.constvalue.CalleeType;
-import codedriver.framework.dependency.core.DependencyHandlerBase;
-import codedriver.framework.dependency.core.ICalleeType;
+import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.core.CustomTableDependencyHandlerBase;
+import codedriver.framework.dependency.core.IFromType;
+import codedriver.framework.dependency.dto.DependencyInfoVo;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.Map;
  * @since: 2021/4/2 17:41
  **/
 @Service
-public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
+public class WorktimeChannelDependencyHandler extends CustomTableDependencyHandlerBase {
 
     @Resource
     private ChannelMapper channelMapper;
@@ -46,7 +46,7 @@ public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
      * @return
      */
     @Override
-    protected String getCalleeField() {
+    protected String getFromField() {
         return "worktime_uuid";
     }
 
@@ -56,32 +56,32 @@ public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
      * @return
      */
     @Override
-    protected String getCallerField() {
+    protected String getToField() {
         return "channel_uuid";
     }
 
     @Override
-    protected List<String> getCallerFieldList() {
+    protected List<String> getToFieldList() {
         return null;
     }
 
     /**
      * 解析数据，拼装跳转url，返回引用下拉列表一个选项数据结构
      *
-     * @param caller 调用者值
+     * @param to 调用者值
      * @return
      */
     @Override
-    protected ValueTextVo parse(Object caller) {
-        if (caller instanceof Map) {
-            Map<String, Object> map = (Map)caller;
+    protected DependencyInfoVo parse(Object to) {
+        if (to instanceof Map) {
+            Map<String, Object> map = (Map) to;
             String channelUuid =  (String) map.get("channel_uuid");
             ChannelVo channelVo = channelMapper.getChannelByUuid(channelUuid);
             if (channelVo != null) {
-                ValueTextVo valueTextVo = new ValueTextVo();
-                valueTextVo.setValue(channelVo.getUuid());
-                valueTextVo.setText(String.format("<a href=\"/%s/process.html#/catalog-manage?uuid=%s\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), channelVo.getUuid(), channelVo.getName()));
-                return valueTextVo;
+                DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
+                dependencyInfoVo.setValue(channelVo.getUuid());
+                dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/catalog-manage?uuid=%s\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), channelVo.getUuid(), channelVo.getName()));
+                return dependencyInfoVo;
             }
         }
         return null;
@@ -93,7 +93,7 @@ public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
      * @return
      */
     @Override
-    public ICalleeType getCalleeType() {
-        return CalleeType.WORKTIME;
+    public IFromType getFromType() {
+        return FromType.WORKTIME;
     }
 }
