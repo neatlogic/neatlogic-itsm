@@ -64,6 +64,6 @@ public class WorkcenterCatalogSaveApi extends PrivateApiComponentBase {
             }
         }
         workcenterMapper.insertWorkcenterCatalog(catalogVo);
-        return null;
+        return catalogVo;
     }
 }
