@@ -200,6 +200,10 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         // 生成活动
         if (isUpdate) {
             ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
+            if (processTaskStepVo == null) {
+                processTaskStepVo = new ProcessTaskStepVo();
+                processTaskStepVo.setProcessTaskId(processTaskId);
+            }
             processTaskStepVo.getParamObj().putAll(jsonObj);
             IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
             IProcessStepHandlerUtil.calculateSla(new ProcessTaskVo(processTaskId), false);
