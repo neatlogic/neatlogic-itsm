@@ -49,6 +49,7 @@ public class WorkcenterCatalogSaveApi extends PrivateApiComponentBase {
             @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "类型名")
     })
     @Output({
+            @Param(explode = WorkcenterCatalogVo.class,desc = "工单中心菜单类型")
     })
     @Description(desc = "保存工单中心菜单类型接口")
     @Override
@@ -64,6 +65,6 @@ public class WorkcenterCatalogSaveApi extends PrivateApiComponentBase {
             }
         }
         workcenterMapper.insertWorkcenterCatalog(catalogVo);
-        return null;
+        return catalogVo;
     }
 }
