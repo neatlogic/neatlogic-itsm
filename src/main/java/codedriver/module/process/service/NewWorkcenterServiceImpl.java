@@ -145,7 +145,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 taskJson.put("route", routeJson);
                 taskJson.put("taskid", processTaskVo.getId());
                 // operate 获取对应工单的操作
-                //taskJson.put("action", getTaskOperate(processTaskVo, operateTypeSetMap));
+                taskJson.put("action", getTaskOperate(processTaskVo, operateTypeSetMap));
                 dataList.add(taskJson);
 
             }
