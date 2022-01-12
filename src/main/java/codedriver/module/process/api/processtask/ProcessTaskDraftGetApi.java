@@ -123,6 +123,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
      **/
     private Map<String, Object> getFromFormAttributeDataMap(Long fromProcessTaskId, JSONObject toProcessTaskFormConfig){
         Map<String, Object> resultObj = new HashMap<>();
+        if (MapUtils.isEmpty(toProcessTaskFormConfig)) {
+            return resultObj;
+        }
         // 获取旧工单表单信息
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(fromProcessTaskId);
         if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
