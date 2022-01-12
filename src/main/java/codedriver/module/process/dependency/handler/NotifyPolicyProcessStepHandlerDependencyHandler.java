@@ -11,6 +11,7 @@ import codedriver.framework.dependency.core.CustomTableDependencyHandlerBase;
 import codedriver.framework.dependency.core.IFromType;
 import codedriver.framework.dependency.dto.DependencyInfoVo;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerTypeFactory;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -74,10 +75,16 @@ public class NotifyPolicyProcessStepHandlerDependencyHandler extends CustomTable
             String handler =  (String) map.get("handler");
             String name = ProcessStepHandlerTypeFactory.getName(handler);
             if (StringUtils.isNotBlank(name)) {
-                DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
-                dependencyInfoVo.setValue(handler);
-                dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/node-manage\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), "节点管理", name));
-                return dependencyInfoVo;
+                JSONObject dependencyInfoConfig = new JSONObject();
+                dependencyInfoConfig.put("handler", handler);
+                dependencyInfoConfig.put("handlerName", name);
+                String pathFormat = "节点管理-${DATA.handlerName}";
+                String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/node-manage";
+                return new DependencyInfoVo(handler, dependencyInfoConfig, pathFormat, urlFormat);
+//                DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
+//                dependencyInfoVo.setValue(handler);
+//                dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/node-manage\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), "节点管理", name));
+//                return dependencyInfoVo;
             }
         }
         return null;

@@ -12,6 +12,7 @@ import codedriver.framework.dependency.core.IFromType;
 import codedriver.framework.dependency.dto.DependencyInfoVo;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -78,10 +79,16 @@ public class WorktimeChannelDependencyHandler extends CustomTableDependencyHandl
             String channelUuid =  (String) map.get("channel_uuid");
             ChannelVo channelVo = channelMapper.getChannelByUuid(channelUuid);
             if (channelVo != null) {
-                DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
-                dependencyInfoVo.setValue(channelVo.getUuid());
-                dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/catalog-manage?uuid=%s\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), channelVo.getUuid(), channelVo.getName()));
-                return dependencyInfoVo;
+                JSONObject dependencyInfoConfig = new JSONObject();
+                dependencyInfoConfig.put("channelUuid", channelVo.getUuid());
+                dependencyInfoConfig.put("channelName", channelVo.getName());
+                String pathFormat = "服务目录管理-${DATA.channelName}";
+                String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/catalog-manage?uuid=#{DATA.channelUuid}";
+                return new DependencyInfoVo(channelVo.getUuid(), dependencyInfoConfig, pathFormat, urlFormat);
+//                DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
+//                dependencyInfoVo.setValue(channelVo.getUuid());
+//                dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/catalog-manage?uuid=%s\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), channelVo.getUuid(), channelVo.getName()));
+//                return dependencyInfoVo;
             }
         }
         return null;
