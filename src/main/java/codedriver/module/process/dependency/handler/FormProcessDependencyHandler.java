@@ -12,6 +12,7 @@ import codedriver.framework.dependency.core.IFromType;
 import codedriver.framework.dependency.dto.DependencyInfoVo;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessVo;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -77,10 +78,16 @@ public class FormProcessDependencyHandler extends CustomTableDependencyHandlerBa
             String processUuid =  (String) map.get("process_uuid");
             ProcessVo processVo = processMapper.getProcessByUuid(processUuid);
             if (processVo != null) {
-                DependencyInfoVo valueTextVo = new DependencyInfoVo();
-                valueTextVo.setValue(processVo.getUuid());
-                valueTextVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName()));
-                return valueTextVo;
+                JSONObject dependencyInfoConfig = new JSONObject();
+                dependencyInfoConfig.put("processUuid", processVo.getUuid());
+                dependencyInfoConfig.put("processName", processVo.getName());
+                String pathFormat = "流程-${DATA.processName}";
+                String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/flow-edit?uuid=${DATA.processUuid}";
+                return new DependencyInfoVo(processVo.getUuid(), dependencyInfoConfig, pathFormat, urlFormat);
+//                DependencyInfoVo valueTextVo = new DependencyInfoVo();
+//                valueTextVo.setValue(processVo.getUuid());
+//                valueTextVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName()));
+//                return valueTextVo;
             }
         }
         return null;

@@ -13,6 +13,7 @@ import codedriver.framework.dependency.dto.DependencyInfoVo;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessSlaVo;
 import codedriver.framework.process.dto.ProcessVo;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -80,10 +81,17 @@ public class NotifyPolicyProcessSlaDependencyHandler extends CustomTableDependen
             if (processSlaVo != null) {
                 ProcessVo processVo = processMapper.getProcessByUuid(processSlaVo.getProcessUuid());
                 if (processVo != null) {
-                    DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
-                    dependencyInfoVo.setValue(processSlaVo.getUuid());
-                    dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName(), processSlaVo.getName()));
-                    return dependencyInfoVo;
+                    JSONObject dependencyInfoConfig = new JSONObject();
+                    dependencyInfoConfig.put("processUuid", processVo.getUuid());
+                    dependencyInfoConfig.put("processName", processVo.getName());
+                    dependencyInfoConfig.put("processSlaName", processSlaVo.getName());
+                    String pathFormat = "流程-${DATA.processName}-${DATA.processSlaName}";
+                    String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/flow-edit?uuid=${DATA.processUuid}";
+                    return new DependencyInfoVo(processVo.getUuid(), dependencyInfoConfig, pathFormat, urlFormat);
+//                    DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
+//                    dependencyInfoVo.setValue(processSlaVo.getUuid());
+//                    dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName(), processSlaVo.getName()));
+//                    return dependencyInfoVo;
                 }
             }
         }
