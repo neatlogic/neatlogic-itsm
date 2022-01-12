@@ -129,6 +129,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     private ProcessTaskStepTaskService processTaskStepTaskService;
     @Resource
     private ProcessTaskAgentService processTaskAgentService;
+    @Resource
+    private ProcessTagMapper processTagMapper;
 //    @Override
 //    public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo,
 //                                                  Map<String, String> formAttributeActionMap, int mode) {
@@ -1827,6 +1829,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 processTaskStepVo.setCommentTemplate(commentTemplate);
             }
             processTaskStepVo.setReplaceableTextList(getReplaceableTextList(processTaskStepVo));
+
+            List<Long> tagIdList = processTaskMapper.getTagIdListByProcessTaskStepId(processTaskStepId);
+            if (CollectionUtils.isNotEmpty(tagIdList)) {
+                List<ProcessTagVo> processTagList = processTagMapper.getProcessTagByIdList(tagIdList);
+                if (CollectionUtils.isNotEmpty(processTagList)) {
+                    processTaskStepVo.setProcessTagList(processTagList);
+                }
+            }
             return processTaskStepVo;
         }
         return null;
