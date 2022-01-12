@@ -4,6 +4,7 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
@@ -203,7 +204,12 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT,
                 (processTaskVo, processTaskStepVo, userUuid) -> {
                     if (processTaskVo.getIsShow() == 1) {
-                        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
+                        AuthenticationInfoVo authenticationInfoVo = null;
+                        if (Objects.equals(UserContext.get().getUserUuid(), userUuid)) {
+                            authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
+                        } else {
+                            authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
+                        }
                         List<String> processUserTypeList = new ArrayList<>();
                         if (userUuid.equals(processTaskVo.getOwner())) {
                             processUserTypeList.add(ProcessUserType.OWNER.getValue());
