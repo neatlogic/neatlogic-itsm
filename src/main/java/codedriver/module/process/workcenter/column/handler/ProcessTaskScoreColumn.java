@@ -4,21 +4,21 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
+import codedriver.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.dto.score.ProcessTaskScoreVo;
 import codedriver.framework.process.workcenter.dto.JoinOnVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskScoreSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,8 +26,14 @@ import java.util.List;
 @Component
 public class ProcessTaskScoreColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 
-	@Autowired
+	@Resource
 	private ProcessTaskMapper processTaskMapper;
+
+	@Resource
+	private ProcessTaskScoreMapper processTaskScoreMapper;
+
+	@Resource
+	private SelectContentByHashMapper selectContentByHashMapper;
 
 	@Override
 	public String getName() {
@@ -93,18 +99,14 @@ public class ProcessTaskScoreColumn extends ProcessTaskColumnBase implements IPr
 	@Override
 	public Object getValue(ProcessTaskVo processTaskVo) {
 		JSONObject obj = new JSONObject();
-		String scoreInfo = processTaskMapper.getProcessTaskScoreInfoById(processTaskVo.getId());
-		if(StringUtils.isNotBlank(scoreInfo)){
+		List<ProcessTaskScoreVo> processTaskScoreVos = processTaskScoreMapper.getProcessTaskScoreWithContentHashByProcessTaskId(processTaskVo.getId());
+		if(CollectionUtils.isNotEmpty(processTaskScoreVos)) {
 			float total = 0;
-			JSONObject scoreObj = JSON.parseObject(scoreInfo);
-			JSONArray dimensionList = scoreObj.getJSONArray("dimensionList");
-			if(CollectionUtils.isNotEmpty(dimensionList)){
-				for(int i = 0;i < dimensionList.size();i++){
-					total += dimensionList.getJSONObject(i).getIntValue("score");
-				}
-				obj.put("value",Math.round(total / dimensionList.size()));
+			for (ProcessTaskScoreVo processTaskScoreVo : processTaskScoreVos) {
+				total += processTaskScoreVo.getScore();
 			}
-			obj.put("content",scoreObj.getString("content"));
+			obj.put("value",Math.round(total / processTaskScoreVos.size()));//平均分数
+			obj.put("content",selectContentByHashMapper.getProcessTaskContentStringByHash(processTaskScoreVos.get(0).getContentHash()));
 		}
 		return obj;
 	}

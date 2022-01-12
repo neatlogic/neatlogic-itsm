@@ -5,26 +5,11 @@
 
 package codedriver.module.process.schedule.plugin;
 
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPath;
-
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -33,9 +18,22 @@ import codedriver.framework.process.dto.score.ProcessTaskScoreVo;
 import codedriver.framework.process.dto.score.ScoreTemplateDimensionVo;
 import codedriver.framework.process.dto.score.ScoreTemplateVo;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
-import codedriver.framework.util.WorkTimeUtil;
 import codedriver.framework.scheduler.core.JobBase;
 import codedriver.framework.scheduler.dto.JobObject;
+import codedriver.framework.util.WorkTimeUtil;
+import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
+import org.apache.commons.collections4.CollectionUtils;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 工单自动评分定时类
@@ -59,7 +57,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 	@Override
     public Boolean isHealthy(JobObject jobObject) {
         Long processTaskId = Long.valueOf(jobObject.getJobName());
-        List<ProcessTaskScoreVo> processtaskScoreVos = processTaskScoreMapper.searchProcessTaskScoreByProcesstaskId(processTaskId);
+        List<ProcessTaskScoreVo> processtaskScoreVos = processTaskScoreMapper.getProcessTaskScoreByProcesstaskId(processTaskId);
         if (CollectionUtils.isEmpty(processtaskScoreVos)) {
             return true;
         } else {
@@ -72,7 +70,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 		String tenantUuid = jobObject.getTenantUuid();
 		TenantContext.get().switchTenant(tenantUuid);
 		Long processTaskId = Long.valueOf(jobObject.getJobName());
-		List<ProcessTaskScoreVo> processtaskScoreVos = processTaskScoreMapper.searchProcessTaskScoreByProcesstaskId(processTaskId);
+		List<ProcessTaskScoreVo> processtaskScoreVos = processTaskScoreMapper.getProcessTaskScoreByProcesstaskId(processTaskId);
 		if(CollectionUtils.isEmpty(processtaskScoreVos)){
 		    /** 如果没有评分记录，那么读取评分配置 */
 		    ProcessTaskVo task = processTaskMapper.getProcessTaskById(processTaskId);
@@ -120,7 +118,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 	@Override
 	public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {	        	    
         Long processTaskId = Long.valueOf(jobObject.getJobName());
-	    List<ProcessTaskScoreVo> processTaskScoreVos = processTaskScoreMapper.searchProcessTaskScoreByProcesstaskId(processTaskId);
+	    List<ProcessTaskScoreVo> processTaskScoreVos = processTaskScoreMapper.getProcessTaskScoreByProcesstaskId(processTaskId);
 	    if(CollectionUtils.isEmpty(processTaskScoreVos)) {
 	        ProcessTaskVo task = processTaskMapper.getProcessTaskById(processTaskId);
 	        if(task != null) {
