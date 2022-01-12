@@ -116,8 +116,6 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             logger.info((System.currentTimeMillis()-detailStartTime)+" ##end workcenter-detail:-------------------------------------------------------------------------------");
             //纠正顺序
             //按钮权限
-            long authBuilderStartTime = System.currentTimeMillis();
-            logger.error("##start workcenter-authBuilder:-------------------------------------------------------------------------------");
             ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
             for (ProcessTaskVo processTaskVo : processTaskVoList) {
                 builder.addProcessTaskId(processTaskVo.getId());
@@ -130,7 +128,6 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                             .addOperationType(ProcessTaskOperationType.PROCESSTASK_RECOVER)
                             .addOperationType(ProcessTaskOperationType.PROCESSTASK_URGE)
                             .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
-            logger.error((System.currentTimeMillis()-authBuilderStartTime)+" ##end workcenter-authBuilder:-------------------------------------------------------------------------------");
             long authStartTime = System.currentTimeMillis();
             logger.info("##start workcenter-auth:-------------------------------------------------------------------------------");
             Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
