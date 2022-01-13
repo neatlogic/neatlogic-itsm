@@ -4,6 +4,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.SystemUser;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
@@ -13,6 +14,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
@@ -72,10 +74,14 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        new ProcessAuthManager
-                .TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW)
-                .build()
-                .checkAndNoPermissionThrowException();
+        try {
+            new ProcessAuthManager
+                    .TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW)
+                    .build()
+                    .checkAndNoPermissionThrowException();
+        } catch (ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
         ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(processTaskId);
         startProcessTaskStepVo.setReplaceableTextList(processTaskService.getReplaceableTextList(startProcessTaskStepVo));
         Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();

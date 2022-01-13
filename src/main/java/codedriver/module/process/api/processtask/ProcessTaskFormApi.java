@@ -1,8 +1,10 @@
 package codedriver.module.process.api.processtask;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,8 +58,15 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build()
-            .checkAndNoPermissionThrowException();
+        try{
+            new ProcessAuthManager
+                    .TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW)
+                    .build()
+                    .checkAndNoPermissionThrowException();
+        } catch (
+        ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
         /** 检查工单是否存在表单 **/
         processTaskService.setProcessTaskFormInfo(processTaskVo);
         if (MapUtils.isNotEmpty(processTaskVo.getFormConfig())) {
