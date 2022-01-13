@@ -56,15 +56,10 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase {
         if (ProcessTaskOperationType.STEP_BACK.getValue().equals(action)) {
             operationType = ProcessTaskOperationType.STEP_BACK;
         }
-        try{
-            new ProcessAuthManager
-                    .StepOperationChecker(processTaskStepId, operationType)
-                    .build()
-                    .checkAndNoPermissionThrowException();
-        } catch (
-        ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+
+        new ProcessAuthManager.StepOperationChecker(processTaskStepId, operationType).build()
+                .checkAndNoPermissionThrowException();
+
         if (operationType == ProcessTaskOperationType.STEP_COMPLETE) {
             return processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepId);
         } else {
