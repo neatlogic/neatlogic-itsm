@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Component
 public class ProcessFileHandler extends FileTypeHandlerBase {
@@ -28,7 +29,8 @@ public class ProcessFileHandler extends FileTypeHandlerBase {
     @Override
     public boolean valid(String userUuid, FileVo fileVo, JSONObject jsonObj) {
         Long fileId = fileVo.getId();
-        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepByFileId(fileId);
+        List<ProcessTaskStepVo> processTaskStepVoList = processTaskMapper.getProcessTaskStepByFileId(fileId);
+        ProcessTaskStepVo processTaskStepVo = processTaskStepVoList.get(0);
         if(processTaskStepVo == null){
             throw new ProcessTaskFileDownloadException(fileId);
         }
