@@ -84,7 +84,7 @@ public class WorktimeChannelDependencyHandler extends CustomTableDependencyHandl
                 dependencyInfoConfig.put("channelName", channelVo.getName());
                 String pathFormat = "服务目录管理-${DATA.channelName}";
                 String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/catalog-manage?uuid=#{DATA.channelUuid}";
-                return new DependencyInfoVo(channelVo.getUuid(), dependencyInfoConfig, pathFormat, urlFormat);
+                return new DependencyInfoVo(channelVo.getUuid(), dependencyInfoConfig, pathFormat, urlFormat, this.getGroupName());
 //                DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
 //                dependencyInfoVo.setValue(channelVo.getUuid());
 //                dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/catalog-manage?uuid=%s\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), channelVo.getUuid(), channelVo.getName()));

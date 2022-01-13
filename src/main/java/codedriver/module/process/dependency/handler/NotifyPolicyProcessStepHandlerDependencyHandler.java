@@ -80,7 +80,7 @@ public class NotifyPolicyProcessStepHandlerDependencyHandler extends CustomTable
                 dependencyInfoConfig.put("handlerName", name);
                 String pathFormat = "节点管理-${DATA.handlerName}";
                 String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/node-manage";
-                return new DependencyInfoVo(handler, dependencyInfoConfig, pathFormat, urlFormat);
+                return new DependencyInfoVo(handler, dependencyInfoConfig, pathFormat, urlFormat, this.getGroupName());
 //                DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
 //                dependencyInfoVo.setValue(handler);
 //                dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/node-manage\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), "节点管理", name));

@@ -83,7 +83,7 @@ public class IntegrationProcessDependencyHandler extends CustomTableDependencyHa
                 dependencyInfoConfig.put("processName", processVo.getName());
                 String pathFormat = "流程-${DATA.processName}";
                 String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/flow-edit?uuid=${DATA.processUuid}";
-                return new DependencyInfoVo(processVo.getUuid(), dependencyInfoConfig, pathFormat, urlFormat);
+                return new DependencyInfoVo(processVo.getUuid(), dependencyInfoConfig, pathFormat, urlFormat, this.getGroupName());
 //                DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
 //                dependencyInfoVo.setValue(processVo.getUuid());
 //                dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\" target=\"_blank\">流程-%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName()));
