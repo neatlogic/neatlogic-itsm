@@ -1850,14 +1850,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
      */
     @Override
     public boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskIdList(Long fileId, List<Long> processTaskIdList) {
-        int notDownloadAuth = 1;
+        int hasDownloadAuth = 0;
         for (Long processTaskId : processTaskIdList) {
             if (new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
-                notDownloadAuth = 0;
+                hasDownloadAuth = 1;
                 break;
             }
         }
-        if (notDownloadAuth == 1) {
+        if (hasDownloadAuth == 0) {
             //所有工单都没有下载权限
             throw new ProcessTaskFileDownloadException(fileId, null);
         }

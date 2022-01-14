@@ -11,6 +11,7 @@ import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.crossover.ICatalogCrossoverService;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.nacos.common.utils.CollectionUtils;
@@ -40,7 +41,7 @@ public class ProcessFileHandler extends FileTypeHandlerBase {
             }
             return processTaskService.getProcessFileHasDownloadAuthWithFileIdAndProcessTaskIdList(fileVo.getId(), processTaskVoList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
         }
-        return false;
+        throw new ProcessTaskNotFoundException();
     }
 
     @Override
