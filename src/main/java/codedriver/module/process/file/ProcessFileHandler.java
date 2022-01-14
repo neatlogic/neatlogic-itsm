@@ -5,17 +5,22 @@
 
 package codedriver.module.process.file;
 
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.file.core.FileTypeHandlerBase;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.process.crossover.ICatalogCrossoverService;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.exception.file.ProcessTaskFileDownloadException;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.nacos.common.utils.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ProcessFileHandler extends FileTypeHandlerBase {
@@ -28,13 +33,23 @@ public class ProcessFileHandler extends FileTypeHandlerBase {
 
     @Override
     public boolean valid(String userUuid, FileVo fileVo, JSONObject jsonObj) {
+        List<Long> processTaskIdList = new ArrayList<>();
         Long fileId = fileVo.getId();
-        List<ProcessTaskStepVo> processTaskStepVoList = processTaskMapper.getProcessTaskStepByFileId(fileId);
-        ProcessTaskStepVo processTaskStepVo = processTaskStepVoList.get(0);
-        if(processTaskStepVo == null){
-            throw new ProcessTaskFileDownloadException(fileId);
+        List<ProcessTaskStepVo> processTaskStepVoList = processTaskMapper.getProcessTaskStepVoListByFileId(fileId);
+        if (CollectionUtils.isNotEmpty(processTaskStepVoList)) {
+            processTaskIdList = processTaskStepVoList.stream().map(ProcessTaskStepVo::getProcessTaskId).collect(Collectors.toList());
         }
-        return processTaskService.getProcessFileHasDownloadAuthWithFileIdAndProcessTaskId(fileVo.getId(),processTaskStepVo.getProcessTaskId());
+
+        if (CollectionUtils.isNotEmpty(processTaskIdList)) {
+            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskIdList.get(0));
+            ICatalogCrossoverService iCatalogCrossoverService = CrossoverServiceFactory.getApi(ICatalogCrossoverService.class);
+            if (iCatalogCrossoverService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid)) {
+                return true;
+            }
+            return processTaskService.getProcessFileHasDownloadAuthWithFileIdAndProcessTaskIdList(fileVo.getId(), processTaskIdList);
+        }
+        return true;
+
     }
 
     @Override

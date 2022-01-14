@@ -340,10 +340,10 @@ public interface ProcessTaskService {
     ProcessTaskStepVo getCurrentProcessTaskStepById(Long processTaskStepId);
 
     /**
-     * 根据fileId  processTaskId 获取对应用户是否有该工单附件的下载权限
+     * 根据fileId  processTaskIdList 获取对应用户是否有该工单附件的下载权限
      * @param fileId 文件id
-     * @param processTaskId 工单id
+     * @param processTaskIdList 工单id
      * @return true：有权限   false：没有权限
      */
-    boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskId(Long fileId,Long processTaskId);
+    boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskIdList(Long fileId,List<Long> processTaskIdList);
 }

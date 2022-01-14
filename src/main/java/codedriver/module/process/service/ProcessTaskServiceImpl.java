@@ -29,7 +29,6 @@ import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.crossover.IProcessTaskCrossoverService;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
-import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.file.ProcessTaskFileDownloadException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
@@ -1843,24 +1842,35 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     }
 
     /**
-     * 根据fileId 和 processTaskId 获取对应用户是否有该工单附件的下载权限
+     * 根据fileId 和 processTaskIdList 获取对应用户是否有该工单附件的下载权限
      *
      * @param fileId
-     * @param processTaskId
+     * @param processTaskIdList
      * @return true：有权限   false：没有权限
      */
     @Override
-    public boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskId(Long fileId, Long processTaskId) {
-        if (!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
+    public boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskIdList(Long fileId, List<Long> processTaskIdList) {
+
+        int notFoundTask = 1;
+        int notDownloadAuth = 1;
+
+        for (Long processTaskId : processTaskIdList) {
+            if (new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
+                notFoundTask = 0;
+                notDownloadAuth = 0;
+                break;
+            }
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
-            if (processTaskVo == null) {
-                throw new ProcessTaskNotFoundException();
+            if (processTaskVo != null) {
+                notFoundTask = 0;
             }
-            ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-            if (channelVo == null) {
-                throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
-            }
-            throw new ProcessTaskFileDownloadException(fileId, channelVo.getName());
+        }
+
+        if (notFoundTask == 1) {
+            throw new ProcessTaskNotFoundException();
+        }
+        if (notDownloadAuth == 1) {
+            throw new ProcessTaskFileDownloadException(fileId, null);
         }
         return true;
     }
