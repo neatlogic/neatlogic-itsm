@@ -188,8 +188,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 // 评分权限score
                 if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
                     if (userUuid.equals(processTaskVo.getOwner())) {
-                        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
-                        Integer isActive = (Integer) JSONPath.read(taskConfig, "process.scoreConfig.isActive");
+                        Integer isActive = (Integer) JSONPath.read(processTaskVo.getConfig(), "process.scoreConfig.isActive");
                         return Objects.equals(isActive, 1);
                     }
                 }
@@ -269,8 +268,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_MARKREPEAT,
                 (processTaskVo, processTaskStepVo, userUuid) -> {
                     if (processTaskVo.getIsShow() == 1) {
-                        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
-                        Integer enableMarkRepeat = (Integer) JSONPath.read(taskConfig, "process.processConfig.enableMarkRepeat");
+                        Integer enableMarkRepeat = (Integer) JSONPath.read(processTaskVo.getConfig(), "process.processConfig.enableMarkRepeat");
                         return Objects.equals(enableMarkRepeat, 1);
                     }
                     return false;
