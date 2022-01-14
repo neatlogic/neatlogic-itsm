@@ -86,39 +86,39 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         //补充工单字段信息
         long theadStartTime = System.currentTimeMillis();
-         System.out.println("##start workcenter-thead:-------------------------------------------------------------------------------");
+         logger.info("##start workcenter-thead:-------------------------------------------------------------------------------");
         List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
         theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
         workcenterVo.setTheadVoList(theadList);
-         System.out.println((System.currentTimeMillis()-theadStartTime)+" ##end workcenter-thead:------------------------------------------------------------------------------- ");
+         logger.info((System.currentTimeMillis()-theadStartTime)+" ##end workcenter-thead:------------------------------------------------------------------------------- ");
         //统计符合条件工单数量
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.TOTAL_COUNT);
         long countStartTime = System.currentTimeMillis();
-         System.out.println("##start workcenter-count:-------------------------------------------------------------------------------");
-        // System.out.println(sb.build());
+         logger.info("##start workcenter-count:-------------------------------------------------------------------------------");
+        // logger.info(sb.build());
         int total = processTaskMapper.getProcessTaskCountBySql(sb.build());
-         System.out.println((System.currentTimeMillis()-countStartTime)+" ##end workcenter-count:------------------------------------------------------------------------------- ");
-         System.out.println((System.currentTimeMillis()-theadStartTime)+" ##end workcenter-thead-count:------------------------------------------------------------------------------- ");
+         logger.info((System.currentTimeMillis()-countStartTime)+" ##end workcenter-count:------------------------------------------------------------------------------- ");
+         logger.info((System.currentTimeMillis()-theadStartTime)+" ##end workcenter-thead-count:------------------------------------------------------------------------------- ");
         if (total > 0) {
             //找出符合条件分页后的工单ID List
             long idStartTime = System.currentTimeMillis();
-             System.out.println("##start workcenter-id:-------------------------------------------------------------------------------");
+             logger.info("##start workcenter-id:-------------------------------------------------------------------------------");
             sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
-            // System.out.println(sb.build());
+            // logger.info(sb.build());
             List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskBySql(sb.build());
             workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
-             System.out.println((System.currentTimeMillis()-idStartTime)+" ##end workcenter-id:-------------------------------------------------------------------------------");
+             logger.info((System.currentTimeMillis()-idStartTime)+" ##end workcenter-id:-------------------------------------------------------------------------------");
 
             long detailStartTime = System.currentTimeMillis();
-             System.out.println("##start workcenter-detail:-------------------------------------------------------------------------------");
+             logger.info("##start workcenter-detail:-------------------------------------------------------------------------------");
             sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
-            // System.out.println(sb.build());
+            // logger.info(sb.build());
             List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskBySql(sb.build());
-             System.out.println((System.currentTimeMillis()-detailStartTime)+" ##end workcenter-detail:-------------------------------------------------------------------------------");
+             logger.info((System.currentTimeMillis()-detailStartTime)+" ##end workcenter-detail:-------------------------------------------------------------------------------");
             //纠正顺序
             //按钮权限
             long authBuildStartTime = System.currentTimeMillis();
-             System.out.println("##start workcenter-authBuild:-------------------------------------------------------------------------------");
+             logger.info("##start workcenter-authBuild:-------------------------------------------------------------------------------");
             ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
             for (ProcessTaskVo processTaskVo : processTaskVoList) {
                 builder.addProcessTaskId(processTaskVo.getId());
@@ -131,7 +131,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                             .addOperationType(ProcessTaskOperationType.PROCESSTASK_RECOVER)
                             .addOperationType(ProcessTaskOperationType.PROCESSTASK_URGE)
                             .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
-             System.out.println((System.currentTimeMillis()-authBuildStartTime)+" ##end workcenter-authBuild:-------------------------------------------------------------------------------");
+             logger.info((System.currentTimeMillis()-authBuildStartTime)+" ##end workcenter-authBuild:-------------------------------------------------------------------------------");
             long tmpColumnStartTime = System.currentTimeMillis();
             Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
             BatchRunner<ProcessTaskVo> runner = new BatchRunner<>();
@@ -143,7 +143,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                     long tmp = System.currentTimeMillis();
                     IProcessTaskColumn column = entry.getValue();
                     taskJson.put(column.getName(), column.getValue(processTaskVo));
-                    // System.out.println(System.currentTimeMillis()-tmp+" ##end workcenter-column "+column.getName()+":-------------------------------------------------------------------------------");
+                    logger.info(System.currentTimeMillis()-tmp+" ##end workcenter-column "+column.getName()+":-------------------------------------------------------------------------------");
                 }
                 // route 供前端跳转路由信息
                 JSONObject routeJson = new JSONObject();
@@ -154,7 +154,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 taskJson.put("action", getTaskOperate(processTaskVo, operateTypeSetMap));
                 dataList.add(taskJson);
             }, "WORKCENTER-COLUMN-SEARCHER");
-             System.out.println(System.currentTimeMillis()-tmpColumnStartTime+" ##end workcenter-auth column:-------------------------------------------------------------------------------");
+             logger.info(System.currentTimeMillis()-tmpColumnStartTime+" ##end workcenter-auth column:-------------------------------------------------------------------------------");
 
         }
         // 字段排序
@@ -171,19 +171,19 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         returnObj.put("pageCount", PageUtil.getPageCount(total, workcenterVo.getPageSize()));
         Integer count = 0;
         long ofMineStartTime = System.currentTimeMillis();
-         System.out.println("##start workcenter-ofMine:-------------------------------------------------------------------------------");
+         logger.info("##start workcenter-ofMine:-------------------------------------------------------------------------------");
         if (total > 0) {
             //补充待办数
             workcenterVo.setIsProcessingOfMine(1);
             workcenterVo.setCurrentPage(1);
             workcenterVo.setPageSize(100);
             sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
-            // System.out.println(sb.build());
+            // logger.info(sb.build());
             count = processTaskMapper.getProcessTaskCountBySql(sb.build());
         }
         returnObj.put("processingOfMineCount", count > 99 ? "99+" : count.toString());
-         System.out.println((System.currentTimeMillis()-ofMineStartTime)+" ##end workcenter-ofMine:-------------------------------------------------------------------------------");
-         System.out.println((System.currentTimeMillis()-theadStartTime)+" ##end workcenter:-------------------------------------------------------------------------------");
+         logger.info((System.currentTimeMillis()-ofMineStartTime)+" ##end workcenter-ofMine:-------------------------------------------------------------------------------");
+         logger.info((System.currentTimeMillis()-theadStartTime)+" ##end workcenter:-------------------------------------------------------------------------------");
 
         return returnObj;
     }
@@ -229,8 +229,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     public List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo) {
         //找出符合条件分页后的工单ID List
         //SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FULL_TEXT);
-        //System.out.println("fullTextSql:-------------------------------------------------------------------------------");
-//        System.out.println(sb.build());
+        //logger.info("fullTextSql:-------------------------------------------------------------------------------");
+//        logger.info(sb.build());
         //return processTaskMapper.getProcessTaskBySql(sb.build());
         List<String> keywordList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(workcenterVo.getKeywordList())) {
@@ -242,8 +242,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     @Override
     public Integer doSearchLimitCount(WorkcenterVo workcenterVo) {
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
-        //System.out.println("countSql:-------------------------------------------------------------------------------");
-        //System.out.println(sb.build());
+        //logger.info("countSql:-------------------------------------------------------------------------------");
+        //logger.info(sb.build());
         return processTaskMapper.getProcessTaskCountBySql(sb.build());
     }
 
@@ -392,8 +392,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     private List<Long> getProcessTaskIdListByKeywordConditionList(WorkcenterVo workcenterVo) {
         if (CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList())) {
             SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FULL_TEXT);
-//        System.out.println("fullTextGetIdListSql:-------------------------------------------------------------------------------");
-//        System.out.println(sb.build());
+//        logger.info("fullTextGetIdListSql:-------------------------------------------------------------------------------");
+//        logger.info(sb.build());
             List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskBySql(sb.build());
             return processTaskVoList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList());
         }
