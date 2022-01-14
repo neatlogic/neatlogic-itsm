@@ -120,7 +120,9 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             long authBuildStartTime = System.currentTimeMillis();
              logger.info("##start workcenter-authBuild:-------------------------------------------------------------------------------");
             ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
-            for (ProcessTaskVo processTaskVo : processTaskVoList) {
+            for (int i = 0; i < processTaskVoList.size(); i++) {
+                ProcessTaskVo processTaskVo = processTaskVoList.get(i);
+                processTaskVo.setIndex(i);
                 builder.addProcessTaskId(processTaskVo.getId());
                 for (ProcessTaskStepVo processStep : processTaskVo.getStepList()) {
                     builder.addProcessTaskStepId(processStep.getId());
@@ -135,6 +137,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             long tmpColumnStartTime = System.currentTimeMillis();
             Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
             BatchRunner<ProcessTaskVo> runner = new BatchRunner<>();
+            List<JSONObject> finalDataList = dataList;
             runner.execute(processTaskVoList, processTaskVoList.size(), processTaskVo -> {
                 processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
                 JSONObject taskJson = new JSONObject();
@@ -143,7 +146,9 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                     long tmp = System.currentTimeMillis();
                     IProcessTaskColumn column = entry.getValue();
                     taskJson.put(column.getName(), column.getValue(processTaskVo));
-                    logger.info(System.currentTimeMillis()-tmp+" ##end workcenter-column "+column.getName()+":-------------------------------------------------------------------------------");
+                    if(Objects.equals("currentstep",column.getName())) {
+                        logger.info(System.currentTimeMillis() - tmp + " ##end workcenter-column " + column.getName() + ":-------------------------------------------------------------------------------");
+                    }
                 }
                 // route 供前端跳转路由信息
                 JSONObject routeJson = new JSONObject();
@@ -152,11 +157,13 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 taskJson.put("taskid", processTaskVo.getId());
                 // operate 获取对应工单的操作
                 taskJson.put("action", getTaskOperate(processTaskVo, operateTypeSetMap));
-                dataList.add(taskJson);
+                taskJson.put("index",processTaskVo.getIndex());
+                finalDataList.add(taskJson);
             }, "WORKCENTER-COLUMN-SEARCHER");
              logger.info(System.currentTimeMillis()-tmpColumnStartTime+" ##end workcenter-auth column:-------------------------------------------------------------------------------");
 
         }
+        dataList = dataList.stream().sorted(Comparator.comparing(o->JSONObject.parseObject(o.toString()).getInteger("index"))).collect(Collectors.toList());
         // 字段排序
         JSONArray sortList = workcenterVo.getSortList();
         if (CollectionUtils.isEmpty(sortList)) {
@@ -455,19 +462,17 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 JSONObject workerJson = new JSONObject();
                 getWorkerInfo(majorWorker, workerJson, workerArray);
             }
-            Map<Long, List<ProcessTaskStepWorkerVo>> stepMinorWorkerListMap = new HashMap<>();
-            List<IProcessStepHandler> handlerList = ProcessStepHandlerFactory.getHandlerList();
-            for (IProcessStepHandler stepHandler : handlerList) {
-                List<ProcessTaskStepWorkerVo> stepWorkerVos = stepHandler.getMinorWorkerList(stepVo);
-                if (CollectionUtils.isNotEmpty(stepWorkerVos)) {
-                    stepMinorWorkerListMap.put(stepVo.getId(), stepWorkerVos);
-                }
-            }
             List<String> workerUuidTypeList = new ArrayList<>();
             for (ProcessTaskStepWorkerVo workerVo : stepVo.getWorkerList()) {
                 if (Objects.equals(workerVo.getUserType(), ProcessUserType.MINOR.getValue())) {
+                    //子任务minor
+                    long stepStartTime = System.currentTimeMillis();
                     stepTaskWorker(workerVo, stepVo, workerArray, workerUuidTypeList);
-                    otherWorker(workerVo, stepVo, workerArray, stepMinorWorkerListMap, workerUuidTypeList);
+                    //System.out.println((System.currentTimeMillis()-stepStartTime)+" ##end stepTaskWorker:-------------------------------------------------------------------------------");
+                    //其他minor
+                    long otherStartTime = System.currentTimeMillis();
+                    otherWorker(workerVo, stepVo, workerArray, workerUuidTypeList);
+                    //System.out.println((System.currentTimeMillis()-otherStartTime)+" ##end otherWorker:-------------------------------------------------------------------------------");
                 }
             }
         }
@@ -475,7 +480,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
 
     /**
-     * 任务处理人
+     * 子任务处理人
      *
      * @param workerVo           处理人
      * @param stepVo             工单步骤
@@ -511,21 +516,17 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
      * @param workerUuidTypeList 用于去重
      */
     @Override
-    public void otherWorker(ProcessTaskStepWorkerVo workerVo, ProcessTaskStepVo stepVo, JSONArray workerArray, Map<Long, List<ProcessTaskStepWorkerVo>> stepMinorWorkerMap, List<String> workerUuidTypeList) {
-        List<IProcessStepHandler> handlerList = ProcessStepHandlerFactory.getHandlerList();
-        for (IProcessStepHandler stepHandler : handlerList) {
-            if (Objects.equals(stepHandler.getHandler(), stepVo.getHandler())) {
-                List<ProcessTaskStepWorkerVo> workerVoList = stepMinorWorkerMap.get(stepVo.getId());
-                if (CollectionUtils.isNotEmpty(workerVoList)) {
-                    if (workerVoList.stream().anyMatch(w -> Objects.equals(workerVo.getUuid(), w.getUuid()))) {
-                        String workerUuidType = workerVo.getUuid() + stepHandler.getMinorName();
-                        if (!workerUuidTypeList.contains(workerUuidType)) {
-                            JSONObject workerJson = new JSONObject();
-                            workerJson.put("workTypename", stepHandler.getMinorName());
-                            getWorkerInfo(workerVo, workerJson, workerArray);
-                            workerUuidTypeList.add(workerUuidType);
-                        }
-                    }
+    public void otherWorker(ProcessTaskStepWorkerVo workerVo, ProcessTaskStepVo stepVo, JSONArray workerArray, List<String> workerUuidTypeList) {
+        IProcessStepHandler stepHandler = ProcessStepHandlerFactory.getHandler(stepVo.getHandler());
+        List<ProcessTaskStepWorkerVo> stepMinorWorkerList = stepHandler.getMinorWorkerList(stepVo);
+        if (CollectionUtils.isNotEmpty(stepMinorWorkerList)) {
+            if (stepMinorWorkerList.stream().anyMatch(w -> Objects.equals(workerVo.getUuid(), w.getUuid()))) {
+                String workerUuidType = workerVo.getUuid() + stepHandler.getMinorName();
+                if (!workerUuidTypeList.contains(workerUuidType)) {
+                    JSONObject workerJson = new JSONObject();
+                    workerJson.put("workTypename", stepHandler.getMinorName());
+                    getWorkerInfo(workerVo, workerJson, workerArray);
+                    workerUuidTypeList.add(workerUuidType);
                 }
             }
         }

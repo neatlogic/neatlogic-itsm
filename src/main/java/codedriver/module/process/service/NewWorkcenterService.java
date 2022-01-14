@@ -104,7 +104,7 @@ public interface NewWorkcenterService {
      * @param stepVo      工单步骤
      * @param workerArray 处理人数组
      */
-    void otherWorker(ProcessTaskStepWorkerVo workerVo, ProcessTaskStepVo stepVo, JSONArray workerArray, Map<Long, List<ProcessTaskStepWorkerVo>> stepMinorWorkerMap, List<String> workerUuidTypeList);
+    void otherWorker(ProcessTaskStepWorkerVo workerVo, ProcessTaskStepVo stepVo, JSONArray workerArray, List<String> workerUuidTypeList);
 
     /**
      * 拼凑处理人column数据
