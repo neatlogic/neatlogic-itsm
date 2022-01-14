@@ -8,8 +8,13 @@ import java.util.Map;
 import java.util.Set;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.exception.processtask.ProcessTaskViewDeniedException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,10 +87,18 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessTaskRelationVo processTaskRelationVo = JSON.toJavaObject(jsonObj, ProcessTaskRelationVo.class);
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskRelationVo.getProcessTaskId());
-
-        new ProcessAuthManager.TaskOperationChecker(processTaskRelationVo.getProcessTaskId(),
-            ProcessTaskOperationType.PROCESSTASK_VIEW).build().checkAndNoPermissionThrowException();
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskRelationVo.getProcessTaskId());
+        if (!new ProcessAuthManager.TaskOperationChecker(processTaskRelationVo.getProcessTaskId(), ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
+            if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+                throw new ProcessTaskViewDeniedException();
+            } else {
+                ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+                if (channelVo == null) {
+                    throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
+                }
+                throw new ProcessTaskViewDeniedException(channelVo.getName());
+            }
+        }
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTaskRelationList", new ArrayList<>());
         int pageCount = 0;
