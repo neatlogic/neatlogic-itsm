@@ -5,10 +5,10 @@
 
 package codedriver.module.process.dependency.handler;
 
-import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.dependency.constvalue.CalleeType;
-import codedriver.framework.dependency.core.DependencyHandlerBase;
-import codedriver.framework.dependency.core.ICalleeType;
+import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.core.CustomTableDependencyHandlerBase;
+import codedriver.framework.dependency.core.IFromType;
+import codedriver.framework.dependency.dto.DependencyInfoVo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.List;
  * @since: 2021/4/2 18:14
  **/
 @Service
-public class WorktimeProcessTaskDependencyHandler extends DependencyHandlerBase {
+public class WorktimeProcessTaskDependencyHandler extends CustomTableDependencyHandlerBase {
     /**
      * 表名
      *
@@ -32,49 +32,49 @@ public class WorktimeProcessTaskDependencyHandler extends DependencyHandlerBase 
     }
 
     /**
-     * 被调用者字段
+     * 被引用者（上游）字段
      *
      * @return
      */
     @Override
-    protected String getCalleeField() {
+    protected String getFromField() {
         return "worktime_uuid";
     }
 
     /**
-     * 调用者字段
+     * 引用者（下游）字段
      *
      * @return
      */
     @Override
-    protected String getCallerField() {
+    protected String getToField() {
         return "id";
     }
 
     @Override
-    protected List<String> getCallerFieldList() {
+    protected List<String> getToFieldList() {
         return null;
     }
 
     /**
      * 解析数据，拼装跳转url，返回引用下拉列表一个选项数据结构
      *
-     * @param caller 调用者值
+     * @param dependencyObj 引用关系数据
      * @return
      */
     @Override
-    protected ValueTextVo parse(Object caller) {
+    protected DependencyInfoVo parse(Object dependencyObj) {
         return null;
     }
 
     /**
-     * 被调用方名
+     * 被引用者（上游）类型
      *
      * @return
      */
     @Override
-    public ICalleeType getCalleeType() {
-        return CalleeType.WORKTIME;
+    public IFromType getFromType() {
+        return FromType.WORKTIME;
     }
 
     /**

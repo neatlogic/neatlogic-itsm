@@ -6,11 +6,12 @@
 package codedriver.module.process.dependency.handler;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.dependency.constvalue.CalleeType;
-import codedriver.framework.dependency.core.DependencyHandlerBase;
-import codedriver.framework.dependency.core.ICalleeType;
+import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.core.CustomTableDependencyHandlerBase;
+import codedriver.framework.dependency.core.IFromType;
+import codedriver.framework.dependency.dto.DependencyInfoVo;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerTypeFactory;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,7 @@ import java.util.Map;
  * @since: 2021/4/5 14:31
  **/
 @Service
-public class NotifyPolicyProcessStepHandlerDependencyHandler extends DependencyHandlerBase {
+public class NotifyPolicyProcessStepHandlerDependencyHandler extends CustomTableDependencyHandlerBase {
 
     /**
      * 表名
@@ -37,59 +38,65 @@ public class NotifyPolicyProcessStepHandlerDependencyHandler extends DependencyH
     }
 
     /**
-     * 被调用者字段
+     * 被引用者（上游）字段
      *
      * @return
      */
     @Override
-    protected String getCalleeField() {
+    protected String getFromField() {
         return "notify_policy_id";
     }
 
     /**
-     * 调用者字段
+     * 引用者（下游）字段
      *
      * @return
      */
     @Override
-    protected String getCallerField() {
+    protected String getToField() {
         return "handler";
     }
 
     @Override
-    protected List<String> getCallerFieldList() {
+    protected List<String> getToFieldList() {
         return null;
     }
 
     /**
      * 解析数据，拼装跳转url，返回引用下拉列表一个选项数据结构
      *
-     * @param caller 调用者值
+     * @param dependencyObj 引用关系数据
      * @return
      */
     @Override
-    protected ValueTextVo parse(Object caller) {
-        if (caller instanceof Map) {
-            Map<String, Object> map = (Map)caller;
+    protected DependencyInfoVo parse(Object dependencyObj) {
+        if (dependencyObj instanceof Map) {
+            Map<String, Object> map = (Map) dependencyObj;
             String handler =  (String) map.get("handler");
             String name = ProcessStepHandlerTypeFactory.getName(handler);
             if (StringUtils.isNotBlank(name)) {
-                ValueTextVo valueTextVo = new ValueTextVo();
-                valueTextVo.setValue(handler);
-                valueTextVo.setText(String.format("<a href=\"/%s/process.html#/node-manage\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), "节点管理", name));
-                return valueTextVo;
+                JSONObject dependencyInfoConfig = new JSONObject();
+                dependencyInfoConfig.put("handler", handler);
+                dependencyInfoConfig.put("handlerName", name);
+                String pathFormat = "节点管理-${DATA.handlerName}";
+                String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/node-manage";
+                return new DependencyInfoVo(handler, dependencyInfoConfig, pathFormat, urlFormat, this.getGroupName());
+//                DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
+//                dependencyInfoVo.setValue(handler);
+//                dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/node-manage\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), "节点管理", name));
+//                return dependencyInfoVo;
             }
         }
         return null;
     }
 
     /**
-     * 被调用方名
+     * 被引用者（上游）类型
      *
      * @return
      */
     @Override
-    public ICalleeType getCalleeType() {
-        return CalleeType.NOTIFY_POLICY;
+    public IFromType getFromType() {
+        return FromType.NOTIFY_POLICY;
     }
 }
