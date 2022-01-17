@@ -29,7 +29,6 @@ import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.crossover.IProcessTaskCrossoverService;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
-import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.file.ProcessTaskFileDownloadException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
@@ -1843,24 +1842,24 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     }
 
     /**
-     * 根据fileId 和 processTaskId 获取对应用户是否有该工单附件的下载权限
+     * 根据fileId 和 processTaskIdList 获取对应用户是否有该工单附件的下载权限
      *
      * @param fileId
-     * @param processTaskId
+     * @param processTaskIdList
      * @return true：有权限   false：没有权限
      */
     @Override
-    public boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskId(Long fileId, Long processTaskId) {
-        if (!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
-            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
-            if (processTaskVo == null) {
-                throw new ProcessTaskNotFoundException();
+    public boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskIdList(Long fileId, List<Long> processTaskIdList) {
+        int hasDownloadAuth = 0;
+        for (Long processTaskId : processTaskIdList) {
+            if (new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
+                hasDownloadAuth = 1;
+                break;
             }
-            ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-            if (channelVo == null) {
-                throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
-            }
-            throw new ProcessTaskFileDownloadException(fileId, channelVo.getName());
+        }
+        if (hasDownloadAuth == 0) {
+            //所有工单都没有下载权限
+            throw new ProcessTaskFileDownloadException(fileId, null);
         }
         return true;
     }

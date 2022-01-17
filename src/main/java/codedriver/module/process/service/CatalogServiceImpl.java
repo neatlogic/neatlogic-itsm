@@ -3,6 +3,7 @@ package codedriver.module.process.service;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.DeviceType;
 import codedriver.framework.dto.AuthenticationInfoVo;
+import codedriver.framework.process.crossover.ICatalogCrossoverService;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
@@ -22,7 +23,7 @@ import javax.annotation.Resource;
 import java.util.*;
 
 @Service
-public class CatalogServiceImpl implements CatalogService {
+public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverService {
 
 	@Autowired
 	private CatalogMapper catalogMapper;
