@@ -3,8 +3,8 @@ package codedriver.module.process.api.workcenter;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.batch.BatchRunner;
 import codedriver.framework.common.config.Config;
-import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.CommonUtil;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
@@ -62,7 +62,6 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "isAll", type = ApiParamType.INTEGER, desc = "获取类型，1:返回所有，用于定时更新; 0:仅返回列表", isRequired = true)
     })
     @Output({
             @Param(name = "workcenter", explode = WorkcenterVo.class, desc = "分类信息")
@@ -70,11 +69,9 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
     @Description(desc = "获取工单中心分类列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-
-        Integer isAll = jsonObj.getInteger("isAll");
         JSONObject workcenterJson = new JSONObject();
         String userUuid = UserContext.get().getUserUuid(true);
-        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
+        AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
         int isHasModifiedAuth = AuthActionChecker.check(WORKCENTER_MODIFY.class) ? 1 : 0;
         int isHasNewTypeAuth = AuthActionChecker.check(WORKCENTER_NEW_TYPE.class) ? 1 : 0;
         List<WorkcenterVo> workcenterList = new ArrayList<>();
@@ -99,7 +96,8 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
                     }
                 }
             }
-            for (WorkcenterVo workcenter : workcenterList) {
+            BatchRunner<WorkcenterVo> runner = new BatchRunner<>();
+            runner.execute(workcenterList, workcenterList.size(), workcenter -> {
                 if (workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
                     workcenter.setIsCanEdit(0);
                     if (Arrays.asList(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()).contains(workcenter.getUuid()) && isWorkcenterManager) {
@@ -124,18 +122,16 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
                 }
 
                 //查询数量
-                if (isAll == 1) {
-                    try {
-                        JSONObject conditionJson = JSONObject.parseObject(workcenter.getConditionConfig());
-                        JSONObject conditionConfig = conditionJson.getJSONObject("conditionConfig");
-                        conditionConfig.put("isProcessingOfMine", 1);
-                        conditionJson.put("pageSize", 100);
-                        WorkcenterVo wcProcessingOfMine = new WorkcenterVo(conditionJson);
-                        Integer ProcessingOfMineCount = newWorkcenterService.doSearchLimitCount(wcProcessingOfMine);
-                        workcenter.setProcessingOfMineCount(ProcessingOfMineCount > 99 ? "99+" : ProcessingOfMineCount.toString());
-                    } catch (Exception ex) {
-                        logger.error(ex.getMessage(), ex);
-                    }
+                try {
+                    JSONObject conditionJson = JSONObject.parseObject(workcenter.getConditionConfig());
+                    JSONObject conditionConfig = conditionJson.getJSONObject("conditionConfig");
+                    conditionConfig.put("isProcessingOfMine", 1);
+                    conditionJson.put("pageSize", 100);
+                    WorkcenterVo wcProcessingOfMine = new WorkcenterVo(conditionJson);
+                    Integer ProcessingOfMineCount = newWorkcenterService.doSearchLimitCount(wcProcessingOfMine);
+                    workcenter.setProcessingOfMineCount(ProcessingOfMineCount > 99 ? "99+" : ProcessingOfMineCount.toString());
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
                 }
                 workcenter.setConditionConfig(null);
                 //排序 用户设置的排序优先
@@ -146,7 +142,7 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
                 workcenter.setConditionGroupList(null);
                 workcenter.setConditionGroupRelList(null);
                 workcenter.setIsProcessingOfMine(null);
-            }
+            }, "WORKCENTER-LIST-SEARCHER");
         }
         workcenterJson.put("mobileIsOnline", Config.MOBILE_IS_ONLINE());
         workcenterJson.put("viewType", viewType);
