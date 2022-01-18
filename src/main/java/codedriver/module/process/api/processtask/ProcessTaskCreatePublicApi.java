@@ -12,8 +12,12 @@ import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.exception.FormAttributeNotFoundException;
+import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
+import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
+import codedriver.framework.matrix.dto.MatrixDataVo;
 import codedriver.framework.matrix.dto.MatrixVo;
+import codedriver.framework.matrix.exception.MatrixDataSourceHandlerNotFoundException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.process.crossover.IProcessTaskCreatePublicApiCrossoverService;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -31,7 +35,6 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.MyApiComponent;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
-import codedriver.framework.restful.dto.ApiVo;
 import codedriver.module.framework.form.attribute.handler.SelectHandler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -296,47 +299,47 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase implement
                     if (matrixVo == null) {
                         throw new MatrixNotFoundException(matrixUuid);
                     }
-                    ApiVo api = PrivateApiComponentFactory.getApiByToken("matrix/column/data/search/forselect/new");
-                    if (api != null) {
-                        MyApiComponent myApiComponent = (MyApiComponent) PrivateApiComponentFactory.getInstance(api.getHandler());
-                        if (myApiComponent != null) {
-                            if (isMultiple) {
-                                List<String> dataLsit = new ArrayList<>();
-                                for (String value : values) {
-                                    String compose = getValue(matrixUuid, mapping, value, myApiComponent);
-                                    if (StringUtils.isNotBlank(compose)) {
-                                        dataLsit.add(compose);
-                                    }
-                                }
-                                return dataLsit;
-                            } else {
-                                return getValue(matrixUuid, mapping, values.get(0), myApiComponent);
+                    if (isMultiple) {
+                        List<String> dataLsit = new ArrayList<>();
+                        for (String value : values) {
+                            String compose = getValue(matrixUuid, mapping, value);
+                            if (StringUtils.isNotBlank(compose)) {
+                                dataLsit.add(compose);
                             }
                         }
+                        return dataLsit;
+                    } else {
+                        return getValue(matrixUuid, mapping, values.get(0));
                     }
                 }
             }
         }
         return result;
     }
-    private String getValue(String matrixUuid, ValueTextVo mapping, String value, MyApiComponent myApiComponent) {
+    private String getValue(String matrixUuid, ValueTextVo mapping, String value) {
         if (StringUtils.isBlank(value)) {
             return value;
         }
         try {
-            JSONObject paramObj = new JSONObject();
-            paramObj.put("matrixUuid", matrixUuid);
-            JSONArray columnList = new JSONArray();
-            columnList.add(mapping.getValue());
+            MatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
+            if (matrixVo == null) {
+                throw new MatrixNotFoundException(matrixUuid);
+            }
+            IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
+            if (matrixDataSourceHandler == null) {
+                throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
+            }
+            MatrixDataVo dataVo = new MatrixDataVo();
+            dataVo.setMatrixUuid(matrixUuid);
+            List<String> columnList = new ArrayList<>();
+            columnList.add((String) mapping.getValue());
             columnList.add(mapping.getText());
-            paramObj.put("columnList", columnList);
-            paramObj.put("keyword", value);
-            paramObj.put("keywordColumn", mapping.getText());
-            JSONObject resultObj = (JSONObject) myApiComponent.myDoService(paramObj);
-            JSONArray tbodyList = resultObj.getJSONArray("tbodyList");
-            for (int i = 0; i < tbodyList.size(); i++) {
-                JSONObject firstObj = tbodyList.getJSONObject(i);
-                JSONObject valueObj = firstObj.getJSONObject((String) mapping.getValue());
+            dataVo.setColumnList(columnList);
+            dataVo.setKeyword(value);
+            dataVo.setKeywordColumn(mapping.getText());
+            List<Map<String, JSONObject>> tbodyList = matrixDataSourceHandler.TableColumnDataSearch(dataVo);
+            for (Map<String, JSONObject> firstObj : tbodyList) {
+                JSONObject valueObj = firstObj.get(mapping.getValue());
                 return valueObj.getString("compose");
             }
         } catch (Exception e) {
