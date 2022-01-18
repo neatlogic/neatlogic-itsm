@@ -104,7 +104,7 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
             List<String> columnList = new ArrayList<>();
             getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardConfigVo().getGroup(), true);
             if (StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getSubGroup())) {
-                getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardConfigVo().getSubGroup(),true);
+                getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardConfigVo().getSubGroup(), true);
             }
             columnList.add("count(1) `count`");
             sqlSb.append(String.join(",", columnList));
@@ -113,24 +113,26 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
 
     /**
      * 获取column sql list
+     *
      * @param columnComponentMap 需要展示thead map
-     * @param columnList sql columnList 防止重复取column
-     * @param theadName 具体的column
-     * @param isGroup 是否group，如果是则需要 any_value 否则group by 会有异常
+     * @param columnList         sql columnList 防止重复取column
+     * @param theadName          具体的column
+     * @param isGroup            是否group,目前用于dashboard统计
      */
     private void getColumnSqlList(Map<String, IProcessTaskColumn> columnComponentMap, List<String> columnList, String theadName, Boolean isGroup) {
         if (columnComponentMap.containsKey(theadName)) {
             IProcessTaskColumn column = columnComponentMap.get(theadName);
             for (TableSelectColumnVo tableSelectColumnVo : column.getTableSelectColumn()) {
-                for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
-                    String expression = " %s.%s as %s ";
-                    if (isGroup) {
-                        //TODO  如果是mariadb 则不支持 any_value 高级函数
+                if(!isGroup||tableSelectColumnVo.getColumnList().stream().anyMatch(SelectColumnVo::getIsPrimary)) {
+                    for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
+                        String expression = " %s.%s as %s ";
+                    /* if (isGroup) {
                         expression = " any_value(%s.%s) as %s ";
-                    }
-                    String columnStr = String.format(expression, tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName(), selectColumnVo.getPropertyName());
-                    if (!columnList.contains(columnStr)) {
-                        columnList.add(columnStr);
+                    }*/
+                        String columnStr = String.format(expression, tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName(), selectColumnVo.getPropertyName());
+                        if (!columnList.contains(columnStr)) {
+                            columnList.add(columnStr);
+                        }
                     }
                 }
             }
@@ -170,7 +172,7 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
             if (theadVo.getIsShow() != 1) {
                 continue;
             }
-            getColumnSqlList(columnComponentMap, columnList, theadVo.getName(),false);
+            getColumnSqlList(columnComponentMap, columnList, theadVo.getName(), false);
         }
         //查询是否隐藏
         columnList.add(String.format(" %s.%s as %s ", new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.IS_SHOW.getValue(), ProcessTaskSqlTable.FieldEnum.IS_SHOW.getValue()));

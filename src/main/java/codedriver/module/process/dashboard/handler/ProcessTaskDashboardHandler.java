@@ -49,10 +49,15 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
         if (chart != null) {
             JSONObject conditionConfig = JSONObject.parseObject(widgetVo.getConditionConfig());
             jsonObj.put("conditionConfig", conditionConfig);
-            JSONObject data = new JSONObject();
             JSONObject configChart = widgetVo.getChartConfigObj();
             String groupField = configChart.getString(DashboardShowConfig.GROUPFIELD.getValue());
             String subGroupField = configChart.getString(DashboardShowConfig.SUBGROUPFIELD.getValue());
+            if (configChart.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
+                configChart.put("groupfieldtext", ProcessWorkcenterField.getName(groupField));
+            }
+            if (configChart.containsKey(DashboardShowConfig.SUBGROUPFIELD.getValue())) {
+                configChart.put("subgroupfieldtext", ProcessWorkcenterField.getName(subGroupField));
+            }
             DashboardDataVo dashboardDataVo = new DashboardDataVo();
             dashboardDataVo.setChartConfig(configChart);
             /* start: 从mysql 获取源数据 */
@@ -89,17 +94,12 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             dashboardDataVo.getDataGroupVo().setDataList(groupMapList);
             /* end: 从mysql 获取源数据 */
             /* start: 将mysql源数据 按不同dashboard插件处理返回结果数据*/
+            JSONObject data = new JSONObject();
             data.put("dataList", chart.getData(dashboardDataVo).get("dataList"));
             data.put("columnList",chart.getData(dashboardDataVo).get("columnList"));
             data.put("theadList",chart.getData(dashboardDataVo).get("theadList"));
             /* end: 将mysql源数据 按不同dashboard插件处理返回结果数据*/
             data.put("configObj", configChart);
-            if (configChart.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
-                configChart.put("groupfieldtext", ProcessWorkcenterField.getName(groupField));
-            }
-            if (configChart.containsKey(DashboardShowConfig.SUBGROUPFIELD.getValue())) {
-                configChart.put("subgroupfieldtext", ProcessWorkcenterField.getName(subGroupField));
-            }
             return data;
         }
         return null;

@@ -102,10 +102,8 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
     public List<TableSelectColumnVo> getTableSelectColumn() {
         return new ArrayList<TableSelectColumnVo>() {
             {
-                add(new TableSelectColumnVo(new ChannelSqlTable(), Collections.singletonList(
-                        new SelectColumnVo(ChannelSqlTable.FieldEnum.UUID.getValue(), ChannelSqlTable.FieldEnum.UUID.getProValue(),true)
-                )));
-                add(new TableSelectColumnVo(new ChannelSqlTable(), Collections.singletonList(
+                add(new TableSelectColumnVo(new ChannelSqlTable(), Arrays.asList(
+                        new SelectColumnVo(ChannelSqlTable.FieldEnum.UUID.getValue(), ChannelSqlTable.FieldEnum.UUID.getProValue(),true),
                         new SelectColumnVo(ChannelSqlTable.FieldEnum.NAME.getValue(), ChannelSqlTable.FieldEnum.NAME.getProValue())
                 )));
             }
