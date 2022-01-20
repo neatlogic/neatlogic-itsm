@@ -502,10 +502,10 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                 "        },\n" +
                 "        \"conditionGroupList\": [\n" +
                 "            {\n" +
-                "                \"uuid\": \"f4c25885e9f6400c970d8d5f930578ed\",\n" +
+                "                \"uuid\": \"6ec0fa68f3d049ba95c8280561c1b9f4\",\n" +
                 "                \"conditionList\": [\n" +
                 "                    {\n" +
-                "                        \"uuid\": \"1062686b83a140a2b2dbfbeb1cd2a26a\",\n" +
+                "                        \"uuid\": \"2fb9ecadd8c04b999d3c53791b2c70f3\",\n" +
                 "                        \"type\": \"common\",\n" +
                 "                        \"name\": \"aboutme\",\n" +
                 "                        \"valueList\": [\n" +
@@ -515,15 +515,151 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                 "                    }\n" +
                 "                ],\n" +
                 "                \"conditionRelList\": [],\n" +
-                "                \"channelUuidList\": [\n" +
-                "                    \"f0b5609ca2dc4a01aa2369d7ba7ad652\"\n" +
-                "                ]\n" +
+                "                \"channelUuidList\": []\n" +
                 "            }\n" +
                 "        ],\n" +
                 "        \"isProcessingOfMine\": 0,\n" +
                 "        \"conditionGroupRelList\": [],\n" +
                 "        \"isProcessing\": 0,\n" +
-                "        \"uuid\": \"3d6a5ea66321470db47487fe7b308f82\"\n" +
+                "        \"uuid\": \"doneOfMineProcessTask\",\n" +
+                "        \"searchContent\": {\n" +
+                "            \"firstConditionList\": [],\n" +
+                "            \"searchContent\": [\n" +
+                "                {\n" +
+                "                    \"uuid\": \"2fb9ecadd8c04b999d3c53791b2c70f3\",\n" +
+                "                    \"label\": \"与我相关\",\n" +
+                "                    \"value\": [\n" +
+                "                        \"已办\"\n" +
+                "                    ],\n" +
+                "                    \"key\": \"与我相关\",\n" +
+                "                    \"handler\": {\n" +
+                "                        \"handler\": \"checkbox\",\n" +
+                "                        \"label\": \"与我相关\",\n" +
+                "                        \"key\": \"与我相关\",\n" +
+                "                        \"data\": {\n" +
+                "                            \"handler\": \"aboutme\",\n" +
+                "                            \"expressionList\": [\n" +
+                "                                {\n" +
+                "                                    \"expression\": \"include\",\n" +
+                "                                    \"expressionName\": \"包括\"\n" +
+                "                                },\n" +
+                "                                {\n" +
+                "                                    \"expression\": \"exclude\",\n" +
+                "                                    \"expressionName\": \"不包括\"\n" +
+                "                                },\n" +
+                "                                {\n" +
+                "                                    \"expression\": \"is-null\",\n" +
+                "                                    \"expressionName\": \"为空\"\n" +
+                "                                },\n" +
+                "                                {\n" +
+                "                                    \"expression\": \"is-not-null\",\n" +
+                "                                    \"expressionName\": \"不为空\"\n" +
+                "                                }\n" +
+                "                            ],\n" +
+                "                            \"handlerType\": \"checkbox\",\n" +
+                "                            \"defaultExpression\": \"include\",\n" +
+                "                            \"conditionModel\": \"checkbox\",\n" +
+                "                            \"handlerName\": \"与我相关\",\n" +
+                "                            \"isMultiple\": false,\n" +
+                "                            \"sort\": 8,\n" +
+                "                            \"type\": \"common\",\n" +
+                "                            \"config\": {\n" +
+                "                                \"search\": false,\n" +
+                "                                \"defaultValue\": \"\",\n" +
+                "                                \"dataList\": [\n" +
+                "                                    {\n" +
+                "                                        \"text\": \"已办\",\n" +
+                "                                        \"value\": \"doneOfMine\",\n" +
+                "                                        \"isShow\": false\n" +
+                "                                    },\n" +
+                "                                    {\n" +
+                "                                        \"text\": \"已关注\",\n" +
+                "                                        \"value\": \"focusOfMine\",\n" +
+                "                                        \"isShow\": false\n" +
+                "                                    }\n" +
+                "                                ],\n" +
+                "                                \"multiple\": false,\n" +
+                "                                \"isMultiple\": false,\n" +
+                "                                \"type\": \"select\",\n" +
+                "                                \"value\": \"\",\n" +
+                "                                \"newListData\": [\n" +
+                "                                    {\n" +
+                "                                        \"text\": \"已办\",\n" +
+                "                                        \"value\": \"doneOfMine\",\n" +
+                "                                        \"isShow\": false\n" +
+                "                                    },\n" +
+                "                                    {\n" +
+                "                                        \"text\": \"已关注\",\n" +
+                "                                        \"value\": \"focusOfMine\",\n" +
+                "                                        \"isShow\": false\n" +
+                "                                    }\n" +
+                "                                ]\n" +
+                "                            },\n" +
+                "                            \"isShow\": true\n" +
+                "                        },\n" +
+                "                        \"expressionList\": [\n" +
+                "                            {\n" +
+                "                                \"expression\": \"include\",\n" +
+                "                                \"expressionName\": \"包括\"\n" +
+                "                            },\n" +
+                "                            {\n" +
+                "                                \"expression\": \"exclude\",\n" +
+                "                                \"expressionName\": \"不包括\"\n" +
+                "                            },\n" +
+                "                            {\n" +
+                "                                \"expression\": \"is-null\",\n" +
+                "                                \"expressionName\": \"为空\"\n" +
+                "                            },\n" +
+                "                            {\n" +
+                "                                \"expression\": \"is-not-null\",\n" +
+                "                                \"expressionName\": \"不为空\"\n" +
+                "                            }\n" +
+                "                        ],\n" +
+                "                        \"config\": {\n" +
+                "                            \"search\": false,\n" +
+                "                            \"defaultValue\": \"\",\n" +
+                "                            \"dataList\": [\n" +
+                "                                {\n" +
+                "                                    \"text\": \"已办\",\n" +
+                "                                    \"value\": \"doneOfMine\",\n" +
+                "                                    \"isShow\": false\n" +
+                "                                },\n" +
+                "                                {\n" +
+                "                                    \"text\": \"已关注\",\n" +
+                "                                    \"value\": \"focusOfMine\",\n" +
+                "                                    \"isShow\": false\n" +
+                "                                }\n" +
+                "                            ],\n" +
+                "                            \"multiple\": false,\n" +
+                "                            \"isMultiple\": false,\n" +
+                "                            \"type\": \"select\",\n" +
+                "                            \"value\": [\n" +
+                "                                \"doneOfMine\"\n" +
+                "                            ],\n" +
+                "                            \"newListData\": [\n" +
+                "                                {\n" +
+                "                                    \"text\": \"已办\",\n" +
+                "                                    \"value\": \"doneOfMine\",\n" +
+                "                                    \"isShow\": false\n" +
+                "                                },\n" +
+                "                                {\n" +
+                "                                    \"text\": \"已关注\",\n" +
+                "                                    \"value\": \"focusOfMine\",\n" +
+                "                                    \"isShow\": false\n" +
+                "                                }\n" +
+                "                            ],\n" +
+                "                            \"width\": \"100%\"\n" +
+                "                        }\n" +
+                "                    },\n" +
+                "                    \"expression\": \"include\",\n" +
+                "                    \"name\": \"aboutme\",\n" +
+                "                    \"type\": \"common\",\n" +
+                "                    \"itemCloseable\": true,\n" +
+                "                    \"closeable\": true,\n" +
+                "                    \"split\": \"|\"\n" +
+                "                }\n" +
+                "            ]\n" +
+                "        }\n" +
                 "    }\n" +
                 "}");
         workcenterVo.setType(ProcessWorkcenterType.FACTORY.getValue());
