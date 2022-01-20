@@ -23,6 +23,7 @@ import codedriver.module.process.service.NewWorkcenterService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +101,7 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
             runner.execute(workcenterList, workcenterList.size(), workcenter -> {
                 if (workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
                     workcenter.setIsCanEdit(0);
-                    if (Arrays.asList(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()).contains(workcenter.getUuid()) && isWorkcenterManager) {
+                    if (Arrays.asList(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getValue()).contains(workcenter.getUuid()) && isWorkcenterManager) {
                         workcenter.setIsCanRole(1);
                     }
                 }
@@ -121,17 +122,19 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
                     }
                 }
 
-                //查询数量
-                try {
-                    JSONObject conditionJson = JSONObject.parseObject(workcenter.getConditionConfig());
-                    JSONObject conditionConfig = conditionJson.getJSONObject("conditionConfig");
-                    conditionConfig.put("isProcessingOfMine", 1);
-                    conditionJson.put("pageSize", 100);
-                    WorkcenterVo wcProcessingOfMine = new WorkcenterVo(conditionJson);
-                    Integer ProcessingOfMineCount = newWorkcenterService.doSearchLimitCount(wcProcessingOfMine);
-                    workcenter.setProcessingOfMineCount(ProcessingOfMineCount > 99 ? "99+" : ProcessingOfMineCount.toString());
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
+                //查询代办工单数量
+                if (!StringUtils.equals(workcenter.getUuid(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()) && !StringUtils.equals(workcenter.getUuid(), ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getValue())) {
+                    try {
+                        JSONObject conditionJson = JSONObject.parseObject(workcenter.getConditionConfig());
+                        JSONObject conditionConfig = conditionJson.getJSONObject("conditionConfig");
+                        conditionConfig.put("isProcessingOfMine", 1);
+                        conditionJson.put("pageSize", 100);
+                        WorkcenterVo wcProcessingOfMine = new WorkcenterVo(conditionJson);
+                        Integer ProcessingOfMineCount = newWorkcenterService.doSearchLimitCount(wcProcessingOfMine);
+                        workcenter.setProcessingOfMineCount(ProcessingOfMineCount > 99 ? "99+" : ProcessingOfMineCount.toString());
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                    }
                 }
                 workcenter.setConditionConfig(null);
                 //排序 用户设置的排序优先
