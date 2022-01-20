@@ -133,6 +133,7 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                 }
+                workcenter.getHandlerType();
                 workcenter.setConditionConfig(null);
                 //排序 用户设置的排序优先
                 if (workcenterUserSortMap.containsKey(workcenter.getUuid())) {
