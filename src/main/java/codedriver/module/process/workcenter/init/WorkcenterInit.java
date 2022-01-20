@@ -489,6 +489,48 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
         workcenterVo.setSort(2);
         return workcenterVo;
     }
+    private WorkcenterVo doneOfMine() {
+        WorkcenterVo workcenterVo = new WorkcenterVo();
+        workcenterVo.setUuid(ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getValue());
+        workcenterVo.setName(ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getName());
+        workcenterVo.setConditionConfig("{\n" +
+                "    \"conditionConfig\": {\n" +
+                "        \"handlerType\": \"simple\",\n" +
+                "        \"startTimeCondition\": {\n" +
+                "            \"timeRange\": \"1\",\n" +
+                "            \"timeUnit\": \"year\"\n" +
+                "        },\n" +
+                "        \"conditionGroupList\": [\n" +
+                "            {\n" +
+                "                \"uuid\": \"f4c25885e9f6400c970d8d5f930578ed\",\n" +
+                "                \"conditionList\": [\n" +
+                "                    {\n" +
+                "                        \"uuid\": \"1062686b83a140a2b2dbfbeb1cd2a26a\",\n" +
+                "                        \"type\": \"common\",\n" +
+                "                        \"name\": \"aboutme\",\n" +
+                "                        \"valueList\": [\n" +
+                "                            \"doneOfMine\"\n" +
+                "                        ],\n" +
+                "                        \"expression\": \"include\"\n" +
+                "                    }\n" +
+                "                ],\n" +
+                "                \"conditionRelList\": [],\n" +
+                "                \"channelUuidList\": [\n" +
+                "                    \"f0b5609ca2dc4a01aa2369d7ba7ad652\"\n" +
+                "                ]\n" +
+                "            }\n" +
+                "        ],\n" +
+                "        \"isProcessingOfMine\": 0,\n" +
+                "        \"conditionGroupRelList\": [],\n" +
+                "        \"isProcessing\": 0,\n" +
+                "        \"uuid\": \"3d6a5ea66321470db47487fe7b308f82\"\n" +
+                "    }\n" +
+                "}");
+        workcenterVo.setType(ProcessWorkcenterType.FACTORY.getValue());
+        workcenterVo.setSupport(DeviceType.ALL.getValue());
+        workcenterVo.setSort(3);
+        return workcenterVo;
+    }
 
     @Override
     public void onInitialized(CodedriverWebApplicationContext context) {
@@ -549,5 +591,6 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
         tenantList = tenantMapper.getAllActiveTenant();
         workcenterList.add(all());
         workcenterList.add(draft());
+        workcenterList.add(doneOfMine());
     }
 }
