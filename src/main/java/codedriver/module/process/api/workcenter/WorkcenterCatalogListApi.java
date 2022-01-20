@@ -41,7 +41,7 @@ public class WorkcenterCatalogListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "name", type = ApiParamType.STRING, desc = "类型名")
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字")
     })
     @Output({
             @Param(explode = WorkcenterCatalogVo.class,desc = "工单中心菜单类型列表")
@@ -49,7 +49,7 @@ public class WorkcenterCatalogListApi extends PrivateApiComponentBase {
     @Description(desc = "查询工单中心菜单类型列表接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        return workcenterMapper.getWorkcenterCatalogListByName(paramObj.getString("name"));
+        return workcenterMapper.getWorkcenterCatalogListByName(paramObj.getString("keyword"));
     }
 
 }
