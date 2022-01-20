@@ -123,7 +123,7 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
                 }
 
                 //查询代办工单数量
-                if (!StringUtils.equals(workcenter.getUuid(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()) && !StringUtils.equals(workcenter.getUuid(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue())) {
+                if (!StringUtils.equals(workcenter.getUuid(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()) && !StringUtils.equals(workcenter.getUuid(), ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getValue())) {
                     try {
                         JSONObject conditionJson = JSONObject.parseObject(workcenter.getConditionConfig());
                         JSONObject conditionConfig = conditionJson.getJSONObject("conditionConfig");
