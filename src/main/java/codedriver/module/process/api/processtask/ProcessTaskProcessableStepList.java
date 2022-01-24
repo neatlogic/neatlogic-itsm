@@ -82,6 +82,7 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 //            TimeUnit.MILLISECONDS.sleep(30);
 //		}
 		JSONObject resultObj = new JSONObject();
+		resultObj.put("status", "ok");
 		List<ProcessTaskStepInOperationVo> processTaskStepInOperationList = processTaskMapper.getProcessTaskStepInOperationListByProcessTaskId(processTaskId);
 		if (CollectionUtils.isNotEmpty(processTaskStepInOperationList)) {
 			for (ProcessTaskStepInOperationVo processTaskStepInOperationVo : processTaskStepInOperationList) {
