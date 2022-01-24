@@ -16,12 +16,16 @@ import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.constvalue.automatic.FailPolicy;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
+import codedriver.framework.process.dto.ProcessTaskStepInOperationVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.dto.automatic.ProcessTaskStepAutomaticRequestVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
+import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
@@ -36,6 +40,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -132,7 +137,18 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
         UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
         if (Objects.equals(isTimeToRun, 0)) {
 //            System.out.println("在时间窗口内，直接发送请求");
-            TransactionSynchronizationPool.execute(new ProcessTaskAutomaticThread(currentProcessTaskStepVo));
+            IProcessStepInternalHandler processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+            if (processStepInternalHandler == null) {
+                throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+            }
+            ProcessTaskStepInOperationVo processTaskStepInOperationVo = new ProcessTaskStepInOperationVo(
+                    currentProcessTaskStepVo.getProcessTaskId(),
+                    currentProcessTaskStepVo.getId(),
+                    "request",
+                    new Date(System.currentTimeMillis() + 1000)
+            );
+            processStepInternalHandler.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
+            TransactionSynchronizationPool.execute(new ProcessTaskAutomaticThread(currentProcessTaskStepVo, processTaskStepInOperationVo.getId()));
         } else {
 //            System.out.println("不在时间窗口内，加载定时作业，定时发送请求");
             IJob jobHandler = SchedulerManager.getHandler(ProcessTaskAutomaticJob.class.getName());

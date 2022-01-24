@@ -48,6 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.PrintWriter;
@@ -380,6 +381,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
      * @param currentProcessTaskStepVo
      */
     @Override
+    @Transactional
     public void firstRequest(ProcessTaskStepVo currentProcessTaskStepVo) {
 //        System.out.println("firstRequest start");
         AutomaticConfigVo automaticConfigVo = getAutomaticConfigVoByProcessTaskStepId(currentProcessTaskStepVo.getId());
@@ -506,6 +508,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
      * @return
      */
     @Override
+    @Transactional
     public boolean callbackRequest(ProcessTaskStepVo currentProcessTaskStepVo) {
 //        System.out.println("callbackRequest start");
         AutomaticConfigVo automaticConfigVo = getAutomaticConfigVoByProcessTaskStepId(currentProcessTaskStepVo.getId());
