@@ -67,7 +67,8 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 		@Param(name = "action", type = ApiParamType.ENUM, rule = "accept,start,complete", desc = "操作类型")
 	})
 	@Output({
-		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表")
+		@Param(name = "tbodyList", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表"),
+		@Param(name = "status", type = ApiParamType.ENUM, rule = "ok,running", desc = "步骤信息列表")
 	})
 	@Description(desc = "当前用户可处理的步骤列表接口")
 	@Override
@@ -81,26 +82,20 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 //            TimeUnit.MILLISECONDS.sleep(30);
 //		}
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("await", -1);
 		List<ProcessTaskStepInOperationVo> processTaskStepInOperationList = processTaskMapper.getProcessTaskStepInOperationListByProcessTaskId(processTaskId);
 		if (CollectionUtils.isNotEmpty(processTaskStepInOperationList)) {
-			boolean needAwait = false;
-			long await = 0;
 			for (ProcessTaskStepInOperationVo processTaskStepInOperationVo : processTaskStepInOperationList) {
 				Date expireTime = processTaskStepInOperationVo.getExpireTime();
 				if (expireTime == null) {
-					needAwait = true;
-					continue;
+					resultObj.put("status", "running");
+					return resultObj;
+				} else {
+					long after = System.currentTimeMillis() - expireTime.getTime();
+					if (after > 0) {
+						resultObj.put("status", "running");
+						return resultObj;
+					}
 				}
-				long after = System.currentTimeMillis() - expireTime.getTime();
-				if (after > 0) {
-					needAwait = true;
-					await = after > await ? after : await;
-				}
-			}
-			if (needAwait) {
-				resultObj.put("await", await);
-				return resultObj;
 			}
 		}
 		List<ProcessTaskStepVo> processableStepList = getProcessableStepList(processTaskId, UserContext.get().getUserUuid(true));
