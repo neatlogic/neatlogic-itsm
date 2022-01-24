@@ -112,7 +112,7 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
                             ProcessTaskOperationType.STEP_COMPLETE.getValue()
                     );
                     processTaskMapper.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
-                    thread.setSupplier(() -> processTaskMapper.deleteProcessTaskStepInOperationByProcessTaskStepIdAndOperationType(processTaskStepInOperationVo));
+                    thread.setSupplier(() -> processTaskMapper.deleteProcessTaskStepInOperationByProcessTaskStepIdAndOperationType(processTaskStepInOperationVo.getId()));
                     TransactionSynchronizationPool.execute(thread);
                     return true;
                 }
