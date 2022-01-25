@@ -7,11 +7,19 @@ package codedriver.module.process.stephandler.utilhandler;
 
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.dto.ProcessStepVo;
+import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
+import codedriver.framework.process.util.ProcessConfigUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author linbq
@@ -36,7 +44,28 @@ public class TimerProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
     @Override
     public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-
+/** 组装分配策略 **/
+        JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+        if (MapUtils.isNotEmpty(workerPolicyConfig)) {
+            JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
+            if (CollectionUtils.isNotEmpty(policyList)) {
+                List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
+                for (int k = 0; k < policyList.size(); k++) {
+                    JSONObject policyObj = policyList.getJSONObject(k);
+                    if (!"1".equals(policyObj.getString("isChecked"))) {
+                        continue;
+                    }
+                    ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
+                    processStepWorkerPolicyVo.setProcessUuid(processStepVo.getProcessUuid());
+                    processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
+                    processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
+                    processStepWorkerPolicyVo.setSort(k + 1);
+                    processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
+                    workerPolicyList.add(processStepWorkerPolicyVo);
+                }
+                processStepVo.setWorkerPolicyList(workerPolicyList);
+            }
+        }
     }
 
     @Override
@@ -55,9 +84,14 @@ public class TimerProcessUtilHandler extends ProcessStepInternalHandlerBase {
             configObj = new JSONObject();
         }
         JSONObject resultObj = new JSONObject();
+        /** 分配处理人 **/
+        JSONObject workerPolicyConfig = configObj.getJSONObject("workerPolicyConfig");
+        JSONObject workerPolicyObj = ProcessConfigUtil.regulateWorkerPolicyConfig(workerPolicyConfig);
+        resultObj.put("workerPolicyConfig", workerPolicyObj);
+
         String type = configObj.getString("type");
         if (StringUtils.isBlank(type)) {
-            type = "custom";
+            type = "form";
         }
         resultObj.put("type", type);
         String value = configObj.getString("value");
