@@ -5,12 +5,9 @@
 
 package codedriver.module.process.api.processtask.automatic;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -51,8 +48,8 @@ public class ProcessTaskStepAutomaticFirstRequestTestApi extends PublicApiCompon
     public Object myDoService(JSONObject paramObj) throws Exception {
         String inputParam1 = paramObj.getString("inputParam1");
         Long inputParam2 = paramObj.getLong("inputParam2");
-        System.out.println("inputParam1=" + inputParam1);
-        System.out.println("inputParam2=" + inputParam2);
+        //System.out.println("inputParam1=" + inputParam1);
+        //System.out.println("inputParam2=" + inputParam2);
         String outputParam1 = inputParam1 + "-out";
         Long outputParam2 = inputParam2 + 10;
         JSONObject output = new JSONObject();
