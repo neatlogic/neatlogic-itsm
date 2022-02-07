@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.dto.ProcessTaskStepInOperationVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.service.ProcessTaskAgentService;
 import codedriver.framework.service.AuthenticationInfoService;
@@ -66,20 +67,32 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 		@Param(name = "action", type = ApiParamType.ENUM, rule = "accept,start,complete", desc = "操作类型")
 	})
 	@Output({
-		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表")
+		@Param(name = "tbodyList", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表"),
+		@Param(name = "status", type = ApiParamType.ENUM, rule = "ok,running", desc = "步骤信息列表")
 	})
 	@Description(desc = "当前用户可处理的步骤列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-		for(int i = 0; i < 10; i++) {
-		    if(processTaskMapper.getProcessTaskStepInOperationCountByProcessTaskId(processTaskId) == 0) {
-		        break;
-		    }
-            TimeUnit.MILLISECONDS.sleep(30);
+		JSONObject resultObj = new JSONObject();
+		resultObj.put("status", "ok");
+		List<ProcessTaskStepInOperationVo> processTaskStepInOperationList = processTaskMapper.getProcessTaskStepInOperationListByProcessTaskId(processTaskId);
+		if (CollectionUtils.isNotEmpty(processTaskStepInOperationList)) {
+			for (ProcessTaskStepInOperationVo processTaskStepInOperationVo : processTaskStepInOperationList) {
+				Date expireTime = processTaskStepInOperationVo.getExpireTime();
+				if (expireTime == null) {
+					resultObj.put("status", "running");
+					return resultObj;
+				} else {
+					long after = System.currentTimeMillis() - expireTime.getTime();
+					if (after > 0) {
+						resultObj.put("status", "running");
+						return resultObj;
+					}
+				}
+			}
 		}
-		    
 		List<ProcessTaskStepVo> processableStepList = getProcessableStepList(processTaskId, UserContext.get().getUserUuid(true));
 		/** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
 		List<String> fromUserUUidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), processTaskVo.getChannelUuid());
@@ -90,14 +103,7 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 				}
 			}
 		}
-//        String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
-//        if(StringUtils.isNotBlank(userUuid)) {
-//            for(ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId, userUuid)) {
-//                if(!processableStepList.contains(processTaskStepVo)) {
-//                    processableStepList.add(processTaskStepVo);
-//                }
-//            }
-//        }
+
 		String action = jsonObj.getString("action");
 		if(StringUtils.isNotBlank(action)) {
 			Iterator<ProcessTaskStepVo> iterator = processableStepList.iterator();
@@ -123,7 +129,9 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 				}
 			}
 		}
-		return processableStepList;
+
+		resultObj.put("tbodyList", processableStepList);
+		return resultObj;
 	}
 	
 	/**
