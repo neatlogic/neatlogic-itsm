@@ -48,7 +48,7 @@ public class ProcessTaskAutomaticThread extends CodeDriverThread {
         try {
             processTaskAutomaticService.firstRequest(currentProcessTaskStepVo);
         } finally {
-            processTaskMapper.deleteProcessTaskStepInOperationByProcessTaskStepIdAndOperationType(processTaskStepInOperationId);
+            processTaskMapper.deleteProcessTaskStepInOperationById(processTaskStepInOperationId);
         }
     }
 }

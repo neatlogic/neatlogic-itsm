@@ -18,9 +18,8 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepInOperationVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
-import codedriver.framework.process.stephandler.core.ProcessStepThread;
+import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.stephandler.core.*;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -77,8 +76,12 @@ public class AutoCompleteHandler implements IAutoCompleteRuleHandler {
                             currentProcessTaskStepVo.getId(),
                             ProcessTaskOperationType.STEP_COMPLETE.getValue()
                     );
-                    processTaskMapper.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
-                    thread.setSupplier(() -> processTaskMapper.deleteProcessTaskStepInOperationByProcessTaskStepIdAndOperationType(processTaskStepInOperationVo.getId()));
+                    IProcessStepInternalHandler processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+                    if (processStepInternalHandler == null) {
+                        throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+                    }
+                    processStepInternalHandler.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
+                    thread.setSupplier(() -> processTaskMapper.deleteProcessTaskStepInOperationById(processTaskStepInOperationVo.getId()));
                     TransactionSynchronizationPool.execute(thread);
                     return true;
                 }

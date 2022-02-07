@@ -75,12 +75,6 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-//		for(int i = 0; i < 10; i++) {
-//		    if(processTaskMapper.getProcessTaskStepInOperationCountByProcessTaskId(processTaskId) == 0) {
-//		        break;
-//		    }
-//            TimeUnit.MILLISECONDS.sleep(30);
-//		}
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("status", "ok");
 		List<ProcessTaskStepInOperationVo> processTaskStepInOperationList = processTaskMapper.getProcessTaskStepInOperationListByProcessTaskId(processTaskId);
