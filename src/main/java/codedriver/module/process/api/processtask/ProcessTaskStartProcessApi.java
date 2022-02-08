@@ -1,21 +1,9 @@
 package codedriver.module.process.api.processtask;
 
-
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
-import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
-import codedriver.framework.process.dto.ProcessTaskStepDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.module.process.service.ProcessTaskService;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -23,7 +11,6 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.nacos.common.utils.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,15 +18,9 @@ import org.springframework.stereotype.Service;
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
-
-	@Autowired
-	private ProcessTaskMapper processTaskMapper;
     
     @Autowired
     private ProcessTaskService processTaskService;
-    
-    @Autowired
-    private ProcessTaskStepDataMapper processTaskStepDataMapper;
 
 	@Override
 	public String getToken() {
@@ -64,35 +45,36 @@ public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
 	@Description(desc = "工单上报提交接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		Long processTaskId = jsonObj.getLong("processTaskId");
-        Long nextStepId = jsonObj.getLong("nextStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, null, nextStepId);
-
-		ProcessTaskStepVo startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
-		if(handler == null) {
-            throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
-		}
-
-		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
-        processTaskStepDataVo.setProcessTaskId(startProcessTaskStepVo.getProcessTaskId());
-        processTaskStepDataVo.setProcessTaskStepId(startProcessTaskStepVo.getId());
-        processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
-        processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
-        processTaskStepDataVo = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
-        if(processTaskStepDataVo != null) {
-            JSONObject dataObj = processTaskStepDataVo.getData();
-            if (MapUtils.isNotEmpty(dataObj)) {
-                jsonObj.putAll(dataObj);
-            }
-        }
-        startProcessTaskStepVo.getParamObj().putAll(jsonObj);
-        try {
-            handler.startProcess(startProcessTaskStepVo);
-			processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
-        }catch(ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+//		Long processTaskId = jsonObj.getLong("processTaskId");
+//        Long nextStepId = jsonObj.getLong("nextStepId");
+//        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, null, nextStepId);
+//
+//		ProcessTaskStepVo startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
+//		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+//		if(handler == null) {
+//            throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
+//		}
+//
+//		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+//        processTaskStepDataVo.setProcessTaskId(startProcessTaskStepVo.getProcessTaskId());
+//        processTaskStepDataVo.setProcessTaskStepId(startProcessTaskStepVo.getId());
+//        processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
+//        processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+//        processTaskStepDataVo = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+//        if(processTaskStepDataVo != null) {
+//            JSONObject dataObj = processTaskStepDataVo.getData();
+//            if (MapUtils.isNotEmpty(dataObj)) {
+//                jsonObj.putAll(dataObj);
+//            }
+//        }
+//        startProcessTaskStepVo.getParamObj().putAll(jsonObj);
+//        try {
+//            handler.startProcess(startProcessTaskStepVo);
+//			processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
+//        }catch(ProcessTaskNoPermissionException e) {
+//            throw new PermissionDeniedException();
+//        }
+		processTaskService.startProcessProcessTask(jsonObj);
 		return null;
 	}
 

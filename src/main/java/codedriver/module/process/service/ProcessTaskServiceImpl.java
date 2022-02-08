@@ -21,6 +21,8 @@ import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.exception.FormActiveVersionNotFoundExcepiton;
+import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
+import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
 import codedriver.framework.notify.dto.NotifyReceiverVo;
 import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
@@ -29,12 +31,17 @@ import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.crossover.IProcessTaskCrossoverService;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
+import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import codedriver.framework.process.exception.core.ProcessTaskPriorityNotMatchException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.file.ProcessTaskFileDownloadException;
+import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.service.ProcessTaskAgentService;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -130,6 +137,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     private ProcessTaskAgentService processTaskAgentService;
     @Resource
     private ProcessTagMapper processTagMapper;
+
+    @Resource
+    private CatalogService catalogService;
 //    @Override
 //    public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo,
 //                                                  Map<String, String> formAttributeActionMap, int mode) {
@@ -1862,5 +1872,186 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             throw new ProcessTaskFileDownloadException(fileId, null);
         }
         return true;
+    }
+
+    @Override
+    public List<ProcessTaskStepVo> getProcessableStepList(ProcessTaskVo processTaskVo, String action) {
+        Long processTaskId = processTaskVo.getId();
+        List<ProcessTaskStepVo> processableStepList = getProcessableStepList(processTaskId, UserContext.get().getUserUuid(true));
+        // 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里
+        List<String> fromUserUUidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), processTaskVo.getChannelUuid());
+        for (String userUuid : fromUserUUidList) {
+            for(ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId, userUuid)) {
+                if(!processableStepList.contains(processTaskStepVo)) {
+                    processableStepList.add(processTaskStepVo);
+                }
+            }
+        }
+
+        if(StringUtils.isNotBlank(action)) {
+            Iterator<ProcessTaskStepVo> iterator = processableStepList.iterator();
+            while(iterator.hasNext()) {
+                ProcessTaskStepVo processTaskStepVo = iterator.next();
+                List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
+                if(ProcessTaskOperationType.STEP_ACCEPT.getValue().equals(action)) {
+                    if(CollectionUtils.isNotEmpty(majorUserList)) {
+                        iterator.remove();
+                    }
+                }else if(ProcessTaskOperationType.STEP_START.getValue().equals(action)) {
+                    if(CollectionUtils.isEmpty(majorUserList)) {
+                        iterator.remove();
+                    }else if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())){
+                        iterator.remove();
+                    }
+                }else if(ProcessTaskOperationType.STEP_COMPLETE.getValue().equals(action)) {
+                    if(CollectionUtils.isEmpty(majorUserList)) {
+                        iterator.remove();
+                    }else if(ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())){
+                        iterator.remove();
+                    }
+                }
+            }
+        }
+        return processableStepList;
+    }
+
+    /**
+     *
+     * @Time:2020年4月3日
+     * @Description: 获取工单中当前用户能处理的步骤列表
+     * @param processTaskId
+     * @return List<ProcessTaskStepVo>
+     */
+    private List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId, String userUuid) {
+        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
+        for (ProcessTaskStepVo stepVo : processTaskStepList) {
+            /** 找到所有已激活未处理的步骤 **/
+            if (stepVo.getIsActive().equals(1)) {
+                if(processTaskMapper.checkIsWorker(processTaskId, stepVo.getId(), null, authenticationInfoVo) > 0) {
+                    resultList.add(stepVo);
+                }
+            }
+        }
+        return resultList;
+    }
+
+    /**
+     * 暂存工单草稿
+     *
+     * @param jsonObj
+     * @return
+     */
+    @Override
+    public JSONObject saveProcessTaskDraft(JSONObject jsonObj) throws Exception {
+        String channelUuid = jsonObj.getString("channelUuid");
+        if (channelMapper.checkChannelIsExists(channelUuid) == 0) {
+            throw new ChannelNotFoundException(channelUuid);
+        }
+        String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
+        if (processMapper.checkProcessIsExists(processUuid) == 0) {
+            throw new ProcessNotFoundException(processUuid);
+        }
+        /**
+         * 由于批量上报是暂存与提交一并完成，
+         * 如果不校验优先级，那么会出现批量上报记录显示上报失败，
+         * 而实际上已经生成工单，只是状态是草稿
+         */
+        if(StringUtils.isBlank(jsonObj.getString("priorityUuid"))){//如果为空字符串，则为null
+            jsonObj.put("priorityUuid",null);
+        }
+        List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
+        if (CollectionUtils.isNotEmpty(channelPriorityList) && channelPriorityList.stream().noneMatch(o -> o.getPriorityUuid().equals(jsonObj.getString("priorityUuid")))) {
+            throw new ProcessTaskPriorityNotMatchException();
+        }
+        String owner = jsonObj.getString("owner");
+        if (StringUtils.isNotBlank(owner) && owner.contains("#")) {
+            owner = owner.split("#")[1];
+            jsonObj.put("owner", owner);
+        }
+        ProcessTaskStepVo startProcessTaskStepVo = null;
+
+        Long processTaskId = jsonObj.getLong("processTaskId");
+        if (processTaskId != null) {
+            checkProcessTaskParamsIsLegal(processTaskId);
+            startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
+        } else {
+            /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
+            if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
+                throw new PermissionDeniedException();
+            }
+            startProcessTaskStepVo = new ProcessTaskStepVo();
+            startProcessTaskStepVo.setProcessUuid(processUuid);
+            ProcessStepVo startProcessStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
+            startProcessTaskStepVo.setHandler(startProcessStepVo.getHandler());
+        }
+
+        IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+        if (handler == null) {
+            throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
+        }
+
+        ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+        processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
+        processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+
+        startProcessTaskStepVo.getParamObj().putAll(jsonObj);
+        handler.saveDraft(startProcessTaskStepVo);
+
+        processTaskStepDataVo.setData(jsonObj.toJSONString());
+        processTaskStepDataVo.setProcessTaskId(startProcessTaskStepVo.getProcessTaskId());
+        processTaskStepDataVo.setProcessTaskStepId(startProcessTaskStepVo.getId());
+        processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
+        processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
+        JSONObject resultObj = new JSONObject();
+        resultObj.put("processTaskId", startProcessTaskStepVo.getProcessTaskId());
+        resultObj.put("processTaskStepId", startProcessTaskStepVo.getId());
+
+        //创建全文检索索引
+        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getHandler(ProcessFullTextIndexType.PROCESSTASK);
+        if (indexHandler != null) {
+            indexHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
+        }
+        return resultObj;
+    }
+
+    /**void
+     * 提交上报工单
+     *
+     * @param jsonObj
+     * @return
+     */
+    @Override
+    public void startProcessProcessTask(JSONObject jsonObj) throws Exception {
+        Long processTaskId = jsonObj.getLong("processTaskId");
+        Long nextStepId = jsonObj.getLong("nextStepId");
+        checkProcessTaskParamsIsLegal(processTaskId, null, nextStepId);
+
+        ProcessTaskStepVo startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
+        IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+        if(handler == null) {
+            throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
+        }
+
+        ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+        processTaskStepDataVo.setProcessTaskId(startProcessTaskStepVo.getProcessTaskId());
+        processTaskStepDataVo.setProcessTaskStepId(startProcessTaskStepVo.getId());
+        processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
+        processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+        processTaskStepDataVo = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+        if(processTaskStepDataVo != null) {
+            JSONObject dataObj = processTaskStepDataVo.getData();
+            if (com.alibaba.nacos.common.utils.MapUtils.isNotEmpty(dataObj)) {
+                jsonObj.putAll(dataObj);
+            }
+        }
+        startProcessTaskStepVo.getParamObj().putAll(jsonObj);
+        try {
+            handler.startProcess(startProcessTaskStepVo);
+            processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
     }
 }

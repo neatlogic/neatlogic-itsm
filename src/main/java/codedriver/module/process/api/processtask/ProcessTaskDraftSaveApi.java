@@ -5,41 +5,17 @@
 
 package codedriver.module.process.api.processtask;
 
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.exception.type.PermissionDeniedException;
-import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
-import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
 import codedriver.framework.process.auth.PROCESS_BASE;
-import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dao.mapper.ProcessMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
-import codedriver.framework.process.dto.ChannelPriorityVo;
-import codedriver.framework.process.dto.ProcessStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.exception.channel.ChannelNotFoundException;
-import codedriver.framework.process.exception.core.ProcessTaskPriorityNotMatchException;
-import codedriver.framework.process.exception.process.ProcessNotFoundException;
-import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
-import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
 import codedriver.module.process.service.ProcessTaskService;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.service.CatalogService;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
@@ -47,22 +23,7 @@ import java.util.List;
 public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
 
     @Resource
-    private ChannelMapper channelMapper;
-
-    @Resource
-    private ProcessTaskMapper processTaskMapper;
-
-    @Resource
     private ProcessTaskService processTaskService;
-
-    @Resource
-    private ProcessMapper processMapper;
-
-    @Resource
-    private ProcessTaskStepDataMapper processTaskStepDataMapper;
-
-    @Resource
-    private CatalogService catalogService;
 
     @Override
     public String getToken() {
@@ -115,84 +76,84 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
     @Override
     @ResubmitInterval(5)
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        String channelUuid = jsonObj.getString("channelUuid");
-        if (channelMapper.checkChannelIsExists(channelUuid) == 0) {
-            throw new ChannelNotFoundException(channelUuid);
-        }
-        String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
-        if (processMapper.checkProcessIsExists(processUuid) == 0) {
-            throw new ProcessNotFoundException(processUuid);
-        }
-        /**
-         * 由于批量上报是暂存与提交一并完成，
-         * 如果不校验优先级，那么会出现批量上报记录显示上报失败，
-         * 而实际上已经生成工单，只是状态是草稿
-         */
-        if(StringUtils.isBlank(jsonObj.getString("priorityUuid"))){//如果为空字符串，则为null
-            jsonObj.put("priorityUuid",null);
-        }
-        List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
-        if (CollectionUtils.isNotEmpty(channelPriorityList) && channelPriorityList.stream().noneMatch(o -> o.getPriorityUuid().equals(jsonObj.getString("priorityUuid")))) {
-            throw new ProcessTaskPriorityNotMatchException();
-        }
-        String owner = jsonObj.getString("owner");
-        if (StringUtils.isNotBlank(owner) && owner.contains("#")) {
-            owner = owner.split("#")[1];
-            jsonObj.put("owner", owner);
-        }
-        ProcessTaskStepVo startProcessTaskStepVo = null;
-
-        Long processTaskId = jsonObj.getLong("processTaskId");
-        if (processTaskId != null) {
-            processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-            startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
-        } else {
-            /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
-            if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
-                throw new PermissionDeniedException();
-                /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
-//                String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
-//                if (StringUtils.isNotBlank(agentUuid)) {
-//                    if (!catalogService.channelIsAuthority(channelUuid, agentUuid)) {
-//                        throw new PermissionDeniedException();
-//                    }
-//                } else {
-//                    throw new PermissionDeniedException();
-//                }
-            }
-            startProcessTaskStepVo = new ProcessTaskStepVo();
-            startProcessTaskStepVo.setProcessUuid(processUuid);
-            ProcessStepVo startProcessStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
-            startProcessTaskStepVo.setHandler(startProcessStepVo.getHandler());
-        }
-
-        IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
-        if (handler == null) {
-            throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
-        }
-
-        ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
-        processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
-        processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
-
-        startProcessTaskStepVo.getParamObj().putAll(jsonObj);
-        handler.saveDraft(startProcessTaskStepVo);
-
-        processTaskStepDataVo.setData(jsonObj.toJSONString());
-        processTaskStepDataVo.setProcessTaskId(startProcessTaskStepVo.getProcessTaskId());
-        processTaskStepDataVo.setProcessTaskStepId(startProcessTaskStepVo.getId());
-        processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
-        processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
-        JSONObject resultObj = new JSONObject();
-        resultObj.put("processTaskId", startProcessTaskStepVo.getProcessTaskId());
-        resultObj.put("processTaskStepId", startProcessTaskStepVo.getId());
-
-        //创建全文检索索引
-        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getHandler(ProcessFullTextIndexType.PROCESSTASK);
-        if (indexHandler != null) {
-            indexHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
-        }
-        return resultObj;
+//        String channelUuid = jsonObj.getString("channelUuid");
+//        if (channelMapper.checkChannelIsExists(channelUuid) == 0) {
+//            throw new ChannelNotFoundException(channelUuid);
+//        }
+//        String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
+//        if (processMapper.checkProcessIsExists(processUuid) == 0) {
+//            throw new ProcessNotFoundException(processUuid);
+//        }
+//        /**
+//         * 由于批量上报是暂存与提交一并完成，
+//         * 如果不校验优先级，那么会出现批量上报记录显示上报失败，
+//         * 而实际上已经生成工单，只是状态是草稿
+//         */
+//        if(StringUtils.isBlank(jsonObj.getString("priorityUuid"))){//如果为空字符串，则为null
+//            jsonObj.put("priorityUuid",null);
+//        }
+//        List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
+//        if (CollectionUtils.isNotEmpty(channelPriorityList) && channelPriorityList.stream().noneMatch(o -> o.getPriorityUuid().equals(jsonObj.getString("priorityUuid")))) {
+//            throw new ProcessTaskPriorityNotMatchException();
+//        }
+//        String owner = jsonObj.getString("owner");
+//        if (StringUtils.isNotBlank(owner) && owner.contains("#")) {
+//            owner = owner.split("#")[1];
+//            jsonObj.put("owner", owner);
+//        }
+//        ProcessTaskStepVo startProcessTaskStepVo = null;
+//
+//        Long processTaskId = jsonObj.getLong("processTaskId");
+//        if (processTaskId != null) {
+//            processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+//            startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
+//        } else {
+//            /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
+//            if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
+//                throw new PermissionDeniedException();
+//                /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
+////                String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
+////                if (StringUtils.isNotBlank(agentUuid)) {
+////                    if (!catalogService.channelIsAuthority(channelUuid, agentUuid)) {
+////                        throw new PermissionDeniedException();
+////                    }
+////                } else {
+////                    throw new PermissionDeniedException();
+////                }
+//            }
+//            startProcessTaskStepVo = new ProcessTaskStepVo();
+//            startProcessTaskStepVo.setProcessUuid(processUuid);
+//            ProcessStepVo startProcessStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
+//            startProcessTaskStepVo.setHandler(startProcessStepVo.getHandler());
+//        }
+//
+//        IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+//        if (handler == null) {
+//            throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
+//        }
+//
+//        ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+//        processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
+//        processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+//
+//        startProcessTaskStepVo.getParamObj().putAll(jsonObj);
+//        handler.saveDraft(startProcessTaskStepVo);
+//
+//        processTaskStepDataVo.setData(jsonObj.toJSONString());
+//        processTaskStepDataVo.setProcessTaskId(startProcessTaskStepVo.getProcessTaskId());
+//        processTaskStepDataVo.setProcessTaskStepId(startProcessTaskStepVo.getId());
+//        processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
+//        processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
+//        JSONObject resultObj = new JSONObject();
+//        resultObj.put("processTaskId", startProcessTaskStepVo.getProcessTaskId());
+//        resultObj.put("processTaskStepId", startProcessTaskStepVo.getId());
+//
+//        //创建全文检索索引
+//        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getHandler(ProcessFullTextIndexType.PROCESSTASK);
+//        if (indexHandler != null) {
+//            indexHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
+//        }
+        return processTaskService.saveProcessTaskDraft(jsonObj);
     }
 
 }
