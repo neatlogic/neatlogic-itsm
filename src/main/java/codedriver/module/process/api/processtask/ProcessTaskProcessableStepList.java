@@ -79,7 +79,7 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 		resultObj.put("status", "ok");
 		List<ProcessTaskStepInOperationVo> processTaskStepInOperationList = processTaskMapper.getProcessTaskStepInOperationListByProcessTaskId(processTaskId);
 		if (CollectionUtils.isNotEmpty(processTaskStepInOperationList)) {
-			/** 如果后台有正在异步处理中的步骤，则返回status=running，前端等待一定时间后再次请求 **/
+			// 如果后台有正在异步处理中的步骤，则返回status=running，前端等待一定时间后再次请求
 			for (ProcessTaskStepInOperationVo processTaskStepInOperationVo : processTaskStepInOperationList) {
 				Date expireTime = processTaskStepInOperationVo.getExpireTime();
 				if (expireTime == null) {
@@ -95,7 +95,7 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 			}
 		}
 		List<ProcessTaskStepVo> processableStepList = getProcessableStepList(processTaskId, UserContext.get().getUserUuid(true));
-		/** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
+		// 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里
 		List<String> fromUserUUidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), processTaskVo.getChannelUuid());
 		for (String userUuid : fromUserUUidList) {
 			for(ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId, userUuid)) {

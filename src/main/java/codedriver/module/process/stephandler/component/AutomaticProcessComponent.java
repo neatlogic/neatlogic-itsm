@@ -48,7 +48,7 @@ import java.util.Set;
 @Service
 public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 
-    /** 激活自动处理步骤时，如果在时间窗口内，在`processtask_step_in_operation`表中插入一条数据，标识该步骤正在后台处理中，有效时长3秒 **/
+    // 激活自动处理步骤时，如果在时间窗口内，在`processtask_step_in_operation`表中插入一条数据，标识该步骤正在后台处理中，有效时长3秒
     private final long EXPIRETIME = 3000;
 
     @Resource
@@ -150,7 +150,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
                     "request",
                     new Date(System.currentTimeMillis() + EXPIRETIME)
             );
-            /** 后台异步操作步骤前，在`processtask_step_in_operation`表中插入一条数据，标识该步骤正在后台处理中，异步处理完删除 **/
+            // 后台异步操作步骤前，在`processtask_step_in_operation`表中插入一条数据，标识该步骤正在后台处理中，异步处理完删除
             processStepInternalHandler.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
             TransactionSynchronizationPool.execute(new ProcessTaskAutomaticThread(currentProcessTaskStepVo, processTaskStepInOperationVo.getId()));
         } else {
