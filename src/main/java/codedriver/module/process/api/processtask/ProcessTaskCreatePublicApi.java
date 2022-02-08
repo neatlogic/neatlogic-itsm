@@ -15,14 +15,12 @@ import codedriver.framework.form.exception.FormAttributeNotFoundException;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.crossover.IProcessTaskCreatePublicApiCrossoverService;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
-import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.dto.PriorityVo;
-import codedriver.framework.process.dto.ProcessFormVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
@@ -33,6 +31,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.restful.dto.ApiVo;
 import codedriver.module.framework.form.attribute.handler.SelectHandler;
+import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
@@ -70,6 +69,9 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase implement
 
     @Resource
     private MatrixMapper matrixMapper;
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @Override
     public String getToken() {
@@ -227,22 +229,20 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase implement
         //暂存
         //TODO isNeedValid 参数是否需要？？？
         jsonObj.put("isNeedValid", 1);
-        MyApiComponent draftSaveApi = (MyApiComponent) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
-        JSONObject saveResultObj = (JSONObject) draftSaveApi.myDoService(jsonObj);
-        saveResultObj.put("action", "start");
+        JSONObject saveResultObj = processTaskService.saveProcessTaskDraft(jsonObj);
 
         //查询可执行下一 步骤
-        MyApiComponent stepListApi = (MyApiComponent) PrivateApiComponentFactory.getInstance(ProcessTaskProcessableStepList.class.getName());
-        Object nextStepListObj = stepListApi.myDoService(saveResultObj);
-        List<ProcessTaskStepVo> nextStepList = (List<ProcessTaskStepVo>) nextStepListObj;
+        ProcessTaskVo processTaskVo = new ProcessTaskVo();
+        processTaskVo.setId(saveResultObj.getLong("processTaskId"));
+        processTaskVo.setChannelUuid(channelVo.getUuid());
+        List<ProcessTaskStepVo> nextStepList = processTaskService.getProcessableStepList(processTaskVo, ProcessTaskOperationType.STEP_START.getValue());
         if (CollectionUtils.isEmpty(nextStepList) && nextStepList.size() != 1) {
             throw new RuntimeException("抱歉！暂不支持开始节点连接多个后续节点。");
         }
         saveResultObj.put("nextStepId", nextStepList.get(0).getId());
 
         //流转
-        MyApiComponent startProcessApi = (MyApiComponent) PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
-        startProcessApi.myDoService(saveResultObj);
+        processTaskService.startProcessProcessTask(saveResultObj);
 
         result.put("processTaskId", saveResultObj.getString("processTaskId"));
         return result;
