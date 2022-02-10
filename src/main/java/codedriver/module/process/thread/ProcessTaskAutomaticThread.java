@@ -6,6 +6,7 @@
 package codedriver.module.process.thread;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.service.ProcessTaskAutomaticService;
 import org.springframework.stereotype.Component;
@@ -20,10 +21,16 @@ import javax.annotation.Resource;
 public class ProcessTaskAutomaticThread extends CodeDriverThread {
 
     private static ProcessTaskAutomaticService processTaskAutomaticService;
+    private static ProcessTaskMapper processTaskMapper;
+    private Long processTaskStepInOperationId;
 
     @Resource
     private void setProcessTaskAutomaticService(ProcessTaskAutomaticService _processTaskAutomaticService) {
         processTaskAutomaticService = _processTaskAutomaticService;
+    }
+    @Resource
+    private void setProcessTaskMapper(ProcessTaskMapper _processTaskMapper) {
+        processTaskMapper = _processTaskMapper;
     }
     private ProcessTaskStepVo currentProcessTaskStepVo;
 
@@ -31,12 +38,17 @@ public class ProcessTaskAutomaticThread extends CodeDriverThread {
         super("ProcessTask-Automatic-Thread");
     }
 
-    public ProcessTaskAutomaticThread(ProcessTaskStepVo currentProcessTaskStepVo) {
+    public ProcessTaskAutomaticThread(ProcessTaskStepVo currentProcessTaskStepVo, Long _processTaskStepInOperationId) {
         super("ProcessTask-Automatic-Thread-" + currentProcessTaskStepVo.getId());
         this.currentProcessTaskStepVo = currentProcessTaskStepVo;
+        this.processTaskStepInOperationId = _processTaskStepInOperationId;
     }
     @Override
     protected void execute() {
-        processTaskAutomaticService.firstRequest(currentProcessTaskStepVo);
+        try {
+            processTaskAutomaticService.firstRequest(currentProcessTaskStepVo);
+        } finally {
+            processTaskMapper.deleteProcessTaskStepInOperationById(processTaskStepInOperationId);
+        }
     }
 }

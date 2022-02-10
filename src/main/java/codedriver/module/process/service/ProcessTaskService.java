@@ -346,4 +346,26 @@ public interface ProcessTaskService {
      * @return true：有权限   false：没有权限
      */
     boolean getProcessFileHasDownloadAuthWithFileIdAndProcessTaskIdList(Long fileId,List<Long> processTaskIdList);
+
+    /**
+     * 查询当前用户可以处理的步骤列表
+     * @param processTaskVo 工单信息
+     * @param action 操作类型
+     * @return
+     */
+    List<ProcessTaskStepVo> getProcessableStepList(ProcessTaskVo processTaskVo, String action);
+
+    /**
+     * 暂存工单草稿
+     * @param jsonObj
+     * @return
+     */
+    JSONObject saveProcessTaskDraft(JSONObject jsonObj) throws Exception;
+
+    /**
+     * 提交上报工单
+     * @param jsonObj
+     */
+    void startProcessProcessTask(JSONObject jsonObj) throws Exception;
+
 }

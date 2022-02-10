@@ -57,72 +57,75 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
         List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = new ArrayList<>();
         if (MapUtils.isNotEmpty(workerPolicyVo.getConfigObj())) {
             /** 选择的表单属性uuid **/
-            String attributeUuid = workerPolicyVo.getConfigObj().getString("attributeUuid");
-            if (StringUtils.isNotBlank(attributeUuid)) {
-                ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo = new ProcessTaskFormAttributeDataVo();
-                processTaskFormAttributeDataVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-                processTaskFormAttributeDataVo.setAttributeUuid(attributeUuid);
-                ProcessTaskFormAttributeDataVo processTaskFormAttributeData = processTaskMapper
-                    .getProcessTaskFormAttributeDataByProcessTaskIdAndAttributeUuid(processTaskFormAttributeDataVo);
-                if (processTaskFormAttributeData != null) {
-                    /** 只有表单属性类型为用户选择器才生效 **/
-                    if ("formuserselect".equals(processTaskFormAttributeData.getType())) {
-                        Object dataObj = processTaskFormAttributeData.getDataObj();
-                        if (dataObj != null) {
-                            List<String> dataList = new ArrayList<>();
-                            if (dataObj instanceof String) {
-                                dataList.add((String)dataObj);
-                            } else if (dataObj instanceof JSONArray) {
-                                dataList = JSON.parseArray(JSON.toJSONString(dataObj), String.class);
-                            }
-                            if (CollectionUtils.isNotEmpty(dataList)) {
-                                for (String value : dataList) {
-                                    /** 校验属性值是否合法，只有是当前存在的用户、组、角色才合法 **/
-                                    if (value.contains("#")) {
-                                        String[] split = value.split("#");
-                                        if (GroupSearch.USER.getValue().equals(split[0])) {
-                                            if (userMapper.checkUserIsExists(split[1]) == 0) {
+            JSONArray attributeUuidArray = workerPolicyVo.getConfigObj().getJSONArray("attributeUuidList");
+            if (CollectionUtils.isNotEmpty(attributeUuidArray)) {
+                List<String> attributeUuidList = attributeUuidArray.toJavaList(String.class);
+                for (String attributeUuid : attributeUuidList) {
+                    ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo = new ProcessTaskFormAttributeDataVo();
+                    processTaskFormAttributeDataVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+                    processTaskFormAttributeDataVo.setAttributeUuid(attributeUuid);
+                    ProcessTaskFormAttributeDataVo processTaskFormAttributeData = processTaskMapper
+                            .getProcessTaskFormAttributeDataByProcessTaskIdAndAttributeUuid(processTaskFormAttributeDataVo);
+                    if (processTaskFormAttributeData != null) {
+                        /** 只有表单属性类型为用户选择器才生效 **/
+                        if ("formuserselect".equals(processTaskFormAttributeData.getType())) {
+                            Object dataObj = processTaskFormAttributeData.getDataObj();
+                            if (dataObj != null) {
+                                List<String> dataList = new ArrayList<>();
+                                if (dataObj instanceof String) {
+                                    dataList.add((String) dataObj);
+                                } else if (dataObj instanceof JSONArray) {
+                                    dataList = JSON.parseArray(JSON.toJSONString(dataObj), String.class);
+                                }
+                                if (CollectionUtils.isNotEmpty(dataList)) {
+                                    for (String value : dataList) {
+                                        /** 校验属性值是否合法，只有是当前存在的用户、组、角色才合法 **/
+                                        if (value.contains("#")) {
+                                            String[] split = value.split("#");
+                                            if (GroupSearch.USER.getValue().equals(split[0])) {
+                                                if (userMapper.checkUserIsExists(split[1]) == 0) {
+                                                    continue;
+                                                }
+                                            } else if (GroupSearch.TEAM.getValue().equals(split[0])) {
+                                                if (teamMapper.checkTeamIsExists(split[1]) == 0) {
+                                                    continue;
+                                                }
+                                            } else if (GroupSearch.ROLE.getValue().equals(split[0])) {
+                                                if (roleMapper.checkRoleIsExists(split[1]) == 0) {
+                                                    continue;
+                                                }
+                                            } else {
                                                 continue;
                                             }
-                                        } else if (GroupSearch.TEAM.getValue().equals(split[0])) {
-                                            if (teamMapper.checkTeamIsExists(split[1]) == 0) {
-                                                continue;
-                                            }
-                                        } else if (GroupSearch.ROLE.getValue().equals(split[0])) {
-                                            if (roleMapper.checkRoleIsExists(split[1]) == 0) {
-                                                continue;
-                                            }
-                                        } else {
-                                            continue;
+                                            processTaskStepWorkerList.add(
+                                                    new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
+                                                            currentProcessTaskStepVo.getId(), split[0], split[1],
+                                                            ProcessUserType.MAJOR.getValue()));
                                         }
-                                        processTaskStepWorkerList.add(
-                                            new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
-                                                currentProcessTaskStepVo.getId(), split[0], split[1],
-                                                ProcessUserType.MAJOR.getValue()));
                                     }
                                 }
                             }
-                        }
-                    } else if ("formselect".equals(processTaskFormAttributeData.getType())) {
-                        Object dataObj = processTaskFormAttributeData.getDataObj();
-                        if (dataObj != null) {
-                            List<String> dataList = new ArrayList<>();
-                            if (dataObj instanceof String) {
-                                dataList.add((String)dataObj);
-                            } else if (dataObj instanceof JSONArray) {
-                                dataList = JSON.parseArray(JSON.toJSONString(dataObj), String.class);
-                            }
-                            if (CollectionUtils.isNotEmpty(dataList)) {
-                                for (String value : dataList) {
-                                    if (StringUtils.isNotBlank(value)) {
-                                        if (value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
-                                            value = value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER)[0];
-                                        }
-                                        if (userMapper.checkUserIsExists(value) > 0) {
-                                            processTaskStepWorkerList.add(
-                                                new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
-                                                    currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(),
-                                                    value, ProcessUserType.MAJOR.getValue()));
+                        } else if ("formselect".equals(processTaskFormAttributeData.getType())) {
+                            Object dataObj = processTaskFormAttributeData.getDataObj();
+                            if (dataObj != null) {
+                                List<String> dataList = new ArrayList<>();
+                                if (dataObj instanceof String) {
+                                    dataList.add((String) dataObj);
+                                } else if (dataObj instanceof JSONArray) {
+                                    dataList = JSON.parseArray(JSON.toJSONString(dataObj), String.class);
+                                }
+                                if (CollectionUtils.isNotEmpty(dataList)) {
+                                    for (String value : dataList) {
+                                        if (StringUtils.isNotBlank(value)) {
+                                            if (value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
+                                                value = value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER)[0];
+                                            }
+                                            if (userMapper.checkUserIsExists(value) > 0) {
+                                                processTaskStepWorkerList.add(
+                                                        new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
+                                                                currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(),
+                                                                value, ProcessUserType.MAJOR.getValue()));
+                                            }
                                         }
                                     }
                                 }

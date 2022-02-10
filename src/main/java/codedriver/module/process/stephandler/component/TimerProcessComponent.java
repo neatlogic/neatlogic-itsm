@@ -64,7 +64,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     public ProcessStepMode getMode() {
-        return ProcessStepMode.AT;
+        return ProcessStepMode.MT;
     }
 
     @Override
@@ -89,22 +89,6 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-        currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
-        return 1;
-    }
-
-    @Override
-    protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, Set<ProcessTaskStepWorkerVo> workerSet) throws ProcessTaskException {
-        return 0;
-    }
-
-    @Override
-    protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) {
-        return 0;
-    }
-
-    @Override
-    protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
         String configHash = currentProcessTaskStepVo.getConfigHash();
         String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(configHash);
 //        {
@@ -161,13 +145,26 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                         );
                         JobObject jobObject = jobObjectBuilder.build();
                         jobHandler.reloadJob(jobObject);
-                    } else {
-                        currentProcessTaskStepVo.setIsAllDone(true);
                     }
                 }
             }
         }
         return 1;
+    }
+
+    @Override
+    protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, Set<ProcessTaskStepWorkerVo> workerSet) throws ProcessTaskException {
+        return defaultAssign(currentProcessTaskStepVo, workerSet);
+    }
+
+    @Override
+    protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) {
+        return 0;
+    }
+
+    @Override
+    protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        return 0;
     }
 
     @Override
@@ -237,7 +234,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected Set<Long> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo, List<Long> nextStepIdList, Long nextStepId) throws ProcessTaskException {
-        return null;
+        return defaultGetNext(nextStepIdList, nextStepId);
     }
 
     @Override
