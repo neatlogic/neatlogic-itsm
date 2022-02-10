@@ -120,7 +120,9 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             List<JSONObject> finalDataList = dataList;
             runner.execute(processTaskVoList, 5, processTaskVo -> {
                 JSONObject taskJson = new JSONObject();
-                processTaskVo.setStepList(processTaskMapper.getProcessTaskCurrentStepByProcessTaskId(processTaskVo.getId()));
+                if(Objects.equals(processTaskVo.getStatus(),ProcessTaskStatus.RUNNING.getValue())) {
+                    processTaskVo.setStepList(processTaskMapper.getProcessTaskCurrentStepByProcessTaskId(processTaskVo.getId()));
+                }
                 //重新渲染工单字段
                 for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                     long tmp = System.currentTimeMillis();
