@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class WorkcenterOperationSearchApi extends PrivateApiComponentBase {
+public class WorkcenterOperationListApi extends PrivateApiComponentBase {
     @Resource
     NewWorkcenterService newWorkcenterService;
 
