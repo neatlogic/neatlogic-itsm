@@ -62,6 +62,7 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
     @Description(desc = "工单中心搜索接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        //Long startTime  = System.currentTimeMillis();
         if (jsonObj.containsKey("uuid")) {
             String uuid = jsonObj.getString("uuid");
             Integer currentPage = jsonObj.getInteger("currentPage");
@@ -79,6 +80,7 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
             }
         }
         WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj);
+        //System.out.println((System.currentTimeMillis() - startTime) + " ##start workcenter-thead:-------------------------------------------------------------------------------");
         //workcenterVo.setSqlFieldType(FieldTypeEnum.DISTINCT_ID.getValue());
         return newWorkcenterService.doSearch(workcenterVo);
         //return workcenterService.doSearch(workcenterVo);

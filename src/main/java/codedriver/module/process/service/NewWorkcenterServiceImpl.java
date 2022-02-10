@@ -118,8 +118,9 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             }
             BatchRunner<ProcessTaskVo> runner = new BatchRunner<>();
             List<JSONObject> finalDataList = dataList;
-            runner.execute(processTaskVoList, 3, processTaskVo -> {
+            runner.execute(processTaskVoList, 5, processTaskVo -> {
                 JSONObject taskJson = new JSONObject();
+                processTaskVo.setStepList(processTaskMapper.getProcessTaskCurrentStepByProcessTaskId(processTaskVo.getId()));
                 //重新渲染工单字段
                 for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                     long tmp = System.currentTimeMillis();

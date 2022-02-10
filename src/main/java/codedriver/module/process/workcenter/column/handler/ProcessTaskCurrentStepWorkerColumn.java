@@ -6,21 +6,13 @@ import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
-import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
-import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
-import codedriver.framework.process.workcenter.table.ProcessTaskStepUserSqlTable;
-import codedriver.framework.process.workcenter.table.ProcessTaskStepWorkerSqlTable;
-import codedriver.framework.process.workcenter.table.UserTable;
-import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import codedriver.module.process.service.NewWorkcenterService;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -38,110 +30,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
         return "当前步骤处理人";
     }
 
-	/*@Override
-	public Object getMyValue(JSONObject json) throws RuntimeException {
-	    JSONArray stepArray = null;
-        try {
-         stepArray = (JSONArray) json.getJSONArray(ProcessWorkcenterField.STEP.getValue());
-        }catch(Exception ex){
-            return "";
-        }
-        String processTaskStatus = json.getString("status");
-        if(CollectionUtils.isEmpty(stepArray)) {
-            return CollectionUtils.EMPTY_COLLECTION;
-        }
-        JSONArray stepResultArray = JSONArray.parseArray(stepArray.toJSONString());
-        ListIterator<Object> stepIterator = stepResultArray.listIterator();
-        JSONArray workerArray = new JSONArray();
-        List<String> workerList = new ArrayList<String>();
-        while(stepIterator.hasNext()) {
-            JSONObject currentStepJson = (JSONObject)stepIterator.next();
-            String stepStatus =currentStepJson.getString("status");
-            Integer isActive =currentStepJson.getInteger("isactive");
-            if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)&&(ProcessTaskStatus.DRAFT.getValue().equals(stepStatus)||(ProcessTaskStatus.PENDING.getValue().equals(stepStatus)&& isActive == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus))) {
-                JSONObject stepStatusJson = new JSONObject();
-                stepStatusJson.put("name", stepStatus);
-                stepStatusJson.put("text", ProcessTaskStatus.getText(stepStatus));
-                stepStatusJson.put("color", ProcessTaskStatus.getColor(stepStatus));
-                currentStepJson.put("status", stepStatusJson);
-                JSONArray userTypeArray = currentStepJson.getJSONArray("usertypelist"); 
-                if(CollectionUtils.isNotEmpty(userTypeArray)) {
-                    ListIterator<Object> userTypeIterator = userTypeArray.listIterator();
-                    while(userTypeIterator.hasNext()) {
-                        JSONObject userTypeJson = (JSONObject) userTypeIterator.next();
-                        //判断子任务|变更步骤
-                        if("changehandle".equals(currentStepJson.getString("handler"))
-                            && ProcessUserType.MINOR.getValue().equals(userTypeJson.getString("usertype"))) {
-                            userTypeJson.put("usertypename", "变更步骤");
-                        }else if(ProcessUserType.MINOR.getValue().equals(userTypeJson.getString("usertype"))){
-                            userTypeJson.put("usertypename", "子任务");
-                        }
-                        
-                        JSONArray userArray = userTypeJson.getJSONArray("userlist");
-                        JSONArray userArrayTmp = new JSONArray();
-                        if(CollectionUtils.isNotEmpty(userArray)) {
-                            List<String> userList = userArray.stream().map(object -> object.toString()).collect(Collectors.toList());
-                            for(String user :userList) {
-                                if(StringUtils.isNotBlank(user.toString())) {
-                                    if(!workerList.contains(user+userTypeJson.getString("usertypename"))) {
-                                        workerList.add(user+userTypeJson.getString("usertypename"));
-                                        if(user.toString().startsWith(GroupSearch.USER.getValuePlugin())) {
-                                            UserVo userVo =userMapper.getUserBaseInfoByUuid(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
-                                            if(userVo != null) {
-                                                JSONObject userJson = new JSONObject();
-                                                userJson.put("workerVo",userVo != null ? JSON.parseObject(JSONObject.toJSONString(userVo)) : null);
-//                                                userJson.put("type", GroupSearch.USER.getValue());
-//                                                userJson.put("worker", user);
-//                                                userJson.put("workername", userVo.getUserName());
-//                                                userJson.put("workerAvatar", userVo.getAvatar());
-//                                                userJson.put("workerVipLevel",userVo.getVipLevel());
-                                                userJson.put("workTypename",userTypeJson.getString("usertypename"));
-                                                userArrayTmp.add(userJson);
-                                            }
-                                        }else if(user.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
-                                            RoleVo roleVo = roleMapper.getRoleByUuid(user.toString().replaceFirst(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
-                                            if(roleVo != null) {
-                                                JSONObject roleJson = new JSONObject();
-                                                JSONObject vo = new JSONObject();
-                                                vo.put("initType",GroupSearch.ROLE.getValue());
-                                                vo.put("uuid",roleVo.getUuid());
-                                                vo.put("name",roleVo.getName());
-                                                roleJson.put("workerVo",vo);
-//                                                roleJson.put("type", GroupSearch.ROLE.getValue());
-//                                                roleJson.put("worker", roleVo.getUuid());
-//                                                roleJson.put("workername", roleVo.getName());
-                                                userArrayTmp.add(roleJson);
-                                            }
-                                        }else if(user.toString().startsWith(GroupSearch.TEAM.getValuePlugin())) {
-                                            TeamVo teamVo = teamMapper.getTeamByUuid(user.toString().replaceFirst(GroupSearch.TEAM.getValuePlugin(), StringUtils.EMPTY));
-                                            if(teamVo != null) {
-                                                JSONObject teamJson = new JSONObject();
-                                                JSONObject vo = new JSONObject();
-                                                vo.put("initType",GroupSearch.TEAM.getValue());
-                                                vo.put("uuid",teamVo.getUuid());
-                                                vo.put("name",teamVo.getName());
-                                                teamJson.put("workerVo",vo);
-//                                                teamJson.put("type", GroupSearch.TEAM.getValue());
-//                                                teamJson.put("worker", teamVo.getUuid());
-//                                                teamJson.put("workername", teamVo.getName());
-                                                userArrayTmp.add(teamJson);
-                                            }
-                                        }
-                                    }
-                                }
 
-                            }
-                            workerArray.addAll(userArrayTmp);
-                        }
-                        
-                    }
-                }
-            }else {
-                stepIterator.remove();
-            }
-        }
-        return workerArray;
-	}*/
 
     @Override
     public Boolean allowSort() {
@@ -164,20 +53,6 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
         return 5;
     }
 
-	/*@Override
-	public Object getSimpleValue(Object json) {
-		StringBuilder sb = new StringBuilder();
-		if(json != null){
-			JSONArray array = JSONArray.parseArray(json.toString());
-			if(CollectionUtils.isNotEmpty(array)){
-				for(int i = 0;i < array.size();i++){
-					sb.append(array.getJSONObject(i).getJSONObject("workerVo").getString("name") + ";");
-				}
-			}
-		}
-		return sb.toString();
-	}*/
-
     @Override
     public String getSimpleValue(ProcessTaskVo processTaskVo) {
         JSONArray workerArray = JSONArray.parseArray(getValue(processTaskVo).toString());
@@ -186,6 +61,11 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
             sb.append(workerArray.getJSONObject(i).getJSONObject("workerVo").getString("name")).append(";");
         }
         return sb.toString();
+    }
+
+    @Override
+    public List<TableSelectColumnVo> getTableSelectColumn() {
+        return new ArrayList<>();
     }
 
     @Override
@@ -201,40 +81,4 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
         return workerArray;
     }
 
-
-    @Override
-    public List<TableSelectColumnVo> getTableSelectColumn() {
-        return new ArrayList<TableSelectColumnVo>() {
-            {
-                add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
-                        new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(), "processTaskStepId"),
-                        new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(), "processTaskId"),
-                        new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.CONFIG_HASH.getValue(), "processTaskConfigHash"),
-                        new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.HANDLER.getValue(), "processTaskStepHandler")
-                )));
-                add(new TableSelectColumnVo(new ProcessTaskStepWorkerSqlTable(), Arrays.asList(
-                        new SelectColumnVo(ProcessTaskStepWorkerSqlTable.FieldEnum.UUID.getValue(), "stepWorkerUuid"),
-                        new SelectColumnVo(ProcessTaskStepWorkerSqlTable.FieldEnum.TYPE.getValue(), "stepWorkerType"),
-                        new SelectColumnVo(ProcessTaskStepWorkerSqlTable.FieldEnum.USER_TYPE.getValue(), "stepWorkerUserType")
-                )));
-                add(new TableSelectColumnVo(new ProcessTaskStepUserSqlTable(), Arrays.asList(
-                        new SelectColumnVo(ProcessTaskStepUserSqlTable.FieldEnum.STATUS.getValue(), "stepUserUserStatus"),
-                        new SelectColumnVo(ProcessTaskStepUserSqlTable.FieldEnum.USER_TYPE.getValue(), "stepUserUserType")
-                )));
-                add(new TableSelectColumnVo(new UserTable(), "ptsuser", Arrays.asList(
-                        new SelectColumnVo(UserTable.FieldEnum.USER_NAME.getValue(), "stepUserUserName"),
-                        new SelectColumnVo(UserTable.FieldEnum.UUID.getValue(), "stepUserUserUuid"),
-                        new SelectColumnVo(UserTable.FieldEnum.USER_INFO.getValue(), "stepUserUserInfo"),
-                        new SelectColumnVo(UserTable.FieldEnum.VIP_LEVEL.getValue(), "stepUserUserVipLevel"),
-                        new SelectColumnVo(UserTable.FieldEnum.PINYIN.getValue(), "stepUserUserPinyin")
-                )));
-            }
-        };
-    }
-
-
-    @Override
-    public List<JoinTableColumnVo> getMyJoinTableColumnList() {
-        return SqlTableUtil.getStepUserJoinTableSql();
-    }
 }

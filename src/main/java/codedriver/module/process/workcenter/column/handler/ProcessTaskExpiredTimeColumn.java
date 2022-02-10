@@ -38,49 +38,6 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
         return "剩余时间";
     }
 
-	/*@Override
-	public Object getMyValue(JSONObject json) throws RuntimeException {
-		JSONArray resultArray = new JSONArray();
-		String worktimeUuid = json.getString("worktime");
-		JSONArray processTaskSlaArray = json.getJSONArray(this.getName());
-		if(json.getString(ProcessWorkcenterField.STATUS.getValue()).equals(ProcessTaskStatus.RUNNING.getValue())&&CollectionUtils.isNotEmpty(processTaskSlaArray)) {
-			for (int i = 0; i < processTaskSlaArray.size(); i++) {
-				JSONObject tmpJson = new JSONObject();
-				JSONObject processTaskSla = processTaskSlaArray.getJSONObject(i);
-				JSONObject slaTimeJson = processTaskSla.getJSONObject("slaTimeVo");
-				Long expireTime = slaTimeJson.getLong("expireTime");
-				Long realExpireTime = slaTimeJson.getLong("realExpireTime");
-                Long expireTimeLong = slaTimeJson.getLong("expireTimeLong");
-                Long realExpireTimeLong = slaTimeJson.getLong("realExpireTimeLong");
-                expireTime = expireTime == null ? expireTimeLong : expireTime;
-                realExpireTime = realExpireTime == null ? realExpireTimeLong : realExpireTime;
-				if(expireTime != null) {
-					long timeLeft = worktimeMapper.calculateCostTime(worktimeUuid, System.currentTimeMillis(),expireTime);
-					tmpJson.put("timeLeft", timeLeft);
-					tmpJson.put("expireTime", expireTime);
-				}
-				if(realExpireTime != null) {
-					long realTimeLeft = realExpireTime - System.currentTimeMillis();
-					tmpJson.put("realTimeLeft", realTimeLeft);
-					tmpJson.put("realExpireTime", realExpireTime);
-				}
-				tmpJson.put("slaName", processTaskSla.getString("name"));
-				//获取即将超时规则，默认分钟（从超时通知策略获取）
-				JSONObject configObj = processTaskSla.getJSONObject("configObj");
-				if(configObj != null && configObj.containsKey("willOverTimeRule")) {
-					Integer willOverTimeRule =  configObj.getInteger("willOverTimeRule");
-					tmpJson.put("willOverTimeRule",willOverTimeRule);
-					if(willOverTimeRule != null && expireTime != null) {
-						tmpJson.put("willOverTime", expireTime - willOverTimeRule*60*100);
-					}
-				}
-				resultArray.add(tmpJson);
-				
-			}
-		}
-		return resultArray;
-	}*/
-
     @Override
     public Boolean allowSort() {
         return false;
@@ -106,36 +63,6 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
     public Boolean getIsSort() {
         return true;
     }
-
-	/*@Override
-	public Object getSimpleValue(Object json) {
-		StringBuilder sb = new StringBuilder();
-		if(json != null){
-			JSONArray array = JSONArray.parseArray(json.toString());
-			if(CollectionUtils.isNotEmpty(array)){
-				for(int i = 0;i < array.size();i++){
-					JSONObject object = array.getJSONObject(i);
-					Long expireTime = object.getLong("expireTime");
-					Long willOverTime = object.getLong("willOverTime");
-					long time;
-					if(willOverTime != null && System.currentTimeMillis() > willOverTime){
-						time = System.currentTimeMillis() - willOverTime;
-						sb.append(object.getString("slaName"))
-								.append("距离超时：")
-								.append(Math.floor(time / (1000 * 60 * 60 * 24)))
-								.append("天;");
-					}else if(expireTime != null && System.currentTimeMillis() > expireTime){
-						time = System.currentTimeMillis() - expireTime;
-						sb.append(object.getString("slaName"))
-								.append("已超时：")
-								.append(Math.floor(time / (1000 * 60 * 60 * 24)))
-								.append("天;");
-					}
-				}
-			}
-		}
-		return sb.toString();
-	}*/
 
     @Override
     public String getSimpleValue(ProcessTaskVo taskVo) {
@@ -241,12 +168,12 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
                                 new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue())
                         )
                 ));
-                add(new TableSelectColumnVo(new ProcessTaskStepSlaSqlTable(),
+                /*add(new TableSelectColumnVo(new ProcessTaskStepSlaSqlTable(),
                         Arrays.asList(
                                 new SelectColumnVo(ProcessTaskStepSlaSqlTable.FieldEnum.PROCESSTASK_STEP_ID.getValue(), "slaStepId"),
                                 new SelectColumnVo(ProcessTaskStepSlaSqlTable.FieldEnum.SLA_ID.getValue(), "slaId")
                         )
-                ));
+                ));*/
             }
         };
     }
