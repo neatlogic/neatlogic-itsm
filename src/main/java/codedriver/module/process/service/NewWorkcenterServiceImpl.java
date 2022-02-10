@@ -116,30 +116,13 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskBySql(sb.build());
             logger.info((System.currentTimeMillis() - detailStartTime) + " ##end workcenter-detail:-------------------------------------------------------------------------------");
             //纠正顺序
-            //按钮权限
-            long authBuildStartTime = System.currentTimeMillis();
-            logger.info("##start workcenter-authBuild:-------------------------------------------------------------------------------");
-            ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
             for (int i = 0; i < processTaskVoList.size(); i++) {
                 ProcessTaskVo processTaskVo = processTaskVoList.get(i);
                 processTaskVo.setIndex(i);
-                builder.addProcessTaskId(processTaskVo.getId());
-                for (ProcessTaskStepVo processStep : processTaskVo.getStepList()) {
-                    builder.addProcessTaskStepId(processStep.getId());
-                }
             }
-            Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
-                    builder.addOperationType(ProcessTaskOperationType.PROCESSTASK_ABORT)
-                            .addOperationType(ProcessTaskOperationType.PROCESSTASK_RECOVER)
-                            .addOperationType(ProcessTaskOperationType.PROCESSTASK_URGE)
-                            .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
-            logger.info((System.currentTimeMillis() - authBuildStartTime) + " ##end workcenter-authBuild:-------------------------------------------------------------------------------");
-            long tmpColumnStartTime = System.currentTimeMillis();
-            Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
             BatchRunner<ProcessTaskVo> runner = new BatchRunner<>();
             List<JSONObject> finalDataList = dataList;
-            runner.execute(processTaskVoList, processTaskVoList.size(), processTaskVo -> {
-                processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
+            runner.execute(processTaskVoList, 3, processTaskVo -> {
                 JSONObject taskJson = new JSONObject();
                 //重新渲染工单字段
                 for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
@@ -155,13 +138,9 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 routeJson.put("taskid", processTaskVo.getId());
                 taskJson.put("route", routeJson);
                 taskJson.put("taskid", processTaskVo.getId());
-                // operate 获取对应工单的操作
-                taskJson.put("action", getTaskOperate(processTaskVo, operateTypeSetMap));
                 taskJson.put("index", processTaskVo.getIndex());
                 finalDataList.add(taskJson);
             }, "WORKCENTER-COLUMN-SEARCHER");
-            logger.info(System.currentTimeMillis() - tmpColumnStartTime + " ##end workcenter-auth column:-------------------------------------------------------------------------------");
-
         }
         dataList = dataList.stream().sorted(Comparator.comparing(o -> JSONObject.parseObject(o.toString()).getInteger("index"))).collect(Collectors.toList());
         // 字段排序
@@ -196,40 +175,41 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     }
 
     @Override
-    public JSONObject doSearch(Long processtaskId) throws ParseException {
+    public JSONObject doSearch(List<Long> processTaskIdList) throws ParseException {
+        JSONObject operationJson = new JSONObject();
         Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
-        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskAndStepById(processtaskId);
-        JSONObject taskJson = null;
-        if (processTaskVo != null) {
-            Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
-            //获取工单&&步骤操作
-            ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
-            builder.addProcessTaskId(processTaskVo.getId());
-            for (ProcessTaskStepVo processStep : processTaskVo.getStepList()) {
-                builder.addProcessTaskStepId(processStep.getId());
-            }
-            Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
-                    builder.addOperationType(ProcessTaskOperationType.PROCESSTASK_ABORT)
-                            .addOperationType(ProcessTaskOperationType.PROCESSTASK_RECOVER)
-                            .addOperationType(ProcessTaskOperationType.PROCESSTASK_URGE)
-                            .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
+        BatchRunner<Long> runner = new BatchRunner<>();
+        runner.execute(processTaskIdList, 3, processtaskId -> {
+            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskAndStepById(processtaskId);
+            JSONObject taskJson = null;
+            if (processTaskVo != null) {
+                Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+                //获取工单&&步骤操作
+                ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
+                builder.addProcessTaskId(processTaskVo.getId());
+                for (ProcessTaskStepVo processStep : processTaskVo.getStepList()) {
+                    builder.addProcessTaskStepId(processStep.getId());
+                }
+                Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
+                        builder.addOperationType(ProcessTaskOperationType.PROCESSTASK_ABORT)
+                                .addOperationType(ProcessTaskOperationType.PROCESSTASK_RECOVER)
+                                .addOperationType(ProcessTaskOperationType.PROCESSTASK_URGE)
+                                .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
 
-            processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
-            taskJson = new JSONObject();
-            //重新渲染工单字段
-            for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
-                IProcessTaskColumn column = entry.getValue();
-                taskJson.put(column.getName(), column.getValue(processTaskVo));
+                processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
+                taskJson = new JSONObject();
+                //重新渲染工单字段
+                for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
+                    IProcessTaskColumn column = entry.getValue();
+                    taskJson.put(column.getName(), column.getValue(processTaskVo));
+                }
+                // route 供前端跳转路由信息
+                JSONObject routeJson = new JSONObject();
+                // operate 获取对应工单的操作
+                operationJson.put(processTaskVo.getId().toString(),getTaskOperate(processTaskVo, operateTypeSetMap));
             }
-            // route 供前端跳转路由信息
-            JSONObject routeJson = new JSONObject();
-            routeJson.put("taskid", processTaskVo.getId());
-            taskJson.put("route", routeJson);
-            taskJson.put("taskid", processTaskVo.getId());
-            // operate 获取对应工单的操作
-            taskJson.put("action", getTaskOperate(processTaskVo, operateTypeSetMap));
-        }
-        return taskJson;
+        },"WORKCENTER-OPERATION-SEARCHER");
+        return operationJson;
     }
 
     @Override

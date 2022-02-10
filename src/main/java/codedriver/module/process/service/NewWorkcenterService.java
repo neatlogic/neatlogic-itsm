@@ -35,13 +35,13 @@ public interface NewWorkcenterService {
 
 
     /**
-     * 根据工单号查询工单信息  目前主要用于单个工单刷新
+     * 根据工单号查询工单信息  目前主要用于工单操作按钮渲染
      *
-     * @param processtaskId 工单号
+     * @param processTaskIdList 工单号列表
      * @return json格式工单操作信息
      * @throws ParseException 转换异常
      */
-    JSONObject doSearch(Long processtaskId) throws ParseException;
+    JSONObject doSearch(List<Long> processTaskIdList) throws ParseException;
 
     /**
      * @Description: 搜索工单数
