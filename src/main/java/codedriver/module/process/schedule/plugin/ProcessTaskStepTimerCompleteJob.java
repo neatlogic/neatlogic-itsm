@@ -42,7 +42,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
     @Override
     public Boolean isHealthy(JobObject jobObject) {
         Long id = Long.valueOf(jobObject.getJobName());
-        ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerById(id);
+        ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerByProcessTaskStepId(id);
         if (processTaskStepTimerVo != null) {
             return true;
         }
@@ -52,7 +52,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
     @Override
     public void reloadJob(JobObject jobObject) {
         Long id = Long.valueOf(jobObject.getJobName());
-        ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerById(id);
+        ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerByProcessTaskStepId(id);
         if (processTaskStepTimerVo == null) {
             return;
         }
@@ -62,7 +62,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
             beginTime = newDate;
         }
         JobObject.Builder jobObjectBuilder = new JobObject.Builder(
-                processTaskStepTimerVo.getId().toString(),
+                id.toString(),
                 this.getGroupName(),
                 this.getClassName(),
                 TenantContext.get().getTenantUuid()
@@ -79,7 +79,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
         List<ProcessTaskStepTimerVo> processTaskStepTimerCompleteList = processTaskMapper.getAllProcessTaskStepTimerList();
         for (ProcessTaskStepTimerVo timerCompleteVo : processTaskStepTimerCompleteList) {
             JobObject.Builder jobObjectBuilder = new JobObject.Builder(
-                    timerCompleteVo.getId().toString(),
+                    timerCompleteVo.getProcessTaskStepId().toString(),
                     this.getGroupName(),
                     this.getClassName(),
                     TenantContext.get().getTenantUuid()
@@ -92,7 +92,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {
         Long id = Long.valueOf(jobObject.getJobName());
-        ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerById(id);
+        ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerByProcessTaskStepId(id);
         if (processTaskStepTimerVo == null) {
             schedulerManager.unloadJob(jobObject);
             return;
@@ -113,7 +113,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }
         processStepHandler.complete(processTaskStepVo);
-        processTaskMapper.deleteProcessTaskStepTimerById(id);
+        processTaskMapper.deleteProcessTaskStepTimerByProcessTaskStepId(id);
         schedulerManager.unloadJob(jobObject);
     }
 }
