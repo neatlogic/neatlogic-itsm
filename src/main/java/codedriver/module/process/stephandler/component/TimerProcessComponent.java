@@ -139,6 +139,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                                             if (Objects.equals(formAttributeVo.getUuid(), attributeUuid)) {
                                                 JSONObject configObj = formAttributeVo.getConfigObj();
                                                 if (MapUtils.isNotEmpty(configObj)) {
+                                                    // 当styleType是"/"，showType="yyyy-MM-dd"，保存的日期值是2022/02/11，需要将yyyy-MM-dd转换成yyyy/MM/dd
                                                     String showType = configObj.getString("showType");
                                                     String styleType = configObj.getString("styleType");
                                                     if ("-".equals(styleType)) {
