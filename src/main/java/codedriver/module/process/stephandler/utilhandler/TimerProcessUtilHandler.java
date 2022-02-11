@@ -8,6 +8,7 @@ package codedriver.module.process.stephandler.utilhandler;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
+import codedriver.framework.process.dto.ProcessTaskStepTimerVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
 import codedriver.framework.process.util.ProcessConfigUtil;
@@ -39,7 +40,12 @@ public class TimerProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
     @Override
     public Object getHandlerStepInitInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
-        return null;
+        JSONObject resultObj = new JSONObject();
+        ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerByProcessTaskStepId(currentProcessTaskStepVo.getId());
+        if (processTaskStepTimerVo != null) {
+            resultObj.put("triggerTime", processTaskStepTimerVo.getTriggerTime());
+        }
+        return resultObj;
     }
 
     @Override
@@ -75,7 +81,7 @@ public class TimerProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
     @Override
     public JSONObject makeupConfig(JSONObject configObj) {
-        return null;
+        return new JSONObject();
     }
 
     @Override

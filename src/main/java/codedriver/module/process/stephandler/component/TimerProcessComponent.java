@@ -6,15 +6,19 @@
 package codedriver.module.process.stephandler.component;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.asynchronization.threadpool.TransactionSynchronizationPool;
+import codedriver.framework.common.constvalue.SystemUser;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepMode;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepTimerVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.core.ProcessTaskException;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
+import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.stephandler.core.*;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
@@ -23,16 +27,18 @@ import codedriver.module.process.schedule.plugin.ProcessTaskStepTimerCompleteJob
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author linbq
@@ -40,6 +46,9 @@ import java.util.Set;
  **/
 @Component
 public class TimerProcessComponent extends ProcessStepHandlerBase {
+
+    private final Logger logger = LoggerFactory.getLogger(TimerProcessComponent.class);
+
     @Override
     public String getHandler() {
         return ProcessStepHandlerType.TIMER.getHandler();
@@ -101,7 +110,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
             if (MapUtils.isNotEmpty(config)) {
                 Date triggerTime = null;
                 String type = config.getString("type");
-                if ("custom".equals(type)) {
+                if ("custom".equals(type)) {//自定义类型没有使用
                     String value = config.getString("value");
                     if (StringUtils.isNotBlank(value)) {
                         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -119,9 +128,41 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                         if (dataVo != null) {
                             String value = dataVo.getData();
                             if (StringUtils.isNotBlank(value)) {
-                                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-                                LocalDateTime localDateTime = LocalDateTime.from(dateTimeFormatter.parse(value));
-                                triggerTime = Date.from(localDateTime.toInstant(OffsetDateTime.now().getOffset()));
+                                String pattern = "yyyy-MM-dd HH:mm";
+                                ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+                                if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
+                                    String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+                                    if (StringUtils.isNotBlank(formContent)) {
+                                        FormVersionVo fromFormVersion = new FormVersionVo();
+                                        fromFormVersion.setFormConfig(formContent);
+                                        List<FormAttributeVo> fromFormAttributeList = fromFormVersion.getFormAttributeList();
+                                        for (FormAttributeVo formAttributeVo : fromFormAttributeList) {
+                                            if (Objects.equals(formAttributeVo.getUuid(), attributeUuid)) {
+                                                JSONObject configObj = formAttributeVo.getConfigObj();
+                                                if (MapUtils.isNotEmpty(configObj)) {
+                                                    String showType = configObj.getString("showType");
+                                                    String styleType = configObj.getString("styleType");
+                                                    if ("-".equals(styleType)) {
+                                                        pattern = showType;
+                                                    } else {
+                                                        char oldChar = '-';
+                                                        char newChar = styleType.charAt(0);
+                                                        pattern = showType.replace(oldChar, newChar);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+                                try {
+                                    triggerTime = sdf.parse(value);
+                                } catch (ParseException e) {
+                                    logger.error(e.getMessage(), e);
+                                }
+//                                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+//                                LocalDateTime localDateTime = LocalDateTime.from(dateTimeFormatter.parse(value));
+//                                triggerTime = Date.from(localDateTime.toInstant(OffsetDateTime.now().getOffset()));
                             }
                         }
                     }
@@ -145,6 +186,28 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                         );
                         JobObject jobObject = jobObjectBuilder.build();
                         jobHandler.reloadJob(jobObject);
+                    } else {
+                        ProcessTaskStepInOperationVo processTaskStepInOperationVo = new ProcessTaskStepInOperationVo(
+                                currentProcessTaskStepVo.getProcessTaskId(),
+                                currentProcessTaskStepVo.getId(),
+                                ProcessTaskOperationType.STEP_COMPLETE.getValue()
+                        );
+                        IProcessStepInternalHandler processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+                        if (processStepInternalHandler == null) {
+                            throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+                        }
+                        /** 后台异步操作步骤前，在`processtask_step_in_operation`表中插入一条数据，标识该步骤正在后台处理中，异步处理完删除 **/
+                        processStepInternalHandler.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
+                        ProcessStepThread thread = new ProcessStepThread(currentProcessTaskStepVo) {
+                            @Override
+                            public void myExecute() {
+                                UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
+                                IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+                                handler.complete(currentProcessTaskStepVo);
+                            }
+                        };
+                        thread.setSupplier(() -> processTaskMapper.deleteProcessTaskStepInOperationById(processTaskStepInOperationVo.getId()));
+                        TransactionSynchronizationPool.execute(thread);
                     }
                 }
             }
