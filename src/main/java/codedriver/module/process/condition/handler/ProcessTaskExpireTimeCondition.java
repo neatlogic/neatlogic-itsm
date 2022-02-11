@@ -12,12 +12,10 @@ import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.workcenter.dto.JoinOnVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.process.workcenter.table.ProcessTaskSlaTimeSqlTable;
-import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
-import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
-import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
+import codedriver.framework.process.workcenter.table.*;
 import codedriver.framework.util.TimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -26,6 +24,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -158,6 +157,23 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
 
     @Override
     public List<JoinTableColumnVo> getMyJoinTableColumnList(WorkcenterVo workcenterVo) {
-        return SqlTableUtil.getExpireTimeJoinTableSql();
+        return new ArrayList<JoinTableColumnVo>() {
+            {
+                add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new ArrayList<JoinOnVo>() {{
+                    add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
+                }}));
+                add(new JoinTableColumnVo(new ProcessTaskStepSqlTable(), new ProcessTaskSlaSqlTable(), new ArrayList<JoinOnVo>() {{
+                    add(new JoinOnVo(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(), ProcessTaskSlaSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
+                }}));
+                add(new JoinTableColumnVo(new ProcessTaskStepSqlTable(), new ProcessTaskStepSlaSqlTable(), new ArrayList<JoinOnVo>() {{
+                    add(new JoinOnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSlaSqlTable.FieldEnum.PROCESSTASK_STEP_ID.getValue()));
+                    add(new JoinOnVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStatus.RUNNING.getValue(), true));
+                    add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStatus.RUNNING.getValue(), true, new ProcessTaskSqlTable().getShortName()));
+                }}));
+                add(new JoinTableColumnVo(new ProcessTaskSlaSqlTable(), new ProcessTaskSlaTimeSqlTable(), new ArrayList<JoinOnVo>() {{
+                    add(new JoinOnVo(ProcessTaskSlaSqlTable.FieldEnum.ID.getValue(), ProcessTaskSlaTimeSqlTable.FieldEnum.SLA_ID.getValue()));
+                }}));
+            }
+        };
     }
 }
