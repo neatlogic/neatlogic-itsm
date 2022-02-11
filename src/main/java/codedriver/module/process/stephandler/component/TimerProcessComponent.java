@@ -179,7 +179,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                         processTaskStepTimerVo.setTriggerTime(triggerTime);
                         processTaskMapper.insertProcessTaskStepTimer(processTaskStepTimerVo);
                         JobObject.Builder jobObjectBuilder = new JobObject.Builder(
-                                processTaskStepTimerVo.getId().toString(),
+                                currentProcessTaskStepVo.getId().toString(),
                                 jobHandler.getGroupName(),
                                 jobHandler.getClassName(),
                                 TenantContext.get().getTenantUuid()
@@ -237,7 +237,8 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-        return 0;
+        processTaskMapper.deleteProcessTaskStepTimerByProcessTaskStepId(currentProcessTaskStepVo.getId());
+        return 1;
     }
 
     @Override
