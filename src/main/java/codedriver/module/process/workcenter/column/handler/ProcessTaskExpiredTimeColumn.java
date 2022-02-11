@@ -99,7 +99,9 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
         if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus()) && CollectionUtils.isNotEmpty(processTaskSlaList)) {
             for (ProcessTaskSlaVo slaVo : processTaskSlaList) {
                 //判断需要 同时满足 该步骤是进行中状态，以及包含sla策略
-                if (processTaskVo.getStepList().stream().noneMatch(o -> Objects.equals(o.getStatus(),ProcessTaskStatus.RUNNING.getValue()) && CollectionUtils.isNotEmpty(o.getSlaTimeList()) && o.getSlaTimeList().stream().anyMatch(c -> Objects.equals(c.getSlaId(),slaVo.getId())))) {
+                if (processTaskVo.getStepList().stream().noneMatch(o -> (Objects.equals(o.getStatus(),ProcessTaskStatus.RUNNING.getValue()) || (Objects.equals(o.getStatus(),ProcessTaskStatus.PENDING.getValue()) && o.getIsActive() == 1))
+                        && CollectionUtils.isNotEmpty(o.getSlaTimeList())
+                        && o.getSlaTimeList().stream().anyMatch(c -> Objects.equals(c.getSlaId(),slaVo.getId())))) {
                     continue;
                 }
                 JSONObject tmpJson = new JSONObject();
