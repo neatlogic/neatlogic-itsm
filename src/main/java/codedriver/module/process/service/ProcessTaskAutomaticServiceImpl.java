@@ -456,7 +456,10 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
                     //补充下一步骤id
                     List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
-                    currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepIdList.get(0));
+//                    currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepIdList.get(0));
+                    JSONObject jsonParam = currentProcessTaskStepVo.getParamObj();
+                    jsonParam.put("action", ProcessTaskOperationType.STEP_COMPLETE.getValue());
+                    jsonParam.put("nextStepId", nextStepIdList.get(0));
                     IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
                     processHandler.complete(currentProcessTaskStepVo);
                 }
@@ -561,7 +564,10 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 callbackAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
                 //补充下一步骤id
                 List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
-                currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepIdList.get(0));
+//                currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepIdList.get(0));
+                JSONObject jsonParam = currentProcessTaskStepVo.getParamObj();
+                jsonParam.put("action", ProcessTaskOperationType.STEP_COMPLETE.getValue());
+                jsonParam.put("nextStepId", nextStepIdList.get(0));
                 IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
                 processHandler.complete(currentProcessTaskStepVo);
                 isUnloadJob = true;
@@ -708,7 +714,10 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
         } else if (FailPolicy.KEEP_ON.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
             //补充下一步骤id
             List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
-            currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepIdList.get(0));
+//            currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepIdList.get(0));
+            JSONObject jsonParam = currentProcessTaskStepVo.getParamObj();
+            jsonParam.put("action", ProcessTaskOperationType.STEP_COMPLETE.getValue());
+            jsonParam.put("nextStepId", nextStepIdList.get(0));
             processHandler.complete(currentProcessTaskStepVo);
         } else if (FailPolicy.CANCEL.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
             processHandler.abortProcessTask(new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId()));

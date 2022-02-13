@@ -11,9 +11,7 @@ import codedriver.framework.asynchronization.threadpool.TransactionSynchronizati
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
-import codedriver.framework.process.constvalue.ProcessStepHandlerType;
-import codedriver.framework.process.constvalue.ProcessStepMode;
-import codedriver.framework.process.constvalue.ProcessTaskOperationType;
+import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
@@ -243,6 +241,11 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myCompleteAudit(ProcessTaskStepVo currentProcessTaskStepVo) {
+        if(StringUtils.isNotBlank(currentProcessTaskStepVo.getError())) {
+            currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CAUSE.getParamName(), currentProcessTaskStepVo.getError());
+        }
+        /** 处理历史记录 **/
+        IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.COMPLETE);
         return 0;
     }
 
