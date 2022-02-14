@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @DisallowConcurrentExecution
@@ -143,7 +144,12 @@ public class ProcessTaskAutomaticJob extends JobBase {
 			schedulerManager.unloadJob(jobObject);
 			return;
 		}
-		if (!ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+		if (!Objects.equals(processTaskStepVo.getIsActive(), 1)) {
+			processTaskMapper.deleteProcessTaskStepAutomaticRequestById(requestId);
+			schedulerManager.unloadJob(jobObject);
+			return;
+		}
+		if (!ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus()) && !ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
 			processTaskMapper.deleteProcessTaskStepAutomaticRequestById(requestId);
 			schedulerManager.unloadJob(jobObject);
 			return;

@@ -9,10 +9,7 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import codedriver.framework.common.constvalue.SystemUser;
-import codedriver.framework.process.constvalue.ProcessStepHandlerType;
-import codedriver.framework.process.constvalue.ProcessStepMode;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
+import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.constvalue.automatic.FailPolicy;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -295,11 +292,18 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
+        processTaskMapper.deleteProcessTaskStepAutomaticRequestByProcessTaskStepId(currentProcessTaskStepVo.getId());
         return 0;
     }
 
     @Override
     protected int myCompleteAudit(ProcessTaskStepVo currentProcessTaskStepVo) {
+        if(StringUtils.isNotBlank(currentProcessTaskStepVo.getError())) {
+            currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CAUSE.getParamName(), currentProcessTaskStepVo.getError());
+        }
+        /** 处理历史记录 **/
+        String action = currentProcessTaskStepVo.getParamObj().getString("action");
+        IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
         return 0;
     }
 
