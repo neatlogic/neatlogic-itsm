@@ -71,11 +71,6 @@ public class ProcessTaskIdColumn extends ProcessTaskColumnBase implements IProce
 	}
 
 	@Override
-    public Boolean getDisabled() {
-        return true;
-    }
-	
-	@Override
     public Boolean getMyIsShow() {
         return false;
     }

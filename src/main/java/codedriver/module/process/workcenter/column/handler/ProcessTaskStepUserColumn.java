@@ -40,6 +40,11 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 		return "步骤处理人";
 	}
 
+	@Override
+	public Boolean getDisabled() {
+		return true;
+	}
+
 	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		return null;

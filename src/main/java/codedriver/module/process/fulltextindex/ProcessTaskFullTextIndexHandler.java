@@ -65,15 +65,20 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(fullTextIndexVo.getTargetId());
         fullTextIndexVo.addFieldContent("title", new FullTextIndexVo.WordVo(processTaskVo.getTitle()));
         fullTextIndexVo.addFieldContent("serial_number", new FullTextIndexVo.WordVo(processTaskVo.getSerialNumber()));
+        fullTextIndexVo.addFieldContent("id", new FullTextIndexVo.WordVo(processTaskVo.getId().toString()));
         //表单
         List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataVoList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(fullTextIndexVo.getTargetId());
         if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataVoList)) {
             for (ProcessTaskFormAttributeDataVo attributeDataVo : processTaskFormAttributeDataVoList) {
                 if (StringUtils.isNotBlank(attributeDataVo.getData())) {
                     IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
-                    List<String> dataList = handler.indexFieldContentList(attributeDataVo.getData());
-                    for (String data : dataList) {
-                        fullTextIndexVo.addFieldContent(attributeDataVo.getAttributeLabel(), new FullTextIndexVo.WordVo(handler.isNeedSliceWord(), data));//target_field 改为用表单的label，为了兼容换表单控件，只要名字相同也支持搜索
+                    if(handler != null) {
+                        List<String> dataList = handler.indexFieldContentList(attributeDataVo.getData());
+                        if (CollectionUtils.isNotEmpty(dataList)) {
+                            for (String data : dataList) {
+                                fullTextIndexVo.addFieldContent(attributeDataVo.getAttributeLabel(), new FullTextIndexVo.WordVo(handler.isNeedSliceWord(), data));//target_field 改为用表单的label，为了兼容换表单控件，只要名字相同也支持搜索
+                            }
+                        }
                     }
                 }
             }

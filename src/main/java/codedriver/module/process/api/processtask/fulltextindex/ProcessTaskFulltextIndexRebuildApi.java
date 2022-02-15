@@ -9,21 +9,21 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -56,12 +56,23 @@ public class ProcessTaskFulltextIndexRebuildApi extends PrivateApiComponentBase 
         if (handler != null) {
             if(CollectionUtils.isNotEmpty(idArray)){
                 idList = JSONObject.parseArray(idArray.toJSONString(), Long.class);
+                for(Long idObj : idList ){
+                    handler.createIndex(idObj);
+                }
             }else{
-                idList = new ArrayList<>();
+                Integer count = processTaskMapper.getAllProcessTaskCount();
+                ProcessTaskVo processTaskVo = new ProcessTaskVo();
+                processTaskVo.getPageSize();
+                processTaskVo.setRowNum(count);
+                for (int i = 1; i <= processTaskVo.getPageCount(); i++) {
+                    processTaskVo.setCurrentPage(i);
+                    idList = processTaskMapper.getProcessTaskIdList(processTaskVo);
+                    for(Long idObj : idList ){
+                        handler.createIndex(idObj);
+                    }
+                }
             }
-            for(Long idObj : idList ){
-                handler.createIndex(idObj);
-            }
+
         }
         return null;
     }
