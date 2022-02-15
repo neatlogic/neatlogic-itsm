@@ -94,55 +94,60 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         }
         ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(processTaskId);
         startProcessTaskStepVo.setReplaceableTextList(processTaskService.getReplaceableTextList(startProcessTaskStepVo));
-        Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
+        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+//        Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.PROCESS.getValue());
         for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+            if (Objects.equals(processTaskStepVo.getId(), startProcessTaskStepVo.getId())) {
+                continue;
+            }
             if (processTaskStepVo.getActiveTime() != null) {
-                processTaskStepMap.put(processTaskStepVo.getId(), processTaskStepVo);
+                resultList.add(processTaskStepVo);
+//                processTaskStepMap.put(processTaskStepVo.getId(), processTaskStepVo);
             }
         }
 
-        Map<Long, List<Long>> fromStepIdMap = new HashMap<>();
-        List<ProcessTaskStepRelVo> prcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByProcessTaskId(processTaskId);
-        for (ProcessTaskStepRelVo processTaskStepRelVo : prcessTaskStepRelList) {
-            if (ProcessFlowDirection.FORWARD.getValue().equals(processTaskStepRelVo.getType())) {
-                Long fromStepId = processTaskStepRelVo.getFromProcessTaskStepId();
-                Long toStepId = processTaskStepRelVo.getToProcessTaskStepId();
-                List<Long> toStepIdList = fromStepIdMap.get(fromStepId);
-                if (toStepIdList == null) {
-                    toStepIdList = new ArrayList<>();
-                    fromStepIdMap.put(fromStepId, toStepIdList);
-                }
-                toStepIdList.add(toStepId);
-            }
-
-        }
-        List<ProcessTaskStepVo> resultList = new ArrayList<>();
-        Set<Long> fromStepIdList = new HashSet<>();
-        fromStepIdList.add(startProcessTaskStepVo.getId());
-        while (!processTaskStepMap.isEmpty()) {
-            Set<Long> newFromStepIdList = new HashSet<>();
-            for (Long fromStepId : fromStepIdList) {
-                List<Long> toStepIdList = fromStepIdMap.get(fromStepId);
-                List<ProcessTaskStepVo> toStepList = new ArrayList<>(toStepIdList.size());
-                for (Long toStepId : toStepIdList) {
-                    ProcessTaskStepVo toStep = processTaskStepMap.remove(toStepId);
-                    if (toStep != null) {
-                        toStepList.add(toStep);
-                    }
-                    if (fromStepIdMap.containsKey(toStepId)) {
-                        newFromStepIdList.add(toStepId);
-                    }
-                }
-                if (toStepList.size() > 1) {
-                    // 按开始时间正序排序
-                    toStepList.sort(Comparator.comparing(ProcessTaskStepVo::getActiveTime));
-                }
-                resultList.addAll(toStepList);
-            }
-            fromStepIdList.clear();
-            fromStepIdList.addAll(newFromStepIdList);
-        }
+//        Map<Long, List<Long>> fromStepIdMap = new HashMap<>();
+//        List<ProcessTaskStepRelVo> prcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByProcessTaskId(processTaskId);
+//        for (ProcessTaskStepRelVo processTaskStepRelVo : prcessTaskStepRelList) {
+//            if (ProcessFlowDirection.FORWARD.getValue().equals(processTaskStepRelVo.getType())) {
+//                Long fromStepId = processTaskStepRelVo.getFromProcessTaskStepId();
+//                Long toStepId = processTaskStepRelVo.getToProcessTaskStepId();
+//                List<Long> toStepIdList = fromStepIdMap.get(fromStepId);
+//                if (toStepIdList == null) {
+//                    toStepIdList = new ArrayList<>();
+//                    fromStepIdMap.put(fromStepId, toStepIdList);
+//                }
+//                toStepIdList.add(toStepId);
+//            }
+//
+//        }
+//        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+//        Set<Long> fromStepIdList = new HashSet<>();
+//        fromStepIdList.add(startProcessTaskStepVo.getId());
+//        while (!processTaskStepMap.isEmpty()) {
+//            Set<Long> newFromStepIdList = new HashSet<>();
+//            for (Long fromStepId : fromStepIdList) {
+//                List<Long> toStepIdList = fromStepIdMap.get(fromStepId);
+//                List<ProcessTaskStepVo> toStepList = new ArrayList<>(toStepIdList.size());
+//                for (Long toStepId : toStepIdList) {
+//                    ProcessTaskStepVo toStep = processTaskStepMap.remove(toStepId);
+//                    if (toStep != null) {
+//                        toStepList.add(toStep);
+//                    }
+//                    if (fromStepIdMap.containsKey(toStepId)) {
+//                        newFromStepIdList.add(toStepId);
+//                    }
+//                }
+//                if (toStepList.size() > 1) {
+//                    // 按开始时间正序排序
+//                    toStepList.sort(Comparator.comparing(ProcessTaskStepVo::getActiveTime));
+//                }
+//                resultList.addAll(toStepList);
+//            }
+//            fromStepIdList.clear();
+//            fromStepIdList.addAll(newFromStepIdList);
+//        }
 
         // 其他处理步骤
         if (CollectionUtils.isNotEmpty(resultList)) {
@@ -168,6 +173,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
             }
         }
         resultList.add(0, startProcessTaskStepVo);
+        resultList.sort(Comparator.comparing(ProcessTaskStepVo::getActiveTime));
         return resultList;
     }
 
