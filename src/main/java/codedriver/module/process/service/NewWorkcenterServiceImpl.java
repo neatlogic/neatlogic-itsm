@@ -250,7 +250,6 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                     thead.setDisplayName(columnComponentMap.get(thead.getName()).getDisplayName());
                     thead.setClassName(columnComponentMap.get(thead.getName()).getClassName());
                     thead.setIsExport(columnComponentMap.get(thead.getName()).getIsExport() ? 1 : 0);
-                    //thead.setIsShow(columnComponentMap.get(thead.getName()).getIsShow() ? 1 : 0);
                 }
             } else {
                 List<String> channelUuidList = workcenterVo.getChannelUuidList();
@@ -273,7 +272,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         // 少补
         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
             IProcessTaskColumn column = entry.getValue();
-            if (column.getIsShow() && CollectionUtils.isEmpty(theadList.stream()
+            if (CollectionUtils.isEmpty(theadList.stream()
                     .filter(data -> column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
                 theadList.add(new WorkcenterTheadVo(column));
             }
@@ -398,11 +397,18 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.TITLE.getValue());
         returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
 
-        // 搜索ID
+        // 搜索SerialNumber
         workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getHandlerName());
         workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getText());
         workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getProValue());
         workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
+        returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
+
+        // 搜索ID
+        workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.ID.getHandlerName());
+        workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.ID.getText());
+        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.ID.getProValue());
+        workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.ID.getValue());
         returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
         return returnArray;
     }
