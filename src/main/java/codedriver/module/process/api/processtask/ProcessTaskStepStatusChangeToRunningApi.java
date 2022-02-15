@@ -73,14 +73,11 @@ public class ProcessTaskStepStatusChangeToRunningApi extends PublicApiComponentB
         if (processTaskStep == null) {
             throw new ProcessTaskStepNotFoundException(processTaskStepId);
         }
-        UserVo user = null;
         if (StringUtils.isNotBlank(userId)) {
-            user = userMapper.getUserByUserId(userId);
+            UserVo user = userMapper.getUserByUserId(userId);
             if (user == null) {
                 throw new UserNotFoundException(userId);
             }
-        }
-        if (user != null) {
             changeStatus(processTaskStep, user.getUuid(), user.getUserName());
         } else {
             // 不指定处理人时，旧处理人必须存在
