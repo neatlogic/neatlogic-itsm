@@ -6,6 +6,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.restful.annotation.*;
+import codedriver.module.process.dao.mapper.ProcessMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.form.dao.mapper.FormMapper;
-import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.form.dto.AttributeDataVo;
