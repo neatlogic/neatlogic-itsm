@@ -9,7 +9,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.batch.BatchRunner;
 import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -37,6 +36,7 @@ import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
+import codedriver.framework.util.TableResultUtil;
 import codedriver.module.process.workcenter.core.SqlBuilder;
 import codedriver.module.process.workcenter.operate.WorkcenterOperateBuilder;
 import com.alibaba.fastjson.JSON;
@@ -81,7 +81,6 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     @Override
     public JSONObject doSearch(WorkcenterVo workcenterVo) {
         //long theadStartTime = System.currentTimeMillis();
-        JSONObject returnObj = new JSONObject();
         List<JSONObject> dataList = Collections.synchronizedList(new ArrayList<JSONObject>());//线程安全
         JSONArray sortColumnList = new JSONArray();
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
@@ -92,11 +91,14 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         //System.out.println((System.currentTimeMillis() - theadStartTime) + " ##end workcenter-thead:------------------------------------------------------------------------------- ");
         //统计符合条件工单数量
         //long countStartTime = System.currentTimeMillis();
-        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.TOTAL_COUNT);
+        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
         // System.out.println(sb.build());
-        int total = processTaskMapper.getProcessTaskCountBySql(sb.build());
+        int offsetRowNum = processTaskMapper.getProcessTaskCountBySql(sb.build());
+        workcenterVo.setOffsetRowNum(offsetRowNum);
+        //int total = processTaskMapper.getProcessTaskCountBySql(sb.build());
         //System.out.println((System.currentTimeMillis() - countStartTime) + " ##end workcenter-count:------------------------------------------------------------------------------- ");
-        if (total > 0) {
+        //if (total > 0) {
+        if(offsetRowNum > 0){
             //找出符合条件分页后的工单ID List
             //long idStartTime = System.currentTimeMillis();
             sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
@@ -149,20 +151,24 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         if (CollectionUtils.isEmpty(sortList)) {
             sortList = sortColumnList;
         }
+
+
+        JSONObject returnObj = TableResultUtil.getOffsetResult(theadList,dataList,workcenterVo);
         returnObj.put("sortList", sortList);
-        returnObj.put("theadList", theadList);
-        returnObj.put("tbodyList", dataList);
-        returnObj.put("rowNum", total);
-        returnObj.put("pageSize", workcenterVo.getPageSize());
-        returnObj.put("currentPage", workcenterVo.getCurrentPage());
-        returnObj.put("pageCount", PageUtil.getPageCount(total, workcenterVo.getPageSize()));
+
+        //补充总数
+        workcenterVo.setExpectOffsetRowNum(1000);
+        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
+        Integer total = processTaskMapper.getProcessTaskCountBySql(sb.build());
+        returnObj.put("rowNum", total > 999 ? "999+" : total.toString());
+
+        //补充待办数
         Integer count = 0;
         //long ofMineStartTime = System.currentTimeMillis();
-        if (total > 0) {
-            //补充待办数
+        if (offsetRowNum > 0) {
             workcenterVo.setIsProcessingOfMine(1);
             workcenterVo.setCurrentPage(1);
-            workcenterVo.setPageSize(100);
+            workcenterVo.setExpectOffsetRowNum(100);
             sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
             // System.out.println(sb.build());
             count = processTaskMapper.getProcessTaskCountBySql(sb.build());
