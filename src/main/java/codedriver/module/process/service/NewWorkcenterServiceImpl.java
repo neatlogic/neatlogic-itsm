@@ -158,6 +158,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
         //补充总数
         workcenterVo.setExpectOffsetRowNum(1000);
+        workcenterVo.setCurrentPage(1);
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
         Integer total = processTaskMapper.getProcessTaskCountBySql(sb.build());
         returnObj.put("rowNum", total > 999 ? "999+" : total.toString());
@@ -167,7 +168,6 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         //long ofMineStartTime = System.currentTimeMillis();
         if (offsetRowNum > 0) {
             workcenterVo.setIsProcessingOfMine(1);
-            workcenterVo.setCurrentPage(1);
             workcenterVo.setExpectOffsetRowNum(100);
             sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
             // System.out.println(sb.build());
