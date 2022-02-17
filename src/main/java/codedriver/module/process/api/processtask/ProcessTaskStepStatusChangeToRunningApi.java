@@ -11,6 +11,7 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.core.ApiRuntimeException;
+import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
@@ -19,6 +20,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepFoundMultipleException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -61,17 +63,39 @@ public class ProcessTaskStepStatusChangeToRunningApi extends PublicApiComponentB
     }
 
     @Input({
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤Id"),
+            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id"),
+            @Param(name = "processTaskStepName", type = ApiParamType.STRING, desc = "工单步骤名称"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤Id"),
             @Param(name = "userId", type = ApiParamType.STRING, desc = "处理人userId")
     })
     @Description(desc = "更改工单步骤状态为处理中")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        Long processTaskId = jsonObj.getLong("processTaskId");
+        String processTaskStepName = jsonObj.getString("processTaskStepName");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         String userId = jsonObj.getString("userId");
-        ProcessTaskStepVo processTaskStep = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-        if (processTaskStep == null) {
-            throw new ProcessTaskStepNotFoundException(processTaskStepId);
+        if (processTaskId == null && processTaskStepId == null) {
+            throw new ParamNotExistsException("processTaskId", "processTaskStepId");
+        }
+        ProcessTaskStepVo processTaskStep;
+        if (processTaskId != null) {
+            if (StringUtils.isBlank(processTaskStepName)) {
+                throw new ParamNotExistsException("processTaskStepName");
+            }
+            List<ProcessTaskStepVo> stepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndStepName(new ProcessTaskStepVo(processTaskId, processTaskStepName));
+            if (stepList.isEmpty()) {
+                throw new ProcessTaskStepNotFoundException(processTaskStepName);
+            }
+            if (stepList.size() > 1) {
+                throw new ProcessTaskStepFoundMultipleException(processTaskStepName);
+            }
+            processTaskStep = stepList.get(0);
+        } else {
+            processTaskStep = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+            if (processTaskStep == null) {
+                throw new ProcessTaskStepNotFoundException(processTaskStepId);
+            }
         }
         if (StringUtils.isNotBlank(userId)) {
             UserVo user = userMapper.getUserByUserId(userId);
