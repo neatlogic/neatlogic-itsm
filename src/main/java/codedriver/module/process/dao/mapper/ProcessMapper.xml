@@ -1,0 +1,724 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright(c) 2022 TechSureCo.,Ltd.AllRightsReserved.
+  ~ 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.module.process.dao.mapper.ProcessMapper">
+	<select id="getProcessStepUuidBySlaUuid" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT
+		`step_uuid`
+		FROM
+		`process_step_sla`
+		WHERE
+		sla_uuid = #{value}
+	</select>
+
+	<select id="getProcessSlaByProcessUuid" parameterType="java.lang.String" resultType="codedriver.framework.process.dto.ProcessSlaVo">
+		SELECT
+		`uuid`,
+		`process_uuid` AS processUuid,
+		`name`,
+		`config`
+		FROM
+		`process_sla`
+		WHERE
+		process_uuid = #{value}
+	</select>
+
+	<select id="getSlaUuidListByProcessUuid" parameterType="java.lang.String" resultType="java.lang.String">
+		select `uuid` FROM `process_sla` WHERE `process_uuid` = #{value}
+	</select>
+
+	<select id="getProcessFormByProcessUuid" parameterType="java.lang.String" resultType="codedriver.framework.process.dto.ProcessFormVo">
+		SELECT
+		`process_uuid` AS processUuid,
+		`form_uuid` AS formUuid
+		FROM
+		`process_form`
+		WHERE
+		process_uuid = #{value}
+	</select>
+
+	<select id="checkProcessIsExists" parameterType="java.lang.String" resultType="int">
+		SELECT
+		count(1)
+		FROM
+		`process`
+		WHERE
+		uuid = #{value}
+	</select>
+
+	<select id="getProcessStepRelByProcessUuid" parameterType="java.lang.String" resultType="codedriver.framework.process.dto.ProcessStepRelVo">
+		SELECT
+		`process_uuid` AS processUuid,
+		`uuid`,
+		`from_step_uuid` AS fromStepUuid,
+		`to_step_uuid` AS toStepUuid,
+		`name`,
+		`type`,
+		`condition`
+		FROM
+		`process_step_rel`
+		WHERE
+		process_uuid = #{processUuid}
+	</select>
+
+	<resultMap id="processStepDetailMap" type="codedriver.framework.process.dto.ProcessStepVo">
+		<id column="processUuid" property="processUuid" />
+		<id column="uuid" property="uuid" />
+		<result column="type" property="type" />
+		<result column="name" property="name" />
+		<result column="handler" property="handler" />
+		<result column="stepConfig" property="config" />
+		<collection property="formAttributeList" ofType="codedriver.framework.process.dto.ProcessStepFormAttributeVo">
+			<result column="formAttributeUuid" property="attributeUuid" />
+			<result column="formUuid" property="formUuid" />
+			<result column="action" property="action" />
+			<result column="actionType" property="type" />
+		</collection>
+		<collection property="workerPolicyList" ofType="codedriver.framework.process.dto.ProcessStepWorkerPolicyVo">
+			<id column="workerPolicy" property="policy" />
+			<result column="workerPolicyProcessUuid" property="processUuid" />
+			<result column="workerPolicyProcessStepUuid" property="processStepUuid" />
+			<result column="workerPolicySort" property="sort" />
+			<result column="workerPolicyConfig" property="config" />
+		</collection>
+	</resultMap>
+
+	<select id="getProcessStepDetailByProcessUuid" parameterType="java.lang.String" resultMap="processStepDetailMap">
+		SELECT
+		a.`process_uuid` AS processUuid,
+		a.`uuid`,
+		a.`name`,
+		a.`type`,
+		a.`handler`,
+		a.`config` AS stepConfig,
+		b.`form_uuid` AS formUuid,
+		b.`attribute_uuid` AS formAttributeUuid,
+		b.`action` AS action,
+		b.`type` AS actionType,
+		c.`handler` AS formAttributeHandler,
+		c.`type` AS formAttributeType,
+		c.`label` AS attributeLabel,
+		h.`policy` AS workerPolicy,
+		h.`sort` AS workerPolicySort,
+		h.`config` AS workerPolicyConfig,
+		h.`process_uuid` AS workerPolicyProcessUuid,
+		h.`process_step_uuid` AS workerPolicyProcessStepUuid
+		FROM
+		`process_step` a
+		LEFT JOIN `process_step_formattribute` b ON a.`uuid` = b.`process_step_uuid` and a.`process_uuid` = b.`process_uuid`
+		LEFT JOIN `form_attribute` c ON b.`attribute_uuid` = c.`uuid`
+		LEFT JOIN `process_step_worker_policy` h ON a.`uuid` = h.`process_step_uuid`
+		WHERE a.`process_uuid` = #{value}
+	</select>
+
+	<select id="getProcessStepUuidListByProcessUuid" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT `uuid` FROM `process_step` WHERE `process_uuid` = #{value}
+	</select>
+
+	<resultMap id="processDetailMap" type="codedriver.framework.process.dto.ProcessVo">
+		<id column="uuid" property="uuid" />
+		<result column="name" property="name" />
+		<result column="isActive" property="isActive" />
+		<result column="formUuid" property="formUuid" />
+		<result column="config" property="config" />
+	</resultMap>
+
+	<select id="getProcessByUuid" parameterType="java.lang.String" resultMap="processDetailMap">
+		SELECT
+		a.`uuid`,
+		a.`name`,
+		a.`is_active` AS isActive,
+		a.`config`,
+		d.`form_uuid` AS formUuid
+		FROM
+		`process` a
+		LEFT JOIN `process_form` d ON a.`uuid` = d.`process_uuid`
+		WHERE
+		a.uuid = #{value}
+	</select>
+	
+	<select id="getProcessByName" parameterType="java.lang.String" resultMap="processDetailMap">
+		SELECT
+		a.`uuid`,
+		a.`name`,
+		a.`is_active` AS isActive,
+		a.`config`,
+		d.`form_uuid` AS formUuid
+		FROM
+		`process` a
+		LEFT JOIN `process_form` d ON a.`uuid` = d.`process_uuid`
+		WHERE
+		a.name = #{value}
+	</select>
+
+	<select id="getProcessBaseInfoByUuid" parameterType="java.lang.String" resultType="codedriver.framework.process.dto.ProcessVo">
+		SELECT
+		`uuid`,
+		`name`,
+		`is_active` AS isActive,
+		`config`
+		FROM
+		`process`
+		WHERE
+		uuid = #{value}
+	</select>
+
+	<select id="searchProcessStep" parameterType="codedriver.framework.process.dto.ProcessStepVo" resultType="codedriver.framework.process.dto.ProcessStepVo">
+		SELECT
+		`process_uuid` AS processUuid,
+		`uuid`,
+		`name`,
+		`type`,
+		`handler`,
+		`config`
+		FROM
+		`process_step`
+		WHERE
+		1=1
+		<if test="processUuid != null and processUuid != ''">
+			AND process_uuid = #{processUuid}
+		</if>
+		<if test="type != null and type != ''">
+			AND `type` = #{type}
+		</if>
+	</select>
+
+	<select id="getAllProcessType" resultType="codedriver.framework.process.dto.ProcessTypeVo">
+		SELECT `id`, `name` FROM `process_type`
+	</select>
+
+	<select id="checkProcessNameIsRepeat" resultType="int">
+		SELECT count(1) FROM `process` WHERE name=#{name} AND uuid != #{uuid}
+	</select>
+
+	<select id="searchProcessCount" resultType="int">
+		SELECT
+		COUNT(`uuid`)
+		FROM `process`
+		WHERE 1=1
+		<if test="keyword != null and keyword != ''">
+			AND `name` LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="isActive != null">
+			AND `is_Active` = #{isActive}
+		</if>
+		<if test="isICreated != null and isICreated == 1">
+			AND `fcu` = #{fcu}
+		</if>
+	</select>
+
+	<select id="searchProcessList" resultType="codedriver.framework.process.dto.ProcessVo">
+		SELECT
+		`uuid`,
+		`name`,
+		`is_active` AS isActive,
+		`fcu`,
+		`fcd`,
+		`lcu`,
+		`lcd`
+		FROM `process`
+		WHERE 1=1
+		<if test="keyword != null and keyword != ''">
+			AND `name` LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="isActive != null">
+			AND `is_Active` = #{isActive}
+		</if>
+		<if test="isICreated != null and isICreated == 1">
+			AND `fcu` = #{fcu}
+		</if>
+		ORDER BY `fcd` DESC
+		<if test="needPage">
+			limit #{startNum}, #{pageSize}
+		</if>
+	</select>
+
+	<select id="searchProcessListForSelect" resultType="codedriver.framework.common.dto.ValueTextVo">
+		SELECT
+		`uuid` as `value`,
+		`name` as `text`
+		FROM `process`
+		WHERE 1=1
+		<if test="keyword != null and keyword != ''">
+			AND `name` LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="isActive != null">
+			AND `is_Active` = #{isActive}
+		</if>
+		<if test="isICreated != null and isICreated == 1">
+			AND `fcu` = #{fcu}
+		</if>
+		ORDER BY `fcd` DESC
+		<if test="needPage">
+			limit #{startNum}, #{pageSize}
+		</if>
+	</select>
+
+	<select id="getProcessReferenceCount" parameterType="java.lang.String" resultType="int">
+		SELECT COUNT(c.`uuid`)
+		FROM `channel` c
+		JOIN `channel_process` cp ON cp.`channel_uuid` = c.`uuid` AND cp.`process_uuid` = #{processUuid}
+	</select>
+
+	<select id="getProcessReferenceUuidList" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT
+			`channel_uuid`
+		FROM `channel_process`
+		WHERE `process_uuid` = #{processUuid}
+	</select>
+
+	<select id="checkProcessDraftIsExists" parameterType="codedriver.framework.process.dto.ProcessDraftVo" resultType="int">
+		SELECT
+		count(1)
+		FROM
+		`process_draft`
+		WHERE `process_uuid` = #{processUuid}
+		AND `md5` = #{md5}
+		AND `fcu` = #{fcu}
+	</select>
+
+	<select id="getProcessDraftByUuid" parameterType="java.lang.String" resultType="codedriver.framework.process.dto.ProcessDraftVo">
+		SELECT
+		`uuid`,
+		`process_uuid` as processUuid,
+		`name`,
+		`config`,
+		`fcd`,
+		`fcu`,
+		`md5`
+		FROM
+		`process_draft`
+		WHERE `uuid` = #{uuid}
+	</select>
+
+	<select id="getProcessDraftList" parameterType="codedriver.framework.process.dto.ProcessDraftVo" resultType="codedriver.framework.process.dto.ProcessDraftVo">
+		SELECT
+		pd.`uuid`,
+		pd.`process_uuid` as processUuid,
+		pd.`name`,
+		pd.`fcd`
+		FROM `process_draft` pd
+		<if test="processUuid == null">
+			LEFT
+		</if>
+		JOIN `process` p ON p.`uuid` = pd.`process_uuid`
+		WHERE pd.`fcu` = #{fcu}
+		<if test="processUuid == null">
+			AND p.`uuid` IS NULL
+		</if>
+		<if test="processUuid != null">
+			AND pd.`process_uuid` = #{processUuid}
+		</if>
+		ORDER BY pd.`fcd` DESC
+		LIMIT 6
+	</select>
+
+	<select id="getEarliestProcessDraft" parameterType="codedriver.framework.process.dto.ProcessDraftVo" resultType="java.lang.String">
+		SELECT
+		pd.`uuid`
+		FROM `process_draft` pd
+		<if test="processUuid == null">
+			LEFT
+		</if>
+		JOIN `process` p ON p.`uuid` = pd.`process_uuid`
+		WHERE pd.`fcu` = #{fcu}
+		<if test="processUuid == null">
+			AND p.`uuid` IS NULL
+		</if>
+		<if test="processUuid != null">
+			AND pd.`process_uuid` = #{processUuid}
+		</if>
+		ORDER BY pd.`fcd` DESC
+		LIMIT 5, 1
+	</select>
+
+	<select id="getProcessStepWorkerPolicyListByProcessUuid" parameterType="java.lang.String" resultType="codedriver.framework.process.dto.ProcessStepWorkerPolicyVo">
+	SELECT 
+	  `process_uuid` AS processUuid,
+	  `process_step_uuid` AS processStepUuid,
+	  `policy`,
+	  `sort`,
+	  `config` 
+	FROM `process_step_worker_policy` 
+	WHERE `process_uuid` = #{processUuid}
+	</select>
+
+	<select id="getProcessStepByUuid" parameterType="java.lang.String" resultType="codedriver.framework.process.dto.ProcessStepVo">
+	SELECT 
+	  `process_uuid` AS processUuid,
+	  `uuid`,
+	  `name`,
+	  `type`,
+	  `handler`,
+	  `config`,
+	  `description` 
+	FROM `process_step`
+	WHERE `uuid` = #{uuid}
+	</select>
+	
+	<select id="getProcessScoreTemplateByProcessUuid" parameterType="java.lang.String" resultType="codedriver.framework.process.dto.score.ProcessScoreTemplateVo">
+	SELECT 
+	  `score_template_id` AS scoreTemplateId,
+	  `process_uuid` AS processUuid,
+	  `is_auto` AS isAuto,
+	  `config` 
+	FROM `process_score_template` 
+	WHERE `process_uuid` = #{value}
+	</select>
+
+	<select id="getStartProcessStepByProcessUuid" parameterType="java.lang.String" resultType="codedriver.framework.process.dto.ProcessStepVo">
+		SELECT
+			`process_uuid` AS processUuid,
+			`uuid`,
+			`name`,
+			`type`,
+			`handler`,
+		    `config`
+		FROM `process_step`
+		WHERE `process_uuid` = #{value}
+		  AND `type` = 'start'
+	</select>
+
+	<!--<select id="getFormReferenceCount" parameterType="java.lang.String" resultType="int">
+		SELECT
+			count(p.`uuid`)
+		FROM `process` p
+				 JOIN `process_form` pf ON pf.`process_uuid` = p.`uuid` AND pf.`form_uuid` = #{formUuid}
+	</select>-->
+
+	<!--<select id="getFormReferenceList" parameterType="codedriver.framework.process.dto.ProcessFormVo" resultType="codedriver.framework.process.dto.ProcessVo">
+		SELECT
+		p.`uuid`,
+		p.`name`
+		FROM `process` p
+		JOIN `process_form` pf ON pf.`process_uuid` = p.`uuid` AND pf.`form_uuid` = #{formUuid}
+		<if test="needPage">
+			LIMIT #{startNum}, #{pageSize}
+		</if>
+	</select>-->
+
+	<select id="getProcessSlaByUuid" parameterType="java.lang.String" resultType="codedriver.framework.process.dto.ProcessSlaVo">
+		SELECT
+			`uuid`,
+			`process_uuid` AS processUuid,
+			`name`
+		FROM `process_sla`
+		WHERE `uuid` = #{value}
+	</select>
+
+	<select id="getNotifyPolicyIdByProcessStepUuid" parameterType="java.lang.String" resultType="java.lang.Long">
+		SELECT `notify_policy_id` FROM `process_step_notify_policy` WHERE `process_step_uuid` = #{value}
+	</select>
+
+	<select id="getProcessListByUuidList" parameterType="java.util.List" resultType="codedriver.framework.process.dto.ProcessVo">
+		SELECT
+			`uuid`,
+			`name`,
+			`is_active` as isActive,
+			`fcu`,
+			`fcd`,
+			`lcu`,
+			`lcd`
+		FROM `process`
+		WHERE `uuid` IN
+		<foreach collection="list" item="uuid" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</select>
+
+	<select id="getProcessStepTagIdListByProcessStepUuid" parameterType="java.lang.String" resultType="java.lang.Long">
+		SELECT `tag_id` FROM `process_step_tag` WHERE `process_step_uuid` = #{value}
+	</select>
+
+	<insert id="insertProcessSla" parameterType="codedriver.framework.process.dto.ProcessSlaVo">
+		INSERT INTO `process_sla` (
+		`uuid`,
+		`process_uuid`,
+		`name`,
+		`config`
+		)
+		VALUES
+		(
+		#{uuid},
+		#{processUuid},
+		#{name},
+		#{config}
+		)
+	</insert>
+
+	<insert id="insertProcessStepSla">
+		INSERT INTO `process_step_sla` (`sla_uuid`, `step_uuid`)
+		VALUES
+		(#{slaUuid}, #{stepUuid})
+	</insert>
+
+	<insert id="insertProcess" parameterType="codedriver.framework.process.dto.ProcessVo">
+		INSERT INTO `process` (
+		`uuid`,
+		`name`,
+		`is_active`,
+		`config`,
+		`fcd`,
+		`fcu`,
+		`lcd`,
+		`lcu`
+		)
+		VALUES
+		(
+		#{processVo.uuid},
+		#{processVo.name},
+		#{processVo.isActive},
+		#{processVo.configStr},
+		now(3),
+		#{processVo.fcu},
+		now(3),
+		#{processVo.fcu}
+		)
+	</insert>
+
+	<insert id="insertProcessStep" parameterType="codedriver.framework.process.dto.ProcessStepVo">
+		INSERT INTO `process_step` (
+		`process_uuid`,
+		`uuid`,
+		`name`,
+		`type`,
+		`handler`,
+		`config`,
+		`description`
+		)
+		VALUES
+		(
+		#{processUuid},
+		#{uuid},
+		#{name},
+		#{type},
+		#{handler},
+		#{config},
+		#{description}
+		)
+	</insert>
+
+	<insert id="insertProcessStepWorkerPolicy" parameterType="codedriver.framework.process.dto.ProcessStepWorkerPolicyVo">
+		INSERT INTO `process_step_worker_policy` (
+		`process_uuid`,
+		`process_step_uuid`,
+		`policy`,
+		`sort`,
+		`config`
+		)
+		VALUES
+		(
+		#{processUuid},
+		#{processStepUuid},
+		#{policy},
+		#{sort},
+		#{config}
+		)
+	</insert>
+
+	<insert id="insertProcessStepFormAttribute" parameterType="codedriver.framework.process.dto.ProcessStepFormAttributeVo">
+		INSERT INTO `process_step_formattribute` (
+		`process_uuid`,
+		`process_step_uuid`,
+		`form_uuid`,
+		`attribute_uuid`,
+		`action`,
+		`type`
+		)
+		VALUES
+		(
+		#{processUuid},
+		#{processStepUuid},
+		#{formUuid},
+		#{attributeUuid},
+		#{action},
+		#{type}
+		)
+	</insert>
+
+	<insert id="insertProcessStepRel" parameterType="codedriver.framework.process.dto.ProcessStepRelVo">
+		INSERT INTO `process_step_rel` (
+		`process_uuid`,
+		`uuid`,
+		`from_step_uuid`,
+		`to_step_uuid`,
+		`condition`,
+		`name`,
+		`type`
+		)
+		VALUES
+		(
+		#{processUuid},
+		#{uuid},
+		#{fromStepUuid},
+		#{toStepUuid},
+		#{condition},
+		#{name},
+		#{type}
+		)
+	</insert>
+
+	<!--<insert id="insertProcessStepTeam" parameterType="codedriver.framework.process.dto.ProcessStepTeamVo">
+		INSERT INTO `process_step_team` (
+		`process_step_uuid`,
+		`team_id`,
+		`team_name`
+		)
+		VALUES
+		(
+		#{processStepUuid},
+		#{teamId},
+		#{teamName}
+		)
+	</insert>-->
+
+	<insert id="insertProcessForm" parameterType="codedriver.framework.process.dto.ProcessFormVo">
+		INSERT INTO `process_form` (`process_uuid`, `form_uuid`)
+		VALUES (#{processUuid}, #{formUuid})
+	</insert>
+
+	<insert id="insertProcessDraft" parameterType="codedriver.framework.process.dto.ProcessDraftVo">
+		INSERT INTO `process_draft` (
+		`uuid`,
+		`process_uuid`,
+		`name`,
+		`config`,
+		`fcd`,
+		`fcu`,
+		`md5`
+		)
+		VALUES
+		(
+		#{uuid},
+		#{processUuid},
+		#{name},
+		#{configStr},
+		now(3),
+		#{fcu},
+		#{md5}
+		)
+	</insert>
+
+	<insert id="insertProcessStepTag" parameterType="codedriver.framework.process.dto.ProcessStepTagVo">
+		INSERT INTO `process_step_tag` (`process_uuid`, `process_step_uuid`, `tag_id`)
+		VALUES (#{processUuid}, #{processStepUuid}, #{tagId})
+	</insert>
+
+	<insert id="insertProcessStepCommentTemplate" parameterType="codedriver.framework.process.dto.ProcessStepVo">
+		INSERT INTO `process_step_comment_template` (`process_step_uuid`, `comment_template_id`)
+		VALUES (#{uuid}, #{commentTemplateId})
+	</insert>
+	<insert id="insertProcessStepTask">
+		insert into `process_step_task_config` (
+			`process_step_uuid`,
+			`task_config_id`
+		)
+		values
+		(
+			#{processStepUuid},
+			#{taskConfigId}
+		) ;
+
+	</insert>
+
+	<update id="updateProcess" parameterType="codedriver.framework.process.dto.ProcessVo">
+		UPDATE `process` SET
+		<if test="processVo.name != null and processVo.name != ''">
+			`name` = #{processVo.name},
+		</if>
+		<if test="processVo.isActive != null">
+			`is_active` = #{processVo.isActive},
+		</if>
+		<if test="processVo.configStr != null and processVo.configStr != ''">
+			`config` = #{processVo.configStr},
+		</if>
+		`lcu` = #{processVo.lcu},
+		`lcd` = NOW(3)
+		WHERE `uuid` = #{processVo.uuid}
+	</update>
+
+	<update id="updateProcessNameByUuid" parameterType="codedriver.framework.process.dto.ProcessVo">
+		UPDATE `process` SET
+		`name` = #{name},
+		`lcu` = #{lcu},
+		`lcd` = NOW(3)
+		WHERE `uuid` = #{uuid}
+	</update>
+
+	<delete id="deleteProcessStepByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_step`
+		WHERE `process_uuid` = #{uuid}
+	</delete>
+
+	<delete id="deleteProcessStepRelByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_step_rel`
+		WHERE `process_uuid` = #{value}
+	</delete>
+
+	<!--<delete id="deleteProcessStepTeamByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_step_team`
+		WHERE `process_uuid` = #{value}
+	</delete>-->
+
+	<delete id="deleteProcessStepWorkerPolicyByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_step_worker_policy`
+		WHERE process_uuid = #{value}
+	</delete>
+
+	<delete id="deleteProcessStepFormAttributeByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_step_formattribute`
+		WHERE `process_uuid` = #{value}
+	</delete>
+
+	<delete id="deleteProcessByUuid" parameterType="java.lang.String">
+		DELETE FROM `process` WHERE `uuid` = #{uuid}
+	</delete>
+
+	<delete id="deleteProcessFormByProcessUuid" parameterType="java.lang.String">
+		DELETE FROM `process_form` WHERE `process_uuid` = #{processUuid}
+	</delete>
+
+	<delete id="deleteProcessDraft" parameterType="codedriver.framework.process.dto.ProcessDraftVo">
+		DELETE FROM `process_draft` 
+		WHERE `process_uuid` = #{processUuid} 
+		<if test="fcu != null and fcu != ''">
+		AND `fcu` = #{fcu}
+		</if>
+	</delete>
+
+	<delete id="deleteProcessDraftByUuid" parameterType="java.lang.String">
+		DELETE FROM `process_draft` WHERE `uuid` = #{uuid}
+	</delete>
+	
+	<delete id="deleteProcessSlaByProcessUuid">
+	DELETE ps, pss
+	FROM `process_sla` ps
+	JOIN `process_step_sla` pss ON pss.`sla_uuid`=ps.`uuid`
+	WHERE `process_uuid` = #{processUuid}
+	</delete>
+
+	<delete id="deleteProcessStepCommentTemplate" parameterType="java.lang.String">
+		DELETE FROM `process_step_comment_template` WHERE `process_step_uuid` = #{value}
+	</delete>
+
+	<delete id="deleteProcessStepTagByProcessUuid" parameterType="java.lang.String">
+		DELETE FROM `process_step_tag` WHERE `process_uuid` = #{value}
+	</delete>
+    <delete id="deleteProcessStepTaskByProcessStepUuid">
+		DELETE FROM `process_step_task_config` WHERE `process_step_uuid` = #{value}
+	</delete>
+</mapper>
