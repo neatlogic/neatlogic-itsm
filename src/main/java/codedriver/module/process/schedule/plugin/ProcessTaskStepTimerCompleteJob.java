@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author linbq
@@ -103,7 +104,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
             schedulerManager.unloadJob(jobObject);
             return;
         }
-        if (!ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+        if (!Objects.equals(processTaskStepVo.getIsActive(), 1)) {
             processTaskMapper.deleteProcessTaskStepAutomaticRequestById(id);
             schedulerManager.unloadJob(jobObject);
             return;
@@ -111,6 +112,10 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
         IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
         if (processStepHandler == null) {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+        }
+        if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {
+            processStepHandler.accept(processTaskStepVo);
+            processStepHandler.start(processTaskStepVo);
         }
         processStepHandler.complete(processTaskStepVo);
         processTaskMapper.deleteProcessTaskStepTimerByProcessTaskStepId(id);
