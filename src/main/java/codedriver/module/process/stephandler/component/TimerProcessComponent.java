@@ -201,12 +201,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                             public void myExecute() {
                                 UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
                                 IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-                                ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-                                if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {
-                                    handler.accept(currentProcessTaskStepVo);
-                                    handler.start(currentProcessTaskStepVo);
-                                }
-                                handler.complete(currentProcessTaskStepVo);
+                                handler.autoComplete(currentProcessTaskStepVo);
                             }
                         };
                         thread.setSupplier(() -> processTaskMapper.deleteProcessTaskStepInOperationById(processTaskStepInOperationVo.getId()));

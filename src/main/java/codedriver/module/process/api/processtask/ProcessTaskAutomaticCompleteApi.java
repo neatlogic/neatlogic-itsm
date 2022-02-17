@@ -16,7 +16,7 @@ import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import java.util.List;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_BASE.class)
-public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
+public class ProcessTaskAutomaticCompleteApi extends PublicApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -81,7 +81,7 @@ public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 		if(handler != null) {
 			jsonObj.put("nextStepId", processTaskStepIdList.get(0));
 			processTaskStepVo.getParamObj().putAll(jsonObj);
-			handler.complete(processTaskStepVo);
+			handler.autoComplete(processTaskStepVo);
 		}else {
 			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
