@@ -469,14 +469,14 @@
 		)
 		VALUES
 		(
-		#{processVo.uuid},
-		#{processVo.name},
-		#{processVo.isActive},
-		#{processVo.configStr},
+		#{uuid},
+		#{name},
+		#{isActive},
+		#{configStr},
 		now(3),
-		#{processVo.fcu},
+		#{fcu},
 		now(3),
-		#{processVo.fcu}
+		#{fcu}
 		)
 	</insert>
 
@@ -627,18 +627,18 @@
 
 	<update id="updateProcess" parameterType="codedriver.framework.process.dto.ProcessVo">
 		UPDATE `process` SET
-		<if test="processVo.name != null and processVo.name != ''">
-			`name` = #{processVo.name},
+		<if test="name != null and name != ''">
+			`name` = #{name},
 		</if>
-		<if test="processVo.isActive != null">
-			`is_active` = #{processVo.isActive},
+		<if test="isActive != null">
+			`is_active` = #{isActive},
 		</if>
-		<if test="processVo.configStr != null and processVo.configStr != ''">
-			`config` = #{processVo.configStr},
+		<if test="configStr != null and configStr != ''">
+			`config` = #{configStr},
 		</if>
-		`lcu` = #{processVo.lcu},
+		`lcu` = #{lcu},
 		`lcd` = NOW(3)
-		WHERE `uuid` = #{processVo.uuid}
+		WHERE `uuid` = #{uuid}
 	</update>
 
 	<update id="updateProcessNameByUuid" parameterType="codedriver.framework.process.dto.ProcessVo">
