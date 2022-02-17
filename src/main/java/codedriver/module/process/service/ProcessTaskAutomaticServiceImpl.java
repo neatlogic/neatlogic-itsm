@@ -461,7 +461,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     jsonParam.put("action", ProcessTaskOperationType.STEP_COMPLETE.getValue());
                     jsonParam.put("nextStepId", nextStepIdList.get(0));
                     IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-                    processHandler.complete(currentProcessTaskStepVo);
+                    processHandler.autoComplete(currentProcessTaskStepVo);
                 }
             } else {// 失败
 //                System.out.println("firstRequest 失败");
@@ -569,7 +569,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 jsonParam.put("action", ProcessTaskOperationType.STEP_COMPLETE.getValue());
                 jsonParam.put("nextStepId", nextStepIdList.get(0));
                 IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-                processHandler.complete(currentProcessTaskStepVo);
+                processHandler.autoComplete(currentProcessTaskStepVo);
                 isUnloadJob = true;
             } else if (predicate(failConfig, resultVo, false)) {// 失败
 //                System.out.println("callbackRequest 失败");
@@ -708,7 +708,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     jsonParam.put("action", ProcessTaskOperationType.STEP_BACK.getValue());
                     jsonParam.put("nextStepId", nextProcessTaskStepVo.getId());
                     jsonParam.put("content", failedReason);
-                    processHandler.complete(currentProcessTaskStepVo);
+                    processHandler.autoComplete(currentProcessTaskStepVo);
                 }
             }
         } else if (FailPolicy.KEEP_ON.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
@@ -718,7 +718,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
             JSONObject jsonParam = currentProcessTaskStepVo.getParamObj();
             jsonParam.put("action", ProcessTaskOperationType.STEP_COMPLETE.getValue());
             jsonParam.put("nextStepId", nextStepIdList.get(0));
-            processHandler.complete(currentProcessTaskStepVo);
+            processHandler.autoComplete(currentProcessTaskStepVo);
         } else if (FailPolicy.CANCEL.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
             processHandler.abortProcessTask(new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId()));
         }

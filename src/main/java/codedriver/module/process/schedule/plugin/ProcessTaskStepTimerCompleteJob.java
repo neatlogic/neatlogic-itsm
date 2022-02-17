@@ -113,11 +113,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
         if (processStepHandler == null) {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }
-        if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {
-            processStepHandler.accept(processTaskStepVo);
-            processStepHandler.start(processTaskStepVo);
-        }
-        processStepHandler.complete(processTaskStepVo);
+        processStepHandler.autoComplete(processTaskStepVo);
         processTaskMapper.deleteProcessTaskStepTimerByProcessTaskStepId(id);
         schedulerManager.unloadJob(jobObject);
     }
