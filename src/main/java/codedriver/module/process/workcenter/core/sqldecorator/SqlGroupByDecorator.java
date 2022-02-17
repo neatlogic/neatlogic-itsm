@@ -27,14 +27,14 @@ import java.util.Map;
 public class SqlGroupByDecorator extends SqlDecoratorBase {
     @Override
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
-        if(FieldTypeEnum.GROUP_COUNT.getValue().equals(workcenterVo.getSqlFieldType())) {
+        if (FieldTypeEnum.GROUP_COUNT.getValue().equals(workcenterVo.getSqlFieldType())) {
             Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
             List<String> columnList = new ArrayList<>();
             List<String> groupList = new ArrayList<>();
-            if(StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getGroup())){
+            if (StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getGroup())) {
                 groupList.add(workcenterVo.getDashboardConfigVo().getGroup());
             }
-            if(StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getSubGroup())){
+            if (StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getSubGroup())) {
                 groupList.add(workcenterVo.getDashboardConfigVo().getSubGroup());
             }
 
@@ -43,8 +43,8 @@ public class SqlGroupByDecorator extends SqlDecoratorBase {
                     IProcessTaskColumn column = columnComponentMap.get(group);
                     for (TableSelectColumnVo tableSelectColumnVo : column.getTableSelectColumn()) {
                         for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
-                            if(selectColumnVo.getIsPrimary()) {
-                                String columnStr = String.format(" %s.%s", tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName());
+                            if (selectColumnVo.getIsPrimary()) {
+                                String columnStr = String.format("%s", selectColumnVo.getPropertyName());
                                 if (!columnList.contains(columnStr)) {
                                     columnList.add(columnStr);
                                 }
@@ -54,9 +54,9 @@ public class SqlGroupByDecorator extends SqlDecoratorBase {
 
                 }
             }
-            sqlSb.append(String.format(" group by %s ",String.join(",",columnList)));
+            sqlSb.append(String.format(" group by %s ", String.join(",", columnList)));
         }
-        if(FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())) {
+        if (FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())) {
             sqlSb.append(String.format(" group by %s.%s ", new ProcessTaskSqlTable().getShortName(), "id"));
         }
     }

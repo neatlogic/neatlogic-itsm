@@ -125,11 +125,11 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
             for (TableSelectColumnVo tableSelectColumnVo : column.getTableSelectColumn()) {
                 if(!isGroup||tableSelectColumnVo.getColumnList().stream().anyMatch(SelectColumnVo::getIsPrimary)) {
                     for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
-                        String expression = " %s.%s as %s ";
-                    /* if (isGroup) {
-                        expression = " any_value(%s.%s) as %s ";
-                    }*/
-                        String columnStr = String.format(expression, tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName(), selectColumnVo.getPropertyName());
+                        String format = " %s.%s as %s ";
+                        if(StringUtils.isNotBlank(selectColumnVo.getColumnFormat())){
+                            format = selectColumnVo.getColumnFormat();
+                        }
+                        String columnStr = String.format(format, tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName(), selectColumnVo.getPropertyName());
                         if (!columnList.contains(columnStr)) {
                             columnList.add(columnStr);
                         }

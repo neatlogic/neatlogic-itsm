@@ -3,15 +3,17 @@ package codedriver.module.process.dashboard.handler;
 import codedriver.framework.common.constvalue.dashboard.ChartType;
 import codedriver.framework.common.constvalue.dashboard.DashboardShowConfig;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
+import codedriver.framework.dashboard.constvalue.DashboardGroupField;
+import codedriver.framework.dashboard.constvalue.IDashboardGroupField;
 import codedriver.framework.dashboard.core.DashboardChartBase;
 import codedriver.framework.dashboard.core.DashboardChartFactory;
 import codedriver.framework.dashboard.core.DashboardHandlerBase;
 import codedriver.framework.dashboard.dto.DashboardDataVo;
 import codedriver.framework.dashboard.dto.DashboardShowConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
-import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
@@ -20,6 +22,7 @@ import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import codedriver.module.process.workcenter.core.SqlBuilder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +30,7 @@ import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
@@ -53,10 +57,10 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             String groupField = configChart.getString(DashboardShowConfig.GROUPFIELD.getValue());
             String subGroupField = configChart.getString(DashboardShowConfig.SUBGROUPFIELD.getValue());
             if (configChart.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
-                configChart.put("groupfieldtext", ProcessWorkcenterField.getName(groupField));
+                configChart.put("groupfieldtext", ProcessWorkcenterField.getText(groupField));
             }
             if (configChart.containsKey(DashboardShowConfig.SUBGROUPFIELD.getValue())) {
-                configChart.put("subgroupfieldtext", ProcessWorkcenterField.getName(subGroupField));
+                configChart.put("subgroupfieldtext", ProcessWorkcenterField.getText(subGroupField));
             }
             DashboardDataVo dashboardDataVo = new DashboardDataVo();
             dashboardDataVo.setChartConfig(configChart);
@@ -105,16 +109,16 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
         return null;
     }
 
-    private void getGroupFieldDataArray(JSONArray groupFieldDataArray, DashboardWidgetVo widgetVo, List<ProcessWorkcenterField> fieldList, Boolean isSub) {
+    private void getGroupFieldDataArray(JSONArray groupFieldDataArray, DashboardWidgetVo widgetVo, List<IDashboardGroupField> fieldList) {
         JSONObject groupFieldJson = new JSONObject();
-        for (ProcessWorkcenterField groupField : fieldList) {
-            if (!isSub && ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType())) {
+        for (IDashboardGroupField groupField : fieldList) {
+            if (ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType())) {
                 groupFieldJson = ConditionHandlerFactory.getHandler(groupField.getValue()).getConfig();
                 groupFieldJson.remove("isMultiple");
                 groupFieldJson.put("handler", ConditionHandlerFactory.getHandler(groupField.getValue()).getHandler(FormConditionModel.CUSTOM));
 
             }
-            groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s',config:%s}", groupField.getValue(), groupField.getName(), groupFieldJson)));
+            groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s',config:%s}", groupField.getValue(), groupField.getText(), groupFieldJson)));
         }
     }
 
@@ -128,49 +132,27 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             chartConfig = chart.getChartConfig();
             if (chartConfig.containsKey("showConfig")) {
                 JSONObject showConfigJson = chartConfig.getJSONObject("showConfig");
-                if (showConfigJson.containsKey(DashboardShowConfig.TYPE.getValue())) {
-                    DashboardShowConfigVo aggregateShowConfig = (DashboardShowConfigVo) showConfigJson.get(DashboardShowConfig.TYPE.getValue());
-                    processTaskShowChartConfigArray.add(aggregateShowConfig);
-                }
-                if (showConfigJson.containsKey(DashboardShowConfig.AGGREGATE.getValue())) {
-                    DashboardShowConfigVo aggregateShowConfig = (DashboardShowConfigVo) showConfigJson.get(DashboardShowConfig.AGGREGATE.getValue());
-                    processTaskShowChartConfigArray.add(aggregateShowConfig);
-                }
-                if (showConfigJson.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
-                    DashboardShowConfigVo groupShowConfig = (DashboardShowConfigVo) showConfigJson.get(DashboardShowConfig.GROUPFIELD.getValue());
-                    getGroupFieldDataArray(groupShowConfig.getDataList(), widgetVo, Arrays.asList(
-                            ProcessWorkcenterField.PRIORITY,
-                            ProcessWorkcenterField.STATUS,
-                            ProcessWorkcenterField.CHANNELTYPE,
-                            ProcessWorkcenterField.CHANNEL,
-                            ProcessWorkcenterField.STEP_USER,
-                            ProcessWorkcenterField.OWNER
-                    ), false);
+                for(DashboardShowConfig gs : DashboardShowConfig.values()) {
+                    DashboardShowConfigVo groupShowConfig = (DashboardShowConfigVo) showConfigJson.get(gs.getValue());
+                    if(groupShowConfig == null){
+                        continue;
+                    }
+                    if(Objects.equals(gs.getValue(),DashboardShowConfig.GROUPFIELD.getValue()) || Objects.equals(gs.getValue(),DashboardShowConfig.SUBGROUPFIELD.getValue())){
+                        List<IDashboardGroupField> groupFields = Arrays.asList(
+                                ProcessWorkcenterField.PRIORITY,
+                                ProcessWorkcenterField.STATUS,
+                                ProcessWorkcenterField.CHANNELTYPE,
+                                ProcessWorkcenterField.CHANNEL,
+                                ProcessWorkcenterField.STEP_USER,
+                                ProcessWorkcenterField.OWNER
+                        );
+                        if(Arrays.stream(chart.getSupportChart()).noneMatch(o->Objects.equals(o,ChartType.NUMBERCHART.getValue()))){
+                            groupFields = Lists.newArrayList(groupFields);
+                            groupFields.add(DashboardGroupField.EVERY_DAY);
+                        }
+                        getGroupFieldDataArray(groupShowConfig.getDataList(), widgetVo, groupFields);
+                    }
                     processTaskShowChartConfigArray.add(groupShowConfig);
-                }
-                if (showConfigJson.containsKey(DashboardShowConfig.SUBGROUPFIELD.getValue())) {
-                    DashboardShowConfigVo subGroupShowConfig = (DashboardShowConfigVo) showConfigJson.get(DashboardShowConfig.SUBGROUPFIELD.getValue());
-                    getGroupFieldDataArray(subGroupShowConfig.getDataList(), widgetVo, Arrays.asList(
-                            ProcessWorkcenterField.PRIORITY,
-                            ProcessWorkcenterField.STATUS,
-                            ProcessWorkcenterField.CHANNELTYPE,
-                            ProcessWorkcenterField.CHANNEL,
-                            ProcessWorkcenterField.STEP_USER,
-                            ProcessWorkcenterField.OWNER
-                    ), true);
-                    processTaskShowChartConfigArray.add(subGroupShowConfig);
-                }
-                if (showConfigJson.containsKey(DashboardShowConfig.MAXGROUP.getValue())) {
-                    DashboardShowConfigVo maxGroupShowConfig = (DashboardShowConfigVo) showConfigJson.get(DashboardShowConfig.MAXGROUP.getValue());
-                    processTaskShowChartConfigArray.add(maxGroupShowConfig);
-                }
-                if (showConfigJson.containsKey(DashboardShowConfig.REFRESHTIME.getValue())) {
-                    DashboardShowConfigVo refreshTimeShowConfig = (DashboardShowConfigVo) showConfigJson.get(DashboardShowConfig.REFRESHTIME.getValue());
-                    processTaskShowChartConfigArray.add(refreshTimeShowConfig);
-                }
-                if (showConfigJson.containsKey(DashboardShowConfig.COLOR.getValue())) {
-                    DashboardShowConfigVo refreshTimeShowConfig = (DashboardShowConfigVo) showConfigJson.get(DashboardShowConfig.COLOR.getValue());
-                    processTaskShowChartConfigArray.add(refreshTimeShowConfig);
                 }
             }
         }

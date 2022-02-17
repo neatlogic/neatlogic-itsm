@@ -144,7 +144,9 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 	public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
 		LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
 		for (Map<String, Object> dataMap : mapList) {
-			groupDataMap.put(dataMap.get("ownerUuid").toString(), dataMap.get("count"));
+			if(dataMap.get("ownerUuid") != null) {
+				groupDataMap.put(dataMap.get("ownerUuid").toString(), dataMap.get("count"));
+			}
 		}
 		return groupDataMap;
 	}

@@ -278,7 +278,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         // 少补
         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
             IProcessTaskColumn column = entry.getValue();
-            if (CollectionUtils.isEmpty(theadList.stream()
+            if (Objects.equals(column.getType(),ProcessFieldType.COMMON.getValue()) && CollectionUtils.isEmpty(theadList.stream()
                     .filter(data -> column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
                 theadList.add(new WorkcenterTheadVo(column));
             }

@@ -71,9 +71,9 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
         });
 
         buildOrderMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), (workcenterVo, sqlSb) -> {
-            if (StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getSubGroup())&&MapUtils.isNotEmpty(workcenterVo.getDashboardConfigVo().getGroupDataCountMap())) {
+            if (StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getSubGroup()) && MapUtils.isNotEmpty(workcenterVo.getDashboardConfigVo().getGroupDataCountMap())) {
                 List<String> groupDataList = new ArrayList<>();
-                if(MapUtils.isNotEmpty(workcenterVo.getDashboardConfigVo().getGroupDataCountMap())) {
+                if (MapUtils.isNotEmpty(workcenterVo.getDashboardConfigVo().getGroupDataCountMap())) {
                     for (Map.Entry<String, Object> entry : workcenterVo.getDashboardConfigVo().getGroupDataCountMap().entrySet()) {
                         groupDataList.add(entry.getKey());
                     }
@@ -81,12 +81,13 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
                 IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getDashboardConfigVo().getGroup());
                 if (columnHandler != null && MapUtils.isNotEmpty(workcenterVo.getDashboardConfigVo().getGroupDataCountMap())) {
                     List<TableSelectColumnVo> columnVoList = columnHandler.getTableSelectColumn();
-                    OUT: for (TableSelectColumnVo columnVo : columnVoList) {
+                    OUT:
+                    for (TableSelectColumnVo columnVo : columnVoList) {
                         for (SelectColumnVo column : columnVo.getColumnList()) {
-                            if(column.getIsPrimary()){
+                            if (column.getIsPrimary()) {
                                 sqlSb.append(" ORDER BY ( CASE ");
                                 for (int i = 1; i <= groupDataList.size(); i++) {
-                                    sqlSb.append(String.format(" WHEN %s.%s = '%s'  THEN %d ",columnVo.getTableShortName(),column.getColumnName(),groupDataList.get(i-1),i));
+                                    sqlSb.append(String.format(" WHEN %s = '%s'  THEN %d ", column.getPropertyName(), groupDataList.get(i - 1), i));
                                 }
                                 break OUT;
                             }
@@ -94,7 +95,7 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
                     }
                     sqlSb.append(" END ),COUNT(1) DESC ");
                 }
-            }else {
+            } else {
                 sqlSb.append(" order by COUNT(1) DESC");
             }
         });
@@ -102,8 +103,8 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
 
     private void getFieldSql(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         sqlSb.append(" order by case ");
-        for(int i =0;i<workcenterVo.getProcessTaskIdList().size();i++){
-            sqlSb.append(String.format(" WHEN  pt.id = %s THEN %s ",workcenterVo.getProcessTaskIdList().get(i).toString(),String.valueOf(i)));
+        for (int i = 0; i < workcenterVo.getProcessTaskIdList().size(); i++) {
+            sqlSb.append(String.format(" WHEN  pt.id = %s THEN %s ", workcenterVo.getProcessTaskIdList().get(i).toString(), String.valueOf(i)));
         }
         sqlSb.append(" ELSE 1000 END ASC");
     }

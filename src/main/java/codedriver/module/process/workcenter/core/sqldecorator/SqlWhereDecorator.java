@@ -129,7 +129,12 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
                     for (SelectColumnVo column : columnVo.getColumnList()) {
                         if (column.getIsPrimary()) {
                             if (CollectionUtils.isNotEmpty(groupDataList)) {
-                                sqlSb.append(String.format(" AND %s.`%s` IN ('%s') ", columnVo.getTableShortName(), column.getColumnName(), String.join("','", groupDataList)));
+                                String format = " %s.%s ";
+                                if(StringUtils.isNotBlank(column.getFormat())){
+                                    format = column.getFormat();
+                                }
+                                format = String.format(" AND %s IN ('%%s') ",format);
+                                sqlSb.append(String.format(format, columnVo.getTableShortName(), column.getColumnName(), String.join("','", groupDataList)));
                             }
                             break OUT;
                         }
