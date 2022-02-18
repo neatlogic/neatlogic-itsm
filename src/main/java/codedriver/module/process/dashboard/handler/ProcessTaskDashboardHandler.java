@@ -2,16 +2,9 @@ package codedriver.module.process.dashboard.handler;
 
 import codedriver.framework.common.constvalue.dashboard.ChartType;
 import codedriver.framework.common.constvalue.dashboard.DashboardShowConfig;
-import codedriver.framework.condition.core.ConditionHandlerFactory;
-import codedriver.framework.dashboard.constvalue.DashboardGroupField;
-import codedriver.framework.dashboard.constvalue.IDashboardGroupField;
-import codedriver.framework.dashboard.core.DashboardChartBase;
-import codedriver.framework.dashboard.core.DashboardChartFactory;
-import codedriver.framework.dashboard.core.DashboardHandlerBase;
+import codedriver.framework.dashboard.core.*;
 import codedriver.framework.dashboard.dto.DashboardDataVo;
-import codedriver.framework.dashboard.dto.DashboardShowConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
-import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
@@ -19,18 +12,16 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
+import codedriver.module.process.dashboard.core.DashboardChartProcessBase;
 import codedriver.module.process.workcenter.core.SqlBuilder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Component
 public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
@@ -100,8 +91,8 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             /* start: 将mysql源数据 按不同dashboard插件处理返回结果数据*/
             JSONObject data = new JSONObject();
             data.put("dataList", chart.getData(dashboardDataVo).get("dataList"));
-            data.put("columnList",chart.getData(dashboardDataVo).get("columnList"));
-            data.put("theadList",chart.getData(dashboardDataVo).get("theadList"));
+            data.put("columnList", chart.getData(dashboardDataVo).get("columnList"));
+            data.put("theadList", chart.getData(dashboardDataVo).get("theadList"));
             /* end: 将mysql源数据 按不同dashboard插件处理返回结果数据*/
             data.put("configObj", configChart);
             return data;
@@ -109,51 +100,26 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
         return null;
     }
 
-    private void getGroupFieldDataArray(JSONArray groupFieldDataArray, DashboardWidgetVo widgetVo, List<IDashboardGroupField> fieldList) {
-        JSONObject groupFieldJson = new JSONObject();
-        for (IDashboardGroupField groupField : fieldList) {
-            if (ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType())) {
-                groupFieldJson = ConditionHandlerFactory.getHandler(groupField.getValue()).getConfig();
-                groupFieldJson.remove("isMultiple");
-                groupFieldJson.put("handler", ConditionHandlerFactory.getHandler(groupField.getValue()).getHandler(FormConditionModel.CUSTOM));
-
-            }
-            groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s',config:%s}", groupField.getValue(), groupField.getText(), groupFieldJson)));
-        }
-    }
-
     @Override
     public JSONObject myGetConfig(DashboardWidgetVo widgetVo) {
         DashboardChartBase chart = DashboardChartFactory.getChart(widgetVo.getChartType());
         JSONObject processTaskChartConfig = new JSONObject();
         JSONArray processTaskShowChartConfigArray = new JSONArray();
-        JSONObject chartConfig = null;
         if (chart != null) {
-            chartConfig = chart.getChartConfig();
+            JSONObject chartConfig = chart.getChartConfig();
             if (chartConfig.containsKey("showConfig")) {
                 JSONObject showConfigJson = chartConfig.getJSONObject("showConfig");
-                for(DashboardShowConfig gs : DashboardShowConfig.values()) {
-                    DashboardShowConfigVo groupShowConfig = (DashboardShowConfigVo) showConfigJson.get(gs.getValue());
-                    if(groupShowConfig == null){
-                        continue;
-                    }
-                    if(Objects.equals(gs.getValue(),DashboardShowConfig.GROUPFIELD.getValue()) || Objects.equals(gs.getValue(),DashboardShowConfig.SUBGROUPFIELD.getValue())){
-                        List<IDashboardGroupField> groupFields = Arrays.asList(
-                                ProcessWorkcenterField.PRIORITY,
-                                ProcessWorkcenterField.STATUS,
-                                ProcessWorkcenterField.CHANNELTYPE,
-                                ProcessWorkcenterField.CHANNEL,
-                                ProcessWorkcenterField.STEP_USER,
-                                ProcessWorkcenterField.OWNER
-                        );
-                        if(Arrays.stream(chart.getSupportChart()).noneMatch(o->Objects.equals(o,ChartType.NUMBERCHART.getValue()))){
-                            groupFields = Lists.newArrayList(groupFields);
-                            groupFields.add(DashboardGroupField.EVERY_DAY);
+                IDashboardChartCustom chartCustom = DashboardChartCustomFactory.getChart(widgetVo.getChartType(), "process");
+                //如果无须自定义渲染配置，则使用默认配置
+                if(chartCustom == null) {
+                    chartCustom = new DashboardChartProcessBase() {
+                        @Override
+                        public String[] getSupportChart() {
+                            return new String[0];
                         }
-                        getGroupFieldDataArray(groupShowConfig.getDataList(), widgetVo, groupFields);
-                    }
-                    processTaskShowChartConfigArray.add(groupShowConfig);
+                    };
                 }
+                processTaskShowChartConfigArray = chartCustom.getShowConfig(showConfigJson);
             }
         }
         processTaskChartConfig.put("showConfig", processTaskShowChartConfigArray);
