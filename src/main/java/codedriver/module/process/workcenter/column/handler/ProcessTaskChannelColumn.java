@@ -2,7 +2,7 @@ package codedriver.module.process.workcenter.column.handler;
 
 import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardDataVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -122,15 +122,15 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
     }
 
     @Override
-    public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
-        if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
-            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ChannelSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardConfigVo().getGroup(), ChannelSqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
+    public void getMyDashboardDataVo(DashboardWidgetDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
+        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
+            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ChannelSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), ChannelSqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
             dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
         }
         //如果存在子分组
-        if (getName().equals(workcenterVo.getDashboardConfigVo().getSubGroup())) {
+        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
             DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ChannelSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardConfigVo().getSubGroup(), ChannelSqlTable.FieldEnum.NAME.getProValue());
+            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ChannelSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), ChannelSqlTable.FieldEnum.NAME.getProValue());
             dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
         }
     }

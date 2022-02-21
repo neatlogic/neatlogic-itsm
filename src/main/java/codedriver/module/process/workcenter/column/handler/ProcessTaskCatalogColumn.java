@@ -2,7 +2,7 @@ package codedriver.module.process.workcenter.column.handler;
 
 import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardDataVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -115,15 +115,15 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
     }
 
     @Override
-    public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
-        if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
-            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardConfigVo().getGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
+    public void getMyDashboardDataVo(DashboardWidgetDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
+        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
+            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
             dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
         }
         //如果存在子分组
-        if (getName().equals(workcenterVo.getDashboardConfigVo().getSubGroup())) {
+        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
             DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardConfigVo().getSubGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue());
+            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue());
             dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
         }
     }

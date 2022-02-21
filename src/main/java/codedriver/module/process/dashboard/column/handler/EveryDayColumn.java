@@ -8,7 +8,7 @@ package codedriver.module.process.dashboard.column.handler;
 import codedriver.framework.dashboard.constvalue.DashboardGroupField;
 import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardDataVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -71,15 +71,15 @@ public class EveryDayColumn extends ProcessTaskColumnBase implements IProcessTas
     }
 
     @Override
-    public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
-        if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
-            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(DashboardGroupField.EVERY_DAY.getValue(), workcenterVo.getDashboardConfigVo().getGroup(), DashboardGroupField.EVERY_DAY.getValue(), workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
+    public void getMyDashboardDataVo(DashboardWidgetDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
+        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
+            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(DashboardGroupField.EVERY_DAY.getValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), DashboardGroupField.EVERY_DAY.getValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
             dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
         }
         //如果存在子分组
-        if (getName().equals(workcenterVo.getDashboardConfigVo().getSubGroup())) {
+        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
             DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(DashboardGroupField.EVERY_DAY.getValue(), workcenterVo.getDashboardConfigVo().getSubGroup(), DashboardGroupField.EVERY_DAY.getValue());
+            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(DashboardGroupField.EVERY_DAY.getValue(), workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), DashboardGroupField.EVERY_DAY.getValue());
             dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
         }
     }

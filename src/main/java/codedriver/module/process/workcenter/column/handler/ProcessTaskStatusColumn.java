@@ -2,7 +2,7 @@ package codedriver.module.process.workcenter.column.handler;
 
 import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardDataVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -106,7 +106,7 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
     }
 
     @Override
-    public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
+    public void getMyDashboardDataVo(DashboardWidgetDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
         //补充text
         for (int i = 0; i < mapList.size(); i++) {
             Map<String, Object> tmpMap = new HashMap<>();
@@ -122,14 +122,14 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
             mapList.set(i, tmpMap);
         }
         //
-        if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
-            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), workcenterVo.getDashboardConfigVo().getGroup(), "statusText", workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
+        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
+            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), "statusText", workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
             dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
         }
         //如果存在子分组
-        if (getName().equals(workcenterVo.getDashboardConfigVo().getSubGroup())) {
+        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
             DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), workcenterVo.getDashboardConfigVo().getSubGroup(), "statusText");
+            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), "statusText");
             dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
         }
     }

@@ -5,7 +5,7 @@ import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardDataVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -187,15 +187,15 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 	}
 
 	@Override
-	public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
-		if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
-			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("stepUserUserUuid", workcenterVo.getDashboardConfigVo().getGroup(), "stepUserUserName", workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
+	public void getMyDashboardDataVo(DashboardWidgetDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
+		if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
+			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("stepUserUserUuid", workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), "stepUserUserName", workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
 			dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
 		}
 		//如果存在子分组
-		if (getName().equals(workcenterVo.getDashboardConfigVo().getSubGroup())) {
+		if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
 			DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-			dashboardDataSubGroupVo = new DashboardDataSubGroupVo("stepUserUserUuid", workcenterVo.getDashboardConfigVo().getSubGroup(), "stepUserUserName");
+			dashboardDataSubGroupVo = new DashboardDataSubGroupVo("stepUserUserUuid", workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), "stepUserUserName");
 			dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
 		}
 	}
