@@ -20,6 +20,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepFoundMultipleException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -79,6 +80,7 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         String processTaskStepName = jsonObj.getString("processTaskStepName");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+        String status = jsonObj.getString("status");
         String userId = jsonObj.getString("userId");
         if (processTaskId == null && processTaskStepId == null) {
             throw new ParamNotExistsException("processTaskId", "processTaskStepId");
@@ -109,6 +111,7 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
             }
             processTaskStep.setOriginalUserVo(user);
         }
+        map.get(status).accept(processTaskStep);
         return null;
     }
 
@@ -117,7 +120,15 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
     @PostConstruct
     private void init() {
         map.put(ProcessTaskStatus.PENDING.getValue(), processTaskStepVo -> {
-
+            if (processTaskStepVo.getOriginalUserVo() == null) {
+                throw new ApiRuntimeException("必须指定处理人");
+            }
+            processTaskMapper.deleteProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
+            processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
+            processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId()
+                    , GroupSearch.USER.getValue(), processTaskStepVo.getOriginalUserVo().getUuid(), ProcessUserType.MAJOR.getValue()));
+            processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStepVo.getId(), ProcessTaskStatus.PENDING.getValue(), 1));
+            processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
         });
         map.put(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo -> {
             if (processTaskStepVo.getOriginalUserVo() == null) {
@@ -131,6 +142,7 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
             } else {
                 changeStatus(processTaskStepVo, processTaskStepVo.getOriginalUserVo().getUuid(), processTaskStepVo.getOriginalUserVo().getUserName());
             }
+            processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
         });
         map.put(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepVo -> {
 
