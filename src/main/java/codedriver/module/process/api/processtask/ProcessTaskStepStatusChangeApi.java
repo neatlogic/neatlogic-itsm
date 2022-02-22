@@ -33,13 +33,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class ProcessTaskStepStatusChangeToRunningApi extends PublicApiComponentBase {
+public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
@@ -49,12 +53,12 @@ public class ProcessTaskStepStatusChangeToRunningApi extends PublicApiComponentB
 
     @Override
     public String getToken() {
-        return "processtask/step/status/changetorunning";
+        return "processtask/step/status/change";
     }
 
     @Override
     public String getName() {
-        return "更改工单步骤状态为处理中";
+        return "手动更改工单步骤状态";
     }
 
     @Override
@@ -66,9 +70,10 @@ public class ProcessTaskStepStatusChangeToRunningApi extends PublicApiComponentB
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id"),
             @Param(name = "processTaskStepName", type = ApiParamType.STRING, desc = "工单步骤名称"),
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤Id"),
+            @Param(name = "status", type = ApiParamType.ENUM, rule = "pending,running,succeed,failed,hang,draft", desc = "工单步骤状态"),
             @Param(name = "userId", type = ApiParamType.STRING, desc = "处理人userId")
     })
-    @Description(desc = "更改工单步骤状态为处理中")
+    @Description(desc = "手动更改工单步骤状态")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
@@ -102,17 +107,44 @@ public class ProcessTaskStepStatusChangeToRunningApi extends PublicApiComponentB
             if (user == null) {
                 throw new UserNotFoundException(userId);
             }
-            changeStatus(processTaskStep, user.getUuid(), user.getUserName());
-        } else {
-            // 不指定处理人时，旧处理人必须存在
-            List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
-            if (processTaskStepUserList.isEmpty()) {
-                throw new ApiRuntimeException("旧处理人不存在");
-            }
-            ProcessTaskStepUserVo majorUser = processTaskStepUserList.get(0);
-            changeStatus(processTaskStep, majorUser.getUserUuid(), majorUser.getUserName());
+            processTaskStep.setOriginalUserVo(user);
         }
         return null;
+    }
+
+    static Map<String, Consumer<ProcessTaskStepVo>> map = new HashMap<>();
+
+    @PostConstruct
+    private void init() {
+        map.put(ProcessTaskStatus.PENDING.getValue(), processTaskStepVo -> {
+
+        });
+        map.put(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo -> {
+            if (processTaskStepVo.getOriginalUserVo() == null) {
+                // 不指定处理人时，旧处理人必须存在
+                List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
+                if (processTaskStepUserList.isEmpty()) {
+                    throw new ApiRuntimeException("旧处理人不存在");
+                }
+                ProcessTaskStepUserVo majorUser = processTaskStepUserList.get(0);
+                changeStatus(processTaskStepVo, majorUser.getUserUuid(), majorUser.getUserName());
+            } else {
+                changeStatus(processTaskStepVo, processTaskStepVo.getOriginalUserVo().getUuid(), processTaskStepVo.getOriginalUserVo().getUserName());
+            }
+        });
+        map.put(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepVo -> {
+
+        });
+        map.put(ProcessTaskStatus.FAILED.getValue(), processTaskStepVo -> {
+
+        });
+        map.put(ProcessTaskStatus.HANG.getValue(), processTaskStepVo -> {
+
+        });
+        map.put(ProcessTaskStatus.DRAFT.getValue(), processTaskStepVo -> {
+
+        });
+
     }
 
     /**
