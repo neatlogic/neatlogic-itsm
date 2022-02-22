@@ -71,15 +71,15 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
         });
 
         buildOrderMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), (workcenterVo, sqlSb) -> {
-            if (StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getSubGroup()) && MapUtils.isNotEmpty(workcenterVo.getDashboardConfigVo().getGroupDataCountMap())) {
+            if (StringUtils.isNotBlank(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup()) && MapUtils.isNotEmpty(workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap())) {
                 List<String> groupDataList = new ArrayList<>();
-                if (MapUtils.isNotEmpty(workcenterVo.getDashboardConfigVo().getGroupDataCountMap())) {
-                    for (Map.Entry<String, Object> entry : workcenterVo.getDashboardConfigVo().getGroupDataCountMap().entrySet()) {
+                if (MapUtils.isNotEmpty(workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap())) {
+                    for (Map.Entry<String, Object> entry : workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap().entrySet()) {
                         groupDataList.add(entry.getKey());
                     }
                 }
-                IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getDashboardConfigVo().getGroup());
-                if (columnHandler != null && MapUtils.isNotEmpty(workcenterVo.getDashboardConfigVo().getGroupDataCountMap())) {
+                IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getDashboardWidgetChartConfigVo().getGroup());
+                if (columnHandler != null && MapUtils.isNotEmpty(workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap())) {
                     List<TableSelectColumnVo> columnVoList = columnHandler.getTableSelectColumn();
                     OUT:
                     for (TableSelectColumnVo columnVo : columnVoList) {

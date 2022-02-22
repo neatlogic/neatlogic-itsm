@@ -23,11 +23,11 @@ public class SqlLimitDecorator extends SqlDecoratorBase {
                 || FieldTypeEnum.GROUP_COUNT.getValue().equals(workcenterVo.getSqlFieldType())
                 || (FieldTypeEnum.FULL_TEXT.getValue().equals(workcenterVo.getSqlFieldType()) && !CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList()))
         ) {
-            if (StringUtils.isBlank(workcenterVo.getDashboardConfigVo().getSubGroup())) {
+            if (StringUtils.isBlank(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
                 sqlSb.append(String.format(" limit %d,%d ", workcenterVo.getStartNum(), workcenterVo.getPageSize()));
             }
         } else if(FieldTypeEnum.LIMIT_COUNT.getValue().equals(workcenterVo.getSqlFieldType())){
-            if (StringUtils.isBlank(workcenterVo.getDashboardConfigVo().getSubGroup())) {
+            if (StringUtils.isBlank(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
                 sqlSb.append(String.format(" limit %d,%d ", workcenterVo.getStartNum(), workcenterVo.getExpectOffsetRowNum()));
             }
         }

@@ -2,6 +2,7 @@ package codedriver.module.process.workcenter.core.sqldecorator;
 
 import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
+import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
 import codedriver.framework.dto.condition.ConditionGroupRelVo;
 import codedriver.framework.dto.condition.ConditionGroupVo;
 import codedriver.framework.dto.condition.ConditionRelVo;
@@ -106,16 +107,16 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
         buildWhereMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), (workcenterVo, sqlSb) -> {
             commonCondition(sqlSb, workcenterVo);
             getCountWhereSql(sqlSb, workcenterVo);
-            IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getDashboardConfigVo().getGroup());
+            IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getDashboardWidgetChartConfigVo().getGroup());
             //拼接sql，对二次过滤选项，如：数值图需要二次过滤选项
-            JSONObject chartConfig = workcenterVo.getDashboardConfigVo().getChartConfig();
+            DashboardWidgetChartConfigVo chartConfigVo = workcenterVo.getDashboardWidgetChartConfigVo();
             List<String> groupDataList = new ArrayList<>();
-            if (chartConfig.containsKey("configlist")) {
-                JSONArray configArray = chartConfig.getJSONArray("configlist");
-                groupDataList = JSONObject.parseArray(configArray.toJSONString(), String.class);
+            JSONArray configList = chartConfigVo.getConfigList();
+            if (CollectionUtils.isNotEmpty(configList)) {
+                groupDataList = JSONObject.parseArray(configList.toJSONString(), String.class);
             }
             //拼接sql，则根据查出的权重，排序截取最大组数量，查出二维数据
-            LinkedHashMap<String, Object> groupDataMap = workcenterVo.getDashboardConfigVo().getGroupDataCountMap();
+            LinkedHashMap<String, Object> groupDataMap = workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap();
             if (MapUtils.isNotEmpty(groupDataMap)) {
                 for (Map.Entry<String, Object> entry : groupDataMap.entrySet()) {
                     groupDataList.add(entry.getKey());

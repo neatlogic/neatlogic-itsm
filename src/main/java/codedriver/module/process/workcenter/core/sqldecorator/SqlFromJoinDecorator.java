@@ -180,11 +180,11 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         //循环所有需要展示的字段
         List<String> groupList = new ArrayList<>();
-        if (StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getGroup())) {
-            groupList.add(workcenterVo.getDashboardConfigVo().getGroup());
+        if (StringUtils.isNotBlank(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
+            groupList.add(workcenterVo.getDashboardWidgetChartConfigVo().getGroup());
         }
-        if (StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getSubGroup())) {
-            groupList.add(workcenterVo.getDashboardConfigVo().getSubGroup());
+        if (StringUtils.isNotBlank(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
+            groupList.add(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup());
         }
         if (CollectionUtils.isNotEmpty(groupList)) {//group by 需要join的表
             for (String group : groupList) {
