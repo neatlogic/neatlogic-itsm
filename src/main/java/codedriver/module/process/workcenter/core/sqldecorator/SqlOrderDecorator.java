@@ -1,5 +1,6 @@
 package codedriver.module.process.workcenter.core.sqldecorator;
 
+import codedriver.framework.dashboard.constvalue.DashboardStatistics;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
@@ -15,10 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Title: SqlOrderDecorator
@@ -70,35 +68,54 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
             }
         });
 
-        buildOrderMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), (workcenterVo, sqlSb) -> {
-            if (StringUtils.isNotBlank(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup()) && MapUtils.isNotEmpty(workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap())) {
-                List<String> groupDataList = new ArrayList<>();
-                if (MapUtils.isNotEmpty(workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap())) {
-                    for (Map.Entry<String, Object> entry : workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap().entrySet()) {
-                        groupDataList.add(entry.getKey());
-                    }
+        buildOrderMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), this::groupOrderService);
+
+        buildOrderMap.put(FieldTypeEnum.SUB_GROUP_COUNT.getValue(), this::groupOrderService);
+
+        buildOrderMap.put(FieldTypeEnum.GROUP_SUM.getValue(), (workcenterVo, sqlSb) -> {
+            //无需排序
+        });
+
+    }
+
+    /**
+     * group 拼接order sql
+     *
+     * @param workcenterVo 工单中心参数
+     * @param sqlSb        sql builder
+     */
+    private void groupOrderService(WorkcenterVo workcenterVo, StringBuilder sqlSb) {
+        if (Objects.equals(workcenterVo.getDashboardWidgetChartConfigVo().getStatisticsType(), DashboardStatistics.SUM.getValue())) {
+            sqlSb.append(" order by everyday DESC");
+            return;
+        }
+        if (StringUtils.isNotBlank(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup()) && MapUtils.isNotEmpty(workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap())) {
+            List<String> groupDataList = new ArrayList<>();
+            if (MapUtils.isNotEmpty(workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap())) {
+                for (Map.Entry<String, Object> entry : workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap().entrySet()) {
+                    groupDataList.add(entry.getKey());
                 }
-                IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getDashboardWidgetChartConfigVo().getGroup());
-                if (columnHandler != null && MapUtils.isNotEmpty(workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap())) {
-                    List<TableSelectColumnVo> columnVoList = columnHandler.getTableSelectColumn();
-                    OUT:
-                    for (TableSelectColumnVo columnVo : columnVoList) {
-                        for (SelectColumnVo column : columnVo.getColumnList()) {
-                            if (column.getIsPrimary()) {
-                                sqlSb.append(" ORDER BY ( CASE ");
-                                for (int i = 1; i <= groupDataList.size(); i++) {
-                                    sqlSb.append(String.format(" WHEN %s = '%s'  THEN %d ", column.getPropertyName(), groupDataList.get(i - 1), i));
-                                }
-                                break OUT;
+            }
+            IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getDashboardWidgetChartConfigVo().getGroup());
+            if (columnHandler != null && MapUtils.isNotEmpty(workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap())) {
+                List<TableSelectColumnVo> columnVoList = columnHandler.getTableSelectColumn();
+                OUT:
+                for (TableSelectColumnVo columnVo : columnVoList) {
+                    for (SelectColumnVo column : columnVo.getColumnList()) {
+                        if (column.getIsPrimary()) {
+                            sqlSb.append(" ORDER BY ( CASE ");
+                            for (int i = 1; i <= groupDataList.size(); i++) {
+                                sqlSb.append(String.format(" WHEN %s = '%s'  THEN %d ", column.getPropertyName(), groupDataList.get(i - 1), i));
                             }
+                            break OUT;
                         }
                     }
-                    sqlSb.append(" END ),COUNT(1) DESC ");
                 }
-            } else {
-                sqlSb.append(" order by COUNT(1) DESC");
+                sqlSb.append(" END ),COUNT(1) DESC ");
             }
-        });
+        } else {
+            sqlSb.append(" order by COUNT(1) DESC");
+        }
     }
 
     private void getFieldSql(StringBuilder sqlSb, WorkcenterVo workcenterVo) {

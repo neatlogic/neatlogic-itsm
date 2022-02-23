@@ -3,7 +3,6 @@ package codedriver.module.process.workcenter.core.sqldecorator;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,13 +22,9 @@ public class SqlLimitDecorator extends SqlDecoratorBase {
                 || FieldTypeEnum.GROUP_COUNT.getValue().equals(workcenterVo.getSqlFieldType())
                 || (FieldTypeEnum.FULL_TEXT.getValue().equals(workcenterVo.getSqlFieldType()) && !CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList()))
         ) {
-            if (StringUtils.isBlank(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
-                sqlSb.append(String.format(" limit %d,%d ", workcenterVo.getStartNum(), workcenterVo.getPageSize()));
-            }
-        } else if(FieldTypeEnum.LIMIT_COUNT.getValue().equals(workcenterVo.getSqlFieldType())){
-            if (StringUtils.isBlank(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
-                sqlSb.append(String.format(" limit %d,%d ", workcenterVo.getStartNum(), workcenterVo.getExpectOffsetRowNum()));
-            }
+            sqlSb.append(String.format(" limit %d,%d ", workcenterVo.getStartNum(), workcenterVo.getPageSize()));
+        } else if (FieldTypeEnum.LIMIT_COUNT.getValue().equals(workcenterVo.getSqlFieldType())) {
+            sqlSb.append(String.format(" limit %d,%d ", workcenterVo.getStartNum(), workcenterVo.getExpectOffsetRowNum()));
         }
     }
 

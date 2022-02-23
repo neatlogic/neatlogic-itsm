@@ -64,7 +64,7 @@ public class EveryDayColumn extends ProcessTaskColumnBase implements IProcessTas
         return new ArrayList<TableSelectColumnVo>() {
             {
                 add(new TableSelectColumnVo(new ProcessTaskSqlTable(), Collections.singletonList(
-                        new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.START_TIME.getValue(), DashboardGroupField.EVERY_DAY.getValue(), true, " DATE_FORMAT(%s.%s,'%%Y-%%m-%%e')")
+                        new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.START_TIME.getValue(), DashboardGroupField.EVERY_DAY.getValue(), true, " STR_TO_DATE(%s.%s,'%%Y-%%m-%%e')")
                 )));
             }
         };

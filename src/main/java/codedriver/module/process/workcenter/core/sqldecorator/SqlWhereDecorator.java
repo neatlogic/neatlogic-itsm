@@ -18,7 +18,6 @@ import codedriver.framework.process.constvalue.ProcessWorkcenterInitType;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import codedriver.module.process.condition.handler.ProcessTaskStartTimeCondition;
@@ -65,29 +64,34 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
     @PostConstruct
     public void fieldDispatcherInit() {
         buildWhereMap.put(FieldTypeEnum.FIELD.getValue(), (workcenterVo, sqlSb) -> {
+            sqlSb.append(" where ");
             //根据column获取需要的表
             sqlSb.append(String.format(" %s.%s in ( %s ) ", new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.ID.getValue(), workcenterVo.getProcessTaskIdList().stream().map(Object::toString).collect(Collectors.joining(","))));
         });
 
         buildWhereMap.put(FieldTypeEnum.LIMIT_COUNT.getValue(), (workcenterVo, sqlSb) -> {
+            sqlSb.append(" where ");
             commonCondition(sqlSb, workcenterVo);
             getCountWhereSql(sqlSb, workcenterVo);
             draftCondition(sqlSb, workcenterVo);
         });
 
         buildWhereMap.put(FieldTypeEnum.DISTINCT_ID.getValue(), (workcenterVo, sqlSb) -> {
+            sqlSb.append(" where ");
             commonCondition(sqlSb, workcenterVo);
             getCountWhereSql(sqlSb, workcenterVo);
             draftCondition(sqlSb, workcenterVo);
         });
 
         buildWhereMap.put(FieldTypeEnum.TOTAL_COUNT.getValue(), (workcenterVo, sqlSb) -> {
+            sqlSb.append(" where ");
             commonCondition(sqlSb, workcenterVo);
             getCountWhereSql(sqlSb, workcenterVo);
             draftCondition(sqlSb, workcenterVo);
         });
 
         buildWhereMap.put(FieldTypeEnum.FULL_TEXT.getValue(), (workcenterVo, sqlSb) -> {
+            sqlSb.append(" where ");
             commonCondition(sqlSb, workcenterVo);
             JSONArray keywordConditionList = workcenterVo.getKeywordConditionList();
             //获取过滤最终工单idList
@@ -104,45 +108,58 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
             }
         });
 
-        buildWhereMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), (workcenterVo, sqlSb) -> {
-            commonCondition(sqlSb, workcenterVo);
-            getCountWhereSql(sqlSb, workcenterVo);
-            IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getDashboardWidgetChartConfigVo().getGroup());
-            //拼接sql，对二次过滤选项，如：数值图需要二次过滤选项
-            DashboardWidgetChartConfigVo chartConfigVo = workcenterVo.getDashboardWidgetChartConfigVo();
-            List<String> groupDataList = new ArrayList<>();
-            JSONArray configList = chartConfigVo.getConfigList();
-            if (CollectionUtils.isNotEmpty(configList)) {
-                groupDataList = JSONObject.parseArray(configList.toJSONString(), String.class);
-            }
-            //拼接sql，则根据查出的权重，排序截取最大组数量，查出二维数据
-            LinkedHashMap<String, Object> groupDataMap = workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap();
-            if (MapUtils.isNotEmpty(groupDataMap)) {
-                for (Map.Entry<String, Object> entry : groupDataMap.entrySet()) {
-                    groupDataList.add(entry.getKey());
-                }
-            }
+        buildWhereMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), this::groupWhereService);
 
-            if (columnHandler != null) {
-                List<TableSelectColumnVo> columnVoList = columnHandler.getTableSelectColumn();
-                OUT:
-                for (TableSelectColumnVo columnVo : columnVoList) {
-                    for (SelectColumnVo column : columnVo.getColumnList()) {
-                        if (column.getIsPrimary()) {
-                            if (CollectionUtils.isNotEmpty(groupDataList)) {
-                                String format = " %s.%s ";
-                                if(StringUtils.isNotBlank(column.getFormat())){
-                                    format = column.getFormat();
-                                }
-                                format = String.format(" AND %s IN ('%%s') ",format);
-                                sqlSb.append(String.format(format, columnVo.getTableShortName(), column.getColumnName(), String.join("','", groupDataList)));
+        buildWhereMap.put(FieldTypeEnum.SUB_GROUP_COUNT.getValue(), this::groupWhereService);
+
+        buildWhereMap.put(FieldTypeEnum.GROUP_SUM.getValue(), (workcenterVo, sqlSb) -> {});
+    }
+
+    /**
+     * group 拼接where sql
+     *
+     * @param workcenterVo 工单中心参数
+     * @param sqlSb        sql builder
+     */
+    private void groupWhereService(WorkcenterVo workcenterVo, StringBuilder sqlSb) {
+        sqlSb.append(" where ");
+        commonCondition(sqlSb, workcenterVo);
+        getCountWhereSql(sqlSb, workcenterVo);
+        IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getDashboardWidgetChartConfigVo().getGroup());
+        //拼接sql，对二次过滤选项，如：数值图需要二次过滤选项
+        DashboardWidgetChartConfigVo chartConfigVo = workcenterVo.getDashboardWidgetChartConfigVo();
+        List<String> groupDataList = new ArrayList<>();
+        JSONArray configList = chartConfigVo.getConfigList();
+        if (CollectionUtils.isNotEmpty(configList)) {
+            groupDataList = JSONObject.parseArray(configList.toJSONString(), String.class);
+        }
+        //拼接sql，则根据查出的权重，排序截取最大组数量，查出二维数据
+        LinkedHashMap<String, Object> groupDataMap = workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap();
+        if (MapUtils.isNotEmpty(groupDataMap)) {
+            for (Map.Entry<String, Object> entry : groupDataMap.entrySet()) {
+                groupDataList.add(entry.getKey());
+            }
+        }
+
+        if (columnHandler != null) {
+            List<TableSelectColumnVo> columnVoList = columnHandler.getTableSelectColumn();
+            OUT:
+            for (TableSelectColumnVo columnVo : columnVoList) {
+                for (SelectColumnVo column : columnVo.getColumnList()) {
+                    if (column.getIsPrimary()) {
+                        if (CollectionUtils.isNotEmpty(groupDataList)) {
+                            String format = " %s.%s ";
+                            if (StringUtils.isNotBlank(column.getFormat())) {
+                                format = column.getFormat();
                             }
-                            break OUT;
+                            format = String.format(" AND %s IN ('%%s') ", format);
+                            sqlSb.append(String.format(format, columnVo.getTableShortName(), column.getColumnName(), String.join("','", groupDataList)));
                         }
+                        break OUT;
                     }
                 }
             }
-        });
+        }
     }
 
     private void getFullTextSql(StringBuilder sqlSb, String value, String handler) {
@@ -168,14 +185,13 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
      **/
     private void getCountWhereSql(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         // 将group 以连接表达式 存 Map<fromUuid_toUuid,joinType>
-        Map<String, String> groupRelMap = new HashMap<String, String>();
+        Map<String, String> groupRelMap = new HashMap<>();
         List<ConditionGroupRelVo> groupRelList = workcenterVo.getConditionGroupRelList();
         if (CollectionUtils.isNotEmpty(groupRelList)) {
             for (ConditionGroupRelVo groupRel : groupRelList) {
                 groupRelMap.put(groupRel.getFrom() + "_" + groupRel.getTo(), groupRel.getJoinType());
             }
         }
-        List<ISqlTable> tableList = new ArrayList<>();
         List<ConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
         if (CollectionUtils.isNotEmpty(groupList)) {
             String fromGroupUuid = null;
@@ -183,7 +199,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
             boolean isAddedAnd = false;
             for (ConditionGroupVo groupVo : groupList) {
                 // 将condition 以连接表达式 存 Map<fromUuid_toUuid,joinType>
-                Map<String, String> conditionRelMap = new HashMap<String, String>();
+                Map<String, String> conditionRelMap = new HashMap<>();
                 List<ConditionRelVo> conditionRelList = groupVo.getConditionRelList();
                 if (CollectionUtils.isNotEmpty(conditionRelList)) {
                     for (ConditionRelVo conditionRel : conditionRelList) {
@@ -203,7 +219,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
                 }
                 sqlSb.append(" ( ");
                 String fromConditionUuid = null;
-                String toConditionUuid = null;
+                String toConditionUuid;
                 for (int i = 0; i < conditionVoList.size(); i++) {
                     ConditionVo conditionVo = conditionVoList.get(i);
                     //append joinType
@@ -230,8 +246,6 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
 
     @Override
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
-        sqlSb.append(" where ");
-
         //其它条件过滤
         buildWhereMap.get(workcenterVo.getSqlFieldType()).build(workcenterVo, sqlSb);
     }

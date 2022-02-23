@@ -4,8 +4,6 @@ import codedriver.framework.dashboard.core.*;
 import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.module.process.dashboard.core.DashboardChartProcessBase;
 import codedriver.module.process.dashboard.core.statistics.DashboardStatisticsFactory;
@@ -15,16 +13,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-
 @Component
 public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
-
-    @Resource
-    WorkcenterMapper workcenterMapper;
-
-    @Resource
-    ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getName() {
@@ -41,11 +31,12 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             /* start: 从mysql 获取源数据 */
             //set条件
             JSONObject conditionConfig = new JSONObject();
-            conditionConfig.put("conditionConfig",widgetVo.getConditionConfig());
+            conditionConfig.put("conditionConfig", widgetVo.getConditionConfig());
+            conditionConfig.put("pageSize", chartConfigVo.getLimitNum());
             WorkcenterVo workcenterVo = new WorkcenterVo(conditionConfig);
             workcenterVo.setDashboardWidgetChartConfigVo(chartConfigVo);
             StatisticsBase statistics = DashboardStatisticsFactory.getStatistics(chartConfigVo.getStatisticsType());
-            statistics.doService(workcenterVo,widgetDataVo,widgetVo);
+            statistics.doService(workcenterVo, widgetDataVo, widgetVo);
             /* end: 从mysql 获取源数据 */
             /* start: 将mysql源数据 按不同dashboard插件处理返回结果数据*/
             JSONObject data = new JSONObject();
@@ -70,7 +61,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
                 JSONObject showConfigJson = chartConfig.getJSONObject("showConfig");
                 IDashboardChartCustom chartCustom = DashboardChartCustomFactory.getChart(widgetVo.getChartType(), "process");
                 //如果无须自定义渲染配置，则使用默认配置
-                if(chartCustom == null) {
+                if (chartCustom == null) {
                     chartCustom = new DashboardChartProcessBase() {
                         @Override
                         public String[] getSupportChart() {
