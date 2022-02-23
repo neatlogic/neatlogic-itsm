@@ -41,6 +41,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Resource;
+import java.net.HttpURLConnection;
 import java.util.*;
 
 @Service
@@ -371,6 +372,8 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
             /** 当SLA未激活时，判断现在是否满足激活条件，不满足条件就删除 **/
             if (SlaStatus.DOING == status) {
                 return status;
+            } else if (SlaStatus.DONE == status) {
+                return status;
             }
         } else {
             if (status != null) {
@@ -465,6 +468,24 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                     processTaskSlaMapper.updateProcessTaskSlaTime(slaTimeVo);
                 } else {
                     processTaskSlaMapper.insertProcessTaskSlaTime(slaTimeVo);
+                }
+                if (SlaStatus.DONE.name().toLowerCase().equals(slaTimeVo.getStatus())) {
+                    List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
+                    if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
+                        ProcessTaskStepSlaTimeVo processTaskStepSlaTimeVo = new ProcessTaskStepSlaTimeVo();
+                        processTaskStepSlaTimeVo.setProcessTaskId(processTaskVo.getId());
+                        processTaskStepSlaTimeVo.setSlaId(slaId);
+                        processTaskStepSlaTimeVo.setType(handler.getType().getValue());
+                        processTaskStepSlaTimeVo.setTimeSum(slaTimeVo.getTimeSum());
+                        processTaskStepSlaTimeVo.setTimeCost(slaTimeVo.getTimeSum() - slaTimeVo.getTimeLeft());
+                        processTaskStepSlaTimeVo.setRealTimeCost(slaTimeVo.getTimeSum() - slaTimeVo.getRealTimeLeft());
+                        for (Long processTaskStepId : processTaskStepIdList) {
+                            processTaskStepSlaTimeVo.setProcessTaskStepId(processTaskStepId);
+                            processTaskSlaMapper.insertProcessTaskStepSlaTime(processTaskStepSlaTimeVo);
+                        }
+                    }
+                } else {
+                    processTaskSlaMapper.deleteProcessTaskStepSlaTimeBySlaId(slaId);
                 }
                 adjustJob(slaTimeVo, slaConfigObj, expireTimeHasChanged);
 //                adjustJob(slaTimeVo, slaConfigObj, oldExpireTime);
