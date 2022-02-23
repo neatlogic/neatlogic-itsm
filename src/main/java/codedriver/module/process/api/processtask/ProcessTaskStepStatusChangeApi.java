@@ -162,10 +162,22 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
             processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.FAILED.getValue()));
         });
         map.put(ProcessTaskStatus.HANG.getValue(), processTaskStepVo -> {
-
+            ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
+            processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
+            processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
+            processTaskStepVo.setIsActive(0);
+            processTaskStepVo.setStatus(ProcessTaskStatus.HANG.name());
+            processTaskStepVo.setUpdateEndTime(1);
+            processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
+            processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.HANG.getValue()));
         });
         map.put(ProcessTaskStatus.DRAFT.getValue(), processTaskStepVo -> {
-
+            processTaskStepVo.setIsActive(1);
+            processTaskStepVo.setStatus(ProcessTaskStatus.DRAFT.getValue());
+            processTaskStepVo.setUpdateActiveTime(1);
+            processTaskStepVo.setUpdateStartTime(1);
+            processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
+            processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.HANG.getValue()));
         });
 
     }
