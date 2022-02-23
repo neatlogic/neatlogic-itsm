@@ -10,6 +10,7 @@ import codedriver.framework.asynchronization.threadlocal.ConditionParamContext;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.dto.condition.ConditionConfigVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
+import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.SlaStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSlaMapper;
@@ -287,22 +288,23 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
         TransactionStatus transactionStatus = transactionUtil.openTx();
         try {
             Long processTaskId = null;
-            List<Long> allSlaIdList = null;
+            if (currentProcessTaskStepVo != null) {
+                processTaskId = currentProcessTaskStepVo.getProcessTaskId();
+            } else {
+                processTaskId = currentProcessTaskVo.getId();
+            }
+            List<Long> validSlaIdList = slaIsInvalid(processTaskId);
             if (currentProcessTaskStepVo != null) {
 //                System.out.println("processTaskStepId=" + currentProcessTaskStepVo.getId());
-                allSlaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskStepId(currentProcessTaskStepVo.getId());
-                processTaskId = currentProcessTaskStepVo.getProcessTaskId();
-            } else if (currentProcessTaskVo != null) {
-//                System.out.println("processTaskId=" + currentProcessTaskVo.getId());
-                allSlaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskId(currentProcessTaskVo.getId());
-                processTaskId = currentProcessTaskVo.getId();
+                List<Long> stepSlaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskStepId(currentProcessTaskStepVo.getId());
+                validSlaIdList.retainAll(stepSlaIdList);
             }
 //            System.out.println("************************start*****************************************");
 //            System.out.println(allSlaIdList);
 //            List<Long> slaIdList = new ArrayList<>();
             Map<Long, SlaStatus> slaStatusMap = new HashMap<>();
             /** 遍历判断需要重新计算的slaId **/
-            for (Long slaId : allSlaIdList) {
+            for (Long slaId : validSlaIdList) {
                 SlaStatus status = slaNeedRecalculate(slaId);
                 if (status != null) {
                     slaStatusMap.put(slaId, status);
@@ -332,6 +334,44 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
         processTaskSlaMapper.deleteProcessTaskSlaTimeBySlaId(slaId);
         processTaskSlaMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
         processTaskSlaMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
+    }
+
+    /**
+     * 判断当前工单的sla是否失效
+     * @param processTaskId
+     */
+    private List<Long> slaIsInvalid(Long processTaskId) {
+        List<Long> resultList = new ArrayList<>();
+        ProcessTaskSlaVo processTaskSlaVo = new ProcessTaskSlaVo();
+        List<Long> allSlaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskId(processTaskId);
+        for (Long slaId: allSlaIdList) {
+            processTaskSlaVo.setId(slaId);
+            boolean invalid = true;
+            List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
+            for (Long processTaskStepId : processTaskStepIdList) {
+                List<ProcessTaskStepRelVo> processTaskStepRelList =  processTaskMapper.getProcessTaskStepRelByToId(processTaskStepId);
+                for (ProcessTaskStepRelVo processTaskStepRelVo : processTaskStepRelList) {
+                    if (processTaskStepRelVo.getType().equals(ProcessFlowDirection.FORWARD.getValue())) {
+                        if (!Objects.equals(processTaskStepRelVo.getIsHit(), -1)) {
+                            invalid = false;
+                            break;
+                        }
+                    }
+                }
+                if (!invalid) {
+                    break;
+                }
+            }
+            if (invalid) {
+                //该时效失效
+                processTaskSlaVo.setIsActive(0);
+            } else {
+                resultList.add(slaId);
+                processTaskSlaVo.setIsActive(1);
+            }
+            processTaskSlaMapper.updateProcessTaskSlaIsActiveBySlaId(processTaskSlaVo);
+        }
+        return resultList;
     }
 
     /**
