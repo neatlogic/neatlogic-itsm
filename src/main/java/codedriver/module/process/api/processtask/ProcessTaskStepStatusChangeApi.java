@@ -145,10 +145,21 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
             processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
         });
         map.put(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepVo -> {
-
+            processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
+            ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
+            processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
+            processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
+            processTaskStepVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
+            processTaskStepVo.setIsActive(2);
+            processTaskStepVo.setUpdateEndTime(1);
+            processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
+            // todo 更改工单状态
+            // todo 要不要激活下一步，如果知道激活哪一步？如何激活？
         });
         map.put(ProcessTaskStatus.FAILED.getValue(), processTaskStepVo -> {
-
+            processTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
+            processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
+            processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.FAILED.getValue()));
         });
         map.put(ProcessTaskStatus.HANG.getValue(), processTaskStepVo -> {
 
