@@ -158,6 +158,7 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
                 throw new ParamNotExistsException("必须指定需要激活的下一步骤名称");
             }
             ProcessTaskStepVo nextStep = null;
+            // 检查下一步骤是否合法
             if (StringUtils.isNotBlank(processTaskStepVo.getNextStepName())) {
                 List<ProcessTaskStepVo> nextStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndStepName(new ProcessTaskStepVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getNextStepName()));
                 if (nextStepList.isEmpty()) {
@@ -181,20 +182,22 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
                     throw new ApiRuntimeException(processTaskStepVo.getNextStepId() + "不是步骤：" + processTaskStepVo.getName() + "的下一步骤");
                 }
             }
-            // 完成并激活下一步骤，先把当前步骤的user改为done、step改为succeed、worker清掉；然后把连线状态改掉，下一步骤改为running
+            // 清空当前步骤worker
             processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
+            // 更改当前步骤处理人状态为DONE
             if (processTaskStepVo.getOriginalUserVo() == null) {
                 ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
                 processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
                 processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
             } else {
-                // 替换处理人
                 processTaskMapper.updateProcessTaskStepMajorUserAndStatus(new ProcessTaskStepUserVo(processTaskStepVo.getId(), processTaskStepVo.getOriginalUserVo().getUuid(), processTaskStepVo.getOriginalUserVo().getUserName(), ProcessTaskStepUserStatus.DONE.getValue()));
             }
+            // 更改当前步骤状态为SUCCEED
             processTaskStepVo.setIsActive(2);
             processTaskStepVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
             processTaskStepVo.setUpdateEndTime(1);
             processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
+            // 激活与下个节点之间的路径
             if (ProcessStepHandlerType.END.getHandler().equals(processTaskStepVo.getHandler())) {
                 processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.SUCCEED.getValue()));
             } else if (nextStep != null) {
