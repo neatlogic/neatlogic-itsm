@@ -70,7 +70,8 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id"),
             @Param(name = "processTaskStepName", type = ApiParamType.STRING, desc = "工单步骤名称"),
             @Param(name = "processTaskNextStepName", type = ApiParamType.STRING, desc = "需要激活的下一步骤名称(更改步骤状态为succeed时需要填此参数)"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤Id"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤Id(待更改状态的步骤名称重复时需要填此参数)"),
+            @Param(name = "processTaskNextStepId", type = ApiParamType.LONG, desc = "工单步骤Id(待激活的下一步骤名称重复时需要填此参数)"),
             @Param(name = "status", type = ApiParamType.ENUM, rule = "pending,running,succeed,hang", isRequired = true, desc = "工单步骤状态"),
             @Param(name = "userId", type = ApiParamType.STRING, desc = "处理人userId"),
     })
@@ -81,6 +82,7 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
         String processTaskStepName = jsonObj.getString("processTaskStepName");
         String processTaskNextStepName = jsonObj.getString("processTaskNextStepName");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+        Long processTaskNextStepId = jsonObj.getLong("processTaskNextStepId");
         String status = jsonObj.getString("status");
         String userId = jsonObj.getString("userId");
         if (processTaskId == null && processTaskStepId == null) {
@@ -113,6 +115,7 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
             processTaskStep.setOriginalUserVo(user);
         }
         processTaskStep.setNextStepName(processTaskNextStepName);
+        processTaskStep.setNextStepId(processTaskNextStepId);
         processTaskMapper.getProcessTaskLockById(processTaskStep.getProcessTaskId());
         map.get(status).accept(processTaskStep);
         return null;
@@ -138,12 +141,20 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
                 ProcessTaskStepUserVo majorUser = processTaskStepUserList.get(0);
                 changeProcessTaskStepStatusToRunning(processTaskStepVo, majorUser.getUserUuid(), majorUser.getUserName());
             } else {
+                processTaskMapper.deleteProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
+                processTaskMapper.insertProcessTaskStepUser(new ProcessTaskStepUserVo(
+                        processTaskStepVo.getProcessTaskId(),
+                        processTaskStepVo.getId(),
+                        processTaskStepVo.getOriginalUserVo().getUuid(),
+                        ProcessUserType.MAJOR.getValue()
+                ));
                 changeProcessTaskStepStatusToRunning(processTaskStepVo, processTaskStepVo.getOriginalUserVo().getUuid(), processTaskStepVo.getOriginalUserVo().getUserName());
             }
             processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
         });
         map.put(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepVo -> {
-            if (!ProcessStepHandlerType.END.getHandler().equals(processTaskStepVo.getHandler()) && StringUtils.isBlank(processTaskStepVo.getNextStepName())) {
+            if (!ProcessStepHandlerType.END.getHandler().equals(processTaskStepVo.getHandler()) && StringUtils.isBlank(processTaskStepVo.getNextStepName())
+                    && processTaskStepVo.getNextStepId() == null) {
                 throw new ParamNotExistsException("必须指定需要激活的下一步骤名称");
             }
             ProcessTaskStepVo nextStep = null;
@@ -152,7 +163,6 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
                 if (nextStepList.isEmpty()) {
                     throw new ProcessTaskStepNotFoundException(processTaskStepVo.getNextStepName());
                 }
-                // todo 如果存在多个的话，要指定步骤id
                 if (nextStepList.size() > 1) {
                     throw new ProcessTaskStepFoundMultipleException(processTaskStepVo.getNextStepName());
                 }
@@ -161,9 +171,16 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
                     throw new ApiRuntimeException(processTaskStepVo.getNextStepName() + "不是步骤：" + processTaskStepVo.getName() + "的下一步骤");
                 }
                 nextStep = nextStepList.get(0);
+            } else if (processTaskStepVo.getNextStepId() != null) {
+                nextStep = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepVo.getNextStepId());
+                if (nextStep == null) {
+                    throw new ProcessTaskStepNotFoundException(processTaskStepVo.getNextStepId());
+                }
+                List<ProcessTaskStepRelVo> stepRelVoList = processTaskMapper.getProcessTaskStepRelByFromId(processTaskStepVo.getId());
+                if (stepRelVoList.stream().noneMatch(o -> Objects.equals(o.getToProcessTaskStepId(), processTaskStepVo.getNextStepId()))) {
+                    throw new ApiRuntimeException(processTaskStepVo.getNextStepId() + "不是步骤：" + processTaskStepVo.getName() + "的下一步骤");
+                }
             }
-
-            // todo 无法确定当前步骤是否需要处理人，所以如果存在原处理人的话，就更新状态
             // 完成并激活下一步骤，先把当前步骤的user改为done、step改为succeed、worker清掉；然后把连线状态改掉，下一步骤改为running
             processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
             if (processTaskStepVo.getOriginalUserVo() == null) {
@@ -181,13 +198,7 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
             if (ProcessStepHandlerType.END.getHandler().equals(processTaskStepVo.getHandler())) {
                 processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.SUCCEED.getValue()));
             } else if (nextStep != null) {
-                // todo 把下一步骤改为running
                 processTaskMapper.updateProcessTaskStepRelIsHit(new ProcessTaskStepRelVo(processTaskStepVo.getId(), nextStep.getId(), 1));
-                nextStep.setIsActive(0);
-                nextStep.setStatus(ProcessTaskStatus.RUNNING.name());
-                nextStep.setUpdateActiveTime(1);
-                nextStep.setUpdateStartTime(1);
-                processTaskMapper.updateProcessTaskStepStatus(nextStep);
                 processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
             }
         });
