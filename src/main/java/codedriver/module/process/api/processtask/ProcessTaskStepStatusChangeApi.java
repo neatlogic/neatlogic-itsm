@@ -150,7 +150,6 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
                 ));
                 changeProcessTaskStepStatusToRunning(processTaskStepVo, processTaskStepVo.getOriginalUserVo().getUuid(), processTaskStepVo.getOriginalUserVo().getUserName());
             }
-            processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
         });
         map.put(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepVo -> {
             if (!ProcessStepHandlerType.END.getHandler().equals(processTaskStepVo.getHandler()) && StringUtils.isBlank(processTaskStepVo.getNextStepName())
@@ -246,6 +245,7 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
         processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStep.getProcessTaskId(), processTaskStep.getId(), GroupSearch.USER.getValue(), userUuid, ProcessUserType.MAJOR.getValue()));
         processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStep.getId(), ProcessTaskStatus.RUNNING.getValue(), 1));
         processTaskMapper.updateProcessTaskStepMajorUserAndStatus(new ProcessTaskStepUserVo(processTaskStep.getId(), userUuid, userName, ProcessTaskStepUserStatus.DOING.getValue()));
+        processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStep.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
     }
 
 }
