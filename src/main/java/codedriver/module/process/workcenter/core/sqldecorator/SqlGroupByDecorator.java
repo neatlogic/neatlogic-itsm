@@ -1,5 +1,6 @@
 package codedriver.module.process.workcenter.core.sqldecorator;
 
+import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
@@ -10,9 +11,7 @@ import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Title: SqlLimitDecorator
@@ -27,14 +26,12 @@ import java.util.Map;
 public class SqlGroupByDecorator extends SqlDecoratorBase {
     @Override
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
-        if (FieldTypeEnum.GROUP_COUNT.getValue().equals(workcenterVo.getSqlFieldType())) {
+        if (Arrays.asList(FieldTypeEnum.GROUP_COUNT.getValue(), FieldTypeEnum.SUB_GROUP_COUNT.getValue()).contains(workcenterVo.getSqlFieldType())) {
             Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
             List<String> columnList = new ArrayList<>();
             List<String> groupList = new ArrayList<>();
-            if (StringUtils.isNotBlank(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
-                groupList.add(workcenterVo.getDashboardWidgetChartConfigVo().getGroup());
-            }
-            if (StringUtils.isNotBlank(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
+            groupList.add(workcenterVo.getDashboardWidgetChartConfigVo().getGroup());
+            if (Objects.equals(workcenterVo.getSqlFieldType(), FieldTypeEnum.SUB_GROUP_COUNT.getValue())) {
                 groupList.add(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup());
             }
 
@@ -58,6 +55,23 @@ public class SqlGroupByDecorator extends SqlDecoratorBase {
         }
         if (FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())) {
             sqlSb.append(String.format(" group by %s.%s ", new ProcessTaskSqlTable().getShortName(), "id"));
+        }
+
+        if (FieldTypeEnum.GROUP_SUM.getValue().equals(workcenterVo.getSqlFieldType())) {
+            DashboardWidgetChartConfigVo chartVo = workcenterVo.getDashboardWidgetChartConfigVo();
+            String subGroup = chartVo.getSubGroup();
+            String subGroupProperty = StringUtils.EMPTY;
+            if (StringUtils.isNotBlank(subGroup)) {
+                IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(subGroup);
+                for (TableSelectColumnVo tableSelectColumnVo : column.getTableSelectColumn()) {
+                    Optional<SelectColumnVo> optional = tableSelectColumnVo.getColumnList().stream().filter(SelectColumnVo::getIsPrimary).findFirst();
+                    if (optional.isPresent()) {
+                        subGroupProperty = optional.get().getPropertyName();
+                        subGroupProperty = String.format(", a.%s ",subGroupProperty);
+                    }
+                }
+            }
+            sqlSb.append(String.format(" group by a.everyday %s", subGroupProperty));
         }
     }
 

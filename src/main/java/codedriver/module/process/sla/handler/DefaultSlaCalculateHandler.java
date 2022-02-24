@@ -7,6 +7,7 @@ package codedriver.module.process.sla.handler;
 
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.SlaStatus;
+import codedriver.framework.process.constvalue.SlaType;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeCostVo;
 import codedriver.framework.process.dto.ProcessTaskStepTimeAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -25,6 +26,11 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
     @Override
     public String getName() {
         return "处理时效计算规则（出厂默认）";
+    }
+
+    @Override
+    public SlaType getType() {
+        return SlaType.HANDLE;
     }
 
     @Override

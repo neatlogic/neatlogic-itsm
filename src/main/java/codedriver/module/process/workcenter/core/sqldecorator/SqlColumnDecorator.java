@@ -14,10 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Title: SqlColumnDecorator
@@ -99,16 +96,63 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
             }
         });
 
-        buildFieldMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), (workcenterVo, sqlSb) -> {
+        buildFieldMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), this::groupColumnService);
+
+        buildFieldMap.put(FieldTypeEnum.SUB_GROUP_COUNT.getValue(), this::subGroupColumnService);
+
+        buildFieldMap.put(FieldTypeEnum.GROUP_SUM.getValue(),(workcenterVo, sqlSb) -> {
             Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
             List<String> columnList = new ArrayList<>();
-            getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), true);
-            if (StringUtils.isNotBlank(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
-                getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), true);
+            List<String> groupColumns = Arrays.asList(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(),workcenterVo.getDashboardWidgetChartConfigVo().getGroup());
+            for(String groupColumn : groupColumns) {
+                if (columnComponentMap.containsKey(groupColumn)) {
+                    IProcessTaskColumn column = columnComponentMap.get(groupColumn);
+                    for (TableSelectColumnVo tableSelectColumnVo : column.getTableSelectColumn()) {
+                        if (tableSelectColumnVo.getColumnList().stream().anyMatch(SelectColumnVo::getIsPrimary)) {
+                            for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
+                                String format = " a.%s ";
+                                String columnStr = String.format(format, selectColumnVo.getPropertyName());
+                                if (!columnList.contains(columnStr)) {
+                                    columnList.add(columnStr);
+                                }
+                            }
+                        }
+                    }
+
+                }
             }
-            columnList.add("count(1) `count`");
             sqlSb.append(String.join(",", columnList));
+            sqlSb.append(", SUM( b.COUNT  ) AS `count`  ");
         });
+    }
+
+    /**
+     * group 拼接order sql
+     *
+     * @param workcenterVo 工单中心参数
+     * @param sqlSb        sql builder
+     */
+    private void groupColumnService(WorkcenterVo workcenterVo, StringBuilder sqlSb) {
+        Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+        List<String> columnList = new ArrayList<>();
+        getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), true);
+        columnList.add("count(1) `count`");
+        sqlSb.append(String.join(",", columnList));
+    }
+
+    /**
+     * sub group 拼接order sql
+     *
+     * @param workcenterVo 工单中心参数
+     * @param sqlSb        sql builder
+     */
+    private void subGroupColumnService(WorkcenterVo workcenterVo, StringBuilder sqlSb) {
+        Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+        List<String> columnList = new ArrayList<>();
+        getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), true);
+        getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), true);
+        columnList.add("count(1) `count`");
+        sqlSb.append(String.join(",", columnList));
     }
 
     /**
@@ -123,10 +167,10 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
         if (columnComponentMap.containsKey(theadName)) {
             IProcessTaskColumn column = columnComponentMap.get(theadName);
             for (TableSelectColumnVo tableSelectColumnVo : column.getTableSelectColumn()) {
-                if(!isGroup||tableSelectColumnVo.getColumnList().stream().anyMatch(SelectColumnVo::getIsPrimary)) {
+                if (!isGroup || tableSelectColumnVo.getColumnList().stream().anyMatch(SelectColumnVo::getIsPrimary)) {
                     for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
                         String format = " %s.%s as %s ";
-                        if(StringUtils.isNotBlank(selectColumnVo.getColumnFormat())){
+                        if (StringUtils.isNotBlank(selectColumnVo.getColumnFormat())) {
                             format = selectColumnVo.getColumnFormat();
                         }
                         String columnStr = String.format(format, tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName(), selectColumnVo.getPropertyName());
