@@ -42,7 +42,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Resource;
-import java.net.HttpURLConnection;
 import java.util.*;
 
 @Service
@@ -337,7 +336,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
     }
 
     /**
-     * 判断当前工单的sla是否失效
+     * 判断当前工单的sla是否失效，返回有效的slaId列表
      * @param processTaskId
      */
     private List<Long> slaIsInvalid(Long processTaskId) {
@@ -369,11 +368,9 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
             }
             if (invalid) {
                 //该时效失效
-//                System.out.println("失效slaId=" + slaId);
                 processTaskSlaVo.setIsActive(0);
                 deleteSlaById(slaId);
             } else {
-//                System.out.println("有效slaId=" + slaId);
                 resultList.add(slaId);
                 processTaskSlaVo.setIsActive(1);
             }
@@ -517,6 +514,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                 } else {
                     processTaskSlaMapper.insertProcessTaskSlaTime(slaTimeVo);
                 }
+                //如果时效状态为已完成，则将耗时数据插入processtask_step_sla_time表；当时效重算时，将该时效的耗时数据从processtask_step_sla_time表删除
                 if (SlaStatus.DONE.name().toLowerCase().equals(slaTimeVo.getStatus())) {
                     List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
                     if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
