@@ -190,19 +190,22 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
                 processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
                 processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
             } else {
-                processTaskMapper.updateProcessTaskStepMajorUserAndStatus(new ProcessTaskStepUserVo(processTaskStepVo.getId(), processTaskStepVo.getOriginalUserVo().getUuid(), processTaskStepVo.getOriginalUserVo().getUserName(), ProcessTaskStepUserStatus.DONE.getValue()));
+                processTaskMapper.updateProcessTaskStepMajorUserAndStatus(new ProcessTaskStepUserVo(processTaskStepVo.getId()
+                        , processTaskStepVo.getOriginalUserVo().getUuid()
+                        , processTaskStepVo.getOriginalUserVo().getUserName()
+                        , ProcessTaskStepUserStatus.DONE.getValue())
+                );
             }
             // 更改当前步骤状态为SUCCEED
             processTaskStepVo.setIsActive(2);
             processTaskStepVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
             processTaskStepVo.setUpdateEndTime(1);
             processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
-            // 激活与下个节点之间的路径
+            // 激活与下个节点之间的路径、更改工单状态
             if (ProcessStepHandlerType.END.getHandler().equals(processTaskStepVo.getHandler())) {
                 processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.SUCCEED.getValue()));
             } else if (nextStep != null) {
                 processTaskMapper.updateProcessTaskStepRelIsHit(new ProcessTaskStepRelVo(processTaskStepVo.getId(), nextStep.getId(), 1));
-                processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
             }
         });
         map.put(ProcessTaskStatus.HANG.getValue(), processTaskStepVo -> {
@@ -210,7 +213,7 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
             processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
             processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
             processTaskStepVo.setIsActive(0);
-            processTaskStepVo.setStatus(ProcessTaskStatus.HANG.name());
+            processTaskStepVo.setStatus(ProcessTaskStatus.HANG.getValue());
             processTaskStepVo.setUpdateEndTime(1);
             processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
             processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.HANG.getValue()));
