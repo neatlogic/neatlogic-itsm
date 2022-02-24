@@ -344,7 +344,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
         ProcessTaskSlaVo processTaskSlaVo = new ProcessTaskSlaVo();
         List<Long> allSlaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskId(processTaskId);
         for (Long slaId: allSlaIdList) {
-            System.out.println("slaId=" + slaId);
+//            System.out.println("slaId=" + slaId);
             processTaskSlaVo.setId(slaId);
             boolean invalid = true;
             List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
