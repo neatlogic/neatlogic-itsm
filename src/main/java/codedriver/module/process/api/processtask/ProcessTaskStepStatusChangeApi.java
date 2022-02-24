@@ -76,7 +76,6 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
     @Description(desc = "手动更改工单步骤状态")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        // todo 参数注释、异常、代码合并、处理人
         Long processTaskId = jsonObj.getLong("processTaskId");
         String processTaskStepName = jsonObj.getString("processTaskStepName");
         String processTaskNextStepName = jsonObj.getString("processTaskNextStepName");
@@ -133,7 +132,7 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
         map.put(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo -> {
             List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
             // 需要处理人的步骤，不指定处理人时，旧处理人必须存在
-            if ("process".equals(processTaskStepVo.getType()) && processTaskStepUserList.isEmpty()) {
+            if ("process".equals(processTaskStepVo.getType()) && processTaskStepUserList.isEmpty() && processTaskStepVo.getOriginalUserVo() == null) {
                 throw new ProcessTaskStepUserUnAssignException();
             }
             if ("process".equals(processTaskStepVo.getType())) {
