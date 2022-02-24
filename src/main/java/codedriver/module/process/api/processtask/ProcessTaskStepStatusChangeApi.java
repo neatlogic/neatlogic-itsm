@@ -68,7 +68,7 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id"),
             @Param(name = "processTaskStepName", type = ApiParamType.STRING, desc = "工单步骤名称"),
             @Param(name = "processTaskNextStepName", type = ApiParamType.STRING, desc = "需要激活的下一步骤名称(更改步骤状态为succeed时需要填此参数)"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤Id(待更改状态的步骤名称重复时需要填此参数。此参数存在时，无需填processTaskId与processTaskNextStepName)"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤Id(待更改状态的步骤名称重复时需要填此参数。此参数存在时，无需填processTaskId与processTaskStepName)"),
             @Param(name = "processTaskNextStepId", type = ApiParamType.LONG, desc = "下一步工单步骤Id(待激活的下一步骤名称重复时需要填此参数。此参数存在时，无需填processTaskNextStepName)"),
             @Param(name = "status", type = ApiParamType.ENUM, rule = "pending,running,succeed,hang", isRequired = true, desc = "工单步骤状态"),
             @Param(name = "userId", type = ApiParamType.STRING, desc = "处理人userId"),
@@ -130,13 +130,13 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
             changeProcessTaskStepStatusToPending(processTaskStepVo);
         });
         map.put(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo -> {
-            List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
-            // 需要处理人的步骤，不指定处理人时，旧处理人必须存在
-            if ("process".equals(processTaskStepVo.getType()) && processTaskStepUserList.isEmpty() && processTaskStepVo.getOriginalUserVo() == null) {
-                throw new ProcessTaskStepUserUnAssignException();
-            }
             if ("process".equals(processTaskStepVo.getType())) {
                 if (processTaskStepVo.getOriginalUserVo() == null) {
+                    List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
+                    // 需要处理人的步骤，不指定处理人时，旧处理人必须存在
+                    if (processTaskStepUserList.isEmpty()) {
+                        throw new ProcessTaskStepUserUnAssignException();
+                    }
                     changeProcessTaskStepStatusToRunning(processTaskStepVo, new UserVo(processTaskStepUserList.get(0).getUserUuid(), processTaskStepUserList.get(0).getUserName()));
                 } else {
                     processTaskMapper.deleteProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
