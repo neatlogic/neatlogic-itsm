@@ -75,6 +75,8 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 					if (after > 0) {
 						resultObj.put("status", "running");
 						return resultObj;
+					} else {
+						processTaskMapper.deleteProcessTaskStepInOperationById(processTaskStepInOperationVo.getId());
 					}
 				}
 			}
