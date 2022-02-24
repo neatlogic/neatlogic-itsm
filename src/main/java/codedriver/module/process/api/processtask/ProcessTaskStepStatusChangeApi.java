@@ -13,14 +13,12 @@ import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.exception.user.UserNotFoundException;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskStepUserVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepFoundMultipleException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -39,6 +37,7 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 @Service
@@ -70,15 +69,17 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id"),
             @Param(name = "processTaskStepName", type = ApiParamType.STRING, desc = "工单步骤名称"),
+            @Param(name = "processTaskNextStepName", type = ApiParamType.STRING, desc = "需要激活的下一步骤名称(更改步骤状态为succeed时需要填此参数)"),
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤Id"),
-            @Param(name = "status", type = ApiParamType.ENUM, rule = "pending,running,succeed,failed,hang,draft", desc = "工单步骤状态"),
-            @Param(name = "userId", type = ApiParamType.STRING, desc = "处理人userId")
+            @Param(name = "status", type = ApiParamType.ENUM, rule = "pending,running,succeed,hang", isRequired = true, desc = "工单步骤状态"),
+            @Param(name = "userId", type = ApiParamType.STRING, desc = "处理人userId"),
     })
     @Description(desc = "手动更改工单步骤状态")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         String processTaskStepName = jsonObj.getString("processTaskStepName");
+        String processTaskNextStepName = jsonObj.getString("processTaskNextStepName");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         String status = jsonObj.getString("status");
         String userId = jsonObj.getString("userId");
@@ -111,6 +112,8 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
             }
             processTaskStep.setOriginalUserVo(user);
         }
+        processTaskStep.setNextStepName(processTaskNextStepName);
+        processTaskMapper.getProcessTaskLockById(processTaskStep.getProcessTaskId());
         map.get(status).accept(processTaskStep);
         return null;
     }
@@ -123,43 +126,70 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
             if (processTaskStepVo.getOriginalUserVo() == null) {
                 throw new ApiRuntimeException("必须指定处理人");
             }
-            processTaskMapper.deleteProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
-            processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
-            processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId()
-                    , GroupSearch.USER.getValue(), processTaskStepVo.getOriginalUserVo().getUuid(), ProcessUserType.MAJOR.getValue()));
-            processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStepVo.getId(), ProcessTaskStatus.PENDING.getValue(), 1));
-            processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
+            changeProcessTaskStepStatusToPending(processTaskStepVo);
         });
         map.put(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo -> {
             if (processTaskStepVo.getOriginalUserVo() == null) {
                 // 不指定处理人时，旧处理人必须存在
                 List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
                 if (processTaskStepUserList.isEmpty()) {
-                    throw new ApiRuntimeException("旧处理人不存在");
+                    throw new ApiRuntimeException("必须指定处理人");
                 }
                 ProcessTaskStepUserVo majorUser = processTaskStepUserList.get(0);
-                changeStatus(processTaskStepVo, majorUser.getUserUuid(), majorUser.getUserName());
+                changeProcessTaskStepStatusToRunning(processTaskStepVo, majorUser.getUserUuid(), majorUser.getUserName());
             } else {
-                changeStatus(processTaskStepVo, processTaskStepVo.getOriginalUserVo().getUuid(), processTaskStepVo.getOriginalUserVo().getUserName());
+                changeProcessTaskStepStatusToRunning(processTaskStepVo, processTaskStepVo.getOriginalUserVo().getUuid(), processTaskStepVo.getOriginalUserVo().getUserName());
             }
             processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
         });
         map.put(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepVo -> {
+            if (!ProcessStepHandlerType.END.getHandler().equals(processTaskStepVo.getHandler()) && StringUtils.isBlank(processTaskStepVo.getNextStepName())) {
+                throw new ParamNotExistsException("必须指定需要激活的下一步骤名称");
+            }
+            ProcessTaskStepVo nextStep = null;
+            if (StringUtils.isNotBlank(processTaskStepVo.getNextStepName())) {
+                List<ProcessTaskStepVo> nextStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndStepName(new ProcessTaskStepVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getNextStepName()));
+                if (nextStepList.isEmpty()) {
+                    throw new ProcessTaskStepNotFoundException(processTaskStepVo.getNextStepName());
+                }
+                // todo 如果存在多个的话，要指定步骤id
+                if (nextStepList.size() > 1) {
+                    throw new ProcessTaskStepFoundMultipleException(processTaskStepVo.getNextStepName());
+                }
+                List<ProcessTaskStepRelVo> stepRelVoList = processTaskMapper.getProcessTaskStepRelByFromId(processTaskStepVo.getId());
+                if (stepRelVoList.stream().noneMatch(o -> Objects.equals(o.getToProcessTaskStepId(), nextStepList.get(0).getId()))) {
+                    throw new ApiRuntimeException(processTaskStepVo.getNextStepName() + "不是步骤：" + processTaskStepVo.getName() + "的下一步骤");
+                }
+                nextStep = nextStepList.get(0);
+            }
+
+            // todo 无法确定当前步骤是否需要处理人，所以如果存在原处理人的话，就更新状态
+            // 完成并激活下一步骤，先把当前步骤的user改为done、step改为succeed、worker清掉；然后把连线状态改掉，下一步骤改为running
             processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
-            ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
-            processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
-            processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
-            processTaskStepVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
+            if (processTaskStepVo.getOriginalUserVo() == null) {
+                ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
+                processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
+                processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
+            } else {
+                // 替换处理人
+                processTaskMapper.updateProcessTaskStepMajorUserAndStatus(new ProcessTaskStepUserVo(processTaskStepVo.getId(), processTaskStepVo.getOriginalUserVo().getUuid(), processTaskStepVo.getOriginalUserVo().getUserName(), ProcessTaskStepUserStatus.DONE.getValue()));
+            }
             processTaskStepVo.setIsActive(2);
+            processTaskStepVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
             processTaskStepVo.setUpdateEndTime(1);
             processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
-            // todo 更改工单状态
-            // todo 要不要激活下一步，如果知道激活哪一步？如何激活？
-        });
-        map.put(ProcessTaskStatus.FAILED.getValue(), processTaskStepVo -> {
-            processTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
-            processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
-            processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.FAILED.getValue()));
+            if (ProcessStepHandlerType.END.getHandler().equals(processTaskStepVo.getHandler())) {
+                processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.SUCCEED.getValue()));
+            } else if (nextStep != null) {
+                // todo 把下一步骤改为running
+                processTaskMapper.updateProcessTaskStepRelIsHit(new ProcessTaskStepRelVo(processTaskStepVo.getId(), nextStep.getId(), 1));
+                nextStep.setIsActive(0);
+                nextStep.setStatus(ProcessTaskStatus.RUNNING.name());
+                nextStep.setUpdateActiveTime(1);
+                nextStep.setUpdateStartTime(1);
+                processTaskMapper.updateProcessTaskStepStatus(nextStep);
+                processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
+            }
         });
         map.put(ProcessTaskStatus.HANG.getValue(), processTaskStepVo -> {
             ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
@@ -171,15 +201,20 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
             processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
             processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.HANG.getValue()));
         });
-        map.put(ProcessTaskStatus.DRAFT.getValue(), processTaskStepVo -> {
-            processTaskStepVo.setIsActive(1);
-            processTaskStepVo.setStatus(ProcessTaskStatus.DRAFT.getValue());
-            processTaskStepVo.setUpdateActiveTime(1);
-            processTaskStepVo.setUpdateStartTime(1);
-            processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
-            processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.HANG.getValue()));
-        });
+    }
 
+    /**
+     * 更改步骤状态为待处理
+     *
+     * @param processTaskStepVo
+     */
+    private void changeProcessTaskStepStatusToPending(ProcessTaskStepVo processTaskStepVo) {
+        processTaskMapper.deleteProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
+        processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
+        processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId()
+                , GroupSearch.USER.getValue(), processTaskStepVo.getOriginalUserVo().getUuid(), ProcessUserType.MAJOR.getValue()));
+        processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStepVo.getId(), ProcessTaskStatus.PENDING.getValue(), 1));
+        processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
     }
 
     /**
@@ -189,7 +224,7 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
      * @param userUuid        处理人uuid
      * @param userName        处理人userName
      */
-    private void changeStatus(ProcessTaskStepVo processTaskStep, String userUuid, String userName) {
+    private void changeProcessTaskStepStatusToRunning(ProcessTaskStepVo processTaskStep, String userUuid, String userName) {
         processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStep.getId(), ProcessUserType.MAJOR.getValue()));
         processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStep.getProcessTaskId(), processTaskStep.getId(), GroupSearch.USER.getValue(), userUuid, ProcessUserType.MAJOR.getValue()));
         processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStep.getId(), ProcessTaskStatus.RUNNING.getValue(), 1));
