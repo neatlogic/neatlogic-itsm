@@ -155,7 +155,7 @@ public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
         map.put(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepVo -> {
             if (!ProcessStepHandlerType.END.getHandler().equals(processTaskStepVo.getHandler()) && StringUtils.isBlank(processTaskStepVo.getNextStepName())
                     && processTaskStepVo.getNextStepId() == null) {
-                throw new ParamNotExistsException("必须指定需要激活的下一步骤名称");
+                throw new ApiRuntimeException("必须指定需要激活的下一步骤名称或步骤id");
             }
             ProcessTaskStepVo nextStep = null;
             // 检查下一步骤是否合法
