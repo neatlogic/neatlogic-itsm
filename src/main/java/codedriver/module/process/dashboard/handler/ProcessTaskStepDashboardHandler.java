@@ -1,3 +1,8 @@
+/*
+ * Copyright (c)  2022 TechSure Co.,Ltd.  All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.dashboard.handler;
 
 import codedriver.framework.dashboard.core.*;
@@ -5,7 +10,7 @@ import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.module.process.dashboard.core.showconfig.ProcessTaskDashboardWidgetShowConfigBase;
+import codedriver.module.process.dashboard.core.showconfig.ProcessTaskStepDashboardWidgetShowConfigBase;
 import codedriver.module.process.dashboard.core.statistics.DashboardStatisticsFactory;
 import codedriver.module.process.dashboard.core.statistics.StatisticsBase;
 import codedriver.module.process.dashboard.dto.DashboardWidgetChartConfigProcessVo;
@@ -14,11 +19,11 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
+public class ProcessTaskStepDashboardHandler extends DashboardHandlerBase {
 
     @Override
     public String getName() {
-        return "processtask";
+        return "processtaskStep";
     }
 
     @Override
@@ -60,10 +65,10 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             JSONObject chartConfig = chart.getChartConfig();
             if (chartConfig.containsKey("showConfig")) {
                 JSONObject showConfigJson = chartConfig.getJSONObject("showConfig");
-                IDashboardWidgetShowConfig chartCustom = DashboardWidgetShowConfigFactory.getChart(widgetVo.getChartType(), "process","processtask");
+                IDashboardWidgetShowConfig chartCustom = DashboardWidgetShowConfigFactory.getChart(widgetVo.getChartType(), "process","processtaskStep");
                 //如果无须自定义渲染配置，则使用默认配置
                 if (chartCustom == null) {
-                    chartCustom = new ProcessTaskDashboardWidgetShowConfigBase() {
+                    chartCustom = new ProcessTaskStepDashboardWidgetShowConfigBase() {
                         @Override
                         public String[] getSupportChart() {
                             return new String[0];
@@ -84,7 +89,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 
     @Override
     public String getDisplayName() {
-        return "ITSM工单数据";
+        return "ITSM工单任务数据";
     }
 
     @Override

@@ -12,9 +12,9 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
+import codedriver.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
 import codedriver.module.process.dashboard.core.statistics.StatisticsBase;
-import codedriver.module.process.workcenter.core.SqlBuilder;
+import codedriver.module.process.sql.decorator.SqlBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +38,7 @@ public class DashboardSumStatistics extends StatisticsBase {
         DashboardWidgetChartConfigVo chartConfigVo = workcenterVo.getDashboardWidgetChartConfigVo();
         //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
         chartConfigVo.setSubSql(getSubSql(workcenterVo));
-        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.GROUP_SUM);
+        SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_SUM);
         System.out.println(sb.build());
         List<Map<String, Object>> groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
         IProcessTaskColumn groupColumn = ProcessTaskColumnFactory.columnComponentMap.get(chartConfigVo.getGroup());
@@ -59,7 +59,7 @@ public class DashboardSumStatistics extends StatisticsBase {
      */
     private String getSubSql(WorkcenterVo workcenterVo){
         //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
-        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.GROUP_COUNT);
+        SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_COUNT);
         DashboardWidgetChartConfigVo chartConfigVo = workcenterVo.getDashboardWidgetChartConfigVo();
         System.out.println(sb.build());
         List<Map<String, Object>> groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
@@ -72,7 +72,7 @@ public class DashboardSumStatistics extends StatisticsBase {
                 //先排序分页获取前分组数的group
                 groupColumn.getExchangeToDashboardGroupDataMap(groupMapList, workcenterVo);
                 //根据分组groupDataList、子分组 再次搜索
-                sb = new SqlBuilder(workcenterVo, FieldTypeEnum.SUB_GROUP_COUNT);
+                sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.SUB_GROUP_COUNT);
                 System.out.println(sb.build());
             }
         }

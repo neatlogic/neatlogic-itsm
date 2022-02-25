@@ -4,30 +4,25 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.*;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskStepUserSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import codedriver.framework.service.AuthenticationInfoService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -99,83 +94,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
         return ParamType.ARRAY;
     }
 
-    @Override
-    public String getMyEsName() {
-        return String.format(" %s.%s", getType(), "step.usertypelist.userlist");
-    }
 
-    @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        ConditionVo condition = conditionList.get(index);
-        //List<ConditionVo> stepStatusConditionList = conditionList.stream().filter(con->con.getName().equals(ProcessWorkcenterField.STEP_STATUS.getValue())).collect(Collectors.toList());
-        //if(CollectionUtils.isNotEmpty(stepStatusConditionList)) {
-        //ConditionVo stepStatusCondition = stepStatusConditionList.get(0);
-//			List<String> stepStatusValueList = new ArrayList<>();
-//			if(stepStatusCondition.getValueList() instanceof String) {
-//				stepStatusValueList.add((String)stepStatusCondition.getValueList());
-//			}else if(stepStatusCondition.getValueList() instanceof List){
-//				List<String> valueList = JSON.parseArray(JSON.toJSONString(stepStatusCondition.getValueList()), String.class);
-//				stepStatusValueList.addAll(valueList);
-//			}
-        List<String> stepUserValueList = new ArrayList<>();
-        if (condition.getValueList() instanceof String) {
-            stepUserValueList.add((String) condition.getValueList());
-        } else if (condition.getValueList() instanceof List) {
-            List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
-            stepUserValueList.addAll(valueList);
-        }
-        List<String> userList = new ArrayList<String>();
-        for (String user : stepUserValueList) {
-            if (user.equals(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue())) {
-                user = GroupSearch.USER.getValuePlugin() + UserContext.get().getUserUuid();
-            }
-            //for(String stepStatus : stepStatusValueList) {
-            userList.add(user);
-            //如果是待处理状态，则需额外匹配角色和组
-            //if(stepStatus.equals(ProcessTaskStatus.PENDING.getValue())) {
-            UserVo userVo = userMapper.getUserByUuid(user.replace(GroupSearch.USER.getValuePlugin(), ""));
-            if (userVo != null) {
-                List<String> teamList = userVo.getTeamUuidList();
-                if (CollectionUtils.isNotEmpty(teamList)) {
-                    for (String team : teamList) {
-                        userList.add(GroupSearch.TEAM.getValuePlugin() + team);
-                    }
-                }
-                List<String> roleUuidList = userVo.getRoleUuidList();
-                if (CollectionUtils.isNotEmpty(roleUuidList)) {
-                    for (String roleUuid : roleUuidList) {
-                        userList.add(GroupSearch.ROLE.getValuePlugin() + roleUuid);
-                    }
-                }
-            }
-            //}
-
-            //}
-        }
-        String value = String.join("','", userList);
-        //排除开始节点的处理人
-        return String.format(Expression.INCLUDE.getExpressionEs(), this.getEsName(), String.format("'%s'", value)) + " and not common.step.usertypelist.type = 'start' ";
-//		}else {
-//		    List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
-//	        //替换“当前登录人标识”为当前登录用户 
-//	        String loginUser = GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue();
-//	        if(valueList.contains(loginUser)) {
-//	            Iterator<String>  valueIterator = valueList.iterator();
-//	            if(valueIterator.hasNext()) {
-//	                String value = valueIterator.next();
-//	                if(value.equals(loginUser)) {
-//	                    valueIterator.remove();
-//	                    valueList.add(GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid());
-//	                }
-//	            }
-//	        }
-//	        String value = String.join("','", valueList);
-//	        if(StringUtils.isNotBlank(value.toString())) {
-//	            value = String.format("'%s'",  value);
-//	        }
-//	        return String.format(Expression.INCLUDE.getExpressionEs(),this.getEsName(),value);
-//		}
-    }
 
     @Override
     public Object valueConversionText(Object value, JSONObject config) {
@@ -211,13 +130,16 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
         }
         sqlSb.append(" (");
         // status
-        List<String> statusList = Stream.of(ProcessTaskStatus.RUNNING.getValue())
+        /*List<String> statusList = Stream.of(ProcessTaskStatus.RUNNING.getValue())
                 .map(String::toString).collect(Collectors.toList());
         sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), String.join("','", statusList)));
-        sqlSb.append(" and ( ");
+        sqlSb.append(" and ( ");*/
         //补充待处理人sql 条件
         getProcessingTaskOfMineSqlWhere(sqlSb, userList, teamList, roleList);
-        sqlSb.append(" )) ");
+        //补充处理人sql 条件
+        sqlSb.append(" or ");
+        sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.USER_UUID.getValue(), String.join("','", userList)));
+        sqlSb.append(" ) ");
 
     }
 
