@@ -302,7 +302,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
             dataVo.setColumnList(columnList);
             dataVo.setKeyword(value);
             dataVo.setKeywordColumn(mapping.getText());
-            List<Map<String, JSONObject>> tbodyList = matrixDataSourceHandler.TableColumnDataSearch(dataVo);
+            List<Map<String, JSONObject>> tbodyList = matrixDataSourceHandler.searchTableColumnData(dataVo);
             for (Map<String, JSONObject> firstObj : tbodyList) {
                 JSONObject valueObj = firstObj.get(mapping.getValue());
                 return valueObj.getString("compose");
