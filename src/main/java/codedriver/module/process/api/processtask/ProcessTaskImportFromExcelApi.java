@@ -3,25 +3,23 @@ package codedriver.module.process.api.processtask;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.file.*;
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
-import codedriver.framework.process.dao.mapper.*;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.PriorityMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
-import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.process.util.ProcessConfigUtil;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import codedriver.framework.restful.core.publicapi.PublicApiComponentFactory;
-import codedriver.framework.restful.dto.ApiVo;
 import codedriver.framework.util.ExcelUtil;
-import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.module.framework.form.attribute.handler.DivideHandler;
 import codedriver.module.framework.form.attribute.handler.LinkHandler;
 import codedriver.module.process.dao.mapper.ProcessMapper;
@@ -39,7 +37,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -293,28 +290,19 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             } else if ("描述".equals(key)) {
                 task.put("content", entry.getValue());
             } else {
-                if (CollectionUtils.isNotEmpty(formAttributeList)) {
-                    for (FormAttributeVo att : formAttributeList) {
-                        if (att.getLabel().equals(key)) {
-                            JSONObject formdata = new JSONObject();
-                            formdata.put("attributeUuid", att.getUuid());
-                            formdata.put("handler", att.getHandler());
-                            String content = entry.getValue();
-                            if (StringUtils.isNotBlank(content)) {
-                                IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(att.getHandler());
-                                if (handler != null) {
-                                    List<String> values = new ArrayList<>();
-                                    if (content.contains(",")) {
-                                        values = Arrays.asList(content.split(","));
-                                    } else {
-                                        values.add(content);
-                                    }
-                                    formdata.put("dataList", handler.textConversionValue(values, JSONObject.parseObject(att.getConfig())));
-                                    formAttributeDataList.add(formdata);
-                                    break;
-                                }
-                            }
+                if (CollectionUtils.isNotEmpty(formAttributeList) && formAttributeList.stream().anyMatch(o -> Objects.equals(o.getLabel(), key))) {
+                    JSONObject formdata = new JSONObject();
+                    formdata.put("label", key);
+                    String content = entry.getValue();
+                    if (StringUtils.isNotBlank(content)) {
+                        List<String> values = new ArrayList<>();
+                        if (content.contains(",")) {
+                            values = Arrays.asList(content.split(","));
+                        } else {
+                            values.add(content);
                         }
+                        formdata.put("dataList", values);
+                        formAttributeDataList.add(formdata);
                     }
                 }
             }
