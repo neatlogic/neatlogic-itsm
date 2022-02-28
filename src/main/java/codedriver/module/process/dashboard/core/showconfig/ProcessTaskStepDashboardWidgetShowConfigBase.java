@@ -29,7 +29,8 @@ public abstract class ProcessTaskStepDashboardWidgetShowConfigBase implements ID
 
     public List<IDashboardGroupField> getMyGroupFields(){
         return Arrays.asList(
-                ProcessWorkcenterField.STEP_USER
+                ProcessWorkcenterField.STEP_USER,
+                ProcessWorkcenterField.STEP_NAME
         );
     }
 
@@ -71,7 +72,8 @@ public abstract class ProcessTaskStepDashboardWidgetShowConfigBase implements ID
 
     public List<IDashboardGroupField> getMySubGroupFields(){
         return Arrays.asList(
-                ProcessWorkcenterField.STEP_USER
+                ProcessWorkcenterField.STEP_USER,
+                ProcessWorkcenterField.STEP_NAME
         );
     }
 

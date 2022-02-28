@@ -385,7 +385,7 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
         return joinTableColumnList;
     }
 
-    protected void getJoinTableOfColumn(StringBuilder sb, WorkcenterVo workcenterVo) {
+    protected  List<JoinTableColumnVo> getJoinTableOfColumn(StringBuilder sb, WorkcenterVo workcenterVo) {
         List<JoinTableColumnVo> joinTableColumnList = new ArrayList<>();
         //根据接口入参的返回需要的columnList,然后获取需要关联的tableList
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
@@ -401,7 +401,7 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
                 }
             }
         }
-        buildFromJoinSql(sb, workcenterVo, joinTableColumnList);
+        return buildFromJoinSql(sb, workcenterVo, joinTableColumnList);
     }
 
     /**
@@ -409,8 +409,8 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
      *
      * @param workcenterVo 工单中心参数
      */
-    protected void getJoinTableOfGroupColumn(StringBuilder sb, WorkcenterVo workcenterVo) {
-        getJoinTableOfGroupColumnCommon(sb, workcenterVo, false);
+    protected List<JoinTableColumnVo> getJoinTableOfGroupColumn(StringBuilder sb, WorkcenterVo workcenterVo) {
+        return getJoinTableOfGroupColumnCommon(sb, workcenterVo, false);
     }
 
     /**
@@ -427,7 +427,7 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
      *
      * @param workcenterVo 工单中心参数
      */
-    protected void getJoinTableOfGroupColumnCommon(StringBuilder sb, WorkcenterVo workcenterVo, boolean isSubGroup) {
+    protected List<JoinTableColumnVo> getJoinTableOfGroupColumnCommon(StringBuilder sb, WorkcenterVo workcenterVo, boolean isSubGroup) {
         //先根据条件补充join table
         List<JoinTableColumnVo> joinTableColumnList = getJoinTableOfCondition(sb, workcenterVo);
         //根据接口入参的返回需要的columnList,然后获取需要关联的tableList
@@ -444,7 +444,7 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
             }
         }
 
-        buildFromJoinSql(sb, workcenterVo, joinTableColumnList);
+        return buildFromJoinSql(sb, workcenterVo, joinTableColumnList);
     }
 
     protected List<JoinTableColumnVo> getJoinTableColumnList(Map<String, IProcessTaskColumn> columnComponentMap, String columnName) {
@@ -459,7 +459,7 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
      * @param sqlSb        sql
      * @param workcenterVo 工单中心参数
      */
-    protected void buildFromJoinSql(StringBuilder sqlSb, WorkcenterVo workcenterVo, List<JoinTableColumnVo> joinTableColumnList) {
+    protected List<JoinTableColumnVo> buildFromJoinSql(StringBuilder sqlSb, WorkcenterVo workcenterVo, List<JoinTableColumnVo> joinTableColumnList) {
         //补充排序需要的表
         joinTableColumnList.addAll(getJoinTableOfOrder(workcenterVo, joinTableColumnList));
         sqlSb.append(" from  processtask pt ");
@@ -473,6 +473,7 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
         for (JoinTableColumnVo joinTableColumn : joinTableColumnList) {
             sqlSb.append(joinTableColumn.toSqlString());
         }
+        return joinTableColumnList;
     }
 
     /**

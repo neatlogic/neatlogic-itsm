@@ -77,6 +77,7 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
                     || condition.getName().equals(ProcessWorkcenterField.ENDTIME.getValue())
                     || condition.getName().equals(ProcessWorkcenterField.SERIAL_NUMBER.getValue())
                     || condition.getName().equals(ProcessWorkcenterField.STARTTIME.getValue())
+                    || condition.getName().equals(ProcessWorkcenterField.ACTIVETIME.getValue())
                     || (Objects.equals(workcenterUuid, ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()) && condition.getName().equals(ProcessWorkcenterField.EXPIRED_TIME.getValue()))
                     || ProcessWorkcenterField.getValue(condition.getName()) == null
                     || !(condition instanceof IProcessTaskCondition)
