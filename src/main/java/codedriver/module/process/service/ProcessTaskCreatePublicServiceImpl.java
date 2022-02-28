@@ -67,6 +67,13 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
     @Resource
     private ProcessTaskService processTaskService;
 
+    /**
+     * 创建工单
+     *
+     * @param paramObj
+     * @return
+     * @throws Exception
+     */
     @Override
     public JSONObject createProcessTask(JSONObject paramObj) throws Exception {
         JSONObject result = new JSONObject();
