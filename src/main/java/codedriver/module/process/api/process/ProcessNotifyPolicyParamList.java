@@ -55,7 +55,7 @@ public class ProcessNotifyPolicyParamList extends PrivateApiComponentBase {
     @Output({
             @Param(explode = ConditionParamVo[].class, desc = "流程参数列表")
     })
-    @Description(desc = "流程参数列表接口")
+    @Description(desc = "流程通知策略参数列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String notifyPolicyHandler = jsonObj.getString("notifyPolicyHandler");
