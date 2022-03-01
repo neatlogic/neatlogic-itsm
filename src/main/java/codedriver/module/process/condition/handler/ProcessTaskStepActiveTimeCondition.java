@@ -35,7 +35,7 @@ public class ProcessTaskStepActiveTimeCondition extends ProcessTaskConditionBase
 
     @Override
     public String getHandler(FormConditionModel processWorkcenterConditionType) {
-        return FormHandlerType.DATE.toString();
+        return FormHandlerType.DATETIME.toString();
     }
 
     @Override
