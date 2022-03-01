@@ -61,7 +61,7 @@ public class DashboardSumStatistics extends StatisticsBase {
         //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
         SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_COUNT);
         DashboardWidgetChartConfigVo chartConfigVo = workcenterVo.getDashboardWidgetChartConfigVo();
-        System.out.println(sb.build());
+        //System.out.println(sb.build());
         List<Map<String, Object>> groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
         IProcessTaskColumn groupColumn = ProcessTaskColumnFactory.columnComponentMap.get(chartConfigVo.getGroup());
         IProcessTaskColumn subGroupColumn = null;
@@ -73,7 +73,7 @@ public class DashboardSumStatistics extends StatisticsBase {
                 groupColumn.getExchangeToDashboardGroupDataMap(groupMapList, workcenterVo);
                 //根据分组groupDataList、子分组 再次搜索
                 sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.SUB_GROUP_COUNT);
-                System.out.println(sb.build());
+                //System.out.println(sb.build());
             }
         }
         return sb.build();

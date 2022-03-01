@@ -29,14 +29,14 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class DashboardAvgResponseCostTimeStatistics extends StatisticsBase {
+public class DashboardResponsePunctualityStatistics extends StatisticsBase {
 
     @Resource
     ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getName() {
-        return ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getValue();
+        return ProcessTaskDashboardStatistics.RESPONSE_PUNCTUALITY.getValue();
     }
 
     @Override
@@ -50,7 +50,7 @@ public class DashboardAvgResponseCostTimeStatistics extends StatisticsBase {
             workcenterVo.setPageSize(chartConfigVo.getLimitNum());
         }
         //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
-        SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_AVG_RESPONSE_COST_TIME);
+        SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_RESPONSE_PUNCTUALITY);
         //System.out.println(sb.build());
         List<Map<String, Object>> groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
         IProcessTaskColumn groupColumn = ProcessTaskColumnFactory.columnComponentMap.get(chartConfigVo.getGroup());
@@ -65,7 +65,7 @@ public class DashboardAvgResponseCostTimeStatistics extends StatisticsBase {
         return new ArrayList<TableSelectColumnVo>() {
             {
                 add(new TableSelectColumnVo(new ProcessTaskStepSlaTimeSqlTable(), Collections.singletonList(
-                        new SelectColumnVo(ProcessTaskStepSlaTimeSqlTable.FieldEnum.TIME_COST.getValue(), "count", true, " AVG(%s.%s)/60000 ")
+                        new SelectColumnVo(ProcessTaskStepSlaTimeSqlTable.FieldEnum.IS_TIMEOUT.getValue(), "count", true, " (1 - SUM(%s.%s)/COUNT(1))*100 ")
                 )));
             }
         };
@@ -87,6 +87,6 @@ public class DashboardAvgResponseCostTimeStatistics extends StatisticsBase {
 
     @Override
     public String getUnit(){
-        return "分";
+        return "%";
     }
 }

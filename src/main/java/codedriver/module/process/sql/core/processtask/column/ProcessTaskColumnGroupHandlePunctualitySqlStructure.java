@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class ProcessTaskColumnGroupAvgCostTimeSqlStructure extends ProcessSqlBase {
+public class ProcessTaskColumnGroupHandlePunctualitySqlStructure extends ProcessSqlBase {
 
     @Override
     public String getName() {
-        return ProcessSqlTypeEnum.GROUP_AVG_COST_TIME.getValue();
+        return ProcessSqlTypeEnum.GROUP_HANDLE_PUNCTUALITY.getValue();
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ProcessTaskColumnGroupAvgCostTimeSqlStructure extends ProcessSqlBas
         List<String> columnList = new ArrayList<>();
         getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), true);
         //补充统计column
-        StatisticsBase avgStatistics = DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getValue());
+        StatisticsBase avgStatistics = DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.HANDLE_PUNCTUALITY.getValue());
         List<TableSelectColumnVo> selectColumnVos = avgStatistics.getTableSelectColumn();
         for(TableSelectColumnVo tableSelectColumnVo : selectColumnVos){
             for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {

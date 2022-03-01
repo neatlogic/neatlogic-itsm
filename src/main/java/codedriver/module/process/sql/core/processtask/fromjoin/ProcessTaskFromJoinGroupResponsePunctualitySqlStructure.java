@@ -18,11 +18,11 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-public class ProcessTaskFromJoinGroupAvgCostTimeSqlStructure extends ProcessSqlBase {
+public class ProcessTaskFromJoinGroupResponsePunctualitySqlStructure extends ProcessSqlBase {
 
     @Override
     public String getName() {
-        return ProcessSqlTypeEnum.GROUP_AVG_COST_TIME.getValue();
+        return ProcessSqlTypeEnum.GROUP_RESPONSE_PUNCTUALITY.getValue();
     }
 
     @Override
@@ -39,7 +39,7 @@ public class ProcessTaskFromJoinGroupAvgCostTimeSqlStructure extends ProcessSqlB
     public void doMyService(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         List<JoinTableColumnVo>  joinTableColumnList = getJoinTableOfGroupColumn(sqlSb, workcenterVo);
         //补充统计joinTable
-        StatisticsBase avgStatistics = DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getValue());
+        StatisticsBase avgStatistics = DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.RESPONSE_PUNCTUALITY.getValue());
         for(JoinTableColumnVo joinTableColumnVo : avgStatistics.getJoinTableColumnList()) {
             if (joinTableColumnList.stream().noneMatch(o-> Objects.equals(o.getHash(),joinTableColumnVo.getHash()))) {
                 sqlSb.append(joinTableColumnVo.toSqlString());

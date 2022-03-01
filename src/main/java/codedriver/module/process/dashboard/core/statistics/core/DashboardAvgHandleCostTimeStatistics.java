@@ -36,7 +36,7 @@ public class DashboardAvgHandleCostTimeStatistics extends StatisticsBase {
 
     @Override
     public String getName() {
-        return ProcessTaskDashboardStatistics.AVG_COST_TIME.getValue();
+        return ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getValue();
     }
 
     @Override
@@ -83,5 +83,10 @@ public class DashboardAvgHandleCostTimeStatistics extends StatisticsBase {
                 }}));
             }
         };
+    }
+
+    @Override
+    public String getUnit(){
+        return "分";
     }
 }

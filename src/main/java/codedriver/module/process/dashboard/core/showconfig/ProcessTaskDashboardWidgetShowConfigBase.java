@@ -93,7 +93,7 @@ public abstract class ProcessTaskDashboardWidgetShowConfigBase extends Dashboard
     @Override
     public JSONArray getStatisticsOptionList() {
         return JSONArray.parseArray(
-                String.format("[{'value':'%s','text':'%s','isDefault':0},{'value':'%s','text':'%s','isDefault':0}]", ProcessTaskDashboardStatistics.AVG_COST_TIME.getValue(), ProcessTaskDashboardStatistics.AVG_COST_TIME.getText()
+                String.format("[{'value':'%s','text':'%s','isDefault':0},{'value':'%s','text':'%s','isDefault':0}]", ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getValue(), ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getText()
                         , ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getValue(), ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getText())
         );
     }

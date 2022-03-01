@@ -10,6 +10,7 @@ import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,5 +45,13 @@ public abstract class StatisticsBase {
      */
     public List<JoinTableColumnVo> getJoinTableColumnList() {
         return new ArrayList<>();
+    }
+
+    /**
+     * 获取单位
+     * @return 单位
+     */
+    public String getUnit(){
+        return StringUtils.EMPTY;
     }
 }
