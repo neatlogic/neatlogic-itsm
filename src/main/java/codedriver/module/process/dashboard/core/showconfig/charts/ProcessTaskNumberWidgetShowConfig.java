@@ -25,7 +25,7 @@ public class ProcessTaskNumberWidgetShowConfig extends ProcessTaskDashboardWidge
     @Override
     public JSONArray getMyGroupFieldsConfig() {
         JSONArray groupFieldJsonArray = new JSONArray();
-        for (IDashboardGroupField groupField : getGroupFields()) {
+        for (IDashboardGroupField groupField : getGroupFieldOptionList()) {
             IConditionHandler conditionHandler = ConditionHandlerFactory.getHandler(groupField.getValue());
             JSONObject groupFieldJson = conditionHandler.getConfig();
             groupFieldJson.remove("isMultiple");

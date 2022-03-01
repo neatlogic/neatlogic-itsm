@@ -5,29 +5,28 @@
 
 package codedriver.module.process.dashboard.core.showconfig;
 
-import codedriver.framework.common.constvalue.dashboard.DashboardShowConfig;
 import codedriver.framework.dashboard.constvalue.IDashboardGroupField;
-import codedriver.framework.dashboard.core.IDashboardWidgetShowConfig;
-import codedriver.framework.dashboard.dto.DashboardShowConfigVo;
+import codedriver.framework.dashboard.core.DashboardWidgetShowConfigBase;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.module.process.dashboard.constvalue.ProcessTaskDashboardStatistics;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
-public abstract class ProcessTaskStepDashboardWidgetShowConfigBase implements IDashboardWidgetShowConfig {
+public abstract class ProcessTaskStepDashboardWidgetShowConfigBase extends DashboardWidgetShowConfigBase {
     @Override
-    public String getName(){
+    public String getName() {
         return "processtaskStep";
     }
+
     @Override
-    public List<IDashboardGroupField> getGroupFields(){
+    public List<IDashboardGroupField> getGroupFieldOptionList() {
         return getMyGroupFields();
     }
 
-    public List<IDashboardGroupField> getMyGroupFields(){
+    public List<IDashboardGroupField> getMyGroupFields() {
         return Arrays.asList(
                 ProcessWorkcenterField.STEP_USER,
                 ProcessWorkcenterField.STEP_NAME
@@ -35,20 +34,21 @@ public abstract class ProcessTaskStepDashboardWidgetShowConfigBase implements ID
     }
 
     @Override
-    public JSONArray getGroupFieldsConfig(){
+    public JSONArray getGroupFieldOptionListConfig() {
         return getMyGroupFieldsConfig();
     }
 
-    public JSONArray getMyGroupFieldsConfig(){
-        return getFieldsConfig(getGroupFields());
+    public JSONArray getMyGroupFieldsConfig() {
+        return getFieldsConfig(getGroupFieldOptionList());
     }
 
 
     /**
      * 获取分组选项渲染配置
+     *
      * @return 分组选项渲染配置
      */
-    private JSONArray getFieldsConfig(List<IDashboardGroupField> getGroupFields){
+    private JSONArray getFieldsConfig(List<IDashboardGroupField> getGroupFields) {
         JSONArray groupFieldJsonArray = new JSONArray();
         for (IDashboardGroupField groupField : getGroupFields) {
             groupFieldJsonArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s',config:%s}", groupField.getValue(), groupField.getText(), new JSONObject())));
@@ -57,20 +57,20 @@ public abstract class ProcessTaskStepDashboardWidgetShowConfigBase implements ID
     }
 
     @Override
-    public List<IDashboardGroupField> getSubGroupFields(){
+    public List<IDashboardGroupField> getSubGroupFieldOptionList() {
         return getMySubGroupFields();
     }
 
     @Override
-    public JSONArray getSubGroupFieldsConfig(){
+    public JSONArray getSubGroupFieldOptionListConfig() {
         return getMySubGroupFieldsConfig();
     }
 
-    public JSONArray getMySubGroupFieldsConfig(){
-        return getFieldsConfig(getSubGroupFields());
+    public JSONArray getMySubGroupFieldsConfig() {
+        return getFieldsConfig(getSubGroupFieldOptionList());
     }
 
-    public List<IDashboardGroupField> getMySubGroupFields(){
+    public List<IDashboardGroupField> getMySubGroupFields() {
         return Arrays.asList(
                 ProcessWorkcenterField.STEP_USER,
                 ProcessWorkcenterField.STEP_NAME
@@ -78,27 +78,16 @@ public abstract class ProcessTaskStepDashboardWidgetShowConfigBase implements ID
     }
 
     @Override
-    public JSONArray getShowConfig(JSONObject showConfigJson){
-        JSONArray processTaskShowChartConfigArray = new JSONArray();
-        for (DashboardShowConfig gs : DashboardShowConfig.values()) {
-            JSONObject showConfig = showConfigJson.getJSONObject(gs.getValue());
-            if(showConfig == null){
-                continue;
-            }
-            DashboardShowConfigVo showConfigVo = showConfig.toJavaObject(DashboardShowConfigVo.class);
-            if (Objects.equals(gs.getValue(), DashboardShowConfig.GROUPFIELD.getValue())) {
-                showConfigVo.getDataList().addAll(getGroupFieldsConfig());
-            } else if (Objects.equals(gs.getValue(), DashboardShowConfig.SUBGROUPFIELD.getValue())) {
-                showConfigVo.getDataList().addAll(getSubGroupFieldsConfig());
-            }
-            processTaskShowChartConfigArray.add(showConfigVo);
-        }
-        return processTaskShowChartConfigArray;
+    public String getModule() {
+        return "process";
     }
 
     @Override
-    public String getModule(){
-      return "process";
+    public JSONArray getStatisticsOptionList() {
+        return JSONArray.parseArray(
+                String.format("[{'value':'%s','text':'%s','isDefault':0},{'value':'%s','text':'%s','isDefault':0}]", ProcessTaskDashboardStatistics.AVG_COST_TIME.getValue(), ProcessTaskDashboardStatistics.AVG_COST_TIME.getText()
+                        , ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getValue(), ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getText())
+        );
     }
 
 }

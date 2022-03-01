@@ -46,7 +46,7 @@ public class ProcessTaskStepActiveTimeCondition extends ProcessTaskConditionBase
     @Override
     public JSONObject getConfig(ConditionConfigType type) {
         JSONObject config = new JSONObject();
-        config.put("type", "datetimerange");
+        config.put("type", "datetime");
         config.put("value", "");
         config.put("defaultValue", "");
         config.put("format", "yyyy-MM-dd HH:mm:ss");

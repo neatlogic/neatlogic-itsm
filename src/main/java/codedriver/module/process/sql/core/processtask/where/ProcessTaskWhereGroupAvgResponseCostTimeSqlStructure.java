@@ -14,11 +14,11 @@ import codedriver.module.process.sql.core.processtask.ProcessSqlBase;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProcessTaskWhereGroupAvgCostTimeSqlStructure extends ProcessSqlBase {
+public class ProcessTaskWhereGroupAvgResponseCostTimeSqlStructure extends ProcessSqlBase {
 
     @Override
     public String getName() {
-        return ProcessSqlTypeEnum.GROUP_AVG_COST_TIME.getValue();
+        return ProcessSqlTypeEnum.GROUP_AVG_RESPONSE_COST_TIME.getValue();
     }
 
     @Override
@@ -34,7 +34,7 @@ public class ProcessTaskWhereGroupAvgCostTimeSqlStructure extends ProcessSqlBase
     @Override
     public void doMyService(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         groupWhereService(workcenterVo, sqlSb);
-        sqlSb.append(String.format(" AND %s.`%s` = 'handle' and %s.%s = '%s'", new ProcessTaskStepSlaTimeSqlTable().getShortName(),ProcessTaskStepSlaTimeSqlTable.FieldEnum.TYPE.getValue(),
+        sqlSb.append(String.format(" AND %s.`%s` = 'response' and %s.%s = '%s'", new ProcessTaskStepSlaTimeSqlTable().getShortName(),ProcessTaskStepSlaTimeSqlTable.FieldEnum.TYPE.getValue(),
                 new ProcessTaskStepSqlTable().getShortName(),ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStatus.SUCCEED.getValue()));
     }
 }

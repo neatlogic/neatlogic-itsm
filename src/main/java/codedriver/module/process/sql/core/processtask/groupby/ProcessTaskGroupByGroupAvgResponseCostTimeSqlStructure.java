@@ -11,11 +11,11 @@ import codedriver.module.process.sql.core.processtask.ProcessSqlBase;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProcessTaskGroupByGroupAvgCostTimeSqlStructure extends ProcessSqlBase {
+public class ProcessTaskGroupByGroupAvgResponseCostTimeSqlStructure extends ProcessSqlBase {
 
     @Override
     public String getName() {
-        return ProcessSqlTypeEnum.GROUP_AVG_COST_TIME.getValue();
+        return ProcessSqlTypeEnum.GROUP_AVG_RESPONSE_COST_TIME.getValue();
     }
 
     @Override

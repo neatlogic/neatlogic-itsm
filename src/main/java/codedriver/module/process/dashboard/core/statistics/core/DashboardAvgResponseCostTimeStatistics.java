@@ -29,14 +29,14 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class DashboardAvgHandleCostTimeStatistics extends StatisticsBase {
+public class DashboardAvgResponseCostTimeStatistics extends StatisticsBase {
 
     @Resource
     ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getName() {
-        return ProcessTaskDashboardStatistics.AVG_COST_TIME.getValue();
+        return ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getValue();
     }
 
     @Override
@@ -50,7 +50,7 @@ public class DashboardAvgHandleCostTimeStatistics extends StatisticsBase {
             workcenterVo.setPageSize(chartConfigVo.getLimitNum());
         }
         //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
-        SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_AVG_COST_TIME);
+        SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_AVG_RESPONSE_COST_TIME);
         //System.out.println(sb.build());
         List<Map<String, Object>> groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
         IProcessTaskColumn groupColumn = ProcessTaskColumnFactory.columnComponentMap.get(chartConfigVo.getGroup());
