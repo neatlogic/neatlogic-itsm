@@ -21,7 +21,9 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.util.Md5Util;
+import codedriver.framework.util.TimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -31,10 +33,8 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Component
 public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -163,9 +163,12 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
             throw new ParamIrregularException("ConditionGroup", " handler illegal");
         }
         JSONArray valueArray = JSONArray.parseArray(conditionVo.getValueList().toString());
-
+        if(CollectionUtils.isEmpty(valueArray)){
+            return;
+        }
         if (FormHandlerTypeBak.FORMDATE.getHandler().equals(conditionVo.getHandler())) {
-            dateSqlBuild(valueArray, conditionVo, sqlSb);
+            JSONObject value = valueArray.getJSONObject(0);
+            dateSqlBuild(value, conditionVo, sqlSb);
         } else {
             defaultSqlBuild(valueArray, conditionVo, formAttributeHandler, sqlSb);
         }
@@ -174,17 +177,23 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     /**
      * date的sql拼凑
      *
-     * @param valueArray  条件的值
+     * @param value  条件的值
      * @param conditionVo 条件
      * @param sqlSb       拼凑的sql
      */
-    private void dateSqlBuild(JSONArray valueArray, ConditionVo conditionVo, StringBuilder sqlSb) {
-        if(valueArray.size() == 2){
-            String startTime = valueArray.getString(0);
-            String endTime = valueArray.getString(1);
-            sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word between '%s' and '%s' ) ",
-                    conditionVo.getName(), startTime, endTime));
+    private void dateSqlBuild(JSONObject value, ConditionVo conditionVo, StringBuilder sqlSb) {
+        SimpleDateFormat format = new SimpleDateFormat(TimeUtil.YYYY_MM_DD_HH_MM_SS);
+        String startTime;
+        String endTime;
+        if (value.containsKey(ProcessWorkcenterField.STARTTIME.getValuePro())) {
+            startTime = format.format(new Date(value.getLong(ProcessWorkcenterField.STARTTIME.getValuePro())));
+            endTime = format.format(new Date(value.getLong(ProcessWorkcenterField.ENDTIME.getValuePro())));
+        } else {
+            startTime = TimeUtil.timeTransfer(value.getInteger("timeRange"), value.getString("timeUnit"));
+            endTime = TimeUtil.timeNow();
         }
+        sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word between '%s' and '%s' ) ",
+                conditionVo.getName(), startTime, endTime));
 
     }
 
