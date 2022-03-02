@@ -5,22 +5,11 @@
 
 package codedriver.module.process.sql.core.processtask.column;
 
-import codedriver.framework.process.column.core.IProcessTaskColumn;
-import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
-import codedriver.framework.process.workcenter.dto.SelectColumnVo;
-import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
 import codedriver.module.process.dashboard.constvalue.ProcessTaskDashboardStatistics;
-import codedriver.module.process.dashboard.core.statistics.DashboardStatisticsFactory;
-import codedriver.module.process.dashboard.core.statistics.StatisticsBase;
 import codedriver.module.process.sql.core.processtask.ProcessSqlBase;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 @Component
 public class ProcessTaskColumnGroupHandlePunctualitySqlStructure extends ProcessSqlBase {
@@ -42,24 +31,6 @@ public class ProcessTaskColumnGroupHandlePunctualitySqlStructure extends Process
 
     @Override
     public void doMyService(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
-        Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
-        List<String> columnList = new ArrayList<>();
-        getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), true);
-        //补充统计column
-        StatisticsBase avgStatistics = DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.HANDLE_PUNCTUALITY.getValue());
-        List<TableSelectColumnVo> selectColumnVos = avgStatistics.getTableSelectColumn();
-        for(TableSelectColumnVo tableSelectColumnVo : selectColumnVos){
-            for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
-                String format = " %s.%s as %s ";
-                if (StringUtils.isNotBlank(selectColumnVo.getColumnFormat())) {
-                    format = selectColumnVo.getColumnFormat();
-                }
-                String columnStr = String.format(format, tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName(), selectColumnVo.getPropertyName());
-                if (!columnList.contains(columnStr)) {
-                    columnList.add(columnStr);
-                }
-            }
-        }
-        sqlSb.append(String.join(",", columnList));
+        buildStatisticsColumnSql(sqlSb,workcenterVo, ProcessTaskDashboardStatistics.HANDLE_PUNCTUALITY);
     }
 }

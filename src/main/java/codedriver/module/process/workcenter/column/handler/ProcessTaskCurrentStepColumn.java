@@ -58,7 +58,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 		List<String> stepNameList = new ArrayList<>();
 		if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
 			for (ProcessTaskStepVo stepVo : stepVoList) {
-				if ((ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) || (ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1) || ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()))) {
+				if (((ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1) || ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()))) {
 					stepNameList.add(stepVo.getName());
 				}
 			}

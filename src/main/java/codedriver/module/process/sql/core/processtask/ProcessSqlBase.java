@@ -27,6 +27,9 @@ import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import codedriver.module.process.condition.handler.ProcessTaskStartTimeCondition;
+import codedriver.module.process.dashboard.constvalue.ProcessTaskDashboardStatistics;
+import codedriver.module.process.dashboard.core.statistics.DashboardStatisticsFactory;
+import codedriver.module.process.dashboard.core.statistics.StatisticsBase;
 import codedriver.module.process.dashboard.handler.ProcessTaskStepDashboardHandler;
 import codedriver.module.process.sql.IProcessSqlStructure;
 import com.alibaba.fastjson.JSONArray;
@@ -568,5 +571,50 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
         } else {
             sqlSb.append(" order by COUNT(1) DESC");
         }
+    }
+
+    /**
+     * 拼接统计方式fromjoin sql
+     * @param sqlSb sql
+     * @param workcenterVo 入参
+     * @param statistics 统计方式
+     */
+    protected void buildStatisticsFromJoinSql(StringBuilder sqlSb, WorkcenterVo workcenterVo,ProcessTaskDashboardStatistics statistics){
+        List<JoinTableColumnVo>  joinTableColumnList = getJoinTableOfGroupColumn(sqlSb, workcenterVo);
+        //补充统计joinTable
+        StatisticsBase avgStatistics = DashboardStatisticsFactory.getStatistics(statistics.getValue());
+        for(JoinTableColumnVo joinTableColumnVo : avgStatistics.getJoinTableColumnList()) {
+            if (joinTableColumnList.stream().noneMatch(o-> Objects.equals(o.getHash(),joinTableColumnVo.getHash()))) {
+                sqlSb.append(joinTableColumnVo.toSqlString());
+            }
+        }
+    }
+
+    /**
+     * 拼接统计方式column sql
+     * @param sqlSb sql
+     * @param workcenterVo 入参
+     * @param statistics 统计方式
+     */
+    protected void buildStatisticsColumnSql(StringBuilder sqlSb, WorkcenterVo workcenterVo,ProcessTaskDashboardStatistics statistics){
+        Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+        List<String> columnList = new ArrayList<>();
+        getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), true);
+        //补充统计column
+        StatisticsBase avgStatistics = DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getValue());
+        List<TableSelectColumnVo> selectColumnVos = avgStatistics.getTableSelectColumn();
+        for(TableSelectColumnVo tableSelectColumnVo : selectColumnVos){
+            for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
+                String format = " %s.%s as %s ";
+                if (StringUtils.isNotBlank(selectColumnVo.getColumnFormat())) {
+                    format = selectColumnVo.getColumnFormat();
+                }
+                String columnStr = String.format(format, tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName(), selectColumnVo.getPropertyName());
+                if (!columnList.contains(columnStr)) {
+                    columnList.add(columnStr);
+                }
+            }
+        }
+        sqlSb.append(String.join(",", columnList));
     }
 }
