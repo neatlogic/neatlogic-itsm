@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class ProcessTaskStepBarWidgetShowConfig extends ProcessTaskStepDashboardWidgetShowConfigBase {
     @Override
     public String[] getSupportChart() {
-        return new String[] {ChartType.AREACHART.getValue(), ChartType.LINECHART.getValue()};
+        return new String[]{ChartType.BARCHART.getValue(), ChartType.STACKBARCHART.getValue(), ChartType.COLUMNCHART.getValue(), ChartType.STACKCOLUMNCHART.getValue()};
     }
 
 }
