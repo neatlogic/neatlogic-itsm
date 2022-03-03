@@ -74,7 +74,7 @@ public class ProcessTaskSerialNumberColumn extends ProcessTaskColumnBase impleme
 		return new ArrayList<TableSelectColumnVo>(){
 			{
 				add(new TableSelectColumnVo(new ProcessTaskSqlTable(), Collections.singletonList(
-						new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue(),ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getProValue())
+						new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue(),ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getProName())
 				)));
 			}
 		};

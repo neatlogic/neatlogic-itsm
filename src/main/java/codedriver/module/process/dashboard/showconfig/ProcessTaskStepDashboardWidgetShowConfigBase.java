@@ -30,6 +30,7 @@ public abstract class ProcessTaskStepDashboardWidgetShowConfigBase extends Dashb
     public List<IDashboardGroupField> getMyGroupFields() {
         return Arrays.asList(
                 ProcessWorkcenterField.STEP_USER,
+                ProcessWorkcenterField.STEP_STATUS,
                 ProcessWorkcenterField.STEP_NAME
         );
     }
@@ -74,6 +75,7 @@ public abstract class ProcessTaskStepDashboardWidgetShowConfigBase extends Dashb
     public List<IDashboardGroupField> getMySubGroupFields() {
         return Arrays.asList(
                 ProcessWorkcenterField.STEP_USER,
+                ProcessWorkcenterField.STEP_STATUS,
                 ProcessWorkcenterField.STEP_NAME
         );
     }

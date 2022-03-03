@@ -89,7 +89,7 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
         return new ArrayList<TableSelectColumnVo>() {
             {
                 add(new TableSelectColumnVo(new ProcessTaskSqlTable(), Collections.singletonList(
-                        new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), true)
+                        new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskSqlTable.FieldEnum.STATUS.getProName(), true)
                 )));
             }
         };
@@ -114,7 +114,7 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue().toString();
-                if (key.equals(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue())) {
+                if (key.equals(ProcessTaskSqlTable.FieldEnum.STATUS.getProName())) {
                     tmpMap.put("statusText", ProcessTaskStatus.getText(value));
                 }
                 tmpMap.put(key, value);
@@ -123,13 +123,13 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
         }
         //
         if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
-            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), "statusText", workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
+            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProName(), workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), "statusText", workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
             dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
         }
         //如果存在子分组
         if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
             DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), "statusText");
+            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProName(), workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), "statusText");
             dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
         }
     }
@@ -138,7 +138,7 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
     public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
         LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
         for (Map<String, Object> dataMap : mapList) {
-            groupDataMap.put(dataMap.get(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue()).toString(), dataMap.get("count"));
+            groupDataMap.put(dataMap.get(ProcessTaskSqlTable.FieldEnum.STATUS.getProName()).toString(), dataMap.get("count"));
         }
         return groupDataMap;
     }
