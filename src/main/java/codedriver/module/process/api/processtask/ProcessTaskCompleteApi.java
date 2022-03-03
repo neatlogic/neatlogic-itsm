@@ -15,7 +15,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.service.ProcessTaskCompleteService;
+import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ import javax.annotation.Resource;
 public class ProcessTaskCompleteApi extends PrivateApiComponentBase implements IProcessTaskCompleteApiCrossoverService {
 
     @Resource
-    private ProcessTaskCompleteService processTaskCompleteService;
+    private ProcessTaskService processTaskService;
 
     @Override
     public String getToken() {
@@ -55,7 +55,7 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase implements I
     @Description(desc = "工单完成接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        processTaskCompleteService.complete(jsonObj);
+        processTaskService.completeProcessTaskStep(jsonObj);
         return null;
     }
 

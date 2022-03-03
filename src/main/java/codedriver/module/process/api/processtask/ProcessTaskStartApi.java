@@ -11,7 +11,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.service.ProcessTaskStartService;
+import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +23,7 @@ import javax.annotation.Resource;
 public class ProcessTaskStartApi extends PrivateApiComponentBase implements IProcessTaskStartApiCrossoverService {
 
     @Resource
-    private ProcessTaskStartService processTaskStartService;
+    private ProcessTaskService processTaskService;
 
     @Override
     public String getToken() {
@@ -48,7 +48,7 @@ public class ProcessTaskStartApi extends PrivateApiComponentBase implements IPro
     @Description(desc = "工单步骤开始接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        processTaskStartService.start(jsonObj);
+        processTaskService.startProcessTaskStep(jsonObj);
         return null;
     }
 

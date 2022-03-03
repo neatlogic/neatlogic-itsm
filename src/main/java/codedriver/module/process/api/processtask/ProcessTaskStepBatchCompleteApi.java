@@ -19,7 +19,10 @@ import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.exception.processtask.*;
+import codedriver.framework.process.exception.processtask.ProcessTaskNextStepIllegalException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNextStepOverOneException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepIsNotManualException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepMustBeManualException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -28,11 +31,11 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.service.AuthenticationInfoService;
-import codedriver.module.process.service.ProcessTaskCompleteService;
-import codedriver.module.process.service.ProcessTaskStartService;
+import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,10 +55,7 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
     private UserMapper userMapper;
 
     @Resource
-    private ProcessTaskStartService processTaskStartService;
-
-    @Resource
-    private ProcessTaskCompleteService processTaskCompleteService;
+    private ProcessTaskService processTaskService;
 
     @Resource
     private AuthenticationInfoService authenticationInfoService;
@@ -77,6 +77,7 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
 
     @Input({
             @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "工单Id列表"),
+            @Param(name = "content", type = ApiParamType.STRING, desc = "处理意见"),
             @Param(name = "userId", type = ApiParamType.STRING, isRequired = true, desc = "处理人userId"),
     })
     @Description(desc = "批量完成工单步骤")
@@ -88,6 +89,7 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
         List<Long> noAuthProcessTaskIdList = new ArrayList<>(); // 无权限处理的工单id列表
         Map<Long, String> exceptionMap = new HashMap<>(); // 处理发生异常的工单
         List<Long> idList = jsonObj.getJSONArray("processTaskIdList").toJavaList(Long.class);
+        String content = jsonObj.getString("content");
         String userId = jsonObj.getString("userId");
         UserVo user = userMapper.getUserByUserId(userId);
         if (user == null) {
@@ -135,10 +137,10 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
                             param.put("action", "start");
                         }
                         UserContext.init(user, authenticationInfo, SystemUser.SYSTEM.getTimezone());
-                        processTaskStartService.start(param);
+                        processTaskService.startProcessTaskStep(param);
                     }
                     UserContext.init(user, authenticationInfo, SystemUser.SYSTEM.getTimezone());
-                    completeProcessTaskStep(currentStep);
+                    completeProcessTaskStep(currentStep, content);
                 } catch (Exception ex) {
                     exceptionMap.put(currentStep.getProcessTaskId(), ex.getMessage());
                 }
@@ -183,9 +185,10 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
      * 完成工单步骤
      *
      * @param processTaskStepVo 工单步骤
+     * @param content           处理意见
      * @throws Exception
      */
-    private void completeProcessTaskStep(ProcessTaskStepVo processTaskStepVo) throws Exception {
+    private void completeProcessTaskStep(ProcessTaskStepVo processTaskStepVo, String content) throws Exception {
         // 查询后续节点，不包括回退节点
         List<Long> nextStepIdList =
                 processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(processTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
@@ -199,8 +202,11 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
         param.put("processTaskId", processTaskStepVo.getProcessTaskId());
         param.put("processTaskStepId", processTaskStepVo.getId());
         param.put("nextStepId", nextStepIdList.get(0));
+        if (StringUtils.isNotBlank(content)) {
+            param.put("content", content);
+        }
         param.put("action", "complete");
-        processTaskCompleteService.complete(param);
+        processTaskService.completeProcessTaskStep(param);
     }
 
 
