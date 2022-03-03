@@ -10,8 +10,8 @@ import codedriver.framework.dashboard.constvalue.IDashboardGroupField;
 public enum ProcessTaskDashboardStatistics implements IDashboardGroupField {
     AVG_HANDLE_COST_TIME("avgCostTime","平均耗时"),
     AVG_RESPONSE_COST_TIME("avgResponseCostTime","平均响应耗时"),
-    RESPONSE_PUNCTUALITY("responseCostTime","响应准时率"),
-    HANDLE_PUNCTUALITY("handleCostTime","处理准时率"),
+    RESPONSE_PUNCTUALITY("responsePunctuality","响应准时率"),
+    HANDLE_PUNCTUALITY("handlePunctuality","处理准时率"),
     ;
 
     private final String value;

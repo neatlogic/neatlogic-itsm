@@ -3,11 +3,11 @@
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
-package codedriver.module.process.dashboard.core.statistics.core;
+package codedriver.module.process.dashboard.statistics.core;
 
 import codedriver.framework.common.constvalue.dashboard.ChartType;
 import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
@@ -18,7 +18,7 @@ import codedriver.framework.process.workcenter.table.ProcessTaskStepSlaTimeSqlTa
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
 import codedriver.module.process.dashboard.constvalue.ProcessTaskDashboardStatistics;
-import codedriver.module.process.dashboard.core.statistics.StatisticsBase;
+import codedriver.module.process.dashboard.statistics.StatisticsBase;
 import codedriver.module.process.sql.decorator.SqlBuilder;
 import org.springframework.stereotype.Service;
 
@@ -29,18 +29,18 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class DashboardAvgResponseCostTimeStatistics extends StatisticsBase {
+public class DashboardAvgHandleCostTimeStatistics extends StatisticsBase {
 
     @Resource
     ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getName() {
-        return ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getValue();
+        return ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getValue();
     }
 
     @Override
-    public void doService(WorkcenterVo workcenterVo, DashboardWidgetDataVo widgetDataVo, DashboardWidgetVo widgetVo) {
+    public void doService(WorkcenterVo workcenterVo, DashboardWidgetDataGroupVo widgetDataVo, DashboardWidgetVo widgetVo) {
         //1、查出group权重，用于排序截取最大组数量
         DashboardWidgetChartConfigVo chartConfigVo = workcenterVo.getDashboardWidgetChartConfigVo();
         //workcenterVo.getDashboardWidgetChartConfigVo().setGroup(chartConfigVo.getGroup());
@@ -50,7 +50,7 @@ public class DashboardAvgResponseCostTimeStatistics extends StatisticsBase {
             workcenterVo.setPageSize(chartConfigVo.getLimitNum());
         }
         //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
-        SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_AVG_RESPONSE_COST_TIME);
+        SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_AVG_COST_TIME);
         //System.out.println(sb.build());
         List<Map<String, Object>> groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
         IProcessTaskColumn groupColumn = ProcessTaskColumnFactory.columnComponentMap.get(chartConfigVo.getGroup());
@@ -65,7 +65,7 @@ public class DashboardAvgResponseCostTimeStatistics extends StatisticsBase {
         return new ArrayList<TableSelectColumnVo>() {
             {
                 add(new TableSelectColumnVo(new ProcessTaskStepSlaTimeSqlTable(), Collections.singletonList(
-                        new SelectColumnVo(ProcessTaskStepSlaTimeSqlTable.FieldEnum.TIME_COST.getValue(), "count", true, " AVG(%s.%s)/60000 ")
+                        new SelectColumnVo(ProcessTaskStepSlaTimeSqlTable.FieldEnum.TIME_COST.getValue(), "count", true, " AVG(%s.%s) div 60000 ")
                 )));
             }
         };

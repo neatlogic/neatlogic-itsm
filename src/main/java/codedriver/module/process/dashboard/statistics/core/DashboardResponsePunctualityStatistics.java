@@ -3,11 +3,11 @@
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
-package codedriver.module.process.dashboard.core.statistics.core;
+package codedriver.module.process.dashboard.statistics.core;
 
 import codedriver.framework.common.constvalue.dashboard.ChartType;
 import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
@@ -18,7 +18,7 @@ import codedriver.framework.process.workcenter.table.ProcessTaskStepSlaTimeSqlTa
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
 import codedriver.module.process.dashboard.constvalue.ProcessTaskDashboardStatistics;
-import codedriver.module.process.dashboard.core.statistics.StatisticsBase;
+import codedriver.module.process.dashboard.statistics.StatisticsBase;
 import codedriver.module.process.sql.decorator.SqlBuilder;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +40,7 @@ public class DashboardResponsePunctualityStatistics extends StatisticsBase {
     }
 
     @Override
-    public void doService(WorkcenterVo workcenterVo, DashboardWidgetDataVo widgetDataVo, DashboardWidgetVo widgetVo) {
+    public void doService(WorkcenterVo workcenterVo, DashboardWidgetDataGroupVo widgetDataVo, DashboardWidgetVo widgetVo) {
         //1、查出group权重，用于排序截取最大组数量
         DashboardWidgetChartConfigVo chartConfigVo = workcenterVo.getDashboardWidgetChartConfigVo();
         //workcenterVo.getDashboardWidgetChartConfigVo().setGroup(chartConfigVo.getGroup());
@@ -65,7 +65,7 @@ public class DashboardResponsePunctualityStatistics extends StatisticsBase {
         return new ArrayList<TableSelectColumnVo>() {
             {
                 add(new TableSelectColumnVo(new ProcessTaskStepSlaTimeSqlTable(), Collections.singletonList(
-                        new SelectColumnVo(ProcessTaskStepSlaTimeSqlTable.FieldEnum.IS_TIMEOUT.getValue(), "count", true, " (1 - SUM(%s.%s)/COUNT(1))*100 ")
+                        new SelectColumnVo(ProcessTaskStepSlaTimeSqlTable.FieldEnum.IS_TIMEOUT.getValue(), "count", true, " (1 - SUM(%s.%s) div COUNT(1))*100 ")
                 )));
             }
         };

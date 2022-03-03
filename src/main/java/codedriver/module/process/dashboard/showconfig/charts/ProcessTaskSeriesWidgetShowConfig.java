@@ -3,19 +3,19 @@
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
-package codedriver.module.process.dashboard.core.showconfig.charts;
+package codedriver.module.process.dashboard.showconfig.charts;
 
 import codedriver.framework.common.constvalue.dashboard.ChartType;
+import codedriver.module.process.dashboard.constvalue.ProcessTaskDashboardGroupField;
 import codedriver.framework.dashboard.constvalue.IDashboardGroupField;
-import codedriver.module.process.dashboard.constvalue.ProcessTaskStepDashboardGroupField;
-import codedriver.module.process.dashboard.core.showconfig.ProcessTaskStepDashboardWidgetShowConfigBase;
+import codedriver.module.process.dashboard.showconfig.ProcessTaskDashboardWidgetShowConfigBase;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
 
 @Service
-public class ProcessTaskStepSeriesWidgetShowConfig extends ProcessTaskStepDashboardWidgetShowConfigBase {
+public class ProcessTaskSeriesWidgetShowConfig extends ProcessTaskDashboardWidgetShowConfigBase {
     @Override
     public String[] getSupportChart() {
         return new String[] {ChartType.AREACHART.getValue(), ChartType.LINECHART.getValue()};
@@ -24,7 +24,7 @@ public class ProcessTaskStepSeriesWidgetShowConfig extends ProcessTaskStepDashbo
     @Override
     public List<IDashboardGroupField> getMyGroupFields(){
         return Collections.singletonList(
-                ProcessTaskStepDashboardGroupField.EVERY_DAY
+                ProcessTaskDashboardGroupField.EVERY_DAY
         );
     }
 }

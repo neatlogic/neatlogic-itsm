@@ -2,7 +2,7 @@ package codedriver.module.process.workcenter.column.handler;
 
 import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -106,16 +106,16 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
     }
 
     @Override
-    public void getMyDashboardDataVo(DashboardWidgetDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
+    public void getMyDashboardDataVo(DashboardWidgetDataGroupVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
         //补充text
         for (int i = 0; i < mapList.size(); i++) {
             Map<String, Object> tmpMap = new HashMap<>();
             Map<String, Object> map = mapList.get(i);
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 String key = entry.getKey();
-                Object value = entry.getValue();
+                String value = entry.getValue().toString();
                 if (key.equals(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue())) {
-                    tmpMap.put("statusText", ProcessTaskStatus.getText(value.toString()));
+                    tmpMap.put("statusText", ProcessTaskStatus.getText(value));
                 }
                 tmpMap.put(key, value);
             }

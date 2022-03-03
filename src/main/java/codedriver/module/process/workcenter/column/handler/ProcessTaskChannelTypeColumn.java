@@ -2,7 +2,7 @@ package codedriver.module.process.workcenter.column.handler;
 
 import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -131,16 +131,16 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 	}
 
 	@Override
-	public void getMyDashboardDataVo(DashboardWidgetDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
+	public void getMyDashboardDataVo(DashboardWidgetDataGroupVo dashboardWidgetDataGroupVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
 		if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
 			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ChannelTypeSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), ChannelTypeSqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
-			dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
+			dashboardWidgetDataGroupVo.setDataGroupVo(dashboardDataGroupVo);
 		}
 		//如果存在子分组
 		if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
 			DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
 			dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ChannelTypeSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), ChannelTypeSqlTable.FieldEnum.NAME.getProValue());
-			dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+			dashboardWidgetDataGroupVo.setDataSubGroupVo(dashboardDataSubGroupVo);
 		}
 	}
 

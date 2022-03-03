@@ -3,22 +3,23 @@
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
-package codedriver.module.process.dashboard.core.showconfig;
+package codedriver.module.process.dashboard.showconfig;
 
 import codedriver.framework.dashboard.constvalue.IDashboardGroupField;
-import codedriver.framework.dashboard.core.DashboardWidgetShowConfigBase;
+import codedriver.framework.dashboard.config.DashboardWidgetShowConfigBase;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.module.process.dashboard.constvalue.ProcessTaskDashboardStatistics;
+import codedriver.module.process.dashboard.statistics.DashboardStatisticsFactory;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class ProcessTaskDashboardWidgetShowConfigBase extends DashboardWidgetShowConfigBase {
+public abstract class ProcessTaskStepDashboardWidgetShowConfigBase extends DashboardWidgetShowConfigBase {
     @Override
     public String getName() {
-        return "processtask";
+        return "processtaskStep";
     }
 
     @Override
@@ -28,12 +29,8 @@ public abstract class ProcessTaskDashboardWidgetShowConfigBase extends Dashboard
 
     public List<IDashboardGroupField> getMyGroupFields() {
         return Arrays.asList(
-                ProcessWorkcenterField.PRIORITY,
-                ProcessWorkcenterField.STATUS,
-                ProcessWorkcenterField.CHANNELTYPE,
-                ProcessWorkcenterField.CHANNEL,
                 ProcessWorkcenterField.STEP_USER,
-                ProcessWorkcenterField.OWNER
+                ProcessWorkcenterField.STEP_NAME
         );
     }
 
@@ -76,12 +73,8 @@ public abstract class ProcessTaskDashboardWidgetShowConfigBase extends Dashboard
 
     public List<IDashboardGroupField> getMySubGroupFields() {
         return Arrays.asList(
-                ProcessWorkcenterField.PRIORITY,
-                ProcessWorkcenterField.STATUS,
-                ProcessWorkcenterField.CHANNELTYPE,
-                ProcessWorkcenterField.CHANNEL,
                 ProcessWorkcenterField.STEP_USER,
-                ProcessWorkcenterField.OWNER
+                ProcessWorkcenterField.STEP_NAME
         );
     }
 
@@ -93,8 +86,12 @@ public abstract class ProcessTaskDashboardWidgetShowConfigBase extends Dashboard
     @Override
     public JSONArray getStatisticsOptionList() {
         return JSONArray.parseArray(
-                String.format("[{'value':'%s','text':'%s','isDefault':0},{'value':'%s','text':'%s','isDefault':0}]", ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getValue(), ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getText()
-                        , ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getValue(), ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getText())
+                String.format("[{'value':'%s','text':'%s','isDefault':0,'unit':'%s'},{'value':'%s','text':'%s','isDefault':0,'unit':'%s'},{'value':'%s','text':'%s','isDefault':0,'unit':'%s'},{'value':'%s','text':'%s','isDefault':0,'unit':'%s'}]",
+                        ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getValue(), ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getText(), DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getValue()).getUnit()
+                        , ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getValue(), ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getText(), DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getValue()).getUnit()
+                        , ProcessTaskDashboardStatistics.RESPONSE_PUNCTUALITY.getValue(), ProcessTaskDashboardStatistics.RESPONSE_PUNCTUALITY.getText(), DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.RESPONSE_PUNCTUALITY.getValue()).getUnit()
+                        , ProcessTaskDashboardStatistics.HANDLE_PUNCTUALITY.getValue(), ProcessTaskDashboardStatistics.HANDLE_PUNCTUALITY.getText(), DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.HANDLE_PUNCTUALITY.getValue()).getUnit()
+                )
         );
     }
 

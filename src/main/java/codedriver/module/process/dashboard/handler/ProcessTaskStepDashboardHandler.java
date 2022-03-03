@@ -5,14 +5,18 @@
 
 package codedriver.module.process.dashboard.handler;
 
-import codedriver.framework.dashboard.core.*;
-import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
+import codedriver.framework.dashboard.charts.*;
+import codedriver.framework.dashboard.config.DashboardWidgetShowConfigFactory;
+import codedriver.framework.dashboard.config.IDashboardWidgetShowConfig;
 import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
+import codedriver.framework.dashboard.handler.DashboardHandlerBase;
+import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.module.process.dashboard.core.showconfig.ProcessTaskStepDashboardWidgetShowConfigBase;
-import codedriver.module.process.dashboard.core.statistics.DashboardStatisticsFactory;
-import codedriver.module.process.dashboard.core.statistics.StatisticsBase;
+import codedriver.module.process.dashboard.showconfig.ProcessTaskStepDashboardWidgetShowConfigBase;
+import codedriver.module.process.dashboard.statistics.DashboardStatisticsFactory;
+import codedriver.module.process.dashboard.statistics.StatisticsBase;
 import codedriver.module.process.dashboard.dto.DashboardWidgetChartConfigProcessVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -31,8 +35,8 @@ public class ProcessTaskStepDashboardHandler extends DashboardHandlerBase {
         DashboardChartBase chart = DashboardChartFactory.getChart(widgetVo.getChartType());
         if (chart != null) {
             DashboardWidgetChartConfigVo chartConfigVo = new DashboardWidgetChartConfigProcessVo(widgetVo.getChartConfigObj());
-            DashboardWidgetDataVo widgetDataVo = new DashboardWidgetDataVo();
-            widgetDataVo.setChartConfigVo(chartConfigVo);
+            DashboardWidgetDataGroupVo widgetDataGroupVo = new DashboardWidgetDataGroupVo();
+            widgetDataGroupVo.setChartConfigVo(chartConfigVo);
             /* start: 从mysql 获取源数据 */
             //set条件
             JSONObject conditionConfig = new JSONObject();
@@ -42,15 +46,17 @@ public class ProcessTaskStepDashboardHandler extends DashboardHandlerBase {
             workcenterVo.setDataSourceHandler(widgetVo.getHandler());
             workcenterVo.setDashboardWidgetChartConfigVo(chartConfigVo);
             StatisticsBase statistics = DashboardStatisticsFactory.getStatistics(chartConfigVo.getStatisticsType());
-            statistics.doService(workcenterVo, widgetDataVo, widgetVo);
+            statistics.doService(workcenterVo, widgetDataGroupVo, widgetVo);
             /* end: 从mysql 获取源数据 */
             /* start: 将mysql源数据 按不同dashboard插件处理返回结果数据*/
+
+            DashboardWidgetDataVo widgetDataVo = new DashboardWidgetDataVo();
             JSONObject data = new JSONObject();
-            data.put("dataList", chart.getData(widgetDataVo).get("dataList"));
-            data.put("columnList", chart.getData(widgetDataVo).get("columnList"));
-            data.put("theadList", chart.getData(widgetDataVo).get("theadList"));
+            data.put("dataList", chart.getData(widgetDataGroupVo).get("dataList"));
+            data.put("columnList", chart.getData(widgetDataGroupVo).get("columnList"));
+            data.put("theadList", chart.getData(widgetDataGroupVo).get("theadList"));
             /* end: 将mysql源数据 按不同dashboard插件处理返回结果数据*/
-            data.put("configObj", chartConfigVo.getConfig());
+            data.put("configObj", chartConfigVo.getConfig().fluentPut("unit",statistics.getUnit()));
             return data;
         }
         return null;

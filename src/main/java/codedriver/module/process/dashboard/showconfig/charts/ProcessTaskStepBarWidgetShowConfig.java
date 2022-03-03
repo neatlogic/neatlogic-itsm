@@ -3,10 +3,10 @@
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
-package codedriver.module.process.dashboard.core.showconfig.charts;
+package codedriver.module.process.dashboard.showconfig.charts;
 
 import codedriver.framework.common.constvalue.dashboard.ChartType;
-import codedriver.module.process.dashboard.core.showconfig.ProcessTaskStepDashboardWidgetShowConfigBase;
+import codedriver.module.process.dashboard.showconfig.ProcessTaskStepDashboardWidgetShowConfigBase;
 import org.springframework.stereotype.Service;
 
 @Service

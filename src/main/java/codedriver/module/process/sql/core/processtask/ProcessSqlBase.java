@@ -28,8 +28,8 @@ import codedriver.framework.process.workcenter.table.constvalue.ProcessSqlTypeEn
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import codedriver.module.process.condition.handler.ProcessTaskStartTimeCondition;
 import codedriver.module.process.dashboard.constvalue.ProcessTaskDashboardStatistics;
-import codedriver.module.process.dashboard.core.statistics.DashboardStatisticsFactory;
-import codedriver.module.process.dashboard.core.statistics.StatisticsBase;
+import codedriver.module.process.dashboard.statistics.DashboardStatisticsFactory;
+import codedriver.module.process.dashboard.statistics.StatisticsBase;
 import codedriver.module.process.dashboard.handler.ProcessTaskStepDashboardHandler;
 import codedriver.module.process.sql.IProcessSqlStructure;
 import com.alibaba.fastjson.JSONArray;
@@ -601,7 +601,7 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
         List<String> columnList = new ArrayList<>();
         getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), true);
         //补充统计column
-        StatisticsBase avgStatistics = DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getValue());
+        StatisticsBase avgStatistics = DashboardStatisticsFactory.getStatistics(statistics.getValue());
         List<TableSelectColumnVo> selectColumnVos = avgStatistics.getTableSelectColumn();
         for(TableSelectColumnVo tableSelectColumnVo : selectColumnVos){
             for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
