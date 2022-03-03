@@ -83,7 +83,7 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject result = new JSONObject();
         List<Long> notFoundProcessTaskIdList = new ArrayList<>(); // 工单不存在的id列表
-        List<Long> currentStepOverOneProcessTaskIdList = new ArrayList<>();// 当前步骤超过一个的工单id列表
+        List<Long> currentStepOverOneProcessTaskIdList;// 当前步骤超过一个的工单id列表
         List<Long> noAuthProcessTaskIdList = new ArrayList<>(); // 无权限处理的工单id列表
         Map<Long, String> exceptionMap = new HashMap<>(); // 处理发生异常的工单
         List<Long> idList = jsonObj.getJSONArray("processTaskIdList").toJavaList(Long.class);
@@ -99,10 +99,9 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
             notFoundProcessTaskIdList.addAll(idList);
         }
         // 检查哪些工单的当前步骤超过1个
-        List<Long> processTaskIdListOfCurrentStepIsOne = processTaskMapper.checkCurrentProcessTaskStepCountIsOverOneByProcessTaskIdList(processTaskIdList);
-        if (processTaskIdListOfCurrentStepIsOne.size() > 0) {
-            processTaskIdList.removeAll(processTaskIdListOfCurrentStepIsOne);
-            currentStepOverOneProcessTaskIdList.addAll(processTaskIdListOfCurrentStepIsOne);
+        currentStepOverOneProcessTaskIdList = processTaskMapper.checkCurrentProcessTaskStepCountIsOverOneByProcessTaskIdList(processTaskIdList);
+        if (currentStepOverOneProcessTaskIdList.size() > 0) {
+            processTaskIdList.removeAll(currentStepOverOneProcessTaskIdList);
         }
         if (processTaskIdList.size() > 0) {
             // 查询工单的当前步骤
@@ -113,7 +112,7 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
                     if (!"process".equals(currentStep.getType())) {
                         throw new ProcessTaskStepIsNotManualException(currentStep.getProcessTaskId(), currentStep.getName());
                     }
-                    // todo 变更和事件必须在页面上处理
+                    // 变更和事件必须在页面上处理
                     if ("event".equals(currentStep.getHandler()) || ChangeProcessStepHandlerType.CHANGECREATE.getHandler().equals(currentStep.getHandler())
                             || ChangeProcessStepHandlerType.CHANGEHANDLE.getHandler().equals(currentStep.getHandler())) {
                         throw new ProcessTaskStepMustBeManualException(currentStep.getProcessTaskId(), currentStep.getName());
