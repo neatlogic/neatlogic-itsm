@@ -10,7 +10,7 @@ import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
+import codedriver.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
@@ -19,7 +19,7 @@ import codedriver.module.process.service.NewWorkcenterService;
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepColumn;
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepNameColumn;
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
-import codedriver.module.process.workcenter.core.SqlBuilder;
+import codedriver.module.process.sql.decorator.SqlBuilder;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -121,7 +121,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
             os.write(header.toString().getBytes("GBK"));
             os.flush();
 
-            SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.TOTAL_COUNT);
+            SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.TOTAL_COUNT);
             int total = processTaskMapper.getProcessTaskCountBySql(sb.build());
             if (total > 0) {
                 workcenterVo.setRowNum(total);
@@ -130,10 +130,10 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                 for (int i = 1; i <= pageCount; i++) {
                     StringBuilder content = new StringBuilder();
                     workcenterVo.setCurrentPage(i);
-                    sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
+                    sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.DISTINCT_ID);
                     List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskBySql(sb.build());
                     workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
-                    sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
+                    sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.FIELD);
                     List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskBySql(sb.build());
                     for (ProcessTaskVo taskVo : processTaskVoList) {
                         Map<String, Object> map = new LinkedHashMap<>();

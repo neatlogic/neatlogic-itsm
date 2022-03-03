@@ -5,7 +5,7 @@ import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.module.process.dashboard.core.DashboardChartProcessBase;
+import codedriver.module.process.dashboard.core.showconfig.ProcessTaskDashboardWidgetShowConfigBase;
 import codedriver.module.process.dashboard.core.statistics.DashboardStatisticsFactory;
 import codedriver.module.process.dashboard.core.statistics.StatisticsBase;
 import codedriver.module.process.dashboard.dto.DashboardWidgetChartConfigProcessVo;
@@ -34,6 +34,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             conditionConfig.put("conditionConfig", widgetVo.getConditionConfig());
             conditionConfig.put("pageSize", chartConfigVo.getLimitNum());
             WorkcenterVo workcenterVo = new WorkcenterVo(conditionConfig);
+            workcenterVo.setDataSourceHandler(widgetVo.getHandler());
             workcenterVo.setDashboardWidgetChartConfigVo(chartConfigVo);
             StatisticsBase statistics = DashboardStatisticsFactory.getStatistics(chartConfigVo.getStatisticsType());
             statistics.doService(workcenterVo, widgetDataVo, widgetVo);
@@ -59,10 +60,10 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             JSONObject chartConfig = chart.getChartConfig();
             if (chartConfig.containsKey("showConfig")) {
                 JSONObject showConfigJson = chartConfig.getJSONObject("showConfig");
-                IDashboardChartCustom chartCustom = DashboardChartCustomFactory.getChart(widgetVo.getChartType(), "process");
+                IDashboardWidgetShowConfig chartCustom = DashboardWidgetShowConfigFactory.getChart(widgetVo.getChartType(), "process","processtask");
                 //如果无须自定义渲染配置，则使用默认配置
                 if (chartCustom == null) {
-                    chartCustom = new DashboardChartProcessBase() {
+                    chartCustom = new ProcessTaskDashboardWidgetShowConfigBase() {
                         @Override
                         public String[] getSupportChart() {
                             return new String[0];
@@ -83,7 +84,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 
     @Override
     public String getDisplayName() {
-        return "ITSM任务数据";
+        return "ITSM工单数据";
     }
 
     @Override
