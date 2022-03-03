@@ -81,68 +81,79 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject result = new JSONObject();
+        List<Long> notFoundProcessTaskIdList = new ArrayList<>(); // 工单不存在的id列表
+        List<Long> currentStepOverOneProcessTaskIdList = new ArrayList<>();// 当前步骤超过一个的工单id列表
+        List<Long> noAuthProcessTaskIdList = new ArrayList<>(); // 无权限处理的工单id列表
+        Map<Long, String> exceptionMap = new HashMap<>(); // 处理发生异常的工单
         List<Long> idList = jsonObj.getJSONArray("processTaskIdList").toJavaList(Long.class);
         String userId = jsonObj.getString("userId");
         UserVo user = userMapper.getUserByUserId(userId);
         if (user == null) {
             throw new UserNotFoundException(userId);
         }
+        // 检查工单是否存在
         List<Long> processTaskIdList = processTaskMapper.checkProcessTaskIdListIsExists(idList);
         if (processTaskIdList.size() < idList.size()) {
             idList.removeAll(processTaskIdList);
-            throw new ProcessTaskNotFoundException(idList.stream().map(Objects::toString).collect(Collectors.joining(",")));
+            notFoundProcessTaskIdList.addAll(idList);
         }
         // 检查哪些工单的当前步骤超过1个
-        List<Long> processTaskIdListOfCurrentStepIsOne = processTaskMapper.checkCurrentProcessTaskStepCountIsOneByProcessTaskIdList(processTaskIdList);
-        if (processTaskIdListOfCurrentStepIsOne.size() < processTaskIdList.size()) {
+        List<Long> processTaskIdListOfCurrentStepIsOne = processTaskMapper.checkCurrentProcessTaskStepCountIsOverOneByProcessTaskIdList(processTaskIdList);
+        if (processTaskIdListOfCurrentStepIsOne.size() > 0) {
             processTaskIdList.removeAll(processTaskIdListOfCurrentStepIsOne);
-            throw new ProcessTaskCurrentStepOverOneException(processTaskIdList);
+            currentStepOverOneProcessTaskIdList.addAll(processTaskIdListOfCurrentStepIsOne);
         }
-        // 查询工单的当前步骤
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getCurrentProcessTaskStepIdByProcessTaskIdList(processTaskIdListOfCurrentStepIsOne);
-        AuthenticationInfoVo authenticationInfo = authenticationInfoService.getAuthenticationInfo(user.getUuid());
-        List<Long> noAuthProcessTaskIdList = new ArrayList<>();
-        Map<Long, String> exceptionMap = new HashMap<>();
-        for (ProcessTaskStepVo currentStep : processTaskStepList) {
-            if (!"process".equals(currentStep.getType())) {
-                throw new ProcessTaskStepIsNotManualException(currentStep.getProcessTaskId(), currentStep.getName());
-            }
-            // todo 换成枚举
-            if ("changecreate".equals(currentStep.getHandler()) || "changehandle".equals(currentStep.getHandler())) {
-                throw new ProcessTaskStepMustBeManualException(currentStep.getProcessTaskId(), currentStep.getName());
-            }
-            Map<Long, Set<ProcessTaskOperationType>> auth = checkAuth(user, authenticationInfo, currentStep);
-            if (MapUtils.isEmpty(auth) || auth.values().stream().findFirst().get().size() == 0) {
-                noAuthProcessTaskIdList.add(currentStep.getProcessTaskId());
-                continue;
-            }
-            ProcessTaskOperationType operationType = auth.values().stream().findFirst().get().stream().findFirst().get();
-            try {
-                if (ProcessTaskOperationType.STEP_ACCEPT.getValue().equals(operationType.getValue())
-                        || ProcessTaskOperationType.STEP_START.getValue().equals(operationType.getValue())) {
-                    JSONObject param = new JSONObject();
-                    param.put("processTaskId", currentStep.getProcessTaskId());
-                    param.put("processTaskStepId", currentStep.getId());
-                    if (ProcessTaskOperationType.STEP_ACCEPT.getValue().equals(operationType.getValue())) {
-                        param.put("action", "accept");
-                    } else {
-                        param.put("action", "start");
+        if (processTaskIdList.size() > 0) {
+            // 查询工单的当前步骤
+            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getCurrentProcessTaskStepIdByProcessTaskIdList(processTaskIdList);
+            AuthenticationInfoVo authenticationInfo = authenticationInfoService.getAuthenticationInfo(user.getUuid());
+            for (ProcessTaskStepVo currentStep : processTaskStepList) {
+                try {
+                    if (!"process".equals(currentStep.getType())) {
+                        throw new ProcessTaskStepIsNotManualException(currentStep.getProcessTaskId(), currentStep.getName());
+                    }
+                    // todo 变更和事件必须在页面上处理
+                    if ("event".equals(currentStep.getHandler()) || "changecreate".equals(currentStep.getHandler()) || "changehandle".equals(currentStep.getHandler())) {
+                        throw new ProcessTaskStepMustBeManualException(currentStep.getProcessTaskId(), currentStep.getName());
+                    }
+                    Map<Long, Set<ProcessTaskOperationType>> auth = checkAuth(user, authenticationInfo, currentStep);
+                    if (MapUtils.isEmpty(auth) || auth.values().stream().findFirst().get().size() == 0) {
+                        noAuthProcessTaskIdList.add(currentStep.getProcessTaskId());
+                        continue;
+                    }
+                    ProcessTaskOperationType operationType = auth.values().stream().findFirst().get().stream().findFirst().get();
+                    if (ProcessTaskOperationType.STEP_ACCEPT.getValue().equals(operationType.getValue())
+                            || ProcessTaskOperationType.STEP_START.getValue().equals(operationType.getValue())) {
+                        JSONObject param = new JSONObject();
+                        param.put("processTaskId", currentStep.getProcessTaskId());
+                        param.put("processTaskStepId", currentStep.getId());
+                        if (ProcessTaskOperationType.STEP_ACCEPT.getValue().equals(operationType.getValue())) {
+                            param.put("action", "accept");
+                        } else {
+                            param.put("action", "start");
+                        }
+                        UserContext.init(user, authenticationInfo, SystemUser.SYSTEM.getTimezone());
+                        processTaskStartService.start(param);
                     }
                     UserContext.init(user, authenticationInfo, SystemUser.SYSTEM.getTimezone());
-                    processTaskStartService.start(param);
+                    completeProcessTaskStep(currentStep);
+                } catch (Exception ex) {
+                    exceptionMap.put(currentStep.getProcessTaskId(), ex.getMessage());
                 }
-                UserContext.init(user, authenticationInfo, SystemUser.SYSTEM.getTimezone());
-                completeProcessTaskStep(currentStep);
-            } catch (Exception ex) {
-                exceptionMap.put(currentStep.getProcessTaskId(), ex.getMessage());
             }
+        }
 
+        if (notFoundProcessTaskIdList.size() > 0) {
+            result.put("工单不存在的ID", notFoundProcessTaskIdList);
+        }
+        if (currentStepOverOneProcessTaskIdList.size() > 0) {
+            result.put("当前步骤超过一个的工单", currentStepOverOneProcessTaskIdList);
         }
         if (noAuthProcessTaskIdList.size() > 0) {
             result.put("无权限处理的工单", noAuthProcessTaskIdList.stream().map(Objects::toString).collect(Collectors.joining()));
         }
         if (!exceptionMap.isEmpty()) {
-            result.put("抛异常的工单", exceptionMap);
+            result.put("处理发生异常的工单", exceptionMap);
         }
         return result;
     }
