@@ -11,7 +11,9 @@ import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.*;
-import codedriver.framework.process.workcenter.table.*;
+import codedriver.framework.process.workcenter.table.ChannelSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -82,8 +84,11 @@ public class ProcessTaskStepNameColumn extends ProcessTaskColumnBase implements 
 		return new ArrayList<TableSelectColumnVo>() {
 			{
 				add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(), "processTaskStepId", true),
 						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(), "processTaskStepName", true)
+				)));
+				add(new TableSelectColumnVo(new ChannelSqlTable(), Arrays.asList(
+						new SelectColumnVo(ChannelSqlTable.FieldEnum.UUID.getValue(), "channelUuid", true),
+						new SelectColumnVo(ChannelSqlTable.FieldEnum.NAME.getValue(), "channelName")
 				)));
 			}
 		};
@@ -96,6 +101,9 @@ public class ProcessTaskStepNameColumn extends ProcessTaskColumnBase implements 
 				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new ArrayList<JoinOnVo>() {{
 					add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
 				}}));
+				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ChannelSqlTable(), new ArrayList<JoinOnVo>() {{
+					add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.CHANNEL_UUID.getValue(), ChannelSqlTable.FieldEnum.UUID.getValue()));
+				}}));
 			}
 		};
 	}
@@ -103,7 +111,7 @@ public class ProcessTaskStepNameColumn extends ProcessTaskColumnBase implements 
 	@Override
 	public void getMyDashboardDataVo(DashboardWidgetDataGroupVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
 		if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
-			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("processTaskStepName", workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), "processTaskStepName", workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
+			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("processTaskStepName", workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), "processTaskStepName","channelName", workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
 			dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
 		}
 		//如果存在子分组
