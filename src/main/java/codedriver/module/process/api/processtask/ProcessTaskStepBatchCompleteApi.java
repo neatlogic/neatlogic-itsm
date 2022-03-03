@@ -7,6 +7,7 @@
 package codedriver.module.process.api.processtask;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.change.constvalue.ChangeProcessStepHandlerType;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -113,7 +114,8 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
                         throw new ProcessTaskStepIsNotManualException(currentStep.getProcessTaskId(), currentStep.getName());
                     }
                     // todo 变更和事件必须在页面上处理
-                    if ("event".equals(currentStep.getHandler()) || "changecreate".equals(currentStep.getHandler()) || "changehandle".equals(currentStep.getHandler())) {
+                    if ("event".equals(currentStep.getHandler()) || ChangeProcessStepHandlerType.CHANGECREATE.getHandler().equals(currentStep.getHandler())
+                            || ChangeProcessStepHandlerType.CHANGEHANDLE.getHandler().equals(currentStep.getHandler())) {
                         throw new ProcessTaskStepMustBeManualException(currentStep.getProcessTaskId(), currentStep.getName());
                     }
                     Map<Long, Set<ProcessTaskOperationType>> auth = checkAuth(user, authenticationInfo, currentStep);
