@@ -54,14 +54,15 @@ public class ProcessTaskWhichCurrentStepIsTagStepOfMineApi extends PublicApiComp
     })
     @Output({
             @Param(name = "id", type = ApiParamType.LONG, desc = "工单ID"),
-            @Param(name = "title", type = ApiParamType.LONG, desc = "工单标题"),
-            @Param(name = "status", type = ApiParamType.LONG, desc = "工单状态"),
-            @Param(name = "stepName", type = ApiParamType.LONG, desc = "当前步骤"),
-            @Param(name = "stepStatus", type = ApiParamType.LONG, desc = "当前步骤状态"),
-            @Param(name = "userId", type = ApiParamType.LONG, desc = "当前步骤处理人id"),
-            @Param(name = "userName", type = ApiParamType.LONG, desc = "当前步骤处理人名称"),
-            @Param(name = "teamName", type = ApiParamType.LONG, desc = "当前步骤处理组"),
-            @Param(name = "roleName", type = ApiParamType.LONG, desc = "当前步骤处理角色"),
+            @Param(name = "title", type = ApiParamType.STRING, desc = "工单标题"),
+            @Param(name = "channelName", type = ApiParamType.STRING, desc = "服务名称"),
+            @Param(name = "status", type = ApiParamType.STRING, desc = "工单状态"),
+            @Param(name = "stepName", type = ApiParamType.STRING, desc = "当前步骤"),
+            @Param(name = "stepStatus", type = ApiParamType.STRING, desc = "当前步骤状态"),
+            @Param(name = "userId", type = ApiParamType.STRING, desc = "当前步骤处理人id"),
+            @Param(name = "userName", type = ApiParamType.STRING, desc = "当前步骤处理人名称"),
+            @Param(name = "teamName", type = ApiParamType.STRING, desc = "当前步骤处理组"),
+            @Param(name = "roleName", type = ApiParamType.STRING, desc = "当前步骤处理角色"),
     })
     @Description(desc = "我的待办的工单中当前处理节点是打了某个标签的节点的工单列表")
     @Override
