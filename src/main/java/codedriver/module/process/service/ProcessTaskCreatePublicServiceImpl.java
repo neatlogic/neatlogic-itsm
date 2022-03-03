@@ -26,6 +26,7 @@ import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNextStepIllegalException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNextStepOverOneException;
 import codedriver.module.framework.form.attribute.handler.SelectHandler;
 import codedriver.module.process.dao.mapper.ProcessMapper;
 import com.alibaba.fastjson.JSON;
@@ -203,8 +204,11 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
         processTaskVo.setId(saveResultObj.getLong("processTaskId"));
         processTaskVo.setChannelUuid(channelVo.getUuid());
         List<ProcessTaskStepVo> nextStepList = processTaskService.getProcessableStepList(processTaskVo, ProcessTaskOperationType.STEP_START.getValue());
-        if (CollectionUtils.isEmpty(nextStepList) && nextStepList.size() != 1) {
+        if (nextStepList.isEmpty()) {
             throw new ProcessTaskNextStepIllegalException(processTaskVo.getId());
+        }
+        if (nextStepList.size() != 1) {
+            throw new ProcessTaskNextStepOverOneException(processTaskVo.getId());
         }
         saveResultObj.put("nextStepId", nextStepList.get(0).getId());
 
