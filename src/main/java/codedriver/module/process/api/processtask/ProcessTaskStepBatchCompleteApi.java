@@ -15,6 +15,7 @@ import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
+import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -99,7 +100,7 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
             notFoundProcessTaskIdList.addAll(idList);
         }
         // 检查哪些工单的当前步骤超过1个
-        currentStepOverOneProcessTaskIdList = processTaskMapper.checkCurrentProcessTaskStepCountIsOverOneByProcessTaskIdList(processTaskIdList);
+        currentStepOverOneProcessTaskIdList = processTaskMapper.getProcessTaskIdListWhichCurrentProcessTaskStepCountIsOverOneByProcessTaskIdList(processTaskIdList);
         if (currentStepOverOneProcessTaskIdList.size() > 0) {
             processTaskIdList.removeAll(currentStepOverOneProcessTaskIdList);
         }
@@ -109,7 +110,7 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
             AuthenticationInfoVo authenticationInfo = authenticationInfoService.getAuthenticationInfo(user.getUuid());
             for (ProcessTaskStepVo currentStep : processTaskStepList) {
                 try {
-                    if (!"process".equals(currentStep.getType())) {
+                    if (!ProcessStepType.PROCESS.getValue().equals(currentStep.getType())) {
                         throw new ProcessTaskStepIsNotManualException(currentStep.getProcessTaskId(), currentStep.getName());
                     }
                     // 变更和事件必须在页面上处理
