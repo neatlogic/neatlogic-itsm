@@ -105,7 +105,7 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
         }
         if (processTaskIdList.size() > 0) {
             AuthenticationInfoVo authenticationInfo = authenticationInfoService.getAuthenticationInfo(user.getUuid());
-            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getCurrentProcessTaskStepListByProcessTaskIdListAndTag(processTaskIdList, StringUtils.isNotBlank(tag) ? tag : null);
+            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getCurrentProcessTaskStepListByProcessTaskIdListAndTag(processTaskIdList, tag);
             Map<Long, List<ProcessTaskStepVo>> map = processTaskStepList.stream().collect(Collectors.groupingBy(ProcessTaskStepVo::getProcessTaskId));
             for (Map.Entry<Long, List<ProcessTaskStepVo>> entry : map.entrySet()) {
                 Long key = entry.getKey();
