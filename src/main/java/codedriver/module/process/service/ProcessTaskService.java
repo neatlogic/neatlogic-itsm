@@ -368,4 +368,22 @@ public interface ProcessTaskService {
      */
     void startProcessProcessTask(JSONObject jsonObj) throws Exception;
 
+    /**
+     * 完成工单步骤
+     *
+     * @param paramObj 参数结构见processtask/complete接口
+     * @return
+     * @throws Exception
+     */
+    void completeProcessTaskStep(JSONObject paramObj) throws Exception;
+
+    /**
+     * 开始工单步骤
+     *
+     * @param paramObj 参数结构见processtask/start接口
+     * @return
+     * @throws Exception
+     */
+    void startProcessTaskStep(JSONObject paramObj) throws Exception;
+
 }
