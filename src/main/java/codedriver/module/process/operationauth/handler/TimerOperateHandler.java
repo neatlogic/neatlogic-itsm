@@ -4,6 +4,7 @@ import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
+import codedriver.framework.process.exception.operationauth.ProcessTaskTimerHandlerNotEnableOperateException;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.TernaryPredicate;
@@ -21,14 +22,30 @@ public class TimerOperateHandler extends OperationAuthHandlerBase {
 
     @PostConstruct
     public void init() {
-        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_ACTIVE,
-            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_RETREAT,
-            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> false);
+            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                Long id = processTaskStepVo.getId();
+                ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_RETREAT;
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskTimerHandlerNotEnableOperateException(operationType));
+                return false;
+            });
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_WORK,
-            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> false);
+            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                Long id = processTaskStepVo.getId();
+                ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_WORK;
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskTimerHandlerNotEnableOperateException(operationType));
+                return false;
+            });
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMMENT,
-            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> false);
+            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                Long id = processTaskStepVo.getId();
+                ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_COMMENT;
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskTimerHandlerNotEnableOperateException(operationType));
+                return false;
+            });
     }
 
     @Override
