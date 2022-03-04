@@ -447,6 +447,10 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                             .put(ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT, new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT));
                     return false;
                 });
+
+        /**
+         * 工单标记重复事件权限
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_MARKREPEAT,
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
                     if (processTaskVo.getIsShow() == 0) {
@@ -463,7 +467,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     return false;
                 });
         /**
-         * 工单复杂上报权限
+         * 工单复制上报权限
          * 判断userUuid用户是否有工单复杂上报权限逻辑：
          * userUuid用户有当前工单对应服务的上报权限，则有工单复杂上报权限
          */
@@ -554,14 +558,27 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return false;
             }
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                boolean flag = false;
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
-                        return checkOperationAuthIsConfigured(processTaskVo, processTaskStep, ProcessTaskOperationType.STEP_TRANSFER, userUuid);
+                        flag = checkOperationAuthIsConfigured(processTaskVo, processTaskStep, ProcessTaskOperationType.STEP_TRANSFER, userUuid);
+                        if (flag) {
+                            return true;
+                        }
                     }
+                }
+                if (!flag) {
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskVo.getId(), key -> new HashMap<>())
+                            .put(ProcessTaskOperationType.PROCESSTASK_TRANSFER, new ProcessTaskNoTransferableStepsException());
+                    return false;
                 }
             }
             return false;
         });
+
+        /**
+         * 工单显示权限
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_SHOW, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
             if (processTaskVo.getIsShow() == 1) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskVo.getId(), key -> new HashMap<>())
@@ -575,6 +592,9 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             }
             return true;
         });
+        /**
+         * 工单隐藏权限
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_HIDE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskVo.getId(), key -> new HashMap<>())
@@ -588,6 +608,9 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             }
             return true;
         });
+        /**
+         * 工单删除权限
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_DELETE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
             if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskVo.getId(), key -> new HashMap<>())
