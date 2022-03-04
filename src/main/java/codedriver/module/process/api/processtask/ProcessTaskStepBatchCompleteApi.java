@@ -13,6 +13,7 @@ import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.event.constvalue.EventProcessStepHandlerType;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
@@ -121,7 +122,7 @@ public class ProcessTaskStepBatchCompleteApi extends PublicApiComponentBase {
                             throw new ProcessTaskStepIsNotManualException(currentStep.getProcessTaskId(), currentStep.getName());
                         }
                         // 变更和事件必须在页面上处理
-                        if ("event".equals(currentStep.getHandler()) || ChangeProcessStepHandlerType.CHANGECREATE.getHandler().equals(currentStep.getHandler())
+                        if (EventProcessStepHandlerType.EVENT.getHandler().equals(currentStep.getHandler()) || ChangeProcessStepHandlerType.CHANGECREATE.getHandler().equals(currentStep.getHandler())
                                 || ChangeProcessStepHandlerType.CHANGEHANDLE.getHandler().equals(currentStep.getHandler())) {
                             throw new ProcessTaskStepMustBeManualException(currentStep.getProcessTaskId(), currentStep.getName());
                         }
