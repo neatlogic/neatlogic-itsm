@@ -18,10 +18,14 @@ import codedriver.framework.matrix.dto.MatrixDataVo;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixDataSourceHandlerNotFoundException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
-import codedriver.framework.process.constvalue.ProcessTaskOperationType;
+import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
-import codedriver.framework.process.dto.*;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.dto.PriorityVo;
+import codedriver.framework.process.dto.ProcessFormVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
@@ -65,6 +69,9 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
 
     @Resource
     private MatrixMapper matrixMapper;
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
     @Resource
     private ProcessTaskService processTaskService;
@@ -203,14 +210,14 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
         ProcessTaskVo processTaskVo = new ProcessTaskVo();
         processTaskVo.setId(saveResultObj.getLong("processTaskId"));
         processTaskVo.setChannelUuid(channelVo.getUuid());
-        List<ProcessTaskStepVo> nextStepList = processTaskService.getProcessableStepList(processTaskVo, ProcessTaskOperationType.STEP_START.getValue());
-        if (nextStepList.isEmpty()) {
+        List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(saveResultObj.getLong("processTaskStepId"), ProcessFlowDirection.FORWARD.getValue());
+        if (nextStepIdList.isEmpty()) {
             throw new ProcessTaskNextStepIllegalException(processTaskVo.getId());
         }
-        if (nextStepList.size() != 1) {
+        if (nextStepIdList.size() != 1) {
             throw new ProcessTaskNextStepOverOneException(processTaskVo.getId());
         }
-        saveResultObj.put("nextStepId", nextStepList.get(0).getId());
+        saveResultObj.put("nextStepId", nextStepIdList.get(0));
 
         //流转
         processTaskService.startProcessProcessTask(saveResultObj);
