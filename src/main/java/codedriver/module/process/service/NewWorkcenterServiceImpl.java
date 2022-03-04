@@ -399,21 +399,21 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         // 搜索标题
         workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.TITLE.getHandlerName());
         workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.TITLE.getText());
-        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.TITLE.getProValue());
+        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.TITLE.getProName());
         workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.TITLE.getValue());
         returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
 
         // 搜索SerialNumber
         workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getHandlerName());
         workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getText());
-        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getProValue());
+        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getProName());
         workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
         returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
 
         // 搜索ID
         workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.ID.getHandlerName());
         workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.ID.getText());
-        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.ID.getProValue());
+        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.ID.getProName());
         workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.ID.getValue());
         returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
         return returnArray;

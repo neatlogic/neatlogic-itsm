@@ -39,7 +39,7 @@ public class DashboardSumStatistics extends StatisticsBase {
         //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
         chartConfigVo.setSubSql(getSubSql(workcenterVo));
         SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_SUM);
-        System.out.println(sb.build());
+        //System.out.println(sb.build());
         List<Map<String, Object>> groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
         IProcessTaskColumn groupColumn = ProcessTaskColumnFactory.columnComponentMap.get(chartConfigVo.getGroup());
         if (StringUtils.isNotBlank(chartConfigVo.getSubGroup())) {
