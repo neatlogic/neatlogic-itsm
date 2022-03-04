@@ -41,24 +41,25 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          * 4.userUuid用户在步骤权限设置中获得“查看节点信息”的授权
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_VIEW, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+            Long id = processTaskStepVo.getId();
+            ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_VIEW;
             if (processTaskVo.getIsShow() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_VIEW, new ProcessTaskHiddenException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
             if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_VIEW, new ProcessTaskNotProcessTaskModifyException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskNotProcessTaskModifyException());
                 return false;
             }
-            if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_VIEW,
-                    processTaskVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
-                    ProcessTaskStatus.DRAFT
-            )) {
+            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.DRAFT);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
+
             if (userUuid.equals(processTaskVo.getOwner())) {
                 return true;
             } else if (userUuid.equals(processTaskVo.getReporter())) {
@@ -68,12 +69,12 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             } else if (checkIsWorker(processTaskStepVo, userUuid)) {
                 return true;
             }
-            boolean flag = checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, ProcessTaskOperationType.STEP_VIEW, userUuid);
+            boolean flag = checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, operationType, userUuid);
             if (flag) {
                 return true;
             }
-            operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                    .put(ProcessTaskOperationType.STEP_VIEW, new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.STEP_VIEW));
+            operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                    .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
             return false;
         });
         /**
@@ -83,46 +84,45 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_TRANSFER,
             (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                Long id = processTaskStepVo.getId();
+                ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_TRANSFER;
                 if (processTaskVo.getIsShow() == 0) {
-                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                            .put(ProcessTaskOperationType.STEP_TRANSFER, new ProcessTaskHiddenException());
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, new ProcessTaskHiddenException());
                     return false;
                 }
-                if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                        ProcessTaskOperationType.STEP_TRANSFER,
-                        processTaskVo.getStatus(),
-                        operationTypePermissionDeniedExceptionMap,
+                ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                         ProcessTaskStatus.DRAFT,
                         ProcessTaskStatus.SUCCEED,
                         ProcessTaskStatus.ABORTED,
                         ProcessTaskStatus.FAILED,
                         ProcessTaskStatus.HANG,
-                        ProcessTaskStatus.SCORED
-                        )) {
+                        ProcessTaskStatus.SCORED);
+                if (exception != null) {
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, exception);
                     return false;
                 }
                 // 步骤状态为已激活的才能转交
                 if (processTaskStepVo.getIsActive() == 0) {
-                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                            .put(ProcessTaskOperationType.STEP_TRANSFER, new ProcessTaskStepNotActiveException());
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, new ProcessTaskStepNotActiveException());
                     return false;
                 }
-                if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
-                        ProcessTaskOperationType.STEP_TRANSFER,
-                        processTaskStepVo.getStatus(),
-                        operationTypePermissionDeniedExceptionMap,
-                        ProcessTaskStatus.SUCCEED,
+                exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
                         ProcessTaskStatus.FAILED,
-                        ProcessTaskStatus.HANG
-                )) {
+                        ProcessTaskStatus.HANG);
+                if (exception != null) {
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, exception);
                     return false;
                 }
-                boolean flag = checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, ProcessTaskOperationType.STEP_TRANSFER, userUuid);
+                boolean flag = checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, operationType, userUuid);
                 if (flag) {
                     return true;
                 }
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_TRANSFER, new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.STEP_TRANSFER));
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
                 return false;
             });
         /**
@@ -131,48 +131,47 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          * 首先步骤状态是“已激活”且“待处理”，然后userUuid用户是步骤的待处理人
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_ACCEPT, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+            Long id = processTaskStepVo.getId();
+            ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_ACCEPT;
             if (processTaskVo.getIsShow() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_ACCEPT, new ProcessTaskHiddenException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
-            if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_ACCEPT,
-                    processTaskVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
+            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.SCORED
-            )) {
+                    ProcessTaskStatus.SCORED);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
             if (processTaskStepVo.getIsActive() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_ACCEPT, new ProcessTaskStepNotActiveException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepNotActiveException());
                 return false;
             }
-            if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_ACCEPT,
-                    processTaskStepVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
-                    ProcessTaskStatus.SUCCEED,
+            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.RUNNING
-            )) {
+                    ProcessTaskStatus.RUNNING);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
             if (!checkIsWorker(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_ACCEPT, new ProcessTaskStepNotWorkerException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepNotWorkerException());
                 return false;
             }
             if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_ACCEPT, new ProcessTaskStepMajorUserException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepMajorUserException());
                 return false;
             }
             return true;
@@ -183,51 +182,51 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          * 首先步骤状态是“已激活”且“待处理”，然后userUuid用户是步骤的处理人
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_START, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+            Long id = processTaskStepVo.getId();
+            ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_START;
             if (processTaskVo.getIsShow() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_START, new ProcessTaskHiddenException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
-            if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_START,
-                    processTaskVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
+            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.SCORED
-            )) {
+                    ProcessTaskStatus.SCORED);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
             if (processTaskStepVo.getIsActive() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_START, new ProcessTaskStepNotActiveException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepNotActiveException());
                 return false;
             }
-            if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_START,
-                    processTaskStepVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
-                    ProcessTaskStatus.SUCCEED,
+
+            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.RUNNING
-            )) {
+                    ProcessTaskStatus.RUNNING);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
 //            if (!checkIsWorker(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-//                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-//                        .put(ProcessTaskOperationType.STEP_START, new ProcessTaskStepNotWorkerException());
+//                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+//                        .put(operationType, new ProcessTaskStepNotWorkerException());
 //                return false;
 //            }
             // 有主处理人时是start
             if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                 return true;
             }
-            operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                    .put(ProcessTaskOperationType.STEP_START, new ProcessTaskStepNotMajorUserException());
+            operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                    .put(operationType, new ProcessTaskStepNotMajorUserException());
             return false;
         });
         /**
@@ -236,49 +235,49 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人，且步骤有前进（实线）方向的连线
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMPLETE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+            Long id = processTaskStepVo.getId();
+            ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_COMPLETE;
             if (processTaskVo.getIsShow() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_COMPLETE, new ProcessTaskHiddenException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
-            if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_COMPLETE,
-                    processTaskVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
+            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.SCORED
-            )) {
+                    ProcessTaskStatus.SCORED);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
             if (processTaskStepVo.getIsActive() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_COMPLETE, new ProcessTaskStepNotActiveException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepNotActiveException());
                 return false;
             }
-            if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_COMPLETE,
-                    processTaskStepVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
-                    ProcessTaskStatus.SUCCEED,
+
+            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.PENDING
-            )) {
+                    ProcessTaskStatus.PENDING);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
             if (!checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_COMPLETE, new ProcessTaskStepNotMajorUserException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepNotMajorUserException());
                 return false;
             }
             if (checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo, processTaskStepVo.getId(), ProcessFlowDirection.FORWARD)) {
                 return true;
             }
-            operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                    .put(ProcessTaskOperationType.STEP_COMPLETE, new ProcessTaskStepNotNextStepException());
+            operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                    .put(operationType, new ProcessTaskStepNotNextStepException());
             return false;
         });
         /**
@@ -287,50 +286,50 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人，且步骤有回退（虚线）方向的连线
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_BACK, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+            Long id = processTaskStepVo.getId();
+            ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_BACK;
             if (processTaskVo.getIsShow() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_BACK, new ProcessTaskHiddenException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
-            if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_BACK,
-                    processTaskVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
+            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.SCORED
-            )) {
+                    ProcessTaskStatus.SCORED);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
             if (processTaskStepVo.getIsActive() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_BACK, new ProcessTaskStepNotActiveException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepNotActiveException());
                 return false;
             }
-            if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_BACK,
-                    processTaskStepVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
-                    ProcessTaskStatus.SUCCEED,
+
+            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.PENDING
-            )) {
+                    ProcessTaskStatus.PENDING);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
             if (!checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_BACK, new ProcessTaskStepNotMajorUserException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepNotMajorUserException());
                 return false;
             }
             if (checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo, processTaskStepVo.getId(), ProcessFlowDirection.BACKWARD)) {
                 return true;
             }
-            operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                    .put(ProcessTaskOperationType.STEP_BACK, new ProcessTaskStepBackNotEnabledException());
+            operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                    .put(operationType, new ProcessTaskStepBackNotEnabledException());
             return false;
         });
         /**
@@ -339,45 +338,46 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_SAVE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+            Long id = processTaskStepVo.getId();
+            ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_SAVE;
             if (processTaskVo.getIsShow() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_SAVE, new ProcessTaskHiddenException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
-            if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_SAVE,
-                    processTaskVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
+
+            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.SCORED
-            )) {
+                    ProcessTaskStatus.SCORED);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
             if (processTaskStepVo.getIsActive() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_SAVE, new ProcessTaskStepNotActiveException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepNotActiveException());
                 return false;
             }
-            if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_SAVE,
-                    processTaskStepVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
-                    ProcessTaskStatus.SUCCEED,
+
+            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.PENDING
-            )) {
+                    ProcessTaskStatus.PENDING);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
             if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                 return true;
             }
-            operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                    .put(ProcessTaskOperationType.STEP_SAVE, new ProcessTaskStepNotMajorUserException());
+            operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                    .put(operationType, new ProcessTaskStepNotMajorUserException());
             return false;
         });
         /**
@@ -386,45 +386,45 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMMENT, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+            Long id = processTaskStepVo.getId();
+            ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_COMMENT;
             if (processTaskVo.getIsShow() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_COMMENT, new ProcessTaskHiddenException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
-            if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_COMMENT,
-                    processTaskVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
+            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.SCORED
-            )) {
+                    ProcessTaskStatus.SCORED);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
             if (processTaskStepVo.getIsActive() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_COMMENT, new ProcessTaskStepNotActiveException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepNotActiveException());
                 return false;
             }
-            if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_COMMENT,
-                    processTaskStepVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
-                    ProcessTaskStatus.SUCCEED,
+
+            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.PENDING
-            )) {
+                    ProcessTaskStatus.PENDING);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
             if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                 return true;
             }
-            operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                    .put(ProcessTaskOperationType.STEP_COMMENT, new ProcessTaskStepNotMajorUserException());
+            operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                    .put(operationType, new ProcessTaskStepNotMajorUserException());
             return false;
         });
         /**
@@ -433,45 +433,46 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          * 首先步骤状态是“处理中”，然后userUuid用户在步骤权限设置中获得“暂停”的授权
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_PAUSE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+            Long id = processTaskStepVo.getId();
+            ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_PAUSE;
             if (processTaskVo.getIsShow() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_PAUSE, new ProcessTaskHiddenException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
-            if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_PAUSE,
-                    processTaskVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
+            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.SCORED
-            )) {
+                    ProcessTaskStatus.SCORED);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
+
             if (processTaskStepVo.getIsActive() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_PAUSE, new ProcessTaskStepNotActiveException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepNotActiveException());
                 return false;
             }
-            if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_PAUSE,
-                    processTaskStepVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
-                    ProcessTaskStatus.SUCCEED,
+
+            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.PENDING
-            )) {
+                    ProcessTaskStatus.PENDING);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
-            if (checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, ProcessTaskOperationType.STEP_PAUSE, userUuid)) {
+            if (checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, operationType, userUuid)) {
                 return true;
             }
-            operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                    .put(ProcessTaskOperationType.STEP_PAUSE, new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.STEP_PAUSE));
+            operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                    .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
             return false;
         });
         /**
@@ -480,45 +481,45 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          * 首先步骤状态是“已激活”且“已挂起”，然后userUuid用户在步骤权限设置中获得“暂停”的授权
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_RECOVER, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+            Long id = processTaskStepVo.getId();
+            ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_RECOVER;
             if (processTaskVo.getIsShow() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_RECOVER, new ProcessTaskHiddenException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
-            if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_RECOVER,
-                    processTaskVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
+            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.SCORED
-            )) {
+                    ProcessTaskStatus.SCORED);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
             if (processTaskStepVo.getIsActive() == 0) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_RECOVER, new ProcessTaskStepNotActiveException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepNotActiveException());
                 return false;
             }
-            if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_RECOVER,
-                    processTaskStepVo.getStatus(),
-                    operationTypePermissionDeniedExceptionMap,
-                    ProcessTaskStatus.SUCCEED,
+
+            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.RUNNING,
-                    ProcessTaskStatus.PENDING
-            )) {
+                    ProcessTaskStatus.PENDING);
+            if (exception != null) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, exception);
                 return false;
             }
             if (checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, ProcessTaskOperationType.STEP_PAUSE, userUuid)) {
                 return true;
             }
-            operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                    .put(ProcessTaskOperationType.STEP_PAUSE, new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.STEP_PAUSE));
+            operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                    .put(operationType, new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.STEP_PAUSE));
             return false;
         });
         /**
@@ -528,30 +529,31 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_RETREAT,
             (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                Long id = processTaskStepVo.getId();
+                ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_RETREAT;
                 if (processTaskVo.getIsShow() == 0) {
-                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                            .put(ProcessTaskOperationType.STEP_RETREAT, new ProcessTaskHiddenException());
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, new ProcessTaskHiddenException());
                     return false;
                 }
-                if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                        ProcessTaskOperationType.STEP_RETREAT,
-                        processTaskVo.getStatus(),
-                        operationTypePermissionDeniedExceptionMap,
+                ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                         ProcessTaskStatus.DRAFT,
                         ProcessTaskStatus.SUCCEED,
                         ProcessTaskStatus.ABORTED,
                         ProcessTaskStatus.FAILED,
                         ProcessTaskStatus.HANG,
-                        ProcessTaskStatus.SCORED
-                )) {
+                        ProcessTaskStatus.SCORED);
+                if (exception != null) {
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, exception);
                     return false;
                 }
                 if (!ProcessTaskStatus.SUCCEED.getValue().equals(processTaskStepVo.getStatus())) {
-                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                            .put(ProcessTaskOperationType.STEP_RETREAT, new ProcessTaskStepUndoneException());
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, new ProcessTaskStepUndoneException());
                     return false;
                 }
-//                if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
+//                if (checkProcessTaskStepStatus(id,
 //                        ProcessTaskOperationType.STEP_RECOVER,
 //                        processTaskStepVo.getStatus(),
 //                        operationTypePermissionDeniedExceptionMap,
@@ -563,16 +565,16 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
 //                    return false;
 //                }
                 // 撤销权限retreat
-                if (!checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, ProcessTaskOperationType.STEP_RETREAT, userUuid)) {
-                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                            .put(ProcessTaskOperationType.STEP_RETREAT, new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.STEP_RETREAT));
+                if (!checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, operationType, userUuid)) {
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
                     return false;
                 }
                 if (checkCurrentStepIsRetractableByProcessTaskStepId(processTaskVo, processTaskStepVo.getId(), userUuid)) {
                     return true;
                 }
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_RETREAT, new ProcessTaskStepCannotRetreatException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepCannotRetreatException());
                 return false;
             });
         /**
@@ -582,57 +584,58 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_REAPPROVAL,
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                    Long id = processTaskStepVo.getId();
+                    ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_REAPPROVAL;
                     if (processTaskVo.getIsShow() == 0) {
-                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                                .put(ProcessTaskOperationType.STEP_REAPPROVAL, new ProcessTaskHiddenException());
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, new ProcessTaskHiddenException());
                         return false;
                     }
-                    if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                            ProcessTaskOperationType.STEP_REAPPROVAL,
-                            processTaskVo.getStatus(),
-                            operationTypePermissionDeniedExceptionMap,
+
+                    ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                             ProcessTaskStatus.DRAFT,
                             ProcessTaskStatus.SUCCEED,
                             ProcessTaskStatus.ABORTED,
                             ProcessTaskStatus.FAILED,
                             ProcessTaskStatus.HANG,
-                            ProcessTaskStatus.SCORED
-                    )) {
+                            ProcessTaskStatus.SCORED);
+                    if (exception != null) {
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, exception);
                         return false;
                     }
-                    if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
-                            ProcessTaskOperationType.STEP_REAPPROVAL,
-                            processTaskStepVo.getStatus(),
-                            operationTypePermissionDeniedExceptionMap,
-                            ProcessTaskStatus.HANG,
+
+                    exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
                             ProcessTaskStatus.FAILED,
-                            ProcessTaskStatus.SUCCEED,
-                            ProcessTaskStatus.PENDING
-                    )) {
+                            ProcessTaskStatus.HANG,
+                            ProcessTaskStatus.PENDING);
+                    if (exception != null) {
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, exception);
                         return false;
                     }
                     if (!checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                                .put(ProcessTaskOperationType.STEP_REAPPROVAL, new ProcessTaskStepNotMajorUserException());
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, new ProcessTaskStepNotMajorUserException());
                         return false;
                     }
                     if (!Objects.equals(processTaskStepVo.getEnableReapproval(), 1)){
-                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                                .put(ProcessTaskOperationType.STEP_REAPPROVAL, new ProcessTaskStepReapprovalNotEnabledException());
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, new ProcessTaskStepReapprovalNotEnabledException());
                         return false;
                     }
                     List<ProcessTaskStepRelVo> relList = processTaskVo.getStepRelList();
                     if (CollectionUtils.isNotEmpty(relList)) {
                         for (ProcessTaskStepRelVo processTaskStepRelVo : relList) {
-                            if (Objects.equals(processTaskStepVo.getId(), processTaskStepRelVo.getToProcessTaskStepId())) {
+                            if (Objects.equals(id, processTaskStepRelVo.getToProcessTaskStepId())) {
                                 if (Objects.equals(processTaskStepRelVo.getType(), ProcessFlowDirection.BACKWARD.getValue()) && Objects.equals(processTaskStepRelVo.getIsHit(), 1)) {
                                     return true;
                                 }
                             }
                         }
                     }
-                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                            .put(ProcessTaskOperationType.STEP_REAPPROVAL, new ProcessTaskStepNoNeedReapprovalStepException());
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, new ProcessTaskStepNoNeedReapprovalStepException());
                     return false;
                 });
         /**
@@ -642,44 +645,45 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_WORK,
             (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                Long id = processTaskStepVo.getId();
+                ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_WORK;
                 if (processTaskVo.getIsShow() == 0) {
-                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                            .put(ProcessTaskOperationType.STEP_WORK, new ProcessTaskHiddenException());
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, new ProcessTaskHiddenException());
                     return false;
                 }
-                if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                        ProcessTaskOperationType.STEP_WORK,
-                        processTaskVo.getStatus(),
-                        operationTypePermissionDeniedExceptionMap,
+
+                ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                         ProcessTaskStatus.DRAFT,
                         ProcessTaskStatus.SUCCEED,
                         ProcessTaskStatus.ABORTED,
                         ProcessTaskStatus.FAILED,
                         ProcessTaskStatus.HANG,
-                        ProcessTaskStatus.SCORED
-                )) {
+                        ProcessTaskStatus.SCORED);
+                if (exception != null) {
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, exception);
                     return false;
                 }
                 if (processTaskStepVo.getIsActive() == 0) {
-                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                            .put(ProcessTaskOperationType.STEP_WORK, new ProcessTaskStepNotActiveException());
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, new ProcessTaskStepNotActiveException());
                     return false;
                 }
-                if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
-                        ProcessTaskOperationType.STEP_WORK,
-                        processTaskStepVo.getStatus(),
-                        operationTypePermissionDeniedExceptionMap,
-                        ProcessTaskStatus.SUCCEED,
+
+                exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
                         ProcessTaskStatus.FAILED,
-                        ProcessTaskStatus.HANG
-                )) {
+                        ProcessTaskStatus.HANG);
+                if (exception != null) {
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, exception);
                     return false;
                 }
                 if (checkIsWorker(processTaskStepVo, userUuid)) {
                     return true;
                 }
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                        .put(ProcessTaskOperationType.STEP_WORK, new ProcessTaskStepNotWorkerException());
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepNotWorkerException());
                 return false;
             });
         /**
@@ -704,45 +708,46 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_CREATE,
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                    Long id = processTaskStepVo.getId();
+                    ProcessTaskOperationType operationType = ProcessTaskOperationType.TASK_CREATE;
                     if (processTaskVo.getIsShow() == 0) {
-                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                                .put(ProcessTaskOperationType.TASK_CREATE, new ProcessTaskHiddenException());
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, new ProcessTaskHiddenException());
                         return false;
                     }
-                    if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                            ProcessTaskOperationType.TASK_CREATE,
-                            processTaskVo.getStatus(),
-                            operationTypePermissionDeniedExceptionMap,
+                    ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                             ProcessTaskStatus.DRAFT,
                             ProcessTaskStatus.SUCCEED,
                             ProcessTaskStatus.ABORTED,
                             ProcessTaskStatus.FAILED,
                             ProcessTaskStatus.HANG,
-                            ProcessTaskStatus.SCORED
-                    )) {
+                            ProcessTaskStatus.SCORED);
+                    if (exception != null) {
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, exception);
                         return false;
                     }
+
                     if (processTaskStepVo.getIsActive() == 0) {
-                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                                .put(ProcessTaskOperationType.TASK_CREATE, new ProcessTaskStepNotActiveException());
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, new ProcessTaskStepNotActiveException());
                         return false;
                     }
-                    if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
-                            ProcessTaskOperationType.TASK_CREATE,
-                            processTaskStepVo.getStatus(),
-                            operationTypePermissionDeniedExceptionMap,
-                            ProcessTaskStatus.SUCCEED,
+
+                    exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
                             ProcessTaskStatus.FAILED,
                             ProcessTaskStatus.HANG,
-                            ProcessTaskStatus.PENDING
-                    )) {
+                            ProcessTaskStatus.PENDING);
+                    if (exception != null) {
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, exception);
                         return false;
                     }
                     if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                         return true;
                     }
-                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                            .put(ProcessTaskOperationType.TASK_CREATE, new ProcessTaskStepNotMajorUserException());
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, new ProcessTaskStepNotMajorUserException());
                     return false;
                 });
 
@@ -753,44 +758,44 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_DELETE,
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                    Long id = processTaskStepVo.getId();
+                    ProcessTaskOperationType operationType = ProcessTaskOperationType.TASK_DELETE;
                     if (processTaskVo.getIsShow() == 0) {
-                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                                .put(ProcessTaskOperationType.TASK_DELETE, new ProcessTaskHiddenException());
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, new ProcessTaskHiddenException());
                         return false;
                     }
-                    if (checkProcessTaskStatus(processTaskStepVo.getId(),
-                            ProcessTaskOperationType.TASK_DELETE,
-                            processTaskVo.getStatus(),
-                            operationTypePermissionDeniedExceptionMap,
+                    ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                             ProcessTaskStatus.DRAFT,
                             ProcessTaskStatus.SUCCEED,
                             ProcessTaskStatus.ABORTED,
                             ProcessTaskStatus.FAILED,
                             ProcessTaskStatus.HANG,
-                            ProcessTaskStatus.SCORED
-                    )) {
+                            ProcessTaskStatus.SCORED);
+                    if (exception != null) {
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, exception);
                         return false;
                     }
                     if (processTaskStepVo.getIsActive() == 0) {
-                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                                .put(ProcessTaskOperationType.TASK_DELETE, new ProcessTaskStepNotActiveException());
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, new ProcessTaskStepNotActiveException());
                         return false;
                     }
-                    if (checkProcessTaskStepStatus(processTaskStepVo.getId(),
-                            ProcessTaskOperationType.TASK_DELETE,
-                            processTaskStepVo.getStatus(),
-                            operationTypePermissionDeniedExceptionMap,
-                            ProcessTaskStatus.SUCCEED,
+
+                    exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
                             ProcessTaskStatus.FAILED,
-                            ProcessTaskStatus.HANG
-                    )) {
+                            ProcessTaskStatus.HANG);
+                    if (exception != null) {
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, exception);
                         return false;
                     }
                     if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                         return true;
                     }
-                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashMap<>())
-                            .put(ProcessTaskOperationType.TASK_DELETE, new ProcessTaskStepNotMajorUserException());
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, new ProcessTaskStepNotMajorUserException());
                     return false;
                 });
     }
