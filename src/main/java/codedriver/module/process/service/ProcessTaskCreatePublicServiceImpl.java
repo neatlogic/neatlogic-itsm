@@ -207,15 +207,13 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
         JSONObject saveResultObj = processTaskService.saveProcessTaskDraft(paramObj);
 
         //查询可执行下一 步骤
-        ProcessTaskVo processTaskVo = new ProcessTaskVo();
-        processTaskVo.setId(saveResultObj.getLong("processTaskId"));
-        processTaskVo.setChannelUuid(channelVo.getUuid());
+        Long processTaskId = saveResultObj.getLong("processTaskId");
         List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(saveResultObj.getLong("processTaskStepId"), ProcessFlowDirection.FORWARD.getValue());
         if (nextStepIdList.isEmpty()) {
-            throw new ProcessTaskNextStepIllegalException(processTaskVo.getId());
+            throw new ProcessTaskNextStepIllegalException(processTaskId);
         }
         if (nextStepIdList.size() != 1) {
-            throw new ProcessTaskNextStepOverOneException(processTaskVo.getId());
+            throw new ProcessTaskNextStepOverOneException(processTaskId);
         }
         saveResultObj.put("nextStepId", nextStepIdList.get(0));
 
