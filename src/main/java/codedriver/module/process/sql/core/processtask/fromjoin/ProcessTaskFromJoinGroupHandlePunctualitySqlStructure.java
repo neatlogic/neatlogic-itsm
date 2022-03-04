@@ -20,11 +20,6 @@ public class ProcessTaskFromJoinGroupHandlePunctualitySqlStructure extends Proce
     }
 
     @Override
-    public String getDataSourceHandlerName() {
-        return "processtask";
-    }
-
-    @Override
     public String getSqlStructureName() {
         return "fromJoin";
     }

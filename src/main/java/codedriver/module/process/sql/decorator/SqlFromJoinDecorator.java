@@ -23,7 +23,7 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
      **/
     @Override
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
-        IProcessSqlStructure processSqlStructure = ProcessSqlStructureFactory.getProcessSqlStructure(new ProcessTaskDashboardHandler().getName(),"fromJoin", workcenterVo.getSqlFieldType());
+        IProcessSqlStructure processSqlStructure = ProcessSqlStructureFactory.getProcessSqlStructure(ProcessTaskDashboardHandler.class.getName(),"fromJoin", workcenterVo.getSqlFieldType());
         if(processSqlStructure != null) {
             processSqlStructure.doService(sqlSb, workcenterVo);
         }

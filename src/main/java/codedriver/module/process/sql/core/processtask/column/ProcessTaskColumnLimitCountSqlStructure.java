@@ -24,11 +24,6 @@ public class ProcessTaskColumnLimitCountSqlStructure extends ProcessSqlBase {
     }
 
     @Override
-    public String getDataSourceHandlerName() {
-        return "processtask";
-    }
-
-    @Override
     public void doMyService(StringBuilder sqlSb, WorkcenterVo workcenterVo){
         sqlSb.append(" distinct pt.id ");
     }

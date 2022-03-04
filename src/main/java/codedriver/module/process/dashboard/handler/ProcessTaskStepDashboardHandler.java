@@ -14,6 +14,7 @@ import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import codedriver.module.process.dashboard.showconfig.ProcessTaskStepDashboardWidgetShowConfigBase;
 import codedriver.module.process.dashboard.statistics.DashboardStatisticsFactory;
 import codedriver.module.process.dashboard.statistics.StatisticsBase;
@@ -43,7 +44,7 @@ public class ProcessTaskStepDashboardHandler extends DashboardHandlerBase {
             conditionConfig.put("conditionConfig", widgetVo.getConditionConfig());
             conditionConfig.put("pageSize", chartConfigVo.getLimitNum());
             WorkcenterVo workcenterVo = new WorkcenterVo(conditionConfig);
-            workcenterVo.setDataSourceHandler(widgetVo.getHandler());
+            workcenterVo.setDataSourceHandler(ProcessTaskStepDashboardHandler.class.getName());
             workcenterVo.setDashboardWidgetChartConfigVo(chartConfigVo);
             StatisticsBase statistics = DashboardStatisticsFactory.getStatistics(chartConfigVo.getStatisticsType());
             statistics.doService(workcenterVo, widgetDataGroupVo, widgetVo);
@@ -101,6 +102,11 @@ public class ProcessTaskStepDashboardHandler extends DashboardHandlerBase {
     @Override
     public String getIcon() {
         return "xx-icon";
+    }
+
+    @Override
+    public String getDistinctCountColumnSql(){
+        return String.format(" count(distinct %s.%s)  `count` ", new ProcessTaskStepSqlTable().getShortName(),ProcessTaskStepSqlTable.FieldEnum.ID.getValue());
     }
 
 }

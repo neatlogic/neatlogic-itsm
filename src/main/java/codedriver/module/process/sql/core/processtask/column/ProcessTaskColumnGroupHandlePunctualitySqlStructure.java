@@ -25,11 +25,6 @@ public class ProcessTaskColumnGroupHandlePunctualitySqlStructure extends Process
     }
 
     @Override
-    public String getDataSourceHandlerName() {
-        return "processtask";
-    }
-
-    @Override
     public void doMyService(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         buildStatisticsColumnSql(sqlSb,workcenterVo, ProcessTaskDashboardStatistics.HANDLE_PUNCTUALITY);
     }

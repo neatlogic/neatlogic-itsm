@@ -19,11 +19,6 @@ public class ProcessTaskWhereLimitCountSqlStructure extends ProcessSqlBase {
     }
 
     @Override
-    public String getDataSourceHandlerName() {
-        return "processtask";
-    }
-
-    @Override
     public String getSqlStructureName() {
         return "where";
     }

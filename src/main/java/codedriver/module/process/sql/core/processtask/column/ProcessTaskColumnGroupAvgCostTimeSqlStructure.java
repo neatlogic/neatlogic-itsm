@@ -25,11 +25,6 @@ public class ProcessTaskColumnGroupAvgCostTimeSqlStructure extends ProcessSqlBas
     }
 
     @Override
-    public String getDataSourceHandlerName() {
-        return "processtask";
-    }
-
-    @Override
     public void doMyService(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         buildStatisticsColumnSql(sqlSb,workcenterVo, ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME);
     }
