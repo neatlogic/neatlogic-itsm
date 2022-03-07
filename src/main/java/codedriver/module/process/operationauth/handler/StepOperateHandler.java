@@ -109,7 +109,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                             .put(operationType, new ProcessTaskStepNotActiveException());
                     return false;
                 }
-                exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
+                exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
                         ProcessTaskStatus.FAILED,
                         ProcessTaskStatus.HANG);
                 if (exception != null) {
@@ -155,7 +155,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                         .put(operationType, new ProcessTaskStepNotActiveException());
                 return false;
             }
-            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
+            exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
                     ProcessTaskStatus.RUNNING);
@@ -207,7 +207,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 return false;
             }
 
-            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
+            exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
                     ProcessTaskStatus.RUNNING);
@@ -259,7 +259,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 return false;
             }
 
-            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
+            exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
                     ProcessTaskStatus.PENDING);
@@ -311,7 +311,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 return false;
             }
 
-            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
+            exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
                     ProcessTaskStatus.PENDING);
@@ -364,7 +364,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 return false;
             }
 
-            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
+            exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
                     ProcessTaskStatus.PENDING);
@@ -411,7 +411,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 return false;
             }
 
-            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
+            exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
                     ProcessTaskStatus.PENDING);
@@ -459,7 +459,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 return false;
             }
 
-            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
+            exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.HANG,
                     ProcessTaskStatus.PENDING);
@@ -506,7 +506,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 return false;
             }
 
-            exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
+            exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.FAILED,
                     ProcessTaskStatus.RUNNING,
                     ProcessTaskStatus.PENDING);
@@ -553,17 +553,6 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                             .put(operationType, new ProcessTaskStepUndoneException());
                     return false;
                 }
-//                if (checkProcessTaskStepStatus(id,
-//                        ProcessTaskOperationType.STEP_RECOVER,
-//                        processTaskStepVo.getStatus(),
-//                        operationTypePermissionDeniedExceptionMap,
-//                        ProcessTaskStatus.HANG,
-//                        ProcessTaskStatus.FAILED,
-//                        ProcessTaskStatus.RUNNING,
-//                        ProcessTaskStatus.PENDING
-//                )) {
-//                    return false;
-//                }
                 // 撤销权限retreat
                 if (!checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, operationType, userUuid)) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
@@ -605,7 +594,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                         return false;
                     }
 
-                    exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
+                    exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
                             ProcessTaskStatus.FAILED,
                             ProcessTaskStatus.HANG,
                             ProcessTaskStatus.PENDING);
@@ -671,7 +660,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     return false;
                 }
 
-                exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
+                exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
                         ProcessTaskStatus.FAILED,
                         ProcessTaskStatus.HANG);
                 if (exception != null) {
@@ -734,7 +723,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                         return false;
                     }
 
-                    exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
+                    exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
                             ProcessTaskStatus.FAILED,
                             ProcessTaskStatus.HANG,
                             ProcessTaskStatus.PENDING);
@@ -783,7 +772,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                         return false;
                     }
 
-                    exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.SUCCEED,
+                    exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
                             ProcessTaskStatus.FAILED,
                             ProcessTaskStatus.HANG);
                     if (exception != null) {
