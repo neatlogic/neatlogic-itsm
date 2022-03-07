@@ -6,15 +6,10 @@
 package codedriver.module.process.api.processtask;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.AuthenticationInfoVo;
-import codedriver.framework.dto.UserVo;
-import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
-import codedriver.framework.service.AuthenticationInfoService;
+import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -25,13 +20,7 @@ import javax.annotation.Resource;
 public class ProcessTaskWhichCurrentStepIsTagStepOfMineApi extends PublicApiComponentBase {
 
     @Resource
-    private UserMapper userMapper;
-
-    @Resource
-    private ProcessTaskMapper processTaskMapper;
-
-    @Resource
-    private AuthenticationInfoService authenticationInfoService;
+    private ProcessTaskService processTaskService;
 
     @Override
     public String getToken() {
@@ -67,14 +56,7 @@ public class ProcessTaskWhichCurrentStepIsTagStepOfMineApi extends PublicApiComp
     @Description(desc = "我的待办的工单中当前处理节点是打了某个标签的节点的工单列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        String userId = jsonObj.getString("userId");
-        String tag = jsonObj.getString("tag");
-        UserVo user = userMapper.getUserByUserId(userId);
-        if (user == null) {
-            throw new UserNotFoundException(userId);
-        }
-        AuthenticationInfoVo authenticationInfo = authenticationInfoService.getAuthenticationInfo(user.getUuid());
-        return processTaskMapper.getProcessTaskListWhichIsProcessingByUserAndTag(tag, user.getUuid(), authenticationInfo.getTeamUuidList(), authenticationInfo.getRoleUuidList());
+        return processTaskService.getProcessTaskListWhichIsProcessingByUserAndTag(jsonObj);
     }
 
 

@@ -9,6 +9,8 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import codedriver.framework.common.constvalue.SystemUser;
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.constvalue.*;
@@ -125,7 +127,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                         if (dataVo != null) {
                             String value = dataVo.getData();
                             if (StringUtils.isNotBlank(value)) {
-                                String pattern = "yyyy-MM-dd HH:mm";
+                                String format = "yyyy-MM-dd HH:mm";
                                 ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
                                 if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
                                     String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
@@ -137,22 +139,27 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                                             if (Objects.equals(formAttributeVo.getUuid(), attributeUuid)) {
                                                 JSONObject configObj = formAttributeVo.getConfigObj();
                                                 if (MapUtils.isNotEmpty(configObj)) {
-                                                    // 当styleType是"/"，showType="yyyy-MM-dd"，保存的日期值是2022/02/11，需要将yyyy-MM-dd转换成yyyy/MM/dd
-                                                    String showType = configObj.getString("showType");
-                                                    String styleType = configObj.getString("styleType");
-                                                    if ("-".equals(styleType)) {
-                                                        pattern = showType;
-                                                    } else {
-                                                        char oldChar = '-';
-                                                        char newChar = styleType.charAt(0);
-                                                        pattern = showType.replace(oldChar, newChar);
+                                                    IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                                                    if(handler != null) {
+                                                        JSONObject detailedData = handler.getDetailedData(dataVo, configObj);
+                                                        format = detailedData.getString("format");
                                                     }
+                                                    // 当styleType是"/"，showType="yyyy-MM-dd"，保存的日期值是2022/02/11，需要将yyyy-MM-dd转换成yyyy/MM/dd
+//                                                    String showType = configObj.getString("showType");
+//                                                    String styleType = configObj.getString("styleType");
+//                                                    if ("-".equals(styleType)) {
+//                                                        pattern = showType;
+//                                                    } else {
+//                                                        char oldChar = '-';
+//                                                        char newChar = styleType.charAt(0);
+//                                                        pattern = showType.replace(oldChar, newChar);
+//                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+                                SimpleDateFormat sdf = new SimpleDateFormat(format);
                                 try {
                                     triggerTime = sdf.parse(value);
                                 } catch (ParseException e) {

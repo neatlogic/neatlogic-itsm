@@ -7,6 +7,7 @@ package codedriver.module.process.service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.change.constvalue.ChangeProcessStepHandlerType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.constvalue.TeamLevel;
@@ -15,8 +16,10 @@ import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.*;
+import codedriver.framework.event.constvalue.EventProcessStepHandlerType;
 import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.exception.type.PermissionDeniedException;
+import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormVersionVo;
@@ -38,9 +41,7 @@ import codedriver.framework.process.exception.file.ProcessTaskFileDownloadExcept
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.exception.processtask.*;
 import codedriver.framework.process.exception.processtask.task.ProcessTaskStepTaskNotCompleteException;
 import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
@@ -2183,5 +2184,150 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
+    }
+
+    @Override
+    public List<Map<String, Object>> getProcessTaskListWhichIsProcessingByUserAndTag(JSONObject jsonObj) {
+        String userId = jsonObj.getString("userId");
+        String tag = jsonObj.getString("tag");
+        UserVo user = userMapper.getUserByUserId(userId);
+        if (user == null) {
+            throw new UserNotFoundException(userId);
+        }
+        AuthenticationInfoVo authenticationInfo = authenticationInfoService.getAuthenticationInfo(user.getUuid());
+        return processTaskMapper.getProcessTaskListWhichIsProcessingByUserAndTag(tag, user.getUuid(), authenticationInfo.getTeamUuidList(), authenticationInfo.getRoleUuidList());
+    }
+
+    @Override
+    public JSONObject batchCompleteProcessTaskStep(JSONObject jsonObj) {
+        JSONObject result = new JSONObject();
+        List<Long> notFoundProcessTaskIdList = new ArrayList<>(); // 工单不存在的id列表
+        List<Long> currentStepOverOneProcessTaskIdList = new ArrayList<>();// 当前步骤超过一个的工单id列表
+        List<Long> noAuthProcessTaskIdList = new ArrayList<>(); // 无权限处理的工单id列表
+        Map<Long, String> exceptionMap = new HashMap<>(); // 处理发生异常的工单
+        List<Long> idList = jsonObj.getJSONArray("processTaskIdList").toJavaList(Long.class);
+        String tag = jsonObj.getString("tag");
+        String content = jsonObj.getString("content");
+        String userId = jsonObj.getString("userId");
+        UserVo user = userMapper.getUserByUserId(userId);
+        if (user == null) {
+            throw new UserNotFoundException(userId);
+        }
+        // 检查工单是否存在
+        List<Long> processTaskIdList = processTaskMapper.checkProcessTaskIdListIsExists(idList);
+        if (processTaskIdList.size() < idList.size()) {
+            idList.removeAll(processTaskIdList);
+            notFoundProcessTaskIdList.addAll(idList);
+        }
+        if (processTaskIdList.size() > 0) {
+            AuthenticationInfoVo authenticationInfo = authenticationInfoService.getAuthenticationInfo(user.getUuid());
+            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getCurrentProcessTaskStepListByProcessTaskIdListAndTag(processTaskIdList, tag);
+            Map<Long, List<ProcessTaskStepVo>> map = processTaskStepList.stream().collect(Collectors.groupingBy(ProcessTaskStepVo::getProcessTaskId));
+            for (Map.Entry<Long, List<ProcessTaskStepVo>> entry : map.entrySet()) {
+                Long key = entry.getKey();
+                List<ProcessTaskStepVo> value = entry.getValue();
+                // 如果没有标签，则不处理当前步骤有多个的工单；如果有标签，尝试处理带标签的步骤
+                if (StringUtils.isBlank(tag) && value.size() > 1) {
+                    currentStepOverOneProcessTaskIdList.add(key);
+                    continue;
+                }
+                for (ProcessTaskStepVo currentStep : value) {
+                    try {
+                        if (!ProcessStepType.PROCESS.getValue().equals(currentStep.getType())) {
+                            throw new ProcessTaskStepIsNotManualException(currentStep.getProcessTaskId(), currentStep.getName());
+                        }
+                        // 变更和事件必须在页面上处理
+                        if (EventProcessStepHandlerType.EVENT.getHandler().equals(currentStep.getHandler()) || ChangeProcessStepHandlerType.CHANGECREATE.getHandler().equals(currentStep.getHandler())
+                                || ChangeProcessStepHandlerType.CHANGEHANDLE.getHandler().equals(currentStep.getHandler())) {
+                            throw new ProcessTaskStepMustBeManualException(currentStep.getProcessTaskId(), currentStep.getName());
+                        }
+                        Map<Long, Set<ProcessTaskOperationType>> auth = checkProcessTaskStepCompleteAuth(user, authenticationInfo, currentStep);
+                        if (MapUtils.isEmpty(auth) || auth.values().stream().findFirst().get().size() == 0) {
+                            noAuthProcessTaskIdList.add(currentStep.getProcessTaskId());
+                            continue;
+                        }
+                        ProcessTaskOperationType operationType = auth.values().stream().findFirst().get().stream().findFirst().get();
+                        if (ProcessTaskOperationType.STEP_ACCEPT.getValue().equals(operationType.getValue())
+                                || ProcessTaskOperationType.STEP_START.getValue().equals(operationType.getValue())) {
+                            JSONObject param = new JSONObject();
+                            param.put("processTaskId", currentStep.getProcessTaskId());
+                            param.put("processTaskStepId", currentStep.getId());
+                            if (ProcessTaskOperationType.STEP_ACCEPT.getValue().equals(operationType.getValue())) {
+                                param.put("action", "accept");
+                            } else {
+                                param.put("action", "start");
+                            }
+                            UserContext.init(user, authenticationInfo, SystemUser.SYSTEM.getTimezone());
+                            startProcessTaskStep(param);
+                        }
+                        UserContext.init(user, authenticationInfo, SystemUser.SYSTEM.getTimezone());
+                        completeProcessTaskStep(currentStep, content);
+                    } catch (Exception ex) {
+                        exceptionMap.put(currentStep.getProcessTaskId(), ex.getMessage());
+                    }
+                }
+            }
+        }
+
+        if (notFoundProcessTaskIdList.size() > 0) {
+            result.put("工单不存在的ID", notFoundProcessTaskIdList);
+        }
+        if (currentStepOverOneProcessTaskIdList.size() > 0) {
+            result.put("当前步骤超过一个的工单", currentStepOverOneProcessTaskIdList);
+        }
+        if (noAuthProcessTaskIdList.size() > 0) {
+            result.put("无权限处理的工单", noAuthProcessTaskIdList.stream().map(Objects::toString).collect(Collectors.joining(",")));
+        }
+        if (!exceptionMap.isEmpty()) {
+            result.put("处理发生异常的工单", exceptionMap);
+        }
+        return result;
+    }
+
+    /**
+     * 检查用户是否有工单完成权限
+     *
+     * @param user               处理人
+     * @param authenticationInfo 处理人权限
+     * @param processTaskStepVo  工单步骤
+     * @return
+     */
+    private Map<Long, Set<ProcessTaskOperationType>> checkProcessTaskStepCompleteAuth(UserVo user, AuthenticationInfoVo authenticationInfo, ProcessTaskStepVo processTaskStepVo) {
+        UserContext.init(user, authenticationInfo, SystemUser.SYSTEM.getTimezone());
+        ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
+        builder.addProcessTaskId(processTaskStepVo.getProcessTaskId());
+        builder.addProcessTaskStepId(processTaskStepVo.getId());
+        return builder.addOperationType(ProcessTaskOperationType.STEP_START)
+                .addOperationType(ProcessTaskOperationType.STEP_ACCEPT)
+                .addOperationType(ProcessTaskOperationType.STEP_COMPLETE)
+                .build().getOperateMap();
+    }
+
+    /**
+     * 完成工单步骤
+     *
+     * @param processTaskStepVo 工单步骤
+     * @param content           处理意见
+     * @throws Exception
+     */
+    private void completeProcessTaskStep(ProcessTaskStepVo processTaskStepVo, String content) throws Exception {
+        // 查询后续节点，不包括回退节点
+        List<Long> nextStepIdList =
+                processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(processTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
+        if (CollectionUtils.isEmpty(nextStepIdList)) {
+            throw new ProcessTaskNextStepIllegalException(processTaskStepVo.getProcessTaskId());
+        }
+        if (nextStepIdList.size() > 1) {
+            throw new ProcessTaskNextStepOverOneException(processTaskStepVo.getProcessTaskId());
+        }
+        JSONObject param = new JSONObject();
+        param.put("processTaskId", processTaskStepVo.getProcessTaskId());
+        param.put("processTaskStepId", processTaskStepVo.getId());
+        param.put("nextStepId", nextStepIdList.get(0));
+        if (StringUtils.isNotBlank(content)) {
+            param.put("content", content);
+        }
+        param.put("action", "complete");
+        completeProcessTaskStep(param);
     }
 }
