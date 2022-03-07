@@ -22,11 +22,6 @@ public class ProcessTaskWhereGroupResponsePunctualitySqlStructure extends Proces
     }
 
     @Override
-    public String getDataSourceHandlerName() {
-        return "processtask";
-    }
-
-    @Override
     public String getSqlStructureName() {
         return "where";
     }

@@ -25,11 +25,6 @@ public class ProcessTaskColumnDistinctIdSqlStructure extends ProcessSqlBase {
     }
 
     @Override
-    public String getDataSourceHandlerName() {
-        return "processtask";
-    }
-
-    @Override
     public void doMyService(StringBuilder sqlSb, WorkcenterVo workcenterVo){
         sqlSb.append(String.format(" %s.%s ", new ProcessTaskSqlTable().getShortName(), "id"));
     }

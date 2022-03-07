@@ -16,7 +16,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
 
     @Override
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
-        IProcessSqlStructure processSqlStructure = ProcessSqlStructureFactory.getProcessSqlStructure(new ProcessTaskDashboardHandler().getName(),"where", workcenterVo.getSqlFieldType());
+        IProcessSqlStructure processSqlStructure = ProcessSqlStructureFactory.getProcessSqlStructure(ProcessTaskDashboardHandler.class.getName(),"where", workcenterVo.getSqlFieldType());
         if(processSqlStructure != null) {
             processSqlStructure.doService(sqlSb, workcenterVo);
         }

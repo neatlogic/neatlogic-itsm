@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class SqlLimitDecorator extends SqlDecoratorBase {
     @Override
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
-        IProcessSqlStructure processSqlStructure = ProcessSqlStructureFactory.getProcessSqlStructure(new ProcessTaskDashboardHandler().getName(),"limit", workcenterVo.getSqlFieldType());
+        IProcessSqlStructure processSqlStructure = ProcessSqlStructureFactory.getProcessSqlStructure(ProcessTaskDashboardHandler.class.getName(),"limit", workcenterVo.getSqlFieldType());
         if(processSqlStructure != null) {
             processSqlStructure.doService(sqlSb, workcenterVo);
         }

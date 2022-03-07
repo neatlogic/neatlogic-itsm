@@ -1,17 +1,19 @@
 package codedriver.module.process.dashboard.handler;
 
-import codedriver.framework.dashboard.charts.*;
+import codedriver.framework.dashboard.charts.DashboardChartBase;
+import codedriver.framework.dashboard.charts.DashboardChartFactory;
 import codedriver.framework.dashboard.config.DashboardWidgetShowConfigFactory;
 import codedriver.framework.dashboard.config.IDashboardWidgetShowConfig;
-import codedriver.framework.dashboard.handler.DashboardHandlerBase;
 import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
+import codedriver.framework.dashboard.handler.DashboardHandlerBase;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import codedriver.module.process.dashboard.dto.DashboardWidgetChartConfigProcessVo;
 import codedriver.module.process.dashboard.showconfig.ProcessTaskDashboardWidgetShowConfigBase;
 import codedriver.module.process.dashboard.statistics.DashboardStatisticsFactory;
 import codedriver.module.process.dashboard.statistics.StatisticsBase;
-import codedriver.module.process.dashboard.dto.DashboardWidgetChartConfigProcessVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
@@ -37,8 +39,8 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             conditionConfig.put("conditionConfig", widgetVo.getConditionConfig());
             conditionConfig.put("pageSize", chartConfigVo.getLimitNum());
             WorkcenterVo workcenterVo = new WorkcenterVo(conditionConfig);
-            workcenterVo.setDataSourceHandler(widgetVo.getHandler());
             workcenterVo.setDashboardWidgetChartConfigVo(chartConfigVo);
+            workcenterVo.setDataSourceHandler(ProcessTaskStepDashboardHandler.class.getName());
             StatisticsBase statistics = DashboardStatisticsFactory.getStatistics(chartConfigVo.getStatisticsType());
             statistics.doService(workcenterVo, widgetDataVo, widgetVo);
             /* end: 从mysql 获取源数据 */
@@ -93,6 +95,11 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
     @Override
     public String getIcon() {
         return "xx-icon";
+    }
+
+    @Override
+    public String getDistinctCountColumnSql(){
+        return String.format(" count(%s.%s)  `count` ", new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.ID.getValue());
     }
 
 }

@@ -24,11 +24,6 @@ public class ProcessTaskColumnSubGroupCountSqlStructure extends ProcessSqlBase {
     }
 
     @Override
-    public String getDataSourceHandlerName() {
-        return "processtask";
-    }
-
-    @Override
     public void doMyService(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         subGroupColumnService(workcenterVo, sqlSb);
     }

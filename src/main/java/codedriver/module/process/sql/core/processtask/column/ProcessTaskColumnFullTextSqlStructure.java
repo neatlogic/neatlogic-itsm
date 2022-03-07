@@ -33,11 +33,6 @@ public class ProcessTaskColumnFullTextSqlStructure extends ProcessSqlBase {
     }
 
     @Override
-    public String getDataSourceHandlerName() {
-        return "processtask";
-    }
-
-    @Override
     public void doMyService(StringBuilder sqlSb, WorkcenterVo workcenterVo){
         JSONArray keywordConditionList = workcenterVo.getKeywordConditionList();
         if (CollectionUtils.isNotEmpty(keywordConditionList)) {

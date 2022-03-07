@@ -19,11 +19,6 @@ public class ProcessTaskGroupByGroupAvgResponseCostTimeSqlStructure extends Proc
     }
 
     @Override
-    public String getDataSourceHandlerName() {
-        return "processtask";
-    }
-
-    @Override
     public String getSqlStructureName() {
         return "groupBy";
     }

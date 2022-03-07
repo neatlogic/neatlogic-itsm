@@ -9,6 +9,8 @@ import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.dashboard.constvalue.DashboardStatistics;
 import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
+import codedriver.framework.dashboard.handler.DashboardHandlerFactory;
+import codedriver.framework.dashboard.handler.IDashboardHandler;
 import codedriver.framework.dto.condition.ConditionGroupRelVo;
 import codedriver.framework.dto.condition.ConditionGroupVo;
 import codedriver.framework.dto.condition.ConditionRelVo;
@@ -28,6 +30,7 @@ import codedriver.framework.process.workcenter.table.constvalue.ProcessSqlTypeEn
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import codedriver.module.process.condition.handler.ProcessTaskStartTimeCondition;
 import codedriver.module.process.dashboard.constvalue.ProcessTaskDashboardStatistics;
+import codedriver.module.process.dashboard.handler.ProcessTaskDashboardHandler;
 import codedriver.module.process.dashboard.statistics.DashboardStatisticsFactory;
 import codedriver.module.process.dashboard.statistics.StatisticsBase;
 import codedriver.module.process.dashboard.handler.ProcessTaskStepDashboardHandler;
@@ -50,6 +53,11 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
     Logger logger = LoggerFactory.getLogger(ProcessSqlBase.class);
 
     @Override
+    public String getDataSourceHandlerName() {
+        return ProcessTaskDashboardHandler.class.getName();
+    }
+
+    @Override
     public void doService(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         doMyService(sqlSb, workcenterVo);
     }
@@ -68,7 +76,12 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         List<String> columnList = new ArrayList<>();
         getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), true);
-        columnList.add("count(1) `count`");
+        IDashboardHandler dashboardHandler = DashboardHandlerFactory.getHandler(workcenterVo.getDataSourceHandler());
+        if(dashboardHandler != null){
+            columnList.add(dashboardHandler.getDistinctCountColumnSql());
+        }else {
+            columnList.add("count(1) `count`");
+        }
         sqlSb.append(String.join(",", columnList));
     }
 
@@ -426,7 +439,7 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
     }
 
     /**
-     * 获取二级分组 join 的字段
+     * 获取分组 join 的字段
      *
      * @param workcenterVo 工单中心参数
      */
@@ -467,7 +480,7 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
         joinTableColumnList.addAll(getJoinTableOfOrder(workcenterVo, joinTableColumnList));
         sqlSb.append(" from  processtask pt ");
         //如果数据源有步骤则必须join processtask_step 表
-        if(Objects.equals(new ProcessTaskStepDashboardHandler().getName(),workcenterVo.getDataSourceHandler())){
+        if(Objects.equals(ProcessTaskStepDashboardHandler.class.getName(),workcenterVo.getDataSourceHandler())){
             joinTableColumnList.add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new ArrayList<JoinOnVo>() {{
                 add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
             }}));

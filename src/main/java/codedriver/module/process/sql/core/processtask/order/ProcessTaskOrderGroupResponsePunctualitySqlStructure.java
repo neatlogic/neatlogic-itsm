@@ -19,11 +19,6 @@ public class ProcessTaskOrderGroupResponsePunctualitySqlStructure extends Proces
     }
 
     @Override
-    public String getDataSourceHandlerName() {
-        return "processtask";
-    }
-
-    @Override
     public String getSqlStructureName() {
         return "order";
     }
