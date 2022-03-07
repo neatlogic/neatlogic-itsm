@@ -19,14 +19,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class DashboardSumStatistics extends StatisticsBase {
 
     @Resource
     ProcessTaskMapper processTaskMapper;
+
     @Override
     public String getName() {
         return "sum";
@@ -41,6 +44,18 @@ public class DashboardSumStatistics extends StatisticsBase {
         SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_SUM);
         //System.out.println(sb.build());
         List<Map<String, Object>> groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
+        //裁剪最大group
+        Set<String> groupSet = new HashSet<>();
+        int subStartIndex =groupMapList.size();
+        for (int i = groupMapList.size()-1; i > 0; i--) {
+            if(groupSet.size() < chartConfigVo.getLimitNum()){
+                groupSet.add(groupMapList.get(i).get(chartConfigVo.getGroup()).toString());
+                subStartIndex = i;
+            }
+        }
+        if (subStartIndex < groupMapList.size()) {
+            groupMapList = groupMapList.subList(subStartIndex, groupMapList.size());
+        }
         IProcessTaskColumn groupColumn = ProcessTaskColumnFactory.columnComponentMap.get(chartConfigVo.getGroup());
         if (StringUtils.isNotBlank(chartConfigVo.getSubGroup())) {
             IProcessTaskColumn subGroupColumn = ProcessTaskColumnFactory.columnComponentMap.get(chartConfigVo.getSubGroup());
@@ -55,9 +70,10 @@ public class DashboardSumStatistics extends StatisticsBase {
 
     /**
      * 获取子sql
+     *
      * @return sql
      */
-    private String getSubSql(WorkcenterVo workcenterVo){
+    private String getSubSql(WorkcenterVo workcenterVo) {
         //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
         SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_COUNT);
         DashboardWidgetChartConfigVo chartConfigVo = workcenterVo.getDashboardWidgetChartConfigVo();

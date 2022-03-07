@@ -298,7 +298,7 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
         if (CollectionUtils.isNotEmpty(configList)) {
             groupDataList = JSONObject.parseArray(configList.toJSONString(), String.class);
         }
-        //拼接sql，则根据查出的权重，排序截取最大组数量，查出二维数据
+        //二级分组拼接sql，则根据查出的权重，排序截取最大组数量，查出二维数据
         LinkedHashMap<String, Object> groupDataMap = workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap();
         if (MapUtils.isNotEmpty(groupDataMap)) {
             for (Map.Entry<String, Object> entry : groupDataMap.entrySet()) {
@@ -554,7 +554,7 @@ public abstract class ProcessSqlBase implements IProcessSqlStructure {
      */
     protected void groupOrderService(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         if (Objects.equals(workcenterVo.getDashboardWidgetChartConfigVo().getStatisticsType(), DashboardStatistics.SUM.getValue())) {
-            sqlSb.append(" order by everyday DESC");
+            sqlSb.append(" order by everyday ASC");
             return;
         }
         if (StringUtils.isNotBlank(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup()) && MapUtils.isNotEmpty(workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap())) {

@@ -1,27 +1,24 @@
 package codedriver.module.process.api.dashboard;
 
-import java.util.Collections;
-import java.util.Comparator;
-
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.process.auth.PROCESS_BASE;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
-import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.form.constvalue.FormConditionModel;
+import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.Comparator;
 
 @Service
 @Transactional
@@ -72,7 +69,7 @@ public class DashboardGetConditionApi extends PrivateApiComponentBase {
 				}
 				commonObj.put("conditionModel", condition.getHandler(FormConditionModel.CUSTOM));
 				commonObj.put("type", condition.getType());
-				commonObj.put("config", condition.getConfig() == null?"": condition.getConfig().toJSONString());
+				commonObj.put("config", condition.getConfig());
 				commonObj.put("defaultExpression", condition.getParamType().getDefaultExpression().getExpression());
 				commonObj.put("sort", condition.getSort());
 				JSONArray expressiobArray = new JSONArray();

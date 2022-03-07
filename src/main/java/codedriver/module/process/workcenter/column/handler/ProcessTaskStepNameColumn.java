@@ -84,6 +84,7 @@ public class ProcessTaskStepNameColumn extends ProcessTaskColumnBase implements 
 		return new ArrayList<TableSelectColumnVo>() {
 			{
 				add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(), "processTaskStepNameChannel", true,String.format("concat(%%s.%%s,%s.%s)",new ChannelSqlTable().getShortName(),ChannelSqlTable.FieldEnum.NAME.getValue())),
 						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(), "processTaskStepName", true)
 				)));
 				add(new TableSelectColumnVo(new ChannelSqlTable(), Arrays.asList(
@@ -111,13 +112,13 @@ public class ProcessTaskStepNameColumn extends ProcessTaskColumnBase implements 
 	@Override
 	public void getMyDashboardDataVo(DashboardWidgetDataGroupVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
 		if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
-			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("processTaskStepName", workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), "processTaskStepName","channelName", workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
+			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("processTaskStepNameChannel", workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), "processTaskStepName","channelName", workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
 			dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
 		}
 		//如果存在子分组
 		if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
 			DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-			dashboardDataSubGroupVo = new DashboardDataSubGroupVo("processTaskStepName", workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), "processTaskStepName");
+			dashboardDataSubGroupVo = new DashboardDataSubGroupVo("processTaskStepName", workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), "processTaskStepName","channelName");
 			dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
 		}
 	}
@@ -126,8 +127,8 @@ public class ProcessTaskStepNameColumn extends ProcessTaskColumnBase implements 
 	public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
 		LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
 		for (Map<String, Object> dataMap : mapList) {
-			if(dataMap.containsKey("processTaskStepName")) {
-				groupDataMap.put(dataMap.get("processTaskStepName").toString(), dataMap.get("count"));
+			if(dataMap.containsKey("processTaskStepNameChannel")) {
+				groupDataMap.put(dataMap.get("processTaskStepNameChannel").toString(), dataMap.get("count"));
 			}
 		}
 		return groupDataMap;

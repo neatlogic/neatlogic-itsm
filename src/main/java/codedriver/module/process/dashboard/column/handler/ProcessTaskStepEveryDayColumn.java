@@ -16,7 +16,7 @@ import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
-import codedriver.module.process.dashboard.constvalue.ProcessTaskStepDashboardGroupField;
+import codedriver.module.process.dashboard.constvalue.ProcessTaskDashboardGroupField;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -26,7 +26,7 @@ public class ProcessTaskStepEveryDayColumn extends ProcessTaskColumnBase impleme
 
     @Override
     public String getName() {
-        return ProcessTaskStepDashboardGroupField.EVERY_DAY.getValue();
+        return ProcessTaskDashboardGroupField.EVERY_DAY.getValue();
     }
 
     @Override

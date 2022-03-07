@@ -42,7 +42,6 @@ public class ProcessTaskStepNumberWidgetShowConfig extends ProcessTaskStepDashbo
     @Override
     public List<IDashboardGroupField> getMyGroupFields() {
         return Arrays.asList(
-                ProcessWorkcenterField.STEP_USER,
                 ProcessWorkcenterField.STEP_STATUS
         );
     }
@@ -50,6 +49,12 @@ public class ProcessTaskStepNumberWidgetShowConfig extends ProcessTaskStepDashbo
     @Override
     public JSONArray getMySubGroupFieldsConfig() {
         return null;
+    }
+
+
+    @Override
+    public JSONArray getStatisticsOptionList() {
+        return new JSONArray();
     }
 
 }

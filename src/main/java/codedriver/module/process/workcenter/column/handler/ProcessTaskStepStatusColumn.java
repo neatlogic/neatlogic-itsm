@@ -97,4 +97,15 @@ public class ProcessTaskStepStatusColumn extends ProcessTaskColumnBase implement
             dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
         }
     }
+
+    @Override
+    public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
+        LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
+        for (Map<String, Object> dataMap : mapList) {
+            if(dataMap.containsKey(ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName())) {
+                groupDataMap.put(dataMap.get(ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName()).toString(), dataMap.get("count"));
+            }
+        }
+        return groupDataMap;
+    }
 }

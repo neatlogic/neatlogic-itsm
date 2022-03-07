@@ -35,17 +35,14 @@ public class ProcessTaskGroupByGroupSumSqlStructure extends ProcessSqlBase {
     public void doMyService(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         DashboardWidgetChartConfigVo chartVo = workcenterVo.getDashboardWidgetChartConfigVo();
         String subGroup = chartVo.getSubGroup();
-        String subGroupProperty = StringUtils.EMPTY;
+        StringBuilder subGroupProperty = new StringBuilder(StringUtils.EMPTY);
         if (StringUtils.isNotBlank(subGroup)) {
             IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(subGroup);
             for (TableSelectColumnVo tableSelectColumnVo : column.getTableSelectColumn()) {
                 Optional<SelectColumnVo> optional = tableSelectColumnVo.getColumnList().stream().filter(SelectColumnVo::getIsPrimary).findFirst();
-                if (optional.isPresent()) {
-                    subGroupProperty = optional.get().getPropertyName();
-                    subGroupProperty = String.format(", a.%s ",subGroupProperty);
-                }
+                optional.ifPresent(selectColumnVo -> subGroupProperty.append(String.format(", a.%s ", selectColumnVo.getPropertyName())));
             }
         }
-        sqlSb.append(String.format(" group by a.everyday %s", subGroupProperty));
+        sqlSb.append(String.format(" group by a.everyday %s", subGroupProperty.toString()));
     }
 }

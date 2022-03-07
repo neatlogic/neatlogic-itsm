@@ -88,7 +88,7 @@ public abstract class ProcessTaskStepDashboardWidgetShowConfigBase extends Dashb
     @Override
     public JSONArray getStatisticsOptionList() {
         return JSONArray.parseArray(
-                String.format("[{'value':'%s','text':'%s','isDefault':0,'unit':'%s'},{'value':'%s','text':'%s','isDefault':0,'unit':'%s'},{'value':'%s','text':'%s','isDefault':0,'unit':'%s'},{'value':'%s','text':'%s','isDefault':0,'unit':'%s'}]",
+                String.format("[{'value':'%s','text':'%s','isDefault':0,'unit':'%s',isHasSubGroup:0},{'value':'%s','text':'%s','isDefault':0,'unit':'%s',isHasSubGroup:0},{'value':'%s','text':'%s','isDefault':0,'unit':'%s',isHasSubGroup:0},{'value':'%s','text':'%s','isDefault':0,'unit':'%s',isHasSubGroup:0}]",
                         ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getValue(), ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getText(), DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.AVG_HANDLE_COST_TIME.getValue()).getUnit()
                         , ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getValue(), ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getText(), DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.AVG_RESPONSE_COST_TIME.getValue()).getUnit()
                         , ProcessTaskDashboardStatistics.RESPONSE_PUNCTUALITY.getValue(), ProcessTaskDashboardStatistics.RESPONSE_PUNCTUALITY.getText(), DashboardStatisticsFactory.getStatistics(ProcessTaskDashboardStatistics.RESPONSE_PUNCTUALITY.getValue()).getUnit()
