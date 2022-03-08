@@ -65,7 +65,7 @@ public class DashboardResponsePunctualityStatistics extends StatisticsBase {
         return new ArrayList<TableSelectColumnVo>() {
             {
                 add(new TableSelectColumnVo(new ProcessTaskStepSlaTimeSqlTable(), Collections.singletonList(
-                        new SelectColumnVo(ProcessTaskStepSlaTimeSqlTable.FieldEnum.IS_TIMEOUT.getValue(), "count", true, " (1 - SUM(%s.%s) div COUNT(1))*100 ")
+                        new SelectColumnVo(ProcessTaskStepSlaTimeSqlTable.FieldEnum.IS_TIMEOUT.getValue(), "count", true, "ROUND( (1 -SUM( %s.%s ) / COUNT( 1 )) * 100,2)")
                 )));
             }
         };
