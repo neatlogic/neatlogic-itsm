@@ -28,6 +28,7 @@ public class AutomaticOperateHandler extends OperationAuthHandlerBase {
             (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
                 Long id = processTaskStepVo.getId();
                 ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_RETREAT;
+                //1.提示“自动处理节点不支持'撤回'操作”；
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskAutomaticHandlerNotEnableOperateException(operationType));
                 return false;
@@ -36,6 +37,7 @@ public class AutomaticOperateHandler extends OperationAuthHandlerBase {
             (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
                 Long id = processTaskStepVo.getId();
                 ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_WORK;
+                //1.提示“自动处理节点不支持'处理'操作”；
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskAutomaticHandlerNotEnableOperateException(operationType));
                 return false;
@@ -44,6 +46,7 @@ public class AutomaticOperateHandler extends OperationAuthHandlerBase {
             (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
                 Long id = processTaskStepVo.getId();
                 ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_COMMENT;
+                //1.提示“自动处理节点不支持'回复'操作”；
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskAutomaticHandlerNotEnableOperateException(operationType));
                 return false;

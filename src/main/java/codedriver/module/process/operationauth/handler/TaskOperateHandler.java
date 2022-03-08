@@ -57,22 +57,26 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_VIEW;
+                    //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
                         return false;
                     }
+                    //2.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
                     if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskNotProcessTaskModifyException());
                         return false;
                     }
+                    //3.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
                     ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.DRAFT);
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
                         return false;
                     }
+                    //4.依次判断当前用户是否是工单上报人、代报人、处理人、待处理人，如果都不是，执行第5步；
                     if (userUuid.equals(processTaskVo.getOwner())) {
                         return true;
                     } else if (userUuid.equals(processTaskVo.getReporter())) {
@@ -82,6 +86,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     } else if (checkIsWorker(processTaskVo, userUuid)) {
                         return true;
                     }
+                    //5.判断当前用户是否有工单对应服务的上报权限，如果没有，则提示“您没有【xxx】服务的上报权限”；
                     if (catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid)) {
                         return true;
                     }
@@ -99,16 +104,19 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_START;
+                    //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
                         return false;
                     }
+                    //2.判断工单状态是否是“未提交”，如果不是，则提示“工单已提交”；
                     if (!ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskSubmittedException());
                         return false;
                     }
+                    //3.依次判断当前用户是否是工单上报人、代报人，如果都不是，则提示“您不是工单上报人或代报人”；
                     if (userUuid.equals(processTaskVo.getOwner()) || userUuid.equals(processTaskVo.getReporter())) {
                         return true;
                     }
@@ -125,11 +133,18 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_ABORT;
+                    //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
                         return false;
                     }
+                    //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
+                    //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
+                    //4.判断工单状态是否是“已取消”，如果是，则提示“工单已取消”；
+                    //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
+                    //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
+                    //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
                     ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                             ProcessTaskStatus.DRAFT,
                             ProcessTaskStatus.SUCCEED,
@@ -144,6 +159,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     }
                     // 工单状态为进行中的才能终止
                     if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                        //8.判断当前用户是否有“取消”操作权限，如果没有，则提示“您的'取消'操作未获得授权”；
                         if (!checkOperationAuthIsConfigured(processTaskVo, operationType, userUuid)) {
                             operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                     .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
@@ -162,11 +178,18 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_RECOVER;
+                    //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
                         return false;
                     }
+                    //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
+                    //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
+                    //4.判断工单状态是否是“处理中”，如果是，则提示“工单处理中”；
+                    //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
+                    //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
+                    //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
                     ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                             ProcessTaskStatus.DRAFT,
                             ProcessTaskStatus.SUCCEED,
@@ -181,6 +204,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     }
                     // 工单状态为已终止的才能恢复
                     if (ProcessTaskStatus.ABORTED.getValue().equals(processTaskVo.getStatus())) {
+                        //8.判断当前用户是否有“取消”操作权限，如果没有，则提示“您的'恢复'操作未获得授权”；
                         if (!checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.PROCESSTASK_ABORT, userUuid)) {
                             operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                     .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
@@ -198,12 +222,18 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_UPDATE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_UPDATE;
+            //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
-
+            //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
+            //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
+            //4.判断工单状态是否是“已取消”，如果是，则提示“工单已取消”；
+            //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
+            //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
+            //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
             ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
@@ -217,6 +247,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return false;
             }
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                //8.判断当前用户是否有“修改上报内容”操作权限，如果没有，则提示“您的'修改上报内容'操作未获得授权”；
                 if (!checkOperationAuthIsConfigured(processTaskVo, operationType, userUuid)) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
@@ -234,12 +265,18 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_URGE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_URGE;
+            //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
-
+            //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
+            //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
+            //4.判断工单状态是否是“已取消”，如果是，则提示“工单已取消”；
+            //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
+            //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
+            //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
             ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
@@ -253,6 +290,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return false;
             }
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                //8.判断当前用户是否有“催办”操作权限，如果没有，则提示“您的'催办'操作未获得授权”；
                 if (!checkOperationAuthIsConfigured(processTaskVo, operationType, userUuid)) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
@@ -270,11 +308,18 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_WORK, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_WORK;
+            //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
+            //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
+            //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
+            //4.判断工单状态是否是“已取消”，如果是，则提示“工单已取消”；
+            //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
+            //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
+            //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
             ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
@@ -288,6 +333,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return false;
             }
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                //8.判断当前用户是否是工单某个步骤的待处理人，如果不是，则提示“工单里没有您可以处理的步骤”；
                 // 有可处理步骤work
                 if (checkIsWorker(processTaskVo, userUuid)) {
                     return true;
@@ -307,11 +353,18 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_RETREAT, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_RETREAT;
+            //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
+            //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
+            //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
+            //4.判断工单状态是否是“已取消”，如果是，则提示“工单已取消”；
+            //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
+            //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
+            //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
             ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
@@ -326,6 +379,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             }
             // 撤销权限retreat
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                //8.判断当前用户是否有工单某个步骤的撤回权限，如果没有，则提示“工单里没有您可以撤回的步骤”；
                 boolean flag = false;
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
@@ -351,22 +405,26 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_SCORE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_SCORE;
+            //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
+            //2.判断工单状态是否是“已完成”，如果不是，则提示“工单未完成”；
             if (!ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskUndoneException());
                 return false;
             }
+            //3.依次判断当前用户是否是工单上报人、代报人，如果都不是，则提示“您不是工单上报人或代报人”；
             // 评分权限score
             if (!userUuid.equals(processTaskVo.getOwner()) && !userUuid.equals(processTaskVo.getReporter())) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskNotOwnerException());
                 return false;
             }
+            //4.判断工单是否启用“评分”功能，如果没有，则提示“工单未启用评分功能”；
             Integer isActive = (Integer) JSONPath.read(processTaskVo.getConfig(), "process.scoreConfig.isActive");
             if (Objects.equals(isActive, 1)) {
                 return true;
@@ -384,11 +442,13 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT;
+                    //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
                         return false;
                     }
+                    //2.判断工单对应的服务是否启用转报功能，如果没有，则提示“工单对应的服务【"xxx"】未启用转报功能”；
                     ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
                     JSONObject config = channelVo.getConfig();
                     Integer allowTranferReport = config.getInteger("allowTranferReport");
@@ -397,6 +457,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                                 .put(operationType, new ProcessTaskChannelTranferReportNotEnabledException(channelVo.getName()));
                         return false;
                     }
+                    //3.判断当前用户是否有“转报”操作权限，如果没有，则提示“您的'转报'操作未获得授权”；
                     AuthenticationInfoVo authenticationInfoVo = null;
                     if (Objects.equals(UserContext.get().getUserUuid(), userUuid)) {
                         authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
@@ -468,11 +529,13 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_MARKREPEAT;
+                    //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
                         return false;
                     }
+                    //2.判断工单是否启用“标记重复事件”功能，如果没有，则提示“工单未启用标记重复事件功能”；
                     Integer enableMarkRepeat = (Integer) JSONPath.read(processTaskVo.getConfig(), "process.processConfig.enableMarkRepeat");
                     if (Objects.equals(enableMarkRepeat, 1)) {
                         return true;
@@ -490,11 +553,13 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_COPYPROCESSTASK;
+                    //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
                         return false;
                     }
+                    //2.判断当前用户是否有工单对应服务的上报权限，如果没有，则提示“您没有【xxx】服务的上报权限”；
                     if (catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid)) {
                         return true;
                     }
@@ -511,11 +576,18 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_REDO, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_REDO;
+            //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
+            //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
+            //4.判断工单状态是否是“处理中”，如果是，则提示“工单处理中”；
+            //3.判断工单状态是否是“已取消”，如果是，则提示“工单已取消”；
+            //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
+            //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
+            //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
             ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.RUNNING,
@@ -529,11 +601,13 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return false;
             }
             if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
+                //8.依次判断当前用户是否是工单上报人、代报人，如果都不是，则提示“您不是工单上报人或代报人”；
                 if (!userUuid.equals(processTaskVo.getOwner()) && !userUuid.equals(processTaskVo.getReporter())) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskNotOwnerException());
                     return false;
                 }
+                //9.判断工单是否启用“重做”功能，如果没有，则提示“工单未启用重做功能”；
                 boolean flag = true;
                 for(ProcessTaskStepVo stepVo : processTaskVo.getStepList()){
                     if(stepVo.getType().equals(ProcessStepType.END.getValue())){
@@ -559,11 +633,18 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_TRANSFER, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_TRANSFER;
+            //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
+            //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
+            //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
+            //4.判断工单状态是否是“已取消”，如果是，则提示“工单已取消”；
+            //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
+            //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
+            //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
             ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
@@ -577,6 +658,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return false;
             }
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                //8.判断当前用户是否有工单某个步骤的转交权限，如果没有，则提示“工单里没有您可以转交的步骤”；
                 boolean flag = false;
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
@@ -601,11 +683,13 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_SHOW, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_SHOW;
+            //1.判断工单是否被显示，如果isShow=1，则提示“工单已显示”；
             if (processTaskVo.getIsShow() == 1) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskShownException());
                 return false;
             }
+            //2.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
             if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskNotProcessTaskModifyException());
@@ -619,11 +703,13 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_HIDE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_HIDE;
+            //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
+            //2.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
             if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskNotProcessTaskModifyException());
@@ -637,6 +723,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_DELETE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_DELETE;
+            //2.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
             if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskNotProcessTaskModifyException());
@@ -657,21 +744,25 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE;
+                    //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
                         return false;
                     }
+                    //2.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
                     if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskNotProcessTaskModifyException());
                         return false;
                     }
+                    //3.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
                     if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskUnsubmittedException());
                         return false;
                     }
+                    //4.依次判断当前用户是否是工单上报人、代报人、处理人、待处理人，如果都不是，则提示“您不是工单干系人”；
                     if (userUuid.equals(processTaskVo.getOwner())) {
                         return true;
                     } else if (userUuid.equals(processTaskVo.getReporter())) {
