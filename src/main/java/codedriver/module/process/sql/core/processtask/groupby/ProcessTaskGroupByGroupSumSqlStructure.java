@@ -16,8 +16,6 @@ import codedriver.module.process.sql.core.processtask.ProcessSqlBase;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 public class ProcessTaskGroupByGroupSumSqlStructure extends ProcessSqlBase {
 
@@ -39,8 +37,11 @@ public class ProcessTaskGroupByGroupSumSqlStructure extends ProcessSqlBase {
         if (StringUtils.isNotBlank(subGroup)) {
             IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(subGroup);
             for (TableSelectColumnVo tableSelectColumnVo : column.getTableSelectColumn()) {
-                Optional<SelectColumnVo> optional = tableSelectColumnVo.getColumnList().stream().filter(SelectColumnVo::getIsPrimary).findFirst();
-                optional.ifPresent(selectColumnVo -> subGroupProperty.append(String.format(", a.%s ", selectColumnVo.getPropertyName())));
+                for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
+                    if (selectColumnVo.getIsPrimary()) {
+                        subGroupProperty.append(String.format(", a.%s ", selectColumnVo.getPropertyName()));
+                    }
+                }
             }
         }
         sqlSb.append(String.format(" group by a.everyday %s", subGroupProperty.toString()));

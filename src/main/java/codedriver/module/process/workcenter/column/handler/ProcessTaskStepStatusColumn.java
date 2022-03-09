@@ -59,6 +59,16 @@ public class ProcessTaskStepStatusColumn extends ProcessTaskColumnBase implement
     }
 
     @Override
+    public Boolean getMyIsShow() {
+        return false;
+    }
+
+    @Override
+    public Boolean getDisabled() {
+        return true;
+    }
+
+    @Override
     public List<TableSelectColumnVo> getTableSelectColumn() {
         return new ArrayList<TableSelectColumnVo>() {
             {
