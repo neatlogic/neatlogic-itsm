@@ -16,7 +16,6 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +62,7 @@ public class ProcessTaskStepStatusColumn extends ProcessTaskColumnBase implement
     public List<TableSelectColumnVo> getTableSelectColumn() {
         return new ArrayList<TableSelectColumnVo>() {
             {
-                add(new TableSelectColumnVo(new ProcessTaskSqlTable(), Collections.singletonList(
+                add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Collections.singletonList(
                         new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName(), true)
                 )));
             }
