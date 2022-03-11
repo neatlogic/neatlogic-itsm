@@ -44,6 +44,7 @@ public class ProcessTaskGroupByGroupSumSqlStructure extends DashboardProcessSqlB
                 }
             }
         }
-        sqlSb.append(String.format(" group by a.everyday %s", subGroupProperty.toString()));
+        String everyday = dashboardWidgetParamVo.getDashboardWidgetChartConfigVo().getGroup();
+        sqlSb.append(String.format("group by a.%s %s", everyday,subGroupProperty));
     }
 }

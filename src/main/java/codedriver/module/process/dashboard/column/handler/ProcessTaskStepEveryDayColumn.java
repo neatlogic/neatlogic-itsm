@@ -63,7 +63,7 @@ public class ProcessTaskStepEveryDayColumn extends ProcessTaskColumnBase impleme
         return new ArrayList<TableSelectColumnVo>() {
             {
                 add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Collections.singletonList(
-                        new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ACTIVE_TIME.getValue(), "everyday", true, " STR_TO_DATE(%s.%s,'%%Y-%%m-%%e')")
+                        new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ACTIVE_TIME.getValue(), ProcessTaskStepDashboardGroupField.EVERY_DAY.getValue(), true, " STR_TO_DATE(%s.%s,'%%Y-%%m-%%e')")
                 )));
             }
         };
@@ -73,12 +73,12 @@ public class ProcessTaskStepEveryDayColumn extends ProcessTaskColumnBase impleme
     public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> dbDataMapList) {
         DashboardWidgetChartConfigVo dashboardWidgetChartConfigVo = dashboardWidgetAllGroupDefineVo.getChartConfigVo();
         if (getName().equals(dashboardWidgetChartConfigVo.getGroup())) {
-            DashboardWidgetGroupDefineVo dashboardDataGroupVo = new DashboardWidgetGroupDefineVo("everyday", dashboardWidgetChartConfigVo.getGroup(), "everyday");
+            DashboardWidgetGroupDefineVo dashboardDataGroupVo = new DashboardWidgetGroupDefineVo(ProcessTaskStepDashboardGroupField.EVERY_DAY.getValue(), dashboardWidgetChartConfigVo.getGroup(), ProcessTaskStepDashboardGroupField.EVERY_DAY.getValue());
             dashboardWidgetAllGroupDefineVo.setGroupDefineVo(dashboardDataGroupVo);
         }
         //如果存在子分组
         if (getName().equals(dashboardWidgetChartConfigVo.getSubGroup())) {
-            DashboardWidgetGroupDefineVo dashboardDataSubGroupVo = new DashboardWidgetGroupDefineVo("everyday", dashboardWidgetChartConfigVo.getSubGroup(), "everyday");
+            DashboardWidgetGroupDefineVo dashboardDataSubGroupVo = new DashboardWidgetGroupDefineVo(ProcessTaskStepDashboardGroupField.EVERY_DAY.getValue(), dashboardWidgetChartConfigVo.getSubGroup(), ProcessTaskStepDashboardGroupField.EVERY_DAY.getValue());
             dashboardWidgetAllGroupDefineVo.setSubGroupDefineVo(dashboardDataSubGroupVo);
         }
     }
@@ -87,10 +87,10 @@ public class ProcessTaskStepEveryDayColumn extends ProcessTaskColumnBase impleme
     public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
         LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
         for (Map<String, Object> dataMap : mapList) {
-            if(!dataMap.containsKey("everyday")){
+            if(!dataMap.containsKey(ProcessTaskStepDashboardGroupField.EVERY_DAY.getValue())){
                 continue;
             }
-            groupDataMap.put(dataMap.get("everyday").toString(), dataMap.get("count"));
+            groupDataMap.put(dataMap.get(ProcessTaskStepDashboardGroupField.EVERY_DAY.getValue()).toString(), dataMap.get("count"));
         }
         return groupDataMap;
     }

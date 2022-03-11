@@ -15,7 +15,10 @@ import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.dto.DashboardWidgetParamVo;
-import codedriver.framework.process.workcenter.dto.*;
+import codedriver.framework.process.workcenter.dto.JoinOnVo;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
@@ -212,10 +215,10 @@ public abstract class DashboardProcessSqlBase extends ProcessSqlBase<DashboardWi
     /**
      * 获取二级分组 join 的字段
      *
-     * @param sqlDecoratorVo 工单中心参数
+     * @param dashboardWidgetParamVo 参数
      */
-    protected void getJoinTableOfGroupSum(StringBuilder sqlSb, DashboardWidgetParamVo sqlDecoratorVo) {
-        DashboardWidgetChartConfigVo chartVo = sqlDecoratorVo.getDashboardWidgetChartConfigVo();
+    protected void getJoinTableOfGroupSum(StringBuilder sqlSb, DashboardWidgetParamVo dashboardWidgetParamVo) {
+        DashboardWidgetChartConfigVo chartVo = dashboardWidgetParamVo.getDashboardWidgetChartConfigVo();
         String subGroup = chartVo.getSubGroup();
         String subGroupJoinOn = StringUtils.EMPTY;
         if (StringUtils.isNotBlank(subGroup)) {
@@ -229,7 +232,8 @@ public abstract class DashboardProcessSqlBase extends ProcessSqlBase<DashboardWi
             }
             subGroupJoinOn = String.format(" and a.%s = b.%s ", subGroupProperty, subGroupProperty);
         }
-        sqlSb.append(String.format("from (%s) a join (%s) b ON a.everyday >= b.everyday %s", chartVo.getSubSql(), chartVo.getSubSql(), subGroupJoinOn));
+        String everyday = dashboardWidgetParamVo.getDashboardWidgetChartConfigVo().getGroup();
+        sqlSb.append(String.format("from (%s) a join (%s) b ON a.%s >= b.%s %s", chartVo.getSubSql(), chartVo.getSubSql(),everyday,everyday, subGroupJoinOn));
     }
 
     /**
@@ -275,7 +279,8 @@ public abstract class DashboardProcessSqlBase extends ProcessSqlBase<DashboardWi
      */
     protected void groupOrderService(StringBuilder sqlSb, DashboardWidgetParamVo dashboardWidgetParamVo) {
         if (Objects.equals(dashboardWidgetParamVo.getDashboardWidgetChartConfigVo().getStatisticsType(), DashboardStatistics.SUM.getValue())) {
-            sqlSb.append(" order by everyday ASC");
+            String everyday = dashboardWidgetParamVo.getDashboardWidgetChartConfigVo().getGroup();
+            sqlSb.append(String.format("order by %s ASC", everyday));
             return;
         }
         if (StringUtils.isNotBlank(dashboardWidgetParamVo.getDashboardWidgetChartConfigVo().getSubGroup()) && MapUtils.isNotEmpty(dashboardWidgetParamVo.getDbExchangeGroupDataMap())) {
