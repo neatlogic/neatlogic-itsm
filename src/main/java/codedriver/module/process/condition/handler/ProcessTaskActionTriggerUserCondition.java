@@ -76,16 +76,6 @@ public class ProcessTaskActionTriggerUserCondition extends ProcessTaskConditionB
     }
 
     @Override
-    public String getMyEsName() {
-        return null;
-    }
-
-    @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        return null;
-    }
-
-    @Override
     public Object valueConversionText(Object value, JSONObject config) {
         // TODO Auto-generated method stub
         return null;

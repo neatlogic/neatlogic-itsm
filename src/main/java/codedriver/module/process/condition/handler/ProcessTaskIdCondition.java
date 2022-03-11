@@ -9,7 +9,6 @@ import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -56,11 +55,6 @@ public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements 
     @Override
     public ParamType getParamType() {
         return ParamType.STRING;
-    }
-
-    @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        return StringUtils.EMPTY;
     }
 
     @Override

@@ -5,7 +5,6 @@
 
 package codedriver.module.process.condition.handler;
 
-import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.exception.type.ParamIrregularException;
@@ -71,36 +70,6 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 
     @Override
     public ParamType getParamType() {
-        return null;
-    }
-
-    @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        ConditionVo condition = conditionList.get(index);
-        if (condition != null && StringUtils.isNotBlank(condition.getName())) {
-            IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(condition.getHandler());
-            if (condition.getHandler().equals("formdate")) {
-                return getDateEsWhere(condition, conditionList);
-            } else {
-                String where = "(";
-                String formKey = condition.getName();
-                String formValueKey = "form.value_" + formHandler.getDataType().toLowerCase();
-                Object value = StringUtils.EMPTY;
-                if (condition.getValueList() instanceof String) {
-                    value = condition.getValueList();
-                } else if (condition.getValueList() instanceof List) {
-                    List<String> values = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
-                    value = String.join("','", values);
-                }
-                if (StringUtils.isNotBlank(value.toString())) {
-                    value = String.format("'%s'", value);
-                }
-                where += String.format(
-                        " [ form.key = '%s' and " + Expression.getExpressionEs(condition.getExpression()) + " ] ", formKey,
-                        formValueKey, value);
-                return where + ")";
-            }
-        }
         return null;
     }
 

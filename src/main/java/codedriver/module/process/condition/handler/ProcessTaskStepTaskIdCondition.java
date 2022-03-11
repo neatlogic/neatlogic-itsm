@@ -12,7 +12,6 @@ import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -59,11 +58,6 @@ public class ProcessTaskStepTaskIdCondition extends ProcessTaskConditionBase imp
     @Override
     public ParamType getParamType() {
         return ParamType.STRING;
-    }
-
-    @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        return StringUtils.EMPTY;
     }
 
     @Override

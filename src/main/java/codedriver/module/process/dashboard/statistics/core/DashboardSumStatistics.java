@@ -5,13 +5,13 @@
 
 package codedriver.module.process.dashboard.statistics.core;
 
+import codedriver.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.dto.DashboardWidgetParamVo;
 import codedriver.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
 import codedriver.module.process.dashboard.statistics.StatisticsBase;
 import codedriver.module.process.sql.decorator.SqlBuilder;
@@ -19,10 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class DashboardSumStatistics extends StatisticsBase {
@@ -36,19 +33,19 @@ public class DashboardSumStatistics extends StatisticsBase {
     }
 
     @Override
-    public void doService(WorkcenterVo workcenterVo, DashboardWidgetDataGroupVo widgetDataVo, DashboardWidgetVo widgetVo) {
+    public List<Map<String, Object>> doService(DashboardWidgetParamVo dashboardWidgetParamVo, DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, DashboardWidgetVo widgetVo) {
         //1、查出group权重，用于排序截取最大组数量
-        DashboardWidgetChartConfigVo chartConfigVo = workcenterVo.getDashboardWidgetChartConfigVo();
+        DashboardWidgetChartConfigVo chartConfigVo = dashboardWidgetParamVo.getDashboardWidgetChartConfigVo();
         //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
-        chartConfigVo.setSubSql(getSubSql(workcenterVo));
-        SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_SUM);
+        chartConfigVo.setSubSql(getSubSql(dashboardWidgetParamVo,dashboardWidgetAllGroupDefineVo));
+        SqlBuilder sb = new SqlBuilder(dashboardWidgetParamVo, ProcessSqlTypeEnum.GROUP_SUM);
         //System.out.println(sb.build());
         List<Map<String, Object>> groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
         //裁剪最大group
         Set<String> groupSet = new HashSet<>();
-        int subStartIndex =groupMapList.size();
-        for (int i = groupMapList.size()-1; i > 0; i--) {
-            if(groupSet.size() < chartConfigVo.getLimitNum()){
+        int subStartIndex = groupMapList.size();
+        for (int i = groupMapList.size() - 1; i > 0; i--) {
+            if (groupSet.size() < chartConfigVo.getLimitNum()) {
                 groupSet.add(groupMapList.get(i).get(chartConfigVo.getGroup()).toString());
                 subStartIndex = i;
             }
@@ -60,12 +57,11 @@ public class DashboardSumStatistics extends StatisticsBase {
         if (StringUtils.isNotBlank(chartConfigVo.getSubGroup())) {
             IProcessTaskColumn subGroupColumn = ProcessTaskColumnFactory.columnComponentMap.get(chartConfigVo.getSubGroup());
             if (subGroupColumn != null) {
-                subGroupColumn.getDashboardDataVo(widgetDataVo, workcenterVo, groupMapList);
+                subGroupColumn.getDashboardAllGroupDefine(dashboardWidgetAllGroupDefineVo, groupMapList);
             }
         }
-        groupColumn.getDashboardDataVo(widgetDataVo, workcenterVo, groupMapList);
-        widgetDataVo.getDataGroupVo().setDataCountMap(workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
-        widgetDataVo.getDataGroupVo().setDataList(groupMapList);
+        groupColumn.getDashboardAllGroupDefine(dashboardWidgetAllGroupDefineVo, groupMapList);
+        return groupMapList;
     }
 
     /**
@@ -73,10 +69,10 @@ public class DashboardSumStatistics extends StatisticsBase {
      *
      * @return sql
      */
-    private String getSubSql(WorkcenterVo workcenterVo) {
+    private String getSubSql(DashboardWidgetParamVo dashboardWidgetParamVo, DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo) {
         //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
-        SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_COUNT);
-        DashboardWidgetChartConfigVo chartConfigVo = workcenterVo.getDashboardWidgetChartConfigVo();
+        SqlBuilder sb = new SqlBuilder(dashboardWidgetParamVo, ProcessSqlTypeEnum.GROUP_COUNT);
+        DashboardWidgetChartConfigVo chartConfigVo = dashboardWidgetParamVo.getDashboardWidgetChartConfigVo();
         //System.out.println(sb.build());
         List<Map<String, Object>> groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
         IProcessTaskColumn groupColumn = ProcessTaskColumnFactory.columnComponentMap.get(chartConfigVo.getGroup());
@@ -86,9 +82,11 @@ public class DashboardSumStatistics extends StatisticsBase {
             subGroupColumn = ProcessTaskColumnFactory.columnComponentMap.get(chartConfigVo.getSubGroup());
             if (subGroupColumn != null) {
                 //先排序分页获取前分组数的group
-                groupColumn.getExchangeToDashboardGroupDataMap(groupMapList, workcenterVo);
+                LinkedHashMap<String, Object> dbExchangeGroupDataMap = groupColumn.getExchangeToDashboardGroupDataMap(groupMapList);
+                dashboardWidgetAllGroupDefineVo.setDbExchangeGroupDataMap(dbExchangeGroupDataMap);
+                dashboardWidgetParamVo.setDbExchangeGroupDataMap(dbExchangeGroupDataMap);
                 //根据分组groupDataList、子分组 再次搜索
-                sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.SUB_GROUP_COUNT);
+                sb = new SqlBuilder(dashboardWidgetParamVo, ProcessSqlTypeEnum.SUB_GROUP_COUNT);
                 //System.out.println(sb.build());
             }
         }

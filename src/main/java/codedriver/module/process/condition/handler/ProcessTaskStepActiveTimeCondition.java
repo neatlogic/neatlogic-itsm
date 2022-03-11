@@ -65,12 +65,6 @@ public class ProcessTaskStepActiveTimeCondition extends ProcessTaskConditionBase
     }
 
     @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        ConditionVo condition = conditionList.get(index);
-        return getDateEsWhere(condition, conditionList);
-    }
-
-    @Override
     public Object valueConversionText(Object value, JSONObject config) {
         if (value != null) {
             if (value instanceof String) {

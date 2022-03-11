@@ -5,23 +5,23 @@
 
 package codedriver.module.process.sql.decorator;
 
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.dto.SqlDecoratorVo;
 
 public abstract class SqlDecoratorBase implements ISqlDecorator{
 
     protected ISqlDecorator nextSqlDecorator;
 
     @Override
-    public void build(StringBuilder sqlSb, WorkcenterVo workcenterVo){
-        myBuild(sqlSb,workcenterVo);
+    public <T extends SqlDecoratorVo> void build(StringBuilder sqlSb, T sqlDecoratorVo){
+        myBuild(sqlSb,sqlDecoratorVo);
         //最后一步 limit 没有 next
         if(nextSqlDecorator != null) {
             //构造下一部分 sql
-            nextSqlDecorator.build(sqlSb, workcenterVo);
+            nextSqlDecorator.build(sqlSb, sqlDecoratorVo);
         }
     }
 
-    public abstract void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo);
+    public abstract <T extends SqlDecoratorVo> void myBuild(StringBuilder sqlSb, T sqlDecoratorVo);
 
     @Override
     public ISqlDecorator getNextSqlDecorator() {

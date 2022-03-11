@@ -5,9 +5,9 @@
 
 package codedriver.module.process.sql;
 
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.dto.SqlDecoratorVo;
 
-public interface IProcessSqlStructure {
+public interface IProcessSqlStructure<T extends SqlDecoratorVo> {
     /**
      * 获取 类型名
      * @return 类型名
@@ -30,8 +30,8 @@ public interface IProcessSqlStructure {
      * 补充主体sql
      *
      * @param sqlSb               sql
-     * @param workcenterVo        工单中心参数
+     * @param sqlDecoratorVo        工单中心参数
      */
-    void doService(StringBuilder sqlSb, WorkcenterVo workcenterVo);
+    void doService(StringBuilder sqlSb, T sqlDecoratorVo);
 
 }

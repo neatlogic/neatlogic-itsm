@@ -80,12 +80,6 @@ public class ProcessTaskStepTaskCondition extends ProcessTaskConditionBase imple
     }
 
     @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        return null;
-    }
-
-
-    @Override
     public Object valueConversionText(Object value, JSONObject config) {
 
         return value;

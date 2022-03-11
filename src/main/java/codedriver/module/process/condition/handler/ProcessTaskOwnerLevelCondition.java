@@ -64,12 +64,6 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        return null;
-    }
-
-
-    @Override
     public Object valueConversionText(Object value, JSONObject config) {
         if (Objects.equals(value, "1")) {
             return "是";
