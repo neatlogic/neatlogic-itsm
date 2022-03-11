@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-public class ProcessTaskWeekEveryDayColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
+public class ProcessTaskEveryDayColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
 
     @Override
     public String getName() {

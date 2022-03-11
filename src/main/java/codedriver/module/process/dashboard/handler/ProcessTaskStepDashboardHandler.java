@@ -41,7 +41,7 @@ public class ProcessTaskStepDashboardHandler extends DashboardHandlerBase {
             dashboardWidgetAllGroupDefineVo.setChartConfigVo(chartConfigVo);
             /* start: 从mysql 获取源数据 */
             //set条件
-            DashboardWidgetParamVo sqlDecoratorVo = new DashboardWidgetParamVo(widgetVo.getConditionConfigObj(), chartConfigVo.getLimitNum(), chartConfigVo, ProcessTaskDashboardHandler.class.getName());
+            DashboardWidgetParamVo sqlDecoratorVo = new DashboardWidgetParamVo(widgetVo.getConditionConfigObj(), chartConfigVo.getLimitNum(), chartConfigVo, ProcessTaskStepDashboardHandler.class.getName());
             StatisticsBase statistics = DashboardStatisticsFactory.getStatistics(chartConfigVo.getStatisticsType());
             List<Map<String, Object>> dbDataMapList = statistics.doService(sqlDecoratorVo, dashboardWidgetAllGroupDefineVo, widgetVo);
             /* end: 从mysql 获取源数据 */
