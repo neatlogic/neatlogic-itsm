@@ -1,9 +1,9 @@
 package codedriver.module.process.workcenter.column.handler;
 
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
-import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetGroupDefineVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -127,16 +127,16 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 	}
 
 	@Override
-	public void getMyDashboardDataVo(DashboardWidgetDataGroupVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
-		if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
-			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("ownerUuid", workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), "ownerName", workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
-			dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
+	public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> mapList) {
+		DashboardWidgetChartConfigVo dashboardWidgetChartConfigVo = dashboardWidgetAllGroupDefineVo.getChartConfigVo();
+		if (getName().equals(dashboardWidgetChartConfigVo.getGroup())) {
+			DashboardWidgetGroupDefineVo dashboardDataGroupVo = new DashboardWidgetGroupDefineVo("ownerUuid", dashboardWidgetChartConfigVo.getGroup(), "ownerName");
+			dashboardWidgetAllGroupDefineVo.setGroupDefineVo(dashboardDataGroupVo);
 		}
 		//如果存在子分组
-		if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
-			DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-			dashboardDataSubGroupVo = new DashboardDataSubGroupVo("ownerUuid", workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), "ownerName");
-			dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+		if (getName().equals(dashboardWidgetChartConfigVo.getSubGroup())) {
+			DashboardWidgetGroupDefineVo dashboardDataSubGroupVo = new DashboardWidgetGroupDefineVo("ownerUuid", dashboardWidgetChartConfigVo.getSubGroup(), "ownerName");
+			dashboardWidgetAllGroupDefineVo.setSubGroupDefineVo(dashboardDataSubGroupVo);
 		}
 	}
 

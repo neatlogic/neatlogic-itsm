@@ -8,6 +8,10 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.SqlDecoratorVo;
+import codedriver.framework.process.workcenter.dto.JoinOnVo;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -65,12 +69,6 @@ public class ProcessTaskStepActiveTimeCondition extends ProcessTaskConditionBase
     }
 
     @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        ConditionVo condition = conditionList.get(index);
-        return getDateEsWhere(condition, conditionList);
-    }
-
-    @Override
     public Object valueConversionText(Object value, JSONObject config) {
         if (value != null) {
             if (value instanceof String) {
@@ -90,5 +88,16 @@ public class ProcessTaskStepActiveTimeCondition extends ProcessTaskConditionBase
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
         getDateSqlWhereByValueList(conditionList.get(index), sqlSb, new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.ACTIVE_TIME.getValue());
+    }
+
+    @Override
+    public List<JoinTableColumnVo> getMyJoinTableColumnList(SqlDecoratorVo sqlDecoratorVo) {
+        return new ArrayList<JoinTableColumnVo>() {
+            {
+                add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new ArrayList<JoinOnVo>() {{
+                    add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
+                }}));
+            }
+        };
     }
 }

@@ -4,15 +4,15 @@ import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
-import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
+import codedriver.framework.process.dto.SqlDecoratorVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ChannelTypeSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import com.alibaba.fastjson.JSON;
@@ -119,7 +119,7 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
     }
 
     @Override
-    public List<JoinTableColumnVo> getMyJoinTableColumnList(WorkcenterVo workcenterVo) {
+    public List<JoinTableColumnVo> getMyJoinTableColumnList(SqlDecoratorVo sqlDecoratorVo) {
         return SqlTableUtil.getChannelTypeJoinTableSql();
     }
 }

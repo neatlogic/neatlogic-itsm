@@ -7,11 +7,12 @@ package codedriver.module.process.dashboard.statistics.core;
 
 import codedriver.framework.common.constvalue.dashboard.ChartType;
 import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.DashboardWidgetParamVo;
 import codedriver.framework.process.workcenter.dto.*;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSlaTimeSqlTable;
@@ -40,24 +41,22 @@ public class DashboardAvgHandleCostTimeStatistics extends StatisticsBase {
     }
 
     @Override
-    public void doService(WorkcenterVo workcenterVo, DashboardWidgetDataGroupVo widgetDataVo, DashboardWidgetVo widgetVo) {
+    public List<Map<String, Object>> doService(DashboardWidgetParamVo dashboardWidgetParamVo, DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, DashboardWidgetVo widgetVo) {
         //1、查出group权重，用于排序截取最大组数量
-        DashboardWidgetChartConfigVo chartConfigVo = workcenterVo.getDashboardWidgetChartConfigVo();
+        DashboardWidgetChartConfigVo chartConfigVo = dashboardWidgetParamVo.getDashboardWidgetChartConfigVo();
         //workcenterVo.getDashboardWidgetChartConfigVo().setGroup(chartConfigVo.getGroup());
         if (!ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType()) && !ChartType.TABLECHART.getValue().equals(widgetVo.getChartType()) && chartConfigVo.getLimitNum() != null) {
             //仅展示分组数
-            workcenterVo.setCurrentPage(1);
-            workcenterVo.setPageSize(chartConfigVo.getLimitNum());
+            dashboardWidgetParamVo.setCurrentPage(1);
+            dashboardWidgetParamVo.setPageSize(chartConfigVo.getLimitNum());
         }
         //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
-        SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_AVG_COST_TIME);
+        SqlBuilder sb = new SqlBuilder(dashboardWidgetParamVo, ProcessSqlTypeEnum.GROUP_AVG_COST_TIME);
         //System.out.println(sb.build());
-        List<Map<String, Object>> groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
+        List<Map<String, Object>> dbMapDataList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
         IProcessTaskColumn groupColumn = ProcessTaskColumnFactory.columnComponentMap.get(chartConfigVo.getGroup());
-
-        groupColumn.getDashboardDataVo(widgetDataVo, workcenterVo, groupMapList);
-        widgetDataVo.getDataGroupVo().setDataCountMap(workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
-        widgetDataVo.getDataGroupVo().setDataList(groupMapList);
+        groupColumn.getDashboardAllGroupDefine(dashboardWidgetAllGroupDefineVo, dbMapDataList);
+        return dbMapDataList;
     }
 
     @Override

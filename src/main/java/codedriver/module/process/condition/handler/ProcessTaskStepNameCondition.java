@@ -9,9 +9,9 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.SqlDecoratorVo;
 import codedriver.framework.process.workcenter.dto.JoinOnVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import codedriver.framework.service.AuthenticationInfoService;
@@ -97,7 +97,7 @@ public class ProcessTaskStepNameCondition extends ProcessTaskConditionBase imple
     }
 
     @Override
-    public List<JoinTableColumnVo> getMyJoinTableColumnList(WorkcenterVo workcenterVo) {
+    public List<JoinTableColumnVo> getMyJoinTableColumnList(SqlDecoratorVo sqlDecoratorVo) {
         return new ArrayList<JoinTableColumnVo>() {
             {
                 add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new ArrayList<JoinOnVo>() {{

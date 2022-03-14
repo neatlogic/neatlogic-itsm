@@ -5,15 +5,16 @@
 
 package codedriver.module.process.dashboard.statistics;
 
-import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.dto.DashboardWidgetParamVo;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public abstract class StatisticsBase {
     /**
@@ -24,11 +25,11 @@ public abstract class StatisticsBase {
 
     /**
      * 统计逻辑
-     * @param workcenterVo 工单中心vo 用于过滤条件
+     * @param sqlDecoratorVo  用于过滤条件
      * @param widgetDataVo
      * @param widgetVo
      */
-    public abstract void doService(WorkcenterVo workcenterVo, DashboardWidgetDataGroupVo widgetDataVo, DashboardWidgetVo widgetVo);
+    public abstract List<Map<String, Object>> doService(DashboardWidgetParamVo sqlDecoratorVo, DashboardWidgetAllGroupDefineVo widgetDataVo, DashboardWidgetVo widgetVo);
 
 
     /**
