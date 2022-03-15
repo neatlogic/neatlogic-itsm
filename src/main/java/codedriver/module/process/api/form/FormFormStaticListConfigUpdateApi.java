@@ -474,6 +474,9 @@ public class FormFormStaticListConfigUpdateApi extends PrivateApiComponentBase {
         JSONObject resultObj = new JSONObject();
         String type = config.getString("type");
         resultObj.put("type", type);
+        if (oldCellData == null) {
+            return resultObj;
+        }
         if ("text".equals(type)) {
             resultObj.put("value", oldCellData);
             resultObj.put("text", oldCellData);
