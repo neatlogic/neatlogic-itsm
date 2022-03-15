@@ -104,9 +104,9 @@ public class FormFormStaticListConfigUpdateApi extends PrivateApiComponentBase {
             String oldFormConfig = formVersionVo.getFormConfig();
             String oldFormConfigHash = DigestUtils.md5DigestAsHex(oldFormConfig.getBytes());
             //判断config是否已经更新过了
-            if (newFormConfigHashSet.contains(oldFormConfigHash)) {
-                continue;
-            }
+//            if (newFormConfigHashSet.contains(oldFormConfigHash)) {
+//                continue;
+//            }
             String newFormConfig = updateConfig(oldFormConfig);
             //如果更新前后相同，则说明已经转换过了(重复执行本接口)
             if (Objects.equals(newFormConfig, oldFormConfig)) {
@@ -212,6 +212,9 @@ public class FormFormStaticListConfigUpdateApi extends PrivateApiComponentBase {
                 String formConfig = selectContentByHashMapper.getProcessTaskFromContentByHash(formContentHash);
                 if (StringUtils.isNotBlank(formConfig)) {
                     JSONObject attributeConfig = getAttributeConfig(processTaskFormAttributeDataVo.getAttributeUuid(), formConfig);
+                    if (MapUtils.isEmpty(attributeConfig)) {
+                        continue;
+                    }
                     String newData = updateAttributeData(attributeConfig, data);
                     ProcessTaskFormAttributeDataVo processTaskFormAttributeData = new ProcessTaskFormAttributeDataVo();
                     processTaskFormAttributeData.setProcessTaskId(processTaskId);
@@ -227,10 +230,13 @@ public class FormFormStaticListConfigUpdateApi extends PrivateApiComponentBase {
         return resultList;
     }
 
+    /**
+     * 通过组件uuid在表单配置信息中找到组件的配置信息
+     * @param attributeUuid 组件uuid
+     * @param configStr 表单配置信息
+     * @return
+     */
     private JSONObject getAttributeConfig(String attributeUuid, String configStr) {
-        if (StringUtils.isBlank(configStr)) {
-            return null;
-        }
         JSONObject config = JSONObject.parseObject(configStr);
         if (MapUtils.isEmpty(config)) {
             return null;
@@ -270,7 +276,6 @@ public class FormFormStaticListConfigUpdateApi extends PrivateApiComponentBase {
         }
         //记录每一列对应的attributeUuid，sheetsConfig.tableList[x][x].component中需要用到
         Map<String, Map<String, String>> attributeUuidMap = new HashMap<>();
-//
         Map<String, Map<String, String>> secondAttributeUuidMap = new HashMap<>();
         JSONArray controllerList = config.getJSONArray("controllerList");
         if (CollectionUtils.isNotEmpty(controllerList)) {
