@@ -1100,20 +1100,42 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
 
         // 优先级
+//        String taskConfigStr = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+//        if (StringUtils.isNotBlank(taskConfigStr)) {
+//            JSONObject taskConfig = JSONObject.parseObject(taskConfigStr);
+//            if (MapUtils.isNotEmpty(taskConfig) && (!taskConfig.containsKey("isNeedPriority") || Objects.equals(taskConfig.getInteger("isNeedPriority"), 1))) {
+//                PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
+//                if (priorityVo == null) {
+//                    priorityVo = new PriorityVo();
+//                    priorityVo.setUuid(processTaskVo.getPriorityUuid());
+//                }
+//                processTaskVo.setPriority(priorityVo);
+//                processTaskVo.setIsNeedPriority(1);
+//            } else {
+//                processTaskVo.setIsNeedPriority(0);
+//            }
+//        }
+        Integer isNeedPriority = 0;
         String taskConfigStr = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
         if (StringUtils.isNotBlank(taskConfigStr)) {
             JSONObject taskConfig = JSONObject.parseObject(taskConfigStr);
-            if (MapUtils.isNotEmpty(taskConfig) && (!taskConfig.containsKey("isNeedPriority") || Objects.equals(taskConfig.getInteger("isNeedPriority"), 1))) {
-                PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
-                if (priorityVo == null) {
-                    priorityVo = new PriorityVo();
-                    priorityVo.setUuid(processTaskVo.getPriorityUuid());
+            if (MapUtils.isNotEmpty(taskConfig)) {
+                isNeedPriority = taskConfig.getInteger("isNeedPriority");
+                if (isNeedPriority == null) {
+                    isNeedPriority = 1;
                 }
-                processTaskVo.setPriority(priorityVo);
-                processTaskVo.setIsNeedPriority(1);
-            } else {
-                processTaskVo.setIsNeedPriority(0);
             }
+        }
+        if (Objects.equals(isNeedPriority, 1)) {
+            PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
+            if (priorityVo == null) {
+                priorityVo = new PriorityVo();
+                priorityVo.setUuid(processTaskVo.getPriorityUuid());
+            }
+            processTaskVo.setPriority(priorityVo);
+            processTaskVo.setIsNeedPriority(1);
+        } else {
+            processTaskVo.setIsNeedPriority(0);
         }
         // 上报服务路径
         ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
@@ -1131,10 +1153,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 channelTypeVo = new ChannelTypeVo();
                 channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
             }
-            try {
-                processTaskVo.setChannelType(channelTypeVo.clone());
-            } catch (CloneNotSupportedException ignored) {
-            }
+            processTaskVo.setChannelType(channelTypeVo);
+//            try {
+//                processTaskVo.setChannelType(channelTypeVo.clone());
+//            } catch (CloneNotSupportedException ignored) {
+//            }
         }
         // 耗时
         if (processTaskVo.getEndTime() != null) {
