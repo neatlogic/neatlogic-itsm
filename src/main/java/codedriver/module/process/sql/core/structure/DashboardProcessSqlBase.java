@@ -109,6 +109,7 @@ public abstract class DashboardProcessSqlBase extends ProcessSqlBase<DashboardWi
         sqlSb.append(" where ");
         buildDashboardCommonConditionWhereSql(sqlSb, dashboardWidgetParamVo);
         buildOtherConditionWhereSql(sqlSb, dashboardWidgetParamVo);
+        sqlSb.append(" and pt.status != 'draft' ");
         IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(dashboardWidgetParamVo.getDashboardWidgetChartConfigVo().getGroup());
         //拼接sql，对二次过滤选项，如：数值图需要二次过滤选项
         DashboardWidgetChartConfigVo chartConfigVo = dashboardWidgetParamVo.getDashboardWidgetChartConfigVo();
