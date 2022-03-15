@@ -399,20 +399,23 @@ public class FormFormStaticListConfigUpdateApi extends PrivateApiComponentBase {
      */
     private String updateAttributeData(JSONObject config, String data) {
         JSONObject resultObj = new JSONObject();
-        JSONArray tableArray = JSONObject.parseArray(data);
-        if (CollectionUtils.isEmpty(tableArray)) {
-            return data;
-        }
-        JSONArray attributeList = config.getJSONArray("attributeList");
-        if (CollectionUtils.isEmpty(attributeList)) {
-            return data;
-        }
         //每行数据uuid列表
         List<String> selectUuidList = new ArrayList<>();
+        resultObj.put("selectUuidList", selectUuidList);
         //详细数据
         Map<String, Object> detailData = new LinkedHashMap<>();
         //简单数据
         Map<String, Object> extendedData = new LinkedHashMap<>();
+        resultObj.put("detailData", detailData);
+        resultObj.put("extendedData", extendedData);
+        JSONArray tableArray = JSONObject.parseArray(data);
+        if (CollectionUtils.isEmpty(tableArray)) {
+            return resultObj.toJSONString();
+        }
+        JSONArray attributeList = config.getJSONArray("attributeList");
+        if (CollectionUtils.isEmpty(attributeList)) {
+            return resultObj.toJSONString();
+        }
         //遍历表格数据
         for (int i = 0; i < tableArray.size(); i++) {
             //一行数据
@@ -458,9 +461,6 @@ public class FormFormStaticListConfigUpdateApi extends PrivateApiComponentBase {
             detailData.put(rowUuid, newRowDetailData);
             extendedData.put(rowUuid, newRowExtendedData);
         }
-        resultObj.put("selectUuidList", selectUuidList);
-        resultObj.put("detailData", detailData);
-        resultObj.put("extendedData", extendedData);
         return JSONObject.toJSONString(resultObj, SerializerFeature.DisableCircularReferenceDetect);
     }
 
