@@ -15,13 +15,11 @@ import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.notify.core.INotifyTriggerType;
 import codedriver.framework.notify.dto.ParamMappingVo;
-import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ActionVo;
@@ -30,8 +28,6 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.handler.ProcessRequestFrom;
 import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import codedriver.framework.util.ConditionUtil;
-import codedriver.module.process.builder.ProcessTaskConditionOptionBuilder;
-import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -52,14 +48,7 @@ public class ProcessTaskActionThread extends CodeDriverThread {
     private static Logger logger = LoggerFactory.getLogger(ProcessTaskActionThread.class);
     private static ProcessTaskMapper processTaskMapper;
     private static SelectContentByHashMapper selectContentByHashMapper;
-    private static ProcessStepHandlerMapper processStepHandlerMapper;
     private static IntegrationMapper integrationMapper;
-    private static ProcessTaskService processTaskService;
-
-    @Autowired
-    public void setProcessTaskService(ProcessTaskService _processTaskService) {
-        processTaskService = _processTaskService;
-    }
 
     @Autowired
     public void setProcessTaskMapper(ProcessTaskMapper _processTaskMapper) {
@@ -69,11 +58,6 @@ public class ProcessTaskActionThread extends CodeDriverThread {
     @Autowired
     public void setSelectContentByHashMapper(SelectContentByHashMapper _selectContentByHashMapper) {
         selectContentByHashMapper = _selectContentByHashMapper;
-    }
-
-    @Autowired
-    public void setProcessStepHandlerMapper(ProcessStepHandlerMapper _processStepHandlerMapper) {
-        processStepHandlerMapper = _processStepHandlerMapper;
     }
 
     @Autowired

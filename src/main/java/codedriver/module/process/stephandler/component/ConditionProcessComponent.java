@@ -9,12 +9,10 @@ import codedriver.framework.asynchronization.threadlocal.ConditionParamContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dto.condition.ConditionConfigVo;
-import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.core.ProcessTaskException;
-import codedriver.module.process.builder.ProcessTaskConditionOptionBuilder;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.util.RunScriptUtil;
@@ -40,8 +38,6 @@ import java.util.stream.Collectors;
 @Service
 public class ConditionProcessComponent extends ProcessStepHandlerBase {
     static Logger logger = LoggerFactory.getLogger(ConditionProcessComponent.class);
-    @Autowired
-    private ProcessTaskService processTaskService;
 
     @Override
     public String getName() {

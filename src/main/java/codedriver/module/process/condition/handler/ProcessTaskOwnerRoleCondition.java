@@ -4,7 +4,6 @@ import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.condition.ConditionVo;
@@ -13,10 +12,8 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.service.AuthenticationInfoService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -32,14 +29,6 @@ public class ProcessTaskOwnerRoleCondition extends ProcessTaskConditionBase impl
 
     @Resource
     private RoleMapper roleMapper;
-
-    @Resource
-    private AuthenticationInfoService authenticationInfoService;
-
-    private ProcessTaskMapper processTaskMapper;
-
-    @Resource
-    private UserMapper userMapper;
 
     @Override
     public String getName() {
