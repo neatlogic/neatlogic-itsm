@@ -1095,9 +1095,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
 
         // 判断当前用户是否关注该工单
-        if (processTaskMapper.checkProcessTaskFocusExists(processTaskId, UserContext.get().getUserUuid()) > 0) {
-            processTaskVo.setIsFocus(1);
-        }
+//        if (processTaskMapper.checkProcessTaskFocusExists(processTaskId, UserContext.get().getUserUuid()) > 0) {
+//            processTaskVo.setIsFocus(1);
+//        }
 
         // 优先级
 //        String taskConfigStr = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
@@ -1153,11 +1153,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 channelTypeVo = new ChannelTypeVo();
                 channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
             }
-            processTaskVo.setChannelType(channelTypeVo);
-//            try {
-//                processTaskVo.setChannelType(channelTypeVo.clone());
-//            } catch (CloneNotSupportedException ignored) {
-//            }
+            try {
+                processTaskVo.setChannelType(channelTypeVo.clone());
+            } catch (CloneNotSupportedException ignored) {
+            }
         }
         // 耗时
         if (processTaskVo.getEndTime() != null) {
@@ -1171,37 +1170,39 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         setProcessTaskFormInfo(processTaskVo);
 
         /** 上报人公司、部门列表 **/
-        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTaskVo.getOwner());
-        List<TeamVo> teamList = null;
-        if (CollectionUtils.isNotEmpty(teamUuidList)) {
-            Set<Long> idSet = new HashSet<>();
-            teamList = teamMapper.getTeamByUuidList(teamUuidList);
-            for (TeamVo teamVo : teamList) {
-                List<TeamVo> companyList = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht(),
-                        TeamLevel.COMPANY.getValue());
-                if (CollectionUtils.isNotEmpty(companyList)) {
-                    for (TeamVo team : companyList) {
-                        if (!idSet.contains(team.getId())) {
-                            idSet.add(team.getId());
-                            processTaskVo.getOwnerCompanyList().add(team);
-                        }
-                    }
-                }
-                List<TeamVo> departmentList = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht(),
-                        TeamLevel.DEPARTMENT.getValue());
-                if (CollectionUtils.isNotEmpty(departmentList)) {
-                    for (TeamVo team : departmentList) {
-                        if (!idSet.contains(team.getId())) {
-                            idSet.add(team.getId());
-                            processTaskVo.getOwnerDepartmentList().add(team);
-                        }
-                    }
-                }
-            }
-        }
+//        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTaskVo.getOwner());
+//        List<TeamVo> teamList = null;
+//        if (CollectionUtils.isNotEmpty(teamUuidList)) {
+//            Set<Long> idSet = new HashSet<>();
+//            teamList = teamMapper.getTeamByUuidList(teamUuidList);
+//            for (TeamVo teamVo : teamList) {
+//                List<TeamVo> companyList = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht(),
+//                        TeamLevel.COMPANY.getValue());
+//                if (CollectionUtils.isNotEmpty(companyList)) {
+//                    for (TeamVo team : companyList) {
+//                        if (!idSet.contains(team.getId())) {
+//                            idSet.add(team.getId());
+//                            processTaskVo.getOwnerCompanyList().add(team);
+//                        }
+//                    }
+//                }
+//                List<TeamVo> departmentList = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht(),
+//                        TeamLevel.DEPARTMENT.getValue());
+//                if (CollectionUtils.isNotEmpty(departmentList)) {
+//                    for (TeamVo team : departmentList) {
+//                        if (!idSet.contains(team.getId())) {
+//                            idSet.add(team.getId());
+//                            processTaskVo.getOwnerDepartmentList().add(team);
+//                        }
+//                    }
+//                }
+//            }
+//        }
         /** 获取评分信息 */
-        String scoreInfo = processTaskMapper.getProcessTaskScoreInfoById(processTaskId);
-        processTaskVo.setScoreInfo(scoreInfo);
+        if (ProcessTaskStatus.SCORED.getValue().equals(processTaskVo.getStatus())) {
+            String scoreInfo = processTaskMapper.getProcessTaskScoreInfoById(processTaskId);
+            processTaskVo.setScoreInfo(scoreInfo);
+        }
 
         /** 转报数据 **/
 //        Long fromProcessTaskId = processTaskMapper.getFromProcessTaskIdByToProcessTaskId(processTaskId);
@@ -1240,6 +1241,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<String> focusUserUuidList = processTaskMapper.getFocusUserListByTaskId(processTaskId);
         if (CollectionUtils.isNotEmpty(focusUserUuidList)) {
             processTaskVo.setFocusUserUuidList(focusUserUuidList);
+            for (String focusUserUuid : focusUserUuidList) {
+                if (focusUserUuid.contains(UserContext.get().getUserUuid())) {
+                    processTaskVo.setIsFocus(1);
+                    break;
+                }
+            }
         }
         /* 查询当前用户是否有权限修改工单关注人 **/
         int canEditFocusUser = new ProcessAuthManager
@@ -1250,7 +1257,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         String owner = processTaskVo.getOwner();
         UserVo ownerVo = userMapper.getUserBaseInfoByUuid(owner);
         if (ownerVo != null) {
-            ownerVo.setTeamList(teamList);
+            List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTaskVo.getOwner());
+            if (CollectionUtils.isNotEmpty(teamUuidList)) {
+                List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
+                ownerVo.setTeamList(teamList);
+            }
             processTaskVo.setOwnerVo(ownerVo);
         }
 
