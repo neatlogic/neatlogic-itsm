@@ -11,7 +11,6 @@ import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.table.ChannelTypeSqlTable;
@@ -33,9 +32,6 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 
     @Resource
     private ChannelMapper channelMapper;
-
-    @Resource
-    private ProcessTaskMapper processTaskMapper;
 
     private String formHandlerType = FormHandlerType.SELECT.toString();
 
