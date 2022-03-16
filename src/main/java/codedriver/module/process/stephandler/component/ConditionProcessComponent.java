@@ -10,12 +10,10 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dto.condition.ConditionConfigVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
-import codedriver.framework.process.constvalue.ProcessStepHandlerType;
-import codedriver.framework.process.constvalue.ProcessStepMode;
-import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
-import codedriver.framework.process.constvalue.ProcessTaskAuditType;
+import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.core.ProcessTaskException;
+import codedriver.module.process.builder.ProcessTaskConditionOptionBuilder;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.util.RunScriptUtil;
@@ -123,12 +121,16 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                             } else if ("optional".equals(type)) {// 自定义
                                 JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
                                 if (CollectionUtils.isNotEmpty(conditionGroupList)) {
-                                    ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
-                                    processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
-                                    processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
-                                    JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
+                                    JSONObject conditionParamData = new ProcessTaskConditionOptionBuilder(currentProcessTaskStepVo.getProcessTaskId())
+                                            .addConditionOptions(ConditionProcessTaskOptions.values())
+                                            .build();
+//                                    ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
+//                                    processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
+//                                    processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
+//                                    JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
                                     try {
-                                        ConditionParamContext.init(conditionParamData).setFormConfig(processTaskVo.getFormConfig()).setTranslate(true);
+//                                        ConditionParamContext.init(conditionParamData).setFormConfig(processTaskVo.getFormConfig()).setTranslate(true);
+                                        ConditionParamContext.init(conditionParamData).setTranslate(true);
                                         ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
                                         String script = conditionConfigVo.buildScript();
                                         // ((false || true) || (true && false) || (true || false))

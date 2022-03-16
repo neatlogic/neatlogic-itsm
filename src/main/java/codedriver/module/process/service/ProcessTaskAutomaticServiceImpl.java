@@ -14,10 +14,7 @@ import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
-import codedriver.framework.process.constvalue.ProcessFlowDirection;
-import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
+import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.constvalue.automatic.CallbackType;
 import codedriver.framework.process.constvalue.automatic.FailPolicy;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -37,6 +34,7 @@ import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.util.FreemarkerUtil;
+import codedriver.module.process.builder.ProcessTaskConditionOptionBuilder;
 import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -638,11 +636,15 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
      * @return
      */
     private JSONObject getIntegrationParam(ProcessTaskStepVo currentProcessTaskStepVo, JSONArray paramList, JSONObject resultJson) {
-        ProcessTaskStepVo stepVo = processTaskService.getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
-        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
-        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
-        processTaskVo.setCurrentProcessTaskStep(stepVo);
-        JSONObject processTaskJson = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
+        JSONObject processTaskJson = new ProcessTaskConditionOptionBuilder(currentProcessTaskStepVo.getProcessTaskId())
+                .addProcessTaskStepId(currentProcessTaskStepVo.getId())
+                .addConditionOptions(ConditionProcessTaskOptions.values())
+                .build();
+//        ProcessTaskStepVo stepVo = processTaskService.getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
+//        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
+//        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
+//        processTaskVo.setCurrentProcessTaskStep(stepVo);
+//        JSONObject processTaskJson = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
         JSONObject integrationParam = new JSONObject();
         if (CollectionUtils.isNotEmpty(paramList)) {
             for (Object paramObj : paramList) {

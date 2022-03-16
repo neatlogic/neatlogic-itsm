@@ -15,6 +15,7 @@ import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.dto.NotifyReceiverVo;
 import codedriver.framework.notify.dto.ParamMappingVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
+import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
@@ -22,6 +23,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
+import codedriver.module.process.builder.ProcessTaskConditionOptionBuilder;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
@@ -142,10 +144,14 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                 if (notifyPolicyVo != null) {
                     NotifyPolicyConfigVo policyConfig = notifyPolicyVo.getConfig();
                     if (policyConfig != null) {
-                        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
-                        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
-                        processTaskVo.setCurrentProcessTaskStep(processTaskService.getCurrentProcessTaskStepDetail(currentProcessTaskStepVo));
-                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
+                        JSONObject conditionParamData = new ProcessTaskConditionOptionBuilder(currentProcessTaskStepVo.getProcessTaskId())
+                                .addProcessTaskStepId(currentProcessTaskStepVo.getId())
+                                .addConditionOptions(ConditionProcessTaskOptions.values())
+                                .build();
+//                        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
+//                        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
+//                        processTaskVo.setCurrentProcessTaskStep(processTaskService.getCurrentProcessTaskStepDetail(currentProcessTaskStepVo));
+//                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
 //                        JSONObject templateParamData = ProcessTaskUtil.getProcessTaskParamData(processTaskVo);
                         Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
                         processTaskService.getReceiverMap(currentProcessTaskStepVo, receiverMap);
