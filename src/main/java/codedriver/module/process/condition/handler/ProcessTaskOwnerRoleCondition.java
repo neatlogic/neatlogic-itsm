@@ -4,7 +4,6 @@ import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.condition.ConditionVo;
@@ -13,8 +12,8 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.service.AuthenticationInfoService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -30,12 +29,6 @@ public class ProcessTaskOwnerRoleCondition extends ProcessTaskConditionBase impl
 
     @Resource
     private RoleMapper roleMapper;
-
-    @Resource
-    private AuthenticationInfoService authenticationInfoService;
-
-    @Resource
-    private UserMapper userMapper;
 
     @Override
     public String getName() {
@@ -123,7 +116,8 @@ public class ProcessTaskOwnerRoleCondition extends ProcessTaskConditionBase impl
     }
 
     @Override
-    public Object getConditionParamData(ProcessTaskVo processTaskVo){
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo){
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
         String owner = processTaskVo.getOwner();
         AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(owner);
         return authenticationInfoVo.getRoleUuidList().stream().map(o->GroupSearch.ROLE.getValuePlugin()+o).collect(Collectors.toList());

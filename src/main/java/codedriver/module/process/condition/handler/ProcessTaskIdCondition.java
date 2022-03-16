@@ -8,6 +8,7 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
@@ -65,5 +66,9 @@ public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements 
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
 
+    }
+    @Override
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
+        return processTaskStepVo.getProcessTaskId();
     }
 }

@@ -7,6 +7,7 @@ package codedriver.module.process.condition.handler;
 
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.common.constvalue.TeamLevel;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.condition.ConditionVo;
@@ -15,13 +16,19 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class ProcessTaskOwnerDepartmentCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -108,5 +115,38 @@ public class ProcessTaskOwnerDepartmentCondition extends ProcessTaskConditionBas
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
 
+    }
+
+    @Override
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo == null) {
+            return null;
+        }
+        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTaskVo.getOwner());
+        if (CollectionUtils.isNotEmpty(teamUuidList)) {
+            Set<String> upwardUuidSet = new HashSet<>();
+            List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
+            for (TeamVo teamVo : teamList) {
+                String upwardUuidPath = teamVo.getUpwardUuidPath();
+                if (StringUtils.isNotBlank(upwardUuidPath)) {
+                    String[] upwardUuidArray = upwardUuidPath.split(",");
+                    for (String upwardUuid : upwardUuidArray) {
+                        upwardUuidSet.add(upwardUuid);
+                    }
+                }
+            }
+            if (CollectionUtils.isNotEmpty(upwardUuidSet)) {
+                List<TeamVo> upwardTeamList = teamMapper.getTeamByUuidList(new ArrayList<>(upwardUuidSet));
+                List<String> departmentUuidList = new ArrayList<>();
+                for (TeamVo teamVo : upwardTeamList) {
+                    if (TeamLevel.DEPARTMENT.getValue().equals(teamVo.getLevel())) {
+                        departmentUuidList.add(teamVo.getUuid());
+                    }
+                }
+                return departmentUuidList;
+            }
+        }
+        return null;
     }
 }
