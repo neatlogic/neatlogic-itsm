@@ -1436,7 +1436,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
         /** 工单关注人 */
         List<String> focusUserList =
-                processTaskMapper.getFocusUsersOfProcessTask(currentProcessTaskStepVo.getProcessTaskId());
+                processTaskMapper.getFocusUserListByTaskId(currentProcessTaskStepVo.getProcessTaskId());
         for (String user : focusUserList) {
             String[] split = user.split("#");
             receiverMap.computeIfAbsent(ProcessUserType.FOCUS_USER.getValue(), k -> new ArrayList<>())
