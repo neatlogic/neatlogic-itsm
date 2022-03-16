@@ -14,6 +14,7 @@ import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
+import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.constvalue.automatic.CallbackType;
 import codedriver.framework.process.constvalue.automatic.FailPolicy;
@@ -636,10 +637,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
      * @return
      */
     private JSONObject getIntegrationParam(ProcessTaskStepVo currentProcessTaskStepVo, JSONArray paramList, JSONObject resultJson) {
-        JSONObject processTaskJson = new ProcessTaskConditionOptionBuilder(currentProcessTaskStepVo.getProcessTaskId())
-                .addProcessTaskStepId(currentProcessTaskStepVo.getId())
-                .addConditionOptions(ConditionProcessTaskOptions.values())
-                .build();
+        JSONObject processTaskJson = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), currentProcessTaskStepVo);
 //        ProcessTaskStepVo stepVo = processTaskService.getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
 //        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
 //        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));

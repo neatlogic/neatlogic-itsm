@@ -10,6 +10,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dto.condition.ConditionConfigVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
+import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.core.ProcessTaskException;
@@ -121,9 +122,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                             } else if ("optional".equals(type)) {// 自定义
                                 JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
                                 if (CollectionUtils.isNotEmpty(conditionGroupList)) {
-                                    JSONObject conditionParamData = new ProcessTaskConditionOptionBuilder(currentProcessTaskStepVo.getProcessTaskId())
-                                            .addConditionOptions(ConditionProcessTaskOptions.values())
-                                            .build();
+                                    JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), currentProcessTaskStepVo);
 //                                    ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
 //                                    processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
 //                                    processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);

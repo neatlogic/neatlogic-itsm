@@ -13,6 +13,7 @@ import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.dto.NotifyReceiverVo;
 import codedriver.framework.notify.dto.ParamMappingVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
+import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -230,9 +231,10 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                         if (CollectionUtils.isNotEmpty(paramMappingArray)) {
                             paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
                         }
-                        JSONObject conditionParamData = new ProcessTaskConditionOptionBuilder(processTaskSlaVo.getProcessTaskId())
-                                .addConditionOptions(ConditionProcessTaskOptions.values())
-                                .build();
+                        ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
+                        processTaskStep.setIsAutoGenerateId(false);
+                        processTaskStep.setProcessTaskId(processTaskSlaVo.getProcessTaskId());
+                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), processTaskStep);
 //                        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskSlaVo.getProcessTaskId());
 //                        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
 //                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);

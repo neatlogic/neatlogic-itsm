@@ -9,6 +9,7 @@ import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.ConditionParamContext;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.dto.condition.ConditionConfigVo;
+import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.SlaStatus;
@@ -125,10 +126,13 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                 boolean isHit = true;
                 if (CollectionUtils.isNotEmpty(conditionGroupList)) {
                     try {
-                        JSONObject conditionParamData = new ProcessTaskConditionOptionBuilder(processTaskVo.getId())
-                                .addProcessTaskStepId(currentProcessTaskStepVo != null ? currentProcessTaskStepVo.getId() : null)
-                                .addConditionOptions(ConditionProcessTaskOptions.values())
-                                .build();
+                        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+                        processTaskStepVo.setIsAutoGenerateId(false);
+                        processTaskStepVo.setProcessTaskId(processTaskVo.getId());
+                        if (currentProcessTaskStepVo != null) {
+                            processTaskStepVo.setId(currentProcessTaskStepVo.getId());
+                        }
+                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), processTaskStepVo);
 //                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
                         ConditionParamContext.init(conditionParamData);
                         ConditionConfigVo conditionConfigVo = new ConditionConfigVo(policyObj);

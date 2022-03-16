@@ -15,6 +15,7 @@ import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.dto.NotifyReceiverVo;
 import codedriver.framework.notify.dto.ParamMappingVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
+import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -144,10 +145,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                 if (notifyPolicyVo != null) {
                     NotifyPolicyConfigVo policyConfig = notifyPolicyVo.getConfig();
                     if (policyConfig != null) {
-                        JSONObject conditionParamData = new ProcessTaskConditionOptionBuilder(currentProcessTaskStepVo.getProcessTaskId())
-                                .addProcessTaskStepId(currentProcessTaskStepVo.getId())
-                                .addConditionOptions(ConditionProcessTaskOptions.values())
-                                .build();
+                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), currentProcessTaskStepVo);
 //                        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
 //                        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
 //                        processTaskVo.setCurrentProcessTaskStep(processTaskService.getCurrentProcessTaskStepDetail(currentProcessTaskStepVo));

@@ -16,6 +16,7 @@ import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.notify.core.INotifyTriggerType;
 import codedriver.framework.notify.dto.ParamMappingVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
+import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
@@ -128,10 +129,7 @@ public class ProcessTaskActionThread extends CodeDriverThread {
                         List<ParamMappingVo> paramMappingList = JSON.parseArray(
                                 actionObj.getJSONArray("paramMappingList").toJSONString(), ParamMappingVo.class);
                         if (CollectionUtils.isNotEmpty(paramMappingList)) {
-                            JSONObject processFieldData = new ProcessTaskConditionOptionBuilder(currentProcessTaskStepVo.getProcessTaskId())
-                                    .addProcessTaskStepId(currentProcessTaskStepVo.getId())
-                                    .addConditionOptions(ConditionProcessTaskOptions.values())
-                                    .build();
+                            JSONObject processFieldData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), currentProcessTaskStepVo);
 //                            ProcessTaskVo processTaskVo =
 //                                    processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
 //                            processTaskVo.setStartProcessTaskStep(

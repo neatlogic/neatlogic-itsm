@@ -13,6 +13,8 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.service.AuthenticationInfoService;
 import com.alibaba.fastjson.JSON;
@@ -33,6 +35,8 @@ public class ProcessTaskOwnerRoleCondition extends ProcessTaskConditionBase impl
 
     @Resource
     private AuthenticationInfoService authenticationInfoService;
+
+    private ProcessTaskMapper processTaskMapper;
 
     @Resource
     private UserMapper userMapper;
@@ -123,7 +127,8 @@ public class ProcessTaskOwnerRoleCondition extends ProcessTaskConditionBase impl
     }
 
     @Override
-    public Object getConditionParamData(ProcessTaskVo processTaskVo){
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo){
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
         String owner = processTaskVo.getOwner();
         AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(owner);
         return authenticationInfoVo.getRoleUuidList().stream().map(o->GroupSearch.ROLE.getValuePlugin()+o).collect(Collectors.toList());
