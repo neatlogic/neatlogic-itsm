@@ -9,7 +9,9 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -78,5 +80,13 @@ public class ProcessTaskContentCondition extends ProcessTaskConditionBase implem
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
 
+    }
+    @Override
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
+        String content = processTaskMapper.getProcessTaskStartContentByProcessTaskId(processTaskStepVo.getProcessTaskId());
+        if (StringUtils.isNotBlank(content)) {
+            return content;
+        }
+        return "";
     }
 }

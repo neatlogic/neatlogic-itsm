@@ -9,7 +9,8 @@ import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.ConditionParamContext;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.dto.condition.ConditionConfigVo;
-import codedriver.framework.process.column.core.ProcessTaskUtil;
+import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
+import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.SlaStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -27,7 +28,6 @@ import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import codedriver.framework.transaction.util.TransactionUtil;
 import codedriver.framework.util.RunScriptUtil;
-import codedriver.module.process.service.ProcessTaskService;
 import codedriver.module.process.sla.handler.DefaultSlaCalculateHandler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -50,12 +50,12 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
     private static ProcessTaskMapper processTaskMapper;
     private static ProcessTaskSlaMapper processTaskSlaMapper;
     private static TransactionUtil transactionUtil;
-    private static ProcessTaskService processTaskService;
+//    private static ProcessTaskService processTaskService;
 
-    @Resource
-    public void setProcessTaskService(ProcessTaskService _processTaskService) {
-        processTaskService = _processTaskService;
-    }
+//    @Resource
+//    public void setProcessTaskService(ProcessTaskService _processTaskService) {
+//        processTaskService = _processTaskService;
+//    }
 
     @Resource
     public void setProcessTaskMapper(ProcessTaskMapper _processTaskMapper) {
@@ -125,7 +125,14 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                 boolean isHit = true;
                 if (CollectionUtils.isNotEmpty(conditionGroupList)) {
                     try {
-                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
+                        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+                        processTaskStepVo.setIsAutoGenerateId(false);
+                        processTaskStepVo.setProcessTaskId(processTaskVo.getId());
+                        if (currentProcessTaskStepVo != null) {
+                            processTaskStepVo.setId(currentProcessTaskStepVo.getId());
+                        }
+                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), processTaskStepVo);
+//                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
                         ConditionParamContext.init(conditionParamData);
                         ConditionConfigVo conditionConfigVo = new ConditionConfigVo(policyObj);
                         String script = conditionConfigVo.buildScript();
@@ -313,9 +320,10 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
 //            System.out.println(slaIdList);
 //            System.out.println("************************end*****************************************");
             if (MapUtils.isNotEmpty(slaStatusMap)) {
-                ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
-                processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId));
-                processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
+                ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
+//                ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
+//                processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId));
+//                processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
                 for (Map.Entry<Long, SlaStatus> entry : slaStatusMap.entrySet()) {
                     recalculateSla(entry.getKey(), entry.getValue(), processTaskVo);
                 }

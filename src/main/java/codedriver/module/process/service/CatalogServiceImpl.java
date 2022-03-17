@@ -10,7 +10,6 @@ import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelRelationVo;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.service.AuthenticationInfoService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -114,36 +113,36 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
 
 	@Override
 	public boolean channelIsAuthority(String channelUuid, String userUuid) {
-		ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
-		if(channel == null) {
-			throw new ChannelNotFoundException(channelUuid);
-		}
-		/** 服务状态必须是激活**/
-		if(Objects.equals(channel.getIsActive(), 1)) {
-			AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
-			/** 查出当前用户所有已授权的服务uuid集合  **/
-			List<String> channelUuidList = channelMapper.getAuthorizedChannelUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), channelUuid);
-			/** 服务已授权 **/
-			if(channelUuidList.contains(channelUuid)) {
-				CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channel.getParentUuid());
-				if(catalogVo != null && !CatalogVo.ROOT_UUID.equals(catalogVo.getUuid())) {
-					/** 查出当前用户所有已授权的目录uuid集合  **/
-					List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
-					List<CatalogVo> ancestorsAndSelfList = catalogMapper.getAncestorsAndSelfByLftRht(catalogVo.getLft(), catalogVo.getRht());
-					for(CatalogVo catalog : ancestorsAndSelfList) {
-						if(!CatalogVo.ROOT_UUID.equals(catalog.getUuid())) {
-							if(Objects.equals(catalog.getIsActive(), 0)) {
-								return false;
-							}else if(!currentUserAuthorizedCatalogUuidList.contains(catalog.getUuid())) {
-								return false;
-							}
-						}
-					}
+		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
+		/** 查出当前用户所有已授权的服务uuid集合  **/
+		List<String> channelUuidList = channelMapper.getActiveAuthorizedChannelUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), channelUuid);
+		/** 服务已授权 **/
+		if(channelUuidList.contains(channelUuid)) {
+			ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
+			if(channel == null) {
+				return false;
+			}
+			CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channel.getParentUuid());
+			if(catalogVo == null) {
+				return false;
+			}
+			List<String> catalogUuidList = new ArrayList<>();
+			List<CatalogVo> ancestorsAndSelfList = catalogMapper.getAncestorsAndSelfByLftRht(catalogVo.getLft(), catalogVo.getRht());
+			for (CatalogVo catalog : ancestorsAndSelfList) {
+				if(Objects.equals(catalog.getIsActive(), 0)) {
+					return false;
+				}
+				catalogUuidList.add(catalog.getUuid());
+			}
+			if (CollectionUtils.isNotEmpty(catalogUuidList)) {
+				/** 查出当前用户所有已授权的目录uuid集合  **/
+				List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidListByCatalogUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), catalogUuidList);
+				catalogUuidList.removeAll(currentUserAuthorizedCatalogUuidList);
+				if (CollectionUtils.isEmpty(catalogUuidList)) {
 					return true;
 				}
 			}
 		}
-		
 		return false;
 	}
 	
