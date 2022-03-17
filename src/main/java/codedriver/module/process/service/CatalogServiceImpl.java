@@ -10,11 +10,9 @@ import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelRelationVo;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.service.AuthenticationInfoService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,7 +137,8 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
 			if (CollectionUtils.isNotEmpty(catalogUuidList)) {
 				/** 查出当前用户所有已授权的目录uuid集合  **/
 				List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidListByCatalogUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), catalogUuidList);
-				if (ListUtils.isEqualList(catalogUuidList, currentUserAuthorizedCatalogUuidList)) {
+				catalogUuidList.removeAll(currentUserAuthorizedCatalogUuidList);
+				if (CollectionUtils.isEmpty(catalogUuidList)) {
 					return true;
 				}
 			}
