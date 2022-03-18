@@ -70,7 +70,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        ProcessTaskStepVo currentProcessTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
         ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder()
                 .addProcessTaskId(processTaskId)
                 .addOperationType(ProcessTaskOperationType.PROCESSTASK_VIEW)
@@ -109,6 +108,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             }
         }
         processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId));
+        ProcessTaskStepVo currentProcessTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
         if (currentProcessTaskStepVo != null) {
             Set<ProcessTaskOperationType> stepOperationTypeSet = operationTypeSetMap.get(processTaskStepId);
             if (stepOperationTypeSet.contains(ProcessTaskOperationType.STEP_VIEW)) {
@@ -119,7 +119,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                     processTaskService.setTemporaryData(processTaskVo, currentProcessTaskStepVo);
                 }
             }
-            processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
         }
 
         // TODO 兼容老工单表单（判断是否存在旧表单）

@@ -105,13 +105,6 @@ public interface ProcessTaskService {
     public List<ProcessTaskSlaTimeVo> getSlaTimeListByProcessTaskStepId(Long processTaskStepId);
 
     /**
-     * @param processTaskStepVo 步骤信息
-     * @return
-     * @Author: linbq
-     * @Time:2020年9月23日
-     * @Description: 获取前进步骤列表
-     */
-    /**
      * 设置下一步骤列表
      * @param processTaskStepVo 步骤信息
      */
@@ -227,14 +220,6 @@ public interface ProcessTaskService {
      * @Description: 获取开始步骤信息
      */
     public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
-
-    /**
-     * @param currentProcessTaskStep 当前步骤基本信息
-     * @return ProcessTaskStepVo
-     * @Time:2020年12月23日
-     * @Description: 返回当前步骤详情
-     */
-    public ProcessTaskStepVo getCurrentProcessTaskStepDetail(ProcessTaskStepVo currentProcessTaskStep);
 
     /**
      * @param processTaskId

@@ -1335,54 +1335,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     }
 
     @Override
-    public ProcessTaskStepVo getCurrentProcessTaskStepDetail(ProcessTaskStepVo currentProcessTaskStep) {
-        if (currentProcessTaskStep.getId() == null) {
-            return null;
-        }
-        // 获取步骤信息
-        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStep.getId());
-        if (processTaskStepVo == null) {
-            return null;
-        }
-        processTaskStepVo.getParamObj().putAll(currentProcessTaskStep.getParamObj());
-        List<ProcessTaskStepWorkerVo> workerList =
-                processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(
-                        processTaskStepVo.getProcessTaskId(), currentProcessTaskStep.getId());
-        for (ProcessTaskStepWorkerVo workerVo : workerList) {
-            if (workerVo.getType().equals(GroupSearch.USER.getValue())) {
-                UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
-                if (userVo != null) {
-                    workerVo.setWorker(new WorkAssignmentUnitVo(userVo));
-                    workerVo.setName(userVo.getUserName());
-                }
-            } else if (workerVo.getType().equals(GroupSearch.TEAM.getValue())) {
-                TeamVo teamVo = teamMapper.getTeamByUuid(workerVo.getUuid());
-                if (teamVo != null) {
-                    workerVo.setWorker(new WorkAssignmentUnitVo(teamVo));
-                    workerVo.setName(teamVo.getName());
-                }
-            } else if (workerVo.getType().equals(GroupSearch.ROLE.getValue())) {
-                RoleVo roleVo = roleMapper.getRoleByUuid(workerVo.getUuid());
-                if (roleVo != null) {
-                    workerVo.setWorker(new WorkAssignmentUnitVo(roleVo));
-                    workerVo.setName(roleVo.getName());
-                }
-            }
-        }
-        processTaskStepVo.setWorkerList(workerList);
-        List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStep.getId(), null);
-        processTaskStepVo.setUserList(userList);
-        IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
-        if (handler == null) {
-            throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
-        }
-        processTaskStepVo.setHandlerStepInfo(handler.getHandlerStepInitInfo(processTaskStepVo));
-//        processTaskStepVo.setCurrentSubtaskVo(currentProcessTaskStep.getCurrentSubtaskVo());
-        processTaskStepVo.setProcessTaskStepTaskVo(currentProcessTaskStep.getProcessTaskStepTaskVo());
-        return processTaskStepVo;
-    }
-
-    @Override
     public ProcessTaskVo getFromProcessTaskById(Long processTaskId) {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
         if (processTaskVo != null) {
