@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -69,7 +70,22 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        if (!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
+        ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder()
+                .addProcessTaskId(processTaskId)
+                .addOperationType(ProcessTaskOperationType.PROCESSTASK_VIEW)
+                .addOperationType(ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE)
+                .addOperationType(ProcessTaskOperationType.PROCESSTASK_SCORE);
+        if (processTaskStepId != null) {
+            builder.addProcessTaskStepId(processTaskStepId)
+                    .addOperationType(ProcessTaskOperationType.STEP_VIEW)
+                    .addOperationType(ProcessTaskOperationType.STEP_SAVE)
+                    .addOperationType(ProcessTaskOperationType.STEP_COMPLETE);
+        }
+        Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap = builder.build().getOperateMap();
+
+        Set<ProcessTaskOperationType> taskOperationTypeSet = operationTypeSetMap.get(processTaskId);
+//        if (!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
+        if (!taskOperationTypeSet.contains(ProcessTaskOperationType.PROCESSTASK_VIEW)) {
             if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
                 throw new ProcessTaskViewDeniedException();
             } else {
@@ -80,9 +96,22 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 throw new ProcessTaskViewDeniedException(channelVo.getName());
             }
         }
-        processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
+        processTaskService.setProcessTaskDetail(processTaskVo);
 
-        if (new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_SCORE).build().check()) {
+
+        /* 查询当前用户是否有权限修改工单关注人 **/
+//        int canEditFocusUser = new ProcessAuthManager
+//                .TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE).build()
+//                .check() ? 1 : 0;
+//        processTaskVo.setCanEditFocusUser(canEditFocusUser);
+        if (taskOperationTypeSet.contains(ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE)) {
+            processTaskVo.setCanEditFocusUser(1);
+        } else {
+            processTaskVo.setCanEditFocusUser(0);
+        }
+
+//        if (new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_SCORE).build().check()) {
+        if (taskOperationTypeSet.contains(ProcessTaskOperationType.PROCESSTASK_SCORE)) {
             ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskId);
             if (processTaskScoreTemplateVo != null) {
                 processTaskVo.setScoreTemplateVo(scoreTemplateMapper.getScoreTemplateById(processTaskScoreTemplateVo.getScoreTemplateId()));
@@ -92,14 +121,16 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             }
         }
         processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId));
-        if (processTaskStepId != null) {
-            ProcessTaskStepVo currentProcessTaskStepVo = processTaskService.getCurrentProcessTaskStepById(processTaskStepId);
-            if (currentProcessTaskStepVo != null) {
-                if (new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_SAVE).build().check()) {
+        ProcessTaskStepVo currentProcessTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
+        if (currentProcessTaskStepVo != null) {
+            Set<ProcessTaskOperationType> stepOperationTypeSet = operationTypeSetMap.get(processTaskStepId);
+            if (stepOperationTypeSet.contains(ProcessTaskOperationType.STEP_VIEW)) {
+                processTaskService.getCurrentProcessTaskStepDetail(currentProcessTaskStepVo, stepOperationTypeSet.contains(ProcessTaskOperationType.STEP_COMPLETE));
+//                if (new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_SAVE).build().check()) {
+                if (stepOperationTypeSet.contains(ProcessTaskOperationType.STEP_SAVE)) {
                     // 回复框内容和附件暂存回显
                     processTaskService.setTemporaryData(processTaskVo, currentProcessTaskStepVo);
                 }
-                processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
             }
         }
 

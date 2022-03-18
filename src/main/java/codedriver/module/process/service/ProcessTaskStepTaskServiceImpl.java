@@ -267,7 +267,6 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         Map<String, List<ProcessTaskStepTaskVo>> stepTaskVoMap = new HashMap<>();
         Map<Long, List<ProcessTaskStepTaskUserVo>> stepTaskUserVoMap = new HashMap<>();
         Map<Long, List<ProcessTaskStepTaskUserContentVo>> stepTaskUserContentVoMap = new HashMap<>();
-        List<ProcessTaskStepTaskVo> stepTaskVoList = processTaskStepTaskMapper.getStepTaskByProcessTaskStepId(processTaskStepVo.getId());
         List<ProcessTaskStepTaskUserVo> stepTaskUserVoList;
         List<ProcessTaskStepTaskUserContentVo> stepTaskUserContentVoList;
         //默认存在所有task 的tab
@@ -280,6 +279,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                     stepTaskVoMap.put(taskConfigVo.getName(), new ArrayList<>());
                 }
 
+                List<ProcessTaskStepTaskVo> stepTaskVoList = processTaskStepTaskMapper.getStepTaskByProcessTaskStepId(processTaskStepVo.getId());
                 if (MapUtils.isNotEmpty(stepTaskVoMap) && CollectionUtils.isNotEmpty(stepTaskVoList)) {
                     stepTaskUserVoList = processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(stepTaskVoList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList()));
                     if (CollectionUtils.isNotEmpty(stepTaskUserVoList)) {
