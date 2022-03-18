@@ -1123,12 +1123,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     }
 
     @Override
-    public ProcessTaskVo getProcessTaskDetailById(Long processTaskId) {
+    public void setProcessTaskDetail(ProcessTaskVo processTaskVo) {
         // 获取工单基本信息(title、channel_uuid、config_hash、priority_uuid、status、start_time、end_time、expire_time、owner、ownerName、reporter、reporterName)
-        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
-        if (processTaskVo == null) {
-            throw new ProcessTaskNotFoundException(processTaskId.toString());
-        }
+//        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
+//        if (processTaskVo == null) {
+//            throw new ProcessTaskNotFoundException(processTaskId.toString());
+//        }
 
         // 判断当前用户是否关注该工单
 //        if (processTaskMapper.checkProcessTaskFocusExists(processTaskId, UserContext.get().getUserUuid()) > 0) {
@@ -1234,6 +1234,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 //                }
 //            }
 //        }
+        Long processTaskId = processTaskVo.getId();
         /** 获取评分信息 */
         if (ProcessTaskStatus.SCORED.getValue().equals(processTaskVo.getStatus())) {
             String scoreInfo = processTaskMapper.getProcessTaskScoreInfoById(processTaskId);
@@ -1284,11 +1285,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 }
             }
         }
-        /* 查询当前用户是否有权限修改工单关注人 **/
-        int canEditFocusUser = new ProcessAuthManager
-                .TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE).build()
-                .check() ? 1 : 0;
-        processTaskVo.setCanEditFocusUser(canEditFocusUser);
 
         String owner = processTaskVo.getOwner();
         UserVo ownerVo = userMapper.getUserBaseInfoByUuid(owner);
@@ -1300,8 +1296,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
             processTaskVo.setOwnerVo(ownerVo);
         }
-
-        return processTaskVo;
     }
 
     @Override

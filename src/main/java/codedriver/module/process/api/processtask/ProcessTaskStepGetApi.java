@@ -73,6 +73,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder()
                 .addProcessTaskId(processTaskId)
                 .addOperationType(ProcessTaskOperationType.PROCESSTASK_VIEW)
+                .addOperationType(ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE)
                 .addOperationType(ProcessTaskOperationType.PROCESSTASK_SCORE);
         if (processTaskStepId != null) {
             builder.addProcessTaskStepId(processTaskStepId)
@@ -95,7 +96,19 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 throw new ProcessTaskViewDeniedException(channelVo.getName());
             }
         }
-        processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
+        processTaskService.setProcessTaskDetail(processTaskVo);
+
+
+        /* 查询当前用户是否有权限修改工单关注人 **/
+//        int canEditFocusUser = new ProcessAuthManager
+//                .TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE).build()
+//                .check() ? 1 : 0;
+//        processTaskVo.setCanEditFocusUser(canEditFocusUser);
+        if (taskOperationTypeSet.contains(ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE)) {
+            processTaskVo.setCanEditFocusUser(1);
+        } else {
+            processTaskVo.setCanEditFocusUser(0);
+        }
 
 //        if (new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_SCORE).build().check()) {
         if (taskOperationTypeSet.contains(ProcessTaskOperationType.PROCESSTASK_SCORE)) {

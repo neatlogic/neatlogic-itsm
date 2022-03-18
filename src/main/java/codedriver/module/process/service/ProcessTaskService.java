@@ -206,12 +206,11 @@ public interface ProcessTaskService {
 
 
     /**
-     * @param processTaskId 工单id
-     * @return ProcessTaskVo
+     * @param processTaskVo 工单信息
      * @Time:2020年8月21日
      * @Description: 获取工单信息
      */
-    public ProcessTaskVo getProcessTaskDetailById(Long processTaskId);
+    void setProcessTaskDetail(ProcessTaskVo processTaskVo);
 
     /**
      * @param processTaskId 工单id
