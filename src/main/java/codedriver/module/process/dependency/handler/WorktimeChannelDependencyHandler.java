@@ -6,7 +6,7 @@
 package codedriver.module.process.dependency.handler;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.CustomTableDependencyHandlerBase;
 import codedriver.framework.dependency.core.IFromType;
 import codedriver.framework.dependency.dto.DependencyInfoVo;
@@ -101,6 +101,6 @@ public class WorktimeChannelDependencyHandler extends CustomTableDependencyHandl
      */
     @Override
     public IFromType getFromType() {
-        return FromType.WORKTIME;
+        return FrameworkFromType.WORKTIME;
     }
 }

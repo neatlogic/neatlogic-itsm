@@ -6,7 +6,7 @@
 package codedriver.module.process.dependency.handler;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.CustomTableDependencyHandlerBase;
 import codedriver.framework.dependency.core.IFromType;
 import codedriver.framework.dependency.dto.DependencyInfoVo;
@@ -105,6 +105,6 @@ public class IntegrationProcessStepDependencyHandler extends CustomTableDependen
      */
     @Override
     public IFromType getFromType() {
-        return FromType.INTEGRATION;
+        return FrameworkFromType.INTEGRATION;
     }
 }
