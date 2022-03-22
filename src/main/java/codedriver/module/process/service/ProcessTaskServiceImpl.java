@@ -253,9 +253,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
                 JSONArray formConfigAuthorityList = (JSONArray) JSONPath.read(taskConfig, "process.formConfig.authorityList");
                 processTaskVo.setFormConfigAuthorityList(formConfigAuthorityList);
-                Long startTime = System.currentTimeMillis();
                 List<String> formAttributeHideList = getFormConfigAuthorityConfig(processTaskVo);
-                System.out.println("U:" + (System.currentTimeMillis() - startTime));
                 processTaskVo.setFormAttributeHideList(formAttributeHideList);
             }
         } else {
@@ -1155,7 +1153,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public void setProcessTaskDetail(ProcessTaskVo processTaskVo) {
-        long startTime = System.currentTimeMillis();
         // 上报服务路径
         ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
         if (channelVo != null) {
