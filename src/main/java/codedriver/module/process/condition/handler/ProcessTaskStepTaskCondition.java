@@ -8,24 +8,16 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.dao.mapper.task.TaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.module.process.service.ProcessTaskStepTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 
 @Component
 public class ProcessTaskStepTaskCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
-    @Resource
-    TaskMapper taskMapper;
-    @Resource
-    ProcessTaskStepTaskService processTaskStepTaskService;
 
     @Override
     public String getName() {
@@ -90,21 +82,10 @@ public class ProcessTaskStepTaskCondition extends ProcessTaskConditionBase imple
     }
 
     @Override
-    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo){
-        Long processTaskStepId = processTaskStepVo.getId();
-        if (processTaskStepId == null) {
-            return null;
-        }
-        ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-        if (currentProcessTaskStepVo == null) {
-            return null;
-        }
-        if (currentProcessTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(currentProcessTaskStepVo.getStatus())) {
-            processTaskStepTaskService.getProcessTaskStepTask(currentProcessTaskStepVo);
-            ProcessTaskStepTaskVo stepTaskVo = currentProcessTaskStepVo.getProcessTaskStepTaskVo();
-            if (stepTaskVo != null) {
-                return Collections.singletonList(stepTaskVo.getTaskConfigId());
-            }
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskStepTaskVo stepTaskVo = processTaskStepVo.getProcessTaskStepTaskVo();
+        if (stepTaskVo != null) {
+            return Collections.singletonList(stepTaskVo.getTaskConfigId());
         }
         return null;
     }
