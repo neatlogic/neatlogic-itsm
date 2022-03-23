@@ -1,9 +1,11 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
@@ -11,7 +13,7 @@ import codedriver.framework.process.dto.ProcessTaskSearchVo;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.util.TableResultUtil;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -30,21 +32,25 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.CatalogService;
 
+import javax.annotation.Resource;
+
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ChannelTypeMapper channelTypeMapper;
 
-    @Autowired
+    @Resource
     private ProcessTaskMapper processTaskMapper;
+    @Resource
+    private UserMapper userMapper;
 
-    @Autowired
+    @Resource
     private ProcessTaskService processTaskService;
 
-    @Autowired
+    @Resource
     private CatalogService catalogService;
 
     @Override
@@ -109,6 +115,17 @@ public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
                 processTaskSearchVo.setRowNum(rowNum);
                 if (processTaskSearchVo.getCurrentPage() <= processTaskSearchVo.getPageCount()) {
                     processTaskList = processTaskMapper.getProcessTaskListByKeywordAndChannelUuidList(processTaskSearchVo);
+                    Set<String> userUuidSet = processTaskList.stream().map(ProcessTaskVo::getOwner).collect(Collectors.toSet());
+                    List<UserVo> userList = userMapper.getUserByUserUuidList(new ArrayList<>(userUuidSet));
+                    Map<String, UserVo> userMap = userList.stream().collect(Collectors.toMap(e -> e.getUuid(), e -> e));
+                    for (ProcessTaskVo processTask : processTaskList) {
+                        UserVo userVo = userMap.get(processTask.getOwner());
+                        if (userVo != null) {
+                            UserVo ownerVo = new UserVo();
+                            BeanUtils.copyProperties(userVo,ownerVo);
+                            processTask.setOwnerVo(ownerVo);
+                        }
+                    }
                 }
             }
         }

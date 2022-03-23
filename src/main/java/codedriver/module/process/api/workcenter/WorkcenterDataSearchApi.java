@@ -4,6 +4,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -77,6 +78,8 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
                 if (CollectionUtils.isNotEmpty(sortList)) {
                     jsonObj.put("sortList", sortList);
                 }
+            }else{
+                throw new WorkcenterNotFoundException(uuid);
             }
         }
         WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj);
