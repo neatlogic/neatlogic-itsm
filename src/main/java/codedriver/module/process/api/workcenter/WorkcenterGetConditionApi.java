@@ -82,6 +82,7 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
                     || ProcessWorkcenterField.getValue(condition.getName()) == null
                     || !(condition instanceof IProcessTaskCondition)
                     || (!AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName()) && (condition instanceof ProcessTaskIsShowCondition))
+                    || condition.getName().equals(ProcessWorkcenterField.STEP_NAME.getValue())
             ) {
                 continue;
             }
