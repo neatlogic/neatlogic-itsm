@@ -4,7 +4,8 @@ import java.util.List;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ParamType;
-import codedriver.framework.form.constvalue.FormHandlerTypeBak;
+import codedriver.framework.condition.core.ConditionHandlerFactory;
+import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,25 +60,31 @@ public class ProcessParamList extends PrivateApiComponentBase {
         JSONArray resultArray = new JSONArray();
         // 固定字段条件
         for (ProcessTaskParams processTaskParams : ProcessTaskParams.values()) {
-            ConditionParamVo param = new ConditionParamVo();
-            param.setName(processTaskParams.getValue());
-            param.setLabel(processTaskParams.getText());
-            param.setParamType(processTaskParams.getParamType().getName());
-            param.setParamTypeName(processTaskParams.getParamType().getText());
-            param.setFreemarkerTemplate(processTaskParams.getFreemarkerTemplate());
-            param.setIsEditable(0);
-            param.setType("common");
-            resultArray.add(param);
+            IConditionHandler condition = ConditionHandlerFactory.getHandler(processTaskParams.getValue());
+            if (condition != null) {
+                ConditionParamVo param = new ConditionParamVo();
+                param.setName(processTaskParams.getValue());
+                param.setLabel(processTaskParams.getText());
+                ParamType paramType = condition.getParamType();
+                if (paramType != null) {
+                    param.setParamType(paramType.getName());
+                    param.setParamTypeName(paramType.getText());
+                }
+//            param.setFreemarkerTemplate(processTaskParams.getFreemarkerTemplate());
+                param.setIsEditable(0);
+                param.setType(condition.getType());
+                resultArray.add(param);
+            }
         }
         /** homeUrl参数 **/
-        ConditionParamVo param = new ConditionParamVo();
-        param.setName("homeUrl");
-        param.setLabel("域名");
-        param.setParamType(ParamType.STRING.getName());
-        param.setParamTypeName(ParamType.STRING.getText());
-        param.setIsEditable(0);
-        param.setType("common");
-        resultArray.add(param);
+//        ConditionParamVo param = new ConditionParamVo();
+//        param.setName("homeUrl");
+//        param.setLabel("域名");
+//        param.setParamType(ParamType.STRING.getName());
+//        param.setParamTypeName(ParamType.STRING.getText());
+//        param.setIsEditable(0);
+//        param.setType("common");
+//        resultArray.add(param);
 
         // 表单条件
         String formUuid = jsonObj.getString("formUuid");
