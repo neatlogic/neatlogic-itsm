@@ -7,6 +7,7 @@ import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -104,7 +105,7 @@ public class ProcessParamList extends PrivateApiComponentBase {
                         conditionParamVo.setParamTypeName(formHandler.getParamType().getText());
                     }
                     conditionParamVo.setIsEditable(0);
-                    conditionParamVo.setType("form");
+                    conditionParamVo.setType(ProcessFieldType.FORM.getValue());
                     resultArray.add(conditionParamVo);
                 }
             }
