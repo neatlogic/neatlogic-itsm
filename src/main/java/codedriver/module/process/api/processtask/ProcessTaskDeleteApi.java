@@ -131,7 +131,7 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
             indexHandler.deleteIndex(processTaskId);
         }
         ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskId, null);
-        processTaskStepVo.setConfigHash(processTaskVo.getConfigHash());
+        processTaskStepVo.setTaskConfigHash(processTaskVo.getConfigHash());
         IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
         return null;
     }

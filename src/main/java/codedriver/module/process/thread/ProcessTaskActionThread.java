@@ -87,7 +87,7 @@ public class ProcessTaskActionThread extends CodeDriverThread {
                 ProcessTaskVo processTaskVo;
                 if (ProcessTaskNotifyTriggerType.DELETEPROCESSTASK.getTrigger().equals(triggerType.getTrigger())) {
                     processTaskVo = new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId());
-                    processTaskVo.setConfigHash(currentProcessTaskStepVo.getConfigHash());
+                    processTaskVo.setConfigHash(currentProcessTaskStepVo.getTaskConfigHash());
                 } else {
                     processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
                 }
