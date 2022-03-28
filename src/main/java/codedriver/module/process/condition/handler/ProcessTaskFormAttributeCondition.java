@@ -5,7 +5,6 @@
 
 package codedriver.module.process.condition.handler;
 
-import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.exception.type.ParamIrregularException;
@@ -22,6 +21,10 @@ import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
+import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
+import codedriver.framework.process.dto.ProcessTaskFormVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.util.Md5Util;
 import codedriver.framework.util.TimeUtil;
 import com.alibaba.fastjson.JSON;
@@ -33,11 +36,15 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Component
 public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+
+    @Resource
+    private SelectContentByHashMapper selectContentByHashMapper;
 
     @Override
     public String getName() {
@@ -71,36 +78,6 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 
     @Override
     public ParamType getParamType() {
-        return null;
-    }
-
-    @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        ConditionVo condition = conditionList.get(index);
-        if (condition != null && StringUtils.isNotBlank(condition.getName())) {
-            IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(condition.getHandler());
-            if (condition.getHandler().equals("formdate")) {
-                return getDateEsWhere(condition, conditionList);
-            } else {
-                String where = "(";
-                String formKey = condition.getName();
-                String formValueKey = "form.value_" + formHandler.getDataType().toLowerCase();
-                Object value = StringUtils.EMPTY;
-                if (condition.getValueList() instanceof String) {
-                    value = condition.getValueList();
-                } else if (condition.getValueList() instanceof List) {
-                    List<String> values = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
-                    value = String.join("','", values);
-                }
-                if (StringUtils.isNotBlank(value.toString())) {
-                    value = String.format("'%s'", value);
-                }
-                where += String.format(
-                        " [ form.key = '%s' and " + Expression.getExpressionEs(condition.getExpression()) + " ] ", formKey,
-                        formValueKey, value);
-                return where + ")";
-            }
-        }
         return null;
     }
 
@@ -224,5 +201,22 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
         }
         sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word IN ('%s')) ",
                 conditionVo.getName(), String.join("','", valueList)));
+    }
+
+    @Override
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo){
+        JSONObject resultObj = new JSONObject();
+        ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskStepVo.getProcessTaskId());
+        if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
+            String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+            if (StringUtils.isNotBlank(formContent)) {
+                resultObj.put("formConfig", formContent);
+                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskStepVo.getProcessTaskId());
+                for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+                    resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+                }
+            }
+        }
+        return resultObj;
     }
 }

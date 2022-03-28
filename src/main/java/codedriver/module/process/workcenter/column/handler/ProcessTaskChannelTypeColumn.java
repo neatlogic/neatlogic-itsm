@@ -1,8 +1,8 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
-import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetGroupDefineVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -12,7 +12,6 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ChannelTypeSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -131,16 +130,16 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 	}
 
 	@Override
-	public void getMyDashboardDataVo(DashboardWidgetDataGroupVo dashboardWidgetDataGroupVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
-		if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
-			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ChannelTypeSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), ChannelTypeSqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
-			dashboardWidgetDataGroupVo.setDataGroupVo(dashboardDataGroupVo);
+	public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> mapList) {
+		DashboardWidgetChartConfigVo dashboardWidgetChartConfigVo = dashboardWidgetAllGroupDefineVo.getChartConfigVo();
+		if (getName().equals(dashboardWidgetChartConfigVo.getGroup())) {
+			DashboardWidgetGroupDefineVo dashboardDataGroupVo = new DashboardWidgetGroupDefineVo(ChannelTypeSqlTable.FieldEnum.UUID.getProValue(), dashboardWidgetChartConfigVo.getGroup(), ChannelTypeSqlTable.FieldEnum.NAME.getProValue());
+			dashboardWidgetAllGroupDefineVo.setGroupDefineVo(dashboardDataGroupVo);
 		}
 		//如果存在子分组
-		if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
-			DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-			dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ChannelTypeSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), ChannelTypeSqlTable.FieldEnum.NAME.getProValue());
-			dashboardWidgetDataGroupVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+		if (getName().equals(dashboardWidgetChartConfigVo.getSubGroup())) {
+			DashboardWidgetGroupDefineVo dashboardDataSubGroupVo = new DashboardWidgetGroupDefineVo(ChannelTypeSqlTable.FieldEnum.UUID.getProValue(), dashboardWidgetChartConfigVo.getSubGroup(), ChannelTypeSqlTable.FieldEnum.NAME.getProValue());
+			dashboardWidgetAllGroupDefineVo.setSubGroupDefineVo(dashboardDataSubGroupVo);
 		}
 	}
 

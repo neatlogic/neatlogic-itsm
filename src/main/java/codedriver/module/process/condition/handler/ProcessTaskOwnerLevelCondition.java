@@ -3,12 +3,15 @@ package codedriver.module.process.condition.handler;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
@@ -64,12 +67,6 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        return null;
-    }
-
-
-    @Override
     public Object valueConversionText(Object value, JSONObject config) {
         if (Objects.equals(value, "1")) {
             return "是";
@@ -82,5 +79,18 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
 
+    }
+
+    @Override
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo == null) {
+            return null;
+        }
+        UserVo ownerVo = userMapper.getUserBaseInfoByUuid(processTaskVo.getOwner());
+        if (ownerVo != null) {
+            return ownerVo.getVipLevel();
+        }
+        return null;
     }
 }

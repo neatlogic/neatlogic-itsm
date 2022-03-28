@@ -7,11 +7,12 @@ package codedriver.module.process.dashboard.statistics.core;
 
 import codedriver.framework.common.constvalue.dashboard.ChartType;
 import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.DashboardWidgetParamVo;
 import codedriver.framework.process.workcenter.dto.*;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSlaTimeSqlTable;
@@ -40,24 +41,23 @@ public class DashboardHandlePunctualityStatistics extends StatisticsBase {
     }
 
     @Override
-    public void doService(WorkcenterVo workcenterVo, DashboardWidgetDataGroupVo widgetDataVo, DashboardWidgetVo widgetVo) {
+    public List<Map<String, Object>> doService(DashboardWidgetParamVo dashboardSqlDecoratorVo, DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, DashboardWidgetVo widgetVo) {
         //1、查出group权重，用于排序截取最大组数量
-        DashboardWidgetChartConfigVo chartConfigVo = workcenterVo.getDashboardWidgetChartConfigVo();
+        DashboardWidgetChartConfigVo chartConfigVo = dashboardSqlDecoratorVo.getDashboardWidgetChartConfigVo();
         //workcenterVo.getDashboardWidgetChartConfigVo().setGroup(chartConfigVo.getGroup());
         if (!ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType()) && !ChartType.TABLECHART.getValue().equals(widgetVo.getChartType()) && chartConfigVo.getLimitNum() != null) {
             //仅展示分组数
-            workcenterVo.setCurrentPage(1);
-            workcenterVo.setPageSize(chartConfigVo.getLimitNum());
+            dashboardSqlDecoratorVo.setCurrentPage(1);
+            dashboardSqlDecoratorVo.setPageSize(chartConfigVo.getLimitNum());
         }
         //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
-        SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.GROUP_HANDLE_PUNCTUALITY);
+        SqlBuilder sb = new SqlBuilder(dashboardSqlDecoratorVo, ProcessSqlTypeEnum.GROUP_HANDLE_PUNCTUALITY);
         //System.out.println(sb.build());
-        List<Map<String, Object>> groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
+        List<Map<String, Object>> dbDataMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
         IProcessTaskColumn groupColumn = ProcessTaskColumnFactory.columnComponentMap.get(chartConfigVo.getGroup());
 
-        groupColumn.getDashboardDataVo(widgetDataVo, workcenterVo, groupMapList);
-        widgetDataVo.getDataGroupVo().setDataCountMap(workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
-        widgetDataVo.getDataGroupVo().setDataList(groupMapList);
+        groupColumn.getDashboardAllGroupDefine(dashboardWidgetAllGroupDefineVo, dbDataMapList);
+        return dbDataMapList;
     }
 
     @Override
@@ -65,7 +65,7 @@ public class DashboardHandlePunctualityStatistics extends StatisticsBase {
         return new ArrayList<TableSelectColumnVo>() {
             {
                 add(new TableSelectColumnVo(new ProcessTaskStepSlaTimeSqlTable(), Collections.singletonList(
-                        new SelectColumnVo(ProcessTaskStepSlaTimeSqlTable.FieldEnum.IS_TIMEOUT.getValue(), "count", true, " (1 - SUM(%s.%s) div COUNT(1))*100 ")
+                        new SelectColumnVo(ProcessTaskStepSlaTimeSqlTable.FieldEnum.IS_TIMEOUT.getValue(), "count", true, "ROUND( (1 -SUM( %s.%s ) / COUNT( 1 )) * 100,2)")
                 )));
             }
         };

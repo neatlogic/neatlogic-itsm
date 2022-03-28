@@ -5,7 +5,7 @@
 
 package codedriver.module.process.sql.decorator;
 
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.dto.SqlDecoratorVo;
 import codedriver.module.process.dashboard.handler.ProcessTaskDashboardHandler;
 import codedriver.module.process.sql.IProcessSqlStructure;
 import codedriver.module.process.sql.ProcessSqlStructureFactory;
@@ -21,11 +21,10 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
      * @Params: []
      * @Returns: java.lang.String
      **/
-    @Override
-    public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
-        IProcessSqlStructure processSqlStructure = ProcessSqlStructureFactory.getProcessSqlStructure(ProcessTaskDashboardHandler.class.getName(),"column", workcenterVo.getSqlFieldType());
+    public <T extends SqlDecoratorVo> void myBuild(StringBuilder sqlSb, T sqlDecoratorVo) {
+        IProcessSqlStructure processSqlStructure = ProcessSqlStructureFactory.getProcessSqlStructure(ProcessTaskDashboardHandler.class.getName(),"column", sqlDecoratorVo.getSqlFieldType());
         if(processSqlStructure != null) {
-            processSqlStructure.doService(sqlSb, workcenterVo);
+            processSqlStructure.doService(sqlSb, sqlDecoratorVo);
         }
     }
 

@@ -3,9 +3,9 @@ package codedriver.module.process.workcenter.column.handler;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
-import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetGroupDefineVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -84,6 +84,7 @@ public class ProcessTaskStepNameColumn extends ProcessTaskColumnBase implements 
 		return new ArrayList<TableSelectColumnVo>() {
 			{
 				add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(), "processTaskStepNameChannel", true,String.format("concat(%%s.%%s,%s.%s)",new ChannelSqlTable().getShortName(),ChannelSqlTable.FieldEnum.NAME.getValue())),
 						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(), "processTaskStepName", true)
 				)));
 				add(new TableSelectColumnVo(new ChannelSqlTable(), Arrays.asList(
@@ -109,16 +110,16 @@ public class ProcessTaskStepNameColumn extends ProcessTaskColumnBase implements 
 	}
 
 	@Override
-	public void getMyDashboardDataVo(DashboardWidgetDataGroupVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
-		if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
-			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("processTaskStepName", workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), "processTaskStepName","channelName", workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
-			dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
+	public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> mapList) {
+		DashboardWidgetChartConfigVo dashboardWidgetChartConfigVo = dashboardWidgetAllGroupDefineVo.getChartConfigVo();
+		if (getName().equals(dashboardWidgetChartConfigVo.getGroup())) {
+			DashboardWidgetGroupDefineVo dashboardDataGroupVo = new DashboardWidgetGroupDefineVo("processTaskStepNameChannel", dashboardWidgetChartConfigVo.getGroup(), "processTaskStepName","channelName");
+			dashboardWidgetAllGroupDefineVo.setGroupDefineVo(dashboardDataGroupVo);
 		}
 		//如果存在子分组
-		if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
-			DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-			dashboardDataSubGroupVo = new DashboardDataSubGroupVo("processTaskStepName", workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), "processTaskStepName");
-			dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+		if (getName().equals(dashboardWidgetChartConfigVo.getSubGroup())) {
+			DashboardWidgetGroupDefineVo dashboardDataSubGroupVo = new DashboardWidgetGroupDefineVo("processTaskStepName", dashboardWidgetChartConfigVo.getSubGroup(), "processTaskStepName","channelName");
+			dashboardWidgetAllGroupDefineVo.setSubGroupDefineVo(dashboardDataSubGroupVo);
 		}
 	}
 
@@ -126,8 +127,8 @@ public class ProcessTaskStepNameColumn extends ProcessTaskColumnBase implements 
 	public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
 		LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
 		for (Map<String, Object> dataMap : mapList) {
-			if(dataMap.containsKey("processTaskStepName")) {
-				groupDataMap.put(dataMap.get("processTaskStepName").toString(), dataMap.get("count"));
+			if(dataMap.containsKey("processTaskStepNameChannel")) {
+				groupDataMap.put(dataMap.get("processTaskStepNameChannel").toString(), dataMap.get("count"));
 			}
 		}
 		return groupDataMap;

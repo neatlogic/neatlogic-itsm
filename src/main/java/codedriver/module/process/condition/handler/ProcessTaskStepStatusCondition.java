@@ -11,15 +11,14 @@ import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.dto.SqlDecoratorVo;
 import codedriver.framework.process.workcenter.dto.JoinOnVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -56,11 +55,6 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    public String getMyEsName() {
-        return String.format(" %s.%s", getType(), "step.status");
-    }
-
-    @Override
     public JSONObject getConfig(ConditionConfigType type) {
         JSONArray dataList = new JSONArray();
         dataList.add(new ValueTextVo(ProcessTaskStatus.PENDING.getValue(), ProcessTaskStatus.PENDING.getText()));
@@ -92,22 +86,6 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        ConditionVo condition = conditionList.get(index);
-        Object value = StringUtils.EMPTY;
-
-        if (condition.getValueList() instanceof String) {
-            value = condition.getValueList();
-        } else if (condition.getValueList() instanceof List) {
-            List<String> values = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
-            value = String.join("','", values);
-        }
-        //String where = String.format(Expression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format("'%s'",  value));
-        String where = String.format(" common.step.filtstatus contains any ( '%s' ) and not common.step.isactive contains any (0,-1)", value);
-        return where;
-    }
-
-    @Override
     public Object valueConversionText(Object value, JSONObject config) {
         if (value != null) {
             if (value instanceof String) {
@@ -133,7 +111,7 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    public List<JoinTableColumnVo> getMyJoinTableColumnList(WorkcenterVo workcenterVo) {
+    public List<JoinTableColumnVo> getMyJoinTableColumnList(SqlDecoratorVo sqlDecoratorVo) {
         return new ArrayList<JoinTableColumnVo>() {
             {
                 add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new ArrayList<JoinOnVo>() {{

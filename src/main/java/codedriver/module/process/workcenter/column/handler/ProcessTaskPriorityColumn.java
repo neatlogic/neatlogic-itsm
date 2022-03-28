@@ -1,8 +1,8 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
-import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetGroupDefineVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -139,16 +139,16 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
     }
 
     @Override
-    public void getMyDashboardDataVo(DashboardWidgetDataGroupVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
-        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
-            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(PrioritySqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), PrioritySqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
-            dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
+    public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> mapList) {
+        DashboardWidgetChartConfigVo dashboardWidgetChartConfigVo = dashboardWidgetAllGroupDefineVo.getChartConfigVo();
+        if (getName().equals(dashboardWidgetChartConfigVo.getGroup())) {
+            DashboardWidgetGroupDefineVo dashboardDataGroupVo = new DashboardWidgetGroupDefineVo(PrioritySqlTable.FieldEnum.UUID.getProValue(), dashboardWidgetChartConfigVo.getGroup(), PrioritySqlTable.FieldEnum.NAME.getProValue());
+            dashboardWidgetAllGroupDefineVo.setGroupDefineVo(dashboardDataGroupVo);
         }
         //如果存在子分组
-        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
-            DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(PrioritySqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), PrioritySqlTable.FieldEnum.NAME.getProValue());
-            dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+        if (getName().equals(dashboardWidgetChartConfigVo.getSubGroup())) {
+            DashboardWidgetGroupDefineVo dashboardDataSubGroupVo = new DashboardWidgetGroupDefineVo(PrioritySqlTable.FieldEnum.UUID.getProValue(), dashboardWidgetChartConfigVo.getSubGroup(), PrioritySqlTable.FieldEnum.NAME.getProValue());
+            dashboardWidgetAllGroupDefineVo.setSubGroupDefineVo(dashboardDataSubGroupVo);
         }
     }
 

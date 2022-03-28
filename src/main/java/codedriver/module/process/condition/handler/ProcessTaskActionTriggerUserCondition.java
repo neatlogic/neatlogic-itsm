@@ -10,7 +10,7 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
@@ -76,16 +76,6 @@ public class ProcessTaskActionTriggerUserCondition extends ProcessTaskConditionB
     }
 
     @Override
-    public String getMyEsName() {
-        return null;
-    }
-
-    @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        return null;
-    }
-
-    @Override
     public Object valueConversionText(Object value, JSONObject config) {
         // TODO Auto-generated method stub
         return null;
@@ -97,7 +87,7 @@ public class ProcessTaskActionTriggerUserCondition extends ProcessTaskConditionB
     }
 
     @Override
-    public Object getConditionParamData(ProcessTaskVo processTaskVo){
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo){
         if(UserContext.get() != null){
             return UserContext.get().getUserUuid();
         }

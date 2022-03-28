@@ -10,15 +10,14 @@ import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 public class ProcessTaskStepTaskIdCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+
     @Override
     public String getName() {
         return "steptaskid";
@@ -62,11 +61,6 @@ public class ProcessTaskStepTaskIdCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        return StringUtils.EMPTY;
-    }
-
-    @Override
     public Object valueConversionText(Object value, JSONObject config) {
         return value;
     }
@@ -77,13 +71,10 @@ public class ProcessTaskStepTaskIdCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    public Object getConditionParamData(ProcessTaskVo processTaskVo) {
-        ProcessTaskStepVo currentTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
-        if (currentTaskStepVo != null) {
-            ProcessTaskStepTaskVo stepTaskVo = currentTaskStepVo.getProcessTaskStepTaskVo();
-            if (stepTaskVo != null) {
-                return stepTaskVo.getId();
-            }
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskStepTaskVo stepTaskVo = processTaskStepVo.getProcessTaskStepTaskVo();
+        if (stepTaskVo != null) {
+            return stepTaskVo.getId();
         }
         return null;
     }

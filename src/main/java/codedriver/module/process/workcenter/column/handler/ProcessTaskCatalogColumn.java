@@ -1,8 +1,8 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
-import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetGroupDefineVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -115,16 +115,16 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
     }
 
     @Override
-    public void getMyDashboardDataVo(DashboardWidgetDataGroupVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
-        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
-            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
-            dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
+    public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> dbDataMapList) {
+        DashboardWidgetChartConfigVo dashboardWidgetChartConfigVo = dashboardWidgetAllGroupDefineVo.getChartConfigVo();
+        if (getName().equals(dashboardWidgetChartConfigVo.getGroup())) {
+            DashboardWidgetGroupDefineVo dashboardGroupDefineVo = new DashboardWidgetGroupDefineVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), dashboardWidgetChartConfigVo.getGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue());
+            dashboardWidgetAllGroupDefineVo.setGroupDefineVo(dashboardGroupDefineVo);
         }
         //如果存在子分组
-        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
-            DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue());
-            dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+        if (getName().equals(dashboardWidgetChartConfigVo.getSubGroup())) {
+            DashboardWidgetGroupDefineVo dashboardSubGroupDefineVo = new DashboardWidgetGroupDefineVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), dashboardWidgetChartConfigVo.getSubGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue());
+            dashboardWidgetAllGroupDefineVo.setSubGroupDefineVo(dashboardSubGroupDefineVo);
         }
     }
 

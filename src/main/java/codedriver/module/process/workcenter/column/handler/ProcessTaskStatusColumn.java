@@ -1,8 +1,8 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
-import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetGroupDefineVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -10,7 +10,6 @@ import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -106,11 +105,11 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
     }
 
     @Override
-    public void getMyDashboardDataVo(DashboardWidgetDataGroupVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
+    public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> dbDataMapList) {
         //补充text
-        for (int i = 0; i < mapList.size(); i++) {
+        for (int i = 0; i < dbDataMapList.size(); i++) {
             Map<String, Object> tmpMap = new HashMap<>();
-            Map<String, Object> map = mapList.get(i);
+            Map<String, Object> map = dbDataMapList.get(i);
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue().toString();
@@ -119,18 +118,17 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
                 }
                 tmpMap.put(key, value);
             }
-            mapList.set(i, tmpMap);
+            dbDataMapList.set(i, tmpMap);
         }
-        //
-        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
-            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProName(), workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), "statusText", workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
-            dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
+        DashboardWidgetChartConfigVo dashboardWidgetChartConfigVo = dashboardWidgetAllGroupDefineVo.getChartConfigVo();
+        if (getName().equals(dashboardWidgetChartConfigVo.getGroup())) {
+            DashboardWidgetGroupDefineVo dashboardDataGroupVo = new DashboardWidgetGroupDefineVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProName(), dashboardWidgetChartConfigVo.getGroup(), "statusText");
+            dashboardWidgetAllGroupDefineVo.setGroupDefineVo(dashboardDataGroupVo);
         }
         //如果存在子分组
-        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
-            DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProName(), workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), "statusText");
-            dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+        if (getName().equals(dashboardWidgetChartConfigVo.getSubGroup())) {
+            DashboardWidgetGroupDefineVo dashboardDataSubGroupVo = new DashboardWidgetGroupDefineVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProName(), dashboardWidgetChartConfigVo.getSubGroup(), "statusText");
+            dashboardWidgetAllGroupDefineVo.setSubGroupDefineVo(dashboardDataSubGroupVo);
         }
     }
 

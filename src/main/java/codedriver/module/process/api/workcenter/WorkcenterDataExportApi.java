@@ -5,6 +5,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -30,10 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -136,6 +134,9 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                     sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.FIELD);
                     List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskBySql(sb.build());
                     for (ProcessTaskVo taskVo : processTaskVoList) {
+                        if(Objects.equals(taskVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())) {
+                            taskVo.setStepList(processTaskMapper.getProcessTaskCurrentStepByProcessTaskId(taskVo.getId()));
+                        }
                         Map<String, Object> map = new LinkedHashMap<>();
                         //重新渲染工单字段
                         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {

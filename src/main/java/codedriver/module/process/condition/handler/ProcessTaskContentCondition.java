@@ -9,8 +9,9 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import com.alibaba.fastjson.JSON;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -72,31 +73,6 @@ public class ProcessTaskContentCondition extends ProcessTaskConditionBase implem
     }
 
     @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        ConditionVo condition = conditionList.get(index);
-        String where = "(";
-        if (condition.getValueList() instanceof String) {
-            Object value = condition.getValueList();
-            where += String.format(Expression.getExpressionEs(condition.getExpression()), this.getEsName(), String.format("'%s'", value));
-        } else if (condition.getValueList() instanceof List) {
-            List<String> keywordList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
-            if (keywordList.size() == 1) {
-                Object value = keywordList.get(0);
-                where += String.format(Expression.getExpressionEs(condition.getExpression()), this.getEsName(), String.format("'%s'", value));
-            } else {
-                for (int i = 0; i < keywordList.size(); i++) {
-                    if (i != 0) {
-                        where += " or ";
-                    }
-                    where += String.format(Expression.getExpressionEs(condition.getExpression()), this.getEsName(), String.format("'%s'", keywordList.get(i)));
-                }
-            }
-        }
-
-        return where + ")";
-    }
-
-    @Override
     public Object valueConversionText(Object value, JSONObject config) {
         return value;
     }
@@ -104,5 +80,13 @@ public class ProcessTaskContentCondition extends ProcessTaskConditionBase implem
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
 
+    }
+    @Override
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
+        String content = processTaskMapper.getProcessTaskStartContentByProcessTaskId(processTaskStepVo.getProcessTaskId());
+        if (StringUtils.isNotBlank(content)) {
+            return content;
+        }
+        return "";
     }
 }

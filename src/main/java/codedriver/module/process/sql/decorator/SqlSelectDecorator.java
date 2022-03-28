@@ -5,7 +5,7 @@
 
 package codedriver.module.process.sql.decorator;
 
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.dto.SqlDecoratorVo;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,7 +18,7 @@ public class SqlSelectDecorator extends SqlDecoratorBase {
      * @Returns: java.lang.String
      **/
     @Override
-    public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
+    public <T extends SqlDecoratorVo> void myBuild(StringBuilder sqlSb, T sqlDecoratorVo) {
         sqlSb.append("SELECT ");
     }
 

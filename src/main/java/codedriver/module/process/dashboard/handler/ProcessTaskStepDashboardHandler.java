@@ -5,23 +5,24 @@
 
 package codedriver.module.process.dashboard.handler;
 
-import codedriver.framework.dashboard.charts.*;
+import codedriver.framework.dashboard.charts.DashboardChartBase;
+import codedriver.framework.dashboard.charts.DashboardChartFactory;
 import codedriver.framework.dashboard.config.DashboardWidgetShowConfigFactory;
 import codedriver.framework.dashboard.config.IDashboardWidgetShowConfig;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataVo;
+import codedriver.framework.dashboard.dto.*;
 import codedriver.framework.dashboard.handler.DashboardHandlerBase;
-import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetVo;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
+import codedriver.module.process.dashboard.dto.DashboardWidgetChartConfigProcessVo;
 import codedriver.module.process.dashboard.showconfig.ProcessTaskStepDashboardWidgetShowConfigBase;
 import codedriver.module.process.dashboard.statistics.DashboardStatisticsFactory;
 import codedriver.module.process.dashboard.statistics.StatisticsBase;
-import codedriver.module.process.dashboard.dto.DashboardWidgetChartConfigProcessVo;
+import codedriver.framework.process.dto.DashboardWidgetParamVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class ProcessTaskStepDashboardHandler extends DashboardHandlerBase {
@@ -32,33 +33,21 @@ public class ProcessTaskStepDashboardHandler extends DashboardHandlerBase {
     }
 
     @Override
-    protected JSONObject myGetData(DashboardWidgetVo widgetVo) {
+    protected DashboardDataVo myGetData(DashboardWidgetVo widgetVo) {
         DashboardChartBase chart = DashboardChartFactory.getChart(widgetVo.getChartType());
         if (chart != null) {
             DashboardWidgetChartConfigVo chartConfigVo = new DashboardWidgetChartConfigProcessVo(widgetVo.getChartConfigObj());
-            DashboardWidgetDataGroupVo widgetDataGroupVo = new DashboardWidgetDataGroupVo();
-            widgetDataGroupVo.setChartConfigVo(chartConfigVo);
+            DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo = new DashboardWidgetAllGroupDefineVo();
+            dashboardWidgetAllGroupDefineVo.setChartConfigVo(chartConfigVo);
             /* start: 从mysql 获取源数据 */
             //set条件
-            JSONObject conditionConfig = new JSONObject();
-            conditionConfig.put("conditionConfig", widgetVo.getConditionConfig());
-            conditionConfig.put("pageSize", chartConfigVo.getLimitNum());
-            WorkcenterVo workcenterVo = new WorkcenterVo(conditionConfig);
-            workcenterVo.setDataSourceHandler(ProcessTaskStepDashboardHandler.class.getName());
-            workcenterVo.setDashboardWidgetChartConfigVo(chartConfigVo);
+            DashboardWidgetParamVo sqlDecoratorVo = new DashboardWidgetParamVo(widgetVo.getConditionConfigObj(), chartConfigVo.getLimitNum(), chartConfigVo, ProcessTaskStepDashboardHandler.class.getName());
             StatisticsBase statistics = DashboardStatisticsFactory.getStatistics(chartConfigVo.getStatisticsType());
-            statistics.doService(workcenterVo, widgetDataGroupVo, widgetVo);
+            List<Map<String, Object>> dbDataMapList = statistics.doService(sqlDecoratorVo, dashboardWidgetAllGroupDefineVo, widgetVo);
             /* end: 从mysql 获取源数据 */
             /* start: 将mysql源数据 按不同dashboard插件处理返回结果数据*/
-
-            DashboardWidgetDataVo widgetDataVo = new DashboardWidgetDataVo();
-            JSONObject data = new JSONObject();
-            data.put("dataList", chart.getData(widgetDataGroupVo).get("dataList"));
-            data.put("columnList", chart.getData(widgetDataGroupVo).get("columnList"));
-            data.put("theadList", chart.getData(widgetDataGroupVo).get("theadList"));
+            return chart.getData(dashboardWidgetAllGroupDefineVo, dbDataMapList);
             /* end: 将mysql源数据 按不同dashboard插件处理返回结果数据*/
-            data.put("configObj", chartConfigVo.getConfig().fluentPut("unit",statistics.getUnit()));
-            return data;
         }
         return null;
     }
@@ -72,7 +61,7 @@ public class ProcessTaskStepDashboardHandler extends DashboardHandlerBase {
             JSONObject chartConfig = chart.getChartConfig();
             if (chartConfig.containsKey("showConfig")) {
                 JSONObject showConfigJson = chartConfig.getJSONObject("showConfig");
-                IDashboardWidgetShowConfig chartCustom = DashboardWidgetShowConfigFactory.getChart(widgetVo.getChartType(), "process","processtaskStep");
+                IDashboardWidgetShowConfig chartCustom = DashboardWidgetShowConfigFactory.getChart(widgetVo.getChartType(), "process", "processtaskStep");
                 //如果无须自定义渲染配置，则使用默认配置
                 if (chartCustom == null) {
                     chartCustom = new ProcessTaskStepDashboardWidgetShowConfigBase() {
@@ -105,8 +94,8 @@ public class ProcessTaskStepDashboardHandler extends DashboardHandlerBase {
     }
 
     @Override
-    public String getDistinctCountColumnSql(){
-        return String.format(" count(distinct %s.%s)  `count` ", new ProcessTaskStepSqlTable().getShortName(),ProcessTaskStepSqlTable.FieldEnum.ID.getValue());
+    public String getDistinctCountColumnSql() {
+        return String.format(" count(distinct %s.%s)  `count` ", new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.ID.getValue());
     }
 
 }

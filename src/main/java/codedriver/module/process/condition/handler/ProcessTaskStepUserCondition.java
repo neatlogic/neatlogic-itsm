@@ -10,8 +10,8 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.SqlDecoratorVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepUserSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import codedriver.framework.service.AuthenticationInfoService;
@@ -59,9 +59,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
         config.put("initConfig", new JSONObject() {
             {
                 this.put("excludeList", new JSONArray() {{
-                    if (ConditionConfigType.WORKCENTER.getValue().equals(configType.getValue())) {
-                        this.add(GroupSearch.COMMON.getValuePlugin() + UserType.ALL.getValue());
-                    }
+                    this.add(GroupSearch.COMMON.getValuePlugin() + UserType.ALL.getValue());
                 }});
                 this.put("groupList", new JSONArray() {
                     {
@@ -71,9 +69,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
                 });
                 this.put("includeList", new JSONArray() {
                     {
-                        if (ConditionConfigType.WORKCENTER.getValue().equals(configType.getValue())) {
-                            this.add(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue());
-                        }
+                        this.add(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue());
                     }
                 });
             }
@@ -144,7 +140,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
     }
 
     @Override
-    public List<JoinTableColumnVo> getMyJoinTableColumnList(WorkcenterVo workcenterVo) {
+    public List<JoinTableColumnVo> getMyJoinTableColumnList(SqlDecoratorVo sqlDecoratorVo) {
         return SqlTableUtil.getStepUserJoinTableSql();
     }
 }

@@ -9,6 +9,7 @@ import codedriver.framework.common.constvalue.dashboard.ChartType;
 import codedriver.framework.dashboard.constvalue.IDashboardGroupField;
 import codedriver.module.process.dashboard.constvalue.ProcessTaskStepDashboardGroupField;
 import codedriver.module.process.dashboard.showconfig.ProcessTaskStepDashboardWidgetShowConfigBase;
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -26,5 +27,10 @@ public class ProcessTaskStepSeriesWidgetShowConfig extends ProcessTaskStepDashbo
         return Collections.singletonList(
                 ProcessTaskStepDashboardGroupField.EVERY_DAY
         );
+    }
+
+    @Override
+    public JSONArray getStatisticsOptionList() {
+        return new JSONArray();
     }
 }

@@ -105,6 +105,12 @@ public interface ProcessTaskService {
     public List<ProcessTaskSlaTimeVo> getSlaTimeListByProcessTaskStepId(Long processTaskStepId);
 
     /**
+     * 设置下一步骤列表
+     * @param processTaskStepVo 步骤信息
+     */
+    void setNextStepList(ProcessTaskStepVo processTaskStepVo);
+
+    /**
      * @param processTaskStepId 步骤id
      * @return List<ProcessTaskStepVo>
      * @Author: linbq
@@ -200,12 +206,11 @@ public interface ProcessTaskService {
 
 
     /**
-     * @param processTaskId 工单id
-     * @return ProcessTaskVo
+     * @param processTaskVo 工单信息
      * @Time:2020年8月21日
      * @Description: 获取工单信息
      */
-    public ProcessTaskVo getProcessTaskDetailById(Long processTaskId);
+    void setProcessTaskDetail(ProcessTaskVo processTaskVo);
 
     /**
      * @param processTaskId 工单id
@@ -214,14 +219,6 @@ public interface ProcessTaskService {
      * @Description: 获取开始步骤信息
      */
     public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
-
-    /**
-     * @param currentProcessTaskStep 当前步骤基本信息
-     * @return ProcessTaskStepVo
-     * @Time:2020年12月23日
-     * @Description: 返回当前步骤详情
-     */
-    public ProcessTaskStepVo getCurrentProcessTaskStepDetail(ProcessTaskStepVo currentProcessTaskStep);
 
     /**
      * @param processTaskId
@@ -299,13 +296,13 @@ public interface ProcessTaskService {
     void refreshStepMinorUser(ProcessTaskStepVo processTaskStepVo, ProcessTaskStepTaskVo processTaskStepTaskVo);
 
     /**
-     * @param processTaskStepId 步骤id
+     * @param processTaskStepVo 步骤信息
      * @return ProcessTaskStepVo
      * @Author: linbq
      * @Time:2020年8月21日
      * @Description: 获取当前步骤信息
      */
-    ProcessTaskStepVo getCurrentProcessTaskStepById(Long processTaskStepId);
+    ProcessTaskStepVo getCurrentProcessTaskStepDetail(ProcessTaskStepVo processTaskStepVo, boolean hasComplete);
 
     /**
      * 根据fileId  processTaskIdList 获取对应用户是否有该工单附件的下载权限

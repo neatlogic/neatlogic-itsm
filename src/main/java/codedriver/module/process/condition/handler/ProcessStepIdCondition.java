@@ -8,8 +8,8 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -59,11 +59,6 @@ public class ProcessStepIdCondition extends ProcessTaskConditionBase implements 
     }
 
     @Override
-    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
-        return StringUtils.EMPTY;
-    }
-
-    @Override
     public Object valueConversionText(Object value, JSONObject config) {
         return value;
     }
@@ -71,5 +66,10 @@ public class ProcessStepIdCondition extends ProcessTaskConditionBase implements 
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
 
+    }
+
+    @Override
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo){
+        return processTaskStepVo.getId();
     }
 }

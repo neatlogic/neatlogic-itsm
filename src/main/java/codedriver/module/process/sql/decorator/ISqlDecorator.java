@@ -5,7 +5,7 @@
 
 package codedriver.module.process.sql.decorator;
 
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.dto.SqlDecoratorVo;
 
 public interface ISqlDecorator {
 
@@ -16,13 +16,13 @@ public interface ISqlDecorator {
      * @Params: []
      * @Returns: java.lang.String
      **/
-    void build(StringBuilder sqlSb, WorkcenterVo workcenterVo);
+    <T extends SqlDecoratorVo> void build(StringBuilder sqlSb, T decorator);
 
 
-    public ISqlDecorator getNextSqlDecorator();
+    ISqlDecorator getNextSqlDecorator();
 
-    public void setNextSqlDecorator(ISqlDecorator nextSqlDecorator);
+    void setNextSqlDecorator(ISqlDecorator nextSqlDecorator);
 
-    public int getSort();
+    int getSort();
 
 }

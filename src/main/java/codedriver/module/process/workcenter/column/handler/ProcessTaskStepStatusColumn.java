@@ -5,9 +5,9 @@
 
 package codedriver.module.process.workcenter.column.handler;
 
-import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
-import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
+import codedriver.framework.dashboard.dto.DashboardWidgetGroupDefineVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -15,8 +15,6 @@ import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import org.springframework.stereotype.Component;
 
@@ -60,10 +58,20 @@ public class ProcessTaskStepStatusColumn extends ProcessTaskColumnBase implement
     }
 
     @Override
+    public Boolean getMyIsShow() {
+        return false;
+    }
+
+    @Override
+    public Boolean getDisabled() {
+        return true;
+    }
+
+    @Override
     public List<TableSelectColumnVo> getTableSelectColumn() {
         return new ArrayList<TableSelectColumnVo>() {
             {
-                add(new TableSelectColumnVo(new ProcessTaskSqlTable(), Collections.singletonList(
+                add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Collections.singletonList(
                         new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName(), true)
                 )));
             }
@@ -71,7 +79,7 @@ public class ProcessTaskStepStatusColumn extends ProcessTaskColumnBase implement
     }
 
     @Override
-    public void getMyDashboardDataVo(DashboardWidgetDataGroupVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
+    public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> mapList) {
         //补充text
         for (int i = 0; i < mapList.size(); i++) {
             Map<String, Object> tmpMap = new HashMap<>();
@@ -86,15 +94,26 @@ public class ProcessTaskStepStatusColumn extends ProcessTaskColumnBase implement
             }
             mapList.set(i, tmpMap);
         }
-        //
-        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getGroup())) {
-            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName(), workcenterVo.getDashboardWidgetChartConfigVo().getGroup(), "statusText", workcenterVo.getDashboardWidgetChartConfigVo().getGroupDataCountMap());
-            dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
+        DashboardWidgetChartConfigVo dashboardWidgetChartConfigVo = dashboardWidgetAllGroupDefineVo.getChartConfigVo();
+        if (getName().equals(dashboardWidgetChartConfigVo.getGroup())) {
+            DashboardWidgetGroupDefineVo dashboardDataGroupVo = new DashboardWidgetGroupDefineVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName(), dashboardWidgetChartConfigVo.getGroup(), "statusText");
+            dashboardWidgetAllGroupDefineVo.setGroupDefineVo(dashboardDataGroupVo);
         }
         //如果存在子分组
-        if (getName().equals(workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup())) {
-            DashboardDataSubGroupVo dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName(), workcenterVo.getDashboardWidgetChartConfigVo().getSubGroup(), "statusText");
-            dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+        if (getName().equals(dashboardWidgetChartConfigVo.getSubGroup())) {
+            DashboardWidgetGroupDefineVo dashboardDataSubGroupVo = new DashboardWidgetGroupDefineVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName(), dashboardWidgetChartConfigVo.getSubGroup(), "statusText");
+            dashboardWidgetAllGroupDefineVo.setSubGroupDefineVo(dashboardDataSubGroupVo);
         }
+    }
+
+    @Override
+    public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
+        LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
+        for (Map<String, Object> dataMap : mapList) {
+            if(dataMap.containsKey(ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName())) {
+                groupDataMap.put(dataMap.get(ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName()).toString(), dataMap.get("count"));
+            }
+        }
+        return groupDataMap;
     }
 }

@@ -5,21 +5,21 @@
 
 package codedriver.module.process.sql.decorator;
 
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.dto.SqlDecoratorVo;
 import codedriver.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
 
 public class SqlBuilder {
     private final StringBuilder sqlSb;
 
-    public SqlBuilder(WorkcenterVo workcenterVo, ProcessSqlTypeEnum fieldTypeEnum) {
+    public SqlBuilder(SqlDecoratorVo sqlDecoratorVo, ProcessSqlTypeEnum fieldTypeEnum) {
         sqlSb = new StringBuilder();
         //提升性能，例如 大于100 则 返回99+ 的场景
         if(ProcessSqlTypeEnum.LIMIT_COUNT.getValue().equals(fieldTypeEnum.getValue())){
             sqlSb.append(" SELECT COUNT(1) FROM ( ");
         }
 
-        workcenterVo.setSqlFieldType(fieldTypeEnum.getValue());
-        SqlDecoratorChain.firstSqlDecorator.build(sqlSb, workcenterVo);
+        sqlDecoratorVo.setSqlFieldType(fieldTypeEnum.getValue());
+        SqlDecoratorChain.firstSqlDecorator.build(sqlSb, sqlDecoratorVo);
 
         //提升性能，例如 大于100 则 返回99+ 的场景
         if(ProcessSqlTypeEnum.LIMIT_COUNT.getValue().equals(fieldTypeEnum.getValue())){
@@ -29,28 +29,6 @@ public class SqlBuilder {
 
     public String build() {
         return sqlSb.toString();
-    }
-
-    /**
-     * @Description: 构建 order 排序
-     * @Author: 89770
-     * @Date: 2021/1/19 15:14
-     * @Params: [workcenterVo]
-     * @Returns: void
-     **/
-    public void buildOrder(WorkcenterVo workcenterVo) {
-        new SqlOrderDecorator().build(sqlSb, workcenterVo);
-    }
-
-    /**
-     * @Description: 构建 limit 分页
-     * @Author: 89770
-     * @Date: 2021/1/19 15:16
-     * @Params: [workcenterVo]
-     * @Returns: void
-     **/
-    public void buildLimit(WorkcenterVo workcenterVo) {
-        new SqlLimitDecorator().build(sqlSb, workcenterVo);
     }
 
 }

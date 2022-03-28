@@ -167,11 +167,11 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
     }
 
     private ProcessTaskVo getProcessTaskVoByProcessTaskId(Long processTaskId) throws Exception {
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         if(!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_START).build().check()){
             throw new PermissionDeniedException();
         }
-        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
+        processTaskService.setProcessTaskDetail(processTaskVo);
         /* 判断当前用户是否拥有channelUuid服务的上报权限 **/
         if (!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), UserContext.get().getUserUuid(true))) {
             throw new PermissionDeniedException();
