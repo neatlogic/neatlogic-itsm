@@ -84,7 +84,13 @@ public class ProcessTaskActionThread extends CodeDriverThread {
             JSONArray actionList = null;
             if (triggerType instanceof ProcessTaskNotifyTriggerType) {
                 /* 获取工单配置信息 **/
-                ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
+                ProcessTaskVo processTaskVo;
+                if (ProcessTaskNotifyTriggerType.DELETEPROCESSTASK.getTrigger().equals(triggerType.getTrigger())) {
+                    processTaskVo = new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId());
+                    processTaskVo.setConfigHash(currentProcessTaskStepVo.getTaskConfigHash());
+                } else {
+                    processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
+                }
                 String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
                 actionList = (JSONArray) JSONPath.read(config, "process.processConfig.actionConfig.actionList");
             } else {

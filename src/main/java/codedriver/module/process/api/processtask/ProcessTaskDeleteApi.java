@@ -9,21 +9,24 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSlaMapper;
 import codedriver.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
-import codedriver.framework.process.dto.ProcessTaskSlaVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
+import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
+import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,6 +53,9 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
     @Autowired
     private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
 
+    @Resource
+    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
+
     @Override
     public String getToken() {
         return "processtask/delete";
@@ -72,8 +78,8 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         /** 删除数据库对应工单信息 **/
         // 锁住当前工单
-        Long taskId = taskMapper.getProcessTaskLockById(processTaskId);
-        if (taskId == null) {
+        ProcessTaskVo processTaskVo = taskMapper.getProcessTaskVoLockById(processTaskId);
+        if (processTaskVo == null) {
             throw new ProcessTaskNotFoundException(processTaskId.toString());
         }
         // 步骤附件 processtask_file
@@ -87,7 +93,7 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         processTaskSlaMapper.deleteProcessTaskSlaTimeBySlaId(processTaskId);
         // 关系 processtask_relation
         List<ProcessTaskRelationVo> relationList =
-            taskMapper.getProcessTaskRelationList(new ProcessTaskRelationVo(processTaskId));
+                taskMapper.getProcessTaskRelationList(new ProcessTaskRelationVo(processTaskId));
         for (ProcessTaskRelationVo relation : relationList) {
             taskMapper.deleteProcessTaskRelationById(relation.getId());
         }
@@ -124,6 +130,9 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         if (indexHandler != null) {
             indexHandler.deleteIndex(processTaskId);
         }
+        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskId, null);
+        processTaskStepVo.setTaskConfigHash(processTaskVo.getConfigHash());
+        IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
         return null;
     }
 
