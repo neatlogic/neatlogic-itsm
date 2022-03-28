@@ -11,10 +11,7 @@ import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.autocompleterule.core.IAutoCompleteRuleHandler;
-import codedriver.framework.process.constvalue.ProcessStepMode;
-import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
@@ -58,6 +55,11 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
 
     @Override
     public boolean execute(ProcessTaskStepVo currentProcessTaskStepVo) {
+        //如果当前步骤有多条可流转路径时，自动审批不生效
+        List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
+        if (nextStepIdList.size() != 1) {
+            return false;
+        }
         List<Long> searchList = new ArrayList<>(2);
         searchList.add(currentProcessTaskStepVo.getId());
         /** 如果当前节点与并行激活兄弟节点中有相同标签的情况，就属于并行审批，当前节点不会自动审批 **/
