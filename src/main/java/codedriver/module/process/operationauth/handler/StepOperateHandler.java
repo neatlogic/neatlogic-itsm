@@ -1,6 +1,7 @@
 package codedriver.module.process.operationauth.handler;
 
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -49,17 +50,21 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                         .put(operationType, new ProcessTaskHiddenException());
                 return false;
             }
-            //2.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
-            if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
-                        .put(operationType, new ProcessTaskNotProcessTaskModifyException());
-                return false;
-            }
-            //3.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
+            //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.DRAFT);
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
+                return false;
+            }
+            //系统用户默认拥有权限
+            if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                return true;
+            }
+            //3.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
+            if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskNotProcessTaskModifyException());
                 return false;
             }
             //4.依次判断当前用户是否是工单上报人、代报人、处理人、待处理人，如果都不是，则执行第5步；
@@ -132,6 +137,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                             .put(operationType, exception);
                     return false;
                 }
+                //系统用户默认拥有权限
+                if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                    return true;
+                }
                 //12.判断当前用户是否有当前步骤“转交”操作权限，如果没有，则提示“您的'转交'操作未获得授权”；
                 boolean flag = checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, operationType, userUuid);
                 if (flag) {
@@ -191,6 +200,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
                 return false;
+            }
+            //系统用户默认拥有权限
+            if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                return true;
             }
             //13.判断当前用户是否是当前步骤的待处理人，如果不是，则提示“您不是步骤待处理人”；
             if (!checkIsWorker(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
@@ -257,6 +270,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                         .put(operationType, exception);
                 return false;
             }
+            //系统用户默认拥有权限
+            if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                return true;
+            }
             //13.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
             // 有主处理人时是start
             if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
@@ -315,19 +332,23 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                         .put(operationType, exception);
                 return false;
             }
-            //12.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
+            //12.判断当前步骤是否有下一步骤，如果没有，则提示“该步骤没有下一步骤”；
+            if (!checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo, processTaskStepVo.getId(), ProcessFlowDirection.FORWARD)) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepNotNextStepException());
+                return false;
+            }
+            //系统用户默认拥有权限
+            if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                return true;
+            }
+            //13.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
             if (!checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotMajorUserException());
                 return false;
             }
-            //13.判断当前步骤是否有下一步骤，如果没有，则提示“该步骤没有下一步骤”；
-            if (checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo, processTaskStepVo.getId(), ProcessFlowDirection.FORWARD)) {
-                return true;
-            }
-            operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
-                    .put(operationType, new ProcessTaskStepNotNextStepException());
-            return false;
+            return true;
         });
         /**
          * 步骤回退权限
@@ -380,19 +401,23 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                         .put(operationType, exception);
                 return false;
             }
-            //13.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
+            //13.判断当前步骤是否有回退线，如果没有，则提示“该步骤未启用回退功能”；
+            if (!checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo, processTaskStepVo.getId(), ProcessFlowDirection.BACKWARD)) {
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskStepBackNotEnabledException());
+                return false;
+            }
+            //系统用户默认拥有权限
+            if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                return true;
+            }
+            //14.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
             if (!checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotMajorUserException());
                 return false;
             }
-            //14.判断当前步骤是否有回退线，如果没有，则提示“该步骤未启用回退功能”；
-            if (checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo, processTaskStepVo.getId(), ProcessFlowDirection.BACKWARD)) {
-                return true;
-            }
-            operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
-                    .put(operationType, new ProcessTaskStepBackNotEnabledException());
-            return false;
+            return true;
         });
         /**
          * 步骤暂存权限
@@ -444,6 +469,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
                 return false;
+            }
+            //系统用户默认拥有权限
+            if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                return true;
             }
             //13.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
             if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
@@ -504,6 +533,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                         .put(operationType, exception);
                 return false;
             }
+            //系统用户默认拥有权限
+            if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                return true;
+            }
             //13.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
             if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                 return true;
@@ -562,6 +595,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
                 return false;
+            }
+            //系统用户默认拥有权限
+            if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                return true;
             }
             //13.判断当前用户是否有当前步骤“暂停”操作权限，如果没有，则提示“您的'暂停'操作未获得授权”；
             if (checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, operationType, userUuid)) {
@@ -622,6 +659,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                         .put(operationType, exception);
                 return false;
             }
+            //系统用户默认拥有权限
+            if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                return true;
+            }
             //13.判断当前用户是否有当前步骤“暂停”操作权限，如果没有，则提示“您的'恢复'操作未获得授权”；
             if (checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, ProcessTaskOperationType.STEP_PAUSE, userUuid)) {
                 return true;
@@ -669,20 +710,24 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                             .put(operationType, new ProcessTaskStepUndoneException());
                     return false;
                 }
-                //9.判断当前用户是否有当前步骤“撤回”操作权限，如果没有，则提示“您的'撤回'操作未获得授权”；
+                //9.判断当前步骤的下一步骤是否已经完成，如果是，则提示“该步骤已经不能撤回”；
+                if (!checkCurrentStepIsRetractableByProcessTaskStepId(processTaskVo, processTaskStepVo.getId())) {
+                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                            .put(operationType, new ProcessTaskStepCannotRetreatException());
+                    return false;
+                }
+                //系统用户默认拥有权限
+                if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                    return true;
+                }
+                //10.判断当前用户是否有当前步骤“撤回”操作权限，如果没有，则提示“您的'撤回'操作未获得授权”；
                 // 撤销权限retreat
                 if (!checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, operationType, userUuid)) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
                     return false;
                 }
-                //10.判断当前步骤的下一步骤是否已经完成，如果是，则提示“该步骤已经不能撤回”；
-                if (checkCurrentStepIsRetractableByProcessTaskStepId(processTaskVo, processTaskStepVo.getId(), userUuid)) {
-                    return true;
-                }
-                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
-                        .put(operationType, new ProcessTaskStepCannotRetreatException());
-                return false;
+                return true;
             });
         /**
          * 步骤重审权限
@@ -736,32 +781,40 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                                 .put(operationType, exception);
                         return false;
                     }
-                    //13.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
-                    if (!checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
-                                .put(operationType, new ProcessTaskStepNotMajorUserException());
-                        return false;
-                    }
-                    //14.判断当前步骤是否启用重审功能，如果没有，则提示“该步骤未启用重审功能”；
+                    //13.判断当前步骤是否启用重审功能，如果没有，则提示“该步骤未启用重审功能”；
                     if (!Objects.equals(processTaskStepVo.getEnableReapproval(), 1)){
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskStepReapprovalNotEnabledException());
                         return false;
                     }
-                    //15.判断当前步骤有没有对应需要重审的步骤，如果没有，则提示“没有需要重审的步骤”；
+                    //14.判断当前步骤有没有对应需要重审的步骤，如果没有，则提示“没有需要重审的步骤”；
+                    boolean flag = false;
                     List<ProcessTaskStepRelVo> relList = processTaskVo.getStepRelList();
                     if (CollectionUtils.isNotEmpty(relList)) {
                         for (ProcessTaskStepRelVo processTaskStepRelVo : relList) {
                             if (Objects.equals(id, processTaskStepRelVo.getToProcessTaskStepId())) {
                                 if (Objects.equals(processTaskStepRelVo.getType(), ProcessFlowDirection.BACKWARD.getValue()) && Objects.equals(processTaskStepRelVo.getIsHit(), 1)) {
-                                    return true;
+                                    flag = true;
                                 }
                             }
                         }
                     }
-                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
-                            .put(operationType, new ProcessTaskStepNoNeedReapprovalStepException());
-                    return false;
+                    if (!flag) {
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, new ProcessTaskStepNoNeedReapprovalStepException());
+                        return false;
+                    }
+                    //系统用户默认拥有权限
+                    if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                        return true;
+                    }
+                    //15.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
+                    if (!checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, new ProcessTaskStepNotMajorUserException());
+                        return false;
+                    }
+                    return true;
                 });
         /**
          * 步骤处理权限
@@ -812,6 +865,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, exception);
                     return false;
+                }
+                //系统用户默认拥有权限
+                if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                    return true;
                 }
                 //12.判断当前用户是否是当前步骤的待处理人，如果不是，则提示“您不是步骤待处理人”；
                 if (checkIsWorker(processTaskStepVo, userUuid)) {
@@ -888,6 +945,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                                 .put(operationType, exception);
                         return false;
                     }
+                    //系统用户默认拥有权限
+                    if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                        return true;
+                    }
                     //13.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
                     if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                         return true;
@@ -946,6 +1007,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
                         return false;
+                    }
+                    //系统用户默认拥有权限
+                    if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                        return true;
                     }
                     //12.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
                     if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
