@@ -11,6 +11,7 @@ import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.autocompleterule.core.IAutoCompleteRuleHandler;
+import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
@@ -57,6 +58,11 @@ public class AutoCompleteHandler implements IAutoCompleteRuleHandler {
 
     @Override
     public boolean execute(ProcessTaskStepVo currentProcessTaskStepVo) {
+        //如果当前步骤有多条可流转路径时，自动流转不生效
+        List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
+        if (nextStepIdList.size() != 1) {
+            return false;
+        }
         if (Objects.equals(currentProcessTaskStepVo.getIsActive(), 1)) {
             if (ProcessTaskStatus.RUNNING.getValue().equals(currentProcessTaskStepVo.getStatus())) {
                 List<ProcessTaskStepUserVo> stepUserVoList =  processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());

@@ -116,11 +116,14 @@ public class ProcessTaskOwnerRoleCondition extends ProcessTaskConditionBase impl
     }
 
     @Override
-    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo){
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
-        String owner = processTaskVo.getOwner();
-        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(owner);
-        return authenticationInfoVo.getRoleUuidList().stream().map(o->GroupSearch.ROLE.getValuePlugin()+o).collect(Collectors.toList());
+        if (processTaskVo != null) {
+            String owner = processTaskVo.getOwner();
+            AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(owner);
+            return authenticationInfoVo.getRoleUuidList().stream().map(o -> GroupSearch.ROLE.getValuePlugin() + o).collect(Collectors.toList());
+        }
+        return null;
     }
 
 }
