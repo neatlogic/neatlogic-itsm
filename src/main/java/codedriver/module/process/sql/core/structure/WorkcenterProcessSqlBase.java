@@ -35,6 +35,7 @@ import static codedriver.framework.common.util.CommonUtil.distinctByKey;
 
 public abstract class WorkcenterProcessSqlBase extends ProcessSqlBase<WorkcenterVo> {
     Logger logger = LoggerFactory.getLogger(WorkcenterProcessSqlBase.class);
+
     /**
      * @Description: 根据条件获取需要的表
      * @Author: 89770
@@ -54,7 +55,8 @@ public abstract class WorkcenterProcessSqlBase extends ProcessSqlBase<Workcenter
 
     /**
      * 补充主体sql
-     *  @param sqlSb          sql
+     *
+     * @param sqlSb        sql
      * @param workcenterVo 工单中心参数
      */
     protected void buildFromJoinSql(StringBuilder sqlSb, WorkcenterVo workcenterVo, List<JoinTableColumnVo> joinTableColumnList) {
@@ -100,7 +102,8 @@ public abstract class WorkcenterProcessSqlBase extends ProcessSqlBase<Workcenter
 
     /**
      * 根据工单中心字段 补充join table
-     * @param sb sql
+     *
+     * @param sb           sql
      * @param workcenterVo 工单中心参数
      */
     protected void getJoinTableOfColumn(StringBuilder sb, WorkcenterVo workcenterVo) {
@@ -163,6 +166,8 @@ public abstract class WorkcenterProcessSqlBase extends ProcessSqlBase<Workcenter
         if (!isHasProcessTaskAuth) {
             sqlSb.append(" and pt.is_show = 1 ");
         }
+        // 过滤掉已删除的工单
+        sqlSb.append(" and (pt.is_deleted is null or pt.is_deleted != 1)");
     }
 
     /**

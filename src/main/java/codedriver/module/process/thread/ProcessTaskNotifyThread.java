@@ -105,7 +105,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
             Long policyId = null;
             if (notifyTriggerType instanceof ProcessTaskNotifyTriggerType) {
                 /** 获取工单配置信息 **/
-                ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
+                ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoByIdIncludeIsDeleted(currentProcessTaskStepVo.getProcessTaskId());
                 String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
                 notifyPolicyConfig = (JSONObject) JSONPath.read(config, "process.processConfig.notifyPolicyConfig");
                 if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
