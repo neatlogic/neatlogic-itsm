@@ -8,6 +8,7 @@ import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
+import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.operationauth.*;
@@ -200,6 +201,12 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
                 return false;
+            }
+            if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                List<ProcessTaskStepUserVo> userList = processTaskStepVo.getUserList();
+                if (CollectionUtils.isNotEmpty(userList)) {
+
+                }
             }
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
