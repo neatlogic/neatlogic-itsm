@@ -16,7 +16,6 @@ import codedriver.framework.process.dao.mapper.ProcessTaskSlaMapper;
 import codedriver.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
 import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
@@ -76,12 +75,20 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
-        /** 删除数据库对应工单信息 **/
         // 锁住当前工单
-        ProcessTaskVo processTaskVo = taskMapper.getProcessTaskVoLockById(processTaskId);
-        if (processTaskVo == null) {
+        if (taskMapper.getProcessTaskLockById(processTaskId) == null) {
             throw new ProcessTaskNotFoundException(processTaskId.toString());
         }
+        // is_deleted置为1
+        taskMapper.updateProcessTaskIsDeletedById(processTaskId, 1);
+        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskId, null);
+        IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
+        IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
+        return null;
+    }
+
+    @Deprecated
+    private void deleteProcessTask(Long processTaskId) {
         // 步骤附件 processtask_file
         taskMapper.deleteProcessTaskStepFileByProcessTaskId(processTaskId);
         // sla processtask_sla_transfer processtask_sla_notify processtask_sla_time
@@ -130,10 +137,6 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         if (indexHandler != null) {
             indexHandler.deleteIndex(processTaskId);
         }
-        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskId, null);
-        processTaskStepVo.setTaskConfigHash(processTaskVo.getConfigHash());
-        IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
-        return null;
     }
 
 }
