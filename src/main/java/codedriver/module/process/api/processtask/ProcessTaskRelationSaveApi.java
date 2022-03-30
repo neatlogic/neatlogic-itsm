@@ -78,12 +78,9 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        try {
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT)
-                .build().checkAndNoPermissionThrowException();
-        } catch (ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+        new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT)
+                .build()
+                .checkAndNoPermissionThrowException();
         Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
         if (channelTypeMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
             throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);

@@ -84,12 +84,9 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long processTaskId = paramObj.getLong("processTaskId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        try {
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_MARKREPEAT)
-                    .build().checkAndNoPermissionThrowException();
-        } catch (ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+        new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_MARKREPEAT)
+                .build()
+                .checkAndNoPermissionThrowException();
         JSONArray repeatProcessTaskIdArray = paramObj.getJSONArray("repeatProcessTaskIdList");
         if (CollectionUtils.isEmpty(repeatProcessTaskIdArray)) {
             throw new ParamNotExistsException("repeatProcessTaskIdList");

@@ -47,11 +47,7 @@ public class ProcessTaskAbortApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-		try {
-		    ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
-		}catch(ProcessTaskNoPermissionException e) {
-		    throw new PermissionDeniedException();
-		}
+		ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
 		return null;
 	}
 

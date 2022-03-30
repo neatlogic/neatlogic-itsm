@@ -19,8 +19,10 @@ import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
+import codedriver.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskViewDeniedException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
@@ -168,9 +170,17 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
     private ProcessTaskVo getProcessTaskVoByProcessTaskId(Long processTaskId) throws Exception {
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        if(!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_START).build().check()){
-            throw new PermissionDeniedException();
+
+        try {
+            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_START)
+                    .build()
+                    .checkAndNoPermissionThrowException();
+        } catch (ProcessTaskPermissionDeniedException e) {
+            throw new PermissionDeniedException(e.getMessage());
         }
+//        if(!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_START).build().check()){
+//            throw new PermissionDeniedException();
+//        }
         processTaskService.setProcessTaskDetail(processTaskVo);
         /* 判断当前用户是否拥有channelUuid服务的上报权限 **/
         if (!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), UserContext.get().getUserUuid(true))) {
@@ -244,7 +254,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         }
         /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
         if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
-            throw new PermissionDeniedException();
+            throw new ProcessTaskViewDeniedException(channel.getName());
+//            throw new PermissionDeniedException();
             /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
 //            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
 //            if(StringUtils.isNotBlank(agentUuid)){

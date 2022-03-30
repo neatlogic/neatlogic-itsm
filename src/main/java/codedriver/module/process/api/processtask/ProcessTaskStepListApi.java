@@ -15,6 +15,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import codedriver.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
@@ -81,17 +82,24 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        if (!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
-            if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
-                throw new ProcessTaskViewDeniedException();
-            } else {
-                ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-                if (channelVo == null) {
-                    throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
-                }
-                throw new ProcessTaskViewDeniedException(channelVo.getName());
-            }
+        try {
+            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW)
+                    .build()
+                    .checkAndNoPermissionThrowException();
+        } catch (ProcessTaskPermissionDeniedException e) {
+            throw new PermissionDeniedException(e.getMessage());
         }
+//        if (!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
+//            if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+//                throw new ProcessTaskViewDeniedException();
+//            } else {
+//                ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+//                if (channelVo == null) {
+//                    throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
+//                }
+//                throw new ProcessTaskViewDeniedException(channelVo.getName());
+//            }
+//        }
         ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(processTaskId);
         startProcessTaskStepVo.setReplaceableTextList(processTaskService.getReplaceableTextList(startProcessTaskStepVo));
         List<ProcessTaskStepVo> resultList = new ArrayList<>();

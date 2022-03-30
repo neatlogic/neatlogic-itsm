@@ -61,11 +61,7 @@ public class ProcessTaskRetreatApi extends PrivateApiComponentBase implements IP
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
         processTaskStepVo.getParamObj().putAll(jsonObj);
-        try {
-            handler.retreat(processTaskStepVo);
-        }catch(ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+		handler.retreat(processTaskStepVo);
 		return null;
 	}
 

@@ -88,11 +88,9 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
         }
         Long processTaskId = processTaskStepVo.getProcessTaskId();
         //校验执行权限
-        try {
-            new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.TASK_CREATE).build().checkAndNoPermissionThrowException();
-        } catch (ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+        new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.TASK_CREATE)
+                .build()
+                .checkAndNoPermissionThrowException();
         if (CollectionUtils.isEmpty(processTaskStepTaskVo.getUserList())) {
             throw new ParamIrregularException("userList");
         }

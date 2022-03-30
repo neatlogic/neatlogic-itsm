@@ -47,11 +47,7 @@ public class ProcessTaskRecoverApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-		try {
-	        ProcessStepHandlerFactory.getHandler().recoverProcessTask(processTaskVo);
-        }catch(ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+		ProcessStepHandlerFactory.getHandler().recoverProcessTask(processTaskVo);
 		return null;
 	}
 

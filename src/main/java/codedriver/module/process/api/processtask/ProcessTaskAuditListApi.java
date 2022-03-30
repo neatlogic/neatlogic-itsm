@@ -79,12 +79,9 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        try {
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build()
-                    .checkAndNoPermissionThrowException();
-        } catch (ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+        new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW)
+                .build()
+                .checkAndNoPermissionThrowException();
 
         List<ProcessTaskStepAuditVo> resultList = new ArrayList<>();
         ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();

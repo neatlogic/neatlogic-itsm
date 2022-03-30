@@ -2043,12 +2043,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
         startProcessTaskStepVo.getParamObj().putAll(jsonObj);
-        try {
-            handler.startProcess(startProcessTaskStepVo);
-            processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
-        } catch (ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+        handler.startProcess(startProcessTaskStepVo);
+        processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
     }
 
     @Override
@@ -2140,11 +2136,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
         processTaskStepVo.getParamObj().putAll(paramObj);
-        try {
-            handler.complete(processTaskStepVo);
-        } catch (ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+        handler.complete(processTaskStepVo);
         processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
 
         //创建全文检索索引
@@ -2165,14 +2157,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }
         String action = paramObj.getString("action");
-        try {
-            if (ProcessTaskOperationType.STEP_ACCEPT.getValue().equals(action)) {
-                handler.accept(processTaskStepVo);
-            }
-            handler.start(processTaskStepVo);
-        } catch (ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
+        if (ProcessTaskOperationType.STEP_ACCEPT.getValue().equals(action)) {
+            handler.accept(processTaskStepVo);
         }
+        handler.start(processTaskStepVo);
     }
 
     @Override

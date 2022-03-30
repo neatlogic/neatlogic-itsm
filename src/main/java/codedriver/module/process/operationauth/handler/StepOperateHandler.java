@@ -2,6 +2,8 @@ package codedriver.module.process.operationauth.handler;
 
 import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.SystemUser;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -19,6 +21,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +32,9 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
 
     private final Map<ProcessTaskOperationType,
         TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<ProcessTaskOperationType, ProcessTaskPermissionDeniedException>>>> operationBiPredicateMap = new HashMap<>();
+
+    @Resource
+    private UserMapper userMapper;
 
     @PostConstruct
     public void init() {
@@ -189,23 +195,40 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                         .put(operationType, new ProcessTaskStepNotActiveException());
                 return false;
             }
-            //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
-            //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
-            //11.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
-            //12.判断步骤状态是否是“处理中”，如果是，则提示“步骤处理中”；
-            exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                    ProcessTaskStatus.FAILED,
-                    ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.RUNNING);
+            //9.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
+            //10.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
+            exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.FAILED,
+                    ProcessTaskStatus.HANG);
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
                 return false;
             }
-            if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+            if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {
                 List<ProcessTaskStepUserVo> userList = processTaskStepVo.getUserList();
                 if (CollectionUtils.isNotEmpty(userList)) {
-
+                    for (ProcessTaskStepUserVo processTaskStepUserVo : userList) {
+                        if (Objects.equals(processTaskStepUserVo.getUserType(), ProcessUserType.MAJOR.getValue())) {
+                            if (Objects.equals(processTaskStepUserVo.getUserUuid(), userUuid)) {
+                                //11.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
+                                //12.判断步骤状态是否是“处理中”，如果是，则提示“步骤处理中”；
+                                exception = checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
+                                        ProcessTaskStatus.RUNNING);
+                                if (exception != null) {
+                                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                            .put(operationType, exception);
+                                    return false;
+                                }
+                            } else {
+                                UserVo userVo = userMapper.getUserBaseInfoByUuid(processTaskStepUserVo.getUserUuid());
+                                if (userVo != null) {
+                                    operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                            .put(operationType, new ProcessTaskStepHandledByOthersException(userVo.getUserId(), userVo.getUserName()));
+                                    return false;
+                                }
+                            }
+                        }
+                    }
                 }
             }
             //系统用户默认拥有权限

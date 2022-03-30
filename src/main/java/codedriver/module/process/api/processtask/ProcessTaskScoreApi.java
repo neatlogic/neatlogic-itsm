@@ -52,11 +52,7 @@ public class ProcessTaskScoreApi extends PrivateApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		processTaskVo.setParamObj(jsonObj);
-		try {
-	        ProcessStepHandlerFactory.getHandler().scoreProcessTask(processTaskVo);
-        }catch(ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+		ProcessStepHandlerFactory.getHandler().scoreProcessTask(processTaskVo);
 		return null;
 	}
 
