@@ -64,6 +64,9 @@ public class TaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
             Map<String, List<IDefaultTemplate>> map = templateList.stream().collect(Collectors.groupingBy(IDefaultTemplate::getTrigger));
             for (ProcessTaskNotifyTriggerType notifyTriggerType : ProcessTaskNotifyTriggerType.values()) {
                 List<IDefaultTemplate> templates = map.get(notifyTriggerType.getTrigger().toLowerCase());
+                if (CollectionUtils.isEmpty(templates)) {
+                    continue;
+                }
                 for(IDefaultTemplate vo : templates){
                     list.add(new NotifyTriggerTemplateVo(notifyTriggerType.getText(),notifyTriggerType.getDescription(),vo.getTitle(),vo.getContent(),handler));
                 }
