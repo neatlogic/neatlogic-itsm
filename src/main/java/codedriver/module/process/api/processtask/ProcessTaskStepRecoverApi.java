@@ -58,11 +58,7 @@ public class ProcessTaskStepRecoverApi extends PrivateApiComponentBase {
         if(handler == null) {
             throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());      
         }
-        try {
-            handler.recover(currentProcessTaskStepVo);
-        }catch(ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+        handler.recover(currentProcessTaskStepVo);
         return null;
     }
 

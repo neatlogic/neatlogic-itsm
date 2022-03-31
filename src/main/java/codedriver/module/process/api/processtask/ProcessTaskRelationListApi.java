@@ -13,6 +13,7 @@ import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import codedriver.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskViewDeniedException;
 import org.apache.commons.collections4.CollectionUtils;
@@ -88,17 +89,24 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessTaskRelationVo processTaskRelationVo = JSON.toJavaObject(jsonObj, ProcessTaskRelationVo.class);
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskRelationVo.getProcessTaskId());
-        if (!new ProcessAuthManager.TaskOperationChecker(processTaskRelationVo.getProcessTaskId(), ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
-            if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
-                throw new ProcessTaskViewDeniedException();
-            } else {
-                ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-                if (channelVo == null) {
-                    throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
-                }
-                throw new ProcessTaskViewDeniedException(channelVo.getName());
-            }
+        try {
+            new ProcessAuthManager.TaskOperationChecker(processTaskRelationVo.getProcessTaskId(), ProcessTaskOperationType.PROCESSTASK_VIEW)
+                    .build()
+                    .checkAndNoPermissionThrowException();
+        } catch (ProcessTaskPermissionDeniedException e) {
+            throw new PermissionDeniedException(e.getMessage());
         }
+//        if (!new ProcessAuthManager.TaskOperationChecker(processTaskRelationVo.getProcessTaskId(), ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
+//            if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+//                throw new ProcessTaskViewDeniedException();
+//            } else {
+//                ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+//                if (channelVo == null) {
+//                    throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
+//                }
+//                throw new ProcessTaskViewDeniedException(channelVo.getName());
+//            }
+//        }
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTaskRelationList", new ArrayList<>());
         int pageCount = 0;

@@ -50,7 +50,7 @@ public class ProcessNotifyPolicyParamList extends PrivateApiComponentBase {
             @Param(name = "formUuid", type = ApiParamType.STRING, desc = "流程绑定表单的uuid")
     })
     @Output({
-            @Param(explode = ConditionParamVo[].class, desc = "流程参数列表")
+            @Param(name = "tbodyList", explode = ConditionParamVo[].class, desc = "流程通知策略参数列表")
     })
     @Description(desc = "流程通知策略参数列表接口")
     @Override

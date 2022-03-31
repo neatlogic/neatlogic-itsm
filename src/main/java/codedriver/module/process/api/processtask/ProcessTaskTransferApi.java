@@ -83,11 +83,7 @@ public class ProcessTaskTransferApi extends PrivateApiComponentBase implements I
             }
         }
         processTaskStepVo.getParamObj().putAll(jsonObj);
-        try {
-            handler.transfer(processTaskStepVo,processTaskStepWorkerList);
-        }catch(ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+		handler.transfer(processTaskStepVo,processTaskStepWorkerList);
 		return null;
 	}
 

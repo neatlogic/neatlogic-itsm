@@ -8,6 +8,7 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import codedriver.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskViewDeniedException;
 import org.apache.commons.collections4.MapUtils;
@@ -67,17 +68,24 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        if (!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
-            if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
-                throw new ProcessTaskViewDeniedException();
-            } else {
-                ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-                if (channelVo == null) {
-                    throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
-                }
-                throw new ProcessTaskViewDeniedException(channelVo.getName());
-            }
+        try {
+            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW)
+                    .build()
+                    .checkAndNoPermissionThrowException();
+        } catch (ProcessTaskPermissionDeniedException e) {
+            throw new PermissionDeniedException(e.getMessage());
         }
+//        if (!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build().check()) {
+//            if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+//                throw new ProcessTaskViewDeniedException();
+//            } else {
+//                ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+//                if (channelVo == null) {
+//                    throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
+//                }
+//                throw new ProcessTaskViewDeniedException(channelVo.getName());
+//            }
+//        }
         /** 检查工单是否存在表单 **/
         processTaskService.setProcessTaskFormInfo(processTaskVo);
         if (MapUtils.isNotEmpty(processTaskVo.getFormConfig())) {

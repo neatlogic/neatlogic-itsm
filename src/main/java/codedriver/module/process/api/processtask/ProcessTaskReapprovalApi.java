@@ -152,11 +152,7 @@ public class ProcessTaskReapprovalApi extends PrivateApiComponentBase {
             }
         }
         processTaskStepVo.getParamObj().putAll(paramObj);
-        try {
-            handler.reapproval(processTaskStepVo);
-        } catch (ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+        handler.reapproval(processTaskStepVo);
         processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
 
         //创建全文检索索引

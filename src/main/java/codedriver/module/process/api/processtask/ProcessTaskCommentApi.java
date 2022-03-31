@@ -89,12 +89,9 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
             processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         processTaskMapper.getProcessTaskLockById(processTaskId);
         ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
-        try {
-            new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_COMMENT).build()
+        new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_COMMENT)
+                .build()
                 .checkAndNoPermissionThrowException();
-        } catch (ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
         // 删除暂存
         ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
         processTaskStepDataVo.setProcessTaskId(processTaskId);

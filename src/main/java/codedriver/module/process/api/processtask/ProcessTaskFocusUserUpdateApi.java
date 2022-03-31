@@ -69,12 +69,9 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         JSONArray focusUserUuidList = jsonObj.getJSONArray("focusUserUuidList");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        try {
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE).build()
+        new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE)
+                .build()
                 .checkAndNoPermissionThrowException();
-        } catch (ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
         List<String> oldFocusUser = processTaskMapper.getFocusUserListByTaskId(processTaskId);
         JSONObject paramObj = new JSONObject();
         paramObj.put("focusUserUuidList",focusUserUuidList);

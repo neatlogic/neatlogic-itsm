@@ -57,11 +57,7 @@ public class ProcessTaskStepPauseApi extends PrivateApiComponentBase {
         if(handler == null) {
             throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());      
         }
-        try {
-            handler.pause(currentProcessTaskStepVo);
-        }catch(ProcessTaskNoPermissionException e) {
-            throw new PermissionDeniedException();
-        }
+        handler.pause(currentProcessTaskStepVo);
         return null;
     }
 

@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import codedriver.framework.process.exception.operationauth.ProcessTaskAutomaticHandlerNotEnableOperateException;
+import codedriver.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import org.springframework.stereotype.Component;
 
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -18,24 +20,37 @@ import codedriver.framework.process.operationauth.core.TernaryPredicate;
 public class AutomaticOperateHandler extends OperationAuthHandlerBase {
 
     private final Map<ProcessTaskOperationType,
-        TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> operationBiPredicateMap = new HashMap<>();
+        TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<ProcessTaskOperationType, ProcessTaskPermissionDeniedException>>>> operationBiPredicateMap = new HashMap<>();
 
     @PostConstruct
     public void init() {
-//        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_START,
-//            (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_ACTIVE,
-            (processTaskVo, processTaskStepVo, userUuid) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_RETREAT,
-            (processTaskVo, processTaskStepVo, userUuid) -> false);
-//        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_ACCEPT,
-//            (processTaskVo, processTaskStepVo, userUuid) -> false);
+            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                Long id = processTaskStepVo.getId();
+                ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_RETREAT;
+                //1.提示“自动处理节点不支持'撤回'操作”；
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskAutomaticHandlerNotEnableOperateException(operationType));
+                return false;
+            });
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_WORK,
-            (processTaskVo, processTaskStepVo, userUuid) -> false);
+            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                Long id = processTaskStepVo.getId();
+                ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_WORK;
+                //1.提示“自动处理节点不支持'处理'操作”；
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskAutomaticHandlerNotEnableOperateException(operationType));
+                return false;
+            });
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMMENT,
-            (processTaskVo, processTaskStepVo, userUuid) -> false);
-//        operationBiPredicateMap.put(ProcessTaskOperationType.SUBTASK_CREATE,
-//            (processTaskVo, processTaskStepVo, userUuid) -> false);
+            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                Long id = processTaskStepVo.getId();
+                ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_COMMENT;
+                //1.提示“自动处理节点不支持'回复'操作”；
+                operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                        .put(operationType, new ProcessTaskAutomaticHandlerNotEnableOperateException(operationType));
+                return false;
+            });
     }
 
     @Override
@@ -44,7 +59,7 @@ public class AutomaticOperateHandler extends OperationAuthHandlerBase {
     }
 
     @Override
-    public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>>
+    public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<ProcessTaskOperationType, ProcessTaskPermissionDeniedException>>>>
         getOperationBiPredicateMap() {
         return operationBiPredicateMap;
     }
