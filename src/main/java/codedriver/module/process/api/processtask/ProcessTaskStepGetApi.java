@@ -4,18 +4,16 @@ import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
-import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskScoreTemplateVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.exception.channel.ChannelNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskViewDeniedException;
+import codedriver.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -83,19 +81,24 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                     .addOperationType(ProcessTaskOperationType.STEP_SAVE)
                     .addOperationType(ProcessTaskOperationType.STEP_COMPLETE);
         }
-        Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap = builder.build().getOperateMap();
+        ProcessAuthManager processAuthManager = builder.build();
+        Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap = processAuthManager.getOperateMap();
 
         Set<ProcessTaskOperationType> taskOperationTypeSet = operationTypeSetMap.get(processTaskId);
         if (!taskOperationTypeSet.contains(ProcessTaskOperationType.PROCESSTASK_VIEW)) {
-            if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
-                throw new ProcessTaskViewDeniedException();
-            } else {
-                ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-                if (channelVo == null) {
-                    throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
-                }
-                throw new ProcessTaskViewDeniedException(channelVo.getName());
+            ProcessTaskPermissionDeniedException exception = processAuthManager.getProcessTaskPermissionDeniedException(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW);
+            if (exception != null) {
+                throw new PermissionDeniedException(exception.getMessage());
             }
+//            if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+//                throw new ProcessTaskViewDeniedException();
+//            } else {
+//                ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+//                if (channelVo == null) {
+//                    throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
+//                }
+//                throw new ProcessTaskViewDeniedException(channelVo.getName());
+//            }
         }
         Phaser phaser = new Phaser();
         phaser.register();
