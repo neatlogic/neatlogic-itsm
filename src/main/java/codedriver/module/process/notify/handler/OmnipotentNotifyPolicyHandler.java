@@ -70,6 +70,9 @@ public class OmnipotentNotifyPolicyHandler extends NotifyPolicyHandlerBase {
             Map<String, List<IDefaultTemplate>> map = templateList.stream().collect(Collectors.groupingBy(IDefaultTemplate::getTrigger));
             for (ProcessTaskStepNotifyTriggerType notifyTriggerType : ProcessTaskStepNotifyTriggerType.values()) {
                 List<IDefaultTemplate> templates = map.get(notifyTriggerType.getTrigger().toLowerCase());
+                if (CollectionUtils.isEmpty(templates)) {
+                    continue;
+                }
                 for(IDefaultTemplate vo : templates){
                     list.add(new NotifyTriggerTemplateVo(notifyTriggerType.getText(),notifyTriggerType.getDescription(),vo.getTitle(),vo.getContent(),handler));
                 }
@@ -83,6 +86,9 @@ public class OmnipotentNotifyPolicyHandler extends NotifyPolicyHandlerBase {
             //任务
             for (ProcessTaskStepTaskNotifyTriggerType notifyTriggerType : ProcessTaskStepTaskNotifyTriggerType.values()) {
                 List<IDefaultTemplate> templates = map.get(notifyTriggerType.getTrigger().toLowerCase());
+                if (CollectionUtils.isEmpty(templates)) {
+                    continue;
+                }
                 for(IDefaultTemplate vo : templates){
                     list.add(new NotifyTriggerTemplateVo(notifyTriggerType.getText(),notifyTriggerType.getDescription(),vo.getTitle(),vo.getContent(),handler));
                 }
