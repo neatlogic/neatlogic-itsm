@@ -11,6 +11,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.service.ProcessTaskAgentService;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.restful.annotation.Description;
@@ -62,28 +63,19 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+		new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_URGE)
+				.build()
+				.checkAndNoPermissionThrowException();
 		List<ProcessTaskStepVo> processTaskStepList = processTaskService.getUrgeableStepList(processTaskVo, UserContext.get().getUserUuid(true));
 		/** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
 		List<String> fromUserUUidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), processTaskVo.getChannelUuid());
 		for (String userUuid : fromUserUUidList) {
 			processTaskStepList.addAll(processTaskService.getUrgeableStepList(processTaskVo, userUuid));
 		}
-//        String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
-//        if(StringUtils.isNotBlank(userUuid)) {
-//            processTaskStepList.addAll(processTaskService.getUrgeableStepList(processTaskVo, userUuid));
-//        }
-		if(CollectionUtils.isNotEmpty(processTaskStepList)) {
-			for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-				/** 触发通知 **/
-				IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.URGE);
-				IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.URGE);
-			}
-		}else {
-			try {
-	            throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.PROCESSTASK_URGE.getText());
-	        }catch(ProcessTaskNoPermissionException e) {
-	            throw new PermissionDeniedException();
-	        }
+		for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+			/** 触发通知 **/
+			IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.URGE);
+			IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.URGE);
 		}
 		/*生成催办活动*/
 		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
