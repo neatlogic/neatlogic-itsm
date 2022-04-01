@@ -138,7 +138,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                     throw new ParamNotExistsException("channelTypeRelationId");
                 }
                 IProcessTaskCrossoverService processTaskCrossoverService = CrossoverServiceFactory.getApi(IProcessTaskCrossoverService.class);
-                boolean flag = processTaskCrossoverService.checkTranferreportAuthorization(fromProcessTaskVo, UserContext.get().getUserUuid(true), channelTypeRelationId);
+                boolean flag = processTaskCrossoverService.checkTranferReportAuthorization(fromProcessTaskVo, UserContext.get().getUserUuid(true), channelTypeRelationId);
                 if (!flag) {
                     new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT);
                 }
