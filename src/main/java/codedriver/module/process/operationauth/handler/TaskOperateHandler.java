@@ -466,10 +466,10 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单转报权限逻辑：
          * userUuid用户在工单对应服务的转报设置中获得授权，且对转报服务有上报权限
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT,
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT,
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
                     Long id = processTaskVo.getId();
-                    ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT;
+                    ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT;
                     //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
@@ -482,7 +482,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     Integer allowTranferReport = config.getInteger("allowTranferReport");
                     if (!Objects.equals(allowTranferReport, 1)) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
-                                .put(operationType, new ProcessTaskChannelTranferReportNotEnabledException(channelVo.getName()));
+                                .put(operationType, new ProcessTaskChannelTransferReportNotEnabledException(channelVo.getName()));
                         return false;
                     }
                     //系统用户默认拥有权限

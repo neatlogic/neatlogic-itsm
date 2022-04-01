@@ -9,7 +9,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.form.dto.FormAttributeVo;
@@ -127,7 +126,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                 ProcessTaskVo fromProcessTaskVo = processTaskService.checkProcessTaskParamsIsLegal(fromProcessTaskId);
                 //转报
                 try {
-                    new ProcessAuthManager.TaskOperationChecker(fromProcessTaskId, ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT)
+                    new ProcessAuthManager.TaskOperationChecker(fromProcessTaskId, ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT)
                             .build()
                             .checkAndNoPermissionThrowException();
                 } catch (ProcessTaskPermissionDeniedException e) {
@@ -138,7 +137,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                 }
                 boolean flag = processTaskService.checkTransferReportAuthorization(fromProcessTaskVo, UserContext.get().getUserUuid(true), channelTypeRelationId);
                 if (!flag) {
-                    new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT);
+                    new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT);
                 }
             }
 

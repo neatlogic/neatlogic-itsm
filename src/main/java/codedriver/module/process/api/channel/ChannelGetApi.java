@@ -77,38 +77,6 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 		}else {
 		    channel.setIsFavorite(1);
 		}
-		/** 转报设置 **/
-//		List<ChannelRelationVo> channelRelationList = channelMapper.getChannelRelationListBySource(uuid);
-//		if(CollectionUtils.isNotEmpty(channelRelationList)) {
-//		    Map<Long, List<String>> channelRelationTargetMap = new HashMap<>();
-//		    for(ChannelRelationVo channelRelationVo : channelRelationList) {
-//				channelRelationTargetMap.computeIfAbsent(channelRelationVo.getChannelTypeRelationId(), v ->new ArrayList<>()).add(channelRelationVo.getType() + "#" + channelRelationVo.getTarget());
-//		    }
-//		    Map<Long, List<String>> channelRelationAuthorityMap = new HashMap<>();
-//	        List<ChannelRelationVo> channelRelationAuthorityList = channelMapper.getChannelRelationAuthorityListBySource(uuid);
-//	        for(ChannelRelationVo channelRelationVo : channelRelationAuthorityList) {
-//				channelRelationAuthorityMap.computeIfAbsent(channelRelationVo.getChannelTypeRelationId(), v ->new ArrayList<>()).add(channelRelationVo.getType() + "#" + channelRelationVo.getUuid());
-//            }
-//	        Long channelRelationId = null;
-//			for(ChannelRelationVo channelRelation : channelRelationList) {
-//				if(channelRelation.getChannelTypeRelationId().equals(channelRelationId)){
-//					continue;
-//				}
-//				channelRelationId = channelRelation.getChannelTypeRelationId();
-//				ChannelRelationVo channelRelationVo = new ChannelRelationVo();
-//				channelRelationVo.setChannelTypeRelationId(channelRelationId);
-//				List<String> targetList = channelRelationTargetMap.get(channelRelationId);
-//				if(CollectionUtils.isNotEmpty(targetList)){
-//					channelRelationVo.setTargetList(targetList);
-//				}
-//				List<String> authorityList = channelRelationAuthorityMap.get(channelRelationId);
-//				if(CollectionUtils.isNotEmpty(authorityList)) {
-//					channelRelationVo.setAuthorityList(authorityList);
-//				}
-//				channel.getChannelRelationList().add(channelRelationVo);
-//			}
-//			channel.setAllowTranferReport(1);
-//		}
 		return channel;
 	}
 
