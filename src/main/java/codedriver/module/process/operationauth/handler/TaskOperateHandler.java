@@ -490,7 +490,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                         return true;
                     }
                     //3.判断当前用户是否有“转报”操作权限，如果没有，则提示“您的'转报'操作未获得授权”；
-                    boolean flag = processTaskService.checkTranferReportAuthorization(processTaskVo, userUuid);
+                    boolean flag = processTaskService.checkTransferReportAuthorization(processTaskVo, userUuid);
                     if (flag) {
                        return true;
                     }

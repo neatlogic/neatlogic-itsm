@@ -2315,8 +2315,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
      * @return
      */
     @Override
-    public boolean checkTranferReportAuthorization(ProcessTaskVo processTaskVo, String userUuid) {
-        return checkTranferReportAuthorization(processTaskVo, userUuid, null);
+    public boolean checkTransferReportAuthorization(ProcessTaskVo processTaskVo, String userUuid) {
+        return checkTransferReportAuthorization(processTaskVo, userUuid, null);
     }
 
     /**
@@ -2327,7 +2327,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
      * @return
      */
     @Override
-    public boolean checkTranferReportAuthorization(ProcessTaskVo processTaskVo, String userUuid, Long relationId) {
+    public boolean checkTransferReportAuthorization(ProcessTaskVo processTaskVo, String userUuid, Long relationId) {
         AuthenticationInfoVo authenticationInfoVo = null;
         if (Objects.equals(UserContext.get().getUserUuid(), userUuid)) {
             authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();

@@ -377,7 +377,7 @@ public interface ProcessTaskService {
      * @param userUuid 用户uuid
      * @return
      */
-    boolean checkTranferReportAuthorization(ProcessTaskVo processTaskVo, String userUuid);
+    boolean checkTransferReportAuthorization(ProcessTaskVo processTaskVo, String userUuid);
 
     /**
      * 判断当前用户是否拥有工单转报权限
@@ -386,5 +386,5 @@ public interface ProcessTaskService {
      * @param relationId 转报关系id
      * @return
      */
-    boolean checkTranferReportAuthorization(ProcessTaskVo processTaskVo, String userUuid, Long relationId);
+    boolean checkTransferReportAuthorization(ProcessTaskVo processTaskVo, String userUuid, Long relationId);
 }
