@@ -1,5 +1,7 @@
 package codedriver.module.process.api.processtask;
 
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,9 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
+
+import java.util.Objects;
+
 @Service
 @Transactional
 @AuthAction(action = PROCESSTASK_MODIFY.class)
@@ -49,6 +54,13 @@ public class ProcessTaskShowHideApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Integer isShow = jsonObj.getInteger("isShow");
+        ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_SHOW;
+        if (Objects.equals(isShow, 0)) {
+            operationType = ProcessTaskOperationType.PROCESSTASK_HIDE;
+        }
+        new ProcessAuthManager.TaskOperationChecker(processTaskId, operationType)
+                .build()
+                .checkAndNoPermissionThrowException();
         ProcessTaskVo processTaskVo = new ProcessTaskVo();
         processTaskVo.setId(processTaskId);
         processTaskVo.setIsShow(isShow);

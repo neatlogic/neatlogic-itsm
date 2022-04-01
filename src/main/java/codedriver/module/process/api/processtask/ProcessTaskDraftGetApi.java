@@ -9,20 +9,22 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
+import codedriver.framework.process.crossover.IProcessTaskCrossoverService;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
+import codedriver.framework.process.exception.operationauth.ProcessTaskOperationUnauthorizedException;
 import codedriver.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskViewDeniedException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
@@ -30,7 +32,6 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.dao.mapper.ProcessMapper;
-import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
@@ -61,9 +62,6 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessMapper processMapper;
-
-    @Resource
-    private CatalogService catalogService;
 
     @Resource
     private ProcessTaskService processTaskService;
@@ -104,12 +102,48 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         String channelUuid = jsonObj.getString("channelUuid");
         ProcessTaskVo processTaskVo = null;
         if (processTaskId != null) {
+            //已经暂存，从工单中心进入上报页
+            try {
+                new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_START)
+                        .build()
+                        .checkAndNoPermissionThrowException();
+            } catch (ProcessTaskPermissionDeniedException e) {
+                throw new PermissionDeniedException(e.getMessage());
+            }
             processTaskVo=  getProcessTaskVoByProcessTaskId(processTaskId);
         } else if (copyProcessTaskId != null) {
+            //复制上报
+            try {
+                new ProcessAuthManager.TaskOperationChecker(copyProcessTaskId, ProcessTaskOperationType.PROCESSTASK_COPYPROCESSTASK)
+                        .build()
+                        .checkAndNoPermissionThrowException();
+            } catch (ProcessTaskPermissionDeniedException e) {
+                throw new PermissionDeniedException(e.getMessage());
+            }
             processTaskVo =  getProcessTaskVoByCopyProcessTaskId(copyProcessTaskId);
         } else if (channelUuid != null) {
-            Long fromProcessTaskId = jsonObj.getLong("fromProcessTaskId");
             Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
+            Long fromProcessTaskId = jsonObj.getLong("fromProcessTaskId");
+            if (fromProcessTaskId != null) {
+                ProcessTaskVo fromProcessTaskVo = processTaskService.checkProcessTaskParamsIsLegal(fromProcessTaskId);
+                //转报
+                try {
+                    new ProcessAuthManager.TaskOperationChecker(fromProcessTaskId, ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT)
+                            .build()
+                            .checkAndNoPermissionThrowException();
+                } catch (ProcessTaskPermissionDeniedException e) {
+                    throw new PermissionDeniedException(e.getMessage());
+                }
+                if (channelTypeRelationId == null) {
+                    throw new ParamNotExistsException("channelTypeRelationId");
+                }
+                IProcessTaskCrossoverService processTaskCrossoverService = CrossoverServiceFactory.getApi(IProcessTaskCrossoverService.class);
+                boolean flag = processTaskCrossoverService.checkTranferreportAuthorize(fromProcessTaskVo, UserContext.get().getUserUuid(true), channelTypeRelationId);
+                if (!flag) {
+                    new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT);
+                }
+            }
+
             processTaskVo =  getProcessTaskVoByChannelUuid(channelUuid, fromProcessTaskId, channelTypeRelationId);
         } else {
             throw new ParamNotExistsException("processTaskId", "copyProcessTaskId", "channelUuid");
@@ -171,30 +205,24 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
     private ProcessTaskVo getProcessTaskVoByProcessTaskId(Long processTaskId) throws Exception {
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 
-        try {
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_START)
-                    .build()
-                    .checkAndNoPermissionThrowException();
-        } catch (ProcessTaskPermissionDeniedException e) {
-            throw new PermissionDeniedException(e.getMessage());
-        }
+
 //        if(!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_START).build().check()){
 //            throw new PermissionDeniedException();
 //        }
         processTaskService.setProcessTaskDetail(processTaskVo);
         /* 判断当前用户是否拥有channelUuid服务的上报权限 **/
-        if (!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), UserContext.get().getUserUuid(true))) {
-            throw new PermissionDeniedException();
-            /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
-//            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
-//            if(StringUtils.isNotBlank(agentUuid)){
-//                if(!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), agentUuid)){
-//                    throw new PermissionDeniedException();
-//                }
-//            }else{
-//                throw new PermissionDeniedException();
-//            }
-        }
+//        if (!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), UserContext.get().getUserUuid(true))) {
+//            throw new PermissionDeniedException();
+//            /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
+////            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
+////            if(StringUtils.isNotBlank(agentUuid)){
+////                if(!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), agentUuid)){
+////                    throw new PermissionDeniedException();
+////                }
+////            }else{
+////                throw new PermissionDeniedException();
+////            }
+//        }
 
         String owner = processTaskVo.getOwner();
         if (StringUtils.isNotBlank(owner)) {
@@ -253,19 +281,19 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             throw new ChannelNotFoundException(channelUuid);
         }
         /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
-        if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
-            throw new ProcessTaskViewDeniedException(channel.getName());
-//            throw new PermissionDeniedException();
-            /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
-//            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
-//            if(StringUtils.isNotBlank(agentUuid)){
-//                if(!catalogService.channelIsAuthority(channelUuid, agentUuid)){
-//                    throw new PermissionDeniedException();
-//                }
-//            }else{
-//                throw new PermissionDeniedException();
-//            }
-        }
+//        if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
+//            throw new ProcessTaskViewDeniedException(channel.getName());
+////            throw new PermissionDeniedException();
+//            /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
+////            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
+////            if(StringUtils.isNotBlank(agentUuid)){
+////                if(!catalogService.channelIsAuthority(channelUuid, agentUuid)){
+////                    throw new PermissionDeniedException();
+////                }
+////            }else{
+////                throw new PermissionDeniedException();
+////            }
+//        }
         ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
         if (channelTypeVo == null) {
             throw new ChannelTypeNotFoundException(channel.getChannelTypeUuid());

@@ -2,7 +2,9 @@ package codedriver.module.process.api.processtask;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.crossover.IProcessTaskRetreatableStepListApiCrossoverService;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.service.ProcessTaskAgentService;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -58,6 +60,9 @@ public class ProcessTaskRetreatableStepListApi extends PrivateApiComponentBase i
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+		new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_RETREAT)
+				.build()
+				.checkAndNoPermissionThrowException();
 		Set<ProcessTaskStepVo> resultList = processTaskService.getRetractableStepListByProcessTask(processTaskVo, UserContext.get().getUserUuid(true));
 		/** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
 		List<String> fromUserUUidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), processTaskVo.getChannelUuid());

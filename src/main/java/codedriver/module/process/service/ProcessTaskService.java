@@ -371,4 +371,20 @@ public interface ProcessTaskService {
      */
     JSONObject batchCompleteProcessTaskStep(JSONObject jsonObj);
 
+    /**
+     * 判断当前用户是否拥有工单转报权限
+     * @param processTaskVo 工单信息
+     * @param userUuid 用户uuid
+     * @return
+     */
+    boolean checkTranferreportAuthorize(ProcessTaskVo processTaskVo, String userUuid);
+
+    /**
+     * 判断当前用户是否拥有工单转报权限
+     * @param processTaskVo 工单信息
+     * @param userUuid 用户uuid
+     * @param relationId 转报关系id
+     * @return
+     */
+    boolean checkTranferreportAuthorize(ProcessTaskVo processTaskVo, String userUuid, Long relationId);
 }

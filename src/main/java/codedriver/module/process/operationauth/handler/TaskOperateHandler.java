@@ -4,22 +4,18 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
-import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.constvalue.*;
-import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.operationauth.*;
+import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONPath;
 
 import codedriver.framework.auth.core.AuthActionChecker;
-import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
@@ -35,9 +31,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
     @Autowired
     private ChannelMapper channelMapper;
     @Autowired
-    private ChannelTypeMapper channelTypeMapper;
-    @Autowired
-    private CatalogMapper catalogMapper;
+    private ProcessTaskService processTaskService;
     @Autowired
     private CatalogService catalogService;
 
@@ -496,64 +490,9 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                         return true;
                     }
                     //3.判断当前用户是否有“转报”操作权限，如果没有，则提示“您的'转报'操作未获得授权”；
-                    AuthenticationInfoVo authenticationInfoVo = null;
-                    if (Objects.equals(UserContext.get().getUserUuid(), userUuid)) {
-                        authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
-                    } else {
-                        authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
-                    }
-                    List<String> processUserTypeList = new ArrayList<>();
-                    if (userUuid.equals(processTaskVo.getOwner())) {
-                        processUserTypeList.add(ProcessUserType.OWNER.getValue());
-                    }
-                    if (userUuid.equals(processTaskVo.getReporter())) {
-                        processUserTypeList.add(ProcessUserType.REPORTER.getValue());
-                    }
-                    if (checkIsProcessTaskStepUser(processTaskVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        processUserTypeList.add(ProcessUserType.MAJOR.getValue());
-                        processUserTypeList.add(ProcessUserType.WORKER.getValue());
-                    } else if (checkIsWorker(processTaskVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        processUserTypeList.add(ProcessUserType.WORKER.getValue());
-                    }
-                    if (checkIsProcessTaskStepUser(processTaskVo, ProcessUserType.MINOR.getValue(), userUuid)) {
-                        processUserTypeList.add(ProcessUserType.MINOR.getValue());
-                    }
-                    List<Long> channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(
-                            processTaskVo.getChannelUuid(), userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), processUserTypeList);
-                    if (CollectionUtils.isNotEmpty(channelTypeRelationIdList)) {
-                        ChannelRelationVo channelRelationVo = new ChannelRelationVo();
-                        channelRelationVo.setSource(processTaskVo.getChannelUuid());
-                        for (Long channelTypeRelationId : channelTypeRelationIdList) {
-                            channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
-                            List<ChannelRelationVo> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
-                            if (CollectionUtils.isNotEmpty(channelRelationTargetList)) {
-                                List<String> channelTypeUuidList = channelTypeMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
-                                if (channelTypeUuidList.contains("all")) {
-                                    channelTypeUuidList.clear();
-                                }
-                                for (ChannelRelationVo channelRelation : channelRelationTargetList) {
-                                    if ("channel".equals(channelRelation.getType())) {
-                                        return true;
-                                    } else if ("catalog".equals(channelRelation.getType())) {
-                                        if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(channelRelation.getTarget(), channelTypeUuidList) > 0) {
-                                            return true;
-                                        } else {
-                                            CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channelRelation.getTarget());
-                                            if (catalogVo != null) {
-                                                List<String> uuidList = catalogMapper.getCatalogUuidListByLftRht(catalogVo.getLft(), catalogVo.getRht());
-                                                for (String uuid : uuidList) {
-                                                    if (!channelRelation.getTarget().equals(uuid)) {
-                                                        if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(uuid, channelTypeUuidList) > 0) {
-                                                            return true;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    boolean flag = processTaskService.checkTranferreportAuthorize(processTaskVo, userUuid);
+                    if (flag) {
+                       return true;
                     }
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
