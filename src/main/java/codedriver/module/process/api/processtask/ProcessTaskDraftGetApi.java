@@ -204,26 +204,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
     private ProcessTaskVo getProcessTaskVoByProcessTaskId(Long processTaskId) throws Exception {
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-
-
-//        if(!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_START).build().check()){
-//            throw new PermissionDeniedException();
-//        }
         processTaskService.setProcessTaskDetail(processTaskVo);
-        /* 判断当前用户是否拥有channelUuid服务的上报权限 **/
-//        if (!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), UserContext.get().getUserUuid(true))) {
-//            throw new PermissionDeniedException();
-//            /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
-////            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
-////            if(StringUtils.isNotBlank(agentUuid)){
-////                if(!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), agentUuid)){
-////                    throw new PermissionDeniedException();
-////                }
-////            }else{
-////                throw new PermissionDeniedException();
-////            }
-//        }
-
         String owner = processTaskVo.getOwner();
         if (StringUtils.isNotBlank(owner)) {
             owner = GroupSearch.USER.getValuePlugin() + owner;
@@ -280,20 +261,6 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         if (channel == null) {
             throw new ChannelNotFoundException(channelUuid);
         }
-        /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
-//        if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
-//            throw new ProcessTaskViewDeniedException(channel.getName());
-////            throw new PermissionDeniedException();
-//            /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
-////            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
-////            if(StringUtils.isNotBlank(agentUuid)){
-////                if(!catalogService.channelIsAuthority(channelUuid, agentUuid)){
-////                    throw new PermissionDeniedException();
-////                }
-////            }else{
-////                throw new PermissionDeniedException();
-////            }
-//        }
         ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
         if (channelTypeVo == null) {
             throw new ChannelTypeNotFoundException(channel.getChannelTypeUuid());
