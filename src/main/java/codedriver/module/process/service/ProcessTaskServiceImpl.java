@@ -1201,10 +1201,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             processTaskVo.setScoreInfo(scoreInfo);
         }
         /** 转报数据 **/
-        ProcessTaskTranferReportVo processTaskTranferReportVo = processTaskMapper.getProcessTaskTransferReportByToProcessTaskId(processTaskId);
-        if (processTaskTranferReportVo != null) {
-            ProcessTaskVo fromProcessTaskVo = getFromProcessTaskById(processTaskTranferReportVo.getFromProcessTaskId());
-            ChannelTypeRelationVo channelTypeRelationVo = channelTypeMapper.getChannelTypeRelationById(processTaskTranferReportVo.getChannelTypeRelationId());
+        ProcessTaskTransferReportVo processTaskTransferReportVo = processTaskMapper.getProcessTaskTransferReportByToProcessTaskId(processTaskId);
+        if (processTaskTransferReportVo != null) {
+            ProcessTaskVo fromProcessTaskVo = getFromProcessTaskById(processTaskTransferReportVo.getFromProcessTaskId());
+            ChannelTypeRelationVo channelTypeRelationVo = channelTypeMapper.getChannelTypeRelationById(processTaskTransferReportVo.getChannelTypeRelationId());
             if (channelTypeRelationVo != null) {
                 fromProcessTaskVo.setChannelTypeRelationName(channelTypeRelationVo.getName());
             }

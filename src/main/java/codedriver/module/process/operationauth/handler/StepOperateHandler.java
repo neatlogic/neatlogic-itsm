@@ -656,14 +656,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
             //4.判断工单状态是否是“已取消”，如果是，则提示“工单已取消”；
             //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
-            //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
             //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
             ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
                     ProcessTaskStatus.FAILED,
-                    ProcessTaskStatus.HANG,
+//                    ProcessTaskStatus.HANG,
                     ProcessTaskStatus.SCORED);
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())

@@ -2,7 +2,6 @@ package codedriver.module.process.api.processtask;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
@@ -14,7 +13,6 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.restful.annotation.Description;
@@ -78,7 +76,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT)
+        new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT)
                 .build()
                 .checkAndNoPermissionThrowException();
         Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
