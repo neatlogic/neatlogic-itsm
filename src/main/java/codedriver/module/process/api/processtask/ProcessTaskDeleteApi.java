@@ -10,6 +10,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
 import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSlaMapper;
@@ -19,6 +20,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
 import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -79,6 +81,9 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         if (taskMapper.getProcessTaskLockById(processTaskId) == null) {
             throw new ProcessTaskNotFoundException(processTaskId.toString());
         }
+        new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_DELETE)
+                .build()
+                .checkAndNoPermissionThrowException();
         // is_deleted置为1
         taskMapper.updateProcessTaskIsDeletedById(processTaskId, 1);
         ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskId, null);
