@@ -662,7 +662,6 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
                     ProcessTaskStatus.FAILED,
-//                    ProcessTaskStatus.HANG,
                     ProcessTaskStatus.SCORED);
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
