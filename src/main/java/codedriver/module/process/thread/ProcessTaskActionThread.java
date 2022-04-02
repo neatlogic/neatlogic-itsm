@@ -98,7 +98,7 @@ public class ProcessTaskActionThread extends CodeDriverThread {
 
             /* 从步骤配置信息中获取动作列表 **/
             if (CollectionUtils.isNotEmpty(actionList)) {
-                List<String> paramEnumValueList = Arrays.stream(ProcessTaskParams.values()).map(ProcessTaskParams::getValue).collect(Collectors.toList());
+                List<String> processTaskParams = Arrays.stream(ProcessTaskParams.values()).map(ProcessTaskParams::getValue).collect(Collectors.toList());
                 for (int i = 0; i < actionList.size(); i++) {
                     JSONObject actionObj = actionList.getJSONObject(i);
                     if (triggerType.getTrigger().equals(actionObj.getString("trigger"))) {
@@ -116,7 +116,7 @@ public class ProcessTaskActionThread extends CodeDriverThread {
                         List<ParamMappingVo> paramMappingList = JSON.parseArray(
                                 actionObj.getJSONArray("paramMappingList").toJSONString(), ParamMappingVo.class);
                         if (CollectionUtils.isNotEmpty(paramMappingList)) {
-                            JSONObject processFieldData = ProcessTaskConditionFactory.getConditionParamData(paramEnumValueList, currentProcessTaskStepVo);
+                            JSONObject processFieldData = ProcessTaskConditionFactory.getConditionParamData(processTaskParams, currentProcessTaskStepVo);
 //                            ProcessTaskVo processTaskVo =
 //                                    processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
 //                            processTaskVo.setStartProcessTaskStep(

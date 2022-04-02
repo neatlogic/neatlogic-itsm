@@ -11,9 +11,11 @@ import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dto.condition.ConditionConfigVo;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.*;
-import codedriver.framework.process.dto.*;
+import codedriver.framework.process.dto.ProcessTaskStepRelVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.framework.process.dto.RelExpressionVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
-import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.util.RunScriptUtil;
 import com.alibaba.fastjson.JSON;
@@ -24,7 +26,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.script.Invocable;
@@ -104,7 +105,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                 JSONArray moveonConfigList = (JSONArray) JSONPath.read(stepConfig, "moveonConfigList");
                 if (CollectionUtils.isNotEmpty(moveonConfigList)) {
                     JSONArray ruleList = new JSONArray();
-                    List<String> paramEnumValueList = Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList());
+                    List<String> conditionProcessTaskOptions = Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList());
                     for (int i = 0; i < moveonConfigList.size(); i++) {
                         JSONObject moveonConfig = moveonConfigList.getJSONObject(i);
                         JSONArray targetStepList = moveonConfig.getJSONArray("targetStepList");
@@ -119,7 +120,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                             } else if ("optional".equals(type)) {// 自定义
                                 JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
                                 if (CollectionUtils.isNotEmpty(conditionGroupList)) {
-                                    JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(paramEnumValueList, currentProcessTaskStepVo);
+                                    JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(conditionProcessTaskOptions, currentProcessTaskStepVo);
 //                                    ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
 //                                    processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
 //                                    processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);

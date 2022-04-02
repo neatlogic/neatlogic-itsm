@@ -115,7 +115,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
     private Long getSlaTimeSumBySlaConfig(JSONObject slaConfigObj, ProcessTaskVo processTaskVo) {
         JSONArray policyList = slaConfigObj.getJSONArray("calculatePolicyList");
         if (CollectionUtils.isNotEmpty(policyList)) {
-            List<String> paramEnumValueList = Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList());
+            List<String> conditionProcessTaskOptions = Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList());
             for (int i = 0; i < policyList.size(); i++) {
                 JSONObject policyObj = policyList.getJSONObject(i);
                 int enablePriority = policyObj.getIntValue("enablePriority");
@@ -133,7 +133,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                         if (currentProcessTaskStepVo != null) {
                             processTaskStepVo.setId(currentProcessTaskStepVo.getId());
                         }
-                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(paramEnumValueList, processTaskStepVo);
+                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(conditionProcessTaskOptions, processTaskStepVo);
 //                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
                         ConditionParamContext.init(conditionParamData);
                         ConditionConfigVo conditionConfigVo = new ConditionConfigVo(policyObj);
