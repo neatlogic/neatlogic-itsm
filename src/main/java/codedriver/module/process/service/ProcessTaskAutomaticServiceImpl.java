@@ -51,15 +51,17 @@ import javax.annotation.Resource;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author lvzk
  * @since 2021/8/16 15:47
  **/
 @Service
-public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticService{
+public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticService {
     private static Logger logger = LoggerFactory.getLogger(ProcessTaskAutomaticServiceImpl.class);
     @Resource
     private IntegrationMapper integrationMapper;
@@ -375,6 +377,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
     /**
      * 第一次请求
+     *
      * @param currentProcessTaskStepVo
      */
     @Override
@@ -466,8 +469,8 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 //拼凑失败原因
                 String failedReason = StringUtils.EMPTY;
                 if (StringUtils.isNotBlank(resultVo.getError())) {
-                    failedReason = integrationVo.getUrl()+"\n"+resultVo.getError();
-                }else {
+                    failedReason = integrationVo.getUrl() + "\n" + resultVo.getError();
+                } else {
                     if (MapUtils.isNotEmpty(successConfig)) {
                         if (StringUtils.isBlank(successConfig.getString("name"))) {
                             failedReason = "-";
@@ -504,6 +507,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
     /**
      * 回调请求
+     *
      * @param currentProcessTaskStepVo
      * @return
      */
@@ -574,8 +578,8 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 //拼凑失败原因
                 String failedReason = StringUtils.EMPTY;
                 if (StringUtils.isNotBlank(resultVo.getError())) {
-                    failedReason = integrationVo.getUrl()+"\n"+resultVo.getError();
-                }else {
+                    failedReason = integrationVo.getUrl() + "\n" + resultVo.getError();
+                } else {
                     if (MapUtils.isNotEmpty(failConfig)) {
                         if (StringUtils.isBlank(failConfig.getString("name"))) {
                             failedReason = "-";
@@ -615,6 +619,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
     /**
      * 获取流程步骤自动处理配置信息
+     *
      * @param processTaskStepId
      * @return
      */
@@ -629,13 +634,14 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
     /**
      * 组装请求参数
+     *
      * @param currentProcessTaskStepVo
      * @param paramList
      * @param resultJson
      * @return
      */
     private JSONObject getIntegrationParam(ProcessTaskStepVo currentProcessTaskStepVo, JSONArray paramList, JSONObject resultJson) {
-        JSONObject processTaskJson = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), currentProcessTaskStepVo);
+        JSONObject processTaskJson = ProcessTaskConditionFactory.getConditionParamData(Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList()), currentProcessTaskStepVo);
 //        ProcessTaskStepVo stepVo = processTaskService.getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
 //        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
 //        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
@@ -662,6 +668,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
     /**
      * 获取回调信息
+     *
      * @param automaticConfigVo
      * @return
      */
@@ -690,6 +697,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
     /**
      * 失败策略
+     *
      * @param automaticConfigVo
      * @param currentProcessTaskStepVo
      * @param failedReason

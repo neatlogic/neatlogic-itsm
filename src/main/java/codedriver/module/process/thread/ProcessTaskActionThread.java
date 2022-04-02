@@ -16,10 +16,10 @@ import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.notify.core.INotifyTriggerType;
 import codedriver.framework.notify.dto.ParamMappingVo;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
-import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
+import codedriver.framework.process.constvalue.ProcessTaskParams;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ActionVo;
@@ -41,7 +41,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProcessTaskActionThread extends CodeDriverThread {
@@ -96,6 +98,7 @@ public class ProcessTaskActionThread extends CodeDriverThread {
 
             /* 从步骤配置信息中获取动作列表 **/
             if (CollectionUtils.isNotEmpty(actionList)) {
+                List<String> processTaskParams = Arrays.stream(ProcessTaskParams.values()).map(ProcessTaskParams::getValue).collect(Collectors.toList());
                 for (int i = 0; i < actionList.size(); i++) {
                     JSONObject actionObj = actionList.getJSONObject(i);
                     if (triggerType.getTrigger().equals(actionObj.getString("trigger"))) {
@@ -113,7 +116,7 @@ public class ProcessTaskActionThread extends CodeDriverThread {
                         List<ParamMappingVo> paramMappingList = JSON.parseArray(
                                 actionObj.getJSONArray("paramMappingList").toJSONString(), ParamMappingVo.class);
                         if (CollectionUtils.isNotEmpty(paramMappingList)) {
-                            JSONObject processFieldData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), currentProcessTaskStepVo);
+                            JSONObject processFieldData = ProcessTaskConditionFactory.getConditionParamData(processTaskParams, currentProcessTaskStepVo);
 //                            ProcessTaskVo processTaskVo =
 //                                    processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
 //                            processTaskVo.setStartProcessTaskStep(
