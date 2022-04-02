@@ -16,6 +16,7 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.*;
 import codedriver.framework.event.constvalue.EventProcessStepHandlerType;
 import codedriver.framework.exception.file.FileNotFoundException;
+import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.file.dao.mapper.FileMapper;
@@ -35,6 +36,8 @@ import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.core.ProcessTaskPriorityNotMatchException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.file.ProcessTaskFileDownloadException;
+import codedriver.framework.process.exception.operationauth.ProcessTaskOperationUnauthorizedException;
+import codedriver.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
@@ -2038,7 +2041,27 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         processTaskStepDataVo = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
         if (processTaskStepDataVo != null) {
             JSONObject dataObj = processTaskStepDataVo.getData();
-            if (com.alibaba.nacos.common.utils.MapUtils.isNotEmpty(dataObj)) {
+            if (MapUtils.isNotEmpty(dataObj)) {
+                Long channelTypeRelationId = dataObj.getLong("channelTypeRelationId");
+                Long fromProcessTaskId = dataObj.getLong("fromProcessTaskId");
+                if (fromProcessTaskId != null) {
+                    ProcessTaskVo fromProcessTaskVo = checkProcessTaskParamsIsLegal(fromProcessTaskId);
+                    //转报
+                    try {
+                        new ProcessAuthManager.TaskOperationChecker(fromProcessTaskId, ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT)
+                                .build()
+                                .checkAndNoPermissionThrowException();
+                    } catch (ProcessTaskPermissionDeniedException e) {
+                        throw new PermissionDeniedException(e.getMessage());
+                    }
+                    if (channelTypeRelationId == null) {
+                        throw new ParamNotExistsException("channelTypeRelationId");
+                    }
+                    boolean flag = checkTransferReportAuthorization(fromProcessTaskVo, UserContext.get().getUserUuid(true), channelTypeRelationId);
+                    if (!flag) {
+                        new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT);
+                    }
+                }
                 jsonObj.putAll(dataObj);
             }
         }
