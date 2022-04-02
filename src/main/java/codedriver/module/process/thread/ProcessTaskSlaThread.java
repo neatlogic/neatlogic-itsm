@@ -43,6 +43,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProcessTaskSlaThread extends CodeDriverThread {
@@ -114,6 +115,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
     private Long getSlaTimeSumBySlaConfig(JSONObject slaConfigObj, ProcessTaskVo processTaskVo) {
         JSONArray policyList = slaConfigObj.getJSONArray("calculatePolicyList");
         if (CollectionUtils.isNotEmpty(policyList)) {
+            List<String> paramEnumValueList = Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList());
             for (int i = 0; i < policyList.size(); i++) {
                 JSONObject policyObj = policyList.getJSONObject(i);
                 int enablePriority = policyObj.getIntValue("enablePriority");
@@ -131,7 +133,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                         if (currentProcessTaskStepVo != null) {
                             processTaskStepVo.setId(currentProcessTaskStepVo.getId());
                         }
-                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), processTaskStepVo);
+                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(paramEnumValueList, processTaskStepVo);
 //                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
                         ConditionParamContext.init(conditionParamData);
                         ConditionConfigVo conditionConfigVo = new ConditionConfigVo(policyObj);
@@ -345,13 +347,14 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
 
     /**
      * 判断当前工单的sla是否失效，返回有效的slaId列表
+     *
      * @param processTaskId
      */
     private List<Long> slaIsInvalid(Long processTaskId) {
         List<Long> resultList = new ArrayList<>();
         ProcessTaskSlaVo processTaskSlaVo = new ProcessTaskSlaVo();
         List<Long> allSlaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskId(processTaskId);
-        for (Long slaId: allSlaIdList) {
+        for (Long slaId : allSlaIdList) {
 //            System.out.println("slaId=" + slaId);
             processTaskSlaVo.setId(slaId);
             boolean invalid = true;
@@ -359,7 +362,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
             for (Long processTaskStepId : processTaskStepIdList) {
                 invalid = true;
 //                ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-                List<ProcessTaskStepRelVo> processTaskStepRelList =  processTaskMapper.getProcessTaskStepRelByToId(processTaskStepId);
+                List<ProcessTaskStepRelVo> processTaskStepRelList = processTaskMapper.getProcessTaskStepRelByToId(processTaskStepId);
                 for (ProcessTaskStepRelVo processTaskStepRelVo : processTaskStepRelList) {
 //                    ProcessTaskStepVo fromProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepRelVo.getFromProcessTaskStepId());
                     if (processTaskStepRelVo.getType().equals(ProcessFlowDirection.FORWARD.getValue())) {

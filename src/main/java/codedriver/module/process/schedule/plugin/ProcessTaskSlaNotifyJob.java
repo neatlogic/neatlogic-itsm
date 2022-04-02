@@ -232,7 +232,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                         ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
                         processTaskStep.setIsAutoGenerateId(false);
                         processTaskStep.setProcessTaskId(processTaskSlaVo.getProcessTaskId());
-                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), processTaskStep);
+                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList()), processTaskStep);
 //                        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskSlaVo.getProcessTaskId());
 //                        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
 //                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);

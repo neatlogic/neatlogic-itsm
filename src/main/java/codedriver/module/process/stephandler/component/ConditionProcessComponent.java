@@ -104,6 +104,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                 JSONArray moveonConfigList = (JSONArray) JSONPath.read(stepConfig, "moveonConfigList");
                 if (CollectionUtils.isNotEmpty(moveonConfigList)) {
                     JSONArray ruleList = new JSONArray();
+                    List<String> paramEnumValueList = Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList());
                     for (int i = 0; i < moveonConfigList.size(); i++) {
                         JSONObject moveonConfig = moveonConfigList.getJSONObject(i);
                         JSONArray targetStepList = moveonConfig.getJSONArray("targetStepList");
@@ -118,7 +119,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                             } else if ("optional".equals(type)) {// 自定义
                                 JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
                                 if (CollectionUtils.isNotEmpty(conditionGroupList)) {
-                                    JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), currentProcessTaskStepVo);
+                                    JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(paramEnumValueList, currentProcessTaskStepVo);
 //                                    ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
 //                                    processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
 //                                    processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
@@ -350,6 +351,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
     /**
      * 回退输出路径数量
      * -1代表不限制
+     *
      * @return
      */
     @Override
