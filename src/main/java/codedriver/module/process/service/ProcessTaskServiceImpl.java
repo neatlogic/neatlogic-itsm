@@ -16,6 +16,7 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.*;
 import codedriver.framework.event.constvalue.EventProcessStepHandlerType;
 import codedriver.framework.exception.file.FileNotFoundException;
+import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.file.dao.mapper.FileMapper;
@@ -35,6 +36,8 @@ import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.core.ProcessTaskPriorityNotMatchException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.file.ProcessTaskFileDownloadException;
+import codedriver.framework.process.exception.operationauth.ProcessTaskOperationUnauthorizedException;
+import codedriver.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
@@ -2038,7 +2041,28 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         processTaskStepDataVo = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
         if (processTaskStepDataVo != null) {
             JSONObject dataObj = processTaskStepDataVo.getData();
-            if (com.alibaba.nacos.common.utils.MapUtils.isNotEmpty(dataObj)) {
+            if (MapUtils.isNotEmpty(dataObj)) {
+                Long fromProcessTaskId = dataObj.getLong("fromProcessTaskId");
+                if (fromProcessTaskId != null) {
+                    ProcessTaskVo fromProcessTaskVo = checkProcessTaskParamsIsLegal(fromProcessTaskId);
+                    Long channelTypeRelationId = dataObj.getLong("channelTypeRelationId");
+                    if (channelTypeRelationId == null) {
+                        throw new ParamNotExistsException("channelTypeRelationId");
+                    }
+                    //转报
+                    try {
+                        new ProcessAuthManager.TaskOperationChecker(fromProcessTaskId, ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT)
+                                .addExtraParam("channelTypeRelationId", channelTypeRelationId)
+                                .build()
+                                .checkAndNoPermissionThrowException();
+                    } catch (ProcessTaskPermissionDeniedException e) {
+                        throw new PermissionDeniedException(e.getMessage());
+                    }
+//                    boolean flag = checkTransferReportAuthorization(fromProcessTaskVo, UserContext.get().getUserUuid(true), channelTypeRelationId);
+//                    if (!flag) {
+//                        new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT);
+//                    }
+                }
                 jsonObj.putAll(dataObj);
             }
         }
@@ -2308,120 +2332,120 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         completeProcessTaskStep(param);
     }
 
-    /**
-     * 判断当前用户是否拥有工单转报权限
-     * @param processTaskVo 工单信息
-     * @param userUuid 用户uuid
-     * @return
-     */
-    @Override
-    public boolean checkTransferReportAuthorization(ProcessTaskVo processTaskVo, String userUuid) {
-        return checkTransferReportAuthorization(processTaskVo, userUuid, null);
-    }
+//    /**
+//     * 判断当前用户是否拥有工单转报权限
+//     * @param processTaskVo 工单信息
+//     * @param userUuid 用户uuid
+//     * @return
+//     */
+//    @Override
+//    public boolean checkTransferReportAuthorization(ProcessTaskVo processTaskVo, String userUuid) {
+//        return checkTransferReportAuthorization(processTaskVo, userUuid, null);
+//    }
 
-    /**
-     * 判断当前用户是否拥有工单转报权限
-     * @param processTaskVo 工单信息
-     * @param userUuid 用户uuid
-     * @param relationId 转报关系id
-     * @return
-     */
-    @Override
-    public boolean checkTransferReportAuthorization(ProcessTaskVo processTaskVo, String userUuid, Long relationId) {
-        AuthenticationInfoVo authenticationInfoVo = null;
-        if (Objects.equals(UserContext.get().getUserUuid(), userUuid)) {
-            authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
-        } else {
-            authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
-        }
-        List<String> processUserTypeList = new ArrayList<>();
-        if (userUuid.equals(processTaskVo.getOwner())) {
-            processUserTypeList.add(ProcessUserType.OWNER.getValue());
-        }
-        if (userUuid.equals(processTaskVo.getReporter())) {
-            processUserTypeList.add(ProcessUserType.REPORTER.getValue());
-        }
-
-        List<ProcessTaskStepVo> processTaskStepList = processTaskVo.getStepList();
-        if (CollectionUtils.isNotEmpty(processTaskStepList)) {
-            for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-                for (ProcessTaskStepUserVo processTaskStepUserVo : processTaskStepVo.getUserList()) {
-                    if (userUuid.equals(processTaskStepUserVo.getUserUuid())) {
-                        if (ProcessUserType.MAJOR.getValue().equals(processTaskStepUserVo.getUserType())) {
-                            if (!processUserTypeList.contains(ProcessUserType.MAJOR.getValue())) {
-                                processUserTypeList.add(ProcessUserType.MAJOR.getValue());
-                            }
-                        }
-                        if (ProcessUserType.WORKER.getValue().equals(processTaskStepUserVo.getUserType())) {
-                            if (!processUserTypeList.contains(ProcessUserType.MAJOR.getValue())) {
-                                processUserTypeList.add(ProcessUserType.WORKER.getValue());
-                            }
-                        }
-                        if (ProcessUserType.MINOR.getValue().equals(processTaskStepUserVo.getUserType())) {
-                            if (!processUserTypeList.contains(ProcessUserType.MAJOR.getValue())) {
-                                processUserTypeList.add(ProcessUserType.MINOR.getValue());
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
-            processTaskStepUserVo.setProcessTaskId(processTaskVo.getId());
-            processTaskStepUserVo.setUserUuid(userUuid);
-            processTaskStepUserVo.setUserType(ProcessUserType.MAJOR.getValue());
-            if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
-                processUserTypeList.add(ProcessUserType.MAJOR.getValue());
-                processUserTypeList.add(ProcessUserType.WORKER.getValue());
-            } else if (processTaskMapper.checkIsWorker(processTaskVo.getId(), null, ProcessUserType.MAJOR.getValue(), authenticationInfoVo) > 0) {
-                processUserTypeList.add(ProcessUserType.WORKER.getValue());
-            }
-            processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
-            if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
-                processUserTypeList.add(ProcessUserType.MINOR.getValue());
-            }
-        }
-
-        List<Long> channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(
-                processTaskVo.getChannelUuid(), userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), processUserTypeList);
-        if (CollectionUtils.isNotEmpty(channelTypeRelationIdList)) {
-            ChannelRelationVo channelRelationVo = new ChannelRelationVo();
-            channelRelationVo.setSource(processTaskVo.getChannelUuid());
-            for (Long channelTypeRelationId : channelTypeRelationIdList) {
-                if (relationId != null && !Objects.equals(channelTypeRelationId, relationId)) {
-                    continue;
-                }
-                channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
-                List<ChannelRelationVo> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
-                if (CollectionUtils.isNotEmpty(channelRelationTargetList)) {
-                    List<String> channelTypeUuidList = channelTypeMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
-                    if (channelTypeUuidList.contains("all")) {
-                        channelTypeUuidList.clear();
-                    }
-                    for (ChannelRelationVo channelRelation : channelRelationTargetList) {
-                        if ("channel".equals(channelRelation.getType())) {
-                            return true;
-                        } else if ("catalog".equals(channelRelation.getType())) {
-                            if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(channelRelation.getTarget(), channelTypeUuidList) > 0) {
-                                return true;
-                            } else {
-                                CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channelRelation.getTarget());
-                                if (catalogVo != null) {
-                                    List<String> uuidList = catalogMapper.getCatalogUuidListByLftRht(catalogVo.getLft(), catalogVo.getRht());
-                                    for (String uuid : uuidList) {
-                                        if (!channelRelation.getTarget().equals(uuid)) {
-                                            if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(uuid, channelTypeUuidList) > 0) {
-                                                return true;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
+//    /**
+//     * 判断当前用户是否拥有工单转报权限
+//     * @param processTaskVo 工单信息
+//     * @param userUuid 用户uuid
+//     * @param relationId 转报关系id
+//     * @return
+//     */
+//    @Override
+//    public boolean checkTransferReportAuthorization(ProcessTaskVo processTaskVo, String userUuid, Long relationId) {
+//        AuthenticationInfoVo authenticationInfoVo = null;
+//        if (Objects.equals(UserContext.get().getUserUuid(), userUuid)) {
+//            authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
+//        } else {
+//            authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
+//        }
+//        List<String> processUserTypeList = new ArrayList<>();
+//        if (userUuid.equals(processTaskVo.getOwner())) {
+//            processUserTypeList.add(ProcessUserType.OWNER.getValue());
+//        }
+//        if (userUuid.equals(processTaskVo.getReporter())) {
+//            processUserTypeList.add(ProcessUserType.REPORTER.getValue());
+//        }
+//
+//        List<ProcessTaskStepVo> processTaskStepList = processTaskVo.getStepList();
+//        if (CollectionUtils.isNotEmpty(processTaskStepList)) {
+//            for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+//                for (ProcessTaskStepUserVo processTaskStepUserVo : processTaskStepVo.getUserList()) {
+//                    if (userUuid.equals(processTaskStepUserVo.getUserUuid())) {
+//                        if (ProcessUserType.MAJOR.getValue().equals(processTaskStepUserVo.getUserType())) {
+//                            if (!processUserTypeList.contains(ProcessUserType.MAJOR.getValue())) {
+//                                processUserTypeList.add(ProcessUserType.MAJOR.getValue());
+//                            }
+//                        }
+//                        if (ProcessUserType.WORKER.getValue().equals(processTaskStepUserVo.getUserType())) {
+//                            if (!processUserTypeList.contains(ProcessUserType.MAJOR.getValue())) {
+//                                processUserTypeList.add(ProcessUserType.WORKER.getValue());
+//                            }
+//                        }
+//                        if (ProcessUserType.MINOR.getValue().equals(processTaskStepUserVo.getUserType())) {
+//                            if (!processUserTypeList.contains(ProcessUserType.MAJOR.getValue())) {
+//                                processUserTypeList.add(ProcessUserType.MINOR.getValue());
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        } else {
+//            ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
+//            processTaskStepUserVo.setProcessTaskId(processTaskVo.getId());
+//            processTaskStepUserVo.setUserUuid(userUuid);
+//            processTaskStepUserVo.setUserType(ProcessUserType.MAJOR.getValue());
+//            if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+//                processUserTypeList.add(ProcessUserType.MAJOR.getValue());
+//                processUserTypeList.add(ProcessUserType.WORKER.getValue());
+//            } else if (processTaskMapper.checkIsWorker(processTaskVo.getId(), null, ProcessUserType.MAJOR.getValue(), authenticationInfoVo) > 0) {
+//                processUserTypeList.add(ProcessUserType.WORKER.getValue());
+//            }
+//            processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
+//            if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+//                processUserTypeList.add(ProcessUserType.MINOR.getValue());
+//            }
+//        }
+//
+//        List<Long> channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(
+//                processTaskVo.getChannelUuid(), userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), processUserTypeList);
+//        if (CollectionUtils.isNotEmpty(channelTypeRelationIdList)) {
+//            ChannelRelationVo channelRelationVo = new ChannelRelationVo();
+//            channelRelationVo.setSource(processTaskVo.getChannelUuid());
+//            for (Long channelTypeRelationId : channelTypeRelationIdList) {
+//                if (relationId != null && !Objects.equals(channelTypeRelationId, relationId)) {
+//                    continue;
+//                }
+//                channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
+//                List<ChannelRelationVo> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
+//                if (CollectionUtils.isNotEmpty(channelRelationTargetList)) {
+//                    List<String> channelTypeUuidList = channelTypeMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
+//                    if (channelTypeUuidList.contains("all")) {
+//                        channelTypeUuidList.clear();
+//                    }
+//                    for (ChannelRelationVo channelRelation : channelRelationTargetList) {
+//                        if ("channel".equals(channelRelation.getType())) {
+//                            return true;
+//                        } else if ("catalog".equals(channelRelation.getType())) {
+//                            if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(channelRelation.getTarget(), channelTypeUuidList) > 0) {
+//                                return true;
+//                            } else {
+//                                CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channelRelation.getTarget());
+//                                if (catalogVo != null) {
+//                                    List<String> uuidList = catalogMapper.getCatalogUuidListByLftRht(catalogVo.getLft(), catalogVo.getRht());
+//                                    for (String uuid : uuidList) {
+//                                        if (!channelRelation.getTarget().equals(uuid)) {
+//                                            if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(uuid, channelTypeUuidList) > 0) {
+//                                                return true;
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return false;
+//    }
 }

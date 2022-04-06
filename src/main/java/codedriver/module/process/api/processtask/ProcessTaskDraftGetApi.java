@@ -5,7 +5,6 @@
 
 package codedriver.module.process.api.processtask;
 
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
@@ -19,7 +18,6 @@ import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
-import codedriver.framework.process.exception.operationauth.ProcessTaskOperationUnauthorizedException;
 import codedriver.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
@@ -124,21 +122,22 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             Long fromProcessTaskId = jsonObj.getLong("fromProcessTaskId");
             if (fromProcessTaskId != null) {
                 ProcessTaskVo fromProcessTaskVo = processTaskService.checkProcessTaskParamsIsLegal(fromProcessTaskId);
+                if (channelTypeRelationId == null) {
+                    throw new ParamNotExistsException("channelTypeRelationId");
+                }
                 //转报
                 try {
                     new ProcessAuthManager.TaskOperationChecker(fromProcessTaskId, ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT)
+                            .addExtraParam("channelTypeRelationId", channelTypeRelationId)
                             .build()
                             .checkAndNoPermissionThrowException();
                 } catch (ProcessTaskPermissionDeniedException e) {
                     throw new PermissionDeniedException(e.getMessage());
                 }
-                if (channelTypeRelationId == null) {
-                    throw new ParamNotExistsException("channelTypeRelationId");
-                }
-                boolean flag = processTaskService.checkTransferReportAuthorization(fromProcessTaskVo, UserContext.get().getUserUuid(true), channelTypeRelationId);
-                if (!flag) {
-                    new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT);
-                }
+//                boolean flag = processTaskService.checkTransferReportAuthorization(fromProcessTaskVo, UserContext.get().getUserUuid(true), channelTypeRelationId);
+//                if (!flag) {
+//                    new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT);
+//                }
             }
 
             processTaskVo =  getProcessTaskVoByChannelUuid(channelUuid, fromProcessTaskId, channelTypeRelationId);
