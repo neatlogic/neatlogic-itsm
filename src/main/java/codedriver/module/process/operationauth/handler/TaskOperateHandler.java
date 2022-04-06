@@ -4,12 +4,16 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.constvalue.*;
+import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.operationauth.*;
-import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,13 +31,15 @@ import codedriver.module.process.service.CatalogService;
 public class TaskOperateHandler extends OperationAuthHandlerBase {
 
     private Map<ProcessTaskOperationType,
-            TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<ProcessTaskOperationType, ProcessTaskPermissionDeniedException>>>> operationBiPredicateMap = new HashMap<>();
+            TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<ProcessTaskOperationType, ProcessTaskPermissionDeniedException>>, JSONObject>> operationBiPredicateMap = new HashMap<>();
     @Autowired
     private ChannelMapper channelMapper;
     @Autowired
-    private ProcessTaskService processTaskService;
+    private ChannelTypeMapper channelTypeMapper;
     @Autowired
     private CatalogService catalogService;
+    @Autowired
+    private CatalogMapper catalogMapper;
 
     @PostConstruct
     public void init() {
@@ -49,7 +55,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 5.userUuid用户有当前工单对应服务的上报权限
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_VIEW,
-                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_VIEW;
                     //1.判断工单是否被隐藏
@@ -97,7 +103,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 首先工单状态是“未提交”，然后userUuid用户是上报人或代报人，则有工单提交权限
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_START,
-                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_START;
                     //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -130,7 +136,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 首先工单状态是“处理中”，然后userUuid用户在工单对应流程图的流程设置-权限设置中获得“取消”的授权
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_ABORT,
-                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_ABORT;
                     //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -179,7 +185,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 首先工单状态是“已取消”，然后userUuid用户在工单对应流程图的流程设置-权限设置中获得“取消”的授权
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_RECOVER,
-                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_RECOVER;
                     //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -227,7 +233,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单修改上报内容权限逻辑：
          * 首先工单状态是“处理中”，然后userUuid用户在工单对应流程图的流程设置-权限设置中获得“修改上报内容”的授权
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_UPDATE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_UPDATE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_UPDATE;
             //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -274,7 +280,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单催单权限逻辑：
          * 首先工单状态是“处理中”，然后userUuid用户在工单对应流程图的流程设置-权限设置中获得“催单”的授权
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_URGE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_URGE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_URGE;
             //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -321,7 +327,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单处理权限逻辑：
          * 首先工单状态是“处理中”，然后userUuid用户是工单中某个步骤的处理人或协助处理人
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_WORK, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_WORK, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_WORK;
             //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -370,7 +376,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 首先工单状态是“处理中”，然后userUuid用户拥有工单中某个步骤的撤回权限，则有工单撤回权限
          * 步骤撤回权限逻辑在{@link codedriver.module.process.operationauth.handler.StepOperateHandler#init}中的ProcessTaskOperationType.STEP_RETREAT里
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_RETREAT, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_RETREAT, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_RETREAT;
             //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -426,7 +432,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单评分权限逻辑：
          * 首先工单状态是“已完成”，然后userUuid用户是工单上报人，且在工单对应流程图的评分设置中启用评分
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_SCORE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_SCORE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_SCORE;
             //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -467,7 +473,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * userUuid用户在工单对应服务的转报设置中获得授权，且对转报服务有上报权限
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT,
-                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT;
                     //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -490,9 +496,87 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                         return true;
                     }
                     //3.判断当前用户是否有“转报”操作权限，如果没有，则提示“您的'转报'操作未获得授权”；
-                    boolean flag = processTaskService.checkTransferReportAuthorization(processTaskVo, userUuid);
-                    if (flag) {
-                       return true;
+//                    boolean flag = processTaskService.checkTransferReportAuthorization(processTaskVo, userUuid);
+//                    if (flag) {
+//                       return true;
+//                    }
+                    AuthenticationInfoVo authenticationInfoVo = null;
+                    if (Objects.equals(UserContext.get().getUserUuid(), userUuid)) {
+                        authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
+                    } else {
+                        authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
+                    }
+                    List<String> processUserTypeList = new ArrayList<>();
+                    if (userUuid.equals(processTaskVo.getOwner())) {
+                        processUserTypeList.add(ProcessUserType.OWNER.getValue());
+                    }
+                    if (userUuid.equals(processTaskVo.getReporter())) {
+                        processUserTypeList.add(ProcessUserType.REPORTER.getValue());
+                    }
+
+                    List<ProcessTaskStepVo> processTaskStepList = processTaskVo.getStepList();
+                    for (ProcessTaskStepVo stepVo : processTaskStepList) {
+                        for (ProcessTaskStepUserVo processTaskStepUserVo : stepVo.getUserList()) {
+                            if (userUuid.equals(processTaskStepUserVo.getUserUuid())) {
+                                if (ProcessUserType.MAJOR.getValue().equals(processTaskStepUserVo.getUserType())) {
+                                    if (!processUserTypeList.contains(ProcessUserType.MAJOR.getValue())) {
+                                        processUserTypeList.add(ProcessUserType.MAJOR.getValue());
+                                    }
+                                }
+                                if (ProcessUserType.WORKER.getValue().equals(processTaskStepUserVo.getUserType())) {
+                                    if (!processUserTypeList.contains(ProcessUserType.MAJOR.getValue())) {
+                                        processUserTypeList.add(ProcessUserType.WORKER.getValue());
+                                    }
+                                }
+                                if (ProcessUserType.MINOR.getValue().equals(processTaskStepUserVo.getUserType())) {
+                                    if (!processUserTypeList.contains(ProcessUserType.MAJOR.getValue())) {
+                                        processUserTypeList.add(ProcessUserType.MINOR.getValue());
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    List<Long> channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(
+                            processTaskVo.getChannelUuid(), userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), processUserTypeList);
+                    if (CollectionUtils.isNotEmpty(channelTypeRelationIdList)) {
+                        ChannelRelationVo channelRelationVo = new ChannelRelationVo();
+                        channelRelationVo.setSource(processTaskVo.getChannelUuid());
+                        Long relationId = extraParam.getLong("channelTypeRelationId");
+                        for (Long channelTypeRelationId : channelTypeRelationIdList) {
+                            if (relationId != null && !Objects.equals(channelTypeRelationId, relationId)) {
+                                continue;
+                            }
+                            channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
+                            List<ChannelRelationVo> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
+                            if (CollectionUtils.isNotEmpty(channelRelationTargetList)) {
+                                List<String> channelTypeUuidList = channelTypeMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
+                                if (channelTypeUuidList.contains("all")) {
+                                    channelTypeUuidList.clear();
+                                }
+                                for (ChannelRelationVo channelRelation : channelRelationTargetList) {
+                                    if ("channel".equals(channelRelation.getType())) {
+                                        return true;
+                                    } else if ("catalog".equals(channelRelation.getType())) {
+                                        if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(channelRelation.getTarget(), channelTypeUuidList) > 0) {
+                                            return true;
+                                        } else {
+                                            CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channelRelation.getTarget());
+                                            if (catalogVo != null) {
+                                                List<String> uuidList = catalogMapper.getCatalogUuidListByLftRht(catalogVo.getLft(), catalogVo.getRht());
+                                                for (String uuid : uuidList) {
+                                                    if (!channelRelation.getTarget().equals(uuid)) {
+                                                        if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(uuid, channelTypeUuidList) > 0) {
+                                                            return true;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
@@ -503,7 +587,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 工单标记重复事件权限
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_MARKREPEAT,
-                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_MARKREPEAT;
                     //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -527,7 +611,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * userUuid用户有当前工单对应服务的上报权限，则有工单复杂上报权限
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_COPYPROCESSTASK,
-                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_COPYPROCESSTASK;
                     //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -554,7 +638,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单重做权限逻辑：
          * 首先工单状态是“已完成”，然后userUuid用户是工单上报人，且在工单对应流程图的评分设置-评分前允许回退中设置了回退步骤列表
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_REDO, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_REDO, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_REDO;
             //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -615,7 +699,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 首先工单状态是“处理中”，然后userUuid用户拥有工单中某个步骤的转交权限，则有工单转交权限
          * 步骤转交权限逻辑在{@link codedriver.module.process.operationauth.handler.StepOperateHandler#init}中的ProcessTaskOperationType.STEP_TRANSFER里
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_TRANSFER, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_TRANSFER, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_TRANSFER;
             //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -669,7 +753,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         /**
          * 工单显示权限
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_SHOW, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_SHOW, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_SHOW;
             //1.判断工单是否被显示，如果isShow=1，则提示“工单已显示”；
@@ -693,7 +777,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         /**
          * 工单隐藏权限
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_HIDE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_HIDE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_HIDE;
             //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -717,7 +801,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         /**
          * 工单删除权限
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_DELETE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_DELETE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
                 return true;
@@ -742,7 +826,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 4.userUuid用户是工单中某个“处理中”步骤的处理人或协助处理人
         **/
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE,
-                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
                     Long id = processTaskVo.getId();
                     ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE;
                     //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
@@ -789,7 +873,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
     }
 
     @Override
-    public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<ProcessTaskOperationType, ProcessTaskPermissionDeniedException>>>>
+    public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<ProcessTaskOperationType, ProcessTaskPermissionDeniedException>>, JSONObject>>
     getOperationBiPredicateMap() {
         return operationBiPredicateMap;
     }

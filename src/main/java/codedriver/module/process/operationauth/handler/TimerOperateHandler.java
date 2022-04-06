@@ -8,6 +8,7 @@ import codedriver.framework.process.exception.operationauth.ProcessTaskTimerHand
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.TernaryPredicate;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -18,12 +19,12 @@ import java.util.Map;
 public class TimerOperateHandler extends OperationAuthHandlerBase {
 
     private final Map<ProcessTaskOperationType,
-        TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<ProcessTaskOperationType, ProcessTaskPermissionDeniedException>>>> operationBiPredicateMap = new HashMap<>();
+        TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<ProcessTaskOperationType, ProcessTaskPermissionDeniedException>>, JSONObject>> operationBiPredicateMap = new HashMap<>();
 
     @PostConstruct
     public void init() {
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_RETREAT,
-            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
                 Long id = processTaskStepVo.getId();
                 ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_RETREAT;
                 //1.提示“定时节点不支持'撤回'操作”；
@@ -32,7 +33,7 @@ public class TimerOperateHandler extends OperationAuthHandlerBase {
                 return false;
             });
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_WORK,
-            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
                 Long id = processTaskStepVo.getId();
                 ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_WORK;
                 //1.提示“定时节点不支持'处理'操作”；
@@ -41,7 +42,7 @@ public class TimerOperateHandler extends OperationAuthHandlerBase {
                 return false;
             });
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMMENT,
-            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap) -> {
+            (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
                 Long id = processTaskStepVo.getId();
                 ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_COMMENT;
                 //1.提示“定时节点不支持'回复'操作”；
@@ -57,7 +58,7 @@ public class TimerOperateHandler extends OperationAuthHandlerBase {
     }
 
     @Override
-    public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<ProcessTaskOperationType, ProcessTaskPermissionDeniedException>>>>
+    public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<ProcessTaskOperationType, ProcessTaskPermissionDeniedException>>, JSONObject>>
         getOperationBiPredicateMap() {
         return operationBiPredicateMap;
     }
