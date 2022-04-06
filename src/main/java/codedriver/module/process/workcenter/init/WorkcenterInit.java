@@ -59,19 +59,18 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
         workcenterVo.setUuid(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue());
         workcenterVo.setName(ProcessWorkcenterInitType.ALL_PROCESSTASK.getName());
         workcenterVo.setConditionConfig("{\n" +
-                "    \"handlerType\":\"simple\",\n" +
-                "    \"conditionConfig\":{\n" +
-                "        \"conditionGroupList\":[\n" +
-                "\n" +
-                "        ],\n" +
-                "        \"conditionGroupRelList\":[\n" +
-                "\n" +
-                "        ],\n" +
-                "        \"startTimeCondition\":{\n" +
-                "            \"timeRange\":\"1\",\n" +
-                "            \"timeUnit\":\"year\"\n" +
-                "        }\n" +
-                "    }\n" +
+                "    \"conditionConfig\": {\n" +
+                "        \"conditionGroupList\": [],\n" +
+                "        \"conditionGroupRelList\": [],\n" +
+                "        \"startTimeCondition\": {\n" +
+                "            \"timeRange\": \"1\",\n" +
+                "            \"timeUnit\": \"year\"\n" +
+                "        },\n" +
+                "        \"handlerType\": \"simple\",\n" +
+                "        \"isProcessingOfMine\": 0,\n" +
+                "        \"uuid\": \"allProcessTask\"\n" +
+                "    },\n" +
+                "    \"pageSize\": 20\n" +
                 "}");
         workcenterVo.setType(ProcessWorkcenterType.FACTORY.getValue());
         workcenterVo.setSupport(DeviceType.ALL.getValue());
@@ -84,411 +83,57 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
         workcenterVo.setUuid(ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue());
         workcenterVo.setName(ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getName());
         workcenterVo.setConditionConfig("{\n" +
-                "    \"valueList\":[\n" +
-                "        \"common#alluser\"\n" +
-                "    ],\n" +
-                "    \"name\":\"我的草稿\",\n" +
-                "    \"type\":\"system\",\n" +
-                "    \"conditionConfig\":{\n" +
-                "        \"handlerType\":\"simple\",\n" +
-                "        \"startTimeCondition\":{\n" +
-                "            \"timeRange\":\"1\",\n" +
-                "            \"timeUnit\":\"year\"\n" +
+                "    \"conditionConfig\": {\n" +
+                "        \"handlerType\": \"simple\",\n" +
+                "        \"startTimeCondition\": {\n" +
+                "            \"timeRange\": \"1\",\n" +
+                "            \"timeUnit\": \"year\"\n" +
                 "        },\n" +
-                "        \"conditionGroupList\":[\n" +
+                "        \"conditionGroupList\": [\n" +
                 "            {\n" +
-                "                \"conditionList\":[\n" +
+                "                \"uuid\": \"05158b6b22d544b39181ef0a1a38c776\",\n" +
+                "                \"conditionList\": [\n" +
                 "                    {\n" +
-                "                        \"expression\":\"include\",\n" +
-                "                        \"valueList\":[\n" +
-                "                            \"common#loginuser\"\n" +
-                "                        ],\n" +
-                "                        \"name\":\"owner\",\n" +
-                "                        \"type\":\"common\",\n" +
-                "                        \"uuid\":\"26dd6599b26c44779df7d504ffd681e9\"\n" +
-                "                    },\n" +
-                "                    {\n" +
-                "                        \"expression\":\"include\",\n" +
-                "                        \"valueList\":[\n" +
+                "                        \"uuid\": \"77d6733ddfdb47e2acb6f11f5dd3f2f5\",\n" +
+                "                        \"type\": \"common\",\n" +
+                "                        \"name\": \"status\",\n" +
+                "                        \"valueList\": [\n" +
                 "                            \"draft\"\n" +
                 "                        ],\n" +
-                "                        \"name\":\"status\",\n" +
-                "                        \"type\":\"common\",\n" +
-                "                        \"uuid\":\"fb487d5c48d4466688258b9c89236c5c\"\n" +
-                "                    }\n" +
-                "                ],\n" +
-                "                \"channelUuidList\":[\n" +
-                "\n" +
-                "                ],\n" +
-                "                \"conditionRelList\":[\n" +
+                "                        \"expression\": \"include\"\n" +
+                "                    },\n" +
                 "                    {\n" +
-                "                        \"joinType\":\"and\",\n" +
-                "                        \"from\":\"26dd6599b26c44779df7d504ffd681e9\",\n" +
-                "                        \"to\":\"fb487d5c48d4466688258b9c89236c5c\"\n" +
+                "                        \"uuid\": \"822cbdec2ec44f0e8ae7af4e065b4d48\",\n" +
+                "                        \"type\": \"common\",\n" +
+                "                        \"name\": \"owner\",\n" +
+                "                        \"valueList\": [\n" +
+                "                            \"common#loginuser\"\n" +
+                "                        ],\n" +
+                "                        \"expression\": \"include\"\n" +
                 "                    }\n" +
                 "                ],\n" +
-                "                \"uuid\":\"7a244b1161ff4aa58d0499652dcaeb27\"\n" +
+                "                \"conditionRelList\": [\n" +
+                "                    {\n" +
+                "                        \"from\": \"77d6733ddfdb47e2acb6f11f5dd3f2f5\",\n" +
+                "                        \"to\": \"822cbdec2ec44f0e8ae7af4e065b4d48\",\n" +
+                "                        \"joinType\": \"and\"\n" +
+                "                    }\n" +
+                "                ],\n" +
+                "                \"channelUuidList\": []\n" +
                 "            }\n" +
                 "        ],\n" +
-                "        \"isProcessingOfMine\":0,\n" +
-                "        \"searchContent\":{\n" +
-                "            \"firstConditionList\":[\n" +
-                "\n" +
-                "            ],\n" +
-                "            \"searchContent\":[\n" +
-                "                {\n" +
-                "                    \"handler\":{\n" +
-                "                        \"handler\":\"userselect\",\n" +
-                "                        \"expressionList\":[\n" +
-                "                            {\n" +
-                "                                \"expression\":\"include\",\n" +
-                "                                \"expressionName\":\"包括\"\n" +
-                "                            },\n" +
-                "                            {\n" +
-                "                                \"expression\":\"exclude\",\n" +
-                "                                \"expressionName\":\"不包括\"\n" +
-                "                            },\n" +
-                "                            {\n" +
-                "                                \"expression\":\"is-null\",\n" +
-                "                                \"expressionName\":\"为空\"\n" +
-                "                            },\n" +
-                "                            {\n" +
-                "                                \"expression\":\"is-not-null\",\n" +
-                "                                \"expressionName\":\"不为空\"\n" +
-                "                            }\n" +
-                "                        ],\n" +
-                "                        \"data\":{\n" +
-                "                            \"handler\":\"owner\",\n" +
-                "                            \"expressionList\":[\n" +
-                "                                {\n" +
-                "                                    \"expression\":\"include\",\n" +
-                "                                    \"expressionName\":\"包括\"\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"expression\":\"exclude\",\n" +
-                "                                    \"expressionName\":\"不包括\"\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"expression\":\"is-null\",\n" +
-                "                                    \"expressionName\":\"为空\"\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"expression\":\"is-not-null\",\n" +
-                "                                    \"expressionName\":\"不为空\"\n" +
-                "                                }\n" +
-                "                            ],\n" +
-                "                            \"handlerType\":\"userselect\",\n" +
-                "                            \"defaultExpression\":\"include\",\n" +
-                "                            \"conditionModel\":\"userselect\",\n" +
-                "                            \"handlerName\":\"上报人\",\n" +
-                "                            \"isMultiple\":true,\n" +
-                "                            \"sort\":4,\n" +
-                "                            \"type\":\"common\",\n" +
-                "                            \"config\":{\n" +
-                "                                \"includeList\":[\n" +
-                "                                    \"common#vipuser\",\n" +
-                "                                    \"common#loginuser\"\n" +
-                "                                ],\n" +
-                "                                \"excludeList\":[\n" +
-                "                                    \"common#alluser\"\n" +
-                "                                ],\n" +
-                "                                \"multiple\":true,\n" +
-                "                                \"isMultiple\":true,\n" +
-                "                                \"groupList\":[\n" +
-                "                                    \"common\",\n" +
-                "                                    \"user\"\n" +
-                "                                ],\n" +
-                "                                \"initConfig\":{\n" +
-                "                                    \"includeList\":[\n" +
-                "                                        \"common#vipuser\",\n" +
-                "                                        \"common#loginuser\"\n" +
-                "                                    ],\n" +
-                "                                    \"excludeList\":[\n" +
-                "                                        \"common#alluser\"\n" +
-                "                                    ],\n" +
-                "                                    \"groupList\":[\n" +
-                "                                        \"common\",\n" +
-                "                                        \"user\"\n" +
-                "                                    ]\n" +
-                "                                },\n" +
-                "                                \"type\":\"userselect\"\n" +
-                "                            },\n" +
-                "                            \"isShow\":false\n" +
-                "                        },\n" +
-                "                        \"label\":\"上报人\",\n" +
-                "                        \"config\":{\n" +
-                "                            \"includeList\":[\n" +
-                "                                \"common#vipuser\",\n" +
-                "                                \"common#loginuser\"\n" +
-                "                            ],\n" +
-                "                            \"excludeList\":[\n" +
-                "                                \"common#alluser\"\n" +
-                "                            ],\n" +
-                "                            \"multiple\":true,\n" +
-                "                            \"width\":\"100%\",\n" +
-                "                            \"isMultiple\":true,\n" +
-                "                            \"groupList\":[\n" +
-                "                                \"common\",\n" +
-                "                                \"user\"\n" +
-                "                            ],\n" +
-                "                            \"initConfig\":{\n" +
-                "                                \"includeList\":[\n" +
-                "                                    \"common#vipuser\",\n" +
-                "                                    \"common#loginuser\"\n" +
-                "                                ],\n" +
-                "                                \"excludeList\":[\n" +
-                "                                    \"common#alluser\"\n" +
-                "                                ],\n" +
-                "                                \"groupList\":[\n" +
-                "                                    \"common\",\n" +
-                "                                    \"user\"\n" +
-                "                                ]\n" +
-                "                            },\n" +
-                "                            \"type\":\"userselect\",\n" +
-                "                            \"value\":[\n" +
-                "                                \"common#loginuser\"\n" +
-                "                            ]\n" +
-                "                        },\n" +
-                "                        \"key\":\"上报人\"\n" +
-                "                    },\n" +
-                "                    \"closeable\":true,\n" +
-                "                    \"expression\":\"include\",\n" +
-                "                    \"split\":\"|\",\n" +
-                "                    \"name\":\"owner\",\n" +
-                "                    \"label\":\"上报人\",\n" +
-                "                    \"type\":\"common\",\n" +
-                "                    \"uuid\":\"26dd6599b26c44779df7d504ffd681e9\",\n" +
-                "                    \"value\":[\n" +
-                "                        \"当前登录人\"\n" +
-                "                    ],\n" +
-                "                    \"itemCloseable\":true,\n" +
-                "                    \"key\":\"上报人\"\n" +
-                "                },\n" +
-                "                {\n" +
-                "                    \"handler\":{\n" +
-                "                        \"handler\":\"checkbox\",\n" +
-                "                        \"expressionList\":[\n" +
-                "                            {\n" +
-                "                                \"expression\":\"include\",\n" +
-                "                                \"expressionName\":\"包括\"\n" +
-                "                            },\n" +
-                "                            {\n" +
-                "                                \"expression\":\"exclude\",\n" +
-                "                                \"expressionName\":\"不包括\"\n" +
-                "                            },\n" +
-                "                            {\n" +
-                "                                \"expression\":\"is-null\",\n" +
-                "                                \"expressionName\":\"为空\"\n" +
-                "                            },\n" +
-                "                            {\n" +
-                "                                \"expression\":\"is-not-null\",\n" +
-                "                                \"expressionName\":\"不为空\"\n" +
-                "                            }\n" +
-                "                        ],\n" +
-                "                        \"data\":{\n" +
-                "                            \"handler\":\"status\",\n" +
-                "                            \"expressionList\":[\n" +
-                "                                {\n" +
-                "                                    \"expression\":\"include\",\n" +
-                "                                    \"expressionName\":\"包括\"\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"expression\":\"exclude\",\n" +
-                "                                    \"expressionName\":\"不包括\"\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"expression\":\"is-null\",\n" +
-                "                                    \"expressionName\":\"为空\"\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"expression\":\"is-not-null\",\n" +
-                "                                    \"expressionName\":\"不为空\"\n" +
-                "                                }\n" +
-                "                            ],\n" +
-                "                            \"handlerType\":\"checkbox\",\n" +
-                "                            \"defaultExpression\":\"include\",\n" +
-                "                            \"conditionModel\":\"checkbox\",\n" +
-                "                            \"handlerName\":\"工单状态\",\n" +
-                "                            \"isMultiple\":true,\n" +
-                "                            \"sort\":7,\n" +
-                "                            \"type\":\"common\",\n" +
-                "                            \"config\":{\n" +
-                "                                \"search\":false,\n" +
-                "                                \"defaultValue\":\"\",\n" +
-                "                                \"dataList\":[\n" +
-                "                                    {\n" +
-                "                                        \"text\":\"处理中\",\n" +
-                "                                        \"value\":\"running\",\n" +
-                "                                        \"isShow\":false\n" +
-                "                                    },\n" +
-                "                                    {\n" +
-                "                                        \"text\":\"已取消\",\n" +
-                "                                        \"value\":\"aborted\",\n" +
-                "                                        \"isShow\":false\n" +
-                "                                    },\n" +
-                "                                    {\n" +
-                "                                        \"text\":\"异常\",\n" +
-                "                                        \"value\":\"failed\",\n" +
-                "                                        \"isShow\":false\n" +
-                "                                    },\n" +
-                "                                    {\n" +
-                "                                        \"text\":\"已完成\",\n" +
-                "                                        \"value\":\"succeed\",\n" +
-                "                                        \"isShow\":false\n" +
-                "                                    },\n" +
-                "                                    {\n" +
-                "                                        \"text\":\"未提交\",\n" +
-                "                                        \"value\":\"draft\",\n" +
-                "                                        \"isShow\":false\n" +
-                "                                    },\n" +
-                "                                    {\n" +
-                "                                        \"text\":\"已评分\",\n" +
-                "                                        \"value\":\"scored\",\n" +
-                "                                        \"isShow\":false\n" +
-                "                                    }\n" +
-                "                                ],\n" +
-                "                                \"multiple\":true,\n" +
-                "                                \"isMultiple\":true,\n" +
-                "                                \"type\":\"select\",\n" +
-                "                                \"value\":\"\",\n" +
-                "                                \"newListData\":[\n" +
-                "                                    {\n" +
-                "                                        \"text\":\"处理中\",\n" +
-                "                                        \"value\":\"running\",\n" +
-                "                                        \"isShow\":false\n" +
-                "                                    },\n" +
-                "                                    {\n" +
-                "                                        \"text\":\"已取消\",\n" +
-                "                                        \"value\":\"aborted\",\n" +
-                "                                        \"isShow\":false\n" +
-                "                                    },\n" +
-                "                                    {\n" +
-                "                                        \"text\":\"异常\",\n" +
-                "                                        \"value\":\"failed\",\n" +
-                "                                        \"isShow\":false\n" +
-                "                                    },\n" +
-                "                                    {\n" +
-                "                                        \"text\":\"已完成\",\n" +
-                "                                        \"value\":\"succeed\",\n" +
-                "                                        \"isShow\":false\n" +
-                "                                    },\n" +
-                "                                    {\n" +
-                "                                        \"text\":\"未提交\",\n" +
-                "                                        \"value\":\"draft\",\n" +
-                "                                        \"isShow\":false\n" +
-                "                                    },\n" +
-                "                                    {\n" +
-                "                                        \"text\":\"已评分\",\n" +
-                "                                        \"value\":\"scored\",\n" +
-                "                                        \"isShow\":false\n" +
-                "                                    }\n" +
-                "                                ]\n" +
-                "                            },\n" +
-                "                            \"isShow\":true\n" +
-                "                        },\n" +
-                "                        \"label\":\"工单状态\",\n" +
-                "                        \"config\":{\n" +
-                "                            \"search\":false,\n" +
-                "                            \"defaultValue\":\"\",\n" +
-                "                            \"dataList\":[\n" +
-                "                                {\n" +
-                "                                    \"text\":\"处理中\",\n" +
-                "                                    \"value\":\"running\",\n" +
-                "                                    \"isShow\":false\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"text\":\"已取消\",\n" +
-                "                                    \"value\":\"aborted\",\n" +
-                "                                    \"isShow\":false\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"text\":\"异常\",\n" +
-                "                                    \"value\":\"failed\",\n" +
-                "                                    \"isShow\":false\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"text\":\"已完成\",\n" +
-                "                                    \"value\":\"succeed\",\n" +
-                "                                    \"isShow\":false\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"text\":\"未提交\",\n" +
-                "                                    \"value\":\"draft\",\n" +
-                "                                    \"isShow\":false\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"text\":\"已评分\",\n" +
-                "                                    \"value\":\"scored\",\n" +
-                "                                    \"isShow\":false\n" +
-                "                                }\n" +
-                "                            ],\n" +
-                "                            \"multiple\":true,\n" +
-                "                            \"width\":\"100%\",\n" +
-                "                            \"isMultiple\":true,\n" +
-                "                            \"type\":\"select\",\n" +
-                "                            \"value\":[\n" +
-                "                                \"draft\"\n" +
-                "                            ],\n" +
-                "                            \"newListData\":[\n" +
-                "                                {\n" +
-                "                                    \"text\":\"处理中\",\n" +
-                "                                    \"value\":\"running\",\n" +
-                "                                    \"isShow\":false\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"text\":\"已取消\",\n" +
-                "                                    \"value\":\"aborted\",\n" +
-                "                                    \"isShow\":false\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"text\":\"异常\",\n" +
-                "                                    \"value\":\"failed\",\n" +
-                "                                    \"isShow\":false\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"text\":\"已完成\",\n" +
-                "                                    \"value\":\"succeed\",\n" +
-                "                                    \"isShow\":false\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"text\":\"未提交\",\n" +
-                "                                    \"value\":\"draft\",\n" +
-                "                                    \"isShow\":false\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"text\":\"已评分\",\n" +
-                "                                    \"value\":\"scored\",\n" +
-                "                                    \"isShow\":false\n" +
-                "                                }\n" +
-                "                            ]\n" +
-                "                        },\n" +
-                "                        \"key\":\"工单状态\"\n" +
-                "                    },\n" +
-                "                    \"closeable\":true,\n" +
-                "                    \"expression\":\"include\",\n" +
-                "                    \"split\":\"|\",\n" +
-                "                    \"name\":\"status\",\n" +
-                "                    \"label\":\"工单状态\",\n" +
-                "                    \"type\":\"common\",\n" +
-                "                    \"uuid\":\"fb487d5c48d4466688258b9c89236c5c\",\n" +
-                "                    \"value\":[\n" +
-                "                        \"未提交\"\n" +
-                "                    ],\n" +
-                "                    \"itemCloseable\":true,\n" +
-                "                    \"key\":\"工单状态\"\n" +
-                "                }\n" +
-                "            ]\n" +
-                "        },\n" +
-                "        \"conditionGroupRelList\":[\n" +
-                "\n" +
-                "        ]\n" +
-                "    }\n" +
+                "        \"isProcessingOfMine\": 0,\n" +
+                "        \"conditionGroupRelList\": [],\n" +
+                "        \"uuid\": \"draftProcessTask\"\n" +
+                "    },\n" +
+                "    \"pageSize\": 20\n" +
                 "}");
         workcenterVo.setType(ProcessWorkcenterType.FACTORY.getValue());
         workcenterVo.setSupport(DeviceType.ALL.getValue());
-        workcenterVo.setSort(2);
+        workcenterVo.setSort(4);
         return workcenterVo;
     }
+
     private WorkcenterVo doneOfMine() {
         WorkcenterVo workcenterVo = new WorkcenterVo();
         workcenterVo.setUuid(ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getValue());
@@ -502,10 +147,10 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                 "        },\n" +
                 "        \"conditionGroupList\": [\n" +
                 "            {\n" +
-                "                \"uuid\": \"6ec0fa68f3d049ba95c8280561c1b9f4\",\n" +
+                "                \"uuid\": \"7b4d42e03ff4413483836c3289a938af\",\n" +
                 "                \"conditionList\": [\n" +
                 "                    {\n" +
-                "                        \"uuid\": \"2fb9ecadd8c04b999d3c53791b2c70f3\",\n" +
+                "                        \"uuid\": \"64b156e0c67c4755864e6b4c36e0f2ff\",\n" +
                 "                        \"type\": \"common\",\n" +
                 "                        \"name\": \"aboutme\",\n" +
                 "                        \"valueList\": [\n" +
@@ -521,150 +166,37 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                 "        \"isProcessingOfMine\": 0,\n" +
                 "        \"conditionGroupRelList\": [],\n" +
                 "        \"isProcessing\": 0,\n" +
-                "        \"uuid\": \"doneOfMineProcessTask\",\n" +
-                "        \"searchContent\": {\n" +
-                "            \"firstConditionList\": [],\n" +
-                "            \"searchContent\": [\n" +
-                "                {\n" +
-                "                    \"uuid\": \"2fb9ecadd8c04b999d3c53791b2c70f3\",\n" +
-                "                    \"label\": \"与我相关\",\n" +
-                "                    \"value\": [\n" +
-                "                        \"已办\"\n" +
-                "                    ],\n" +
-                "                    \"key\": \"与我相关\",\n" +
-                "                    \"handler\": {\n" +
-                "                        \"handler\": \"checkbox\",\n" +
-                "                        \"label\": \"与我相关\",\n" +
-                "                        \"key\": \"与我相关\",\n" +
-                "                        \"data\": {\n" +
-                "                            \"handler\": \"aboutme\",\n" +
-                "                            \"expressionList\": [\n" +
-                "                                {\n" +
-                "                                    \"expression\": \"include\",\n" +
-                "                                    \"expressionName\": \"包括\"\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"expression\": \"exclude\",\n" +
-                "                                    \"expressionName\": \"不包括\"\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"expression\": \"is-null\",\n" +
-                "                                    \"expressionName\": \"为空\"\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"expression\": \"is-not-null\",\n" +
-                "                                    \"expressionName\": \"不为空\"\n" +
-                "                                }\n" +
-                "                            ],\n" +
-                "                            \"handlerType\": \"checkbox\",\n" +
-                "                            \"defaultExpression\": \"include\",\n" +
-                "                            \"conditionModel\": \"checkbox\",\n" +
-                "                            \"handlerName\": \"与我相关\",\n" +
-                "                            \"isMultiple\": false,\n" +
-                "                            \"sort\": 8,\n" +
-                "                            \"type\": \"common\",\n" +
-                "                            \"config\": {\n" +
-                "                                \"search\": false,\n" +
-                "                                \"defaultValue\": \"\",\n" +
-                "                                \"dataList\": [\n" +
-                "                                    {\n" +
-                "                                        \"text\": \"已办\",\n" +
-                "                                        \"value\": \"doneOfMine\",\n" +
-                "                                        \"isShow\": false\n" +
-                "                                    },\n" +
-                "                                    {\n" +
-                "                                        \"text\": \"已关注\",\n" +
-                "                                        \"value\": \"focusOfMine\",\n" +
-                "                                        \"isShow\": false\n" +
-                "                                    }\n" +
-                "                                ],\n" +
-                "                                \"multiple\": false,\n" +
-                "                                \"isMultiple\": false,\n" +
-                "                                \"type\": \"select\",\n" +
-                "                                \"value\": \"\",\n" +
-                "                                \"newListData\": [\n" +
-                "                                    {\n" +
-                "                                        \"text\": \"已办\",\n" +
-                "                                        \"value\": \"doneOfMine\",\n" +
-                "                                        \"isShow\": false\n" +
-                "                                    },\n" +
-                "                                    {\n" +
-                "                                        \"text\": \"已关注\",\n" +
-                "                                        \"value\": \"focusOfMine\",\n" +
-                "                                        \"isShow\": false\n" +
-                "                                    }\n" +
-                "                                ]\n" +
-                "                            },\n" +
-                "                            \"isShow\": true\n" +
-                "                        },\n" +
-                "                        \"expressionList\": [\n" +
-                "                            {\n" +
-                "                                \"expression\": \"include\",\n" +
-                "                                \"expressionName\": \"包括\"\n" +
-                "                            },\n" +
-                "                            {\n" +
-                "                                \"expression\": \"exclude\",\n" +
-                "                                \"expressionName\": \"不包括\"\n" +
-                "                            },\n" +
-                "                            {\n" +
-                "                                \"expression\": \"is-null\",\n" +
-                "                                \"expressionName\": \"为空\"\n" +
-                "                            },\n" +
-                "                            {\n" +
-                "                                \"expression\": \"is-not-null\",\n" +
-                "                                \"expressionName\": \"不为空\"\n" +
-                "                            }\n" +
-                "                        ],\n" +
-                "                        \"config\": {\n" +
-                "                            \"search\": false,\n" +
-                "                            \"defaultValue\": \"\",\n" +
-                "                            \"dataList\": [\n" +
-                "                                {\n" +
-                "                                    \"text\": \"已办\",\n" +
-                "                                    \"value\": \"doneOfMine\",\n" +
-                "                                    \"isShow\": false\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"text\": \"已关注\",\n" +
-                "                                    \"value\": \"focusOfMine\",\n" +
-                "                                    \"isShow\": false\n" +
-                "                                }\n" +
-                "                            ],\n" +
-                "                            \"multiple\": false,\n" +
-                "                            \"isMultiple\": false,\n" +
-                "                            \"type\": \"select\",\n" +
-                "                            \"value\": [\n" +
-                "                                \"doneOfMine\"\n" +
-                "                            ],\n" +
-                "                            \"newListData\": [\n" +
-                "                                {\n" +
-                "                                    \"text\": \"已办\",\n" +
-                "                                    \"value\": \"doneOfMine\",\n" +
-                "                                    \"isShow\": false\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"text\": \"已关注\",\n" +
-                "                                    \"value\": \"focusOfMine\",\n" +
-                "                                    \"isShow\": false\n" +
-                "                                }\n" +
-                "                            ],\n" +
-                "                            \"width\": \"100%\"\n" +
-                "                        }\n" +
-                "                    },\n" +
-                "                    \"expression\": \"include\",\n" +
-                "                    \"name\": \"aboutme\",\n" +
-                "                    \"type\": \"common\",\n" +
-                "                    \"itemCloseable\": true,\n" +
-                "                    \"closeable\": true,\n" +
-                "                    \"split\": \"|\"\n" +
-                "                }\n" +
-                "            ]\n" +
-                "        }\n" +
-                "    }\n" +
+                "        \"uuid\": \"doneOfMineProcessTask\"\n" +
+                "    },\n" +
+                "    \"pageSize\": 20\n" +
                 "}");
         workcenterVo.setType(ProcessWorkcenterType.FACTORY.getValue());
         workcenterVo.setSupport(DeviceType.ALL.getValue());
         workcenterVo.setSort(3);
+        return workcenterVo;
+    }
+
+    private WorkcenterVo processingOfMine() {
+        WorkcenterVo workcenterVo = new WorkcenterVo();
+        workcenterVo.setUuid(ProcessWorkcenterInitType.PROCESSING_OF_MINE_PROCESSTASK.getValue());
+        workcenterVo.setName(ProcessWorkcenterInitType.PROCESSING_OF_MINE_PROCESSTASK.getName());
+        workcenterVo.setConditionConfig("{\n" +
+                "    \"conditionConfig\": {\n" +
+                "        \"conditionGroupList\": [],\n" +
+                "        \"conditionGroupRelList\": [],\n" +
+                "        \"startTimeCondition\": {\n" +
+                "            \"timeRange\": \"1\",\n" +
+                "            \"timeUnit\": \"year\"\n" +
+                "        },\n" +
+                "        \"handlerType\": \"simple\",\n" +
+                "        \"isProcessingOfMine\": 1,\n" +
+                "        \"uuid\": \"allProcessTask\"\n" +
+                "    },\n" +
+                "    \"pageSize\": 20\n" +
+                "}");
+        workcenterVo.setType(ProcessWorkcenterType.FACTORY.getValue());
+        workcenterVo.setSupport(DeviceType.ALL.getValue());
+        workcenterVo.setSort(2);
         return workcenterVo;
     }
 
@@ -713,7 +245,7 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
                     workcenterMapper.replaceWorkcenter(workcenterVo);
 
                     //初始化工单中心分类权限
-                    if (oldAuthorityVoList.stream().noneMatch(o-> Objects.equals(o.getWorkcenterUuid(),uuid))) {
+                    if (oldAuthorityVoList.stream().noneMatch(o -> Objects.equals(o.getWorkcenterUuid(), uuid))) {
                         workcenterMapper.insertWorkcenterAuthority(new WorkcenterAuthorityVo(uuid, GroupSearch.COMMON.getValue(), UserType.ALL.getValue()));
                     }
 
@@ -728,5 +260,6 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
         workcenterList.add(all());
         workcenterList.add(draft());
         workcenterList.add(doneOfMine());
+        workcenterList.add(processingOfMine());
     }
 }
