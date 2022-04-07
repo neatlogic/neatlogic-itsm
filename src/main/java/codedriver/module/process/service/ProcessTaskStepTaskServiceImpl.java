@@ -90,7 +90,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         ProcessTaskAuditType auditType = ProcessTaskAuditType.CREATETASK;
         ProcessTaskStepTaskNotifyTriggerType triggerType = ProcessTaskStepTaskNotifyTriggerType.CREATETASK;
         if (isCreate) {
-            processTaskStepTaskVo.setStatus(ProcessTaskStatus.PENDING.getValue());
+//            processTaskStepTaskVo.setStatus(ProcessTaskStatus.PENDING.getValue());
             processTaskStepTaskMapper.insertTask(processTaskStepTaskVo);
         } else {
             //processTaskStepTaskMapper.getStepTaskLockById(processTaskStepTaskVo.getId());
@@ -332,5 +332,60 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                 processTaskStepVo.setProcessTaskStepTask(stepTaskJson);
             }
         }
+    }
+
+    /**
+     * 获取步骤的任务策略列表及其任务列表
+     * @param processTaskStepVo 步骤信息
+     * @return
+     */
+    @Override
+    public List<TaskConfigVo> getTaskConfigList(ProcessTaskStepVo processTaskStepVo) {
+        JSONObject taskConfig = getTaskConfig(processTaskStepVo.getConfigHash());
+        if (MapUtils.isEmpty(taskConfig)) {
+            return null;
+        }
+        JSONArray idArray = taskConfig.getJSONArray("idList");
+        if (CollectionUtils.isEmpty(idArray)) {
+            return null;
+        }
+        List<TaskConfigVo> taskConfigList = taskMapper.getTaskConfigByIdList(idArray);
+        List<ProcessTaskStepTaskVo> processTaskStepTaskList = processTaskStepTaskMapper.getStepTaskByProcessTaskStepId(processTaskStepVo.getId());
+        if (CollectionUtils.isEmpty(processTaskStepTaskList)) {
+            return taskConfigList;
+        }
+        Map<Long, List<ProcessTaskStepTaskUserVo>> stepTaskUserMap = new HashMap<>();
+        List<Long> stepTaskIdList= processTaskStepTaskList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList());
+        List<ProcessTaskStepTaskUserVo> stepTaskUserList = processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(stepTaskIdList);
+        if (CollectionUtils.isNotEmpty(stepTaskUserList)) {
+            List<Long> stepTaskUserIdList = stepTaskUserList.stream().map(ProcessTaskStepTaskUserVo::getId).collect(Collectors.toList());
+            List<ProcessTaskStepTaskUserContentVo> stepTaskUserContentList = processTaskStepTaskMapper.getStepTaskUserContentByStepTaskUserIdList(stepTaskUserIdList);
+            Map<Long, ProcessTaskStepTaskUserContentVo> stepTaskUserContentMap = new HashMap<>();
+            for (ProcessTaskStepTaskUserContentVo stepTaskUserContentVo : stepTaskUserContentList) {
+                if (stepTaskUserContentMap.containsKey(stepTaskUserContentVo.getProcessTaskStepTaskUserId())) {
+                    continue;
+                }
+                stepTaskUserContentMap.put(stepTaskUserContentVo.getProcessTaskStepTaskUserId(), stepTaskUserContentVo);
+            }
+            for (ProcessTaskStepTaskUserVo stepTaskUserVo : stepTaskUserList) {
+                stepTaskUserVo.setIsReplyable(0);
+                ProcessTaskStepTaskUserContentVo stepTaskUserContentVo = stepTaskUserContentMap.get(stepTaskUserVo.getId());
+                if (stepTaskUserContentVo != null) {
+                    stepTaskUserVo.setContent(stepTaskUserContentVo.getContent());
+                }
+                stepTaskUserMap.computeIfAbsent(stepTaskUserVo.getProcessTaskStepTaskId(), key -> new ArrayList<>()).add(stepTaskUserVo);
+            }
+        }
+        Map<Long, List<ProcessTaskStepTaskVo>> stepTaskMap = new HashMap<>();
+        for (ProcessTaskStepTaskVo stepTaskVo : processTaskStepTaskList) {
+            List<ProcessTaskStepTaskUserVo> processTaskStepTaskUserList = stepTaskUserMap.get(stepTaskVo.getId());
+            stepTaskVo.setStepTaskUserVoList(processTaskStepTaskUserList);
+            stepTaskMap.computeIfAbsent(stepTaskVo.getTaskConfigId(), key -> new ArrayList<>()).add(stepTaskVo);
+        }
+        for (TaskConfigVo taskConfigVo : taskConfigList) {
+            List<ProcessTaskStepTaskVo> stepTaskList = stepTaskMap.get(taskConfigVo.getId());
+            taskConfigVo.setProcessTaskStepTaskList(stepTaskList);
+        }
+        return taskConfigList;
     }
 }

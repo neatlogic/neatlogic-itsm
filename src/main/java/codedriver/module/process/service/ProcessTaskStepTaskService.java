@@ -8,6 +8,9 @@ package codedriver.module.process.service;
 import codedriver.framework.process.dto.ProcessTaskStepTaskUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.TaskConfigVo;
+
+import java.util.List;
 
 /**
  * @author lvzk
@@ -34,4 +37,10 @@ public interface ProcessTaskStepTaskService {
      */
     void getProcessTaskStepTask(ProcessTaskStepVo processTaskStepVo);
 
+    /**
+     * 获取步骤的任务策略列表及其任务列表
+     * @param processTaskStepVo 步骤信息
+     * @return
+     */
+    List<TaskConfigVo> getTaskConfigList(ProcessTaskStepVo processTaskStepVo);
 }
