@@ -11,6 +11,7 @@ import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.TaskConfigVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -53,8 +54,10 @@ public class ProcessTaskStepTaskListApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "processTaskStepId", isRequired = true, type = ApiParamType.LONG, desc = "工单步骤id")
     })
-    @Output({})
-    @Description(desc = "获取工单步骤任务接口")
+    @Output({
+            @Param(name = "Return", explode = TaskConfigVo[].class, desc = "任务列表")
+    })
+    @Description(desc = "获取工单步骤任务列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
