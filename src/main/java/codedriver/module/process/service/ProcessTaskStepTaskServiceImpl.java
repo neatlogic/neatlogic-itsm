@@ -350,6 +350,9 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             return null;
         }
         List<TaskConfigVo> taskConfigList = taskMapper.getTaskConfigByIdList(idArray);
+        if (CollectionUtils.isEmpty(taskConfigList)) {
+            return null;
+        }
         List<ProcessTaskStepTaskVo> processTaskStepTaskList = processTaskStepTaskMapper.getStepTaskByProcessTaskStepId(processTaskStepVo.getId());
         if (CollectionUtils.isEmpty(processTaskStepTaskList)) {
             return taskConfigList;
@@ -368,7 +371,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                 stepTaskUserContentMap.put(stepTaskUserContentVo.getProcessTaskStepTaskUserId(), stepTaskUserContentVo);
             }
             for (ProcessTaskStepTaskUserVo stepTaskUserVo : stepTaskUserList) {
-                stepTaskUserVo.setIsReplyable(0);
+                stepTaskUserVo.setIsReplyable(checkIsReplyable(stepTaskUserVo));
                 ProcessTaskStepTaskUserContentVo stepTaskUserContentVo = stepTaskUserContentMap.get(stepTaskUserVo.getId());
                 if (stepTaskUserContentVo != null) {
                     stepTaskUserVo.setContent(stepTaskUserContentVo.getContent());
@@ -382,10 +385,26 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             stepTaskVo.setStepTaskUserVoList(processTaskStepTaskUserList);
             stepTaskMap.computeIfAbsent(stepTaskVo.getTaskConfigId(), key -> new ArrayList<>()).add(stepTaskVo);
         }
+        JSONArray rangeArray = taskConfig.getJSONArray("rangeList");
         for (TaskConfigVo taskConfigVo : taskConfigList) {
             List<ProcessTaskStepTaskVo> stepTaskList = stepTaskMap.get(taskConfigVo.getId());
             taskConfigVo.setProcessTaskStepTaskList(stepTaskList);
+            if (CollectionUtils.isNotEmpty(rangeArray)) {
+                taskConfigVo.setRangeList(rangeArray.toJavaList(String.class));
+            }
         }
         return taskConfigList;
+    }
+
+    /**
+     * 判断当前用户是否可以处理任务
+     * @param stepTaskUserVo 任务处理人信息
+     * @return
+     */
+    private int checkIsReplyable(ProcessTaskStepTaskUserVo stepTaskUserVo) {
+        if (Objects.equals(stepTaskUserVo.getUserUuid(), UserContext.get().getUserUuid(true))) {
+            return 1;
+        }
+        return 0;
     }
 }
