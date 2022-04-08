@@ -19,6 +19,7 @@ import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoun
 import codedriver.framework.process.exception.processtask.ProcessTaskStepUnRunningException;
 import codedriver.framework.process.exception.processtask.task.*;
 import codedriver.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
+import codedriver.framework.process.service.ProcessTaskAgentServiceImpl;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.process.task.TaskConfigManager;
 import codedriver.framework.service.UserService;
@@ -58,6 +59,8 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
     TaskConfigManager taskConfigManager;
     @Resource
     ProcessTaskService processTaskService;
+    @Resource
+    ProcessTaskAgentServiceImpl processTaskAgentServiceImpl;
 
     /**
      * 创建任务
@@ -361,6 +364,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         List<Long> stepTaskIdList= processTaskStepTaskList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList());
         List<ProcessTaskStepTaskUserVo> stepTaskUserList = processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(stepTaskIdList);
         if (CollectionUtils.isNotEmpty(stepTaskUserList)) {
+            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
             List<Long> stepTaskUserIdList = stepTaskUserList.stream().map(ProcessTaskStepTaskUserVo::getId).collect(Collectors.toList());
             List<ProcessTaskStepTaskUserContentVo> stepTaskUserContentList = processTaskStepTaskMapper.getStepTaskUserContentByStepTaskUserIdList(stepTaskUserIdList);
             Map<Long, ProcessTaskStepTaskUserContentVo> stepTaskUserContentMap = new HashMap<>();
@@ -371,7 +375,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                 stepTaskUserContentMap.put(stepTaskUserContentVo.getProcessTaskStepTaskUserId(), stepTaskUserContentVo);
             }
             for (ProcessTaskStepTaskUserVo stepTaskUserVo : stepTaskUserList) {
-                stepTaskUserVo.setIsReplyable(checkIsReplyable(stepTaskUserVo));
+                stepTaskUserVo.setIsReplyable(checkIsReplyable(processTaskVo.getChannelUuid(), stepTaskUserVo.getUserUuid()));
                 ProcessTaskStepTaskUserContentVo stepTaskUserContentVo = stepTaskUserContentMap.get(stepTaskUserVo.getId());
                 if (stepTaskUserContentVo != null) {
                     stepTaskUserVo.setContent(stepTaskUserContentVo.getContent());
@@ -398,11 +402,16 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
 
     /**
      * 判断当前用户是否可以处理任务
-     * @param stepTaskUserVo 任务处理人信息
+     * @param channelUuid 服务uuid
+     * @param stepTaskUserUuid 任务处理人uuid
      * @return
      */
-    private int checkIsReplyable(ProcessTaskStepTaskUserVo stepTaskUserVo) {
-        if (Objects.equals(stepTaskUserVo.getUserUuid(), UserContext.get().getUserUuid(true))) {
+    private int checkIsReplyable(String channelUuid, String stepTaskUserUuid) {
+        if (Objects.equals(stepTaskUserUuid, UserContext.get().getUserUuid(true))) {
+            return 1;
+        }
+        List<String> fromUuidList = processTaskAgentServiceImpl.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), channelUuid);
+        if (fromUuidList.contains(stepTaskUserUuid)) {
             return 1;
         }
         return 0;
