@@ -3,6 +3,7 @@ package codedriver.module.process.operationauth.handler;
 import java.util.*;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
@@ -12,6 +13,7 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.operationauth.*;
+import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,8 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
     private CatalogService catalogService;
     @Autowired
     private CatalogMapper catalogMapper;
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @PostConstruct
     public void init() {
@@ -68,7 +72,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                         }
                     }
                     //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
-                    ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.DRAFT);
+                    ProcessTaskPermissionDeniedException exception = processTaskService.checkProcessTaskStatus(processTaskVo.getStatus(), ProcessTaskStatus.DRAFT);
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
@@ -151,7 +155,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
                     //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
                     //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
-                    ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
+                    ProcessTaskPermissionDeniedException exception = processTaskService.checkProcessTaskStatus(processTaskVo.getStatus(),
                             ProcessTaskStatus.DRAFT,
                             ProcessTaskStatus.SUCCEED,
                             ProcessTaskStatus.ABORTED,
@@ -200,7 +204,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
                     //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
                     //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
-                    ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
+                    ProcessTaskPermissionDeniedException exception = processTaskService.checkProcessTaskStatus(processTaskVo.getStatus(),
                             ProcessTaskStatus.DRAFT,
                             ProcessTaskStatus.SUCCEED,
                             ProcessTaskStatus.RUNNING,
@@ -248,7 +252,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
             //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
             //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
-            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
+            ProcessTaskPermissionDeniedException exception = processTaskService.checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
@@ -295,7 +299,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
             //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
             //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
-            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
+            ProcessTaskPermissionDeniedException exception = processTaskService.checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
@@ -342,7 +346,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
             //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
             //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
-            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
+            ProcessTaskPermissionDeniedException exception = processTaskService.checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
@@ -391,7 +395,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
             //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
             //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
-            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
+            ProcessTaskPermissionDeniedException exception = processTaskService.checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,
@@ -653,7 +657,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
             //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
             //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
-            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
+            ProcessTaskPermissionDeniedException exception = processTaskService.checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.RUNNING,
                     ProcessTaskStatus.ABORTED,
@@ -714,7 +718,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
             //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
             //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
-            ProcessTaskPermissionDeniedException exception = checkProcessTaskStatus(processTaskVo.getStatus(),
+            ProcessTaskPermissionDeniedException exception = processTaskService.checkProcessTaskStatus(processTaskVo.getStatus(),
                     ProcessTaskStatus.DRAFT,
                     ProcessTaskStatus.SUCCEED,
                     ProcessTaskStatus.ABORTED,

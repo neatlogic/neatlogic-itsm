@@ -29,7 +29,7 @@ public interface ProcessTaskStepTaskService {
      *
      * @param processTaskStepTaskUserVo 任务用户参数
      */
-    Long completeTask(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo);
+    Long completeTask(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo) throws Exception;
 
     /**
      * 获取工单任务信息
