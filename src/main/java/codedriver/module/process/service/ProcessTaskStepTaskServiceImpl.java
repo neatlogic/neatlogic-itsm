@@ -528,6 +528,8 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         if (CollectionUtils.isNotEmpty(stepTaskUserList)) {
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
             List<Long> stepTaskUserIdList = stepTaskUserList.stream().map(ProcessTaskStepTaskUserVo::getId).collect(Collectors.toList());
+            List<ProcessTaskStepTaskUserAgentVo> stepTaskUserAgentList = processTaskStepTaskMapper.getProcessTaskStepTaskUserAgentListByStepTaskUserIdList(stepTaskUserIdList);
+            Map<Long, String> stepTaskUserAgentMap = stepTaskUserAgentList.stream().collect(Collectors.toMap(e -> e.getProcessTaskStepTaskUserId(), e -> e.getUserUuid()));
             List<ProcessTaskStepTaskUserContentVo> stepTaskUserContentList = processTaskStepTaskMapper.getStepTaskUserContentByStepTaskUserIdList(stepTaskUserIdList);
             Map<Long, ProcessTaskStepTaskUserContentVo> stepTaskUserContentMap = new HashMap<>();
             for (ProcessTaskStepTaskUserContentVo stepTaskUserContentVo : stepTaskUserContentList) {
@@ -537,6 +539,9 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                 stepTaskUserContentMap.put(stepTaskUserContentVo.getProcessTaskStepTaskUserId(), stepTaskUserContentVo);
             }
             for (ProcessTaskStepTaskUserVo stepTaskUserVo : stepTaskUserList) {
+                if (stepTaskUserVo.getEndTime() == null && stepTaskUserVo.getIsDelete() == 1) {
+                    continue;
+                }
                 int isReplyable = 0;
                 try {
                     isReplyable = checkIsReplyable(processTaskVo, processTaskStepVo, stepTaskUserVo.getUserUuid(), stepTaskUserVo.getId());
@@ -544,6 +549,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                     isReplyable = 0;
                 }
                 stepTaskUserVo.setIsReplyable(isReplyable);
+                stepTaskUserVo.setOriginalUser(stepTaskUserAgentMap.get(stepTaskUserVo.getId()));
                 ProcessTaskStepTaskUserContentVo stepTaskUserContentVo = stepTaskUserContentMap.get(stepTaskUserVo.getId());
                 if (stepTaskUserContentVo != null) {
                     stepTaskUserVo.setContent(stepTaskUserContentVo.getContent());
