@@ -356,6 +356,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         if (CollectionUtils.isEmpty(taskConfigList)) {
             return null;
         }
+        taskConfigList.sort(Comparator.comparingInt(e -> idArray.indexOf(e.getId())));
         List<ProcessTaskStepTaskVo> processTaskStepTaskList = processTaskStepTaskMapper.getStepTaskByProcessTaskStepId(processTaskStepVo.getId());
         if (CollectionUtils.isEmpty(processTaskStepTaskList)) {
             return taskConfigList;
