@@ -8,7 +8,9 @@ package codedriver.module.process.service;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.notify.dto.NotifyReceiverVo;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dto.*;
+import codedriver.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -371,6 +373,21 @@ public interface ProcessTaskService {
      */
     JSONObject batchCompleteProcessTaskStep(JSONObject jsonObj);
 
+    /**
+     * 检查工单状态，如果processTaskStatus属于status其中一员，则返回对应的异常对象，否则返回null
+     * @param processTaskStatus 工单状态
+     * @param statuss 状态列表
+     * @return
+     */
+    ProcessTaskPermissionDeniedException checkProcessTaskStatus(String processTaskStatus, ProcessTaskStatus... statuss);
+
+    /**
+     * 检查步骤状态，如果stepStatus属于status其中一员，则返回对应的异常对象，否则返回null
+     * @param stepStatus 步骤状态
+     * @param statuss 状态列表
+     * @return
+     */
+    ProcessTaskPermissionDeniedException checkProcessTaskStepStatus(String stepStatus, ProcessTaskStatus ... statuss);
 //    /**
 //     * 判断当前用户是否拥有工单转报权限
 //     * @param processTaskVo 工单信息
