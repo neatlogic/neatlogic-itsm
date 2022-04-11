@@ -26,13 +26,11 @@ import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoun
 import codedriver.framework.process.exception.processtask.ProcessTaskStepUnRunningException;
 import codedriver.framework.process.exception.processtask.task.*;
 import codedriver.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
-import codedriver.framework.process.service.ProcessTaskAgentService;
 import codedriver.framework.process.service.ProcessTaskAgentServiceImpl;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.process.task.TaskConfigManager;
-import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.framework.service.UserService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -72,10 +70,6 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
     ProcessTaskService processTaskService;
     @Resource
     ProcessTaskAgentServiceImpl processTaskAgentServiceImpl;
-    @Resource
-    AuthenticationInfoService authenticationInfoService;
-    @Resource
-    ProcessTaskAgentService processTaskAgentService;
     /**
      * 创建任务
      *
