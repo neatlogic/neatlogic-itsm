@@ -241,6 +241,8 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
 
         //任务列表
         processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
+        List<TaskConfigVo> taskConfigList = processTaskStepTaskService.getTaskConfigList(processTaskStepVo);
+        processTaskStepVo.setTaskConfigList(taskConfigList);
         // 时效列表
         processTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepId(processTaskStepVo.getId()));
         // automatic processtaskStepData
