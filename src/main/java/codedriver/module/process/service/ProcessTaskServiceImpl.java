@@ -1737,8 +1737,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         //任务列表
         if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
             processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
-//            List<TaskConfigVo> taskConfigList = processTaskStepTaskService.getTaskConfigList(processTaskStepVo);
-//            processTaskStepVo.setTaskConfigList(taskConfigList);
+            List<TaskConfigVo> taskConfigList = processTaskStepTaskService.getTaskConfigList(processTaskStepVo);
+            processTaskStepVo.setTaskConfigList(taskConfigList);
         }
 
         // 获取可分配处理人的步骤列表
