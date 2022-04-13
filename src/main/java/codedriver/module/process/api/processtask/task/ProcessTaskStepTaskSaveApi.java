@@ -295,7 +295,9 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
         List<String> legalUserUuidList = userMapper.checkUserInRangeList(userUuidList, userVo);
         if (legalUserUuidList.size() != userUuidList.size()) {
             userUuidList.removeAll(legalUserUuidList);
-            throw new TaskUserIllegalException(String.join(",", userUuidList));
+            if (CollectionUtils.isNotEmpty(userUuidList)) {
+                throw new TaskUserIllegalException(String.join(",", userUuidList));
+            }
         }
     }
 }
