@@ -217,16 +217,19 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
                 isChange = true;
             }
             //找出需要恢复的stepUserId
+            List<String> needRecoverUserUuidList = new ArrayList<>();
             List<Long> needRecoverStepTaskUserIdList = new ArrayList<>();
             for (ProcessTaskStepTaskUserVo processTaskStepTaskUserVo : processTaskStepTaskUserList) {
                 if (Objects.equals(processTaskStepTaskUserVo.getIsDelete(), 0)) {
                     continue;
                 }
-                if (newUserUuidSet.remove(processTaskStepTaskUserVo.getUserUuid())) {
+                if (newUserUuidSet.contains(processTaskStepTaskUserVo.getUserUuid())) {
                     needRecoverStepTaskUserIdList.add(processTaskStepTaskUserVo.getId());
+                    needRecoverUserUuidList.add(processTaskStepTaskUserVo.getUserUuid());
                 }
             }
             if (CollectionUtils.isNotEmpty(needRecoverStepTaskUserIdList)) {
+                newUserUuidSet.removeAll(needRecoverUserUuidList);
                 processTaskStepTaskMapper.updateTaskUserIsDeleteByIdList(needRecoverStepTaskUserIdList, 0);
                 isChange = true;
             }
