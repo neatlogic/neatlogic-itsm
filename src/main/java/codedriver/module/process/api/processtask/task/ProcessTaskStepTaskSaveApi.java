@@ -214,6 +214,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
             }
             if (CollectionUtils.isNotEmpty(needDeleteStepTaskUserIdList)) {
                 processTaskStepTaskMapper.updateTaskUserIsDeleteByIdList(needDeleteStepTaskUserIdList, 1);
+//                processTaskStepTaskMapper.deleteProcessTaskStepTaskUserAgentByStepTaskUserIdList(needDeleteStepTaskUserIdList);
                 isChange = true;
             }
             //找出需要恢复的stepUserId
