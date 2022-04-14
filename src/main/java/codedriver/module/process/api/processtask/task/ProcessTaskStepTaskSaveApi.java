@@ -255,9 +255,6 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
             }
             isChange = true;
         }
-        if (!isChange) {
-            System.out.println(isChange);
-        }
         //第四步 更新`processtask_step_worker`表和`processtask_step_user`表、记录活动、触发通知、动作
         if (isChange) {
             IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());

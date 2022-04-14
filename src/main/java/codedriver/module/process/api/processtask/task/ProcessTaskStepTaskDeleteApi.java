@@ -96,7 +96,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         processTaskStepTaskMapper.deleteTaskById(processTaskStepTaskId);
         processTaskStepTaskMapper.deleteTaskUserByTaskId(processTaskStepTaskId);
         processTaskStepTaskMapper.deleteTaskUserContentByTaskId(processTaskStepTaskId);
-
+        processTaskStepTaskMapper.deleteProcessTaskStepTaskUserAgentByStepTaskId(processTaskStepTaskId);
 //        processTaskService.refreshStepMinorWorker(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskId));
 //        processTaskService.refreshStepMinorUser(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskId));
         IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
