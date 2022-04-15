@@ -57,7 +57,7 @@ public class ChannelTypeGetApi extends PrivateApiComponentBase {
             throw new ChannelTypeNotFoundException(uuid);
         }
         ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo =
-            processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(uuid);
+            processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyByChannelTypeUuid(uuid);
         if (processTaskSerialNumberPolicyVo != null) {
             channelType.setHandler(processTaskSerialNumberPolicyVo.getHandler());
             JSONObject resultObj = (JSONObject)JSON.toJSON(channelType);
