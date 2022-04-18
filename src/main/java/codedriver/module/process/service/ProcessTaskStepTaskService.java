@@ -28,9 +28,10 @@ public interface ProcessTaskStepTaskService {
     /**
      * 完成任务
      *
-     * @param processTaskStepTaskUserVo 任务用户参数
+     * @param id 任务id
+     * @param content 回复内容
      */
-    Long completeTask(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo) throws Exception;
+    Long completeTask(Long id, String content) throws Exception;
     /**
      * 解析&校验 任务配置
      *
