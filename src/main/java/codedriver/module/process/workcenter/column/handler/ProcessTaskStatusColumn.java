@@ -30,21 +30,6 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
         return "工单状态";
     }
 
-  /*  @Override
-    public Object getMyValue(JSONObject json) throws RuntimeException {
-        JSONObject statusJson = new JSONObject();
-        String status = json.getString(this.getName());
-        statusJson.put("value", status);
-        statusJson.put("text", ProcessTaskStatus.getText(status));
-        statusJson.put("color", ProcessTaskStatus.getColor(status));
-        return statusJson;
-    }
-
-    @Override
-    public JSONObject getMyValueText(JSONObject json) {
-        return (JSONObject) getMyValue(json);
-    }*/
-
     @Override
     public Boolean allowSort() {
         return false;
@@ -65,15 +50,6 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
     public Integer getSort() {
         return 5;
     }
-
-   /* @Override
-    public Object getSimpleValue(Object json) {
-        String status = null;
-        if (json != null) {
-            status = JSONObject.parseObject(json.toString()).getString("text");
-        }
-        return status;
-    }*/
 
     @Override
     public String getSimpleValue(ProcessTaskVo processTaskVo) {
@@ -106,6 +82,7 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
 
     @Override
     public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> dbDataMapList) {
+        getNoExistGroup(dashboardWidgetAllGroupDefineVo, dbDataMapList, ProcessTaskSqlTable.FieldEnum.STATUS.getProName());
         //补充text
         for (int i = 0; i < dbDataMapList.size(); i++) {
             Map<String, Object> tmpMap = new HashMap<>();
@@ -140,4 +117,5 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
         }
         return groupDataMap;
     }
+
 }

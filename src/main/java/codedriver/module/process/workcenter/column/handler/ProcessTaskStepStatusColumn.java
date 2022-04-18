@@ -79,11 +79,12 @@ public class ProcessTaskStepStatusColumn extends ProcessTaskColumnBase implement
     }
 
     @Override
-    public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> mapList) {
+    public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> dbDataMapList) {
+        getNoExistGroup(dashboardWidgetAllGroupDefineVo, dbDataMapList, ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName());
         //补充text
-        for (int i = 0; i < mapList.size(); i++) {
+        for (int i = 0; i < dbDataMapList.size(); i++) {
             Map<String, Object> tmpMap = new HashMap<>();
-            Map<String, Object> map = mapList.get(i);
+            Map<String, Object> map = dbDataMapList.get(i);
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue().toString();
@@ -92,7 +93,7 @@ public class ProcessTaskStepStatusColumn extends ProcessTaskColumnBase implement
                 }
                 tmpMap.put(key, value);
             }
-            mapList.set(i, tmpMap);
+            dbDataMapList.set(i, tmpMap);
         }
         DashboardWidgetChartConfigVo dashboardWidgetChartConfigVo = dashboardWidgetAllGroupDefineVo.getChartConfigVo();
         if (getName().equals(dashboardWidgetChartConfigVo.getGroup())) {
@@ -110,7 +111,7 @@ public class ProcessTaskStepStatusColumn extends ProcessTaskColumnBase implement
     public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
         LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
         for (Map<String, Object> dataMap : mapList) {
-            if(dataMap.containsKey(ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName())) {
+            if (dataMap.containsKey(ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName())) {
                 groupDataMap.put(dataMap.get(ProcessTaskStepSqlTable.FieldEnum.STATUS.getProName()).toString(), dataMap.get("count"));
             }
         }

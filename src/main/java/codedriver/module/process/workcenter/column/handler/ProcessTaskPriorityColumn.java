@@ -1,23 +1,29 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import codedriver.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetGroupDefineVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
+import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.workcenter.dto.*;
+import codedriver.framework.process.workcenter.dto.JoinOnVo;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.PrioritySqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
@@ -33,26 +39,6 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
     public String getDisplayName() {
         return "优先级";
     }
-
-   /* @Override
-    public Object getMyValue(JSONObject json) throws RuntimeException {
-        String priorityUuid = json.getString(this.getName());
-        JSONObject priorityJson = new JSONObject();
-        if (StringUtils.isNotBlank(priorityUuid)) {
-            priorityJson.put("value", priorityUuid);
-            PriorityVo priority = priorityMapper.getPriorityByUuid(priorityUuid);
-            if (priority != null) {
-                priorityJson.put("text", priority.getName());
-                priorityJson.put("color", priority.getColor());
-            }
-        }
-        return priorityJson;
-    }
-
-    @Override
-    public JSONObject getMyValueText(JSONObject json) {
-        return (JSONObject) getMyValue(json);
-    }*/
 
     @Override
     public Boolean allowSort() {
@@ -75,15 +61,6 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
         // TODO Auto-generated method stub
         return 3;
     }
-
-   /* @Override
-    public Object getSimpleValue(Object json) {
-        String priority = null;
-        if (json != null) {
-            priority = JSONObject.parseObject(json.toString()).getString("text");
-        }
-        return priority;
-    }*/
 
     @Override
     public String getSimpleValue(ProcessTaskVo taskVo) {
@@ -139,7 +116,8 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
     }
 
     @Override
-    public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> mapList) {
+    public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> dbDataMapList) {
+        getNoExistGroup(dashboardWidgetAllGroupDefineVo, dbDataMapList, PrioritySqlTable.FieldEnum.UUID.getProName(), PrioritySqlTable.FieldEnum.NAME.getProName());
         DashboardWidgetChartConfigVo dashboardWidgetChartConfigVo = dashboardWidgetAllGroupDefineVo.getChartConfigVo();
         if (getName().equals(dashboardWidgetChartConfigVo.getGroup())) {
             DashboardWidgetGroupDefineVo dashboardDataGroupVo = new DashboardWidgetGroupDefineVo(PrioritySqlTable.FieldEnum.UUID.getProValue(), dashboardWidgetChartConfigVo.getGroup(), PrioritySqlTable.FieldEnum.NAME.getProValue());
@@ -162,5 +140,14 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
             groupDataMap.put(dataMap.get(PrioritySqlTable.FieldEnum.UUID.getProValue()).toString(), dataMap.get("count"));
         }
         return groupDataMap;
+    }
+
+    @Override
+    public Map<String, String> getGroupNameTextMap(List<String> groupNameList) {
+        List<PriorityVo> noExistGroupList =  priorityMapper.getPriorityByUuidList(groupNameList);
+        if (CollectionUtils.isNotEmpty(noExistGroupList)) {
+            return noExistGroupList.stream().collect(Collectors.toMap(PriorityVo::getUuid, PriorityVo::getName));
+        }
+        return new HashMap<>();
     }
 }

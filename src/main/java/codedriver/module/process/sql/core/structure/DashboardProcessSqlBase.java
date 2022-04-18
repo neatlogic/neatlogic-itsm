@@ -6,6 +6,7 @@
 package codedriver.module.process.sql.core.structure;
 
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.dashboard.constvalue.DashboardStatistics;
 import codedriver.framework.dashboard.dto.DashboardWidgetChartConfigVo;
@@ -41,13 +42,14 @@ import static codedriver.framework.common.util.CommonUtil.distinctByKey;
 public abstract class DashboardProcessSqlBase extends ProcessSqlBase<DashboardWidgetParamVo> {
 
     @Override
-    public  void doService(StringBuilder sqlSb, DashboardWidgetParamVo sqlDecoratorVo) {
+    public void doService(StringBuilder sqlSb, DashboardWidgetParamVo sqlDecoratorVo) {
         doMyService(sqlSb, sqlDecoratorVo);
     }
 
     public void doMyService(StringBuilder sqlSb, DashboardWidgetParamVo sqlDecoratorVo) {
 
     }
+
     /**
      * group 拼接order sql
      *
@@ -71,7 +73,7 @@ public abstract class DashboardProcessSqlBase extends ProcessSqlBase<DashboardWi
      * sub group 拼接order sql
      *
      * @param dashboardWidgetParamVo 工单中心参数
-     * @param sqlSb          sql builder
+     * @param sqlSb                  sql builder
      */
     protected void subGroupColumnService(DashboardWidgetParamVo dashboardWidgetParamVo, StringBuilder sqlSb) {
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
@@ -85,7 +87,7 @@ public abstract class DashboardProcessSqlBase extends ProcessSqlBase<DashboardWi
     /**
      * 固定条件
      *
-     * @param sqlSb                   sql builder
+     * @param sqlSb                  sql builder
      * @param dashboardWidgetParamVo 工单入参
      */
     protected void buildDashboardCommonConditionWhereSql(StringBuilder sqlSb, DashboardWidgetParamVo dashboardWidgetParamVo) {
@@ -103,7 +105,7 @@ public abstract class DashboardProcessSqlBase extends ProcessSqlBase<DashboardWi
      * group 拼接where sql
      *
      * @param dashboardWidgetParamVo 工单中心参数
-     * @param sqlSb          sql builder
+     * @param sqlSb                  sql builder
      */
     protected void groupWhereService(DashboardWidgetParamVo dashboardWidgetParamVo, StringBuilder sqlSb) {
         sqlSb.append(" where ");
@@ -117,6 +119,7 @@ public abstract class DashboardProcessSqlBase extends ProcessSqlBase<DashboardWi
         JSONArray configList = chartConfigVo.getConfigList();
         if (CollectionUtils.isNotEmpty(configList)) {
             groupDataList = JSONObject.parseArray(configList.toJSONString(), String.class);
+            groupDataList = groupDataList.stream().map(GroupSearch::removePrefix).collect(Collectors.toList());
         }
         //二级分组拼接sql，则根据查出的权重，排序截取最大组数量，查出二维数据
         LinkedHashMap<String, Object> groupDataMap = dashboardWidgetParamVo.getDbExchangeGroupDataMap();
@@ -234,12 +237,13 @@ public abstract class DashboardProcessSqlBase extends ProcessSqlBase<DashboardWi
             subGroupJoinOn = String.format(" and a.%s = b.%s ", subGroupProperty, subGroupProperty);
         }
         String everyday = dashboardWidgetParamVo.getDashboardWidgetChartConfigVo().getGroup();
-        sqlSb.append(String.format("from (%s) a join (%s) b ON a.%s >= b.%s %s", chartVo.getSubSql(), chartVo.getSubSql(),everyday,everyday, subGroupJoinOn));
+        sqlSb.append(String.format("from (%s) a join (%s) b ON a.%s >= b.%s %s", chartVo.getSubSql(), chartVo.getSubSql(), everyday, everyday, subGroupJoinOn));
     }
 
     /**
      * 拼group by sql
-     * @param sqlSb sql
+     *
+     * @param sqlSb                  sql
      * @param dashboardWidgetParamVo dashboard 入参
      */
     protected void getGroupByGroupCount(StringBuilder sqlSb, DashboardWidgetParamVo dashboardWidgetParamVo) {
@@ -276,7 +280,7 @@ public abstract class DashboardProcessSqlBase extends ProcessSqlBase<DashboardWi
      * group 拼接order sql
      *
      * @param dashboardWidgetParamVo 参数
-     * @param sqlSb          sql builder
+     * @param sqlSb                  sql builder
      */
     protected void groupOrderService(StringBuilder sqlSb, DashboardWidgetParamVo dashboardWidgetParamVo) {
         if (Objects.equals(dashboardWidgetParamVo.getDashboardWidgetChartConfigVo().getStatisticsType(), DashboardStatistics.SUM.getValue())) {

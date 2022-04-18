@@ -15,11 +15,13 @@ import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ChannelTypeSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -36,25 +38,6 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 	public String getDisplayName() {
 		return "服务类型";
 	}
-
-	/*@Override
-	public Object getMyValue(JSONObject json) throws RuntimeException {
-		String channelTypeUuid = json.getString(this.getName());
-		JSONObject channelTypeJson = new JSONObject();
-		ChannelTypeVo channelType = channelTypeMapper.getChannelTypeByUuid(channelTypeUuid);
-		channelTypeJson.put("value", channelTypeUuid);
-		if(channelType != null) {
-			channelTypeJson.put("text", channelType.getName());
-			channelTypeJson.put("color", channelType.getColor());
-
-		}
-		return channelTypeJson;
-	}
-
-	@Override
-	public JSONObject getMyValueText(JSONObject json) {
-		return (JSONObject) getMyValue(json);
-	}*/
 
 	@Override
 	public String getSimpleValue(ProcessTaskVo processTaskVo) {
@@ -87,15 +70,6 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 	public Integer getSort() {
 		return 8;
 	}
-
-	/*@Override
-	public Object getSimpleValue(Object json) {
-		String channelType = null;
-		if(json != null){
-			channelType = JSONObject.parseObject(json.toString()).getString("text");
-		}
-		return channelType;
-	}*/
 
 	@Override
 	public Object getValue(ProcessTaskVo processTaskVo) {
@@ -130,7 +104,8 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 	}
 
 	@Override
-	public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> mapList) {
+	public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> dbDataMapList) {
+		getNoExistGroup(dashboardWidgetAllGroupDefineVo, dbDataMapList, ChannelTypeSqlTable.FieldEnum.UUID.getProName(), ChannelTypeSqlTable.FieldEnum.NAME.getProName());
 		DashboardWidgetChartConfigVo dashboardWidgetChartConfigVo = dashboardWidgetAllGroupDefineVo.getChartConfigVo();
 		if (getName().equals(dashboardWidgetChartConfigVo.getGroup())) {
 			DashboardWidgetGroupDefineVo dashboardDataGroupVo = new DashboardWidgetGroupDefineVo(ChannelTypeSqlTable.FieldEnum.UUID.getProValue(), dashboardWidgetChartConfigVo.getGroup(), ChannelTypeSqlTable.FieldEnum.NAME.getProValue());
@@ -153,5 +128,14 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 			groupDataMap.put(dataMap.get(ChannelTypeSqlTable.FieldEnum.UUID.getProValue()).toString(), dataMap.get("count"));
 		}
 		return groupDataMap;
+	}
+
+	@Override
+	public Map<String, String> getGroupNameTextMap(List<String> groupNameList) {
+		List<ChannelTypeVo> noExistGroupList = channelTypeMapper.getChannelTypeByUuidList(groupNameList);
+		if (CollectionUtils.isNotEmpty(noExistGroupList)) {
+			return noExistGroupList.stream().collect(Collectors.toMap(ChannelTypeVo::getUuid, ChannelTypeVo::getName));
+		}
+		return new HashMap<>();
 	}
 }

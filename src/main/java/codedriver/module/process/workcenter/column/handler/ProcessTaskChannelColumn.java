@@ -7,6 +7,7 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinOnVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
@@ -14,10 +15,12 @@ import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ChannelSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
@@ -34,30 +37,6 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
     public String getDisplayName() {
         return "服务";
     }
-
-    /*@Override
-    public Object getMyValue(JSONObject json) throws RuntimeException {
-        String channelUuid = json.getString(this.getName());
-        String channelName = StringUtils.EMPTY;
-        ChannelVo channelVo = channelMapper.getChannelByUuid(channelUuid);
-        if (channelVo != null) {
-            channelName = channelVo.getName();
-        }
-        return channelName;
-    }*/
-
-    /*@Override
-    public JSONObject getMyValueText(JSONObject json) {
-        String channelUuid = json.getString(this.getName());
-        JSONObject channelJson = new JSONObject();
-        ChannelVo channelVo = channelMapper.getChannelByUuid(channelUuid);
-        if (channelVo != null) {
-            channelJson.put("value", channelUuid);
-            channelJson.put("text", channelVo.getName());
-            channelJson.put("color", channelVo.getColor());
-        }
-        return channelJson;
-    }*/
 
     @Override
     public Boolean allowSort() {
@@ -79,14 +58,6 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
     public Integer getSort() {
         return 9;
     }
-
-    /*@Override
-    public Object getSimpleValue(Object json) {
-        if (json != null) {
-            return json.toString();
-        }
-        return null;
-    }*/
 
     @Override
     public String getSimpleValue(ProcessTaskVo taskVo) {
@@ -125,7 +96,8 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
     }
 
     @Override
-    public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> mapList) {
+    public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> dbDataMapList) {
+        getNoExistGroup(dashboardWidgetAllGroupDefineVo, dbDataMapList, ChannelSqlTable.FieldEnum.UUID.getProName(), ChannelSqlTable.FieldEnum.NAME.getProName());
         DashboardWidgetChartConfigVo dashboardWidgetChartConfigVo = dashboardWidgetAllGroupDefineVo.getChartConfigVo();
         if (getName().equals(dashboardWidgetChartConfigVo.getGroup())) {
             DashboardWidgetGroupDefineVo dashboardDataGroupVo = new DashboardWidgetGroupDefineVo(ChannelSqlTable.FieldEnum.UUID.getProValue(), dashboardWidgetChartConfigVo.getGroup(), ChannelSqlTable.FieldEnum.NAME.getProValue());
@@ -148,5 +120,14 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
             groupDataMap.put(dataMap.get(ChannelSqlTable.FieldEnum.UUID.getProValue()).toString(), dataMap.get("count"));
         }
         return groupDataMap;
+    }
+
+    @Override
+    public Map<String, String> getGroupNameTextMap(List<String> groupNameList) {
+        List<ChannelVo> noExistGroupList =  channelMapper.getChannelByUuidList(groupNameList);
+        if (CollectionUtils.isNotEmpty(noExistGroupList)) {
+            return noExistGroupList.stream().collect(Collectors.toMap(ChannelVo::getUuid, ChannelVo::getName));
+        }
+        return new HashMap<>();
     }
 }

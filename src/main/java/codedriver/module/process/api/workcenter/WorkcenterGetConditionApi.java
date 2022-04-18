@@ -2,21 +2,21 @@ package codedriver.module.process.api.workcenter;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.core.AuthActionChecker;
-import codedriver.framework.common.constvalue.*;
-import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.Expression;
+import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
+import codedriver.framework.form.constvalue.FormConditionModel;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ConditionConfigType;
-import codedriver.framework.form.constvalue.FormConditionModel;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.constvalue.ProcessWorkcenterInitType;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.module.process.condition.handler.ProcessTaskIsShowCondition;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -88,10 +87,10 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
             }
             JSONObject config = condition.getConfig(ConditionConfigType.WORKCENTER);
             //非草稿的时候，过滤条件：工单状态去掉”未提交“
-            if (condition.getName().equals(ProcessWorkcenterField.STATUS.getValue()) && !Objects.equals(workcenterUuid, ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue())) {
+            /*if (condition.getName().equals(ProcessWorkcenterField.STATUS.getValue()) && !Objects.equals(workcenterUuid, ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue())) {
                 JSONArray dataArray = config.getJSONArray("dataList");
                 config.put("dataList", dataArray.stream().filter(o -> !Objects.equals(ProcessTaskStatus.DRAFT.getValue(), ((ValueTextVo) o).getValue())).collect(Collectors.toList()));
-            }
+            }*/
             JSONObject commonObj = new JSONObject();
             commonObj.put("handler", condition.getName());
             commonObj.put("handlerName", condition.getDisplayName());
