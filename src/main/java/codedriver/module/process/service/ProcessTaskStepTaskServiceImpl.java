@@ -292,7 +292,6 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                     isChange = true;
                 }
             } catch (ProcessTaskPermissionDeniedException processTaskPermissionDeniedException) {
-                System.out.println(1);
             }
         }
         if (isChange) {
