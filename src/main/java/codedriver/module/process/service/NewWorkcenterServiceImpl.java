@@ -43,7 +43,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -431,20 +430,10 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         JSONArray returnArray = new JSONArray();
         List<ProcessTaskVo> processTaskVoList = doSearchKeyword(workcenterVo);
         if (CollectionUtils.isNotEmpty(processTaskVoList)) {
-            Map<Long, String> processTaskChannelTypeMap = new HashMap<>();
             JSONObject titleObj = new JSONObject();
             JSONArray dataList = new JSONArray();
-            //通过工单号搜索需带上"服务类型"
-            if(Objects.equals(workcenterVo.getKeywordPro(),ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getProName())) {
-                List<ProcessTaskVo> processTaskVos = processTaskMapper.getProcessTaskListWithChannelVoByTaskIdList(processTaskVoList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
-                processTaskChannelTypeMap = processTaskVos.stream().collect(Collectors.toMap(ProcessTaskVo::getId, e -> e.getChannelVo().getChannelTypeVo().getName()));
-            }
             for (ProcessTaskVo processTaskVo : processTaskVoList) {
-                String channelType = StringUtils.EMPTY;
-                if (processTaskChannelTypeMap.containsKey(processTaskVo.getId())) {
-                    channelType = processTaskChannelTypeMap.get(processTaskVo.getId()) + " ";
-                }
-                dataList.add(channelType + JSONObject.parseObject(JSONObject.toJSONString(processTaskVo)).getString(workcenterVo.getKeywordPro()));
+                dataList.add(JSONObject.parseObject(JSONObject.toJSONString(processTaskVo)).getString(workcenterVo.getKeywordPro()));
             }
             titleObj.put("dataList", dataList);
             titleObj.put("value", workcenterVo.getKeywordColumn());
