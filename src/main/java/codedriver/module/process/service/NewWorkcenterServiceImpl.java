@@ -43,6 +43,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -98,7 +99,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         //int total = processTaskMapper.getProcessTaskCountBySql(sb.build());
         //System.out.println((System.currentTimeMillis() - countStartTime) + " ##end workcenter-count:------------------------------------------------------------------------------- ");
         //if (total > 0) {
-        if(offsetRowNum > 0){
+        if (offsetRowNum > 0) {
             //找出符合条件分页后的工单ID List
             //long idStartTime = System.currentTimeMillis();
             sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.DISTINCT_ID);
@@ -122,7 +123,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             List<JSONObject> finalDataList = dataList;
             runner.execute(processTaskVoList, 5, processTaskVo -> {
                 JSONObject taskJson = new JSONObject();
-                if(Objects.equals(processTaskVo.getStatus(),ProcessTaskStatus.RUNNING.getValue())) {
+                if (Objects.equals(processTaskVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())) {
                     processTaskVo.setStepList(processTaskMapper.getProcessTaskCurrentStepByProcessTaskId(processTaskVo.getId()));
                 }
                 //重新渲染工单字段
@@ -153,7 +154,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         }
 
 
-        JSONObject returnObj = TableResultUtil.getOffsetResult(theadList,dataList,workcenterVo);
+        JSONObject returnObj = TableResultUtil.getOffsetResult(theadList, dataList, workcenterVo);
         returnObj.put("sortList", sortList);
 
         //补充总数
@@ -278,7 +279,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         // 少补
         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
             IProcessTaskColumn column = entry.getValue();
-            if (Objects.equals(column.getType(),ProcessFieldType.COMMON.getValue()) && CollectionUtils.isEmpty(theadList.stream()
+            if (Objects.equals(column.getType(), ProcessFieldType.COMMON.getValue()) && CollectionUtils.isEmpty(theadList.stream()
                     .filter(data -> column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
                 theadList.add(new WorkcenterTheadVo(column));
             }
@@ -429,11 +430,21 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     private JSONArray getKeywordOptionPCNew(WorkcenterVo workcenterVo) {
         JSONArray returnArray = new JSONArray();
         List<ProcessTaskVo> processTaskVoList = doSearchKeyword(workcenterVo);
-        if (!processTaskVoList.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(processTaskVoList)) {
+            Map<Long, String> processTaskChannelTypeMap = new HashMap<>();
             JSONObject titleObj = new JSONObject();
             JSONArray dataList = new JSONArray();
+            //通过工单号搜索需带上"服务类型"
+            if(Objects.equals(workcenterVo.getKeywordPro(),ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getProName())) {
+                List<ProcessTaskVo> processTaskVos = processTaskMapper.getProcessTaskListWithChannelVoByTaskIdList(processTaskVoList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
+                processTaskChannelTypeMap = processTaskVos.stream().collect(Collectors.toMap(ProcessTaskVo::getId, e -> e.getChannelVo().getChannelTypeVo().getName()));
+            }
             for (ProcessTaskVo processTaskVo : processTaskVoList) {
-                dataList.add(JSONObject.parseObject(JSONObject.toJSONString(processTaskVo)).getString(workcenterVo.getKeywordPro()));
+                String channelType = StringUtils.EMPTY;
+                if (processTaskChannelTypeMap.containsKey(processTaskVo.getId())) {
+                    channelType = processTaskChannelTypeMap.get(processTaskVo.getId()) + " ";
+                }
+                dataList.add(channelType + JSONObject.parseObject(JSONObject.toJSONString(processTaskVo)).getString(workcenterVo.getKeywordPro()));
             }
             titleObj.put("dataList", dataList);
             titleObj.put("value", workcenterVo.getKeywordColumn());
