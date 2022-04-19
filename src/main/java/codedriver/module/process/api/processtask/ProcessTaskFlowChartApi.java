@@ -3,7 +3,6 @@ package codedriver.module.process.api.processtask;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -42,9 +41,6 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessMapper processMapper;
-
-    @Resource
-    private UserMapper userMapper;
 
     @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
@@ -97,7 +93,6 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
                     processTaskStepVo.setForwardNextStepList(null);
                     processTaskStepVo.setIsCurrentUserDone(null);
                     processTaskStepVo.setProcessTaskStepRemindList(null);
-//                    processTaskStepVo.setProcessTaskStepSubtaskList(null);
                     processTaskStepVo.setSlaTimeList(null);
                     processTaskStepVo.setUserList(null);
                     processTaskStepVo.setWorkerPolicyList(null);
@@ -135,15 +130,12 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
             processTaskStepVo.setForwardNextStepList(null);
             processTaskStepVo.setIsCurrentUserDone(null);
             processTaskStepVo.setProcessTaskStepRemindList(null);
-//            processTaskStepVo.setProcessTaskStepSubtaskList(null);
             processTaskStepVo.setSlaTimeList(null);
             processTaskStepVo.setUserList(null);
             processTaskStepVo.setWorkerPolicyList(null);
             ProcessTaskStepUserVo majorUser = new ProcessTaskStepUserVo();
             majorUser.setUserUuid(UserContext.get().getUserUuid(true));
             majorUser.setUserName(UserContext.get().getUserName());
-//            UserVo userVo = userMapper.getUserBaseInfoByUuid(UserContext.get().getUserUuid(true));
-//            majorUser.setUserVo(userVo);
             majorUser.setUserType(ProcessUserType.MAJOR.getValue());
             majorUser.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
             majorUser.setStartTime(startTime);

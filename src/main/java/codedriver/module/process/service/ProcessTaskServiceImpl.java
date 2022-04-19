@@ -741,6 +741,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<ProcessTaskStepUserVo> minorUserList = new ArrayList<>();
         List<ProcessTaskStepUserVo> stepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), null);
         for (ProcessTaskStepUserVo stepUserVo : stepUserList) {
+            UserVo userVo = userMapper.getUserBaseInfoByUuid(stepUserVo.getUserUuid());
+            if (userVo != null) {
+                stepUserVo.setUserName(userVo.getUserName());
+            }
             if (stepUserVo.getUserType().equals(ProcessUserType.MAJOR.getValue())) {
                 majorUserList.add(stepUserVo);
             } else if (stepUserVo.getUserType().equals(ProcessUserType.MINOR.getValue())) {
