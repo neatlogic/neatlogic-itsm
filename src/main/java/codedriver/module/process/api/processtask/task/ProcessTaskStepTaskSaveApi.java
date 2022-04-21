@@ -8,32 +8,41 @@ package codedriver.module.process.api.processtask.task;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.type.ParamIrregularException;
-import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.dao.mapper.task.TaskMapper;
+import codedriver.framework.process.dto.*;
+import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskStepUnRunningException;
-import codedriver.framework.process.exception.processtask.task.ProcessTaskStepTaskNotFoundException;
+import codedriver.framework.process.exception.processtask.task.*;
+import codedriver.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
+import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
+import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.service.UserService;
 import codedriver.module.process.service.ProcessTaskStepTaskService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author lvzk
@@ -50,6 +59,14 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
     ProcessTaskStepTaskMapper processTaskStepTaskMapper;
     @Resource
     ProcessTaskStepTaskService processTaskStepTaskService;
+    @Resource
+    TaskMapper taskMapper;
+    @Resource
+    UserService userService;
+    @Resource
+    UserMapper userMapper;
+    @Resource
+    IProcessStepHandlerUtil processStepHandlerUtil;
 
     @Override
     public String getToken() {
@@ -67,49 +84,217 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskStepTaskId", type = ApiParamType.LONG, desc = "任务id，如果不为空则是编辑，为空则新增"),
+            @Param(name = "id", type = ApiParamType.LONG, desc = "任务id，如果不为空则是编辑，为空则新增"),
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-            @Param(name = "userList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "任务处理人userUuid,格式user#userUuid"),
+            @Param(name = "stepTaskUserVoList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "任务处理人列表"),
             @Param(name = "taskConfigId", type = ApiParamType.LONG, isRequired = true, desc = "任务策略id"),
-            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述")})
-    @Output({@Param(name = "Return", type = ApiParamType.LONG, desc = "任务id")})
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述")
+    })
+    @Output({
+            @Param(name = "Return", type = ApiParamType.LONG, desc = "任务id")
+    })
     @Description(desc = "保存任务接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        Long processTaskStepTaskId = jsonObj.getLong("processTaskStepTaskId");
-        ProcessTaskStepTaskVo processTaskStepTaskVo = JSONObject.toJavaObject(jsonObj, ProcessTaskStepTaskVo.class);
-        Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+        ProcessTaskStepTaskVo processTaskStepTaskVo = jsonObj.toJavaObject(ProcessTaskStepTaskVo.class);
+        // 第一步 判断入参是否合法
+        Long processTaskStepId = processTaskStepTaskVo.getProcessTaskStepId();
         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
         if (processTaskStepVo == null) {
             throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
         }
-        if (!Objects.equals(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo.getStatus())) {
-            throw new ProcessTaskStepUnRunningException();
+
+        //获取流程步骤配置中的 任务策略和人员范围
+        JSONObject taskConfig = processTaskStepTaskService.getTaskConfig(processTaskStepVo.getConfigHash());
+        if (MapUtils.isEmpty(taskConfig)) {
+            throw new TaskConfigException(processTaskStepVo.getName());
         }
-        Long processTaskId = processTaskStepVo.getProcessTaskId();
-        //校验执行权限
+
+        Long taskConfigId = processTaskStepTaskVo.getTaskConfigId();
+        JSONArray taskConfigIdArray = taskConfig.getJSONArray("idList");
+        if (CollectionUtils.isEmpty(taskConfigIdArray)) {
+            throw new ProcessTaskStepTaskConfigIllegalException(taskConfigId.toString());
+        }
+        List<Long> taskConfigIdList = taskConfigIdArray.toJavaList(Long.class);
+        if (!taskConfigIdList.contains(taskConfigId)) {
+            throw new ProcessTaskStepTaskConfigIllegalException(taskConfigId.toString());
+        }
+        TaskConfigVo taskConfigVo = taskMapper.getTaskConfigById(taskConfigId);
+        if (taskConfigVo == null) {
+            throw new ProcessTaskStepTaskConfigIllegalException(taskConfigId.toString());
+        }
+
+        JSONArray stepTaskUserVoList = jsonObj.getJSONArray("stepTaskUserVoList");
+        if (CollectionUtils.isEmpty(stepTaskUserVoList)) {
+            throw new ParamIrregularException("stepTaskUserVoList");
+        }
+        int num = taskConfigVo.getNum();
+        if (num != -1 && num != stepTaskUserVoList.size()) {
+            throw new ProcessTaskStepTaskUserCountIllegalException(taskConfigVo.getName(), taskConfigVo.getNum());
+        }
+        List<String> allUserUuidList = new ArrayList<>();
+        Set<String> newUserUuidSet = new HashSet<>();
+        Map<Long, String> stepTaskUserMap = new HashMap<>();
+        for (int i = 0; i < stepTaskUserVoList.size(); i++) {
+            JSONObject stepTaskUserObj = stepTaskUserVoList.getJSONObject(i);
+            String userUuid = stepTaskUserObj.getString("userUuid");
+            if (StringUtils.isBlank(userUuid)) {
+                throw new ParamIrregularException("stepTaskUserVoList[" + i + "].userUuid");
+            }
+            allUserUuidList.add(userUuid);
+            Long stepTaskUserId = stepTaskUserObj.getLong("id");
+            if (stepTaskUserId == null) {
+                newUserUuidSet.add(userUuid);
+                continue;
+            }
+            stepTaskUserMap.put(stepTaskUserId, userUuid);
+        }
+
+        JSONArray rangeList = taskConfig.getJSONArray("rangeList");
+        if (CollectionUtils.isNotEmpty(rangeList)) {
+            //校验用户是否在配置范围内
+            checkUserIsLegal(allUserUuidList.stream().map(Object::toString).collect(Collectors.toList()), rangeList.stream().map(Object::toString).collect(Collectors.toList()));
+        }
+
+        //第二步 校验执行权限
         new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.TASK_CREATE)
                 .build()
                 .checkAndNoPermissionThrowException();
-        if (CollectionUtils.isEmpty(processTaskStepTaskVo.getUserList())) {
-            throw new ParamIrregularException("userList");
-        }
-        processTaskStepTaskVo.setProcessTaskId(processTaskId);
-        processTaskStepTaskVo.setOwnerVo(new UserVo(UserContext.get().getUserUuid(true)));
-        processTaskStepTaskVo.getParamObj().put("stepConfigHash", processTaskStepVo.getConfigHash());
-        processTaskStepTaskVo.getParamObj().put("stepName", processTaskStepVo.getName());
+
+        //第三步 保存数据
         // 锁定当前流程
+        Long processTaskId = processTaskStepVo.getProcessTaskId();
         processTaskMapper.getProcessTaskLockById(processTaskId);
-        boolean isCreate = true;
-        if (processTaskStepTaskId != null) {
-            ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskById(processTaskStepTaskId);
-            if(stepTaskVo == null){
-                throw new ProcessTaskStepTaskNotFoundException(processTaskStepTaskId.toString());
+        boolean isChange = false;
+        ProcessTaskAuditType auditType = ProcessTaskAuditType.CREATETASK;
+        ProcessTaskStepTaskNotifyTriggerType triggerType = ProcessTaskStepTaskNotifyTriggerType.CREATETASK;
+        Long id = jsonObj.getLong("id");
+        if (id != null) {
+            //更新
+            auditType = ProcessTaskAuditType.EDITTASK;
+            triggerType = ProcessTaskStepTaskNotifyTriggerType.EDITTASK;
+            ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskById(id);
+            if (stepTaskVo == null) {
+                throw new ProcessTaskStepTaskNotFoundException(id.toString());
             }
-            isCreate = false;
-            processTaskStepTaskVo.setId(processTaskStepTaskId);
+            boolean isChangeContent = false;
+            ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(processTaskStepTaskVo.getContent());
+            processTaskStepTaskVo.setContentHash(processTaskContentVo.getHash());
+            if (!Objects.equals(processTaskContentVo.getHash(), stepTaskVo.getContentHash())) {
+                processTaskMapper.insertIgnoreProcessTaskContent(processTaskContentVo);
+                isChangeContent = true;
+            }
+            boolean isChangeOwner = false;
+            if (!Objects.equals(UserContext.get().getUserUuid(true), stepTaskVo.getOwner())) {
+                processTaskStepTaskVo.setOwner(UserContext.get().getUserUuid(true));
+                isChangeOwner = true;
+            }
+            if (isChangeContent || isChangeOwner) {
+                processTaskStepTaskMapper.updateTask(processTaskStepTaskVo);
+                isChange = true;
+            }
+            //找出需要删除的stepUserId
+            List<Long> needDeleteStepTaskUserIdList = new ArrayList<>();
+            List<ProcessTaskStepTaskUserVo> processTaskStepTaskUserList = processTaskStepTaskMapper.getStepTaskUserListByStepTaskId(id);
+            for (ProcessTaskStepTaskUserVo processTaskStepTaskUserVo : processTaskStepTaskUserList) {
+                if (Objects.equals(processTaskStepTaskUserVo.getIsDelete(), 1)) {
+                    continue;
+                }
+                String userUuid = stepTaskUserMap.get(processTaskStepTaskUserVo.getId());
+                if (StringUtils.isNotBlank(userUuid)) {
+                    if (!Objects.equals(userUuid, processTaskStepTaskUserVo.getUserUuid())) {
+                        //删除
+                        needDeleteStepTaskUserIdList.add(processTaskStepTaskUserVo.getId());
+                        newUserUuidSet.add(userUuid);
+                    }
+                } else {
+                    //删除
+                    needDeleteStepTaskUserIdList.add(processTaskStepTaskUserVo.getId());
+                }
+            }
+            if (CollectionUtils.isNotEmpty(needDeleteStepTaskUserIdList)) {
+                processTaskStepTaskMapper.updateTaskUserIsDeleteByIdList(needDeleteStepTaskUserIdList, 1);
+//                processTaskStepTaskMapper.deleteProcessTaskStepTaskUserAgentByStepTaskUserIdList(needDeleteStepTaskUserIdList);
+                isChange = true;
+            }
+            //找出需要恢复的stepUserId
+            List<String> needRecoverUserUuidList = new ArrayList<>();
+            List<Long> needRecoverStepTaskUserIdList = new ArrayList<>();
+            for (ProcessTaskStepTaskUserVo processTaskStepTaskUserVo : processTaskStepTaskUserList) {
+                if (Objects.equals(processTaskStepTaskUserVo.getIsDelete(), 0)) {
+                    continue;
+                }
+                if (newUserUuidSet.contains(processTaskStepTaskUserVo.getUserUuid())) {
+                    needRecoverStepTaskUserIdList.add(processTaskStepTaskUserVo.getId());
+                    needRecoverUserUuidList.add(processTaskStepTaskUserVo.getUserUuid());
+                }
+            }
+            if (CollectionUtils.isNotEmpty(needRecoverStepTaskUserIdList)) {
+                newUserUuidSet.removeAll(needRecoverUserUuidList);
+                processTaskStepTaskMapper.updateTaskUserIsDeleteByIdList(needRecoverStepTaskUserIdList, 0);
+                isChange = true;
+            }
+        } else {
+            //新增
+            ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(processTaskStepTaskVo.getContent());
+            processTaskMapper.insertIgnoreProcessTaskContent(processTaskContentVo);
+            processTaskStepTaskVo.setContentHash(processTaskContentVo.getHash());
+            processTaskStepTaskVo.setProcessTaskId(processTaskId);
+            processTaskStepTaskVo.setOwner(UserContext.get().getUserUuid(true));
+            processTaskStepTaskMapper.insertTask(processTaskStepTaskVo);
         }
-        processTaskStepTaskService.saveTask(processTaskStepVo,processTaskStepTaskVo, isCreate);
+        //插上新taskUser
+        if (CollectionUtils.isNotEmpty(newUserUuidSet)) {
+            ProcessTaskStepTaskUserVo processTaskStepTaskUserVo = new ProcessTaskStepTaskUserVo();
+            processTaskStepTaskUserVo.setProcessTaskStepTaskId(processTaskStepTaskVo.getId());
+            processTaskStepTaskUserVo.setStatus(ProcessTaskStatus.PENDING.getValue());
+            for (String userUuid : newUserUuidSet) {
+                processTaskStepTaskUserVo.setId(null);
+                processTaskStepTaskUserVo.setUserUuid(userUuid);
+                processTaskStepTaskMapper.insertTaskUser(processTaskStepTaskUserVo);
+            }
+            isChange = true;
+        }
+        //第四步 更新`processtask_step_worker`表和`processtask_step_user`表、记录活动、触发通知、动作
+        if (isChange) {
+            IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
+            if (handler == null) {
+                throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
+            }
+            handler.updateProcessTaskStepUserAndWorker(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId());
+
+            //活动参数
+            JSONObject paramObj = new JSONObject();
+            paramObj.put("replaceable_task", taskConfigVo.getName());
+            processTaskStepVo.getParamObj().putAll(paramObj);
+            processTaskStepTaskVo.setTaskConfigName(taskConfigVo.getName());
+            processTaskStepVo.setProcessTaskStepTaskVo(processTaskStepTaskVo);
+            processTaskStepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(Collections.singletonList(processTaskStepTaskVo.getId())));
+            processStepHandlerUtil.audit(processTaskStepVo, auditType);
+            processStepHandlerUtil.notify(processTaskStepVo, triggerType);
+            processStepHandlerUtil.action(processTaskStepVo, triggerType);
+        }
         return processTaskStepTaskVo.getId();
+    }
+
+    /**
+     * 检查用户是否合法
+     *
+     * @param userUuidList 用户uuidList
+     * @param rangeList    用户范围
+     */
+    private void checkUserIsLegal(List<String> userUuidList, List<String> rangeList) {
+        UserVo userVo = new UserVo();
+        userVo.setCurrentPage(1);
+        userVo.setIsDelete(0);
+        userVo.setIsActive(1);
+        userService.getUserByRangeList(userVo, rangeList);
+        List<String> legalUserUuidList = userMapper.checkUserInRangeList(userUuidList, userVo);
+        if (legalUserUuidList.size() != userUuidList.size()) {
+            userUuidList.removeAll(legalUserUuidList);
+            if (CollectionUtils.isNotEmpty(userUuidList)) {
+                throw new TaskUserIllegalException(String.join(",", userUuidList));
+            }
+        }
     }
 }

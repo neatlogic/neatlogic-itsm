@@ -741,6 +741,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<ProcessTaskStepUserVo> minorUserList = new ArrayList<>();
         List<ProcessTaskStepUserVo> stepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), null);
         for (ProcessTaskStepUserVo stepUserVo : stepUserList) {
+            UserVo userVo = userMapper.getUserBaseInfoByUuid(stepUserVo.getUserUuid());
+            if (userVo != null) {
+                stepUserVo.setUserName(userVo.getUserName());
+            }
             if (stepUserVo.getUserType().equals(ProcessUserType.MAJOR.getValue())) {
                 majorUserList.add(stepUserVo);
             } else if (stepUserVo.getUserType().equals(ProcessUserType.MINOR.getValue())) {
@@ -1737,8 +1741,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         //任务列表
         if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
             processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
-//            List<TaskConfigVo> taskConfigList = processTaskStepTaskService.getTaskConfigList(processTaskStepVo);
-//            processTaskStepVo.setTaskConfigList(taskConfigList);
+            List<TaskConfigVo> taskConfigList = processTaskStepTaskService.getTaskConfigList(processTaskStepVo);
+            processTaskStepVo.setTaskConfigList(taskConfigList);
         }
 
         // 获取可分配处理人的步骤列表

@@ -9,7 +9,6 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.crossover.IProcessTaskStepTaskCompleteApiCrossoverService;
-import codedriver.framework.process.dto.ProcessTaskStepTaskUserVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -48,14 +47,15 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase impl
     }
 
     @Input({
-            @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "任务用户id"),
-            @Param(name = "processTaskStepTaskUserContentId", type = ApiParamType.LONG, desc = "任务用户回复id，不为空则修改该回复，为空则新增回复"),
-            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述")})
-    @Output({ })
+            @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "任务id"),
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述")
+    })
+    @Output({})
     @Description(desc = "任务完成接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        ProcessTaskStepTaskUserVo stepTaskUserVo = JSONObject.toJavaObject(jsonObj, ProcessTaskStepTaskUserVo.class);
-        return processTaskStepTaskService.completeTask(stepTaskUserVo);
+        Long id = jsonObj.getLong("id");
+        String content = jsonObj.getString("content");
+        return processTaskStepTaskService.completeTask(id, content);
     }
 }

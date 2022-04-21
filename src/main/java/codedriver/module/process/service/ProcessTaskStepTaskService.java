@@ -9,6 +9,7 @@ import codedriver.framework.process.dto.ProcessTaskStepTaskUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.TaskConfigVo;
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
@@ -27,10 +28,17 @@ public interface ProcessTaskStepTaskService {
     /**
      * 完成任务
      *
-     * @param processTaskStepTaskUserVo 任务用户参数
+     * @param id 任务id
+     * @param content 回复内容
      */
-    Long completeTask(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo) throws Exception;
-
+    Long completeTask(Long id, String content) throws Exception;
+    /**
+     * 解析&校验 任务配置
+     *
+     * @param stepConfigHash 步骤配置hash
+     * @return 任务配置
+     */
+    JSONObject getTaskConfig(String stepConfigHash);
     /**
      * 获取工单任务信息
      * @param processTaskStepVo 步骤vo
