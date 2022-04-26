@@ -9,10 +9,8 @@ import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
-import codedriver.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.operationauth.*;
-import codedriver.framework.process.exception.processtask.task.ProcessTaskStepTaskUserNotFoundException;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.TernaryPredicate;
@@ -36,8 +34,6 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
 
     @Resource
     private UserMapper userMapper;
-    @Resource
-    private ProcessTaskStepTaskMapper processTaskStepTaskMapper;
     @Resource
     private ProcessTaskService processTaskService;
 

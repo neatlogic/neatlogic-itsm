@@ -9,6 +9,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -298,6 +299,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             //活动参数
             JSONObject paramObj = new JSONObject();
             paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
+            paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), content);
             processTaskStepVo.getParamObj().putAll(paramObj);
             processTaskStepVo.setProcessTaskStepTaskVo(stepTaskVo);
             stepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdListAndUserUuid(Collections.singletonList(stepTaskVo.getId()), UserContext.get().getUserUuid()));

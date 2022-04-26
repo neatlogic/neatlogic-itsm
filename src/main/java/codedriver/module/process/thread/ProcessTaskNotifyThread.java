@@ -147,7 +147,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
 //                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
 //                        JSONObject templateParamData = ProcessTaskUtil.getProcessTaskParamData(processTaskVo);
                         Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
-                        processTaskService.getReceiverMap(currentProcessTaskStepVo, receiverMap);
+                        processTaskService.getReceiverMap(currentProcessTaskStepVo, receiverMap, notifyTriggerType);
                         /* 参数映射列表 **/
                         List<ParamMappingVo> paramMappingList = new ArrayList<>();
                         JSONArray paramMappingArray = notifyPolicyConfig.getJSONArray("paramMappingList");

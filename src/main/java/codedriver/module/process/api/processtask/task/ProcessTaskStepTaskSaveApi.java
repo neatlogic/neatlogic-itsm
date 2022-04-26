@@ -8,10 +8,12 @@ package codedriver.module.process.api.processtask.task;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -264,12 +266,18 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
             handler.updateProcessTaskStepUserAndWorker(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId());
 
             //活动参数
+            processTaskStepTaskVo.setTaskConfigName(taskConfigVo.getName());
+            List<String> workerList = new ArrayList<>();
+            List<ProcessTaskStepTaskUserVo> processTaskStepTaskUserList = processTaskStepTaskVo.getStepTaskUserVoList();
+            for (ProcessTaskStepTaskUserVo processTaskStepTaskUserVo : processTaskStepTaskUserList) {
+                workerList.add(GroupSearch.USER.getValuePlugin() + processTaskStepTaskUserVo.getUserUuid());
+            }
             JSONObject paramObj = new JSONObject();
             paramObj.put("replaceable_task", taskConfigVo.getName());
+            paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskStepTaskVo.getContent());
+            paramObj.put(ProcessTaskAuditDetailType.WORKERLIST.getParamName(), JSONObject.toJSONString(workerList));
             processTaskStepVo.getParamObj().putAll(paramObj);
-            processTaskStepTaskVo.setTaskConfigName(taskConfigVo.getName());
             processTaskStepVo.setProcessTaskStepTaskVo(processTaskStepTaskVo);
-            processTaskStepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(Collections.singletonList(processTaskStepTaskVo.getId())));
             processStepHandlerUtil.audit(processTaskStepVo, auditType);
             processStepHandlerUtil.notify(processTaskStepVo, triggerType);
             processStepHandlerUtil.action(processTaskStepVo, triggerType);
