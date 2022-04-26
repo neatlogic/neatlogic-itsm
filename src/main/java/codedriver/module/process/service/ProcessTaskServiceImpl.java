@@ -25,6 +25,7 @@ import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.exception.FormActiveVersionNotFoundExcepiton;
 import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
+import codedriver.framework.notify.core.INotifyTriggerType;
 import codedriver.framework.notify.dto.NotifyReceiverVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
@@ -43,6 +44,7 @@ import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotF
 import codedriver.framework.process.exception.processtask.*;
 import codedriver.framework.process.exception.processtask.task.ProcessTaskStepTaskNotCompleteException;
 import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
+import codedriver.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.service.ProcessTaskAgentService;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -1326,7 +1328,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
      */
     @Override
     public void getReceiverMap(ProcessTaskStepVo currentProcessTaskStepVo,
-                               Map<String, List<NotifyReceiverVo>> receiverMap) {
+                               Map<String, List<NotifyReceiverVo>> receiverMap, INotifyTriggerType notifyTriggerType) {
         ProcessTaskVo processTaskVo =
                 processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
         if (processTaskVo != null) {
@@ -1351,24 +1353,32 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             receiverMap.computeIfAbsent(ProcessUserType.MAJOR.getValue(), k -> new ArrayList<>())
                     .add(new NotifyReceiverVo(GroupSearch.USER.getValue(), processTaskStepUserVo.getUserUuid()));
         }
-        /** 子任务处理人 **/
-        processTaskStepUser.setUserType(ProcessUserType.MINOR.getValue());
-        List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserList(processTaskStepUser);
-        for (ProcessTaskStepUserVo processTaskStepUserVo : minorUserList) {
-            receiverMap.computeIfAbsent(ProcessUserType.MINOR.getValue(), k -> new ArrayList<>())
-                    .add(new NotifyReceiverVo(GroupSearch.USER.getValue(), processTaskStepUserVo.getUserUuid()));
-        }
-        /* 任务处理人 */
-        ProcessTaskStepTaskVo stepTaskVo = currentProcessTaskStepVo.getProcessTaskStepTaskVo();
-        if (stepTaskVo != null) {
-            List<ProcessTaskStepTaskUserVo> taskUserVoList = stepTaskVo.getStepTaskUserVoList();
-            if (CollectionUtils.isNotEmpty(taskUserVoList)) {
-                for (ProcessTaskStepTaskUserVo taskUserVo : taskUserVoList) {
-                    receiverMap.computeIfAbsent(stepTaskVo.getTaskConfigId().toString(), k -> new ArrayList<>())
-                            .add(new NotifyReceiverVo(GroupSearch.USER.getValue(), taskUserVo.getUserUuid()));
+        if (notifyTriggerType == ProcessTaskStepTaskNotifyTriggerType.COMPLETETASK
+                || notifyTriggerType == ProcessTaskStepTaskNotifyTriggerType.CREATETASK
+                || notifyTriggerType == ProcessTaskStepTaskNotifyTriggerType.DELETETASK
+                || notifyTriggerType == ProcessTaskStepTaskNotifyTriggerType.EDITTASK
+                || notifyTriggerType == ProcessTaskStepTaskNotifyTriggerType.COMPLETEALLTASK) {
+            /* 当前任务处理人 */
+            ProcessTaskStepTaskVo stepTaskVo = currentProcessTaskStepVo.getProcessTaskStepTaskVo();
+            if (stepTaskVo != null) {
+                List<ProcessTaskStepTaskUserVo> taskUserVoList = stepTaskVo.getStepTaskUserVoList();
+                if (CollectionUtils.isNotEmpty(taskUserVoList)) {
+                    for (ProcessTaskStepTaskUserVo taskUserVo : taskUserVoList) {
+                        receiverMap.computeIfAbsent(ProcessUserType.MINOR.getValue(), k -> new ArrayList<>())
+                                .add(new NotifyReceiverVo(GroupSearch.USER.getValue(), taskUserVo.getUserUuid()));
+                    }
                 }
             }
+        } else {
+            /** 所有任务处理人 **/
+            processTaskStepUser.setUserType(ProcessUserType.MINOR.getValue());
+            List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserList(processTaskStepUser);
+            for (ProcessTaskStepUserVo processTaskStepUserVo : minorUserList) {
+                receiverMap.computeIfAbsent(ProcessUserType.MINOR.getValue(), k -> new ArrayList<>())
+                        .add(new NotifyReceiverVo(GroupSearch.USER.getValue(), processTaskStepUserVo.getUserUuid()));
+            }
         }
+
         /** 待处理人 **/
         List<ProcessTaskStepWorkerVo> workerList =
                 processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(

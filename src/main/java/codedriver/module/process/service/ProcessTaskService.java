@@ -6,6 +6,7 @@
 package codedriver.module.process.service;
 
 import codedriver.framework.dto.AuthenticationInfoVo;
+import codedriver.framework.notify.core.INotifyTriggerType;
 import codedriver.framework.notify.dto.NotifyReceiverVo;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -238,7 +239,7 @@ public interface ProcessTaskService {
      * @Returns:void
      **/
     public void getReceiverMap(ProcessTaskStepVo currentProcessTaskStepVo,
-                               Map<String, List<NotifyReceiverVo>> receiverMap);
+                               Map<String, List<NotifyReceiverVo>> receiverMap, INotifyTriggerType notifyTriggerType);
 
     /**
      * @Description: 设置步骤当前用户的暂存数据
