@@ -267,7 +267,6 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
 
             //活动参数
             processTaskStepTaskVo.setTaskConfigName(taskConfigVo.getName());
-//            processTaskStepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(Collections.singletonList(processTaskStepTaskVo.getId())));
             List<String> workerList = new ArrayList<>();
             List<ProcessTaskStepTaskUserVo> processTaskStepTaskUserList = processTaskStepTaskVo.getStepTaskUserVoList();
             for (ProcessTaskStepTaskUserVo processTaskStepTaskUserVo : processTaskStepTaskUserList) {
