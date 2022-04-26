@@ -103,7 +103,8 @@ public abstract class ProcessSqlBase<T extends SqlDecoratorVo> implements IProce
                 }
                 List<ConditionVo> conditionVoList = groupVo.getConditionList();
                 if (!isAddedAnd && CollectionUtils.isNotEmpty((conditionVoList))) {
-                    sqlSb.append(" and ");
+                    //补充整体and 结束左括号
+                    sqlSb.append(" and (");
                     isAddedAnd = true;
                 }
                 sqlSb.append(" ( ");
@@ -129,6 +130,10 @@ public abstract class ProcessSqlBase<T extends SqlDecoratorVo> implements IProce
                 sqlSb.append(" ) ");
                 fromGroupUuid = toGroupUuid;
 
+            }
+            //补充整体and 结束右括号
+            if(isAddedAnd){
+                sqlSb.append(" ) ");
             }
         }
     }
