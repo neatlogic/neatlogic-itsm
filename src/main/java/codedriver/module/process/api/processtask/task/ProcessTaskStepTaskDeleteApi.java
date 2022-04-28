@@ -7,16 +7,15 @@ package codedriver.module.process.api.processtask.task;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepTaskUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.exception.processtask.task.ProcessTaskStepTaskNotFoundException;
 import codedriver.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
@@ -33,7 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Collections;
+import java.util.List;
 
 /**
  * @author lvzk
@@ -91,8 +90,8 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
                 .checkAndNoPermissionThrowException();
         // 锁定当前流程
         processTaskMapper.getProcessTaskLockById(processTaskStepVo.getProcessTaskId());
+        List<ProcessTaskStepTaskUserVo> processTaskStepTaskUserList = processTaskStepTaskMapper.getStepTaskUserListByStepTaskId(stepTaskVo.getId());
 
-        stepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(Collections.singletonList(stepTaskVo.getId())));
         processTaskStepTaskMapper.deleteTaskById(processTaskStepTaskId);
         processTaskStepTaskMapper.deleteTaskUserByTaskId(processTaskStepTaskId);
         processTaskStepTaskMapper.deleteTaskUserContentByTaskId(processTaskStepTaskId);
@@ -108,8 +107,9 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         JSONObject paramObj = new JSONObject();
         paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
         processTaskStepVo.getParamObj().putAll(paramObj);
-        processTaskStepVo.setProcessTaskStepTaskVo(stepTaskVo);
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETETASK);
+        stepTaskVo.setStepTaskUserVoList(processTaskStepTaskUserList);
+        processTaskStepVo.setProcessTaskStepTaskVo(stepTaskVo);
         IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.DELETETASK);
         IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.DELETETASK);
         return null;
