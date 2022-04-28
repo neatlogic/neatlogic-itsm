@@ -254,6 +254,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
         processTaskMapper.insertIgnoreProcessTaskContent(processTaskContentVo);
         String contentHash = processTaskContentVo.getHash();
+        List<ProcessTaskStepTaskUserVo> canHandleStepTaskUserList = new ArrayList<>();
         List<ProcessTaskStepTaskUserVo> processTaskStepTaskUserList = processTaskStepTaskMapper.getStepTaskUserListByStepTaskId(id);
         for (ProcessTaskStepTaskUserVo oldProcessTaskStepTaskUserVo : processTaskStepTaskUserList) {
             if (Objects.equals(oldProcessTaskStepTaskUserVo.getIsDelete(), 1)) {
@@ -262,6 +263,8 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             try {
                 Long stepTaskUserId = oldProcessTaskStepTaskUserVo.getId();
                 checkIsReplyable(processTaskVo, processTaskStepVo, oldProcessTaskStepTaskUserVo.getUserUuid(), stepTaskUserId);
+                oldProcessTaskStepTaskUserVo.setOriginalUserUuid(UserContext.get().getUserUuid());
+                canHandleStepTaskUserList.add(oldProcessTaskStepTaskUserVo);
                 stepMinorUserRegulate(oldProcessTaskStepTaskUserVo);
 
                 //新增回复
@@ -301,9 +304,9 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
             paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), content);
             processTaskStepVo.getParamObj().putAll(paramObj);
-            processTaskStepVo.setProcessTaskStepTaskVo(stepTaskVo);
-            stepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdListAndUserUuid(Collections.singletonList(stepTaskVo.getId()), UserContext.get().getUserUuid()));
+            stepTaskVo.setStepTaskUserVoList(canHandleStepTaskUserList);
             stepTaskVo.setTaskStepTaskUserContent(content);
+            processTaskStepVo.setProcessTaskStepTaskVo(stepTaskVo);
             //判断满足任务流转条件，触发通知
             List<ProcessTaskStepTaskVo> stepTaskVoList = processTaskStepTaskMapper.getStepTaskWithUserByProcessTaskStepId(processTaskStepId);
             if (CollectionUtils.isNotEmpty(stepTaskVoList)) {

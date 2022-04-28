@@ -266,7 +266,6 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
             handler.updateProcessTaskStepUserAndWorker(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId());
 
             //活动参数
-            processTaskStepTaskVo.setTaskConfigName(taskConfigVo.getName());
             List<String> workerList = new ArrayList<>();
             List<ProcessTaskStepTaskUserVo> processTaskStepTaskUserList = processTaskStepTaskVo.getStepTaskUserVoList();
             for (ProcessTaskStepTaskUserVo processTaskStepTaskUserVo : processTaskStepTaskUserList) {
@@ -277,8 +276,9 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
             paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskStepTaskVo.getContent());
             paramObj.put(ProcessTaskAuditDetailType.WORKERLIST.getParamName(), JSONObject.toJSONString(workerList));
             processTaskStepVo.getParamObj().putAll(paramObj);
-            processTaskStepVo.setProcessTaskStepTaskVo(processTaskStepTaskVo);
             processStepHandlerUtil.audit(processTaskStepVo, auditType);
+            processTaskStepTaskVo.setTaskConfigName(taskConfigVo.getName());
+            processTaskStepVo.setProcessTaskStepTaskVo(processTaskStepTaskVo);
             processStepHandlerUtil.notify(processTaskStepVo, triggerType);
             processStepHandlerUtil.action(processTaskStepVo, triggerType);
         }
