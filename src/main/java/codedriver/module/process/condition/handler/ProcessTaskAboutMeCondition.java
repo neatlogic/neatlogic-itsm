@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.condition.handler;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -139,8 +144,27 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 
     @Override
     public Object valueConversionText(Object value, JSONObject config) {
-        // TODO Auto-generated method stub
-        return null;
+        if (value instanceof String) {
+            String v = value.toString();
+            if (v.equalsIgnoreCase("doneOfMine")) {
+                return "已办";
+            } else if (v.equalsIgnoreCase("focusOfMine")) {
+                return "已关注";
+            }
+        } else if (value instanceof JSONArray) {
+            List<String> textList = new ArrayList<>();
+            JSONArray vList = (JSONArray) value;
+            for (int i = 0; i < vList.size(); i++) {
+                String v = vList.getString(i);
+                if (v.equalsIgnoreCase("doneOfMine")) {
+                    textList.add("已办");
+                } else if (v.equalsIgnoreCase("focusOfMine")) {
+                    textList.add("已关注");
+                }
+            }
+            return String.join("、", textList);
+        }
+        return value;
     }
 
     @Override

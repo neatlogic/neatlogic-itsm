@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.api.workcenter;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -62,11 +67,8 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({
-    })
-    @Output({
-            @Param(name = "workcenter", explode = WorkcenterVo.class, desc = "分类信息")
-    })
+    @Input({})
+    @Output({@Param(name = "workcenter", explode = WorkcenterVo.class, desc = "分类信息")})
     @Description(desc = "获取工单中心分类列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -82,7 +84,7 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(workcenterUuidList)) {
             workcenterList = workcenterMapper.getAuthorizedWorkcenterListByUuidList(workcenterUuidList);
             WorkcenterUserProfileVo userProfile = workcenterMapper.getWorkcenterUserProfileByUserUuid(userUuid);
-            Map<String, Integer> workcenterUserSortMap = new HashMap<String, Integer>();
+            Map<String, Integer> workcenterUserSortMap = new HashMap<>();
             boolean isWorkcenterManager = AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName());
             if (userProfile != null) {
                 JSONObject userConfig = JSONObject.parseObject(userProfile.getConfig());
@@ -101,7 +103,7 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
             runner.execute(workcenterList, 3, workcenter -> {
                 if (workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
                     workcenter.setIsCanEdit(0);
-                    if (Arrays.asList(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getValue(),ProcessWorkcenterInitType.PROCESSING_OF_MINE_PROCESSTASK.getValue()).contains(workcenter.getUuid()) && isWorkcenterManager) {
+                    if (Arrays.asList(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getValue(), ProcessWorkcenterInitType.PROCESSING_OF_MINE_PROCESSTASK.getValue()).contains(workcenter.getUuid()) && isWorkcenterManager) {
                         workcenter.setIsCanRole(1);
                     }
                 }
@@ -125,12 +127,12 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
                 //查询代办工单数量
                 if (!StringUtils.equals(workcenter.getUuid(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()) && !StringUtils.equals(workcenter.getUuid(), ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getValue())) {
                     try {
-                        JSONObject conditionJson = JSONObject.parseObject(workcenter.getConditionConfig());
-                        JSONObject conditionConfig = conditionJson.getJSONObject("conditionConfig");
-                        conditionConfig.put("isProcessingOfMine", 1);
-                        conditionJson.put("expectOffsetRowNum", 100);
-                        WorkcenterVo wcProcessingOfMine = new WorkcenterVo(conditionJson);
-                        Integer ProcessingOfMineCount = newWorkcenterService.doSearchLimitCount(wcProcessingOfMine);
+                         /*
+            由于需要一直显示我的待办数量，因此无论输入条件有没有设置我的待办，都需要把我的待办设为1来查询一次数量
+             */
+                        workcenter.getConditionConfig().put("isProcessingOfMine", 1);
+                        workcenter.setExpectOffsetRowNum(100);
+                        Integer ProcessingOfMineCount = newWorkcenterService.doSearchLimitCount(workcenter);
                         workcenter.setProcessingOfMineCount(ProcessingOfMineCount > 99 ? "99+" : ProcessingOfMineCount.toString());
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
@@ -138,6 +140,7 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
                 }
                 workcenter.getHandlerType();
                 workcenter.setConditionConfig(null);
+                workcenter.setConditionConfigStr(null);
                 //排序 用户设置的排序优先
                 if (workcenterUserSortMap.containsKey(workcenter.getUuid())) {
                     workcenter.setSort(workcenterUserSortMap.get(workcenter.getUuid()));
@@ -145,7 +148,6 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
                 //去除返回前端的多余字段
                 workcenter.setConditionGroupList(null);
                 workcenter.setConditionGroupRelList(null);
-                workcenter.setIsProcessingOfMine(null);
             }, "WORKCENTER-LIST-SEARCHER");
         }
         workcenterJson.put("mobileIsOnline", Config.MOBILE_IS_ONLINE());

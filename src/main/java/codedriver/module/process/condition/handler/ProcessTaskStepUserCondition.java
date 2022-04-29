@@ -1,9 +1,15 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.condition.handler;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.*;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
@@ -91,11 +97,37 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
     }
 
 
-
     @Override
     public Object valueConversionText(Object value, JSONObject config) {
-        // TODO Auto-generated method stub
-        return null;
+        if (value != null) {
+            if (value instanceof String) {
+                UserVo userVo = userMapper.getUserBaseInfoByUuid(value.toString().substring(5));
+                if (userVo != null) {
+                    return userVo.getUserName();
+                } else {
+                    if (value.toString().startsWith("common#")) {
+                        return UserType.getText(value.toString().substring(7));
+                    }
+                }
+            } else if (value instanceof List) {
+                List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
+                List<String> textList = new ArrayList<>();
+                for (String valueStr : valueList) {
+                    UserVo userVo = userMapper.getUserBaseInfoByUuid(valueStr.substring(5));
+                    if (userVo != null) {
+                        textList.add(userVo.getUserName());
+                    } else {
+                        if (valueStr.startsWith("common#")) {
+                            textList.add(UserType.getText(valueStr.substring(7)));
+                        } else {
+                            textList.add(valueStr);
+                        }
+                    }
+                }
+                return String.join("、", textList);
+            }
+        }
+        return value;
     }
 
     @Override

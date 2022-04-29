@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.service;
 
 import codedriver.framework.process.column.core.IProcessTaskColumn;
@@ -13,15 +18,6 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Title: NewWorkcenterService
- * @Package: codedriver.module.process.service
- * @Description: TODO
- * @Author: 89770
- * @Date: 2021/1/19 20:08
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
- * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
- **/
 public interface NewWorkcenterService {
 
     /**
@@ -79,7 +75,7 @@ public interface NewWorkcenterService {
      * @Params: [workcenterVo, columnComponentMap, sortColumnList]
      * @Returns: java.util.List<codedriver.framework.process.workcenter.dto.WorkcenterTheadVo>
      **/
-    List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap, JSONArray sortColumnList);
+    List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap);
 
     /**
      * 获取步骤待处理人

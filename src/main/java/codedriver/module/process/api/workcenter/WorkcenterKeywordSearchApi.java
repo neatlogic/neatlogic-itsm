@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.api.workcenter;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -49,8 +54,8 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
-        @Param(name = "pageSize", type = ApiParamType.STRING, desc = "选项显示数量"),
-        @Param(name = "isCombine", type = ApiParamType.INTEGER, desc = "分开：1（pc端）；融合：0（移动端）；  默认1；")})
+            @Param(name = "pageSize", type = ApiParamType.STRING, desc = "选项显示数量"),
+            @Param(name = "isCombine", type = ApiParamType.INTEGER, desc = "分开：1（pc端）；融合：0（移动端）；  默认1；")})
     @Output({@Param(name = "dataList", type = ApiParamType.JSONARRAY, desc = "展示的值")})
     @Description(desc = "工单中心关键字搜索提示接口，用于输入框输入关键字后，获取提示选项")
     @Override
@@ -61,11 +66,11 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
             return CollectionUtils.EMPTY_COLLECTION;
         }
         if (isCombine != null && isCombine == 0) {
-            if(StringUtils.isNotBlank(keyword)){
+            if (StringUtils.isNotBlank(keyword)) {
                 BaseEditorVo baseEditorVo = new BaseEditorVo();
                 baseEditorVo.setKeyword(keyword);
                 baseEditorVo.setPageSize(jsonObj.getInteger("pageSize"));
-                return processTaskMapper.getProcessTaskIdAndTitleByIndexKeyword(new ArrayList<>(baseEditorVo.getKeywordList()),baseEditorVo.getPageSize());
+                return processTaskMapper.getProcessTaskIdAndTitleByIndexKeyword(new ArrayList<>(baseEditorVo.getKeywordList()), baseEditorVo.getPageSize());
             }
             return CollectionUtils.EMPTY_COLLECTION;
         }
@@ -74,7 +79,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
 
     /**
      * 根据关键字获取所有过滤选项 移动端
-     * 
+     *
      * @param keyword
      * @return
      */
@@ -110,9 +115,8 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
 
     /**
      * 拼接关键字过滤选项 移动端
-     * 
-     * @param conditionList
-     *            搜索内容类型
+     *
+     * @param conditionList 搜索内容类型
      * @return
      */
     @Deprecated
@@ -156,10 +160,9 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
     }
 
 
-
     /**
      * 根据单个关键字获取过滤选项 pc端
-     * 
+     *
      * @param keyword
      * @return
      */
@@ -192,9 +195,8 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
 
     /**
      * 拼接关键字过滤选项 pc端
-     * 
-     * @param keyword
-     *            搜索内容类型
+     *
+     * @param keyword 搜索内容类型
      * @return
      */
     @Deprecated

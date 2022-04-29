@@ -1,18 +1,21 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.api.workcenter;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
-import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.NewWorkcenterService;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -42,7 +45,7 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({
+    /*@Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid,有则去数据库获取对应分类的条件，无则根据传的过滤条件查询"),
             @Param(name = "isMeWillDo", type = ApiParamType.INTEGER, desc = "是否带我处理的，1：是；0：否"),
             @Param(name = "conditionGroupList", type = ApiParamType.JSONARRAY, desc = "条件组条件", isRequired = false),
@@ -51,6 +54,14 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
             @Param(name = "headerList", type = ApiParamType.JSONARRAY, desc = "显示的字段", isRequired = false),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数", isRequired = false),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目", isRequired = false)
+    })*/
+    @Input({
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = true),
+            @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "条件设置，为空则使用数据库中保存的条件"),
+            @Param(name = "sortList", type = ApiParamType.JSONARRAY, desc = "排序"),
+            @Param(name = "headerList", type = ApiParamType.JSONARRAY, desc = "显示的字段"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
     })
     @Output({
             @Param(name = "headerList", type = ApiParamType.JSONARRAY, desc = "展示的字段"),
@@ -63,30 +74,13 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
     @Description(desc = "工单中心搜索接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        //Long startTime  = System.currentTimeMillis();
-        if (jsonObj.containsKey("uuid")) {
-            String uuid = jsonObj.getString("uuid");
-            Integer currentPage = jsonObj.getInteger("currentPage");
-            Integer pageSize = jsonObj.getInteger("pageSize");
-            JSONArray sortList = jsonObj.getJSONArray("sortList");
+        String uuid = jsonObj.getString("uuid");
+        WorkcenterVo workcenterVo = JSONObject.toJavaObject(jsonObj, WorkcenterVo.class);
+        if (MapUtils.isEmpty(workcenterVo.getConditionConfig())) {
             WorkcenterVo workcenter = workcenterMapper.getWorkcenterByUuid(uuid);
-            if (workcenter != null) {
-                jsonObj = JSONObject.parseObject(workcenter.getConditionConfig());
-                jsonObj.put("uuid", uuid);
-                jsonObj.put("currentPage", currentPage);
-                jsonObj.put("pageSize", pageSize);
-                if (CollectionUtils.isNotEmpty(sortList)) {
-                    jsonObj.put("sortList", sortList);
-                }
-            }else{
-                throw new WorkcenterNotFoundException(uuid);
-            }
+            workcenterVo.setConditionConfig(workcenter.getConditionConfig());
         }
-        WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj);
-        //System.out.println((System.currentTimeMillis() - startTime) + " ##start workcenter-thead:-------------------------------------------------------------------------------");
-        //workcenterVo.setSqlFieldType(FieldTypeEnum.DISTINCT_ID.getValue());
         return newWorkcenterService.doSearch(workcenterVo);
-        //return workcenterService.doSearch(workcenterVo);
     }
 
 }

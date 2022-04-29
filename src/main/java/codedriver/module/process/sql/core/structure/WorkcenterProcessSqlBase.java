@@ -1,5 +1,5 @@
 /*
- * Copyright (c)  2022 TechSure Co.,Ltd.  All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -21,9 +21,9 @@ import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import codedriver.module.process.condition.handler.ProcessTaskStartTimeCondition;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public abstract class WorkcenterProcessSqlBase extends ProcessSqlBase<Workcenter
     protected void buildJoinTableOfConditionSql(StringBuilder sb, WorkcenterVo workcenterVo) {
         List<JoinTableColumnVo> joinTableColumnList = getJoinTableOfCondition(sb, workcenterVo);
         //我的待办 条件
-        if (workcenterVo.getIsProcessingOfMine() == 1) {
+        if (workcenterVo.getConditionConfig().getIntValue("isProcessingOfMine") == 1) {
             List<JoinTableColumnVo> handlerJoinTableColumnList = SqlTableUtil.getProcessingOfMineJoinTableSql();
             joinTableColumnList.addAll(handlerJoinTableColumnList);
         }
@@ -77,22 +77,16 @@ public abstract class WorkcenterProcessSqlBase extends ProcessSqlBase<Workcenter
      * @Returns: java.util.List<codedriver.framework.process.workcenter.dto.JoinTableColumnVo>
      **/
     protected List<JoinTableColumnVo> getJoinTableOfOrder(WorkcenterVo workcenterVo, List<JoinTableColumnVo> joinTableColumnList) {
-        JSONArray sortJsonArray = workcenterVo.getSortList();
-        if (CollectionUtils.isNotEmpty(sortJsonArray)) {
-            for (Object sortObj : sortJsonArray) {
-                JSONObject sortJson = JSONObject.parseObject(sortObj.toString());
-                for (Map.Entry<String, Object> entry : sortJson.entrySet()) {
-                    String handler = entry.getKey();
-                    IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(handler);
-                    if (column != null && column.getIsSort()) {
-                        List<JoinTableColumnVo> handlerJoinTableColumnList = column.getJoinTableColumnList();
-                        for (JoinTableColumnVo handlerJoinTableColumn : handlerJoinTableColumnList) {
-                            String key = handlerJoinTableColumn.getHash();
-
-                            joinTableColumnList.add(handlerJoinTableColumn);
-
-
-                        }
+        JSONObject sortConfig = workcenterVo.getSortConfig();
+        if (MapUtils.isNotEmpty(sortConfig)) {
+            for (Map.Entry<String, Object> entry : sortConfig.entrySet()) {
+                String handler = entry.getKey();
+                IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(handler);
+                if (column != null && column.getIsSort()) {
+                    List<JoinTableColumnVo> handlerJoinTableColumnList = column.getJoinTableColumnList();
+                    for (JoinTableColumnVo handlerJoinTableColumn : handlerJoinTableColumnList) {
+                        handlerJoinTableColumn.getHash();
+                        joinTableColumnList.add(handlerJoinTableColumn);
                     }
                 }
             }
@@ -134,9 +128,13 @@ public abstract class WorkcenterProcessSqlBase extends ProcessSqlBase<Workcenter
     protected void buildCommonConditionWhereSql(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         //上报时间
         ProcessTaskStartTimeCondition startTimeSqlCondition = (ProcessTaskStartTimeCondition) ConditionHandlerFactory.getHandler("starttime");
-        startTimeSqlCondition.getDateSqlWhere(workcenterVo.getStartTimeCondition(), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.START_TIME.getValue());
+        JSONObject startTimeCondition = workcenterVo.getConditionConfig().getJSONObject("startTimeCondition");
+        if (startTimeCondition == null) {
+            startTimeCondition = JSONObject.parseObject("{\"timeRange\":\"1\",\"timeUnit\":\"year\"}");//默认展示一年
+        }
+        startTimeSqlCondition.getDateSqlWhere(startTimeCondition, sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.START_TIME.getValue());
         //我的待办
-        if (workcenterVo.getIsProcessingOfMine() == 1) {
+        if (workcenterVo.getConditionConfig().getIntValue("isProcessingOfMine") == 1) {
             sqlSb.append(" and ");
             IProcessTaskCondition sqlCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler("processingofmine");
             sqlCondition.getSqlConditionWhere(null, 0, sqlSb);

@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -84,7 +84,9 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     @Override
     public Object valueConversionText(Object value, JSONObject config) {
         if (MapUtils.isNotEmpty(config)) {
+            //表单属性的uuid
             String attributeUuid = config.getString("attributeUuid");
+            //对应表单版本的form_config字段
             String formConfig = config.getString("formConfig");
             FormVersionVo formVersionVo = new FormVersionVo();
             formVersionVo.setFormConfig(formConfig);

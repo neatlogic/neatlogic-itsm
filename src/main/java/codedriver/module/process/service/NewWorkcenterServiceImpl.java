@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -81,18 +81,18 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     @Override
     public JSONObject doSearch(WorkcenterVo workcenterVo) {
         //long theadStartTime = System.currentTimeMillis();
-        List<JSONObject> dataList = Collections.synchronizedList(new ArrayList<JSONObject>());//线程安全
-        JSONArray sortColumnList = new JSONArray();
+        List<JSONObject> dataList = Collections.synchronizedList(new ArrayList<>());//线程安全
+        //JSONArray sortColumnList = new JSONArray();
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         //补充工单字段信息
-        List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
+        List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap);
         theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
         workcenterVo.setTheadVoList(theadList);
         //System.out.println((System.currentTimeMillis() - theadStartTime) + " ##end workcenter-thead:------------------------------------------------------------------------------- ");
         //统计符合条件工单数量
         //long countStartTime = System.currentTimeMillis();
         SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.LIMIT_COUNT);
-        // System.out.println(sb.build());
+        //System.out.println(sb.build());
         int offsetRowNum = processTaskMapper.getProcessTaskCountBySql(sb.build());
         workcenterVo.setOffsetRowNum(offsetRowNum);
         //int total = processTaskMapper.getProcessTaskCountBySql(sb.build());
@@ -147,14 +147,14 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         }
         dataList = dataList.stream().sorted(Comparator.comparing(o -> JSONObject.parseObject(o.toString()).getInteger("index"))).collect(Collectors.toList());
         // 字段排序
-        JSONArray sortList = workcenterVo.getSortList();
+        /*JSONArray sortList = workcenterVo.getSortList();
         if (CollectionUtils.isEmpty(sortList)) {
             sortList = sortColumnList;
-        }
+        }*/
 
 
         JSONObject returnObj = TableResultUtil.getOffsetResult(theadList, dataList, workcenterVo);
-        returnObj.put("sortList", sortList);
+        //returnObj.put("sortList", sortList);
 
         //补充总数
         workcenterVo.setExpectOffsetRowNum(1000);
@@ -167,7 +167,10 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         Integer count = 0;
         //long ofMineStartTime = System.currentTimeMillis();
         if (offsetRowNum > 0) {
-            workcenterVo.setIsProcessingOfMine(1);
+            /*
+            由于需要一直显示我的待办数量，因此无论输入条件有没有设置我的待办，都需要把我的待办设为1来查询一次数量
+             */
+            workcenterVo.getConditionConfig().put("isProcessingOfMine", 1);
             workcenterVo.setExpectOffsetRowNum(100);
             sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.LIMIT_COUNT);
             // System.out.println(sb.build());
@@ -241,7 +244,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     }
 
     @Override
-    public List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap, JSONArray sortColumnList) {
+    public List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap) {
         List<WorkcenterTheadVo> theadList = workcenterMapper.getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(), UserContext.get().getUserUuid()));
         // 矫正theadList 或存在表单属性或固定字段增删
         // 多删
@@ -283,9 +286,11 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 theadList.add(new WorkcenterTheadVo(column));
             }
             // 如果需要排序
-            if (sortColumnList != null && column.getIsSort()) {
-                sortColumnList.add(column.getName());
-            }
+            //if (sortColumnList != null && column.get //if (sortColumnList != null && column.getIsSort()) {
+            //            //     sortColumnList.add(column.getName());
+            //            //}IsSort()) {
+            //     sortColumnList.add(column.getName());
+            //}
         }
         return theadList;
     }

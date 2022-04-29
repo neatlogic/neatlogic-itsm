@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.api.workcenter;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -17,10 +22,10 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.util.FileUtil;
 import codedriver.module.process.service.NewWorkcenterService;
+import codedriver.module.process.sql.decorator.SqlBuilder;
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepColumn;
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepNameColumn;
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
-import codedriver.module.process.sql.decorator.SqlBuilder;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -67,32 +72,20 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid,据此从数据库获取对应分类的条件"),
-            @Param(name = "isMeWillDo", type = ApiParamType.INTEGER, desc = "是否带我处理的，1：是；0：否"),
-            @Param(name = "conditionGroupList", type = ApiParamType.JSONARRAY, desc = "条件组条件"),
-            @Param(name = "conditionGroupRelList", type = ApiParamType.JSONARRAY, desc = "条件组连接类型")
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = true),
+            @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "条件设置，为空则使用数据库中保存的条件")
     })
     @Output({})
     @Description(desc = "导出工单中心数据")
     @Override
     public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String title = "";
         String uuid = jsonObj.getString("uuid");
-        if (StringUtils.isNotBlank(uuid)) {
-            WorkcenterVo workcenter = workcenterMapper.getWorkcenterByUuid(uuid);
-            if (workcenter != null) {
-                title = workcenter.getName();
-                jsonObj = JSONObject.parseObject(workcenter.getConditionConfig());
-                jsonObj.put("uuid", uuid);
-            }
-        }
-
-        WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj);
+        WorkcenterVo workcenterVo = JSONObject.toJavaObject(jsonObj, WorkcenterVo.class);
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         /* 获取表头 */
-        List<WorkcenterTheadVo> theadList = newWorkcenterService.getWorkcenterTheadList(workcenterVo, columnComponentMap, null);
+        List<WorkcenterTheadVo> theadList = newWorkcenterService.getWorkcenterTheadList(workcenterVo, columnComponentMap);
         if (CollectionUtils.isNotEmpty(theadList)) {
-            /** 如果勾选了当前步骤，却没有勾选当前步骤名与当前步骤处理人，自动加上 */
+            /* 如果勾选了当前步骤，却没有勾选当前步骤名与当前步骤处理人，自动加上 */
             if (theadList.stream().anyMatch(o -> o.getName().equals(new ProcessTaskCurrentStepColumn().getName()) && o.getIsShow() == 1)) {
                 IProcessTaskColumn stepNameColumn = new ProcessTaskCurrentStepNameColumn();
                 IProcessTaskColumn stepWorkerColumn = new ProcessTaskCurrentStepWorkerColumn();
@@ -108,7 +101,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
             workcenterVo.setTheadVoList(theadList);
         }
         try (OutputStream os = response.getOutputStream()) {
-            String fileNameEncode = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), (StringUtils.isNotBlank(title) ? title : "工单数据") + ".csv");
+            String fileNameEncode = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), "工单数据" + ".csv");
             response.setContentType("application/text;charset=GBK");
             response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
 
@@ -134,7 +127,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                     sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.FIELD);
                     List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskBySql(sb.build());
                     for (ProcessTaskVo taskVo : processTaskVoList) {
-                        if(Objects.equals(taskVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())) {
+                        if (Objects.equals(taskVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())) {
                             taskVo.setStepList(processTaskMapper.getProcessTaskCurrentStepByProcessTaskId(taskVo.getId()));
                         }
                         Map<String, Object> map = new LinkedHashMap<>();

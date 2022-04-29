@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.api.channel;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -61,14 +66,14 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "channelUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "服务uuidList"),
-        @Param(name = "conditionModel", type = ApiParamType.ENUM, rule = "simple,custom", isRequired = true,
-            desc = "条件模型 simple|custom,  simple:目前用于用于工单中心条件过滤简单模式, custom:目前用于用于工单中心条件过自定义模式、条件分流和sla条件;默认custom"),})
+            @Param(name = "conditionModel", type = ApiParamType.ENUM, rule = "simple,custom", isRequired = true,
+                    desc = "条件模型 simple|custom,  simple:目前用于用于工单中心条件过滤简单模式, custom:目前用于用于工单中心条件过自定义模式、条件分流和sla条件;默认custom"),})
     @Output({@Param(name = "Return", explode = FormAttributeVo[].class, desc = "表单属性列表")})
     @Description(desc = "服务绑定的表单属性信息获取接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<String> channelUuidList =
-            JSONObject.parseArray(jsonObj.getJSONArray("channelUuidList").toJSONString(), String.class);
+                JSONObject.parseArray(jsonObj.getJSONArray("channelUuidList").toJSONString(), String.class);
         if (CollectionUtils.isEmpty(channelUuidList)) {
             throw new ChannelNotFoundException(channelUuidList.toString());
         }
@@ -76,7 +81,7 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
         if (CollectionUtils.isEmpty(channelList)) {
             throw new ChannelNotFoundException(channelList.toString());
         }
-        List<FormAttributeVo> allFormAttributeList = new ArrayList<FormAttributeVo>();
+        List<FormAttributeVo> allFormAttributeList = new ArrayList<>();
         for (ChannelVo channel : channelList) {
             String processUuid = channel.getProcessUuid();
             if (processUuid == null) {
@@ -101,7 +106,7 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
             while (formIterator.hasNext()) {
                 FormAttributeVo formAttributeVo = formIterator.next();
                 //如果是radio 则改为 checkbox，前端解决多选，取消选择问题
-                if(Objects.equals(formAttributeVo.getHandler(),new RadioHandler().getHandler())){
+                if (Objects.equals(formAttributeVo.getHandler(), new RadioHandler().getHandler())) {
                     formAttributeVo.setHandler(new CheckboxHandler().getHandler());
                 }
                 IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
@@ -111,6 +116,7 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
                 }
                 formAttributeVo.setConditionModel(FormConditionModel.getFormConditionModel(conditionModel));
                 formAttributeVo.setType("form");
+                formAttributeVo.setChannelUuid(channel.getUuid());
                 formAttributeVo.setIsUseFormConfig(handler.isUseFormConfig());
             }
             allFormAttributeList.addAll(formAttributeList);

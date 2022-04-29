@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.condition.handler;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -41,15 +46,15 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
         return "上报人";
     }
 
-	@Override
-	public String getHandler(FormConditionModel processWorkcenterConditionType) {
-		return FormHandlerType.USERSELECT.toString();
-	}
-	
-	@Override
-	public String getType() {
-		return ProcessFieldType.COMMON.getValue();
-	}
+    @Override
+    public String getHandler(FormConditionModel processWorkcenterConditionType) {
+        return FormHandlerType.USERSELECT.toString();
+    }
+
+    @Override
+    public String getType() {
+        return ProcessFieldType.COMMON.getValue();
+    }
 
     @Override
     public JSONObject getConfig(ConditionConfigType configType) {
@@ -81,7 +86,7 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
                 });
             }
         });
-        /** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
+        /* 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
         config.put("isMultiple", true);
         return config;
     }
@@ -103,6 +108,10 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
                 UserVo userVo = userMapper.getUserBaseInfoByUuid(value.toString().substring(5));
                 if (userVo != null) {
                     return userVo.getUserName();
+                } else {
+                    if (value.toString().startsWith("common#")) {
+                        return UserType.getText(value.toString().substring(7));
+                    }
                 }
             } else if (value instanceof List) {
                 List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
@@ -112,7 +121,11 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
                     if (userVo != null) {
                         textList.add(userVo.getUserName());
                     } else {
-                        textList.add(valueStr);
+                        if (valueStr.startsWith("common#")) {
+                            textList.add(UserType.getText(valueStr.substring(7)));
+                        } else {
+                            textList.add(valueStr);
+                        }
                     }
                 }
                 return String.join("、", textList);
@@ -146,7 +159,7 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
                 }
             }
         }
-        String value = valueList.stream().map(o->o.replaceAll(GroupSearch.USER.getValuePlugin(),"")).collect(Collectors.joining("','"));
+        String value = valueList.stream().map(o -> o.replaceAll(GroupSearch.USER.getValuePlugin(), "")).collect(Collectors.joining("','"));
         sqlSb.append(Expression.getExpressionSql(condition.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.OWNER.getValue(), value.toString()));
     }
 
