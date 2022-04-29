@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.condition.handler;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -104,8 +109,35 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
 
     @Override
     public Object valueConversionText(Object value, JSONObject config) {
-        // TODO Auto-generated method stub
-        return null;
+        if (value != null) {
+            if (value instanceof String) {
+                TeamVo teamVo = teamMapper.getTeamByUuid(value.toString().substring(5));
+                if (teamVo != null) {
+                    return teamVo.getName();
+                } else {
+                    if (value.toString().startsWith("common#")) {
+                        return UserType.getText(value.toString().substring(7));
+                    }
+                }
+            } else if (value instanceof List) {
+                List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
+                List<String> textList = new ArrayList<>();
+                for (String valueStr : valueList) {
+                    TeamVo teamVo = teamMapper.getTeamByUuid(valueStr.substring(5));
+                    if (teamVo != null) {
+                        textList.add(teamVo.getName());
+                    } else {
+                        if (valueStr.startsWith("common#")) {
+                            textList.add(UserType.getText(valueStr.substring(7)));
+                        } else {
+                            textList.add(valueStr);
+                        }
+                    }
+                }
+                return String.join("、", textList);
+            }
+        }
+        return value;
     }
 
     @Override
