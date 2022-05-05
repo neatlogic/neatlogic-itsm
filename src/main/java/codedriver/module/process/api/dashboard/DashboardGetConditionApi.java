@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.api.dashboard;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -72,13 +77,13 @@ public class DashboardGetConditionApi extends PrivateApiComponentBase {
 				commonObj.put("config", condition.getConfig());
 				commonObj.put("defaultExpression", condition.getParamType().getDefaultExpression().getExpression());
 				commonObj.put("sort", condition.getSort());
-				JSONArray expressiobArray = new JSONArray();
+				JSONArray expressionArray = new JSONArray();
 				for(Expression expression:condition.getParamType().getExpressionList()) {
 					JSONObject expressionObj = new JSONObject();
 					expressionObj.put("expression", expression.getExpression());
 					expressionObj.put("expressionName", expression.getExpressionName());
-					expressiobArray.add(expressionObj);
-					commonObj.put("expressionList", expressiobArray);
+					expressionArray.add(expressionObj);
+					commonObj.put("expressionList", expressionArray);
 				}
 				resultArray.add(commonObj);
 			}			
