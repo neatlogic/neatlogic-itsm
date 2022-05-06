@@ -105,7 +105,9 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
                 workcenterMapper.insertWorkcenterAuthority(authorityVo);
             }
         } else {
-            workcenterMapper.insertWorkcenterOwner(UserContext.get().getUserUuid(true), workcenterVo.getUuid());
+            if (StringUtils.isBlank(uuid)) {
+                workcenterMapper.insertWorkcenterOwner(UserContext.get().getUserUuid(true), workcenterVo.getUuid());
+            }
         }
         if (StringUtils.isNotBlank(workcenterVo.getCatalogName())) {
             WorkcenterCatalogVo workcenterCatalogVo = workcenterMapper.getWorkcenterCatalogByName(workcenterVo.getCatalogName());
