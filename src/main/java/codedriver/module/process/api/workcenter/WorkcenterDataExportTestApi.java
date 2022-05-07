@@ -146,9 +146,7 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                     String channelUuid = taskVo.getChannelVo().getUuid();
                     Sheet sheet = sheetMap.get(channelUuid);
                     if (sheet == null) {
-                        // todo 可能没有channelName
                         sheet = workbook.createSheet(taskVo.getChannelVo().getName());
-                        // todo sheet表头
                         List<String> headList = new ArrayList<>(publicHeadList);
                         List<String> formLabelList = null;
                         Map<String, Integer> formLabelCellRangeMap = null;
@@ -160,6 +158,15 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                                 if (formVersionVo != null) {
                                     List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
                                     if (CollectionUtils.isNotEmpty(formAttributeList)) {
+                                        // todo 如果存在表格类字段，则需要根据表头字段数量计算出sheet表头需要合并多少列
+                                        // todo DynamicListHandler扩展属性
+                                        /**
+                                         * 表头数量获取途径：
+                                         * 账号选择组件-AccountsHandler：theadList
+                                         * 表格选择组件-DynamicListHandler：dataConfig(扩展属性从attributeList拿)
+                                         * 表格输入组件-StaticListHandler：attributeList
+                                         * 配置项修改组件-CiEntitySyncHandler：dataConfig(注意isShow)
+                                         */
                                         formLabelList = new ArrayList<>();
                                         formLabelCellRangeMap = new HashMap<>();
                                         for (FormAttributeVo formAttributeVo : formAttributeList) {
@@ -175,15 +182,6 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                                 }
                             }
                         }
-                        // todo 如果存在表格类字段，则需要根据表头字段数量计算出sheet表头需要合并多少列
-                        // todo DynamicListHandler扩展属性
-                        /**
-                         * 表头数量获取途径：
-                         * 账号选择组件-AccountsHandler：theadList
-                         * 表格选择组件-DynamicListHandler：dataConfig(扩展属性从attributeList拿)
-                         * 表格输入组件-StaticListHandler：attributeList
-                         * 配置项修改组件-CiEntitySyncHandler：dataConfig(注意isShow)
-                         */
                         List<String> formCellValueList = new ArrayList<>();
                         List<CellRangeAddress> cellRangeAddressList = new ArrayList<>();
                         // 记录表单字段值&计算表单字段单元格合并
