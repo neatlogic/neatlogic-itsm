@@ -8,9 +8,14 @@ package codedriver.module.process.notify.handler.param;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import codedriver.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author linbq
@@ -26,6 +31,18 @@ public class StepIdParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
-        return processTaskStepVo.getId();
+        Long id = processTaskStepVo.getId();
+        if (id != null) {
+            return id;
+        }
+        JSONObject paramObj = processTaskStepVo.getParamObj();
+        if (MapUtils.isNotEmpty(paramObj)) {
+            JSONArray idArray = paramObj.getJSONArray("idList");
+            if (CollectionUtils.isNotEmpty(idArray)) {
+                List<String> idList = idArray.toJavaList(String.class);
+                return String.join("、", idList);
+            }
+        }
+        return null;
     }
 }
