@@ -9,10 +9,15 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import codedriver.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author linbq
@@ -32,12 +37,24 @@ public class StepNameParamHandler extends ProcessTaskNotifyParamHandlerBase {
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
         String name = processTaskStepVo.getName();
-        if (StringUtils.isBlank(name)) {
-            ProcessTaskStepVo stepVo =  processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepVo.getId());
+        if (StringUtils.isNotBlank(name)) {
+            return name;
+        }
+        Long id = processTaskStepVo.getId();
+        if (id != null) {
+            ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(id);
             if (stepVo != null) {
-                name = stepVo.getName();
+                return stepVo.getName();
             }
         }
-        return name;
+        JSONObject paramObj = processTaskStepVo.getParamObj();
+        if (MapUtils.isNotEmpty(paramObj)) {
+            JSONArray nameArray = paramObj.getJSONArray("nameList");
+            if (CollectionUtils.isNotEmpty(nameArray)) {
+                List<String> idList = nameArray.toJavaList(String.class);
+                return String.join("、", idList);
+            }
+        }
+        return null;
     }
 }

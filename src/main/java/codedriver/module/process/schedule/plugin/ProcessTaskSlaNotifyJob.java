@@ -237,18 +237,24 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 //                        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
 //                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
 //                        JSONObject templateParamData = ProcessTaskUtil.getProcessTaskParamData(processTaskVo);
+                        List<Long> stepIdList = new ArrayList<>();
+                        List<String> stepNameList = new ArrayList<>();
                         Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
                         for (ProcessTaskStepVo processTaskStepVo : needNotifyStepList) {
                             processTaskService.getReceiverMap(processTaskStepVo, receiverMap, SlaNotifyTriggerType.TIMEOUT);
+                            stepIdList.add(processTaskStepVo.getId());
+                            stepNameList.add(processTaskStepVo.getName());
                         }
-                        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-                        processTaskStepVo.setProcessTaskId(processTaskSlaVo.getProcessTaskId());
+                        JSONObject paramObj = processTaskStep.getParamObj();
+                        paramObj.put("idList", stepIdList);
+                        paramObj.put("nameList", stepNameList);
+                        System.out.println(paramObj);
                         List<FileVo> fileList = fileMapper.getFileListByProcessTaskId(processTaskSlaVo.getProcessTaskId());
                         if (CollectionUtils.isNotEmpty(fileList)) {
                             fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
                         }
                         NotifyPolicyUtil.execute(notifyPolicyVo.getHandler(), SlaNotifyTriggerType.TIMEOUT, ProcessTaskMessageHandler.class, notifyPolicyVo.getConfig(), paramMappingList,
-                                conditionParamData, receiverMap, processTaskStepVo, fileList);
+                                conditionParamData, receiverMap, processTaskStep, fileList);
                     }
                 }
                 Date nextFireTime = context.getNextFireTime();
