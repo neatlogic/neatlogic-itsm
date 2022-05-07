@@ -152,7 +152,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                 ProcessTaskOperationType.STEP_BACK,
                 ProcessTaskOperationType.STEP_COMMENT,
                 ProcessTaskOperationType.PROCESSTASK_TRANSFER,
-                ProcessTaskOperationType.STEP_START,
+                ProcessTaskOperationType.STEP_ACCEPT,
                 ProcessTaskOperationType.PROCESSTASK_ABORT,
                 ProcessTaskOperationType.PROCESSTASK_RECOVER
         };
@@ -244,7 +244,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                 ProcessTaskOperationType.STEP_BACK,
                 ProcessTaskOperationType.STEP_COMMENT,
                 ProcessTaskOperationType.PROCESSTASK_TRANSFER,
-                ProcessTaskOperationType.STEP_START,
+                ProcessTaskOperationType.STEP_ACCEPT,
                 ProcessTaskOperationType.PROCESSTASK_ABORT,
                 ProcessTaskOperationType.PROCESSTASK_RECOVER,
                 ProcessTaskOperationType.STEP_REAPPROVAL
