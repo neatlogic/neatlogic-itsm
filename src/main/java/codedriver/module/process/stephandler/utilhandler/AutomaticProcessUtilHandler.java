@@ -194,7 +194,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
                 ProcessTaskOperationType.STEP_COMPLETE,
                 ProcessTaskOperationType.STEP_BACK,
                 ProcessTaskOperationType.PROCESSTASK_TRANSFER,
-                ProcessTaskOperationType.STEP_START
+                ProcessTaskOperationType.STEP_ACCEPT
         };
         JSONArray customButtonList = configObj.getJSONArray("customButtonList");
         JSONArray customButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, stepButtons);
@@ -256,7 +256,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
                 ProcessTaskOperationType.STEP_COMPLETE,
                 ProcessTaskOperationType.STEP_BACK,
                 ProcessTaskOperationType.PROCESSTASK_TRANSFER,
-                ProcessTaskOperationType.STEP_START
+                ProcessTaskOperationType.STEP_ACCEPT
         };
         JSONArray customButtonList = configObj.getJSONArray("customButtonList");
         JSONArray customButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, stepButtons);
