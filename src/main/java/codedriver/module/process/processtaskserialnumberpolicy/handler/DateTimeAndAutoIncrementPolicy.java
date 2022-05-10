@@ -8,10 +8,13 @@ package codedriver.module.process.processtaskserialnumberpolicy.handler;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
+import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import codedriver.framework.scheduler.core.JobBase;
 import codedriver.framework.scheduler.dto.JobObject;
@@ -40,6 +43,9 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
     @Autowired
     private ProcessTaskMapper processTaskMapper;
+
+    @Autowired
+    private ChannelTypeMapper channelTypeMapper;
 
     @Override
     public String getName() {
@@ -129,6 +135,10 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
         try {
             ProcessTaskVo processTaskVo = new ProcessTaskVo();
             processTaskVo.setChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+            ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+            if(channelTypeVo == null){
+                throw new ChannelTypeNotFoundException(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+            }
             int rowNum = processTaskMapper.getProcessTaskCountByChannelTypeUuidAndStartTime(processTaskVo);
             if (rowNum > 0) {
                 int numberOfDigits = processTaskSerialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
@@ -149,7 +159,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
                             serialNumberSeed = startValue;
                             timeFormat = startTimeFormat;
                         }
-                        String serialNumber = startTimeFormat + String.format("%0" + numberOfDigits + "d", serialNumberSeed);
+                        String serialNumber = channelTypeVo.getPrefix() + startTimeFormat + String.format("%0" + numberOfDigits + "d", serialNumberSeed);
                         processTaskMapper.updateProcessTaskSerialNumberById(processTask.getId(), serialNumber);
                         processTaskSerialNumberMapper.insertProcessTaskSerialNumber(processTask.getId(), serialNumber);
                         serialNumberSeed++;

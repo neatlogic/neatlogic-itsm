@@ -409,18 +409,20 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
 
         // 搜索SerialNumber
-        workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getHandlerName());
-        workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getText());
-        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getProName());
-        workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
-        returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
+        JSONObject titleObj = new JSONObject();
+        List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskBySerialNumberList(new ArrayList<>(workcenterVo.getKeywordList()));
+        titleObj.put("dataList", processTaskVoList.stream().map(ProcessTaskVo::getSerialNumber).collect(Collectors.toList()));
+        titleObj.put("value", ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
+        titleObj.put("text", ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getText());
+        returnArray.add(titleObj);
 
         // 搜索ID
-        workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.ID.getHandlerName());
-        workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.ID.getText());
-        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.ID.getProName());
-        workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.ID.getValue());
-        returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
+        titleObj = new JSONObject();
+        processTaskVoList = processTaskMapper.getProcessTaskByIdStrList(new ArrayList<>(workcenterVo.getKeywordList()));
+        titleObj.put("dataList", processTaskVoList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
+        titleObj.put("value", ProcessTaskSqlTable.FieldEnum.ID.getValue());
+        titleObj.put("text", ProcessTaskSqlTable.FieldEnum.ID.getText());
+        returnArray.add(titleObj);
         return returnArray;
     }
 
