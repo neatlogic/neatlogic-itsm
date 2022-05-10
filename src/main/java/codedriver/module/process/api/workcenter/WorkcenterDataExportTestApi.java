@@ -10,6 +10,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.AttributeDataVo;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
@@ -17,8 +18,10 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.ProcessFormVo;
+import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -27,6 +30,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.util.FileUtil;
+import codedriver.module.framework.form.attribute.handler.AccountsHandler;
 import codedriver.module.framework.form.attribute.handler.DivideHandler;
 import codedriver.module.process.dao.mapper.ProcessMapper;
 import codedriver.module.process.service.NewWorkcenterService;
@@ -79,9 +83,12 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
     @Resource
     ProcessTaskMapper processTaskMapper;
 
+    @Resource
+    SelectContentByHashMapper selectContentByHashMapper;
+
     @Override
     public String getToken() {
-        return "workcenter/export";
+        return "workcenter/export/test";
     }
 
     @Override
@@ -128,6 +135,8 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
         Workbook workbook = new SXSSFWorkbook();
         Map<String, Sheet> sheetMap = new HashMap<>();
         Map<String, List<String>> channelFormLabelListMap = new HashMap<>();
+        Map<String, List<FormAttributeVo>> channelFormAttributeListMap = new HashMap<>();
+        Map<String, Integer> sheetLastRowNumMap = new HashMap<>();// 由于可能存在的单元格合并，sheet.getLastRowNum()不能获取实际的最后一行行号，需要手动记录
 
         SqlBuilder sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.TOTAL_COUNT);
         int total = processTaskMapper.getProcessTaskCountBySql(sb.build());
@@ -158,9 +167,9 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                                 if (formVersionVo != null) {
                                     List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
                                     if (CollectionUtils.isNotEmpty(formAttributeList)) {
-                                        // todo 如果存在表格类字段，则需要根据表头字段数量计算出sheet表头需要合并多少列
-                                        // todo DynamicListHandler扩展属性
+                                        channelFormAttributeListMap.put(channelUuid, formAttributeList);
                                         /**
+                                         * 如果存在表格类字段，则需要根据表头字段数量计算出sheet表头需要合并多少列
                                          * 表头数量获取途径：
                                          * 账号选择组件-AccountsHandler：theadList
                                          * 表格选择组件-DynamicListHandler：dataConfig(扩展属性从attributeList拿)
@@ -223,21 +232,61 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                             }
                         }
                         sheetMap.put(channelUuid, sheet);
+                        sheetLastRowNumMap.put(channelUuid, 0);
                     }
-                    int lastRowNum = sheet.getLastRowNum();
-                    sheet.createRow(lastRowNum + 1);
-
-//                    if (Objects.equals(taskVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())) {
-//                        taskVo.setStepList(processTaskMapper.getProcessTaskCurrentStepByProcessTaskId(taskVo.getId()));
-//                    }
-//                    Map<String, Object> map = new LinkedHashMap<>();
-//                    //重新渲染工单字段
-//                    for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
-//                        IProcessTaskColumn column = entry.getValue();
-//                        if (column.getIsShow() && column.getIsExport() && !column.getDisabled()) {
-//                            map.put(column.getDisplayName(), column.getSimpleValue(taskVo));
-//                        }
-//                    }
+                    Integer lastRowNum = sheetLastRowNumMap.get(channelUuid);
+                    int beginRowNum = lastRowNum + 1;
+                    Row row = sheet.createRow(beginRowNum);
+                    int maxRowCount = 1; // 大于1说明需要合并行
+                    List<FormAttributeVo> formAttributeList = channelFormAttributeListMap.get(channelUuid);
+                    if (CollectionUtils.isNotEmpty(formAttributeList)) {
+                        // todo 先找出当前工单是否有表格类表单字段，有的话找出数据行数最多的那个字段，该字段的数据行数作为当前行需要合并的行数
+                        String formContent = selectContentByHashMapper.getProcessTaskFromContentByProcessTaskId(taskVo.getId());
+                        if (StringUtils.isNotBlank(formContent)) {
+                            taskVo.setFormConfig(JSONObject.parseObject(formContent));
+                            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskVo.getId());
+                            if (processTaskFormAttributeDataList.size() > 0) {
+                                Map<String, ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(AttributeDataVo::getAttributeUuid, e -> e));
+                                for (FormAttributeVo formAttributeVo : formAttributeList) {
+                                    ProcessTaskFormAttributeDataVo formAttributeDataVo = processTaskFormAttributeDataMap.get(formAttributeVo.getUuid());
+                                    if (formAttributeDataVo == null || formAttributeDataVo.getData() == null) {
+                                        continue;
+                                    }
+                                    IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                                    if (handler == null || (handler instanceof AccountsHandler) || (Objects.equals(handler.getHandler(), "custommergeprocess"))) {
+                                        continue;
+                                    }
+                                    int excelRowCount = handler.getExcelRowCount(formAttributeDataVo, JSONObject.parseObject(formAttributeVo.getConfig()));
+                                    if (excelRowCount > maxRowCount) {
+                                        maxRowCount = excelRowCount;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // todo 创建工单字段并记录合并单元格
+                    Map<String, Object> map = new LinkedHashMap<>();
+                    for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
+                        IProcessTaskColumn column = entry.getValue();
+                        if (column.getIsShow() && column.getIsExport() && !column.getDisabled()) {
+                            map.put(column.getDisplayName(), column.getSimpleValue(taskVo));
+                        }
+                    }
+                    List<CellRangeAddress> cellRangeAddressList = new ArrayList<>();
+                    for (int j = 0; j < publicHeadList.size(); j++) {
+                        Cell cell = row.createCell(j);
+                        Object value = map.get(publicHeadList.get(j));
+                        cell.setCellValue(value != null ? value.toString() : "");
+                        if (maxRowCount > 1) {
+                            cellRangeAddressList.add(new CellRangeAddress(beginRowNum, beginRowNum + maxRowCount - 1, j, j));
+                        }
+                    }
+                    if (cellRangeAddressList.size() > 0) {
+                        for (CellRangeAddress cellAddresses : cellRangeAddressList) {
+                            sheet.addMergedRegion(cellAddresses);
+                        }
+                    }
+                    sheetLastRowNumMap.put(channelUuid, beginRowNum + maxRowCount - 1);
 
                 }
 
