@@ -30,7 +30,6 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.util.FileUtil;
-import codedriver.module.framework.form.attribute.handler.AccountsHandler;
 import codedriver.module.framework.form.attribute.handler.DivideHandler;
 import codedriver.module.process.dao.mapper.ProcessMapper;
 import codedriver.module.process.service.NewWorkcenterService;
@@ -38,8 +37,10 @@ import codedriver.module.process.sql.decorator.SqlBuilder;
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepColumn;
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepNameColumn;
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -169,6 +170,7 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                                     if (CollectionUtils.isNotEmpty(formAttributeList)) {
                                         channelFormAttributeListMap.put(channelUuid, formAttributeList);
                                         /**
+                                         * todo 批量合并上报流程
                                          * 如果存在表格类字段，则需要根据表头字段数量计算出sheet表头需要合并多少列
                                          * 表头数量获取途径：
                                          * 账号选择组件-AccountsHandler：theadList
@@ -180,7 +182,7 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                                         formLabelCellRangeMap = new HashMap<>();
                                         for (FormAttributeVo formAttributeVo : formAttributeList) {
                                             IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                                            if ((handler instanceof DivideHandler)) {
+                                            if (handler == null || handler instanceof DivideHandler) {
                                                 continue;
                                             }
                                             formLabelCellRangeMap.put(formAttributeVo.getLabel(), handler.getExcelHeadLength(formAttributeVo.getConfigObj()));
@@ -239,6 +241,7 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                     Row row = sheet.createRow(beginRowNum);
                     int maxRowCount = 1; // 大于1说明需要合并行
                     List<FormAttributeVo> formAttributeList = channelFormAttributeListMap.get(channelUuid);
+                    Map<String, ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataMap = null;
                     if (CollectionUtils.isNotEmpty(formAttributeList)) {
                         // todo 先找出当前工单是否有表格类表单字段，有的话找出数据行数最多的那个字段，该字段的数据行数作为当前行需要合并的行数
                         String formContent = selectContentByHashMapper.getProcessTaskFromContentByProcessTaskId(taskVo.getId());
@@ -246,14 +249,14 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                             taskVo.setFormConfig(JSONObject.parseObject(formContent));
                             List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskVo.getId());
                             if (processTaskFormAttributeDataList.size() > 0) {
-                                Map<String, ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(AttributeDataVo::getAttributeUuid, e -> e));
+                                processTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(AttributeDataVo::getAttributeLabel, e -> e));
                                 for (FormAttributeVo formAttributeVo : formAttributeList) {
-                                    ProcessTaskFormAttributeDataVo formAttributeDataVo = processTaskFormAttributeDataMap.get(formAttributeVo.getUuid());
+                                    ProcessTaskFormAttributeDataVo formAttributeDataVo = processTaskFormAttributeDataMap.get(formAttributeVo.getLabel());
                                     if (formAttributeDataVo == null || formAttributeDataVo.getData() == null) {
                                         continue;
                                     }
                                     IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                                    if (handler == null || (handler instanceof AccountsHandler) || (Objects.equals(handler.getHandler(), "custommergeprocess"))) {
+                                    if (handler == null || handler instanceof DivideHandler) {
                                         continue;
                                     }
                                     int excelRowCount = handler.getExcelRowCount(formAttributeDataVo, JSONObject.parseObject(formAttributeVo.getConfig()));
@@ -286,10 +289,67 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                             sheet.addMergedRegion(cellAddresses);
                         }
                     }
+                    // todo 创建表单字段
+                    if (MapUtils.isNotEmpty(processTaskFormAttributeDataMap)) {
+                        int formCellIndex = publicHeadList.size() - 1; // 表单cell开始的列数
+                        Row headRow = sheet.getRow(beginRowNum);
+                        for (FormAttributeVo formAttributeVo : formAttributeList) {
+                            ProcessTaskFormAttributeDataVo formAttributeDataVo = processTaskFormAttributeDataMap.get(formAttributeVo.getLabel());
+                            if (formAttributeDataVo == null || formAttributeDataVo.getData() == null) {
+                                continue;
+                            }
+                            IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                            if (handler == null || handler instanceof DivideHandler) {
+                                continue;
+                            }
+                            Object detailedData = handler.dataTransformationForExcel(formAttributeDataVo, formAttributeVo.getConfigObj());
+                            int excelHeadLength = handler.getExcelHeadLength(formAttributeVo.getConfigObj());
+                            if (detailedData != null) {
+                                if (excelHeadLength > 1) {
+                                    JSONObject jsonObject = (JSONObject) detailedData;
+                                    JSONArray _theadList = jsonObject.getJSONArray("theadList");
+                                    JSONArray _tbodyList = jsonObject.getJSONArray("tbodyList");
+                                    if (CollectionUtils.isNotEmpty(_theadList) && CollectionUtils.isNotEmpty(_tbodyList)) {
+                                        Map<String, String> headMap = new LinkedHashMap<>();
+                                        for (int j = 0; j < _theadList.size(); j++) {
+                                            JSONObject head = _theadList.getJSONObject(j);
+                                            Cell cell = headRow.createCell(formCellIndex + j + 1);
+                                            cell.setCellValue(head.getString("title"));
+                                            headMap.put(head.getString("key"), head.getString("title"));
+                                        }
+//                                        for (int j = 0; j < _tbodyList.size(); j++) {
+//                                            Row contentRow = sheet.createRow(beginRowNum + j + 1);
+//                                            JSONObject value = _tbodyList.getJSONObject(j);
+//                                            Set<Map.Entry<String, Object>> entrySet = value.entrySet();
+//                                            for (Map.Entry<String, String> valueMap : headMap.entrySet()) {
+//                                                for (Map.Entry<String, Object> entry : entrySet) {
+//                                                    if (valueMap.getKey().equals(entry.getKey())) {
+//                                                        JSONObject entryValue = (JSONObject) entry.getValue();
+//                                                        if (entryValue != null) {
+//                                                            Object text = entryValue.get("text");
+//                                                            if (text == null) {
+//                                                                text = "";
+//                                                            }
+//                                                            Cell cell = contentRow.createCell(formCellIndex + j);
+//                                                            cell.setCellValue(text.toString());
+//                                                        }
+//                                                    }
+//                                                }
+//                                            }
+//                                        }
+                                    }
+                                } else {
+                                    // todo 合并行
+                                    Cell cell = row.createCell(formCellIndex + excelHeadLength);
+                                    cell.setCellValue(detailedData.toString());
+                                }
+                            }
+                            formCellIndex = formCellIndex + excelHeadLength;
+                        }
+                    }
                     sheetLastRowNumMap.put(channelUuid, beginRowNum + maxRowCount - 1);
 
                 }
-
             }
         }
         String fileNameEncode = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), "工单数据" + ".xlsx");
@@ -297,6 +357,7 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
         response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
         try (OutputStream os = response.getOutputStream()) {
             workbook.write(os);
+            ((SXSSFWorkbook) workbook).dispose();
         } catch (IOException e) {
             throw e;
         }
