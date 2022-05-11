@@ -248,7 +248,6 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                         JSONObject paramObj = processTaskStep.getParamObj();
                         paramObj.put("idList", stepIdList);
                         paramObj.put("nameList", stepNameList);
-                        System.out.println(paramObj);
                         List<FileVo> fileList = fileMapper.getFileListByProcessTaskId(processTaskSlaVo.getProcessTaskId());
                         if (CollectionUtils.isNotEmpty(fileList)) {
                             fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
