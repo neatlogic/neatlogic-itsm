@@ -678,21 +678,23 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepVo.getId(), null);
         for (ProcessTaskStepVo processTaskStep : nextStepList) {
             if (ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
-                if (StringUtils.isNotBlank(processTaskStep.getAliasName())) {
-                    processTaskStep.setName(processTaskStep.getAliasName());
-                    processTaskStep.setFlowDirection("");
-                } else {
-                    processTaskStep.setFlowDirection(ProcessFlowDirection.FORWARD.getText());
-                }
+                processTaskStep.setFlowDirection(ProcessFlowDirection.FORWARD.getText());
+//                if (StringUtils.isNotBlank(processTaskStep.getAliasName())) {
+//                    processTaskStep.setName(processTaskStep.getAliasName());
+//                    processTaskStep.setFlowDirection("");
+//                } else {
+//                    processTaskStep.setFlowDirection(ProcessFlowDirection.FORWARD.getText());
+//                }
                 forwardNextStepList.add(processTaskStep);
             } else if (ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection())) {
                 if (!Objects.equals(processTaskStep.getIsActive(), 0)) {
-                    if (StringUtils.isNotBlank(processTaskStep.getAliasName())) {
-                        processTaskStep.setName(processTaskStep.getAliasName());
-                        processTaskStep.setFlowDirection("");
-                    } else {
-                        processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
-                    }
+                    processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
+//                    if (StringUtils.isNotBlank(processTaskStep.getAliasName())) {
+//                        processTaskStep.setName(processTaskStep.getAliasName());
+//                        processTaskStep.setFlowDirection("");
+//                    } else {
+//                        processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
+//                    }
                     backwardNextStepList.add(processTaskStep);
                 }
             }
