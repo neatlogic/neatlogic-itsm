@@ -16,6 +16,7 @@ import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
@@ -155,6 +156,9 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                 sb = new SqlBuilder(workcenterVo, ProcessSqlTypeEnum.FIELD);
                 List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskBySql(sb.build());
                 for (ProcessTaskVo taskVo : processTaskVoList) {
+                    if (Objects.equals(taskVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())) {
+                        taskVo.setStepList(processTaskMapper.getProcessTaskCurrentStepByProcessTaskId(taskVo.getId()));
+                    }
                     String channelUuid = taskVo.getChannelVo().getUuid();
                     Sheet sheet = sheetMap.get(channelUuid);
                     if (sheet == null) {
