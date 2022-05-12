@@ -286,11 +286,6 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                             cellRangeAddressList.add(new CellRangeAddress(beginRowNum, beginRowNum + maxRowCount - 1, j, j));
                         }
                     }
-                    if (cellRangeAddressList.size() > 0) {
-                        for (CellRangeAddress cellAddresses : cellRangeAddressList) {
-                            sheet.addMergedRegion(cellAddresses);
-                        }
-                    }
                     // 填充表单字段
                     if (MapUtils.isNotEmpty(processTaskFormAttributeDataMap)) {
                         Row headRow = sheet.getRow(beginRowNum);
@@ -363,16 +358,23 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                                         }
                                     }
                                 } else {
-                                    // todo 合并行
-                                    Cell cell = row.createCell(formCellIndex + excelHeadLength);
+                                    int beginColumnNum = formCellIndex + excelHeadLength;
+                                    Cell cell = row.createCell(beginColumnNum);
                                     cell.setCellValue(detailedData.toString());
+                                    if (maxRowCount > 1) {
+                                        cellRangeAddressList.add(new CellRangeAddress(beginRowNum, beginRowNum + maxRowCount - 1, beginColumnNum, beginColumnNum));
+                                    }
                                 }
                             }
-                            formCellIndex = formCellIndex + excelHeadLength;
+                            formCellIndex += excelHeadLength;
+                        }
+                    }
+                    if (cellRangeAddressList.size() > 0) {
+                        for (CellRangeAddress cellAddresses : cellRangeAddressList) {
+                            sheet.addMergedRegion(cellAddresses);
                         }
                     }
                     sheetLastRowNumMap.put(channelUuid, beginRowNum + maxRowCount - 1);
-
                 }
             }
         }
