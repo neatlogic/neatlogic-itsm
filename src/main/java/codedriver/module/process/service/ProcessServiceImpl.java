@@ -17,6 +17,10 @@ import codedriver.framework.process.dao.mapper.ProcessTagMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
+import codedriver.framework.process.exception.sla.SlaCalculateHandlerNotFoundException;
+import codedriver.framework.process.sla.core.ISlaCalculateHandler;
+import codedriver.framework.process.sla.core.SlaCalculateHandlerFactory;
+import codedriver.framework.util.UuidUtil;
 import codedriver.module.process.dao.mapper.ProcessMapper;
 import codedriver.module.process.dependency.handler.*;
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ProcessServiceImpl implements ProcessService {
@@ -91,7 +96,15 @@ public class ProcessServiceImpl implements ProcessService {
 
         if (CollectionUtils.isNotEmpty(processVo.getSlaList())) {
             for (ProcessSlaVo slaVo : processVo.getSlaList()) {
-                if (slaVo.getProcessStepUuidList().size() > 0) {
+                ISlaCalculateHandler slaCalculateHandler = SlaCalculateHandlerFactory.getHandler(slaVo.getCalculateHandler());
+                if (slaCalculateHandler == null) {
+                    throw new SlaCalculateHandlerNotFoundException(slaVo.getCalculateHandler());
+                }
+                if (CollectionUtils.isEmpty(slaVo.getProcessStepUuidList())) {
+                    continue;
+                }
+                if (Objects.equals(slaCalculateHandler.isSum(), 1)) {
+                    //关联的多个步骤共用一个时效
                     processMapper.insertProcessSla(slaVo);
                     for (String stepUuid : slaVo.getProcessStepUuidList()) {
                         processMapper.insertProcessStepSla(stepUuid, slaVo.getUuid());
@@ -101,6 +114,19 @@ public class ProcessServiceImpl implements ProcessService {
                             throw new NotifyPolicyNotFoundException(notifyPolicyId.toString());
                         }
                         DependencyManager.insert(NotifyPolicyProcessSlaDependencyHandler.class, notifyPolicyId, slaVo.getUuid());
+                    }
+                } else {
+                    //关联的多个步骤各用一个时效
+                    for (String stepUuid : slaVo.getProcessStepUuidList()) {
+                        slaVo.setUuid(UuidUtil.randomUuid());
+                        processMapper.insertProcessSla(slaVo);
+                        processMapper.insertProcessStepSla(stepUuid, slaVo.getUuid());
+                        for (Long notifyPolicyId : slaVo.getNotifyPolicyIdList()) {
+                            if (notifyMapper.checkNotifyPolicyIsExists(notifyPolicyId) == 0) {
+                                throw new NotifyPolicyNotFoundException(notifyPolicyId.toString());
+                            }
+                            DependencyManager.insert(NotifyPolicyProcessSlaDependencyHandler.class, notifyPolicyId, slaVo.getUuid());
+                        }
                     }
                 }
             }

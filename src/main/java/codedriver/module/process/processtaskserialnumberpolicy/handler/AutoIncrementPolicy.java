@@ -1,24 +1,25 @@
 package codedriver.module.process.processtaskserialnumberpolicy.handler;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
+import codedriver.framework.process.dto.ChannelTypeVo;
+import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
+import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
-import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
@@ -29,6 +30,9 @@ public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandle
 
     @Autowired
     private ProcessTaskMapper processTaskMapper;
+
+    @Autowired
+    private ChannelTypeMapper channelTypeMapper;
 
     @Override
     public String getName() {
@@ -117,6 +121,10 @@ public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandle
         try {
             ProcessTaskVo processTaskVo = new ProcessTaskVo();
             processTaskVo.setChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+            ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+            if (channelTypeVo == null) {
+                throw new ChannelTypeNotFoundException(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+            }
             int rowNum = processTaskMapper.getProcessTaskCountByChannelTypeUuidAndStartTime(processTaskVo);
             if (rowNum > 0) {
                 int numberOfDigits = processTaskSerialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
@@ -129,7 +137,7 @@ public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandle
                     List<ProcessTaskVo> processTaskList =
                             processTaskMapper.getProcessTaskListByChannelTypeUuidAndStartTime(processTaskVo);
                     for (ProcessTaskVo processTask : processTaskList) {
-                        String serialNumber = String.format("%0" + numberOfDigits + "d", startValue);
+                        String serialNumber = channelTypeVo.getPrefix() + String.format("%0" + numberOfDigits + "d", startValue);
                         processTaskMapper.updateProcessTaskSerialNumberById(processTask.getId(), serialNumber);
                         processTaskSerialNumberMapper.insertProcessTaskSerialNumber(processTask.getId(), serialNumber);
                         startValue++;

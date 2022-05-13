@@ -48,6 +48,11 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
     }
 
     @Override
+    public int isSum() {
+        return 1;
+    }
+
+    @Override
     public SlaStatus getStatus(List<ProcessTaskStepVo> processTaskStepList) {
         int doing = 0;
         int pause = 0;
