@@ -148,7 +148,9 @@ public abstract class WorkcenterProcessSqlBase extends ProcessSqlBase<Workcenter
                     sqlSb.append(String.format(" AND pt.title in ('%s') ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("','"))));
                 } else if (ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue().equals(condition.getString("name"))) {
                     sqlSb.append(String.format(" AND pt.serial_number in ('%s') ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("','"))));
-                } else {
+                } else if (ProcessTaskSqlTable.FieldEnum.ID.getValue().equals(condition.getString("name"))) {
+                    sqlSb.append(String.format(" AND pt.id in ('%s') ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("','"))));
+                }else {
                     try {
                         List<FullTextIndexWordOffsetVo> wordOffsetVoList = FullTextIndexUtil.sliceWord(condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("")));
                         String contentWord = wordOffsetVoList.stream().map(FullTextIndexWordOffsetVo::getWord).collect(Collectors.joining("','"));
