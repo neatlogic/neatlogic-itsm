@@ -39,6 +39,11 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
         return WorkerPolicy.FORM.getText();
     }
 
+    @Override
+    public int isOnlyOnceExecute() {
+        return 0;
+    }
+
     @Autowired
     private ProcessTaskMapper processTaskMapper;
 

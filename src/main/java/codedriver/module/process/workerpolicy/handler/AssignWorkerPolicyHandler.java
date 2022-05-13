@@ -41,6 +41,11 @@ public class AssignWorkerPolicyHandler implements IWorkerPolicyHandler {
 	}
 
 	@Override
+	public int isOnlyOnceExecute() {
+		return 0;
+	}
+
+	@Override
 	public List<ProcessTaskStepWorkerVo> execute(ProcessTaskStepWorkerPolicyVo workerPolicyVo, ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = new ArrayList<>();
 		if (MapUtils.isEmpty(workerPolicyVo.getConfigObj())) {
