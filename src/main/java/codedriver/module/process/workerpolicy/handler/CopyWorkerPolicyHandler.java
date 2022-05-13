@@ -30,7 +30,12 @@ public class CopyWorkerPolicyHandler implements IWorkerPolicyHandler {
 	public String getName() {
 		return WorkerPolicy.COPY.getText();
 	}
-	
+
+	@Override
+	public int isOnlyOnceExecute() {
+		return 0;
+	}
+
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 

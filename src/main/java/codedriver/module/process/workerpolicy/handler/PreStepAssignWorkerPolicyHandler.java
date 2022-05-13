@@ -30,7 +30,13 @@ public class PreStepAssignWorkerPolicyHandler implements IWorkerPolicyHandler {
 	public String getName() {
 		return WorkerPolicy.PRESTEPASSIGN.getText();
 	}
-//	{
+
+	@Override
+	public int isOnlyOnceExecute() {
+		return 0;
+	}
+
+	//	{
 //		"name": "由前置步骤处理人指定",
 //		"type": "prestepassign",
 //		"isChecked": 1,
