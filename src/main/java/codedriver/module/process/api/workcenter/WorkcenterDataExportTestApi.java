@@ -19,8 +19,6 @@ import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
-import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.ProcessFormVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -49,6 +47,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -67,8 +67,8 @@ import java.util.stream.Collectors;
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponentBase {
-    @Resource
-    WorkcenterMapper workcenterMapper;
+
+    static Logger logger = LoggerFactory.getLogger(WorkcenterDataExportTestApi.class);
 
     @Resource
     NewWorkcenterService newWorkcenterService;
@@ -84,9 +84,6 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
 
     @Resource
     ProcessTaskMapper processTaskMapper;
-
-    @Resource
-    SelectContentByHashMapper selectContentByHashMapper;
 
     @Override
     public String getToken() {
@@ -165,7 +162,7 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                         // 创建sheet并填充表头
                         sheet = workbook.createSheet(taskVo.getChannelVo().getName());
                         List<String> formLabelList = null;
-                        Map<String, Integer> formLabelCellRangeMap = null;
+                        Map<String, Integer> formLabelCellRangeMap = null; // 记录每个表单属性需要占据的单元格长度
                         String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
                         if (StringUtils.isNotBlank(processUuid)) {
                             ProcessFormVo processForm = processMapper.getProcessFormByProcessUuid(processUuid);
@@ -175,17 +172,10 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                                     List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
                                     if (CollectionUtils.isNotEmpty(formAttributeList)) {
                                         channelFormAttributeListMap.put(channelUuid, formAttributeList);
-                                        /**
-                                         * todo 批量合并上报流程
-                                         * 如果存在表格类属性，则需要根据表头字段数量计算出sheet表头需要合并多少列
-                                         * 表头数量获取途径：
-                                         * 账号选择组件-AccountsHandler：theadList
-                                         * 表格选择组件-DynamicListHandler：dataConfig(扩展属性从attributeList拿)
-                                         * 表格输入组件-StaticListHandler：attributeList
-                                         * 配置项修改组件-CiEntitySyncHandler：dataConfig(注意isShow)
-                                         */
+                                        // 记录每一种channel的表单组件label列表到channelFormLabelListMap
+                                        // 不同的表单组件需要占据的单元格长度不同，使用组件handler的getExcelHeadLength方法计算出组件需要占据的长度，并记录到formLabelCellRangeMap
                                         formLabelList = new ArrayList<>();
-                                        formLabelCellRangeMap = new HashMap<>(); // 记录每个表单属性需要占据的单元格长度
+                                        formLabelCellRangeMap = new HashMap<>();
                                         for (FormAttributeVo formAttributeVo : formAttributeList) {
                                             IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                                             if (handler == null || handler instanceof DivideHandler) {
@@ -201,7 +191,11 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                         }
                         List<String> formHeadCellValueList = new ArrayList<>();
                         List<CellRangeAddress> cellRangeAddressList = new ArrayList<>();
-                        // 记录表单属性值&计算表单属性单元格合并
+                        /**
+                         * 跨列的表单组件，需要在表头占据多少cell，就要创建多少个cell，并且合并这些cell
+                         * 根据formLabelCellRangeMap计算出实际需要创建多少个表单属性的cell，每个cell的值记录到formHeadCellValueList
+                         * 同时计算需要合并的单元格并记录到cellRangeAddressList
+                         */
                         if (CollectionUtils.isNotEmpty(formLabelList)) {
                             int start = publicHeadList.size();
                             int end = publicHeadList.size();
@@ -221,13 +215,13 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                                 }
                             }
                         }
-                        // 填充工单属性表头
+                        // 先填充工单属性的表头
                         Row headerRow = sheet.createRow(0);
                         for (int j = 0; j < publicHeadList.size(); j++) {
                             Cell cell = headerRow.createCell(j);
                             cell.setCellValue(publicHeadList.get(j));
                         }
-                        // 在工单属性后填充表单属性表头
+                        // 在工单属性后填充表单属性的表头
                         if (CollectionUtils.isNotEmpty(formHeadCellValueList)) {
                             for (int j = 0; j < formHeadCellValueList.size(); j++) {
                                 Cell cell = headerRow.createCell(publicHeadList.size() + j);
@@ -248,32 +242,29 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                     int maxRowCount = 1; // 大于1说明需要合并行
                     List<FormAttributeVo> formAttributeList = channelFormAttributeListMap.get(channelUuid);
                     Map<String, ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataMap = null;
+                    // 以channel当前关联的流程为准，如果流程没有关联表单或关联的表单没有属性，则无论当前工单是否有表单，都不查询
                     if (CollectionUtils.isNotEmpty(formAttributeList)) {
-                        // 先找出当前工单是否有表格类表单属性，有的话找出数据行数最多的那个属性，该属性的数据行数作为当前行需要合并的行数
-                        String formContent = selectContentByHashMapper.getProcessTaskFromContentByProcessTaskId(taskVo.getId());
-                        if (StringUtils.isNotBlank(formContent)) {
-                            taskVo.setFormConfig(JSONObject.parseObject(formContent));
-                            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskVo.getId());
-                            if (processTaskFormAttributeDataList.size() > 0) {
-                                processTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(AttributeDataVo::getAttributeLabel, e -> e));
-                                for (FormAttributeVo formAttributeVo : formAttributeList) {
-                                    ProcessTaskFormAttributeDataVo formAttributeDataVo = processTaskFormAttributeDataMap.get(formAttributeVo.getLabel());
-                                    if (formAttributeDataVo == null || formAttributeDataVo.getData() == null) {
-                                        continue;
-                                    }
-                                    IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                                    if (handler == null || handler instanceof DivideHandler) {
-                                        continue;
-                                    }
-                                    int excelRowCount = handler.getExcelRowCount(formAttributeDataVo, JSONObject.parseObject(formAttributeVo.getConfig()));
-                                    if (excelRowCount > maxRowCount) {
-                                        maxRowCount = excelRowCount;
-                                    }
+                        // 遍历当前工单的所有表单属性，找出数据行数最多的属性，该属性的数据行数作为当前工单需要合并的行数
+                        List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskVo.getId());
+                        if (processTaskFormAttributeDataList.size() > 0) {
+                            processTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(AttributeDataVo::getAttributeLabel, e -> e));
+                            for (FormAttributeVo formAttributeVo : formAttributeList) {
+                                ProcessTaskFormAttributeDataVo formAttributeDataVo = processTaskFormAttributeDataMap.get(formAttributeVo.getLabel());
+                                if (formAttributeDataVo == null || formAttributeDataVo.getData() == null) {
+                                    continue;
+                                }
+                                IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                                if (handler == null || handler instanceof DivideHandler) {
+                                    continue;
+                                }
+                                int excelRowCount = handler.getExcelRowCount(formAttributeDataVo, JSONObject.parseObject(formAttributeVo.getConfig()));
+                                if (excelRowCount > maxRowCount) {
+                                    maxRowCount = excelRowCount;
                                 }
                             }
                         }
                     }
-                    // 填充工单属性并根据表单中的表格属性最大行数合并单元格
+                    // 获取每个工单属性的值
                     Map<String, Object> map = new LinkedHashMap<>();
                     for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                         IProcessTaskColumn column = entry.getValue();
@@ -281,6 +272,7 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                             map.put(column.getDisplayName(), column.getSimpleValue(taskVo));
                         }
                     }
+                    // 填充工单属性&记录每个工单属性的单元格合并
                     List<CellRangeAddress> cellRangeAddressList = new ArrayList<>();
                     for (int j = 0; j < publicHeadList.size(); j++) {
                         Cell cell = row.createCell(j);
@@ -293,7 +285,8 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                     // 填充表单属性
                     if (MapUtils.isNotEmpty(processTaskFormAttributeDataMap)) {
                         Row headRow = sheet.getRow(beginRowNum);
-                        int formCellIndex = publicHeadList.size() - 1; // 表单cell开始的列数
+                        int formCellIndex = publicHeadList.size() - 1; // 填充表单属性开始的列数
+                        // POI不允许重复创建Row，遍历到表格类属性时，需要创建多个Row，把这些Row记录下来，待到下一个表格类属性时，重复使用这些Row
                         Map<Integer, Row> rowMap = new HashMap<>();
                         for (FormAttributeVo formAttributeVo : formAttributeList) {
                             ProcessTaskFormAttributeDataVo formAttributeDataVo = processTaskFormAttributeDataMap.get(formAttributeVo.getLabel());
@@ -318,14 +311,16 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                                         // 填充表头
                                         for (int j = 0; j < _theadList.size(); j++) {
                                             JSONObject head = _theadList.getJSONObject(j);
+                                            String key = head.getString("key");
+                                            String title = head.getString("title");
                                             Cell cell = headRow.createCell(formCellIndex + j + 1);
-                                            cell.setCellValue(head.getString("title"));
-                                            headMap.put(head.getString("key"), head.getString("title"));
-                                            headKeyList.add(head.getString("key"));
+                                            cell.setCellValue(title);
+                                            headMap.put(key, title);
+                                            headKeyList.add(key);
                                         }
-                                        // 填充表格行数据
+                                        // 填充表格行
                                         for (int j = 0; j < _tbodyList.size(); j++) {
-                                            // POI不允许重复创建行，创建过的行需要记录下来，循环到下一个表单属性时重复使用
+                                            // 先尝试从rowMap获取Row，获取不到说明之前没有创建过
                                             Row contentRow = rowMap.get(beginRowNum + j + 1);
                                             if (contentRow == null) {
                                                 int formRowNum = beginRowNum + j + 1;
@@ -365,12 +360,13 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
                                     int beginColumnNum = formCellIndex + excelHeadLength;
                                     Cell cell = row.createCell(beginColumnNum);
                                     cell.setCellValue(detailedData.toString());
+                                    // 对于只占一行的普通属性，如果存在占多行的表格类属性，那么普通属性需要占据同样的行数，并且合并这些行
                                     if (maxRowCount > 1) {
                                         cellRangeAddressList.add(new CellRangeAddress(beginRowNum, beginRowNum + maxRowCount - 1, beginColumnNum, beginColumnNum));
                                     }
                                 }
                             }
-                            formCellIndex += excelHeadLength;
+                            formCellIndex += excelHeadLength; // 每次循环完毕一个表单属性，就把指针移到该属性之后
                         }
                     }
                     if (cellRangeAddressList.size() > 0) {
@@ -389,7 +385,7 @@ public class WorkcenterDataExportTestApi extends PrivateBinaryStreamApiComponent
             workbook.write(os);
             ((SXSSFWorkbook) workbook).dispose();
         } catch (IOException e) {
-            throw e;
+            logger.error(e.getMessage(), e);
         }
 
         return null;
