@@ -21,6 +21,8 @@ import codedriver.framework.process.exception.processtask.ProcessTaskStepContent
 import codedriver.framework.process.exception.processtask.ProcessTaskTitleIsEmptyException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.process.stepremind.core.IProcessTaskStepRemindType;
+import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
+import codedriver.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import codedriver.module.process.thread.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -394,6 +396,11 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         List<ProcessTaskStepWorkerPolicyVo> processTaskStepWorkerPolicyList =
                 processTaskMapper.getProcessTaskStepWorkerPolicy(processTaskStepWorkerPolicyVo);
         if (CollectionUtils.isNotEmpty(processTaskStepWorkerPolicyList)) {
+            int isOnlyOnceExecute = 0;
+            IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(WorkerPolicy.PRESTEPASSIGN.getValue());
+            if (workerPolicyHandler == null) {
+                isOnlyOnceExecute = workerPolicyHandler.isOnlyOnceExecute();
+            }
             for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : processTaskStepWorkerPolicyList) {
                 if (WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
                     List<String> processStepUuidList = JSON
@@ -403,7 +410,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                             List<ProcessTaskStepUserVo> majorList =
                                     processTaskMapper.getProcessTaskStepUserByStepId(
                                             workerPolicyVo.getProcessTaskStepId(), ProcessUserType.MAJOR.getValue());
-                            if (CollectionUtils.isEmpty(majorList)) {
+                            if (CollectionUtils.isEmpty(majorList) || isOnlyOnceExecute == 0) {
                                 ProcessTaskAssignWorkerVo assignWorkerVo = new ProcessTaskAssignWorkerVo();
                                 assignWorkerVo.setProcessTaskId(workerPolicyVo.getProcessTaskId());
                                 assignWorkerVo.setProcessTaskStepId(workerPolicyVo.getProcessTaskStepId());

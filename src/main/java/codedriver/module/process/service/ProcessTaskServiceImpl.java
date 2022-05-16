@@ -53,6 +53,8 @@ import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.process.stepremind.core.ProcessTaskStepRemindTypeFactory;
 import codedriver.framework.process.task.TaskConfigManager;
+import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
+import codedriver.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.framework.util.TimeUtil;
 import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
@@ -593,6 +595,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<ProcessTaskStepWorkerPolicyVo> processTaskStepWorkerPolicyList =
                 processTaskMapper.getProcessTaskStepWorkerPolicy(processTaskStepWorkerPolicyVo);
         if (CollectionUtils.isNotEmpty(processTaskStepWorkerPolicyList)) {
+            int isOnlyOnceExecute = 0;
+            IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(WorkerPolicy.PRESTEPASSIGN.getValue());
+            if (workerPolicyHandler == null) {
+                isOnlyOnceExecute = workerPolicyHandler.isOnlyOnceExecute();
+            }
             List<AssignableWorkerStepVo> assignableWorkerStepList = new ArrayList<>();
             for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : processTaskStepWorkerPolicyList) {
                 if (WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
@@ -604,7 +611,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                                 if (processStepUuid.equals(stepUuid)) {
                                     List<ProcessTaskStepUserVo> majorList = processTaskMapper.getProcessTaskStepUserByStepId(
                                             workerPolicyVo.getProcessTaskStepId(), ProcessUserType.MAJOR.getValue());
-                                    if (CollectionUtils.isEmpty(majorList)) {
+                                    if (CollectionUtils.isEmpty(majorList) || isOnlyOnceExecute == 0) {
                                         ProcessTaskStepVo processTaskStepVo = processTaskMapper
                                                 .getProcessTaskStepBaseInfoById(workerPolicyVo.getProcessTaskStepId());
                                         AssignableWorkerStepVo assignableWorkerStepVo = new AssignableWorkerStepVo();
