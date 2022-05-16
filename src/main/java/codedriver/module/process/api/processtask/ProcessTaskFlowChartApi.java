@@ -95,7 +95,7 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
                     processTaskService.setProcessTaskStepUser(processTaskStepVo);
                     List<ProcessTaskStepUserVo> minorUserList = processTaskStepVo.getMinorUserList();
                     if (CollectionUtils.isNotEmpty(minorUserList)) {
-                        setTaskConfigName(processTaskStepVo, minorUserList);
+                        setMinorUserTaskType(processTaskStepVo, minorUserList);
                     }
                     processTaskStepVo.setReplaceableTextList(processTaskService.getReplaceableTextList(processTaskStepVo));
                     processTaskStepVo.setAssignableWorkerStepList(null);
@@ -119,12 +119,12 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
             return resultObj;
         } else if (channelUuid != null) {
             ChannelVo channelVo = channelMapper.getChannelByUuid(channelUuid);
-            if(channelVo == null){
+            if (channelVo == null) {
                 throw new ChannelNotFoundException(channelUuid);
             }
             String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
             ProcessVo processVo = processMapper.getProcessByUuid(processUuid);
-            if(processVo == null){
+            if (processVo == null) {
                 throw new ProcessNotFoundException(processUuid);
             }
             Date startTime = new Date();
@@ -166,11 +166,12 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
     }
 
     /**
-     * 设置子任务处理人对应当的子任务名称
+     * 设置协助处理人对应当的任务类型
+     *
      * @param processTaskStepVo
      * @param minorUserList
      */
-    private void setTaskConfigName(ProcessTaskStepVo processTaskStepVo, List<ProcessTaskStepUserVo> minorUserList) {
+    private void setMinorUserTaskType(ProcessTaskStepVo processTaskStepVo, List<ProcessTaskStepUserVo> minorUserList) {
         Map<String, Set<String>> userUuidTaskConfigNameMap = new HashMap<>();
         String stepConfigStr = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
         JSONObject taskConfig = (JSONObject) JSONPath.read(stepConfigStr, "taskConfig");
@@ -182,8 +183,8 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
                     Map<Long, TaskConfigVo> taskConfigMap = taskConfigList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
                     List<ProcessTaskStepTaskVo> processTaskStepTaskList = processTaskStepTaskMapper.getStepTaskListByProcessTaskStepId(processTaskStepVo.getId());
                     if (CollectionUtils.isEmpty(processTaskStepTaskList)) {
-                        Map<Long, ProcessTaskStepTaskVo> stepTaskIdMap= processTaskStepTaskList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
-                        List<Long> stepTaskIdList= processTaskStepTaskList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList());
+                        Map<Long, ProcessTaskStepTaskVo> stepTaskIdMap = processTaskStepTaskList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
+                        List<Long> stepTaskIdList = processTaskStepTaskList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList());
                         List<ProcessTaskStepTaskUserVo> stepTaskUserList = processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(stepTaskIdList);
                         for (ProcessTaskStepTaskUserVo stepTaskUserVo : stepTaskUserList) {
                             if (Objects.equals(stepTaskUserVo.getIsDelete(), 1)) {
