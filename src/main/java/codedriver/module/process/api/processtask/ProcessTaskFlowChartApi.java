@@ -16,6 +16,8 @@ import codedriver.framework.process.dao.mapper.task.TaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
+import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -215,7 +217,10 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
             if (CollectionUtils.isNotEmpty(taskConfigNameSet)) {
                 minorUserVo.setTaskType(String.join("、", taskConfigNameSet));
             } else {
-                minorUserVo.setTaskType("变更步骤");
+                IProcessStepHandler stepHandler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+                if (stepHandler != null) {
+                    minorUserVo.setTaskType(stepHandler.getMinorName());
+                }
             }
         }
     }
