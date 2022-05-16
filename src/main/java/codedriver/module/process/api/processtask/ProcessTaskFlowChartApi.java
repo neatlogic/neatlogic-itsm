@@ -52,8 +52,10 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskService processTaskService;
+
     @Resource
     private TaskMapper taskMapper;
+
     @Resource
     private ProcessTaskStepTaskMapper processTaskStepTaskMapper;
 
