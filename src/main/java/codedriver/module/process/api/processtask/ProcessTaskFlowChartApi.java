@@ -184,7 +184,7 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
                 if (CollectionUtils.isNotEmpty(taskConfigList)) {
                     Map<Long, TaskConfigVo> taskConfigMap = taskConfigList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
                     List<ProcessTaskStepTaskVo> processTaskStepTaskList = processTaskStepTaskMapper.getStepTaskListByProcessTaskStepId(processTaskStepVo.getId());
-                    if (CollectionUtils.isEmpty(processTaskStepTaskList)) {
+                    if (CollectionUtils.isNotEmpty(processTaskStepTaskList)) {
                         Map<Long, ProcessTaskStepTaskVo> stepTaskIdMap = processTaskStepTaskList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
                         List<Long> stepTaskIdList = processTaskStepTaskList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList());
                         List<ProcessTaskStepTaskUserVo> stepTaskUserList = processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(stepTaskIdList);
