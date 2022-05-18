@@ -4,6 +4,7 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskSlaVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -99,14 +100,14 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
         if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus()) && CollectionUtils.isNotEmpty(processTaskSlaList)) {
             for (ProcessTaskSlaVo slaVo : processTaskSlaList) {
                 //判断需要 同时满足 该步骤是进行中状态，以及包含sla策略
-                if (processTaskVo.getStepList().stream().noneMatch(o -> (Objects.equals(o.getStatus(),ProcessTaskStatus.RUNNING.getValue()) || (Objects.equals(o.getStatus(),ProcessTaskStatus.PENDING.getValue()) && o.getIsActive() == 1))
+                if (processTaskVo.getStepList().stream().noneMatch(o -> (Objects.equals(o.getStatus(), ProcessTaskStatus.RUNNING.getValue()) || (Objects.equals(o.getStatus(), ProcessTaskStatus.PENDING.getValue()) && o.getIsActive() == 1))
                         && CollectionUtils.isNotEmpty(o.getSlaTimeList())
-                        && o.getSlaTimeList().stream().anyMatch(c -> Objects.equals(c.getSlaId(),slaVo.getId())))) {
+                        && o.getSlaTimeList().stream().anyMatch(c -> Objects.equals(c.getSlaId(), slaVo.getId())))) {
                     continue;
                 }
                 JSONObject tmpJson = new JSONObject();
                 ProcessTaskSlaTimeVo slaTimeVo = slaVo.getSlaTimeVo();
-                if (slaTimeVo == null) {
+                if (slaTimeVo == null || Objects.equals(ProcessTaskStepUserStatus.DONE.getValue(), slaTimeVo.getStatus())) {
                     continue;
                 }
                 Long expireTimeLong = slaTimeVo.getExpireTime() != null ? slaTimeVo.getExpireTime().getTime() : null;
@@ -163,6 +164,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
                                 , new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.REALEXPIRE_TIME.getValue(), "realExpireTime")
                                 , new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.TIME_LEFT.getValue(), "timeLeft")
                                 , new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.REALTIME_LEFT.getValue(), "realTimeLeft")
+                                , new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.STATUS.getValue(), "slaTimeStatus")
                         )
                 ));
                 add(new TableSelectColumnVo(new ProcessTaskSqlTable(),
