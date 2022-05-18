@@ -121,8 +121,8 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
                 add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new ArrayList<JoinOnVo>() {{
                     add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
                 }}));
-                add(new JoinTableColumnVo(new ProcessTaskStepSqlTable(), new ProcessTaskSlaSqlTable(), new ArrayList<JoinOnVo>() {{
-                    add(new JoinOnVo(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(), ProcessTaskSlaSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
+                add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskSlaSqlTable(), new ArrayList<JoinOnVo>() {{
+                    add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskSlaSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
                 }}));
                 add(new JoinTableColumnVo(new ProcessTaskStepSqlTable(), new ProcessTaskStepSlaSqlTable(), new ArrayList<JoinOnVo>() {{
                     add(new JoinOnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSlaSqlTable.FieldEnum.PROCESSTASK_STEP_ID.getValue()));
