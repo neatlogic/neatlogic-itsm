@@ -127,7 +127,11 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
         processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(
                 processTaskSerialNumberPolicyVo.getChannelTypeUuid(), serialNumberSeed + 1);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        return sdf.format(new Date()) + String.format("%0" + numberOfDigits + "d", serialNumberSeed);
+        ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+        if (channelTypeVo == null) {
+            throw new ChannelTypeNotFoundException(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+        }
+        return channelTypeVo.getPrefix() + sdf.format(new Date()) + String.format("%0" + numberOfDigits + "d", serialNumberSeed);
     }
 
     @Override
@@ -136,7 +140,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
             ProcessTaskVo processTaskVo = new ProcessTaskVo();
             processTaskVo.setChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
             ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-            if(channelTypeVo == null){
+            if (channelTypeVo == null) {
                 throw new ChannelTypeNotFoundException(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
             }
             int rowNum = processTaskMapper.getProcessTaskCountByChannelTypeUuidAndStartTime(processTaskVo);

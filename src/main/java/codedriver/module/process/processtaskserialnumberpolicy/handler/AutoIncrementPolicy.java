@@ -113,7 +113,11 @@ public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandle
         }
         processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(
                 processTaskSerialNumberPolicyVo.getChannelTypeUuid(), serialNumberSeed + 1);
-        return String.format("%0" + numberOfDigits + "d", serialNumberSeed);
+        ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+        if (channelTypeVo == null) {
+            throw new ChannelTypeNotFoundException(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+        }
+        return channelTypeVo.getPrefix() + String.format("%0" + numberOfDigits + "d", serialNumberSeed);
     }
 
     @Override
