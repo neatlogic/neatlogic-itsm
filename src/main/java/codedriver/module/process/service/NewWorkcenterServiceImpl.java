@@ -120,7 +120,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             }
             BatchRunner<ProcessTaskVo> runner = new BatchRunner<>();
             List<JSONObject> finalDataList = dataList;
-            runner.execute(processTaskVoList, 5, processTaskVo -> {
+            runner.execute(processTaskVoList, 3, processTaskVo -> {
                 JSONObject taskJson = new JSONObject();
                 if (Objects.equals(processTaskVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())) {
                     processTaskVo.setStepList(processTaskMapper.getProcessTaskCurrentStepByProcessTaskId(processTaskVo.getId()));
