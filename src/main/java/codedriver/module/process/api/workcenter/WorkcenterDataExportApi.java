@@ -135,7 +135,6 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
         List<String> publicHeadList = theadList.stream().map(WorkcenterTheadVo::getDisplayName).collect(Collectors.toList());
         Workbook workbook = new SXSSFWorkbook();
         Map<String, Sheet> sheetMap = new HashMap<>(); // channelUuid与sheet的map
-        Map<String, List<String>> channelFormLabelListMap = new HashMap<>(); // channelUuid与其表单属性label的map
         Map<String, List<FormAttributeVo>> channelFormAttributeListMap = new HashMap<>(); // channelUuid与其表单属性VO的map
         Map<String, Integer> sheetLastRowNumMap = new HashMap<>(); // 由于可能存在的单元格合并，sheet.getLastRowNum()不能获取实际的最后一行行号，需要手动记录每个sheet的最后一行行号
 
@@ -171,7 +170,8 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                                 if (formVersionVo != null) {
                                     List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
                                     if (CollectionUtils.isNotEmpty(formAttributeList)) {
-                                        channelFormAttributeListMap.put(channelUuid, formAttributeList);
+                                        List<FormAttributeVo> formAttributeVoList = new ArrayList<>();
+                                        channelFormAttributeListMap.put(channelUuid, formAttributeVoList);
                                         // 记录每一种channel的表单组件label列表到channelFormLabelListMap
                                         // 不同的表单组件需要占据的单元格长度不同，使用组件handler的getExcelHeadLength方法计算出组件需要占据的长度，并记录到formLabelCellRangeMap
                                         formLabelList = new ArrayList<>();
@@ -183,8 +183,8 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                                             }
                                             formLabelCellRangeMap.put(formAttributeVo.getLabel(), handler.getExcelHeadLength(formAttributeVo.getConfigObj()));
                                             formLabelList.add(formAttributeVo.getLabel());
+                                            formAttributeVoList.add(formAttributeVo);
                                         }
-                                        channelFormLabelListMap.put(channelUuid, formLabelList);
                                     }
                                 }
                             }
@@ -289,81 +289,83 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                         // POI不允许重复创建Row，遍历到表格类属性时，需要创建多个Row，把这些Row记录下来，待到下一个表格类属性时，重复使用这些Row
                         Map<Integer, Row> rowMap = new HashMap<>();
                         for (FormAttributeVo formAttributeVo : formAttributeList) {
-                            ProcessTaskFormAttributeDataVo formAttributeDataVo = processTaskFormAttributeDataMap.get(formAttributeVo.getLabel());
-                            if (formAttributeDataVo == null || formAttributeDataVo.getData() == null) {
-                                continue;
-                            }
                             IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                             if (handler == null || handler instanceof DivideHandler) {
                                 continue;
                             }
-                            Object detailedData = handler.dataTransformationForExcel(formAttributeDataVo, formAttributeVo.getConfigObj());
+                            Object detailedData = "";
+                            ProcessTaskFormAttributeDataVo formAttributeDataVo = processTaskFormAttributeDataMap.get(formAttributeVo.getLabel());
+                            // 因为表头中已经有了当前组件的label，所以如果当前工单表单中没有当前组件或组件值为null，那么使用空串来占位，防止后续组件前移
+                            if (formAttributeDataVo != null && formAttributeDataVo.getData() != null) {
+                                detailedData = handler.dataTransformationForExcel(formAttributeDataVo, formAttributeVo.getConfigObj());
+                            }
+                            if (detailedData == null) {
+                                detailedData = "";
+                            }
                             int excelHeadLength = handler.getExcelHeadLength(formAttributeVo.getConfigObj());
-                            if (detailedData != null) {
-                                // excelHeadLength > 1表示该表单属性为表格类属性，需要生成嵌套表格
-                                if (excelHeadLength > 1) {
-                                    JSONObject jsonObject = (JSONObject) detailedData;
-                                    JSONArray _theadList = jsonObject.getJSONArray("theadList");
-                                    JSONArray _tbodyList = jsonObject.getJSONArray("tbodyList");
-                                    if (CollectionUtils.isNotEmpty(_theadList) && CollectionUtils.isNotEmpty(_tbodyList)) {
-                                        Map<String, String> headMap = new LinkedHashMap<>();
-                                        List<String> headKeyList = new ArrayList<>();
-                                        // 填充表头
-                                        for (int j = 0; j < _theadList.size(); j++) {
-                                            JSONObject head = _theadList.getJSONObject(j);
-                                            String key = head.getString("key");
-                                            String title = head.getString("title");
-                                            Cell cell = headRow.createCell(formCellIndex + j + 1);
-                                            cell.setCellValue(title);
-                                            headMap.put(key, title);
-                                            headKeyList.add(key);
+                            // excelHeadLength > 1表示该表单属性为表格类属性，需要生成嵌套表格
+                            if (excelHeadLength > 1) {
+                                JSONObject jsonObject = (JSONObject) detailedData;
+                                JSONArray _theadList = jsonObject.getJSONArray("theadList");
+                                JSONArray _tbodyList = jsonObject.getJSONArray("tbodyList");
+                                if (CollectionUtils.isNotEmpty(_theadList) && CollectionUtils.isNotEmpty(_tbodyList)) {
+                                    Map<String, String> headMap = new LinkedHashMap<>();
+                                    List<String> headKeyList = new ArrayList<>();
+                                    // 填充表头
+                                    for (int j = 0; j < _theadList.size(); j++) {
+                                        JSONObject head = _theadList.getJSONObject(j);
+                                        String key = head.getString("key");
+                                        String title = head.getString("title");
+                                        Cell cell = headRow.createCell(formCellIndex + j + 1);
+                                        cell.setCellValue(title);
+                                        headMap.put(key, title);
+                                        headKeyList.add(key);
+                                    }
+                                    // 填充表格行
+                                    for (int j = 0; j < _tbodyList.size(); j++) {
+                                        // 先尝试从rowMap获取Row，获取不到说明之前没有创建过
+                                        Row contentRow = rowMap.get(beginRowNum + j + 1);
+                                        if (contentRow == null) {
+                                            int formRowNum = beginRowNum + j + 1;
+                                            contentRow = sheet.createRow(formRowNum);
+                                            rowMap.put(formRowNum, contentRow);
                                         }
-                                        // 填充表格行
-                                        for (int j = 0; j < _tbodyList.size(); j++) {
-                                            // 先尝试从rowMap获取Row，获取不到说明之前没有创建过
-                                            Row contentRow = rowMap.get(beginRowNum + j + 1);
-                                            if (contentRow == null) {
-                                                int formRowNum = beginRowNum + j + 1;
-                                                contentRow = sheet.createRow(formRowNum);
-                                                rowMap.put(formRowNum, contentRow);
+                                        JSONObject value = _tbodyList.getJSONObject(j);
+                                        // 检查每一行数据的字段是否完整，完整是指keySet与表头字段数量一致，不一致则补全
+                                        Set<String> keySet = value.keySet();
+                                        for (String head : headKeyList) {
+                                            if (!keySet.contains(head)) {
+                                                value.put(head, new JSONObject());
                                             }
-                                            JSONObject value = _tbodyList.getJSONObject(j);
-                                            // 检查每一行数据的字段是否完整，完整是指keySet与表头字段数量一致，不一致则补全
-                                            Set<String> keySet = value.keySet();
-                                            for (String head : headKeyList) {
-                                                if (!keySet.contains(head)) {
-                                                    value.put(head, new JSONObject());
-                                                }
-                                            }
-                                            Set<Map.Entry<String, Object>> entrySet = value.entrySet();
-                                            int k = 0;
-                                            for (Map.Entry<String, String> valueMap : headMap.entrySet()) {
-                                                for (Map.Entry<String, Object> entry : entrySet) {
-                                                    if (valueMap.getKey().equals(entry.getKey())) {
-                                                        Cell cell = contentRow.createCell(formCellIndex + k + 1);
-                                                        JSONObject entryValue = (JSONObject) entry.getValue();
-                                                        String _value = "";
-                                                        if (entryValue != null) {
-                                                            Object text = entryValue.get("text");
-                                                            if (text != null) {
-                                                                _value = text.toString();
-                                                            }
+                                        }
+                                        Set<Map.Entry<String, Object>> entrySet = value.entrySet();
+                                        int k = 0;
+                                        for (Map.Entry<String, String> valueMap : headMap.entrySet()) {
+                                            for (Map.Entry<String, Object> entry : entrySet) {
+                                                if (valueMap.getKey().equals(entry.getKey())) {
+                                                    Cell cell = contentRow.createCell(formCellIndex + k + 1);
+                                                    JSONObject entryValue = (JSONObject) entry.getValue();
+                                                    String _value = "";
+                                                    if (entryValue != null) {
+                                                        Object text = entryValue.get("text");
+                                                        if (text != null) {
+                                                            _value = text.toString();
                                                         }
-                                                        cell.setCellValue(_value);
-                                                        k++;
                                                     }
+                                                    cell.setCellValue(_value);
+                                                    k++;
                                                 }
                                             }
                                         }
                                     }
-                                } else {
-                                    int beginColumnNum = formCellIndex + excelHeadLength;
-                                    Cell cell = row.createCell(beginColumnNum);
-                                    cell.setCellValue(detailedData.toString());
-                                    // 对于只占一行的普通属性，如果存在占多行的表格类属性，那么普通属性需要占据同样的行数，并且合并这些行
-                                    if (maxRowCount > 1) {
-                                        cellRangeAddressList.add(new CellRangeAddress(beginRowNum, beginRowNum + maxRowCount - 1, beginColumnNum, beginColumnNum));
-                                    }
+                                }
+                            } else {
+                                int beginColumnNum = formCellIndex + excelHeadLength;
+                                Cell cell = row.createCell(beginColumnNum);
+                                cell.setCellValue(detailedData.toString());
+                                // 对于只占一行的普通属性，如果存在占多行的表格类属性，那么普通属性需要占据同样的行数，并且合并这些行
+                                if (maxRowCount > 1) {
+                                    cellRangeAddressList.add(new CellRangeAddress(beginRowNum, beginRowNum + maxRowCount - 1, beginColumnNum, beginColumnNum));
                                 }
                             }
                             formCellIndex += excelHeadLength; // 每次循环完毕一个表单属性，就把指针移到该属性之后
