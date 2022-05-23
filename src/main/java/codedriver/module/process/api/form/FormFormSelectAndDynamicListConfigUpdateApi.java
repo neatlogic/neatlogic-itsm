@@ -201,7 +201,6 @@ public class FormFormSelectAndDynamicListConfigUpdateApi extends PrivateApiCompo
             return configStr;
         }
         boolean flag = false;
-        //记录每一列对应的attributeUuid，sheetsConfig.tableList[x][x].component中需要用到
         JSONArray controllerList = config.getJSONArray("controllerList");
         if (CollectionUtils.isNotEmpty(controllerList)) {
             //遍历表单的所有组件
@@ -267,8 +266,8 @@ public class FormFormSelectAndDynamicListConfigUpdateApi extends PrivateApiCompo
                 flag = true;
             }
         }
-        if (!flag) {
-            return configStr;
+        if (flag) {
+            System.out.println(formVersionUuid);
         }
         System.out.println(formVersionUuid);
         //sheetsConfig.tableList[x][x].component中表格输入组件
