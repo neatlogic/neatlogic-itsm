@@ -107,6 +107,7 @@ public class FormFormSelectAndDynamicListConfigUpdateApi extends PrivateApiCompo
             if (Objects.equals(newFormConfig, oldFormConfig)) {
                 continue;
             }
+            System.out.println("a=" + formVersionVo.getUuid());
             String newFormConfigHash = DigestUtils.md5DigestAsHex(newFormConfig.getBytes());
             newFormConfigHashSet.add(newFormConfigHash);
             FormVersionVo newFormVersionVo = new FormVersionVo();
@@ -209,67 +210,16 @@ public class FormFormSelectAndDynamicListConfigUpdateApi extends PrivateApiCompo
                 if (MapUtils.isEmpty(controllerObj)) {
                     continue;
                 }
-                //只更新表格输入组件
-                String handler = controllerObj.getString("handler");
-                if (!"formdynamiclist".equals(handler) && !"formselect".equals(handler) && !"formcheckbox".equals(handler) && !"formradio".equals(handler)) {
-                    continue;
+                if(updateControllerConfig(controllerObj)){
+                    flag = true;
+                    System.out.println("attribute1=" + controllerObj.getString("label"));
                 }
-                JSONObject controllerConfig = controllerObj.getJSONObject("config");
-                if (MapUtils.isEmpty(controllerConfig)) {
-                    continue;
-                }
-                String dataSource = controllerConfig.getString("dataSource");
-                if ("matrix".equals(dataSource)) {
-                    String matrixType = controllerConfig.getString("matrixType");
-                    if ("cmdbci".equals(matrixType)) {
-                        continue;
-                    }
-                } else if ("integration".equals(dataSource)) {
-
-                } else {
-                    continue;
-                }
-                JSONArray filterList = controllerConfig.getJSONArray("filterList");
-                if (CollectionUtils.isEmpty(filterList)) {
-                    controllerConfig.remove("filterList");
-                    continue;
-                }
-                List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
-                for (int j = 0; j < filterList.size(); j++) {
-                    JSONObject filterObj = filterList.getJSONObject(j);
-                    if (MapUtils.isEmpty(filterObj)) {
-                        continue;
-                    }
-                    String column = filterObj.getString("uuid");
-                    if (StringUtils.isBlank(column)) {
-                        continue;
-                    }
-                    JSONArray valueArray = filterObj.getJSONArray("valueList");
-                    if (CollectionUtils.isEmpty(valueArray)) {
-                        continue;
-                    }
-                    List<String> valueList = valueArray.toJavaList(String.class);
-                    List<String> defaultValue = new ArrayList<>();
-                    for (String value : valueList) {
-                        defaultValue.add(value + "&=&" + value);
-                    }
-                    MatrixColumnVo sourceColumn = new MatrixColumnVo();
-                    sourceColumn.setColumn(column);
-                    sourceColumn.setValueList(valueList);
-                    sourceColumn.setIsFilterList(true);
-                    sourceColumn.setExpression("include");
-                    sourceColumn.setDefaultValue(defaultValue);
-                    sourceColumnList.add(sourceColumn);
-                }
-                controllerConfig.remove("filterList");
-                controllerConfig.put("sourceColumnList", sourceColumnList);
-                flag = true;
             }
         }
         if (flag) {
-            System.out.println(formVersionUuid);
+            System.out.println("b=" + formVersionUuid);
         }
-        System.out.println(formVersionUuid);
+        flag = false;
         //sheetsConfig.tableList[x][x].component中表格输入组件
         JSONObject sheetsConfig = config.getJSONObject("sheetsConfig");
         if (MapUtils.isEmpty(sheetsConfig)) {
@@ -295,63 +245,127 @@ public class FormFormSelectAndDynamicListConfigUpdateApi extends PrivateApiCompo
                     if (MapUtils.isEmpty(component)) {
                         continue;
                     }
-                    String handler = component.getString("handler");
-                    if (!"formdynamiclist".equals(handler) && !"formselect".equals(handler) && !"formcheckbox".equals(handler) && !"formradio".equals(handler)) {
-                        continue;
+                    if(updateControllerConfig(component)) {
+                        flag = true;
+                        System.out.println("attribute2=" + component.getString("label"));
                     }
-                    JSONObject componentConfig = component.getJSONObject("config");
-                    if (MapUtils.isEmpty(componentConfig)) {
-                        continue;
-                    }
-                    String dataSource = componentConfig.getString("dataSource");
-                    if ("matrix".equals(dataSource)) {
-                        String matrixType = componentConfig.getString("matrixType");
-                        if ("cmdbci".equals(matrixType)) {
-                            continue;
-                        }
-                    } else if ("integration".equals(dataSource)) {
-
-                    } else {
-                        continue;
-                    }
-                    JSONArray filterList = componentConfig.getJSONArray("filterList");
-                    if (CollectionUtils.isEmpty(filterList)) {
-                        componentConfig.remove("filterList");
-                        continue;
-                    }
-                    List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
-                    for (int k = 0; k < filterList.size(); k++) {
-                        JSONObject filterObj = filterList.getJSONObject(k);
-                        if (MapUtils.isEmpty(filterObj)) {
-                            continue;
-                        }
-                        String column = filterObj.getString("uuid");
-                        if (StringUtils.isBlank(column)) {
-                            continue;
-                        }
-                        JSONArray valueArray = filterObj.getJSONArray("valueList");
-                        if (CollectionUtils.isEmpty(valueArray)) {
-                            continue;
-                        }
-                        List<String> valueList = valueArray.toJavaList(String.class);
-                        List<String> defaultValue = new ArrayList<>();
-                        for (String value : valueList) {
-                            defaultValue.add(value + "&=&" + value);
-                        }
-                        MatrixColumnVo sourceColumn = new MatrixColumnVo();
-                        sourceColumn.setColumn(column);
-                        sourceColumn.setValueList(valueList);
-                        sourceColumn.setIsFilterList(true);
-                        sourceColumn.setExpression("include");
-                        sourceColumn.setDefaultValue(defaultValue);
-                        sourceColumnList.add(sourceColumn);
-                    }
-                    componentConfig.remove("filterList");
-                    componentConfig.put("sourceColumnList", sourceColumnList);
+//                    String handler = component.getString("handler");
+//                    if (!"formdynamiclist".equals(handler) && !"formselect".equals(handler) && !"formcheckbox".equals(handler) && !"formradio".equals(handler)) {
+//                        continue;
+//                    }
+//                    JSONObject componentConfig = component.getJSONObject("config");
+//                    if (MapUtils.isEmpty(componentConfig)) {
+//                        continue;
+//                    }
+//                    String dataSource = componentConfig.getString("dataSource");
+//                    if ("matrix".equals(dataSource)) {
+//                        String matrixType = componentConfig.getString("matrixType");
+//                        if ("cmdbci".equals(matrixType)) {
+//                            continue;
+//                        }
+//                    } else if ("integration".equals(dataSource)) {
+//
+//                    } else {
+//                        continue;
+//                    }
+//                    JSONArray filterList = componentConfig.getJSONArray("filterList");
+//                    if (CollectionUtils.isEmpty(filterList)) {
+//                        componentConfig.remove("filterList");
+//                        continue;
+//                    }
+//                    List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
+//                    for (int k = 0; k < filterList.size(); k++) {
+//                        JSONObject filterObj = filterList.getJSONObject(k);
+//                        if (MapUtils.isEmpty(filterObj)) {
+//                            continue;
+//                        }
+//                        String column = filterObj.getString("uuid");
+//                        if (StringUtils.isBlank(column)) {
+//                            continue;
+//                        }
+//                        JSONArray valueArray = filterObj.getJSONArray("valueList");
+//                        if (CollectionUtils.isEmpty(valueArray)) {
+//                            continue;
+//                        }
+//                        List<String> valueList = valueArray.toJavaList(String.class);
+//                        List<String> defaultValue = new ArrayList<>();
+//                        for (String value : valueList) {
+//                            defaultValue.add(value + "&=&" + value);
+//                        }
+//                        MatrixColumnVo sourceColumn = new MatrixColumnVo();
+//                        sourceColumn.setColumn(column);
+//                        sourceColumn.setValueList(valueList);
+//                        sourceColumn.setIsFilterList(true);
+//                        sourceColumn.setExpression("include");
+//                        sourceColumn.setDefaultValue(defaultValue);
+//                        sourceColumnList.add(sourceColumn);
+//                    }
+//                    componentConfig.remove("filterList");
+//                    componentConfig.put("sourceColumnList", sourceColumnList);
                 }
             }
+        }
+        if (flag) {
+            System.out.println("c=" + formVersionUuid);
         }
         return config.toJSONString();
     }
 
+    private boolean updateControllerConfig(JSONObject controllerObj) {
+        //只更新表格输入组件
+        String handler = controllerObj.getString("handler");
+        if (!"formdynamiclist".equals(handler) && !"formselect".equals(handler) && !"formcheckbox".equals(handler) && !"formradio".equals(handler)) {
+            return false;
+        }
+        JSONObject controllerConfig = controllerObj.getJSONObject("config");
+        if (MapUtils.isEmpty(controllerConfig)) {
+            return false;
+        }
+        String dataSource = controllerConfig.getString("dataSource");
+        if ("matrix".equals(dataSource)) {
+            String matrixType = controllerConfig.getString("matrixType");
+            if ("cmdbci".equals(matrixType)) {
+                return false;
+            }
+        } else if ("integration".equals(dataSource)) {
+
+        } else {
+            return false;
+        }
+        JSONArray filterList = controllerConfig.getJSONArray("filterList");
+        if (CollectionUtils.isEmpty(filterList)) {
+            controllerConfig.remove("filterList");
+            return true;
+        }
+        List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
+        for (int j = 0; j < filterList.size(); j++) {
+            JSONObject filterObj = filterList.getJSONObject(j);
+            if (MapUtils.isEmpty(filterObj)) {
+                continue;
+            }
+            String column = filterObj.getString("uuid");
+            if (StringUtils.isBlank(column)) {
+                continue;
+            }
+            JSONArray valueArray = filterObj.getJSONArray("valueList");
+            if (CollectionUtils.isEmpty(valueArray)) {
+                continue;
+            }
+            List<String> valueList = valueArray.toJavaList(String.class);
+            List<String> defaultValue = new ArrayList<>();
+            for (String value : valueList) {
+                defaultValue.add(value + "&=&" + value);
+            }
+            MatrixColumnVo sourceColumn = new MatrixColumnVo();
+            sourceColumn.setColumn(column);
+            sourceColumn.setValueList(valueList);
+            sourceColumn.setIsFilterList(true);
+            sourceColumn.setExpression("include");
+            sourceColumn.setDefaultValue(defaultValue);
+            sourceColumnList.add(sourceColumn);
+        }
+        controllerConfig.remove("filterList");
+        controllerConfig.put("sourceColumnList", sourceColumnList);
+        return true;
+    }
 }
