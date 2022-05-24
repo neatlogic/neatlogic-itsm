@@ -249,59 +249,6 @@ public class FormFormSelectAndDynamicListConfigUpdateApi extends PrivateApiCompo
                         flag = true;
                         System.out.println("attribute2=" + component.getString("label"));
                     }
-//                    String handler = component.getString("handler");
-//                    if (!"formdynamiclist".equals(handler) && !"formselect".equals(handler) && !"formcheckbox".equals(handler) && !"formradio".equals(handler)) {
-//                        continue;
-//                    }
-//                    JSONObject componentConfig = component.getJSONObject("config");
-//                    if (MapUtils.isEmpty(componentConfig)) {
-//                        continue;
-//                    }
-//                    String dataSource = componentConfig.getString("dataSource");
-//                    if ("matrix".equals(dataSource)) {
-//                        String matrixType = componentConfig.getString("matrixType");
-//                        if ("cmdbci".equals(matrixType)) {
-//                            continue;
-//                        }
-//                    } else if ("integration".equals(dataSource)) {
-//
-//                    } else {
-//                        continue;
-//                    }
-//                    JSONArray filterList = componentConfig.getJSONArray("filterList");
-//                    if (CollectionUtils.isEmpty(filterList)) {
-//                        componentConfig.remove("filterList");
-//                        continue;
-//                    }
-//                    List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
-//                    for (int k = 0; k < filterList.size(); k++) {
-//                        JSONObject filterObj = filterList.getJSONObject(k);
-//                        if (MapUtils.isEmpty(filterObj)) {
-//                            continue;
-//                        }
-//                        String column = filterObj.getString("uuid");
-//                        if (StringUtils.isBlank(column)) {
-//                            continue;
-//                        }
-//                        JSONArray valueArray = filterObj.getJSONArray("valueList");
-//                        if (CollectionUtils.isEmpty(valueArray)) {
-//                            continue;
-//                        }
-//                        List<String> valueList = valueArray.toJavaList(String.class);
-//                        List<String> defaultValue = new ArrayList<>();
-//                        for (String value : valueList) {
-//                            defaultValue.add(value + "&=&" + value);
-//                        }
-//                        MatrixColumnVo sourceColumn = new MatrixColumnVo();
-//                        sourceColumn.setColumn(column);
-//                        sourceColumn.setValueList(valueList);
-//                        sourceColumn.setIsFilterList(true);
-//                        sourceColumn.setExpression("include");
-//                        sourceColumn.setDefaultValue(defaultValue);
-//                        sourceColumnList.add(sourceColumn);
-//                    }
-//                    componentConfig.remove("filterList");
-//                    componentConfig.put("sourceColumnList", sourceColumnList);
                 }
             }
         }
