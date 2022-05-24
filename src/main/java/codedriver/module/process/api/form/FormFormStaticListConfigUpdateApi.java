@@ -38,8 +38,8 @@ import java.util.*;
  * @author linbq
  * @since 2022/3/8 16:29
  **/
-@Service
-@Transactional
+//@Service
+//@Transactional
 public class FormFormStaticListConfigUpdateApi extends PrivateApiComponentBase {
 
     @Resource
