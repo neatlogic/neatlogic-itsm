@@ -9,8 +9,8 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import codedriver.framework.common.constvalue.SystemUser;
-import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.form.attribute.core.FormHandlerBase;
+import codedriver.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeDataConversionHandler;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.constvalue.*;
@@ -142,7 +142,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                                             if (Objects.equals(formAttributeVo.getUuid(), attributeUuid)) {
                                                 JSONObject configObj = formAttributeVo.getConfigObj();
                                                 if (MapUtils.isNotEmpty(configObj)) {
-                                                    FormHandlerBase handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                                                    IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo.getHandler());
                                                     if (handler != null) {
                                                         JSONObject detailedData = handler.getDetailedData(dataVo, configObj);
                                                         format = detailedData.getString("format");

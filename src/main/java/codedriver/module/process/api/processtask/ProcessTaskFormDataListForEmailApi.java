@@ -7,8 +7,8 @@ package codedriver.module.process.api.processtask;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.form.attribute.core.FormHandlerBase;
+import codedriver.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeDataConversionHandler;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
@@ -84,7 +84,7 @@ public class ProcessTaskFormDataListForEmailApi extends PrivateApiComponentBase 
                     if (attributeDataVo != null) {
                         attributeDataVo.setAttributeLabel(formAttribute.getLabel());
                         if (attributeDataVo.getData() != null) {
-                            FormHandlerBase handler = FormAttributeHandlerFactory.getHandler(formAttribute.getHandler());
+                            IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttribute.getHandler());
                             if (handler != null) {
 //                                long startTime = System.currentTimeMillis();
 //                                Object value = handler.dataTransformationForEmail(attributeDataVo, JSONObject.parseObject(formAttribute.getConfig()));
