@@ -9,6 +9,7 @@ import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.FormHandlerBase;
 import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.form.constvalue.FormHandlerTypeBak;
@@ -96,7 +97,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                     if (Objects.equal(attributeUuid, formAttribute.getUuid())) {
                         config.put("name", formAttribute.getLabel());
                         if (value != null) {
-                            IFormAttributeHandler formAttributeHandler =
+                            FormHandlerBase formAttributeHandler =
                                     FormAttributeHandlerFactory.getHandler(formAttribute.getHandler());
                             if (formAttributeHandler != null) {
                                 AttributeDataVo attributeDataVo = new AttributeDataVo();

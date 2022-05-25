@@ -6,7 +6,7 @@
 package codedriver.module.process.notify.handler.param;
 
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.form.attribute.core.IFormAttributeHandler;
+import codedriver.framework.form.attribute.core.FormHandlerBase;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -65,7 +65,7 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
                             if (attributeDataVo != null) {
                                 attributeDataVo.setAttributeLabel(formAttribute.getLabel());
                                 if (attributeDataVo.getData() != null) {
-                                    IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttribute.getHandler());
+                                    FormHandlerBase handler = FormAttributeHandlerFactory.getHandler(formAttribute.getHandler());
                                     if (handler != null) {
                                         Object value = handler.dataTransformationForEmail(attributeDataVo, JSONObject.parseObject(formAttribute.getConfig()));
                                         attributeDataVo.setDataObj(value);

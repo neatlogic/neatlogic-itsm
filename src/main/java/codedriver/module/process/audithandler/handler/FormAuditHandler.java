@@ -1,9 +1,18 @@
 package codedriver.module.process.audithandler.handler;
 
-import java.util.*;
-
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.FormHandlerBase;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
+import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
+import codedriver.framework.process.dto.ProcessTaskFormVo;
+import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -11,17 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
-import codedriver.framework.process.dto.ProcessTaskFormVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
-import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.form.attribute.core.IFormAttributeHandler;
+import java.util.*;
 
 @Service
 public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
@@ -99,7 +98,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 
             Map<String, String> oldContentMap = new HashMap<>();
             for (ProcessTaskFormAttributeDataVo attributeDataVo : oldProcessTaskFormAttributeDataList) {
-                IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
+                FormHandlerBase handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
                 if (handler != null) {
                     String result = null;
                     Object value = handler.valueConversionText(attributeDataVo,
@@ -133,7 +132,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
                     content.put("oldContent", oldContent);
                 }
                 String newContent = null;
-                IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
+                FormHandlerBase handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
                 if (handler != null) {
                     String result = null;
                     Object value = handler.valueConversionText(attributeDataVo,

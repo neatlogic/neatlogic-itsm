@@ -10,7 +10,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.form.attribute.core.IFormAttributeHandler;
+import codedriver.framework.form.attribute.core.FormHandlerBase;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.constvalue.*;
@@ -37,7 +37,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author linbq
@@ -139,8 +142,8 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                                             if (Objects.equals(formAttributeVo.getUuid(), attributeUuid)) {
                                                 JSONObject configObj = formAttributeVo.getConfigObj();
                                                 if (MapUtils.isNotEmpty(configObj)) {
-                                                    IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                                                    if(handler != null) {
+                                                    FormHandlerBase handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                                                    if (handler != null) {
                                                         JSONObject detailedData = handler.getDetailedData(dataVo, configObj);
                                                         format = detailedData.getString("format");
                                                     }
@@ -248,7 +251,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myCompleteAudit(ProcessTaskStepVo currentProcessTaskStepVo) {
-        if(StringUtils.isNotBlank(currentProcessTaskStepVo.getError())) {
+        if (StringUtils.isNotBlank(currentProcessTaskStepVo.getError())) {
             currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CAUSE.getParamName(), currentProcessTaskStepVo.getError());
         }
         /** 处理历史记录 **/
@@ -319,28 +322,33 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
     /**
      * 正向输出路径数量
      * -1代表不限制
+     *
      * @return
      */
     @Override
     public int getForwardOutnputQuantity() {
         return 1;
     }
+
     /**
      * 回退输入路径数量
      * -1代表不限制
+     *
      * @return
      */
     @Override
-    public  int getBackwardInputQuantity() {
+    public int getBackwardInputQuantity() {
         return 0;
     }
+
     /**
      * 回退输出路径数量
      * -1代表不限制
+     *
      * @return
      */
     @Override
-    public  int getBackwardOutputQuantity() {
+    public int getBackwardOutputQuantity() {
         return 0;
     }
 }
