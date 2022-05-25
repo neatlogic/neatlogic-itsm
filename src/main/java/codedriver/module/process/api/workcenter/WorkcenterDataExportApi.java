@@ -8,7 +8,7 @@ package codedriver.module.process.api.workcenter;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.form.attribute.core.IFormAttributeHandler;
+import codedriver.framework.form.attribute.core.FormHandlerBase;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.AttributeDataVo;
 import codedriver.framework.form.dto.FormAttributeVo;
@@ -177,7 +177,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                                         formLabelList = new ArrayList<>();
                                         formLabelCellRangeMap = new HashMap<>();
                                         for (FormAttributeVo formAttributeVo : formAttributeList) {
-                                            IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                                            FormHandlerBase handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                                             if (handler == null || handler instanceof DivideHandler) {
                                                 continue;
                                             }
@@ -253,7 +253,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                                 if (formAttributeDataVo == null || formAttributeDataVo.getData() == null) {
                                     continue;
                                 }
-                                IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                                FormHandlerBase handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                                 if (handler == null || handler instanceof DivideHandler) {
                                     continue;
                                 }
@@ -289,7 +289,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                         // POI不允许重复创建Row，遍历到表格类属性时，需要创建多个Row，把这些Row记录下来，待到下一个表格类属性时，重复使用这些Row
                         Map<Integer, Row> rowMap = new HashMap<>();
                         for (FormAttributeVo formAttributeVo : formAttributeList) {
-                            IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                            FormHandlerBase handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                             if (handler == null || handler instanceof DivideHandler) {
                                 continue;
                             }
