@@ -6,7 +6,6 @@
 package codedriver.module.process.schedule.plugin;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepTimerVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -59,7 +58,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
         }
         Date beginTime = processTaskStepTimerVo.getTriggerTime();
         Date newDate = new Date();
-        if (newDate.after(beginTime)) {
+        if (beginTime != null && newDate.after(beginTime)) {
             beginTime = newDate;
         }
         JobObject.Builder jobObjectBuilder = new JobObject.Builder(
