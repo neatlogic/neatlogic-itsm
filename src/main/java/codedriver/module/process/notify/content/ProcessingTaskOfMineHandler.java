@@ -456,7 +456,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				List<UserVo> userList = new ArrayList<>();
 				JSONArray stepTeam = conditionConfig.getJSONArray(ConditionOptions.STEPTEAM.getValue());
 				if (CollectionUtils.isNotEmpty(stepTeam)) {
-					teamUuidList = teamMapper.checkTeamUuidListIsExists(stepTeam.toJavaList(String.class)
+					teamUuidList = teamMapper.getTeamUuidListByUuidList(stepTeam.toJavaList(String.class)
 							.stream().map(o -> o.split("#")[1]).collect(Collectors.toList()));
 				}
 				if(CollectionUtils.isNotEmpty(teamUuidList)){

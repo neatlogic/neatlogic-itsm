@@ -224,8 +224,8 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         typeList.add(ProcessTaskOperationType.STEP_COMMENT.getValue());
         typeList.add(ProcessTaskOperationType.STEP_COMPLETE.getValue());
         typeList.add(ProcessTaskOperationType.STEP_BACK.getValue());
-        typeList.add(ProcessTaskOperationType.STEP_RETREAT.getValue());
-        typeList.add(ProcessTaskOperationType.STEP_TRANSFER.getValue());
+        typeList.add(ProcessTaskOperationType.PROCESSTASK_RETREAT.getValue());
+        typeList.add(ProcessTaskOperationType.PROCESSTASK_TRANSFER.getValue());
         processTaskStepVo.setCommentList(
                 processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepVo.getId(), typeList));
         // 子任务列表
