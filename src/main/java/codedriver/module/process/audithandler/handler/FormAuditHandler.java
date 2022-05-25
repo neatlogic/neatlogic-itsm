@@ -1,7 +1,8 @@
 package codedriver.module.process.audithandler.handler;
 
+import codedriver.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.form.attribute.core.FormHandlerBase;
+import codedriver.framework.form.attribute.core.IFormAttributeDataConversionHandler;
 import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
@@ -98,7 +99,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 
             Map<String, String> oldContentMap = new HashMap<>();
             for (ProcessTaskFormAttributeDataVo attributeDataVo : oldProcessTaskFormAttributeDataList) {
-                FormHandlerBase handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
+                IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(attributeDataVo.getType());
                 if (handler != null) {
                     String result = null;
                     Object value = handler.valueConversionText(attributeDataVo,
@@ -132,7 +133,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
                     content.put("oldContent", oldContent);
                 }
                 String newContent = null;
-                FormHandlerBase handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
+                IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(attributeDataVo.getType());
                 if (handler != null) {
                     String result = null;
                     Object value = handler.valueConversionText(attributeDataVo,
