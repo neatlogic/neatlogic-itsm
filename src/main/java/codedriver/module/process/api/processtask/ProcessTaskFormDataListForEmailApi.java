@@ -91,7 +91,7 @@ public class ProcessTaskFormDataListForEmailApi extends PrivateApiComponentBase 
 //                                System.out.println(formAttribute.getHandler() + "-" + (System.currentTimeMillis() - startTime));
 //                                attributeDataVo.setDataObj(value);
                                 long startTime2 = System.currentTimeMillis();
-                                Object valueObj = handler.dataTransformationForExcel(attributeDataVo, JSONObject.parseObject(formAttribute.getConfig()));
+                                JSONObject valueObj = handler.getDetailedData(attributeDataVo, JSONObject.parseObject(formAttribute.getConfig()));
                                 System.out.println(formAttribute.getHandler() + "-" + (System.currentTimeMillis() - startTime2));
                                 attributeDataVo.setDataObj(valueObj);
                             }
