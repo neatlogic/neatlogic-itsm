@@ -51,6 +51,7 @@ public class TaskSaveApi extends PrivateApiComponentBase {
             @Param(name = "num", type = ApiParamType.INTEGER, isRequired = true, desc = "参与人数。-1：不做限制", rule = "single,many"),
             @Param(name = "policy", type = ApiParamType.ENUM, isRequired = true, desc = "其中一个人完成即可：any,所有人完成：all", rule = "any,all"),
             @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "是否激活,激活：1，禁用：0", rule = "0,1"),
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "配置信息")
     })
     @Output({
 
