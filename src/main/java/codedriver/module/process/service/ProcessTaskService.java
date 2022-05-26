@@ -274,14 +274,14 @@ public interface ProcessTaskService {
      */
     public JSONArray getReplaceableTextList(ProcessTaskStepVo processTaskStepVo);
     /**
-     * 获取该步骤可替换文本列表数据
+     * 获取该步骤自定义按钮文本列表数据
      *
      * @param processTaskStepVo
      * @return
      */
     public JSONArray getCustomButtonList(ProcessTaskStepVo processTaskStepVo);
     /**
-     * 获取该步骤可替换文本列表数据
+     * 获取该步骤自定义状态文本列表数据
      *
      * @param processTaskStepVo
      * @return
