@@ -102,6 +102,8 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
 //        }
         ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(processTaskId);
         startProcessTaskStepVo.setReplaceableTextList(processTaskService.getReplaceableTextList(startProcessTaskStepVo));
+        startProcessTaskStepVo.setCustomStatusList(processTaskService.getCustomStatusList(startProcessTaskStepVo));
+        startProcessTaskStepVo.setCustomButtonList(processTaskService.getCustomButtonList(startProcessTaskStepVo));
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
 //        Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.PROCESS.getValue());
@@ -258,5 +260,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
             processTaskStepVo.setProcessTaskStepData(stepDataJson);
         }
         processTaskStepVo.setReplaceableTextList(processTaskService.getReplaceableTextList(processTaskStepVo));
+        processTaskStepVo.setCustomStatusList(processTaskService.getCustomStatusList(processTaskStepVo));
+        processTaskStepVo.setCustomButtonList(processTaskService.getCustomButtonList(processTaskStepVo));
     }
 }

@@ -1302,6 +1302,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
         startProcessTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
         startProcessTaskStepVo.setReplaceableTextList(getReplaceableTextList(startProcessTaskStepVo));
+        startProcessTaskStepVo.setCustomStatusList(getCustomStatusList(startProcessTaskStepVo));
+        startProcessTaskStepVo.setCustomButtonList(getCustomButtonList(startProcessTaskStepVo));
         return startProcessTaskStepVo;
     }
 
@@ -1607,6 +1609,64 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         return replaceableTextList;
     }
 
+    @Override
+    public JSONArray getCustomButtonList(ProcessTaskStepVo processTaskStepVo) {
+        String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+        boolean stepLevelTakesEffect = false;
+        JSONArray customButtonList = (JSONArray) JSONPath.read(config, "customButtonList");
+        if (CollectionUtils.isNotEmpty(customButtonList)) {
+            for (int i = 0; i < customButtonList.size(); i++) {
+                JSONObject customButton = customButtonList.getJSONObject(i);
+                if (StringUtils.isNotBlank(customButton.getString("value"))) {
+                    stepLevelTakesEffect = true;
+                    break;
+                }
+            }
+        }
+        if (!stepLevelTakesEffect) {
+            String handler = processTaskStepVo.getHandler();
+            if (StringUtils.isNotBlank(handler)) {
+                String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(handler);
+                if (StringUtils.isNotBlank(processStepHandlerConfig)) {
+                    JSONObject configObj = JSONObject.parseObject(processStepHandlerConfig);
+                    if (MapUtils.isNotEmpty(configObj)) {
+                        customButtonList = configObj.getJSONArray("customButtonList");
+                    }
+                }
+            }
+        }
+        return customButtonList;
+    }
+
+    @Override
+    public JSONArray getCustomStatusList(ProcessTaskStepVo processTaskStepVo) {
+        String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+        boolean stepLevelTakesEffect = false;
+        JSONArray customStatusList = (JSONArray) JSONPath.read(config, "customStatusList");
+        if (CollectionUtils.isNotEmpty(customStatusList)) {
+            for (int i = 0; i < customStatusList.size(); i++) {
+                JSONObject customStatus = customStatusList.getJSONObject(i);
+                if (StringUtils.isNotBlank(customStatus.getString("value"))) {
+                    stepLevelTakesEffect = true;
+                    break;
+                }
+            }
+        }
+        if (!stepLevelTakesEffect) {
+            String handler = processTaskStepVo.getHandler();
+            if (StringUtils.isNotBlank(handler)) {
+                String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(handler);
+                if (StringUtils.isNotBlank(processStepHandlerConfig)) {
+                    JSONObject configObj = JSONObject.parseObject(processStepHandlerConfig);
+                    if (MapUtils.isNotEmpty(configObj)) {
+                        customStatusList = configObj.getJSONArray("customStatusList");
+                    }
+                }
+            }
+        }
+        return customStatusList;
+    }
+
     /**
      * 刷新minor worker
      *
@@ -1838,6 +1898,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             processTaskStepVo.setCommentTemplate(commentTemplate);
         }
         processTaskStepVo.setReplaceableTextList(getReplaceableTextList(processTaskStepVo));
+        processTaskStepVo.setCustomStatusList(getCustomStatusList(processTaskStepVo));
+        processTaskStepVo.setCustomButtonList(getCustomButtonList(processTaskStepVo));
 
         List<Long> tagIdList = processTaskMapper.getTagIdListByProcessTaskStepId(processTaskStepId);
         if (CollectionUtils.isNotEmpty(tagIdList)) {
