@@ -102,6 +102,8 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
                         setMinorUserTaskType(processTaskStepVo, minorUserList);
                     }
                     processTaskStepVo.setReplaceableTextList(processTaskService.getReplaceableTextList(processTaskStepVo));
+                    processTaskStepVo.setCustomStatusList(processTaskService.getCustomStatusList(processTaskStepVo));
+                    processTaskStepVo.setCustomButtonList(processTaskService.getCustomButtonList(processTaskStepVo));
                     processTaskStepVo.setAssignableWorkerStepList(null);
                     processTaskStepVo.setBackwardNextStepList(null);
                     processTaskStepVo.setCommentList(null);
