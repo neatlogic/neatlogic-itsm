@@ -48,7 +48,8 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase impl
 
     @Input({
             @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "任务id"),
-            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述")
+            @Param(name = "button", type = ApiParamType.STRING, desc = "按钮"),
+            @Param(name = "content", type = ApiParamType.STRING, desc = "描述")
     })
     @Output({})
     @Description(desc = "任务完成接口")
@@ -56,6 +57,7 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase impl
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");
         String content = jsonObj.getString("content");
-        return processTaskStepTaskService.completeTask(id, content);
+        String button = jsonObj.getString("button");
+        return processTaskStepTaskService.completeTask(id, content, button);
     }
 }
