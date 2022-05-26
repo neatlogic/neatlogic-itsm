@@ -11,16 +11,22 @@ import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.task.TaskMapper;
 import codedriver.framework.process.dto.TaskConfigVo;
+import codedriver.framework.process.exception.processtask.task.TaskConfigButtonNameRepeatException;
 import codedriver.framework.process.exception.processtask.task.TaskConfigNameRepeatException;
 import codedriver.framework.process.exception.processtask.task.TaskConfigNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 
@@ -63,6 +69,23 @@ public class TaskSaveApi extends PrivateApiComponentBase {
         TaskConfigVo taskConfigVo = JSONObject.toJavaObject(jsonObj, TaskConfigVo.class);
         if(taskMapper.checkTaskConfigNameIsRepeat(taskConfigVo) > 0) {
             throw new TaskConfigNameRepeatException(taskConfigVo.getName());
+        }
+        JSONObject config = taskConfigVo.getConfig();
+        if (MapUtils.isNotEmpty(config)) {
+            JSONArray customButtonList = config.getJSONArray("customButtonList");
+            if (CollectionUtils.isNotEmpty(customButtonList)) {
+                List<String> nameList = new ArrayList<>();
+                for (int i = 0; i < customButtonList.size(); i++) {
+                    JSONObject customButton = customButtonList.getJSONObject(i);
+                    if (MapUtils.isNotEmpty(customButton)) {
+                        String name = customButton.getString("name");
+                        if (nameList.contains(name)) {
+                            throw new TaskConfigButtonNameRepeatException(name);
+                        }
+                        nameList.add(name);
+                    }
+                }
+            }
         }
         if (taskId != null) {
             TaskConfigVo taskConfigTmp = taskMapper.getTaskConfigById(taskId);

@@ -9,6 +9,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -235,12 +236,36 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
      *
      * @param id 任务id
      * @param content 回复内容
+     * @param button 按钮
      */
     @Override
-    public Long completeTask(Long id, String content) throws Exception {
+    public Long completeTask(Long id, String content, String button) throws Exception {
         ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskDetailById(id);
         if (stepTaskVo == null) {
             throw new ProcessTaskStepTaskNotFoundException(id.toString());
+        }
+        if (StringUtils.isBlank(content) && StringUtils.isNotBlank(button)) {
+            TaskConfigVo taskConfigVo = taskMapper.getTaskConfigById(stepTaskVo.getTaskConfigId());
+            if (taskConfigVo != null) {
+                JSONObject config = taskConfigVo.getConfig();
+                if (MapUtils.isNotEmpty(config)) {
+                    JSONArray customButtonList = config.getJSONArray("customButtonList");
+                    if (CollectionUtils.isNotEmpty(customButtonList)) {
+                        for (int i = 0; i < customButtonList.size(); i++) {
+                            JSONObject customButton = customButtonList.getJSONObject(i);
+                            if (MapUtils.isNotEmpty(customButton)) {
+                                String name = customButton.getString("name");
+                                if (Objects.equals(name, button)) {
+                                    Integer isRequired = customButton.getInteger("isRequired");
+                                    if (Objects.equals(isRequired, 1)) {
+                                        throw new ParamNotExistsException("content");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         Long processTaskId = stepTaskVo.getProcessTaskId();
         Long processTaskStepId = stepTaskVo.getProcessTaskStepId();

@@ -5,7 +5,6 @@
 
 package codedriver.module.process.service;
 
-import codedriver.framework.process.dto.ProcessTaskStepTaskUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.TaskConfigVo;
@@ -30,8 +29,9 @@ public interface ProcessTaskStepTaskService {
      *
      * @param id 任务id
      * @param content 回复内容
+     * @param button 按钮
      */
-    Long completeTask(Long id, String content) throws Exception;
+    Long completeTask(Long id, String content, String button) throws Exception;
     /**
      * 解析&校验 任务配置
      *
