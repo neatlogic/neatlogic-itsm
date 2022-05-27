@@ -244,27 +244,31 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         if (stepTaskVo == null) {
             throw new ProcessTaskStepTaskNotFoundException(id.toString());
         }
-        if (StringUtils.isBlank(content) && StringUtils.isNotBlank(button)) {
-            TaskConfigVo taskConfigVo = taskMapper.getTaskConfigById(stepTaskVo.getTaskConfigId());
-            if (taskConfigVo != null) {
-                JSONObject config = taskConfigVo.getConfig();
-                if (MapUtils.isNotEmpty(config)) {
-                    JSONArray customButtonList = config.getJSONArray("customButtonList");
-                    if (CollectionUtils.isNotEmpty(customButtonList)) {
-                        for (int i = 0; i < customButtonList.size(); i++) {
-                            JSONObject customButton = customButtonList.getJSONObject(i);
-                            if (MapUtils.isNotEmpty(customButton)) {
-                                String name = customButton.getString("name");
-                                if (Objects.equals(name, button)) {
-                                    Integer isRequired = customButton.getInteger("isRequired");
-                                    if (Objects.equals(isRequired, 1)) {
-                                        throw new ParamNotExistsException("content");
+        if (StringUtils.isBlank(content)) {
+            if (StringUtils.isNotBlank(button)) {
+                TaskConfigVo taskConfigVo = taskMapper.getTaskConfigById(stepTaskVo.getTaskConfigId());
+                if (taskConfigVo != null) {
+                    JSONObject config = taskConfigVo.getConfig();
+                    if (MapUtils.isNotEmpty(config)) {
+                        JSONArray customButtonList = config.getJSONArray("customButtonList");
+                        if (CollectionUtils.isNotEmpty(customButtonList)) {
+                            for (int i = 0; i < customButtonList.size(); i++) {
+                                JSONObject customButton = customButtonList.getJSONObject(i);
+                                if (MapUtils.isNotEmpty(customButton)) {
+                                    String name = customButton.getString("name");
+                                    if (Objects.equals(name, button)) {
+                                        Integer isRequired = customButton.getInteger("isRequired");
+                                        if (Objects.equals(isRequired, 1)) {
+                                            throw new ParamNotExistsException("content");
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+            } else {
+                throw new ParamNotExistsException("content");
             }
         }
         Long processTaskId = stepTaskVo.getProcessTaskId();
