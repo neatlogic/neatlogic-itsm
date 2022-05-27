@@ -352,7 +352,11 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                                                         if (entryValue != null) {
                                                             Object text = entryValue.get("text");
                                                             if (text != null) {
-                                                                _value = text.toString();
+                                                                if (text instanceof List) {
+                                                                    _value = String.join("", ((List) text));
+                                                                } else {
+                                                                    _value = text.toString();
+                                                                }
                                                             }
                                                         }
                                                         cell.setCellValue(_value);
