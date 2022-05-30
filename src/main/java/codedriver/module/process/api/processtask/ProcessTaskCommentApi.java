@@ -167,6 +167,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
         typeList.add(ProcessTaskOperationType.PROCESSTASK_RETREAT.getValue());
         typeList.add(ProcessTaskOperationType.PROCESSTASK_TRANSFER.getValue());
         typeList.add(ProcessTaskOperationType.STEP_REAPPROVAL.getValue());
+        typeList.add(ProcessTaskOperationType.PROCESSTASK_START.getValue());
         resultObj.put("commentList",
             processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, typeList));
         return resultObj;

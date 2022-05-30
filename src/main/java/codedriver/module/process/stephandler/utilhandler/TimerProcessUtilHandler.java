@@ -6,6 +6,7 @@
 package codedriver.module.process.stephandler.utilhandler;
 
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepTimerVo;
@@ -90,6 +91,17 @@ public class TimerProcessUtilHandler extends ProcessStepInternalHandlerBase {
             configObj = new JSONObject();
         }
         JSONObject resultObj = new JSONObject();
+        /* 默认所有人都可以查看定时节点步骤信息 */
+        resultObj.put("enableAuthority", 1);
+        JSONArray authorityArray = new JSONArray();
+        authorityArray.add(new JSONObject() {{
+            this.put("action", ProcessTaskOperationType.STEP_VIEW.getValue());
+            this.put("text", ProcessTaskOperationType.STEP_VIEW.getText());
+            this.put("defaultValue", ProcessTaskOperationType.STEP_VIEW.getDefaultValue());
+            this.put("acceptList", ProcessTaskOperationType.STEP_VIEW.getDefaultValue());
+            this.put("groupList", ProcessTaskOperationType.STEP_VIEW.getGroupList());
+        }});
+        resultObj.put("authorityList", authorityArray);
         /** 分配处理人 **/
         JSONObject workerPolicyConfig = configObj.getJSONObject("workerPolicyConfig");
         JSONObject workerPolicyObj = ProcessConfigUtil.regulateWorkerPolicyConfig(workerPolicyConfig);
