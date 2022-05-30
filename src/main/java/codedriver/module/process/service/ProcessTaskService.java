@@ -109,6 +109,7 @@ public interface ProcessTaskService {
 
     /**
      * 设置下一步骤列表
+     *
      * @param processTaskStepVo 步骤信息
      */
     void setNextStepList(ProcessTaskStepVo processTaskStepVo);
@@ -273,6 +274,7 @@ public interface ProcessTaskService {
      * @return
      */
     public JSONArray getReplaceableTextList(ProcessTaskStepVo processTaskStepVo);
+
     /**
      * 获取该步骤自定义按钮文本列表数据
      *
@@ -280,6 +282,7 @@ public interface ProcessTaskService {
      * @return
      */
     public JSONArray getCustomButtonList(ProcessTaskStepVo processTaskStepVo);
+
     /**
      * 获取该步骤自定义状态文本列表数据
      *
@@ -390,19 +393,30 @@ public interface ProcessTaskService {
 
     /**
      * 检查工单状态，如果processTaskStatus属于status其中一员，则返回对应的异常对象，否则返回null
+     *
      * @param processTaskStatus 工单状态
-     * @param statuss 状态列表
+     * @param statuss           状态列表
      * @return
      */
     ProcessTaskPermissionDeniedException checkProcessTaskStatus(String processTaskStatus, ProcessTaskStatus... statuss);
 
     /**
      * 检查步骤状态，如果stepStatus属于status其中一员，则返回对应的异常对象，否则返回null
+     *
      * @param stepStatus 步骤状态
-     * @param statuss 状态列表
+     * @param statuss    状态列表
      * @return
      */
-    ProcessTaskPermissionDeniedException checkProcessTaskStepStatus(String stepStatus, ProcessTaskStatus ... statuss);
+    ProcessTaskPermissionDeniedException checkProcessTaskStepStatus(String stepStatus, ProcessTaskStatus... statuss);
+
+    /**
+     * 获取步骤回复模版
+     *
+     * @param processStepUuid      步骤uuid
+     * @param authenticationInfoVo 用户授权
+     * @return
+     */
+    ProcessCommentTemplateVo getProcessStepCommentTemplate(String processStepUuid, AuthenticationInfoVo authenticationInfoVo);
 //    /**
 //     * 判断当前用户是否拥有工单转报权限
 //     * @param processTaskVo 工单信息
