@@ -91,7 +91,7 @@ public class TimerProcessUtilHandler extends ProcessStepInternalHandlerBase {
             configObj = new JSONObject();
         }
         JSONObject resultObj = new JSONObject();
-        // 默认所有人都可以查看定时节点步骤信息
+        /* 默认所有人都可以查看定时节点步骤信息 */
         resultObj.put("enableAuthority", 1);
         JSONArray authorityArray = new JSONArray();
         authorityArray.add(new JSONObject() {{
