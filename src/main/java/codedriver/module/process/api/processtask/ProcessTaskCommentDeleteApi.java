@@ -96,6 +96,7 @@ public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
         typeList.add(ProcessTaskOperationType.STEP_BACK.getValue());
         typeList.add(ProcessTaskOperationType.PROCESSTASK_RETREAT.getValue());
         typeList.add(ProcessTaskOperationType.PROCESSTASK_TRANSFER.getValue());
+		typeList.add(ProcessTaskOperationType.STEP_REAPPROVAL.getValue());
         resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(replyVo.getProcessTaskStepId(), typeList));
         return resultObj;
 	}

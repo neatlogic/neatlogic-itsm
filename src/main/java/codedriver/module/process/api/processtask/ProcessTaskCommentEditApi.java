@@ -99,6 +99,7 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
         typeList.add(ProcessTaskOperationType.STEP_BACK.getValue());
         typeList.add(ProcessTaskOperationType.PROCESSTASK_RETREAT.getValue());
         typeList.add(ProcessTaskOperationType.PROCESSTASK_TRANSFER.getValue());
+		typeList.add(ProcessTaskOperationType.STEP_REAPPROVAL.getValue());
         resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(oldReplyVo.getProcessTaskStepId(), typeList));
         return resultObj;
 	}
