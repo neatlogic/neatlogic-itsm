@@ -1296,7 +1296,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
         /** 当前步骤特有步骤信息 **/
-        IProcessStepInternalHandler processStepUtilHandler =ProcessStepInternalHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+        IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
         if (processStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
         }
@@ -1888,14 +1888,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
         /** 如果当前用户有处理权限，则获取其有权看到的配置的回复模版 */
         if (hasComplete) {
-            List<String> authList = new ArrayList<>();
-            AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
-            authList.addAll(authenticationInfoVo.getTeamUuidList());
-            authList.addAll(authenticationInfoVo.getRoleUuidList());
-            authList.add(UserType.ALL.getValue());
-            authList.add(UserContext.get().getUserUuid());
-            ProcessCommentTemplateVo commentTemplate = commentTemplateMapper.getTemplateByStepUuidAndAuth(processTaskStepVo.getProcessStepUuid(), authList);
-            processTaskStepVo.setCommentTemplate(commentTemplate);
+            processTaskStepVo.setCommentTemplate(getProcessStepCommentTemplate(processTaskStepVo.getProcessStepUuid(), authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true))));
         }
         processTaskStepVo.setReplaceableTextList(getReplaceableTextList(processTaskStepVo));
         processTaskStepVo.setCustomStatusList(getCustomStatusList(processTaskStepVo));
@@ -1909,6 +1902,19 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
         return processTaskStepVo;
+    }
+
+    @Override
+    public ProcessCommentTemplateVo getProcessStepCommentTemplate(String processStepUuid, AuthenticationInfoVo authenticationInfoVo) {
+        if (processStepUuid != null && authenticationInfoVo != null) {
+            List<String> authList = new ArrayList<>();
+            authList.addAll(authenticationInfoVo.getTeamUuidList());
+            authList.addAll(authenticationInfoVo.getRoleUuidList());
+            authList.add(UserType.ALL.getValue());
+            authList.add(UserContext.get().getUserUuid());
+            return commentTemplateMapper.getTemplateByStepUuidAndAuth(processStepUuid, authList);
+        }
+        return null;
     }
 
     /**
@@ -2420,12 +2426,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     /**
      * 检查工单状态，如果processTaskStatus属于status其中一员，则返回对应的异常对象，否则返回null
+     *
      * @param processTaskStatus 工单状态
-     * @param statuss 状态列表
+     * @param statuss           状态列表
      * @return
      */
     @Override
-    public ProcessTaskPermissionDeniedException checkProcessTaskStatus(String processTaskStatus, ProcessTaskStatus ... statuss) {
+    public ProcessTaskPermissionDeniedException checkProcessTaskStatus(String processTaskStatus, ProcessTaskStatus... statuss) {
         if (statuss != null) {
             for (ProcessTaskStatus status : statuss) {
                 switch (status) {
@@ -2472,12 +2479,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     /**
      * 检查步骤状态，如果stepStatus属于status其中一员，则返回对应的异常对象，否则返回null
+     *
      * @param stepStatus 步骤状态
-     * @param statuss 状态列表
+     * @param statuss    状态列表
      * @return
      */
     @Override
-    public ProcessTaskPermissionDeniedException checkProcessTaskStepStatus(String stepStatus, ProcessTaskStatus ... statuss) {
+    public ProcessTaskPermissionDeniedException checkProcessTaskStepStatus(String stepStatus, ProcessTaskStatus... statuss) {
         if (statuss != null) {
             for (ProcessTaskStatus status : statuss) {
                 switch (status) {
