@@ -1755,6 +1755,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         typeList.add(ProcessTaskOperationType.STEP_BACK.getValue());
         typeList.add(ProcessTaskOperationType.PROCESSTASK_RETREAT.getValue());
         typeList.add(ProcessTaskOperationType.PROCESSTASK_TRANSFER.getValue());
+        typeList.add(ProcessTaskOperationType.STEP_REAPPROVAL.getValue());
+        typeList.add(ProcessTaskOperationType.PROCESSTASK_START.getValue());
         processTaskStepVo.setCommentList(getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, typeList));
 
         // 获取当前用户有权限的所有子任务
