@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 @Service
 @OperationType(type = OperationTypeEnum.OPERATE)
 @AuthAction(action = PROCESS_BASE.class)
+@Deprecated
 public class ProcessTaskStepTaskGetApi extends PrivateApiComponentBase {
     @Resource
     ProcessTaskMapper processTaskMapper;

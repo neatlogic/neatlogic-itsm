@@ -5,9 +5,8 @@
 
 package codedriver.module.process.service;
 
-import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.TaskConfigVo;
+import codedriver.framework.process.dto.*;
+import codedriver.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
@@ -51,4 +50,24 @@ public interface ProcessTaskStepTaskService {
      * @return
      */
     List<TaskConfigVo> getTaskConfigList(ProcessTaskStepVo processTaskStepVo);
+
+    /**
+     * @param processTaskStepTaskUserVo
+     * @return void
+     * @Time:2020年9月30日
+     * @Description: 步骤主处理人校正操作 判断当前用户是否是代办人，如果不是就什么都不做，如果是，进行下面3个操作 1.往processtask_step_agent表中插入一条数据，记录该步骤的原主处理人和代办人
+     * 2.将processtask_step_worker表中该步骤的主处理人uuid改为代办人(当前用户)
+     * 3.将processtask_step_user表中该步骤的主处理人user_uuid改为代办人(当前用户)
+     */
+    void stepMinorUserRegulate(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo);
+
+    /**
+     * 判断当前用户是否可以处理任务
+     * @param processTaskVo 工单信息
+     * @param processTaskStepVo 步骤信息
+     * @param stepTaskUserUuid 任务处理人uuid
+     * @param stepTaskUserUuid 任务处理人id
+     * @return
+     */
+    int checkIsReplyable(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, String stepTaskUserUuid, Long stepTaskUserId) throws ProcessTaskPermissionDeniedException;
 }
