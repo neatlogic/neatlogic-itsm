@@ -2022,6 +2022,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 } else {
                     if (processTaskMapper.checkIsWorker(processTaskId, stepVo.getId(), null, authenticationInfoVo) > 0) {
                         resultList.add(stepVo);
+                        continue;
+                    }
+                    // 子任务处理人可以重复回复
+                    ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
+                    processTaskStepUserVo.setProcessTaskId(processTaskId);
+                    processTaskStepUserVo.setProcessTaskStepId(stepVo.getId());
+                    processTaskStepUserVo.setUserUuid(userUuid);
+                    processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
+                    if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+                        resultList.add(stepVo);
                     }
                 }
             }
