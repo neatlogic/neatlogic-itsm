@@ -10,6 +10,8 @@ import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.type.ParamNotExistsException;
+import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -73,6 +75,8 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
     ProcessTaskService processTaskService;
     @Resource
     ProcessTaskAgentServiceImpl processTaskAgentServiceImpl;
+    @Resource
+    private FileMapper fileMapper;
     /**
      * 创建任务
      *
@@ -320,7 +324,6 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                     processTaskStepTaskUserVo.setId(stepTaskUserId);
                     processTaskStepTaskUserVo.setUserUuid(UserContext.get().getUserUuid());
                     processTaskStepTaskUserVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
-                    processTaskStepTaskUserVo.setUserUuid(UserContext.get().getUserUuid());
                     processTaskStepTaskMapper.updateTaskUserById(processTaskStepTaskUserVo);
                     isChange = true;
                 }
@@ -372,7 +375,8 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
      * 2.将processtask_step_worker表中该步骤的主处理人uuid改为代办人(当前用户)
      * 3.将processtask_step_user表中该步骤的主处理人user_uuid改为代办人(当前用户)
      */
-    private void stepMinorUserRegulate(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo) {
+    @Override
+    public void stepMinorUserRegulate(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo) {
         Long stepTaskUserId = processTaskStepTaskUserVo.getId();
         Long stepTaskId = processTaskStepTaskUserVo.getProcessTaskStepTaskId();
         String currentUserUuid = UserContext.get().getUserUuid(true);
@@ -583,6 +587,11 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                 }
                 stepTaskUserContentMap.put(stepTaskUserContentVo.getProcessTaskStepTaskUserId(), stepTaskUserContentVo);
             }
+            Map<Long, List<Long>> stepTaskUserFileIdListMap = new HashMap<>();
+            List<ProcessTaskStepTaskUserFileVo> processTaskStepTaskUserFileList = processTaskStepTaskMapper.getStepTaskUserFileListByStepTaskUserIdList(stepTaskUserIdList);
+            for (ProcessTaskStepTaskUserFileVo stepTaskUserFileVo : processTaskStepTaskUserFileList) {
+                stepTaskUserFileIdListMap.computeIfAbsent(stepTaskUserFileVo.getProcessTaskStepTaskUserId(), key -> new ArrayList<>()).add(stepTaskUserFileVo.getFileId());
+            }
             for (ProcessTaskStepTaskUserVo stepTaskUserVo : stepTaskUserList) {
                 if (stepTaskUserVo.getEndTime() == null && stepTaskUserVo.getIsDelete() == 1) {
                     continue;
@@ -610,6 +619,13 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                     stepTaskUserVo.setProcessTaskStepTaskUserContentId(stepTaskUserContentVo.getId());
                 }
                 stepTaskUserMap.computeIfAbsent(stepTaskUserVo.getProcessTaskStepTaskId(), key -> new ArrayList<>()).add(stepTaskUserVo);
+
+                List<Long> fileIdList = stepTaskUserFileIdListMap.get(stepTaskUserVo.getId());
+                if (CollectionUtils.isNotEmpty(fileIdList)) {
+                    stepTaskUserVo.setFileIdList(fileIdList);
+                    List<FileVo> fileList = fileMapper.getFileListByIdList(fileIdList);
+                    stepTaskUserVo.setFileList(fileList);
+                }
             }
         }
         Map<Long, List<ProcessTaskStepTaskVo>> stepTaskMap = new HashMap<>();
@@ -633,7 +649,8 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
      * @param stepTaskUserUuid 任务处理人id
      * @return
      */
-    private int checkIsReplyable(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, String stepTaskUserUuid, Long stepTaskUserId) throws ProcessTaskPermissionDeniedException {
+    @Override
+    public int checkIsReplyable(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, String stepTaskUserUuid, Long stepTaskUserId) throws ProcessTaskPermissionDeniedException {
         Long id = processTaskStepVo.getId();
         ProcessTaskOperationType operationType = ProcessTaskOperationType.TASK_COMPLETE;
         //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
