@@ -1944,12 +1944,22 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public List<ProcessTaskStepVo> getProcessableStepList(ProcessTaskVo processTaskVo, String action) {
+        String currentUserUuid = UserContext.get().getUserUuid(true);
         Long processTaskId = processTaskVo.getId();
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
-        List<ProcessTaskStepVo> processableStepList = getProcessableStepList(processTaskId, UserContext.get().getUserUuid(true), action, processTaskStepList);
+        List<ProcessTaskStepVo> processableStepList = getProcessableStepList(processTaskId, currentUserUuid, action, processTaskStepList);
         // 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里
-        List<String> fromUserUUidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), processTaskVo.getChannelUuid());
+        List<String> fromUserUUidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(currentUserUuid, processTaskVo.getChannelUuid());
         for (String userUuid : fromUserUUidList) {
+            for (ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId, userUuid, action, processTaskStepList)) {
+                if (!processableStepList.contains(processTaskStepVo)) {
+                    processableStepList.add(processTaskStepVo);
+                }
+            }
+        }
+        // 如果当前用户给其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里
+        List<String> toUserUUidList = processTaskAgentService.getToUserUuidListByFromUserUuidAndChannelUuid(currentUserUuid, processTaskVo.getChannelUuid());
+        for (String userUuid : toUserUUidList) {
             for (ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId, userUuid, action, processTaskStepList)) {
                 if (!processableStepList.contains(processTaskStepVo)) {
                     processableStepList.add(processTaskStepVo);
