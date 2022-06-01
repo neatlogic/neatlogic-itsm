@@ -1957,7 +1957,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 }
             }
         }
-        // 如果当前用户给其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里
+        // 如果当前用户授权给其他用户，查出其他用户拥有的权限，叠加当前用户权限里
         List<String> toUserUUidList = processTaskAgentService.getToUserUuidListByFromUserUuidAndChannelUuid(currentUserUuid, processTaskVo.getChannelUuid());
         for (String userUuid : toUserUUidList) {
             for (ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId, userUuid, action, processTaskStepList)) {
