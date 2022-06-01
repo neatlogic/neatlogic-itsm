@@ -1957,15 +1957,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 }
             }
         }
-        // 如果当前用户授权给其他用户，查出其他用户拥有的权限，叠加当前用户权限里
-        List<String> toUserUUidList = processTaskAgentService.getToUserUuidListByFromUserUuidAndChannelUuid(currentUserUuid, processTaskVo.getChannelUuid());
-        for (String userUuid : toUserUUidList) {
-            for (ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId, userUuid, action, processTaskStepList)) {
-                if (!processableStepList.contains(processTaskStepVo)) {
-                    processableStepList.add(processTaskStepVo);
-                }
-            }
-        }
 
 //        if (StringUtils.isNotBlank(action)) {
 //            Iterator<ProcessTaskStepVo> iterator = processableStepList.iterator();
@@ -2042,6 +2033,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
                     if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
                         resultList.add(stepVo);
+                        continue;
+                    }
+                    List<ProcessTaskStepTaskVo> processTaskStepTaskList = processTaskStepTaskMapper.getStepTaskListByProcessTaskStepId(stepVo.getId());
+                    List<Long> stepTaskIdList = processTaskStepTaskList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList());
+                    List<ProcessTaskStepTaskUserAgentVo> processTaskStepTaskUserAgentList = processTaskStepTaskMapper.getProcessTaskStepTaskUserAgentListByStepTaskIdList(stepTaskIdList);
+                    for (ProcessTaskStepTaskUserAgentVo processTaskStepTaskUserAgentVo : processTaskStepTaskUserAgentList) {
+                        if (Objects.equals(processTaskStepTaskUserAgentVo.getUserUuid(), userUuid)) {
+                            resultList.add(stepVo);
+                            break;
+                        }
                     }
                 }
             }
