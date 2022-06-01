@@ -1,25 +1,23 @@
 package codedriver.module.process.api.process;
 
-import codedriver.framework.dto.FieldValidResultVo;
-import codedriver.framework.process.exception.process.ProcessNameRepeatException;
-import codedriver.framework.process.util.ProcessConfigUtil;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.IValid;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import codedriver.module.process.dao.mapper.ProcessMapper;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dto.ProcessVo;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.process.auth.PROCESS_MODIFY;
+import codedriver.framework.process.dto.ProcessVo;
+import codedriver.framework.process.exception.process.ProcessNameRepeatException;
+import codedriver.framework.process.util.ProcessConfigUtil;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.IValid;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.RegexUtils;
+import codedriver.module.process.dao.mapper.ProcessMapper;
 import codedriver.module.process.service.ProcessService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
@@ -53,7 +51,7 @@ public class ProcessSaveApi extends PrivateApiComponentBase {
     @Override
     @Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "流程uuid", isRequired = true),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired = true, maxLength = 50, desc = "流程名称"),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "流程名称"),
             @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "流程配置内容", isRequired = true)
     })
     @Output({

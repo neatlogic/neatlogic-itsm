@@ -17,6 +17,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.RegexUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "服务通道uuid"),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired = true, maxLength = 50, desc = "服务通道名称"),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "服务通道名称"),
             @Param(name = "parentUuid", type = ApiParamType.STRING, isRequired = true, desc = "父级uuid"),
             @Param(name = "processUuid", type = ApiParamType.STRING, isRequired = true, desc = "工作流uuid"),
             @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "是否激活", rule = "0,1"),

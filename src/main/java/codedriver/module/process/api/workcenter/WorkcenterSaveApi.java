@@ -22,6 +22,7 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.RegexUtils;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -59,7 +60,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid"),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "分类名", xss = true),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, desc = "分类名", xss = true),
             @Param(name = "type", type = ApiParamType.STRING, desc = "分类类型，system|custom 默认custom"),
             @Param(name = "catalogName", type = ApiParamType.STRING, desc = "菜单分类"),
             @Param(name = "support", type = ApiParamType.ENUM, rule = "all,mobile,pc", desc = "使用范围，all|pc|mobile，默认值是：all"),

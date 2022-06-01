@@ -1,32 +1,30 @@
 package codedriver.module.process.api.process;
 
-import java.util.List;
-import java.util.UUID;
-
-import codedriver.framework.dto.FieldValidResultVo;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.IValid;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import codedriver.module.process.dao.mapper.ProcessMapper;
-import com.alibaba.fastjson.JSON;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dto.FieldValidResultVo;
+import codedriver.framework.process.auth.PROCESS_MODIFY;
 import codedriver.framework.process.dto.ProcessSlaVo;
 import codedriver.framework.process.dto.ProcessStepRelVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
-import codedriver.framework.process.auth.PROCESS_MODIFY;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.IValid;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.RegexUtils;
+import codedriver.module.process.dao.mapper.ProcessMapper;
 import codedriver.module.process.service.ProcessService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -56,7 +54,7 @@ public class ProcessCopyApi extends PrivateApiComponentBase {
 
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "被复制流程的uuid"),
-		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired= true, maxLength = 50, desc = "新流程名称")
+		@Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired= true, maxLength = 50, desc = "新流程名称")
 	})
 	@Output({
 		@Param(name = "Return", explode = ProcessVo.class, desc = "新流程信息")

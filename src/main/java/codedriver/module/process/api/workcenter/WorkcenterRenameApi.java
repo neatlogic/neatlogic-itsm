@@ -22,6 +22,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.RegexUtils;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -57,7 +58,7 @@ public class WorkcenterRenameApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = true),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "分类名", xss = true),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, desc = "分类名", xss = true),
             @Param(name = "catalogName", type = ApiParamType.STRING, desc = "菜单分类"),
     })
     @Description(desc = "修改工单中心分类名称接口")
