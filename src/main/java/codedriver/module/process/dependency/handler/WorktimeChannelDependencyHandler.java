@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -81,14 +82,13 @@ public class WorktimeChannelDependencyHandler extends CustomTableDependencyHandl
             if (channelVo != null) {
                 JSONObject dependencyInfoConfig = new JSONObject();
                 dependencyInfoConfig.put("channelUuid", channelVo.getUuid());
-                dependencyInfoConfig.put("channelName", channelVo.getName());
-                String pathFormat = "服务目录管理-${DATA.channelName}";
+//                dependencyInfoConfig.put("channelName", channelVo.getName());
+                List<String> pathList = new ArrayList<>();
+                pathList.add("服务目录管理");
+                String lastName = channelVo.getName();
+//                String pathFormat = "服务目录管理-${DATA.channelName}";
                 String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/catalog-manage?uuid=#{DATA.channelUuid}";
-                return new DependencyInfoVo(channelVo.getUuid(), dependencyInfoConfig, pathFormat, urlFormat, this.getGroupName());
-//                DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
-//                dependencyInfoVo.setValue(channelVo.getUuid());
-//                dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/catalog-manage?uuid=%s\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), channelVo.getUuid(), channelVo.getName()));
-//                return dependencyInfoVo;
+                return new DependencyInfoVo(channelVo.getUuid(), dependencyInfoConfig, lastName, pathList, urlFormat, this.getGroupName());
             }
         }
         return null;

@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -76,15 +77,14 @@ public class NotifyPolicyProcessStepHandlerDependencyHandler extends CustomTable
             String name = ProcessStepHandlerTypeFactory.getName(handler);
             if (StringUtils.isNotBlank(name)) {
                 JSONObject dependencyInfoConfig = new JSONObject();
-                dependencyInfoConfig.put("handler", handler);
-                dependencyInfoConfig.put("handlerName", name);
-                String pathFormat = "节点管理-${DATA.handlerName}";
+//                dependencyInfoConfig.put("handler", handler);
+//                dependencyInfoConfig.put("handlerName", name);
+                List<String> pathList = new ArrayList<>();
+                pathList.add("节点管理");
+                String lastName = name;
+//                String pathFormat = "节点管理-${DATA.handlerName}";
                 String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/node-manage";
-                return new DependencyInfoVo(handler, dependencyInfoConfig, pathFormat, urlFormat, this.getGroupName());
-//                DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
-//                dependencyInfoVo.setValue(handler);
-//                dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/node-manage\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), "节点管理", name));
-//                return dependencyInfoVo;
+                return new DependencyInfoVo(handler, dependencyInfoConfig, lastName, pathList, urlFormat, this.getGroupName());
             }
         }
         return null;

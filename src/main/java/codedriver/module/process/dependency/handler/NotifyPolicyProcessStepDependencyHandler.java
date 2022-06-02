@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -83,15 +84,15 @@ public class NotifyPolicyProcessStepDependencyHandler extends CustomTableDepende
                 if (processVo != null) {
                     JSONObject dependencyInfoConfig = new JSONObject();
                     dependencyInfoConfig.put("processUuid", processVo.getUuid());
-                    dependencyInfoConfig.put("processName", processVo.getName());
-                    dependencyInfoConfig.put("processStepName", processStepVo.getName());
-                    String pathFormat = "流程-${DATA.processName}-${DATA.processStepName}";
+//                    dependencyInfoConfig.put("processName", processVo.getName());
+//                    dependencyInfoConfig.put("processStepName", processStepVo.getName());
+                    List<String> pathList = new ArrayList<>();
+                    pathList.add("流程管理");
+                    pathList.add(processVo.getName());
+                    String lastName = processStepVo.getName();
+//                    String pathFormat = "流程-${DATA.processName}-${DATA.processStepName}";
                     String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/flow-edit?uuid=${DATA.processUuid}";
-                    return new DependencyInfoVo(processVo.getUuid(), dependencyInfoConfig, pathFormat, urlFormat, this.getGroupName());
-//                    DependencyInfoVo dependencyInfoVo = new DependencyInfoVo();
-//                    dependencyInfoVo.setValue(processStepVo.getUuid());
-//                    dependencyInfoVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName(), processStepVo.getName()));
-//                    return dependencyInfoVo;
+                    return new DependencyInfoVo(processVo.getUuid(), dependencyInfoConfig, lastName, pathList, urlFormat, this.getGroupName());
                 }
             }
         }
