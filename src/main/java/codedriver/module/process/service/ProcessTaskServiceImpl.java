@@ -1948,8 +1948,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
         List<ProcessTaskStepVo> processableStepList = getProcessableStepList(processTaskId, UserContext.get().getUserUuid(true), action, processTaskStepList);
         // 用户A授权给B，B是当前登录人，查出用户A拥有的权限，叠加当前用户B权限里
-        List<String> fromUserUUidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), processTaskVo.getChannelUuid());
-        for (String userUuid : fromUserUUidList) {
+        List<String> fromUserUuidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), processTaskVo.getChannelUuid());
+        for (String userUuid : fromUserUuidList) {
             for (ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId, userUuid, action, processTaskStepList)) {
                 if (!processableStepList.contains(processTaskStepVo)) {
                     processableStepList.add(processTaskStepVo);
