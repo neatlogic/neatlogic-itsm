@@ -2036,12 +2036,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     }
                     // 子任务用户A授权给B，B处理后，A也能处理
                     List<ProcessTaskStepTaskVo> processTaskStepTaskList = processTaskStepTaskMapper.getStepTaskListByProcessTaskStepId(stepVo.getId());
-                    List<Long> stepTaskIdList = processTaskStepTaskList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList());
-                    List<ProcessTaskStepTaskUserAgentVo> processTaskStepTaskUserAgentList = processTaskStepTaskMapper.getProcessTaskStepTaskUserAgentListByStepTaskIdList(stepTaskIdList);
-                    for (ProcessTaskStepTaskUserAgentVo processTaskStepTaskUserAgentVo : processTaskStepTaskUserAgentList) {
-                        if (Objects.equals(processTaskStepTaskUserAgentVo.getUserUuid(), userUuid)) {
-                            resultList.add(stepVo);
-                            break;
+                    if (CollectionUtils.isNotEmpty(processTaskStepTaskList)) {
+                        List<Long> stepTaskIdList = processTaskStepTaskList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList());
+                        List<ProcessTaskStepTaskUserAgentVo> processTaskStepTaskUserAgentList = processTaskStepTaskMapper.getProcessTaskStepTaskUserAgentListByStepTaskIdList(stepTaskIdList);
+                        for (ProcessTaskStepTaskUserAgentVo processTaskStepTaskUserAgentVo : processTaskStepTaskUserAgentList) {
+                            if (Objects.equals(processTaskStepTaskUserAgentVo.getUserUuid(), userUuid)) {
+                                resultList.add(stepVo);
+                                break;
+                            }
                         }
                     }
                 }
