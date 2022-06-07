@@ -495,20 +495,21 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
         String content = paramObj.getString("content");
         List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(paramObj.getJSONArray("fileIdList")), Long.class);
-        if (StringUtils.isBlank(content) && CollectionUtils.isEmpty(fileIdList)) {
-            return;
+//        if (StringUtils.isBlank(content) && CollectionUtils.isEmpty(fileIdList)) {
+//            return;
+//        }
+        if (content == null) {
+            content = "";
+        } else if (StringUtils.isBlank(content)) {
+            paramObj.remove("content");
         }
         ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo();
         processTaskStepContentVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
         processTaskStepContentVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
         processTaskStepContentVo.setType(action.getValue());
-        if (StringUtils.isNotBlank(content)) {
-            ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-            processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
-            processTaskStepContentVo.setContentHash(contentVo.getHash());
-        } else {
-            paramObj.remove("content");
-        }
+        ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+        processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
+        processTaskStepContentVo.setContentHash(contentVo.getHash());
         processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
 
         /** 保存附件uuid **/
