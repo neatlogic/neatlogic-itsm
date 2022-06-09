@@ -272,7 +272,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
      * @param formAttributeList
      * @param map
      * @param readComponentList 只读的表单属性
-     * @param isNeedPriority    优先级是否隐藏
+     * @param isNeedPriority    是否需要优先级
      * @return
      */
     private JSONObject parseTask(String channelUuid, List<FormAttributeVo> formAttributeList, Map<String, String> map, JSONArray readComponentList, int isNeedPriority) {
