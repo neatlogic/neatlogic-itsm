@@ -34,7 +34,7 @@ import codedriver.framework.process.crossover.IProcessTaskCrossoverService;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
-import codedriver.framework.process.exception.core.ProcessTaskPriorityNotMatchException;
+import codedriver.framework.process.exception.processtask.ProcessTaskPriorityNotMatchException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.file.ProcessTaskFileDownloadException;
 import codedriver.framework.process.exception.operationauth.*;
