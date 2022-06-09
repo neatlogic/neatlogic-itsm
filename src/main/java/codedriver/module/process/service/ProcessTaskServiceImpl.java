@@ -2076,7 +2076,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         if (CollectionUtils.isNotEmpty(channelPriorityList)) {
             String priorityUuid = jsonObj.getString("priorityUuid");
             if (StringUtils.isBlank(priorityUuid)) {
-                throw new ProcessTaskPriorityEmptyException();
+                throw new ProcessTaskPriorityIsEmptyException();
             }
             if (channelPriorityList.stream().noneMatch(o -> o.getPriorityUuid().equals(priorityUuid))) {
                 throw new ProcessTaskPriorityNotMatchException();
