@@ -1,10 +1,16 @@
 package codedriver.module.process.stephandler.component;
 
-import java.util.List;
-import java.util.Set;
-
 import codedriver.framework.process.autocompleterule.core.AutoCompleteRuleHandlerFactory;
 import codedriver.framework.process.autocompleterule.core.IAutoCompleteRuleHandler;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
+import codedriver.framework.process.constvalue.ProcessStepMode;
+import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskException;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import com.alibaba.nacos.common.utils.Objects;
 import org.apache.commons.lang3.StringUtils;
@@ -12,16 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.process.constvalue.ProcessStepHandlerType;
-import codedriver.framework.process.constvalue.ProcessStepMode;
-import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
-import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
-import codedriver.framework.process.exception.core.ProcessTaskException;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
