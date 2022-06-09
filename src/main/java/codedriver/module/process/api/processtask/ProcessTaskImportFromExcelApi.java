@@ -201,8 +201,12 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                     throw new ExcelMissColumnException("标题、请求人");
                 }
                 List<ChannelPriorityVo> priorityVos = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
-                if (CollectionUtils.isNotEmpty(priorityVos) && !headerList.contains("优先级")) {
-                    throw new ExcelMissColumnException("优先级");
+                int isNeedPriority = 0;
+                if (CollectionUtils.isNotEmpty(priorityVos)) {
+                    isNeedPriority = 1;
+                    if (!headerList.contains("优先级")) {
+                        throw new ExcelMissColumnException("优先级");
+                    }
                 }
                 if (CollectionUtils.isNotEmpty(formAttributeList)) {
                     for (FormAttributeVo att : formAttributeList) {
@@ -216,7 +220,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                 int successCount = 0;
                 /** 上报工单 */
                 for (Map<String, String> map : contentList) {
-                    JSONObject task = parseTask(channelUuid, formAttributeList, map, readComponentList);
+                    JSONObject task = parseTask(channelUuid, formAttributeList, map, readComponentList, isNeedPriority);
                     ProcessTaskImportAuditVo auditVo = new ProcessTaskImportAuditVo();
                     auditVo.setChannelUuid(channelUuid);
                     auditVo.setTitle(task.getString("title"));
@@ -268,9 +272,10 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
      * @param formAttributeList
      * @param map
      * @param readComponentList 只读的表单属性
+     * @param isNeedPriority    优先级是否隐藏
      * @return
      */
-    private JSONObject parseTask(String channelUuid, List<FormAttributeVo> formAttributeList, Map<String, String> map, JSONArray readComponentList) {
+    private JSONObject parseTask(String channelUuid, List<FormAttributeVo> formAttributeList, Map<String, String> map, JSONArray readComponentList, int isNeedPriority) {
         JSONObject task = new JSONObject();
         JSONArray formAttributeDataList = new JSONArray();
         task.put("channel", channelUuid);
@@ -284,7 +289,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                 }
             } else if ("优先级".equals(key)) {
                 PriorityVo priority = null;
-                if (StringUtils.isNotBlank(entry.getValue()) && (priority = priorityMapper.getPriorityByName(entry.getValue())) != null) {
+                if (isNeedPriority == 1 && StringUtils.isNotBlank(entry.getValue()) && (priority = priorityMapper.getPriorityByName(entry.getValue())) != null) {
                     task.put("priority", priority.getUuid());
                 }
             } else if ("描述".equals(key)) {
@@ -295,13 +300,13 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                     formdata.put("label", key);
                     String content = entry.getValue();
                     if (StringUtils.isNotBlank(content)) {
-                        List<String> values = new ArrayList<>();
+                        Object formData;
                         if (content.contains(",")) {
-                            values = Arrays.asList(content.split(","));
+                            formData = Arrays.asList(content.split(","));
                         } else {
-                            values.add(content);
+                            formData = content;
                         }
-                        formdata.put("dataList", values);
+                        formdata.put("dataList", formData);
                         formAttributeDataList.add(formdata);
                     }
                 }
