@@ -34,7 +34,6 @@ import codedriver.framework.process.crossover.IProcessTaskCrossoverService;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskPriorityNotMatchException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.file.ProcessTaskFileDownloadException;
 import codedriver.framework.process.exception.operationauth.*;
@@ -2073,12 +2072,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
          * 如果不校验优先级，那么会出现批量上报记录显示上报失败，
          * 而实际上已经生成工单，只是状态是草稿
          */
-        if (StringUtils.isBlank(jsonObj.getString("priorityUuid"))) {//如果为空字符串，则为null
-            jsonObj.put("priorityUuid", null);
-        }
         List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
-        if (CollectionUtils.isNotEmpty(channelPriorityList) && channelPriorityList.stream().noneMatch(o -> o.getPriorityUuid().equals(jsonObj.getString("priorityUuid")))) {
-            throw new ProcessTaskPriorityNotMatchException();
+        if (CollectionUtils.isNotEmpty(channelPriorityList)) {
+            String priorityUuid = jsonObj.getString("priorityUuid");
+            if (StringUtils.isBlank(priorityUuid)) {
+                throw new ProcessTaskPriorityIsEmptyException();
+            }
+            if (channelPriorityList.stream().noneMatch(o -> o.getPriorityUuid().equals(priorityUuid))) {
+                throw new ProcessTaskPriorityNotMatchException();
+            }
         }
         String owner = jsonObj.getString("owner");
         if (StringUtils.isNotBlank(owner) && owner.contains("#")) {
