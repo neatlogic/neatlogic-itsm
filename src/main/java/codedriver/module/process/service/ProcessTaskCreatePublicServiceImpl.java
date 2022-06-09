@@ -25,7 +25,6 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessFormVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
@@ -108,14 +107,16 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
         paramObj.put("channelUuid", channelVo.getUuid());
         //优先级
         String priority = paramObj.getString("priority");
-        PriorityVo priorityVo = priorityMapper.getPriorityByUuid(priority);
-        if (priorityVo == null) {
-            priorityVo = priorityMapper.getPriorityByName(priority);
+        if (StringUtils.isNotBlank(priority)) {
+            PriorityVo priorityVo = priorityMapper.getPriorityByUuid(priority);
             if (priorityVo == null) {
-                throw new PriorityNotFoundException(priority);
+                priorityVo = priorityMapper.getPriorityByName(priority);
+                if (priorityVo == null) {
+                    throw new PriorityNotFoundException(priority);
+                }
             }
+            paramObj.put("priorityUuid", priorityVo.getUuid());
         }
-        paramObj.put("priorityUuid", priorityVo.getUuid());
         //流程
         String processUuid = channelMapper.getProcessUuidByChannelUuid(channelVo.getUuid());
         if (processMapper.checkProcessIsExists(processUuid) == 0) {
