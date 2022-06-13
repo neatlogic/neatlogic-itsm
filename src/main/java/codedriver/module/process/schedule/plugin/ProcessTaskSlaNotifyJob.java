@@ -95,8 +95,10 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                             String intervalUnit = policyObj.getString("intervalUnit");
                             if (intervalUnit.equalsIgnoreCase("day")) {
                                 intervalTime = intervalTime * 24 * 60 * 60;
-                            } else {
+                            } else if (intervalUnit.equalsIgnoreCase("hour")) {
                                 intervalTime = intervalTime * 60 * 60;
+                            } else {
+                                intervalTime = intervalTime * 60;
                             }
                         } else {// 单次执行
                             repeatCount = 0;
