@@ -9,7 +9,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
@@ -26,8 +25,6 @@ import codedriver.framework.process.exception.operationauth.ProcessTaskPermissio
 import codedriver.framework.process.exception.operationauth.ProcessTaskStepNotActiveException;
 import codedriver.framework.process.exception.operationauth.ProcessTaskStepNotMinorUserException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskStepUnRunningException;
 import codedriver.framework.process.exception.processtask.task.*;
 import codedriver.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
 import codedriver.framework.process.service.ProcessTaskAgentServiceImpl;
@@ -264,7 +261,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                                     if (Objects.equals(name, button)) {
                                         Integer isRequired = customButton.getInteger("isRequired");
                                         if (Objects.equals(isRequired, 1)) {
-                                            throw new ParamNotExistsException("回复意见");
+                                            throw new ProcessTaskStepTaskContentIsEmptyException();
                                         }
                                     }
                                 }
@@ -273,7 +270,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                     }
                 }
             } else {
-                throw new ParamNotExistsException("回复意见");
+                throw new ProcessTaskStepTaskContentIsEmptyException();
             }
         }
         Long processTaskId = stepTaskVo.getProcessTaskId();
