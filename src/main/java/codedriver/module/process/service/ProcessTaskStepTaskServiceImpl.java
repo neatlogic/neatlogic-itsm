@@ -9,7 +9,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
@@ -26,8 +25,6 @@ import codedriver.framework.process.exception.operationauth.ProcessTaskPermissio
 import codedriver.framework.process.exception.operationauth.ProcessTaskStepNotActiveException;
 import codedriver.framework.process.exception.operationauth.ProcessTaskStepNotMinorUserException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskStepUnRunningException;
 import codedriver.framework.process.exception.processtask.task.*;
 import codedriver.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
 import codedriver.framework.process.service.ProcessTaskAgentServiceImpl;
@@ -77,6 +74,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
     ProcessTaskAgentServiceImpl processTaskAgentServiceImpl;
     @Resource
     private FileMapper fileMapper;
+
     /**
      * 创建任务
      *
@@ -95,8 +93,8 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             throw new ProcessTaskStepTaskConfigIllegalException(processTaskStepTaskVo.getTaskConfigId().toString());
         }
         //判断人数是否合法
-        if(processTaskStepTaskVo.getUserList() == null || ( taskConfigVo.getNum() != -1 && taskConfigVo.getNum() !=  processTaskStepTaskVo.getUserList().size())){
-            throw new ProcessTaskStepTaskUserCountIllegalException(taskConfigVo.getName(),taskConfigVo.getNum());
+        if (processTaskStepTaskVo.getUserList() == null || (taskConfigVo.getNum() != -1 && taskConfigVo.getNum() != processTaskStepTaskVo.getUserList().size())) {
+            throw new ProcessTaskStepTaskUserCountIllegalException(taskConfigVo.getName(), taskConfigVo.getNum());
         }
         processTaskStepTaskVo.setTaskConfigId(processTaskStepTaskVo.getTaskConfigId());
         //content
@@ -238,9 +236,9 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
     /**
      * 完成任务
      *
-     * @param id 任务id
+     * @param id      任务id
      * @param content 回复内容
-     * @param button 按钮
+     * @param button  按钮
      */
     @Override
     public Long completeTask(Long id, String content, String button) throws Exception {
@@ -263,7 +261,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                                     if (Objects.equals(name, button)) {
                                         Integer isRequired = customButton.getInteger("isRequired");
                                         if (Objects.equals(isRequired, 1)) {
-                                            throw new ParamNotExistsException("content");
+                                            throw new ProcessTaskStepTaskContentIsEmptyException();
                                         }
                                     }
                                 }
@@ -272,7 +270,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                     }
                 }
             } else {
-                throw new ParamNotExistsException("content");
+                throw new ProcessTaskStepTaskContentIsEmptyException();
             }
         }
         Long processTaskId = stepTaskVo.getProcessTaskId();
@@ -367,6 +365,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
 
         return id;
     }
+
     /**
      * @param processTaskStepTaskUserVo
      * @return void
@@ -413,6 +412,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             }
         }
     }
+
     /**
      * 解析&校验 任务配置
      *
@@ -536,6 +536,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
 
     /**
      * 获取步骤的任务策略列表及其任务列表
+     *
      * @param processTaskStepVo 步骤信息
      * @return
      */
@@ -566,7 +567,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             return taskConfigList;
         }
         Map<Long, List<ProcessTaskStepTaskUserVo>> stepTaskUserMap = new HashMap<>();
-        List<Long> stepTaskIdList= processTaskStepTaskList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList());
+        List<Long> stepTaskIdList = processTaskStepTaskList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList());
         List<ProcessTaskStepTaskUserVo> stepTaskUserList = processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(stepTaskIdList);
         if (CollectionUtils.isNotEmpty(stepTaskUserList)) {
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
@@ -643,10 +644,11 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
 
     /**
      * 判断当前用户是否可以处理任务
-     * @param processTaskVo 工单信息
+     *
+     * @param processTaskVo     工单信息
      * @param processTaskStepVo 步骤信息
-     * @param stepTaskUserUuid 任务处理人uuid
-     * @param stepTaskUserUuid 任务处理人id
+     * @param stepTaskUserUuid  任务处理人uuid
+     * @param stepTaskUserUuid  任务处理人id
      * @return
      */
     @Override
