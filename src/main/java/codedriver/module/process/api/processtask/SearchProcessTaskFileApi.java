@@ -10,6 +10,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.form.constvalue.FormHandler;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
@@ -59,7 +60,7 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单ID"),
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单ID"),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
@@ -81,7 +82,7 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
         List<FileVo> fileList = fileMapper.getFileDetailListByProcessTaskId(processTaskId);
         List<Long> fileIdList = new ArrayList<>();
         // 表单附件
-        List<ProcessTaskFormAttributeDataVo> formDataList = processTaskMapper.getProcessTaskFormAttributeDataListByProcessTaskIdAndFormType(processTaskId, UploadHandler.handler);
+        List<ProcessTaskFormAttributeDataVo> formDataList = processTaskMapper.getProcessTaskFormAttributeDataListByProcessTaskIdAndFormType(processTaskId, FormHandler.FORMUPLOAD.getHandler());
         if (formDataList.size() > 0) {
             for (ProcessTaskFormAttributeDataVo dataVo : formDataList) {
                 String data = dataVo.getData();
