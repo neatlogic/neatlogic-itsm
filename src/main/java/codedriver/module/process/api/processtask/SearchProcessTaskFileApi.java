@@ -66,7 +66,7 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
     })
     @Output({
             @Param(explode = BasePageVo.class),
-            @Param(name = "list", explode = FileVo[].class)
+            @Param(name = "tbodyList", explode = FileVo[].class)
     })
     @Description(desc = "工单附件列表")
     @Override
@@ -121,12 +121,12 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
                 if (fromIndex < basePageVo.getRowNum()) {
                     int toIndex = fromIndex + basePageVo.getPageSize();
                     toIndex = Math.min(toIndex, basePageVo.getRowNum());
-                    result.put("list", fileList.subList(fromIndex, toIndex));
+                    result.put("tbodyList", fileList.subList(fromIndex, toIndex));
                 } else {
-                    result.put("list", new ArrayList<>());
+                    result.put("tbodyList", new ArrayList<>());
                 }
             } else {
-                result.put("list", fileList);
+                result.put("tbodyList", fileList);
             }
         }
         return result;
