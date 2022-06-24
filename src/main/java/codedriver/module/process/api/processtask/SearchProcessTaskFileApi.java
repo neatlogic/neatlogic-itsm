@@ -78,7 +78,7 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
             throw new ProcessTaskNotFoundException(processTaskId.toString());
         }
         // 工单上报与步骤附件
-        List<FileVo> fileList = fileMapper.getFileDetailListByProcessTaskId(processTaskId);
+        List<FileVo> fileList = processTaskMapper.getFileDetailListByProcessTaskId(processTaskId);
         List<Long> fileIdList = new ArrayList<>();
         // 表单附件
         List<ProcessTaskFormAttributeDataVo> formDataList = processTaskMapper.getProcessTaskFormAttributeDataListByProcessTaskIdAndFormType(processTaskId, FormHandler.FORMUPLOAD.getHandler());
@@ -105,7 +105,7 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
             fileList.addAll(fileMapper.getFileDetailListByIdList(fileIdList));
         }
         // 子任务附件
-        List<FileVo> taskFileList = fileMapper.getProcessTaskStepTaskFileListByProcessTaskId(processTaskId);
+        List<FileVo> taskFileList = processTaskMapper.getProcessTaskStepTaskFileListByProcessTaskId(processTaskId);
         if (taskFileList.size() > 0) {
             fileList.addAll(taskFileList);
         }

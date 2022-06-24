@@ -6,7 +6,6 @@
 package codedriver.module.process.schedule.plugin;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
@@ -17,7 +16,10 @@ import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSlaMapper;
-import codedriver.framework.process.dto.*;
+import codedriver.framework.process.dto.ProcessTaskSlaNotifyVo;
+import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
+import codedriver.framework.process.dto.ProcessTaskSlaVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.scheduler.core.JobBase;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.util.NotifyPolicyUtil;
@@ -49,9 +51,6 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 
     @Resource
     private NotifyMapper notifyMapper;
-
-    @Resource
-    private FileMapper fileMapper;
 
     @Resource
     private ProcessTaskService processTaskService;
@@ -250,7 +249,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                         JSONObject paramObj = processTaskStep.getParamObj();
                         paramObj.put("idList", stepIdList);
                         paramObj.put("nameList", stepNameList);
-                        List<FileVo> fileList = fileMapper.getFileListByProcessTaskId(processTaskSlaVo.getProcessTaskId());
+                        List<FileVo> fileList = processTaskMapper.getFileListByProcessTaskId(processTaskSlaVo.getProcessTaskId());
                         if (CollectionUtils.isNotEmpty(fileList)) {
                             fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
                         }
