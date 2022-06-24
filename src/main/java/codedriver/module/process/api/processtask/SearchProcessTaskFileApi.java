@@ -34,9 +34,9 @@ import java.util.stream.Collectors;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ListProcessTaskFileApi extends PrivateApiComponentBase {
+public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
 
-    static Logger logger = LoggerFactory.getLogger(ListProcessTaskFileApi.class);
+    static Logger logger = LoggerFactory.getLogger(SearchProcessTaskFileApi.class);
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
@@ -46,7 +46,7 @@ public class ListProcessTaskFileApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "processtask/file/list";
+        return "processtask/file/search";
     }
 
     @Override
@@ -66,6 +66,8 @@ public class ListProcessTaskFileApi extends PrivateApiComponentBase {
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
     })
     @Output({
+            @Param(explode = BasePageVo.class),
+            @Param(name = "list", explode = FileVo[].class)
     })
     @Description(desc = "工单附件列表")
     @Override
@@ -76,10 +78,12 @@ public class ListProcessTaskFileApi extends PrivateApiComponentBase {
         if (processTaskMapper.getProcessTaskById(processTaskId) == null) {
             throw new ProcessTaskNotFoundException(processTaskId.toString());
         }
+        // 工单上报与步骤附件
         List<FileVo> fileList = fileMapper.getFileDetailListByProcessTaskId(processTaskId);
         List<Long> fileIdList = fileList.stream().map(FileVo::getId).collect(Collectors.toList());
         Set<Long> fileIdSet = new HashSet<>();
-        List<ProcessTaskFormAttributeDataVo> formDataList = processTaskMapper.getProcessTaskFormAttributeDataListByProcessTaskIdAndFormType(processTaskId, UploadHandler.handlerName);
+        // 表单附件
+        List<ProcessTaskFormAttributeDataVo> formDataList = processTaskMapper.getProcessTaskFormAttributeDataListByProcessTaskIdAndFormType(processTaskId, UploadHandler.handler);
         if (formDataList.size() > 0) {
             for (ProcessTaskFormAttributeDataVo dataVo : formDataList) {
                 String data = dataVo.getData();
@@ -101,6 +105,16 @@ public class ListProcessTaskFileApi extends PrivateApiComponentBase {
         }
         if (fileIdSet.size() > 0) {
             fileList.addAll(fileMapper.getFileDetailListByIdList(new ArrayList<>(fileIdSet)));
+        }
+        fileIdList = fileList.stream().map(FileVo::getId).collect(Collectors.toList());
+        // 子任务附件
+        List<FileVo> taskFileList = fileMapper.getProcessTaskStepTaskFileListByProcessTaskId(processTaskId);
+        if (taskFileList.size() > 0) {
+            for (FileVo vo : taskFileList) {
+                if (!fileIdList.contains(vo.getId())) {
+                    fileList.add(vo);
+                }
+            }
         }
         if (fileList.size() > 0) {
             if (basePageVo.getNeedPage()) {
