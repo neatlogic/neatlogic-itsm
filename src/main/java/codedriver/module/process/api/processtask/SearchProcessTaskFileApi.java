@@ -8,7 +8,6 @@ package codedriver.module.process.api.processtask;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
@@ -28,8 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -80,8 +79,7 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
         }
         // 工单上报与步骤附件
         List<FileVo> fileList = fileMapper.getFileDetailListByProcessTaskId(processTaskId);
-        List<Long> fileIdList = fileList.stream().map(FileVo::getId).collect(Collectors.toList());
-        Set<Long> fileIdSet = new HashSet<>();
+        List<Long> fileIdList = new ArrayList<>();
         // 表单附件
         List<ProcessTaskFormAttributeDataVo> formDataList = processTaskMapper.getProcessTaskFormAttributeDataListByProcessTaskIdAndFormType(processTaskId, UploadHandler.handler);
         if (formDataList.size() > 0) {
@@ -93,8 +91,8 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
                         for (int i = 0; i < array.size(); i++) {
                             JSONObject object = array.getJSONObject(i);
                             Long id = object.getLong("id");
-                            if (!fileIdList.contains(id)) {
-                                fileIdSet.add(id);
+                            if (id != null) {
+                                fileIdList.add(id);
                             }
                         }
                     } catch (Exception ex) {
@@ -103,31 +101,26 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
                 }
             }
         }
-        if (fileIdSet.size() > 0) {
-            fileList.addAll(fileMapper.getFileDetailListByIdList(new ArrayList<>(fileIdSet)));
+        if (fileIdList.size() > 0) {
+            fileList.addAll(fileMapper.getFileDetailListByIdList(fileIdList));
         }
-        fileIdList = fileList.stream().map(FileVo::getId).collect(Collectors.toList());
         // 子任务附件
         List<FileVo> taskFileList = fileMapper.getProcessTaskStepTaskFileListByProcessTaskId(processTaskId);
         if (taskFileList.size() > 0) {
-            for (FileVo vo : taskFileList) {
-                if (!fileIdList.contains(vo.getId())) {
-                    fileList.add(vo);
-                }
-            }
+            fileList.addAll(taskFileList);
         }
         if (fileList.size() > 0) {
             if (basePageVo.getNeedPage()) {
-                int rowNum = fileList.size();
-                int pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
+                basePageVo.setRowNum(fileList.size());
+                Integer pageCount = basePageVo.getPageCount();
                 result.put("currentPage", basePageVo.getCurrentPage());
                 result.put("pageSize", basePageVo.getPageSize());
                 result.put("pageCount", pageCount);
-                result.put("rowNum", rowNum);
+                result.put("rowNum", basePageVo.getRowNum());
                 int fromIndex = basePageVo.getStartNum();
-                if (fromIndex < rowNum) {
+                if (fromIndex < basePageVo.getRowNum()) {
                     int toIndex = fromIndex + basePageVo.getPageSize();
-                    toIndex = Math.min(toIndex, rowNum);
+                    toIndex = Math.min(toIndex, basePageVo.getRowNum());
                     result.put("list", fileList.subList(fromIndex, toIndex));
                 } else {
                     result.put("list", new ArrayList<>());
