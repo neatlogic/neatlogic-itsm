@@ -49,7 +49,6 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
     private static SelectContentByHashMapper selectContentByHashMapper;
     private static ProcessStepHandlerMapper processStepHandlerMapper;
     private static NotifyMapper notifyMapper;
-    private static FileMapper fileMapper;
     private static ProcessTaskService processTaskService;
 
     @Autowired
@@ -75,11 +74,6 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
     @Autowired
     public void setNotifyMapper(NotifyMapper _notifyMapper) {
         notifyMapper = _notifyMapper;
-    }
-
-    @Autowired
-    public void setFileMapper(FileMapper _fileMapper) {
-        fileMapper = _fileMapper;
     }
 
     private ProcessTaskStepVo currentProcessTaskStepVo;
@@ -154,7 +148,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                         if (CollectionUtils.isNotEmpty(paramMappingArray)) {
                             paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
                         }
-                        List<FileVo> fileList = fileMapper.getFileListByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+                        List<FileVo> fileList = processTaskMapper.getFileListByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
                         if (CollectionUtils.isNotEmpty(fileList)) {
                             fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
                         }

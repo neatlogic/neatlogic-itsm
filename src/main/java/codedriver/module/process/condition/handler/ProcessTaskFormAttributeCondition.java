@@ -13,7 +13,7 @@ import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.form.attribute.core.IFormAttributeDataConversionHandler;
 import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.form.constvalue.FormConditionModel;
-import codedriver.framework.form.constvalue.FormHandlerTypeBak;
+import codedriver.framework.form.constvalue.FormHandler;
 import codedriver.framework.form.dto.AttributeDataVo;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
@@ -147,7 +147,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
         if(CollectionUtils.isEmpty(valueArray)){
             return;
         }
-        if (FormHandlerTypeBak.FORMDATE.getHandler().equals(conditionVo.getHandler())) {
+        if (FormHandler.FORMDATE.getHandler().equals(conditionVo.getHandler())) {
             JSONObject value = valueArray.getJSONObject(0);
             dateSqlBuild(value, conditionVo, sqlSb);
         } else {
