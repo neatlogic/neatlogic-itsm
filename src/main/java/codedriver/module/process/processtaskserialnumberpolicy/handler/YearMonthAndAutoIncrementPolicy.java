@@ -39,8 +39,8 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
-    private Logger logger = LoggerFactory.getLogger(DateTimeAndAutoIncrementPolicy.class);
+public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
+    private Logger logger = LoggerFactory.getLogger(YearMonthAndAutoIncrementPolicy.class);
     @Resource
     private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
 
@@ -55,7 +55,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
     @Override
     public String getName() {
-        return "年月日 + 自增序列";
+        return "年月 + 自增序列";
     }
 
     @SuppressWarnings("serial")
@@ -82,7 +82,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
     @Override
     public String genarate(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        return processTaskSerialnumberService.genarate(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMMdd"));
+        return processTaskSerialnumberService.genarate(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMM"));
     }
 
     @Override
@@ -103,7 +103,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
                 String timeFormat = null;
                 processTaskVo.setPageSize(100);
                 int pageCount = PageUtil.getPageCount(rowNum, processTaskVo.getPageSize());
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMM");
                 for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
                     processTaskVo.setCurrentPage(currentPage);
                     List<ProcessTaskVo> processTaskList =
@@ -193,7 +193,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
         @Override
         public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
-            String handler = DateTimeAndAutoIncrementPolicy.class.getName();
+            String handler = YearMonthAndAutoIncrementPolicy.class.getName();
             List<ProcessTaskSerialNumberPolicyVo> processTaskSerialNumberPolicyList =
                     processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyListByHandler(handler);
             for (ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo : processTaskSerialNumberPolicyList) {
