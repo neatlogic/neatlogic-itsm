@@ -6,14 +6,8 @@
 package codedriver.module.process.processtaskserialnumberpolicy.handler;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
-import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import codedriver.framework.scheduler.core.JobBase;
 import codedriver.framework.scheduler.dto.JobObject;
@@ -32,23 +26,11 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
     private Logger logger = LoggerFactory.getLogger(DateTimeAndAutoIncrementPolicy.class);
-    @Resource
-    private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
-
-    @Resource
-    private ProcessTaskMapper processTaskMapper;
-
-    @Resource
-    private ChannelTypeMapper channelTypeMapper;
 
     @Resource
     private ProcessTaskSerialnumberService processTaskSerialnumberService;
@@ -87,65 +69,13 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
     @Override
     public int batchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        try {
-            ProcessTaskVo processTaskVo = new ProcessTaskVo();
-            processTaskVo.setChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-            ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-            if (channelTypeVo == null) {
-                throw new ChannelTypeNotFoundException(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-            }
-            int rowNum = processTaskMapper.getProcessTaskCountByChannelTypeUuidAndStartTime(processTaskVo);
-            if (rowNum > 0) {
-                int numberOfDigits = processTaskSerialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
-                long max = (long) Math.pow(10, numberOfDigits) - 1;
-                long startValue = processTaskSerialNumberPolicyVo.getConfig().getLongValue("startValue");
-                long serialNumberSeed = startValue;
-                String timeFormat = null;
-                processTaskVo.setPageSize(100);
-                int pageCount = PageUtil.getPageCount(rowNum, processTaskVo.getPageSize());
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-                for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
-                    processTaskVo.setCurrentPage(currentPage);
-                    List<ProcessTaskVo> processTaskList =
-                            processTaskMapper.getProcessTaskListByChannelTypeUuidAndStartTime(processTaskVo);
-                    for (ProcessTaskVo processTask : processTaskList) {
-                        String startTimeFormat = sdf.format(processTask.getStartTime());
-                        if (!Objects.equals(timeFormat, startTimeFormat)) {
-                            serialNumberSeed = startValue;
-                            timeFormat = startTimeFormat;
-                        }
-                        String serialNumber = channelTypeVo.getPrefix() + startTimeFormat + String.format("%0" + numberOfDigits + "d", serialNumberSeed);
-                        processTaskMapper.updateProcessTaskSerialNumberById(processTask.getId(), serialNumber);
-                        processTaskSerialNumberMapper.insertProcessTaskSerialNumber(processTask.getId(), serialNumber);
-                        serialNumberSeed++;
-                        if (serialNumberSeed > max) {
-                            serialNumberSeed -= max;
-                        }
-                    }
-                }
-            }
-            return rowNum;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        } finally {
-            processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyEndTimeByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-        }
-//        System.out.println("------------");
-        return 0;
+        return processTaskSerialnumberService.batchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMMdd"));
     }
 
 
     @Override
     public Long calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        int numberOfDigits = processTaskSerialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
-        long max = (long) Math.pow(10, numberOfDigits) - 1;
-        long startValue = processTaskSerialNumberPolicyVo.getConfig().getLongValue("startValue");
-        ProcessTaskVo processTaskVo = new ProcessTaskVo();
-        processTaskVo.setChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-        processTaskVo.setStartTime(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        int rowNum = processTaskMapper.getProcessTaskCountByChannelTypeUuidAndStartTime(processTaskVo);
-        rowNum += startValue;
-        return rowNum % max;
+        return processTaskSerialnumberService.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, true);
     }
 
     @Component
@@ -159,7 +89,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
         @Override
         public String getGroupName() {
-            return TenantContext.get().getTenantUuid() + "-PROCESSTASK-SERIALNUMBERSEED-RESET";
+            return TenantContext.get().getTenantUuid() + "-PROCESSTASK-SERIALNUMBERSEED-" + this.getClass().getSimpleName() + "-RESET";
         }
 
         @Override

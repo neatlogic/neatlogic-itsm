@@ -109,13 +109,6 @@ public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandle
 
     @Override
     public Long calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        int numberOfDigits = processTaskSerialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
-        long max = (long) Math.pow(10, numberOfDigits) - 1;
-        long startValue = processTaskSerialNumberPolicyVo.getConfig().getLongValue("startValue");
-        ProcessTaskVo processTaskVo = new ProcessTaskVo();
-        processTaskVo.setChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-        int rowNum = processTaskMapper.getProcessTaskCountByChannelTypeUuidAndStartTime(processTaskVo);
-        rowNum += startValue;
-        return rowNum % max;
+        return processTaskSerialnumberService.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, false);
     }
 }

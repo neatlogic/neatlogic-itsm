@@ -13,7 +13,7 @@ import java.text.DateFormat;
 public interface ProcessTaskSerialnumberService {
 
     /**
-     * 工单号策略配置
+     * 工单号策略属性
      *
      * @param startDigit 工单号位数起始值
      * @param endDigit   工单号位数结束值
@@ -25,7 +25,24 @@ public interface ProcessTaskSerialnumberService {
      * 生成工单号
      *
      * @param processTaskSerialNumberPolicyVo
+     * @param dateFormat                      日期格式
      * @return
      */
     String genarate(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, DateFormat dateFormat);
+
+    /**
+     * 批量更新工单号
+     *
+     * @param processTaskSerialNumberPolicyVo
+     * @param dateFormat                      日期格式
+     * @return
+     */
+    int batchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, DateFormat dateFormat);
+
+    /**
+     * @param processTaskSerialNumberPolicyVo
+     * @param startTimeLimit                  是否限定startTime
+     * @return
+     */
+    Long calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, boolean startTimeLimit);
 }
