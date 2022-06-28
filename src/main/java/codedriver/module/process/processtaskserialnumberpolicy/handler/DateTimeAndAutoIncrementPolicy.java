@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -38,13 +39,13 @@ import java.util.*;
 @Service
 public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
     private Logger logger = LoggerFactory.getLogger(DateTimeAndAutoIncrementPolicy.class);
-    @Autowired
+    @Resource
     private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
 
-    @Autowired
+    @Resource
     private ProcessTaskMapper processTaskMapper;
 
-    @Autowired
+    @Resource
     private ChannelTypeMapper channelTypeMapper;
 
     @Override
@@ -88,6 +89,9 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
             jsonObj.put("validateList", Arrays.asList("required"));
             jsonObj.put("dataList", new ArrayList<ValueTextVo>() {
                 {
+                    this.add(new ValueTextVo(10, "10"));
+                    this.add(new ValueTextVo(11, "11"));
+                    this.add(new ValueTextVo(12, "12"));
                     this.add(new ValueTextVo(13, "13"));
                     this.add(new ValueTextVo(14, "14"));
                     this.add(new ValueTextVo(15, "15"));
