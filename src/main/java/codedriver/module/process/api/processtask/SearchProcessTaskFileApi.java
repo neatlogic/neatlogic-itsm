@@ -28,7 +28,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -110,6 +113,7 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
             fileList.addAll(taskFileList);
         }
         if (fileList.size() > 0) {
+            fileList = fileList.stream().sorted(Comparator.comparing(FileVo::getUploadTime, Comparator.nullsLast(Date::compareTo).reversed())).collect(Collectors.toList());
             if (basePageVo.getNeedPage()) {
                 basePageVo.setRowNum(fileList.size());
                 Integer pageCount = basePageVo.getPageCount();
