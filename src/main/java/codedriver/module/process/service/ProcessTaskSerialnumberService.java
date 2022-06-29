@@ -7,6 +7,7 @@ package codedriver.module.process.service;
 
 import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 import java.text.DateFormat;
 
@@ -20,6 +21,16 @@ public interface ProcessTaskSerialnumberService {
      * @return
      */
     JSONArray makeupFormAttributeList(int startDigit, int endDigit);
+
+    /**
+     * 工单号策略配置
+     * 以日期或其他固定位数的数字串+自增序号的工单号策略，计算自增序号的位数时，需要减去固定串的位数，而后做10的次幂计算才能得到自增序号的位数
+     *
+     * @param jsonObj
+     * @param prefixDigits 固定串位数
+     * @return
+     */
+    JSONObject makeupConfig(JSONObject jsonObj, int prefixDigits);
 
     /**
      * 生成工单号
@@ -45,4 +56,6 @@ public interface ProcessTaskSerialnumberService {
      * @return
      */
     Long calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, boolean startTimeLimit);
+
+    void serialNumberSeedReset(String handlerClassName);
 }

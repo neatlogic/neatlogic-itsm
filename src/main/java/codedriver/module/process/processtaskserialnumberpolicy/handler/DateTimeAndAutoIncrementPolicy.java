@@ -6,7 +6,6 @@
 package codedriver.module.process.processtaskserialnumberpolicy.handler;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
 import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import codedriver.framework.scheduler.core.JobBase;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 @Service
 public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
@@ -48,18 +46,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
     @Override
     public JSONObject makeupConfig(JSONObject jsonObj) {
-        JSONObject resultObj = new JSONObject();
-        Long startValue = jsonObj.getLong("startValue");
-        if (startValue == null) {
-            startValue = 0L;
-        }
-        resultObj.put("startValue", startValue);
-        Integer digits = jsonObj.getInteger("digits");
-        if (digits != null) {
-            resultObj.put("digits", digits);
-            resultObj.put("numberOfDigits", digits - 8);
-        }
-        return resultObj;
+        return processTaskSerialnumberService.makeupConfig(jsonObj, 8);
     }
 
     @Override
@@ -85,7 +72,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
         private String cron = "0 0 0 * * ?";
 
         @Autowired
-        private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
+        private ProcessTaskSerialnumberService processTaskSerialnumberService;
 
         @Override
         public String getGroupName() {
@@ -123,22 +110,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
         @Override
         public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
-            String handler = DateTimeAndAutoIncrementPolicy.class.getName();
-            List<ProcessTaskSerialNumberPolicyVo> processTaskSerialNumberPolicyList =
-                    processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyListByHandler(handler);
-            for (ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo : processTaskSerialNumberPolicyList) {
-                ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicy =
-                        processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(
-                                processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-                Long startValue = 1L;
-                Long value = processTaskSerialNumberPolicy.getConfig().getLong("startValue");
-                if (value != null) {
-                    startValue = value;
-                }
-                processTaskSerialNumberPolicyVo.setSerialNumberSeed(startValue);
-                processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(
-                        processTaskSerialNumberPolicyVo.getChannelTypeUuid(), startValue);
-            }
+            processTaskSerialnumberService.serialNumberSeedReset(DateTimeAndAutoIncrementPolicy.class.getName());
         }
     }
 }

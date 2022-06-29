@@ -48,18 +48,7 @@ public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandle
 
     @Override
     public JSONObject makeupConfig(JSONObject jsonObj) {
-        JSONObject resultObj = new JSONObject();
-        Long startValue = jsonObj.getLong("startValue");
-        if (startValue == null) {
-            startValue = 0L;
-        }
-        resultObj.put("startValue", startValue);
-        Integer digits = jsonObj.getInteger("digits");
-        if (digits != null) {
-            resultObj.put("digits", digits);
-            resultObj.put("numberOfDigits", digits);
-        }
-        return resultObj;
+        return processTaskSerialnumberService.makeupConfig(jsonObj, 0);
     }
 
     @Override
