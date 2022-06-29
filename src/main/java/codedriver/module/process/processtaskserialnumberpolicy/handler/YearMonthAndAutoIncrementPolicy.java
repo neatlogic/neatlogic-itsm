@@ -69,7 +69,7 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
     @DisallowConcurrentExecution
     private static class ProcessTaskSerialNumberSeedResetJob extends JobBase {
 
-        private String cron = "0 0 1 * *"; // 每月1日0时0分0秒
+        private String cron = "0 0 0 1 * ?"; // 每月1日0时0分0秒
 
         @Autowired
         private ProcessTaskSerialnumberService processTaskSerialnumberService;
