@@ -27,15 +27,15 @@ import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 
 @Service
-public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
-    private Logger logger = LoggerFactory.getLogger(DateTimeAndAutoIncrementPolicy.class);
+public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
+    private Logger logger = LoggerFactory.getLogger(YearMonthAndAutoIncrementPolicy.class);
 
     @Resource
     private ProcessTaskSerialnumberService processTaskSerialnumberService;
 
     @Override
     public String getName() {
-        return "年月日 + 自增序列";
+        return "年月 + 自增序列";
     }
 
     @SuppressWarnings("serial")
@@ -46,17 +46,17 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
     @Override
     public JSONObject makeupConfig(JSONObject jsonObj) {
-        return processTaskSerialnumberService.makeupConfig(jsonObj, 8);
+        return processTaskSerialnumberService.makeupConfig(jsonObj, 6);
     }
 
     @Override
     public String genarate(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        return processTaskSerialnumberService.genarate(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMMdd"));
+        return processTaskSerialnumberService.genarate(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMM"));
     }
 
     @Override
     public int batchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        return processTaskSerialnumberService.batchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMMdd"));
+        return processTaskSerialnumberService.batchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMM"));
     }
 
 
@@ -69,7 +69,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
     @DisallowConcurrentExecution
     private static class ProcessTaskSerialNumberSeedResetJob extends JobBase {
 
-        private String cron = "0 0 0 * * ?";
+        private String cron = "0 0 0 1 * ?"; // 每月1日0时0分0秒
 
         @Autowired
         private ProcessTaskSerialnumberService processTaskSerialnumberService;
@@ -110,7 +110,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
         @Override
         public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
-            processTaskSerialnumberService.serialNumberSeedReset(DateTimeAndAutoIncrementPolicy.class.getName());
+            processTaskSerialnumberService.serialNumberSeedReset(YearMonthAndAutoIncrementPolicy.class.getName());
         }
     }
 }
