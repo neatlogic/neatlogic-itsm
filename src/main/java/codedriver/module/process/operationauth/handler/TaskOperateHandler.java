@@ -1,33 +1,30 @@
 package codedriver.module.process.operationauth.handler;
 
-import java.util.*;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dto.AuthenticationInfoVo;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.operationauth.*;
+import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
+import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
+import codedriver.framework.process.operationauth.core.TernaryPredicate;
+import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONPath;
-
-import codedriver.framework.auth.core.AuthActionChecker;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
-import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
-import codedriver.framework.process.operationauth.core.TernaryPredicate;
-import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
-import codedriver.module.process.service.CatalogService;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import java.util.*;
 
 @Component
 public class TaskOperateHandler extends OperationAuthHandlerBase {
@@ -672,8 +669,8 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
                 //8.判断工单是否启用“重做”功能，如果没有，则提示“工单未启用重做功能”；
                 boolean flag = true;
-                for(ProcessTaskStepVo stepVo : processTaskVo.getStepList()){
-                    if(stepVo.getType().equals(ProcessStepType.END.getValue())){
+                for (ProcessTaskStepVo stepVo : processTaskVo.getStepList()) {
+                    if (stepVo.getType().equals(ProcessStepType.END.getValue())) {
                         flag = checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo, stepVo.getId(), ProcessFlowDirection.BACKWARD);
                         break;
                     }
@@ -812,6 +809,11 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             }
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_DELETE;
+
+            //如果当前工单是草稿状态，则上报人允许删除
+            if (Objects.equals(ProcessTaskStatus.DRAFT.getValue(), processTaskVo.getStatus()) && Objects.equals(processTaskVo.getOwner(), UserContext.get().getUserUuid(true))) {
+                return true;
+            }
             //2.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
             if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
@@ -828,7 +830,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 2.userUuid用户是代报人
          * 3.userUuid用户是工单中某个“已完成”步骤的处理人或协助处理人
          * 4.userUuid用户是工单中某个“处理中”步骤的处理人或协助处理人
-        **/
+         **/
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE,
                 (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
                     Long id = processTaskVo.getId();

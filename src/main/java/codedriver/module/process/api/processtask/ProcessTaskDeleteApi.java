@@ -9,7 +9,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
-import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
@@ -38,7 +38,7 @@ import java.util.List;
 
 @Service
 @Transactional
-@AuthAction(action = PROCESSTASK_MODIFY.class)
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
 
