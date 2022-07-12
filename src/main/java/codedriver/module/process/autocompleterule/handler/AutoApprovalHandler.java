@@ -104,6 +104,7 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
         if (preStepMajorUserUuid != null) {
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
             List<String> fromUserUuidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(preStepMajorUserUuid, processTaskVo.getChannelUuid());
+            fromUserUuidList.add(preStepMajorUserUuid);
             AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(fromUserUuidList);
             if (processTaskMapper.checkIsWorker(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue(), authenticationInfoVo) > 0) {
                 UserVo currentUserVo = userMapper.getUserBaseInfoByUuid(preStepMajorUserUuid);
