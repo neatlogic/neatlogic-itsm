@@ -9,13 +9,16 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.autocompleterule.core.IAutoCompleteRuleHandler;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.service.ProcessTaskAgentService;
 import codedriver.framework.process.stephandler.core.*;
+import codedriver.framework.service.AuthenticationInfoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +40,11 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
     @Resource
     private UserMapper userMapper;
 
+    @Resource
+    private AuthenticationInfoService authenticationInfoService;
+
+    @Resource
+    private ProcessTaskAgentService processTaskAgentService;
 
     @Override
     public String getHandler() {
@@ -92,35 +100,36 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
         if (preApprovalStepIdList.size() != 1) {
             return false;
         }
-        String currentStepMajorUserUuid = getCurrentStepMajorUserUuid(currentProcessTaskStepVo);
-        if (currentStepMajorUserUuid != null) {
-            String preStepMajorUserUuid = getPreStepMajorUserUuid(preApprovalStepIdList.get(0));
-            if (preStepMajorUserUuid != null) {
-                if (Objects.equals(currentStepMajorUserUuid, preStepMajorUserUuid)) {
-                    UserVo currentUserVo = userMapper.getUserBaseInfoByUuid(currentStepMajorUserUuid);
-                    IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-                    ProcessStepThread thread = new ProcessStepThread(currentProcessTaskStepVo, currentUserVo) {
-                        @Override
-                        public void myExecute() {
-                            UserContext.init(currentUserVo, SystemUser.SYSTEM.getTimezone());
-                            currentProcessTaskStepVo.getParamObj().put("action", "complete");
-                            handler.complete(currentProcessTaskStepVo);
-                        }
-                    };
-                    ProcessTaskStepInOperationVo processTaskStepInOperationVo = new ProcessTaskStepInOperationVo(
-                            currentProcessTaskStepVo.getProcessTaskId(),
-                            currentProcessTaskStepVo.getId(),
-                            ProcessTaskOperationType.STEP_COMPLETE.getValue()
-                    );
-                    IProcessStepInternalHandler processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-                    if (processStepInternalHandler == null) {
-                        throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+        String preStepMajorUserUuid = getPreStepMajorUserUuid(preApprovalStepIdList.get(0));
+        if (preStepMajorUserUuid != null) {
+            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
+            List<String> fromUserUuidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(preStepMajorUserUuid, processTaskVo.getChannelUuid());
+            fromUserUuidList.add(preStepMajorUserUuid);
+            AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(fromUserUuidList);
+            if (processTaskMapper.checkIsWorker(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue(), authenticationInfoVo) > 0) {
+                UserVo currentUserVo = userMapper.getUserBaseInfoByUuid(preStepMajorUserUuid);
+                IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+                ProcessStepThread thread = new ProcessStepThread(currentProcessTaskStepVo, currentUserVo) {
+                    @Override
+                    public void myExecute() {
+                        UserContext.init(currentUserVo, SystemUser.SYSTEM.getTimezone());
+                        currentProcessTaskStepVo.getParamObj().put("action", "complete");
+                        handler.autoComplete(currentProcessTaskStepVo);
                     }
-                    processStepInternalHandler.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
-                    thread.setSupplier(() -> processTaskMapper.deleteProcessTaskStepInOperationById(processTaskStepInOperationVo.getId()));
-                    TransactionSynchronizationPool.execute(thread);
-                    return true;
+                };
+                ProcessTaskStepInOperationVo processTaskStepInOperationVo = new ProcessTaskStepInOperationVo(
+                        currentProcessTaskStepVo.getProcessTaskId(),
+                        currentProcessTaskStepVo.getId(),
+                        ProcessTaskOperationType.STEP_COMPLETE.getValue()
+                );
+                IProcessStepInternalHandler processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+                if (processStepInternalHandler == null) {
+                    throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
                 }
+                processStepInternalHandler.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
+                thread.setSupplier(() -> processTaskMapper.deleteProcessTaskStepInOperationById(processTaskStepInOperationVo.getId()));
+                TransactionSynchronizationPool.execute(thread);
+                return true;
             }
         }
         return false;
@@ -179,28 +188,4 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
         return null;
     }
 
-    /**
-     * 如果当前节点是审批节点，则返回处理人
-     * @param currentProcessTaskStepVo
-     * @return
-     */
-    private String getCurrentStepMajorUserUuid(ProcessTaskStepVo currentProcessTaskStepVo) {
-        if (Objects.equals(currentProcessTaskStepVo.getIsActive(), 1)) {
-            if (ProcessTaskStatus.RUNNING.getValue().equals(currentProcessTaskStepVo.getStatus())) {
-//                Long tagId = processTagMapper.getProcessTagIdByName("审批");
-//                if (tagId != null) {
-//                    ProcessTaskStepTagVo processTaskStepTagVo = new ProcessTaskStepTagVo();
-//                    processTaskStepTagVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-//                    processTaskStepTagVo.setTagId(tagId);
-//                    if (processTaskMapper.checkProcessTaskStepTagIsExists(processTaskStepTagVo) > 0) {
-                        List<ProcessTaskStepUserVo> stepUserVoList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
-                        if (stepUserVoList.size() == 1) {
-                            return stepUserVoList.get(0).getUserUuid();
-                        }
-//                    }
-//                }
-            }
-        }
-        return null;
-    }
 }
