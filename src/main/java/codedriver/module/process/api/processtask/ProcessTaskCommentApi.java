@@ -76,6 +76,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
     @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
         @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
         @Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
+        @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
         @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "附件id列表"),
         @Param(name = "commentTemplateId", type = ApiParamType.LONG, desc = "回复模版ID")})
     @Output({@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "当前步骤评论列表")})
@@ -127,6 +128,10 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
             processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
             processTaskStepContentVo.setContentHash(contentVo.getHash());
+        }
+        String source = jsonObj.getString("source");
+        if (StringUtils.isNotBlank(source)) {
+            processTaskStepContentVo.setSource(source);
         }
         processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
 

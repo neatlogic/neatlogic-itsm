@@ -43,6 +43,7 @@ public class ProcessTaskScoreApi extends PrivateApiComponentBase {
 		@Param(name = "scoreTemplateId", type = ApiParamType.LONG, isRequired = true, desc = "评分模版ID"),
 		@Param(name = "scoreDimensionList", type = ApiParamType.JSONARRAY, isRequired = true,
 				desc = "评分维度及分数，格式[{\"id\":133018403841111,\"name\":\"dim\",\"description\":\"see\",\"score\":3}]"),
+		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
 		@Param(name = "content", type = ApiParamType.STRING, desc = "评价内容")
 	})
 	@Output({})

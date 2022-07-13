@@ -40,13 +40,15 @@ public class ProcessTaskRecoverApi extends PrivateApiComponentBase {
 
 	@Override
 	@Input({
-			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id")
+			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
+			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
 	})
 	@Output({})
 	@Description(desc = "工单恢复接口")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+		processTaskVo.getParamObj().put("source", jsonObj.getString("source"));
 		ProcessStepHandlerFactory.getHandler().recoverProcessTask(processTaskVo);
 		return null;
 	}

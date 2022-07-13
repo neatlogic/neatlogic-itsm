@@ -61,6 +61,7 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
             @Param(name = "focusUserUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "工单关注人列表")
     })
     @Description(desc = "更新工单关注人")
@@ -76,6 +77,7 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
         JSONObject paramObj = new JSONObject();
         paramObj.put("focusUserUuidList",focusUserUuidList);
         paramObj.put(ProcessTaskAuditDetailType.FOCUSUSER.getOldDataParamName(), JSON.toJSONString(oldFocusUser));
+        paramObj.put("source",jsonObj.getString("source"));
 
         ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
         processTaskStepVo.setProcessTaskId(processTaskVo.getId());

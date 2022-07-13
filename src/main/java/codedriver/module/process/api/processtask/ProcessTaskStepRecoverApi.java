@@ -45,7 +45,8 @@ public class ProcessTaskStepRecoverApi extends PrivateApiComponentBase {
     
     @Input({
         @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤id")
+        @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤id"),
+        @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
     })
     @Description(desc ="恢复工单步骤")
     @Override
@@ -58,6 +59,7 @@ public class ProcessTaskStepRecoverApi extends PrivateApiComponentBase {
         if(handler == null) {
             throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());      
         }
+        currentProcessTaskStepVo.getParamObj().put("source", jsonObj.getString("source"));
         handler.recover(currentProcessTaskStepVo);
         return null;
     }

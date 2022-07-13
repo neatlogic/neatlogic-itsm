@@ -40,13 +40,15 @@ public class ProcessTaskAbortApi extends PrivateApiComponentBase {
 
 	@Override
 	@Input({
-			@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true)
+			@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true),
+			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
 	})
 	@Output({})
 	@Description(desc = "工单取消接口")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+		processTaskVo.getParamObj().put("source", jsonObj.getString("source"));
 		ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
 		return null;
 	}

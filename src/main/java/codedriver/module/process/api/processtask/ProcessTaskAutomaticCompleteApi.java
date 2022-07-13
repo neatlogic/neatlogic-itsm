@@ -49,6 +49,7 @@ public class ProcessTaskAutomaticCompleteApi extends PublicApiComponentBase {
 	@Input({
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "当前步骤Id"),
 		@Param(name = "action", type = ApiParamType.ENUM, rule = "back,complete", isRequired = true, desc = "操作类型，complete：流转,back：回退"),
+		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
 	})
 	@Output({
 		@Param(name = "Status", type = ApiParamType.STRING, desc = "操作成功"),

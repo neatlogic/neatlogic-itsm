@@ -1,6 +1,7 @@
 package codedriver.module.process.api.processtask.datamigration;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
@@ -13,10 +14,7 @@ import codedriver.framework.process.exception.processtaskserialnumberpolicy.Proc
 import codedriver.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberPolicyNotFoundException;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyHandlerFactory;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateJsonStreamApiComponentBase;
 import codedriver.framework.util.TimeUtil;
@@ -85,7 +83,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
     }
 
     @Input({
-
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
     })
     @Output({
 
@@ -93,6 +91,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
     @Description(desc = "目前用于同步老工单数据到本系统")
     @Override
     public Object myDoService(JSONObject paramObj, JSONReader jsonReader) throws Exception {
+        String source = paramObj.getString("source");
         List<ProcessTaskVo> processTaskList = new ArrayList<ProcessTaskVo>();
         List<String> errorTaskList = new ArrayList<String>();
         jsonReader.startArray();
@@ -328,6 +327,9 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                             processTaskStepContentVo.setProcessTaskId(processTask.getId());
                                             processTaskStepContentVo.setProcessTaskStepId(processTaskStep.getId());
                                             processTaskStepContentVo.setType(ProcessTaskOperationType.STEP_COMMENT.getValue());
+                                            if (StringUtils.isNotBlank(source)) {
+                                                processTaskStepContentVo.setSource(source);
+                                            }
                                             processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
                                             jsonReader.endObject();
                                         }
@@ -346,7 +348,11 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         if (StringUtils.isNotBlank(taskValue)) {
                             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(taskValue);
                             processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
-                            processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(processTask.getId(), processTask.getStartProcessTaskStep().getId(), contentVo.getHash(), null));
+                            ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(processTask.getId(), processTask.getStartProcessTaskStep().getId(), contentVo.getHash(), null);
+                            if (StringUtils.isNotBlank(source)) {
+                                processTaskStepContentVo.setSource(source);
+                            }
+                            processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
                         }
                         break;
                     case "processTaskStepRelList":

@@ -57,7 +57,8 @@ public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "回复id")
+		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "回复id"),
+			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
 	})
 	@Output({
 		@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "当前步骤评论列表")

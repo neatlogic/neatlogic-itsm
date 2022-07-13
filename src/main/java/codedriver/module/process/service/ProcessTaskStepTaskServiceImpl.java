@@ -239,9 +239,10 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
      * @param id      任务id
      * @param content 回复内容
      * @param button  按钮
+     * @param source  来源
      */
     @Override
-    public Long completeTask(Long id, String content, String button) throws Exception {
+    public Long completeTask(Long id, String content, String button, String source) throws Exception {
         ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskDetailById(id);
         if (stepTaskVo == null) {
             throw new ProcessTaskStepTaskNotFoundException(id.toString());
@@ -333,6 +334,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             JSONObject paramObj = new JSONObject();
             paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
             paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), content);
+            paramObj.put("source", source);
             processTaskStepVo.getParamObj().putAll(paramObj);
             stepTaskVo.setStepTaskUserVoList(canHandleStepTaskUserList);
             stepTaskVo.setTaskStepTaskUserContent(content);

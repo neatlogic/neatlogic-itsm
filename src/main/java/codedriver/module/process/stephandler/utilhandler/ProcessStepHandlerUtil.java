@@ -506,6 +506,10 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
         processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
         processTaskStepContentVo.setContentHash(contentVo.getHash());
+        String source = paramObj.getString("source");
+        if (StringUtils.isNotBlank(source)) {
+            processTaskStepContentVo.setSource(source);
+        }
         processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
 
         /** 保存附件uuid **/
