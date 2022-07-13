@@ -74,6 +74,7 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
             @Param(name = "repeatProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "重复工单id列表")
     })
     @Output({
@@ -131,6 +132,7 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
         }
         List<ProcessTaskVo> runningProcessTaskList = new ArrayList<>();
         List<ProcessTaskRepeatVo> processTaskRepeatList = new ArrayList<>();
+        String source = paramObj.getString("source");
         for (ProcessTaskVo processTaskVo : processTaskList) {
             //1. 如果工单不是取消状态，则取消工单
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
@@ -143,6 +145,7 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
             }
             ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
             processTaskStepVo.setProcessTaskId(processTaskVo.getId());
+            processTaskStepVo.getParamObj().put("source", source);
             processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.BINDREPEAT);
         }
         if (CollectionUtils.isNotEmpty(processTaskRepeatList)) {
@@ -151,6 +154,7 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
         processTaskMapper.replaceProcessTaskRepeat(new ProcessTaskRepeatVo(processTaskId, repeatGroupId));
         ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
         processTaskStepVo.setProcessTaskId(processTaskId);
+        processTaskStepVo.getParamObj().put("source", source);
         processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.BINDREPEAT);
 
         for (ProcessTaskVo processTaskVo : runningProcessTaskList) {
@@ -159,6 +163,7 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
             ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
             ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
             processTaskStep.setProcessTaskId(processTaskVo.getId());
+            processTaskStep.getParamObj().put("source", source);
             processStepHandlerUtil.notify(processTaskStep, ProcessTaskNotifyTriggerType.MARKREPEATPROCESSTASK);
         }
         return null;

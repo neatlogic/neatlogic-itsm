@@ -51,6 +51,7 @@ public class ProcessTaskTransferKnowledgeAuditApi extends PrivateApiComponentBas
 
     @Input({
         @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
+        @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
         @Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "知识标题")
     })
     @Description(desc = "记录工单转知识活动")

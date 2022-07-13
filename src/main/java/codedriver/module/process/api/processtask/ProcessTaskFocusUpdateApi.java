@@ -47,6 +47,7 @@ public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 	@Override
 	@Input({
 			@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true),
+			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
 			@Param(name = "isFocus", type = ApiParamType.ENUM, desc = "是否关注工单(1：关注；0：取消关注)", isRequired = true,rule = "0,1")
 	})
 	@Output({@Param(name="isFocus", type = ApiParamType.INTEGER, desc="是否关注工单")})
@@ -60,6 +61,7 @@ public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 		}
 		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
 		processTaskStepVo.setProcessTaskId(processTaskId);
+		processTaskStepVo.getParamObj().put("source", jsonObj.getString("source"));
 		if(isFocus == 1){
 			if(processTaskMapper.checkProcessTaskFocusExists(processTaskId,userUuid) > 0){
 				throw new ProcessTaskFocusRepeatException(processTaskId);

@@ -818,7 +818,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             oldContent = oldReplyVo.getContent();
             oldFileIdList = oldReplyVo.getFileIdList();
         }
-
+        String source = jsonObj.getString("source");
         if (StringUtils.isNotBlank(content) && StringUtils.isNotBlank(oldContent)) {
             if (content.equals(oldContent)) {
                 jsonObj.remove("content");
@@ -829,10 +829,17 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
                 if (oldContentId == null) {
                     ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(processTaskId, processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.PROCESSTASK_START.getValue());
+                    if (StringUtils.isNotBlank(source)) {
+                        processTaskStepContentVo.setSource(source);
+                    }
                     processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
                     oldContentId = processTaskStepContentVo.getId();
                 } else {
-                    processTaskMapper.updateProcessTaskStepContentById(new ProcessTaskStepContentVo(oldContentId, contentVo.getHash()));
+                    ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(oldContentId, contentVo.getHash());
+                    if (StringUtils.isNotBlank(source)) {
+                        processTaskStepContentVo.setSource(source);
+                    }
+                    processTaskMapper.updateProcessTaskStepContentById(processTaskStepContentVo);
                 }
             }
         } else if (StringUtils.isNotBlank(content)) {
@@ -841,20 +848,27 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
             if (oldContentId == null) {
                 ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(processTaskId, processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.PROCESSTASK_START.getValue());
+                if (StringUtils.isNotBlank(source)) {
+                    processTaskStepContentVo.setSource(source);
+                }
                 processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
                 oldContentId = processTaskStepContentVo.getId();
             } else {
-                processTaskMapper.updateProcessTaskStepContentById(new ProcessTaskStepContentVo(oldContentId, contentVo.getHash()));
+                ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(oldContentId, contentVo.getHash());
+                if (StringUtils.isNotBlank(source)) {
+                    processTaskStepContentVo.setSource(source);
+                }
+                processTaskMapper.updateProcessTaskStepContentById(processTaskStepContentVo);
             }
         } else if (StringUtils.isNotBlank(oldContent)) {
             isUpdate = true;
             jsonObj.remove("content");
             jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContent);
-            processTaskMapper.updateProcessTaskStepContentById(new ProcessTaskStepContentVo(oldContentId, null));
-            if (CollectionUtils.isEmpty(fileIdList)) {
-            } else {
-
+            ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(oldContentId, null);
+            if (StringUtils.isNotBlank(source)) {
+                processTaskStepContentVo.setSource(source);
             }
+            processTaskMapper.updateProcessTaskStepContentById(processTaskStepContentVo);
         } else {
             jsonObj.remove("content");
         }
@@ -869,6 +883,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 isUpdate = true;
                 if (oldContentId == null) {
                     ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(processTaskId, processTaskStepId, null, ProcessTaskOperationType.PROCESSTASK_START.getValue());
+                    if (StringUtils.isNotBlank(source)) {
+                        processTaskStepContentVo.setSource(source);
+                    }
                     processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
                     oldContentId = processTaskStepContentVo.getId();
                 }
@@ -888,6 +905,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             isUpdate = true;
             if (oldContentId == null) {
                 ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(processTaskId, processTaskStepId, null, ProcessTaskOperationType.PROCESSTASK_START.getValue());
+                if (StringUtils.isNotBlank(source)) {
+                    processTaskStepContentVo.setSource(source);
+                }
                 processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
                 oldContentId = processTaskStepContentVo.getId();
             }
@@ -2300,6 +2320,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }
         String action = paramObj.getString("action");
+        processTaskStepVo.getParamObj().put("source", paramObj.getString("source"));
         if (ProcessTaskOperationType.STEP_ACCEPT.getValue().equals(action)) {
             handler.accept(processTaskStepVo);
         }

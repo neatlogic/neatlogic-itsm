@@ -82,7 +82,8 @@ public class ProcessTaskStepTaskFileSaveApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "任务id"),
-            @Param(name = "fileId", isRequired = true, type = ApiParamType.LONG, desc = "附件id")
+            @Param(name = "fileId", isRequired = true, type = ApiParamType.LONG, desc = "附件id"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
     })
     @Output({})
     @Description(desc = "任务上传附件接口")
@@ -136,6 +137,7 @@ public class ProcessTaskStepTaskFileSaveApi extends PrivateApiComponentBase {
         JSONObject paramObj = new JSONObject();
         paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
         paramObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), Arrays.asList(fileId));
+        paramObj.put("source", jsonObj.getString("source"));
         processTaskStepVo.getParamObj().putAll(paramObj);
 //        stepTaskVo.setStepTaskUserVoList(canHandleStepTaskUserList);
 //        processTaskStepVo.setProcessTaskStepTaskVo(stepTaskVo);

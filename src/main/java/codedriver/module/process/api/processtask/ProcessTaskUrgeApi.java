@@ -56,7 +56,8 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id")
+		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
+		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
 	})
 	@Description(desc = "催办工单")
 	@Override
@@ -80,6 +81,7 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 		/*生成催办活动*/
 		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
 		processTaskStepVo.setProcessTaskId(processTaskId);
+		processTaskStepVo.getParamObj().put("source", jsonObj.getString("source"));
 		IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.URGE);
 		return null;
 	}

@@ -90,7 +90,8 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
             @Param(name = "stepTaskUserVoList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "任务处理人列表"),
             @Param(name = "taskConfigId", type = ApiParamType.LONG, isRequired = true, desc = "任务策略id"),
-            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述")
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
     })
     @Output({
             @Param(name = "Return", type = ApiParamType.LONG, desc = "任务id")
@@ -275,6 +276,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
             paramObj.put("replaceable_task", taskConfigVo.getName());
             paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskStepTaskVo.getContent());
             paramObj.put(ProcessTaskAuditDetailType.WORKERLIST.getParamName(), JSONObject.toJSONString(workerList));
+            paramObj.put("source", jsonObj.getString("source"));
             processTaskStepVo.getParamObj().putAll(paramObj);
             processStepHandlerUtil.audit(processTaskStepVo, auditType);
             processTaskStepTaskVo.setTaskConfigName(taskConfigVo.getName());

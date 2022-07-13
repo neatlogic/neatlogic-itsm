@@ -53,7 +53,10 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "processTaskRelationId", type = ApiParamType.LONG, isRequired = true, desc = "工单关联id")})
+    @Input({
+            @Param(name = "processTaskRelationId", type = ApiParamType.LONG, isRequired = true, desc = "工单关联id"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+    })
     @Description(desc = "删除工单关联")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -73,6 +76,7 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
                 processTaskRelationVo.getChannelTypeRelationId());
             processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
                 JSON.toJSONString(Arrays.asList(processTaskRelationVo.getTarget())));
+            processTaskStepVo.getParamObj().put("source", jsonObj.getString("source"));
             IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETERELATION);
 
             ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
@@ -81,6 +85,7 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
                 processTaskRelationVo.getChannelTypeRelationId());
             processTaskStep.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
                 JSON.toJSONString(Arrays.asList(processTaskRelationVo.getSource())));
+            processTaskStep.getParamObj().put("source", jsonObj.getString("source"));
             IProcessStepHandlerUtil.audit(processTaskStep, ProcessTaskAuditType.DELETERELATION);
         }
 

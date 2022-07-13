@@ -47,6 +47,7 @@ public class ProcessTaskRetreatApi extends PrivateApiComponentBase implements IP
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
+		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
 		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述")
 	})
 	@Description(desc = "上一步发起的撤回动作接口")

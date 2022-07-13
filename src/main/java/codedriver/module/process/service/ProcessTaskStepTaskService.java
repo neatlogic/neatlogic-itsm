@@ -29,8 +29,9 @@ public interface ProcessTaskStepTaskService {
      * @param id 任务id
      * @param content 回复内容
      * @param button 按钮
+     * @param source 来源
      */
-    Long completeTask(Long id, String content, String button) throws Exception;
+    Long completeTask(Long id, String content, String button, String source) throws Exception;
     /**
      * 解析&校验 任务配置
      *

@@ -58,7 +58,8 @@ public class ProcessTaskRepeatDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
@@ -69,6 +70,7 @@ public class ProcessTaskRepeatDeleteApi extends PrivateApiComponentBase {
             processTaskMapper.deleteProcessTaskRepeatByProcessTaskId(processTaskId);
             ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
             processTaskStepVo.setProcessTaskId(processTaskId);
+            processTaskStepVo.getParamObj().put("source", paramObj.getString("source"));
 //        processTaskStepVo.setParamObj(jsonObj);
             processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UNBINDREPEAT);
             List<Long> repeatProcessTaskIdList = processTaskMapper.getProcessTaskIdListByRepeatGroupId(repeatGroupId);
@@ -76,6 +78,7 @@ public class ProcessTaskRepeatDeleteApi extends PrivateApiComponentBase {
                 processTaskMapper.deleteProcessTaskRepeatByProcessTaskId(repeatProcessTaskIdList.get(0));
                 ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
                 processTaskStep.setProcessTaskId(repeatProcessTaskIdList.get(0));
+                processTaskStep.getParamObj().put("source", paramObj.getString("source"));
 //        processTaskStepVo.setParamObj(jsonObj);
                 processStepHandlerUtil.audit(processTaskStep, ProcessTaskAuditType.UNBINDREPEAT);
             }

@@ -69,6 +69,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskStepTaskId", type = ApiParamType.LONG, isRequired = true, desc = "任务id"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
     })
     @Output({})
     @Description(desc = "任务删除接口")
@@ -106,6 +107,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         //活动参数
         JSONObject paramObj = new JSONObject();
         paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
+        paramObj.put("source", jsonObj.getString("source"));
         processTaskStepVo.getParamObj().putAll(paramObj);
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETETASK);
         stepTaskVo.setStepTaskUserVoList(processTaskStepTaskUserList);

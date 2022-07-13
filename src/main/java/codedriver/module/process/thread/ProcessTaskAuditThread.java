@@ -72,6 +72,10 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
             processTaskStepAuditVo.setUserUuid(UserContext.get().getUserUuid());// 兼容automatic作业无用户
             processTaskStepAuditVo.setStepStatus(currentProcessTaskStepVo.getStatus());
             processTaskStepAuditVo.setOriginalUser(currentProcessTaskStepVo.getOriginalUser());
+            String source = paramObj.getString("source");
+            if (StringUtils.isNotBlank(source)) {
+                processTaskStepAuditVo.setSource(source);
+            }
             if (currentProcessTaskStepVo.getId() != null) {
                 processTaskStepAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
                 String processTaskStepName = currentProcessTaskStepVo.getName();

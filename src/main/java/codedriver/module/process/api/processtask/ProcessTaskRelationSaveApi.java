@@ -68,9 +68,12 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
         return null;
     }
 
-    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id"), @Param(
-            name = "relationProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "被关联的工单id列表")})
+    @Input({
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
+            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id"),
+            @Param(name = "relationProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "被关联的工单id列表"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
+    })
     @Description(desc = "保存工单关联")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -88,6 +91,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
         if (CollectionUtils.isNotEmpty(relationProcessTaskIdList)) {
             List<Long> processTaskIdList = processTaskMapper.checkProcessTaskIdListIsExists(relationProcessTaskIdList);
             if (CollectionUtils.isNotEmpty(processTaskIdList)) {
+                String source = jsonObj.getString("source");
                 for (Long target : processTaskIdList) {
                     ProcessTaskRelationVo processTaskRelationVo = new ProcessTaskRelationVo();
                     processTaskRelationVo.setSource(processTaskId);
@@ -101,6 +105,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
                         channelTypeRelationId);
                     processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
                         JSON.toJSONString(Arrays.asList(processTaskId)));
+                    processTaskStepVo.getParamObj().put("source", source);
                     processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
                 }
                 jsonObj.put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
