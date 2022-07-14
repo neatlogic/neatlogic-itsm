@@ -76,6 +76,7 @@ public class ProcessTaskSerialNumberUpdateApi extends PrivateApiComponentBase {
         Long serialNumberSeed =
                 handler.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo);
         if (serialNumberSeed != null) {
+            //TODO 封装numberSeed 的get和update 方法，统一控制
             processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(
                     channelTypeUuid, serialNumberSeed);
         }

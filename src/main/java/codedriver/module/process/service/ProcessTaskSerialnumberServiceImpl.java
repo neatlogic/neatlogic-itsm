@@ -17,8 +17,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.text.DateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -166,13 +164,18 @@ public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumb
 
     @Override
     public Long calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, boolean startTimeLimit) {
+        return calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, startTimeLimit, null);
+    }
+
+    @Override
+    public Long calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, boolean startTimeLimit, Date startDate) {
         int numberOfDigits = processTaskSerialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
         long max = (long) Math.pow(10, numberOfDigits) - 1;
         long startValue = processTaskSerialNumberPolicyVo.getConfig().getLongValue("startValue");
         ProcessTaskVo processTaskVo = new ProcessTaskVo();
         processTaskVo.setChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
         if (startTimeLimit) {
-            processTaskVo.setStartTime(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            processTaskVo.setStartTime(startDate);
         }
         int rowNum = processTaskMapper.getProcessTaskCountByChannelTypeUuidAndStartTime(processTaskVo);
         rowNum += startValue;

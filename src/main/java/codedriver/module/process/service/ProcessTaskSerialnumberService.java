@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.text.DateFormat;
+import java.util.Date;
 
 public interface ProcessTaskSerialnumberService {
 
@@ -49,6 +50,14 @@ public interface ProcessTaskSerialnumberService {
      * @return
      */
     int batchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, DateFormat dateFormat);
+
+    /**
+     * @param processTaskSerialNumberPolicyVo
+     * @param startTimeLimit                  是否限定startTime
+     * @param startDate                      开始计算的的日期
+     * @return
+     */
+    Long calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, boolean startTimeLimit, Date startDate);
 
     /**
      * @param processTaskSerialNumberPolicyVo
