@@ -130,19 +130,16 @@ public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumb
                 long max = (long) Math.pow(10, numberOfDigits) - 1;
                 long startValue = processTaskSerialNumberPolicyVo.getConfig().getLongValue("startValue");
                 long serialNumberSeed = startValue;
-                String timeFormat = null;
                 processTaskVo.setPageSize(100);
                 int pageCount = PageUtil.getPageCount(rowNum, processTaskVo.getPageSize());
+                Map<String, Long> serNumMap = new HashMap<>();
                 for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
                     processTaskVo.setCurrentPage(currentPage);
                     List<ProcessTaskVo> processTaskList =
                             processTaskMapper.getProcessTaskListByChannelTypeUuidAndStartTime(processTaskVo);
                     for (ProcessTaskVo processTask : processTaskList) {
                         String startTimeFormat = dateFormat.format(processTask.getStartTime());
-                        if (!Objects.equals(timeFormat, startTimeFormat)) {
-                            serialNumberSeed = startValue;
-                            timeFormat = startTimeFormat;
-                        }
+                        serialNumberSeed = serNumMap.getOrDefault(startTimeFormat, startValue);
                         String serialNumber = channelTypeVo.getPrefix() + startTimeFormat + String.format("%0" + numberOfDigits + "d", serialNumberSeed);
                         processTaskMapper.updateProcessTaskSerialNumberById(processTask.getId(), serialNumber);
                         processTaskSerialNumberMapper.insertProcessTaskSerialNumber(processTask.getId(), serialNumber);
@@ -150,6 +147,7 @@ public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumb
                         if (serialNumberSeed > max) {
                             serialNumberSeed -= max;
                         }
+                        serNumMap.put(startTimeFormat, serialNumberSeed);
                     }
                 }
             }
