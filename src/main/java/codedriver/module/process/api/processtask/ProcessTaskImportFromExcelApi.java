@@ -9,6 +9,7 @@ import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
+import codedriver.framework.process.constvalue.ProcessTaskSource;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -221,6 +222,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                 /** 上报工单 */
                 for (Map<String, String> map : contentList) {
                     JSONObject task = parseTask(channelUuid, formAttributeList, map, readComponentList, isNeedPriority);
+                    task.put("source", ProcessTaskSource.PC.getValue());
                     ProcessTaskImportAuditVo auditVo = new ProcessTaskImportAuditVo();
                     auditVo.setChannelUuid(channelUuid);
                     auditVo.setTitle(task.getString("title"));
