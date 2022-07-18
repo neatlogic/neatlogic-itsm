@@ -79,7 +79,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
         @Override
         public String getGroupName() {
-            return TenantContext.get().getTenantUuid() + "-PROCESSTASK-SERIALNUMBERSEED-" + this.getClass().getSimpleName() + "-RESET";
+            return TenantContext.get().getTenantUuid() + "-PROCESSTASK-SERIALNUMBERSEED-" + DateTimeAndAutoIncrementPolicy.class.getSimpleName() + "-RESET";
         }
 
         @Override
