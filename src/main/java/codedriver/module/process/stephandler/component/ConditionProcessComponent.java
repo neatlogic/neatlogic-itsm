@@ -268,7 +268,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                     }
                     script.append("return ").append(temp).append(";");
                     script.append("}");
-                    ScriptEngine se = JavascriptUtil.getEngine("-strict", "-doe", "--no-java");
+                    ScriptEngine se = JavascriptUtil.getEngine();
                     try {
                         se.eval(script.toString());
                         Invocable invocableEngine = (Invocable) se;
