@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -18,6 +18,7 @@ import codedriver.framework.process.dto.RelExpressionVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.util.RunScriptUtil;
+import codedriver.framework.util.javascript.JavascriptUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -30,7 +31,6 @@ import org.springframework.stereotype.Service;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -268,8 +268,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                     }
                     script.append("return ").append(temp).append(";");
                     script.append("}");
-                    ScriptEngineManager sem = new ScriptEngineManager();
-                    ScriptEngine se = sem.getEngineByName("nashorn");
+                    ScriptEngine se = JavascriptUtil.getEngine("-strict", "-doe", "--no-java");
                     try {
                         se.eval(script.toString());
                         Invocable invocableEngine = (Invocable) se;
