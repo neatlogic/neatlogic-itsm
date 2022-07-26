@@ -209,9 +209,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
         ProcessTaskStepVo startProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId);
         // 获取须指派的步骤列表
-        startProcessTaskStepVo.setAssignableWorkerStepList(
-                processTaskService.getAssignableWorkerStepList(startProcessTaskStepVo)
-        );
+//        startProcessTaskStepVo.setAssignableWorkerStepList(
+//                processTaskService.getAssignableWorkerStepList(startProcessTaskStepVo)
+//        );
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
         processTaskService.setTemporaryData(processTaskVo, startProcessTaskStepVo);
         return processTaskVo;
@@ -295,7 +295,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         startProcessTaskStepVo.setIsAutoGenerateId(false);
 
         // 获取须指派的步骤列表
-        startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(processUuid, startProcessTaskStepVo.getProcessStepUuid()));
+//        startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(processUuid, startProcessTaskStepVo.getProcessStepUuid()));
         startProcessTaskStepVo.setIsRequired((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isRequired"));
         startProcessTaskStepVo.setIsNeedContent((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isNeedContent"));
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
