@@ -5,6 +5,7 @@
 
 package codedriver.module.process.api.form;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
@@ -12,13 +13,12 @@ import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixCiVo;
 import codedriver.framework.matrix.dto.MatrixVo;
+import codedriver.framework.process.auth.PROCESS_MODIFY;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.UuidUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -40,6 +40,8 @@ import java.util.*;
  **/
 @Service
 @Transactional
+@AuthAction(action = PROCESS_MODIFY.class)
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class FormFormSelectAndDynamicListCmdbMatrixConfigUpdateApi extends PrivateApiComponentBase {
 
     @Resource
