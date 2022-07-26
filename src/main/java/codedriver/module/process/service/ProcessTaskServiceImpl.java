@@ -588,59 +588,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     }
 
     @Override
-    public List<AssignableWorkerStepVo> getAssignableWorkerStepList(ProcessTaskStepVo currentProcessTaskStepVo) {
-        ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
-        processTaskStepWorkerPolicyVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-        List<ProcessTaskStepWorkerPolicyVo> processTaskStepWorkerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicy(processTaskStepWorkerPolicyVo);
-        if (CollectionUtils.isEmpty(processTaskStepWorkerPolicyList)) {
-            return new ArrayList<>();
-        }
-        int isOnlyOnceExecute = 0;
-        IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(WorkerPolicy.PRESTEPASSIGN.getValue());
-        if (workerPolicyHandler == null) {
-            isOnlyOnceExecute = workerPolicyHandler.isOnlyOnceExecute();
-        }
-        List<AssignableWorkerStepVo> assignableWorkerStepList = new ArrayList<>();
-        for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : processTaskStepWorkerPolicyList) {
-            if (!WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
-                continue;
-            }
-            JSONObject configObj = workerPolicyVo.getConfigObj();
-            if (MapUtils.isEmpty(configObj)) {
-                continue;
-            }
-            JSONArray processStepUuidList = configObj.getJSONArray("processStepUuidList");
-            if (CollectionUtils.isEmpty(processStepUuidList)) {
-                continue;
-            }
-            for (String stepUuid : processStepUuidList.toJavaList(String.class)) {
-                if (!currentProcessTaskStepVo.getProcessStepUuid().equals(stepUuid)) {
-                    continue;
-                }
-                List<ProcessTaskStepUserVo> majorList = processTaskMapper.getProcessTaskStepUserByStepId(workerPolicyVo.getProcessTaskStepId(), ProcessUserType.MAJOR.getValue());
-                if (CollectionUtils.isNotEmpty(majorList) && isOnlyOnceExecute == 1) {
-                    break;
-                }
-                List<Long> nextStepIdList = processStepHandlerUtil.getNextStepIdList(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), workerPolicyVo.getProcessTaskStepId());
-                if (CollectionUtils.isEmpty(nextStepIdList)) {
-                    break;
-                }
-                ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(workerPolicyVo.getProcessTaskStepId());
-                AssignableWorkerStepVo assignableWorkerStepVo = new AssignableWorkerStepVo();
-                assignableWorkerStepVo.setId(processTaskStepVo.getId());
-                assignableWorkerStepVo.setProcessStepUuid(processTaskStepVo.getProcessStepUuid());
-                assignableWorkerStepVo.setName(processTaskStepVo.getName());
-                assignableWorkerStepVo.setIsRequired(configObj.getInteger("isRequired"));
-                assignableWorkerStepVo.setGroupList(configObj.getJSONArray("groupList"));
-                assignableWorkerStepVo.setRangeList(configObj.getJSONArray("rangeList"));
-//                assignableWorkerStepVo.setNextStepIdList(nextStepIdList);
-                assignableWorkerStepList.add(assignableWorkerStepVo);
-            }
-        }
-        return assignableWorkerStepList;
-    }
-
-    @Override
     public Map<Long, List<AssignableWorkerStepVo>> getAssignableWorkerStepMap(ProcessTaskStepVo currentProcessTaskStepVo) {
         Map<Long, List<AssignableWorkerStepVo>> assignableWorkerStepMap = new HashMap<>();
         ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
@@ -654,7 +601,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         if (workerPolicyHandler == null) {
             isOnlyOnceExecute = workerPolicyHandler.isOnlyOnceExecute();
         }
-//        List<AssignableWorkerStepVo> assignableWorkerStepList = new ArrayList<>();
         for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : processTaskStepWorkerPolicyList) {
             if (!WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
                 continue;
@@ -687,8 +633,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 assignableWorkerStepVo.setIsRequired(configObj.getInteger("isRequired"));
                 assignableWorkerStepVo.setGroupList(configObj.getJSONArray("groupList"));
                 assignableWorkerStepVo.setRangeList(configObj.getJSONArray("rangeList"));
-//                assignableWorkerStepVo.setNextStepIdList(nextStepIdList);
-//                assignableWorkerStepList.add(assignableWorkerStepVo);
                 for (Long nextStepId : nextStepIdList) {
                     assignableWorkerStepMap.computeIfAbsent(nextStepId, key -> new ArrayList<>()).add(assignableWorkerStepVo);
                 }
@@ -696,97 +640,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
         return assignableWorkerStepMap;
     }
-
-//    @Override
-//    public List<AssignableWorkerStepVo> getAssignableWorkerStepList(String processUuid, String processStepUuid) {
-//        List<AssignableWorkerStepVo> assignableWorkerStepList = new ArrayList<>();
-//        List<ProcessStepWorkerPolicyVo> processStepWorkerPolicyList = processMapper.getProcessStepWorkerPolicyListByProcessUuid(processUuid);
-//        if (CollectionUtils.isEmpty(processStepWorkerPolicyList)) {
-//            return assignableWorkerStepList;
-//        }
-//        for (ProcessStepWorkerPolicyVo workerPolicyVo : processStepWorkerPolicyList) {
-//            if (!WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
-//                continue;
-//            }
-//            JSONObject configObj = workerPolicyVo.getConfigObj();
-//            if (MapUtils.isEmpty(configObj)) {
-//                continue;
-//            }
-//            JSONArray processStepUuidList = configObj.getJSONArray("processStepUuidList");
-//            if (CollectionUtils.isEmpty(processStepUuidList)) {
-//                continue;
-//            }
-//            for (String stepUuid : processStepUuidList.toJavaList(String.class)) {
-//                if (!processStepUuid.equals(stepUuid)) {
-//                    continue;
-//                }
-//                ProcessStepVo processStep = processMapper.getProcessStepByUuid(workerPolicyVo.getProcessStepUuid());
-//                List<String> nextStepUuidList = getNextStepUuidList(processUuid, processStepUuid, workerPolicyVo.getProcessStepUuid());
-//                if (CollectionUtils.isEmpty(nextStepUuidList)) {
-//                    break;
-//                }
-//                AssignableWorkerStepVo assignableWorkerStepVo = new AssignableWorkerStepVo();
-//                assignableWorkerStepVo.setProcessStepUuid(processStep.getUuid());
-//                assignableWorkerStepVo.setName(processStep.getName());
-//                assignableWorkerStepVo.setIsRequired(configObj.getInteger("isRequired"));
-//                assignableWorkerStepVo.setGroupList(configObj.getJSONArray("groupList"));
-//                assignableWorkerStepVo.setRangeList(configObj.getJSONArray("rangeList"));
-//                assignableWorkerStepVo.setNextStepUuidList(nextStepUuidList);
-//                assignableWorkerStepList.add(assignableWorkerStepVo);
-//                break;
-//            }
-//        }
-//        return assignableWorkerStepList;
-//    }
-//
-//    /**
-//     * 找出流转到哪些步骤时，需要指定targetStepUuid步骤的处理人
-//     * @param processUuid 流程uuid
-//     * @param currentStepUuid 当前流转步骤uuid
-//     * @param targetStepUuid 配置了由当前步骤处理人指定处理人的步骤uuid
-//     * @return
-//     */
-//    private List<String> getNextStepUuidList(String processUuid, String currentStepUuid, String targetStepUuid) {
-//        Map<String, List<String>> fromUuid2ToUuidListMap = new HashMap<>();
-//        List<ProcessStepRelVo> processStepRelList = processMapper.getProcessStepRelByProcessUuid(processUuid);
-//        for (ProcessStepRelVo relVo : processStepRelList) {
-//            if (Objects.equals(relVo.getType(), ProcessFlowDirection.FORWARD.getValue())) {
-//                String fromUuid = relVo.getFromStepUuid();
-//                fromUuid2ToUuidListMap.computeIfAbsent(fromUuid, key -> new ArrayList<>()).add(relVo.getToStepUuid());
-//            }
-//        }
-//        List<String> resultList = new ArrayList<>();
-//        List<String> currentStepNextStepUuidList = fromUuid2ToUuidListMap.get(currentStepUuid);
-//        if (CollectionUtils.isEmpty(currentStepNextStepUuidList)) {
-//            return resultList;
-//        }
-//        for (String nextStepUuid : currentStepNextStepUuidList) {
-//            boolean flag = false;
-//            List<String> stepUuidList = new ArrayList<>();
-//            stepUuidList.add(nextStepUuid);
-//            while (CollectionUtils.isNotEmpty(stepUuidList)) {
-//                if (stepUuidList.contains(targetStepUuid)) {
-//                    flag = true;
-//                    break;
-//                }
-//                List<String> newStepUuidList = new ArrayList<>();
-//                for (String stepUuid : stepUuidList) {
-//                    List<String> toUuidList = fromUuid2ToUuidListMap.get(stepUuid);
-//                    if (CollectionUtils.isNotEmpty(toUuidList)) {
-//                        newStepUuidList.addAll(toUuidList);
-//                    }
-//                }
-//                if (flag) {
-//                    break;
-//                }
-//                stepUuidList = newStepUuidList;
-//            }
-//            if (flag) {
-//                resultList.add(nextStepUuid);
-//            }
-//        }
-//        return resultList;
-//    }
 
     @Override
     public List<ProcessTaskSlaTimeVo> getSlaTimeListByProcessTaskStepId(Long processTaskStepId) {
