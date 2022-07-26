@@ -210,7 +210,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         ProcessTaskStepVo startProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId);
         // 获取须指派的步骤列表
         startProcessTaskStepVo.setAssignableWorkerStepList(
-                processTaskService.getAssignableWorkerStepList(startProcessTaskStepVo.getProcessTaskId(), startProcessTaskStepVo.getProcessStepUuid())
+                processTaskService.getAssignableWorkerStepList(startProcessTaskStepVo)
         );
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
         processTaskService.setTemporaryData(processTaskVo, startProcessTaskStepVo);
