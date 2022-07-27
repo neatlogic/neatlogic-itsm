@@ -3,6 +3,7 @@ package codedriver.module.process.stephandler.utilhandler;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import codedriver.framework.common.RootComponent;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.form.dto.FormAttributeVo;
@@ -432,8 +433,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                         break;
                     }
                     ProcessTaskStepVo assignableWorkerStep = processTaskMapper.getProcessTaskStepBaseInfoById(workerPolicyVo.getProcessTaskStepId());
-                    throw new ProcessTaskRuntimeException(
-                            "指派：" + assignableWorkerStep.getName() + "步骤处理人是必填");
+                    throw new ProcessTaskMustBeAssignWorkerException(assignableWorkerStep.getName());
                 }
                 ProcessTaskAssignWorkerVo assignWorkerVo = new ProcessTaskAssignWorkerVo();
                 assignWorkerVo.setProcessTaskId(workerPolicyVo.getProcessTaskId());
@@ -442,9 +442,8 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 assignWorkerVo.setFromProcessStepUuid(currentProcessTaskStepVo.getProcessStepUuid());
                 processTaskMapper.deleteProcessTaskAssignWorker(assignWorkerVo);
                 for (String worker : workerList) {
-                    String[] split = worker.split("#");
-                    assignWorkerVo.setType(split[0]);
-                    assignWorkerVo.setUuid(split[1]);
+                    assignWorkerVo.setType(GroupSearch.getPrefix(worker));
+                    assignWorkerVo.setUuid(GroupSearch.removePrefix(worker));
                     processTaskMapper.insertProcessTaskAssignWorker(assignWorkerVo);
                 }
             }
