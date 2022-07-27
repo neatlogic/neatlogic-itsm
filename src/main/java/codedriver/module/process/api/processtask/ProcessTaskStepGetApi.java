@@ -52,6 +52,11 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     }
 
     @Override
+    public boolean disableReturnCircularReferenceDetect() {
+        return true;
+    }
+
+    @Override
     public String getName() {
         return "工单步骤基本信息获取接口";
     }

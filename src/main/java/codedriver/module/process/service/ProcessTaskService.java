@@ -79,24 +79,11 @@ public interface ProcessTaskService {
                                                                                        List<String> typeList);
 
     /**
-     * @param processTaskId   工单id
-     * @param processStepUuid 流程步骤uuid
-     * @return List<AssignableWorkerStepVo>
-     * @Author: linbq
-     * @Time:2020年8月21日
-     * @Description: 获取需指派处理人的步骤列表
+     * 获取需指派处理人的步骤列表
+     * @param currentProcessTaskStepVo 工单步骤信息
+     * @return
      */
-    public List<AssignableWorkerStepVo> getAssignableWorkerStepList(Long processTaskId, String processStepUuid);
-
-    /**
-     * @param processUuid     流程uuid
-     * @param processStepUuid 流程步骤uuid
-     * @return List<AssignableWorkerStepVo>
-     * @Author: linbq
-     * @Time:2020年8月21日
-     * @Description: 获取需指派处理人的步骤列表
-     */
-    public List<AssignableWorkerStepVo> getAssignableWorkerStepList(String processUuid, String processStepUuid);
+    Map<Long, List<AssignableWorkerStepVo>> getAssignableWorkerStepMap(ProcessTaskStepVo currentProcessTaskStepVo);
 
     /**
      * @param processTaskStepId 步骤id

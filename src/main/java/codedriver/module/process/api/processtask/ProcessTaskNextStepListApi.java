@@ -2,6 +2,9 @@ package codedriver.module.process.api.processtask;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.dto.AssignableWorkerStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +18,9 @@ import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -35,6 +41,11 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase {
     }
 
     @Override
+    public boolean disableReturnCircularReferenceDetect() {
+        return true;
+    }
+
+    @Override
     public String getConfig() {
         return null;
     }
@@ -48,7 +59,7 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_COMPLETE;
         String action = jsonObj.getString("action");
         if (ProcessTaskOperationType.STEP_BACK.getValue().equals(action)) {
@@ -57,12 +68,23 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase {
 
         new ProcessAuthManager.StepOperationChecker(processTaskStepId, operationType).build()
             .checkAndNoPermissionThrowException();
-
+        Map<Long, List<AssignableWorkerStepVo>> assignableWorkerStepMap = processTaskService.getAssignableWorkerStepMap(processTaskVo.getCurrentProcessTaskStep());
+        List<ProcessTaskStepVo> nextStepList = null;
         if (operationType == ProcessTaskOperationType.STEP_COMPLETE) {
-            return processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepId);
+            nextStepList =  processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepId);
         } else {
-            return processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepId);
+            nextStepList =  processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepId);
         }
+        if (CollectionUtils.isEmpty(nextStepList)) {
+            return nextStepList;
+        }
+        for (ProcessTaskStepVo nextStepVo : nextStepList) {
+            List<AssignableWorkerStepVo> assignableWorkerStepList = assignableWorkerStepMap.get(nextStepVo.getId());
+            if (CollectionUtils.isNotEmpty(assignableWorkerStepList)) {
+                nextStepVo.setAssignableWorkerStepList(assignableWorkerStepList);
+            }
+        }
+        return nextStepList;
     }
 
 }
