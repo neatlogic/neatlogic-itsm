@@ -102,7 +102,6 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
             throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(channelTypeVo.getHandler());
         }
         JSONObject config = handler.makeupConfig(jsonObj);
-        Long startValue = config.getLong("startValue");
         ProcessTaskSerialNumberPolicyVo policy = new ProcessTaskSerialNumberPolicyVo();
         policy.setChannelTypeUuid(channelTypeVo.getUuid());
         policy.setHandler(channelTypeVo.getHandler());
@@ -110,11 +109,9 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
         ProcessTaskSerialNumberPolicyVo oldPolicy = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyByChannelTypeUuid(uuid);
         if (oldPolicy != null) {
             processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyByChannelTypeUuid(policy);
-            if (oldPolicy.getSerialNumberSeed() > startValue) {
-                Function<ProcessTaskSerialNumberPolicyVo, Long> function = (serialNumberPolicyVo) -> serialNumberPolicyVo.getSerialNumberSeed();
-                processTaskSerialNumberService.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(uuid, function);
-            }
         } else {
+            Long startValue = config.getLong("startValue");
+            policy.setSerialNumberSeed(startValue);
             processTaskSerialNumberMapper.insertProcessTaskSerialNumberPolicy(policy);
         }
         return channelTypeVo.getUuid();
