@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.function.Function;
 
 public interface ProcessTaskSerialnumberService {
 
@@ -67,4 +68,6 @@ public interface ProcessTaskSerialnumberService {
     Long calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, boolean startTimeLimit);
 
     void serialNumberSeedReset(String handlerClassName);
+
+    Long updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(String channelTypeUuid, Function<ProcessTaskSerialNumberPolicyVo, Long> function);
 }

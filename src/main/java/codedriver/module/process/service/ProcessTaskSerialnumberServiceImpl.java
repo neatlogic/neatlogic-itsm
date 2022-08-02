@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.text.DateFormat;
 import java.util.*;
+import java.util.function.Function;
 
 @Service
 public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumberService {
@@ -94,25 +95,34 @@ public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumb
 
     @Override
     public String genarate(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, DateFormat dateFormat) {
-        processTaskSerialNumberPolicyVo = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+//        processTaskSerialNumberPolicyVo = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
         int numberOfDigits = processTaskSerialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
-        long max = (long) Math.pow(10, numberOfDigits) - 1;
-        long serialNumberSeed = processTaskSerialNumberPolicyVo.getSerialNumberSeed();
-        if (serialNumberSeed > max) {
-            serialNumberSeed -= max;
-        }
-        processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(
-                processTaskSerialNumberPolicyVo.getChannelTypeUuid(), serialNumberSeed + 1);
+//        long max = (long) Math.pow(10, numberOfDigits) - 1;
+//        long serialNumberSeed = processTaskSerialNumberPolicyVo.getSerialNumberSeed();
+//        if (serialNumberSeed > max) {
+//            serialNumberSeed -= max;
+//        }
+//        processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(
+//                processTaskSerialNumberPolicyVo.getChannelTypeUuid(), serialNumberSeed + 1);
+        Function<ProcessTaskSerialNumberPolicyVo, Long> function = (serialNumberPolicyVo) -> {
+            int numberOfDigit = serialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
+            long max = (long) Math.pow(10, numberOfDigit) - 1;
+            long serialNumberSeed = serialNumberPolicyVo.getSerialNumberSeed();
+            if (serialNumberSeed > max) {
+                serialNumberSeed -= max;
+            }
+            return serialNumberSeed + 1;
+        };
+        Long serialNumberSeed = updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid(), function);
         ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
         if (channelTypeVo == null) {
             throw new ChannelTypeNotFoundException(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
         }
-        String number = channelTypeVo.getPrefix();
+        String prefix = channelTypeVo.getPrefix();
         if (dateFormat != null) {
-            number += dateFormat.format(new Date());
+            prefix += dateFormat.format(new Date());
         }
-        number += String.format("%0" + numberOfDigits + "d", serialNumberSeed);
-        return number;
+        return prefix + String.format("%0" + numberOfDigits + "d", serialNumberSeed - 1);
     }
 
     @Override
@@ -185,17 +195,34 @@ public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumb
         List<ProcessTaskSerialNumberPolicyVo> processTaskSerialNumberPolicyList =
                 processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyListByHandler(handlerClassName);
         for (ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo : processTaskSerialNumberPolicyList) {
-            ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicy =
-                    processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(
-                            processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-            Long startValue = 1L;
-            Long value = processTaskSerialNumberPolicy.getConfig().getLong("startValue");
-            if (value != null) {
-                startValue = value;
-            }
-            processTaskSerialNumberPolicyVo.setSerialNumberSeed(startValue);
-            processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(
-                    processTaskSerialNumberPolicyVo.getChannelTypeUuid(), startValue);
+//            ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicy =
+//                    processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(
+//                            processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+//            Long startValue = 1L;
+//            Long value = processTaskSerialNumberPolicy.getConfig().getLong("startValue");
+//            if (value != null) {
+//                startValue = value;
+//            }
+//            processTaskSerialNumberPolicyVo.setSerialNumberSeed(startValue);
+//            processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(
+//                    processTaskSerialNumberPolicyVo.getChannelTypeUuid(), startValue);
+            Function<ProcessTaskSerialNumberPolicyVo, Long> function = (serialNumberPolicyVo) -> {
+                Long serialNumberSeed = 1L;
+                Long startValue = serialNumberPolicyVo.getConfig().getLong("startValue");
+                if (startValue != null) {
+                    serialNumberSeed = startValue;
+                }
+                return serialNumberSeed;
+            };
+            updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid(), function);
         }
+    }
+
+    @Override
+    public Long updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(String channelTypeUuid, Function<ProcessTaskSerialNumberPolicyVo, Long> function) {
+        ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(channelTypeUuid);
+        Long serialNumberSeed = function.apply(processTaskSerialNumberPolicyVo);
+        processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(channelTypeUuid, serialNumberSeed);
+        return serialNumberSeed;
     }
 }

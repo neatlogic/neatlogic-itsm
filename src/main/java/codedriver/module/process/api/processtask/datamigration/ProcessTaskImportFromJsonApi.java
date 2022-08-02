@@ -148,7 +148,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         }
                         processTask.setChannelUuid(channel.getUuid());
                         /* 生成工单号 **/
-                        ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(channel.getChannelTypeUuid());
+                        ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyByChannelTypeUuid(channel.getChannelTypeUuid());
                         if (processTaskSerialNumberPolicyVo == null) {
                             throw new ProcessTaskSerialNumberPolicyNotFoundException(channel.getChannelTypeUuid());
                         }

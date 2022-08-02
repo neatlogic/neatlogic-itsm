@@ -9,6 +9,7 @@ import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.process.auth.CHANNELTYPE_MODIFY;
 
+import codedriver.module.process.service.ProcessTaskSerialnumberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessT
 import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyHandlerFactory;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 @Service
 @Transactional
@@ -40,6 +42,8 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
     private ChannelTypeMapper channelTypeMapper;
     @Autowired
     private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
+    @Autowired
+    private ProcessTaskSerialnumberService processTaskSerialNumberService;
 
     @Override
     public String getToken() {
@@ -103,14 +107,13 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
         policy.setChannelTypeUuid(channelTypeVo.getUuid());
         policy.setHandler(channelTypeVo.getHandler());
         policy.setConfig(config.toJSONString());
-        policy.setSerialNumberSeed(startValue);
-        ProcessTaskSerialNumberPolicyVo oldPolicy =
-            processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(uuid);
+        ProcessTaskSerialNumberPolicyVo oldPolicy = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyByChannelTypeUuid(uuid);
         if (oldPolicy != null) {
-            if (oldPolicy.getSerialNumberSeed() > startValue) {
-                policy.setSerialNumberSeed(oldPolicy.getSerialNumberSeed());
-            }
             processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyByChannelTypeUuid(policy);
+            if (oldPolicy.getSerialNumberSeed() > startValue) {
+                Function<ProcessTaskSerialNumberPolicyVo, Long> function = (serialNumberPolicyVo) -> serialNumberPolicyVo.getSerialNumberSeed();
+                processTaskSerialNumberService.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(uuid, function);
+            }
         } else {
             processTaskSerialNumberMapper.insertProcessTaskSerialNumberPolicy(policy);
         }
