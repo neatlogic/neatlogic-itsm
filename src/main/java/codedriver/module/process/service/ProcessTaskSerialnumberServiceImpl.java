@@ -95,8 +95,6 @@ public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumb
 
     @Override
     public String genarate(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, DateFormat dateFormat) {
-//        processTaskSerialNumberPolicyVo = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-        int numberOfDigits = processTaskSerialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
 //        long max = (long) Math.pow(10, numberOfDigits) - 1;
 //        long serialNumberSeed = processTaskSerialNumberPolicyVo.getSerialNumberSeed();
 //        if (serialNumberSeed > max) {
@@ -105,8 +103,8 @@ public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumb
 //        processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(
 //                processTaskSerialNumberPolicyVo.getChannelTypeUuid(), serialNumberSeed + 1);
         Function<ProcessTaskSerialNumberPolicyVo, Long> function = (serialNumberPolicyVo) -> {
-            int numberOfDigit = serialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
-            long max = (long) Math.pow(10, numberOfDigit) - 1;
+            int numberOfDigits = serialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
+            long max = (long) Math.pow(10, numberOfDigits) - 1;
             long serialNumberSeed = serialNumberPolicyVo.getSerialNumberSeed();
             if (serialNumberSeed > max) {
                 serialNumberSeed -= max;
@@ -114,6 +112,8 @@ public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumb
             return serialNumberSeed + 1;
         };
         Long serialNumberSeed = updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid(), function);
+        processTaskSerialNumberPolicyVo = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+        int numberOfDigits = processTaskSerialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
         ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
         if (channelTypeVo == null) {
             throw new ChannelTypeNotFoundException(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
