@@ -37,11 +37,11 @@ public interface ProcessTaskSerialnumberService {
     /**
      * 生成工单号
      *
-     * @param processTaskSerialNumberPolicyVo
+     * @param channelTypeUuid 服务类型
      * @param dateFormat                      日期格式
      * @return
      */
-    String genarate(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, DateFormat dateFormat);
+    String genarate(String channelTypeUuid, DateFormat dateFormat);
 
     /**
      * 批量更新工单号
@@ -69,5 +69,11 @@ public interface ProcessTaskSerialnumberService {
 
     void serialNumberSeedReset(String handlerClassName);
 
+    /**
+     * 更新工单号自增值
+     * @param channelTypeUuid
+     * @param function
+     * @return
+     */
     Long updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(String channelTypeUuid, Function<ProcessTaskSerialNumberPolicyVo, Long> function);
 }

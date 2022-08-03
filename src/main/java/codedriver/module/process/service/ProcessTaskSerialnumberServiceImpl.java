@@ -94,14 +94,7 @@ public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumb
     }
 
     @Override
-    public String genarate(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, DateFormat dateFormat) {
-//        long max = (long) Math.pow(10, numberOfDigits) - 1;
-//        long serialNumberSeed = processTaskSerialNumberPolicyVo.getSerialNumberSeed();
-//        if (serialNumberSeed > max) {
-//            serialNumberSeed -= max;
-//        }
-//        processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(
-//                processTaskSerialNumberPolicyVo.getChannelTypeUuid(), serialNumberSeed + 1);
+    public String genarate(String channelTypeUuid, DateFormat dateFormat) {
         Function<ProcessTaskSerialNumberPolicyVo, Long> function = (serialNumberPolicyVo) -> {
             int numberOfDigits = serialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
             long max = (long) Math.pow(10, numberOfDigits) - 1;
@@ -111,12 +104,12 @@ public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumb
             }
             return serialNumberSeed + 1;
         };
-        Long serialNumberSeed = updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid(), function);
-        processTaskSerialNumberPolicyVo = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+        Long serialNumberSeed = updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(channelTypeUuid, function);
+        ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyByChannelTypeUuid(channelTypeUuid);
         int numberOfDigits = processTaskSerialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
-        ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+        ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelTypeUuid);
         if (channelTypeVo == null) {
-            throw new ChannelTypeNotFoundException(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+            throw new ChannelTypeNotFoundException(channelTypeUuid);
         }
         String prefix = channelTypeVo.getPrefix();
         if (dateFormat != null) {
@@ -127,47 +120,40 @@ public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumb
 
     @Override
     public int batchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo, DateFormat dateFormat) {
-        try {
-            ProcessTaskVo processTaskVo = new ProcessTaskVo();
-            processTaskVo.setChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-            ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-            if (channelTypeVo == null) {
-                throw new ChannelTypeNotFoundException(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-            }
-            int rowNum = processTaskMapper.getProcessTaskCountByChannelTypeUuidAndStartTime(processTaskVo);
-            if (rowNum > 0) {
-                int numberOfDigits = processTaskSerialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
-                long max = (long) Math.pow(10, numberOfDigits) - 1;
-                long startValue = processTaskSerialNumberPolicyVo.getConfig().getLongValue("startValue");
-                long serialNumberSeed = startValue;
-                processTaskVo.setPageSize(100);
-                int pageCount = PageUtil.getPageCount(rowNum, processTaskVo.getPageSize());
-                Map<String, Long> serNumMap = new HashMap<>();
-                for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
-                    processTaskVo.setCurrentPage(currentPage);
-                    List<ProcessTaskVo> processTaskList =
-                            processTaskMapper.getProcessTaskListByChannelTypeUuidAndStartTime(processTaskVo);
-                    for (ProcessTaskVo processTask : processTaskList) {
-                        String startTimeFormat = dateFormat.format(processTask.getStartTime());
-                        serialNumberSeed = serNumMap.getOrDefault(startTimeFormat, startValue);
-                        String serialNumber = channelTypeVo.getPrefix() + startTimeFormat + String.format("%0" + numberOfDigits + "d", serialNumberSeed);
-                        processTaskMapper.updateProcessTaskSerialNumberById(processTask.getId(), serialNumber);
-                        processTaskSerialNumberMapper.insertProcessTaskSerialNumber(processTask.getId(), serialNumber);
-                        serialNumberSeed++;
-                        if (serialNumberSeed > max) {
-                            serialNumberSeed -= max;
-                        }
-                        serNumMap.put(startTimeFormat, serialNumberSeed);
+        ProcessTaskVo processTaskVo = new ProcessTaskVo();
+        processTaskVo.setChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+        ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+        if (channelTypeVo == null) {
+            throw new ChannelTypeNotFoundException(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+        }
+        int rowNum = processTaskMapper.getProcessTaskCountByChannelTypeUuidAndStartTime(processTaskVo);
+        if (rowNum > 0) {
+            int numberOfDigits = processTaskSerialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
+            long max = (long) Math.pow(10, numberOfDigits) - 1;
+            long startValue = processTaskSerialNumberPolicyVo.getConfig().getLongValue("startValue");
+            long serialNumberSeed = startValue;
+            processTaskVo.setPageSize(100);
+            int pageCount = PageUtil.getPageCount(rowNum, processTaskVo.getPageSize());
+            Map<String, Long> serNumMap = new HashMap<>();
+            for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
+                processTaskVo.setCurrentPage(currentPage);
+                List<ProcessTaskVo> processTaskList =
+                        processTaskMapper.getProcessTaskListByChannelTypeUuidAndStartTime(processTaskVo);
+                for (ProcessTaskVo processTask : processTaskList) {
+                    String startTimeFormat = dateFormat.format(processTask.getStartTime());
+                    serialNumberSeed = serNumMap.getOrDefault(startTimeFormat, startValue);
+                    String serialNumber = channelTypeVo.getPrefix() + startTimeFormat + String.format("%0" + numberOfDigits + "d", serialNumberSeed);
+                    processTaskMapper.updateProcessTaskSerialNumberById(processTask.getId(), serialNumber);
+                    processTaskSerialNumberMapper.insertProcessTaskSerialNumber(processTask.getId(), serialNumber);
+                    serialNumberSeed++;
+                    if (serialNumberSeed > max) {
+                        serialNumberSeed -= max;
                     }
+                    serNumMap.put(startTimeFormat, serialNumberSeed);
                 }
             }
-            return rowNum;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        } finally {
-            processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyEndTimeByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
         }
-        return 0;
+        return rowNum;
     }
 
     @Override
@@ -195,17 +181,6 @@ public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumb
         List<ProcessTaskSerialNumberPolicyVo> processTaskSerialNumberPolicyList =
                 processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyListByHandler(handlerClassName);
         for (ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo : processTaskSerialNumberPolicyList) {
-//            ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicy =
-//                    processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(
-//                            processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-//            Long startValue = 1L;
-//            Long value = processTaskSerialNumberPolicy.getConfig().getLong("startValue");
-//            if (value != null) {
-//                startValue = value;
-//            }
-//            processTaskSerialNumberPolicyVo.setSerialNumberSeed(startValue);
-//            processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(
-//                    processTaskSerialNumberPolicyVo.getChannelTypeUuid(), startValue);
             Function<ProcessTaskSerialNumberPolicyVo, Long> function = (serialNumberPolicyVo) -> {
                 Long serialNumberSeed = 1L;
                 Long startValue = serialNumberPolicyVo.getConfig().getLong("startValue");

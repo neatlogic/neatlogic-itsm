@@ -53,8 +53,8 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
     }
 
     @Override
-    public String genarate(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        return processTaskSerialnumberService.genarate(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMMdd"));
+    public String genarate(String channelTypeUuid) {
+        return processTaskSerialnumberService.genarate(channelTypeUuid, new SimpleDateFormat("yyyyMMdd"));
     }
 
     @Override

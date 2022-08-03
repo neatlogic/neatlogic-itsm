@@ -54,8 +54,8 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
     }
 
     @Override
-    public String genarate(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        return processTaskSerialnumberService.genarate(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMM"));
+    public String genarate(String channelTypeUuid) {
+        return processTaskSerialnumberService.genarate(channelTypeUuid, new SimpleDateFormat("yyyyMM"));
     }
 
     @Override

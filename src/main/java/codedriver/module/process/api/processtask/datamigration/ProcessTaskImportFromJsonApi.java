@@ -156,7 +156,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         if (policyHandler == null) {
                             throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(processTaskSerialNumberPolicyVo.getHandler());
                         }
-                        String serialNumber = policyHandler.genarate(processTaskSerialNumberPolicyVo);
+                        String serialNumber = policyHandler.genarate(channel.getChannelTypeUuid());
                         processTask.setSerialNumber(serialNumber);
                         break;
                     case "priorityName":
