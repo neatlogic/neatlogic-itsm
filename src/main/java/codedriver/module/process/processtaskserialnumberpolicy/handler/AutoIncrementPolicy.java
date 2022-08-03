@@ -9,7 +9,7 @@ import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
-import codedriver.module.process.service.ProcessTaskSerialnumberService;
+import codedriver.module.process.service.ProcessTaskSerialNumberService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandle
     private ChannelTypeMapper channelTypeMapper;
 
     @Resource
-    private ProcessTaskSerialnumberService processTaskSerialnumberService;
+    private ProcessTaskSerialNumberService processTaskSerialNumberService;
 
     @Override
     public String getName() {
@@ -43,17 +43,17 @@ public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandle
     @SuppressWarnings("serial")
     @Override
     public JSONArray makeupFormAttributeList() {
-        return processTaskSerialnumberService.makeupFormAttributeList(5, 8);
+        return processTaskSerialNumberService.makeupFormAttributeList(5, 8);
     }
 
     @Override
     public JSONObject makeupConfig(JSONObject jsonObj) {
-        return processTaskSerialnumberService.makeupConfig(jsonObj, 0);
+        return processTaskSerialNumberService.makeupConfig(jsonObj, 0);
     }
 
     @Override
     public String genarate(String channelTypeUuid) {
-        return processTaskSerialnumberService.genarate(channelTypeUuid, null);
+        return processTaskSerialNumberService.genarate(channelTypeUuid, null);
     }
 
     @Override
@@ -91,6 +91,6 @@ public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandle
 
     @Override
     public Long calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        return processTaskSerialnumberService.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, false);
+        return processTaskSerialNumberService.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, false);
     }
 }

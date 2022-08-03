@@ -13,7 +13,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.function.Function;
 
-public interface ProcessTaskSerialnumberService {
+public interface ProcessTaskSerialNumberService {
 
     /**
      * 工单号策略属性

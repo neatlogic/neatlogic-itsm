@@ -10,7 +10,6 @@ import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.process.auth.CHANNELTYPE_MODIFY;
 
-import codedriver.module.process.service.ProcessTaskSerialnumberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,8 +41,6 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
     private ChannelTypeMapper channelTypeMapper;
     @Autowired
     private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
-    @Autowired
-    private ProcessTaskSerialnumberService processTaskSerialNumberService;
 
     @Override
     public String getToken() {

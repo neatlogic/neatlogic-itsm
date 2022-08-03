@@ -21,9 +21,9 @@ import java.util.*;
 import java.util.function.Function;
 
 @Service
-public class ProcessTaskSerialnumberServiceImpl implements ProcessTaskSerialnumberService {
+public class ProcessTaskSerialNumberServiceImpl implements ProcessTaskSerialNumberService {
 
-    static Logger logger = LoggerFactory.getLogger(ProcessTaskSerialnumberServiceImpl.class);
+    static Logger logger = LoggerFactory.getLogger(ProcessTaskSerialNumberServiceImpl.class);
 
     @Resource
     private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;

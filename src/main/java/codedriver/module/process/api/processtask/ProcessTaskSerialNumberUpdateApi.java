@@ -22,7 +22,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.service.ProcessTaskSerialnumberService;
+import codedriver.module.process.service.ProcessTaskSerialNumberService;
 import codedriver.module.process.thread.ProcessTaskSerialNumberUpdateThread;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class ProcessTaskSerialNumberUpdateApi extends PrivateApiComponentBase {
     @Autowired
     private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
     @Autowired
-    private ProcessTaskSerialnumberService processTaskSerialnumberService;
+    private ProcessTaskSerialNumberService processTaskSerialNumberService;
 
     @Override
     public String getToken() {
@@ -85,7 +85,7 @@ public class ProcessTaskSerialNumberUpdateApi extends PrivateApiComponentBase {
             }
             return policyHandler.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(serialNumberPolicyVo);
         };
-        processTaskSerialnumberService.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(channelTypeUuid, function);
+        processTaskSerialNumberService.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(channelTypeUuid, function);
         processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyStartTimeByChannelTypeUuid(channelTypeUuid);
         CachedThreadPool.execute(new ProcessTaskSerialNumberUpdateThread(handler, processTaskSerialNumberPolicyVo));
         return null;
