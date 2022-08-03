@@ -148,7 +148,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         }
                         processTask.setChannelUuid(channel.getUuid());
                         /* 生成工单号 **/
-                        ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(channel.getChannelTypeUuid());
+                        ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyByChannelTypeUuid(channel.getChannelTypeUuid());
                         if (processTaskSerialNumberPolicyVo == null) {
                             throw new ProcessTaskSerialNumberPolicyNotFoundException(channel.getChannelTypeUuid());
                         }
@@ -156,7 +156,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         if (policyHandler == null) {
                             throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(processTaskSerialNumberPolicyVo.getHandler());
                         }
-                        String serialNumber = policyHandler.genarate(processTaskSerialNumberPolicyVo);
+                        String serialNumber = policyHandler.genarate(channel.getChannelTypeUuid());
                         processTask.setSerialNumber(serialNumber);
                         break;
                     case "priorityName":

@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -35,7 +35,7 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
     private Logger logger = LoggerFactory.getLogger(YearMonthAndAutoIncrementPolicy.class);
 
     @Resource
-    private ProcessTaskSerialNumberService processTaskSerialnumberService;
+    private ProcessTaskSerialNumberService processTaskSerialNumberService;
 
     @Override
     public String getName() {
@@ -45,28 +45,28 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
     @SuppressWarnings("serial")
     @Override
     public JSONArray makeupFormAttributeList() {
-        return processTaskSerialnumberService.makeupFormAttributeList(10, 16);
+        return processTaskSerialNumberService.makeupFormAttributeList(10, 16);
     }
 
     @Override
     public JSONObject makeupConfig(JSONObject jsonObj) {
-        return processTaskSerialnumberService.makeupConfig(jsonObj, 6);
+        return processTaskSerialNumberService.makeupConfig(jsonObj, 6);
     }
 
     @Override
-    public String genarate(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        return processTaskSerialnumberService.genarate(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMM"));
+    public String genarate(String channelTypeUuid) {
+        return processTaskSerialNumberService.genarate(channelTypeUuid, new SimpleDateFormat("yyyyMM"));
     }
 
     @Override
     public int batchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        return processTaskSerialnumberService.batchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMM"));
+        return processTaskSerialNumberService.batchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMM"));
     }
 
 
     @Override
     public Long calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        return processTaskSerialnumberService.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, true, Date.from(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        return processTaskSerialNumberService.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, true, Date.from(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()).atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 
     @Component
@@ -76,7 +76,7 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
         private String cron = "0 0 0 1 * ?"; // 每月1日0时0分0秒
 
         @Autowired
-        private ProcessTaskSerialNumberService processTaskSerialnumberService;
+        private ProcessTaskSerialNumberService processTaskSerialNumberService;
 
         @Override
         public String getGroupName() {
@@ -114,7 +114,7 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
 
         @Override
         public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
-            processTaskSerialnumberService.serialNumberSeedReset(YearMonthAndAutoIncrementPolicy.class.getName());
+            processTaskSerialNumberService.serialNumberSeedReset(YearMonthAndAutoIncrementPolicy.class.getName());
         }
     }
 }

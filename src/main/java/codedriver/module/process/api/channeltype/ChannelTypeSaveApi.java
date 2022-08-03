@@ -3,6 +3,7 @@ package codedriver.module.process.api.channeltype;
 import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.exception.channeltype.ChannelTypeHasReferenceException;
+import codedriver.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberUpdateInProcessException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.IValid;
@@ -98,20 +99,22 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
             throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(channelTypeVo.getHandler());
         }
         JSONObject config = handler.makeupConfig(jsonObj);
-        Long startValue = config.getLong("startValue");
         ProcessTaskSerialNumberPolicyVo policy = new ProcessTaskSerialNumberPolicyVo();
         policy.setChannelTypeUuid(channelTypeVo.getUuid());
         policy.setHandler(channelTypeVo.getHandler());
         policy.setConfig(config.toJSONString());
-        policy.setSerialNumberSeed(startValue);
-        ProcessTaskSerialNumberPolicyVo oldPolicy =
-            processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(uuid);
+        ProcessTaskSerialNumberPolicyVo oldPolicy = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyByChannelTypeUuid(uuid);
         if (oldPolicy != null) {
-            if (oldPolicy.getSerialNumberSeed() > startValue) {
-                policy.setSerialNumberSeed(oldPolicy.getSerialNumberSeed());
+            if (Objects.equals(oldPolicy.getHandler(), policy.getHandler()) && Objects.equals(oldPolicy.getConfigStr(), config.toJSONString())) {
+                return channelTypeVo.getUuid();
+            }
+            if (oldPolicy.getStartTime() != null && oldPolicy.getEndTime() == null) {
+                throw new ProcessTaskSerialNumberUpdateInProcessException();
             }
             processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyByChannelTypeUuid(policy);
         } else {
+            Long startValue = config.getLong("startValue");
+            policy.setSerialNumberSeed(startValue);
             processTaskSerialNumberMapper.insertProcessTaskSerialNumberPolicy(policy);
         }
         return channelTypeVo.getUuid();

@@ -6,13 +6,30 @@
 package codedriver.module.process.thread;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
+import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
 import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+@Component
 public class ProcessTaskSerialNumberUpdateThread extends CodeDriverThread {
+    private static Logger logger = LoggerFactory.getLogger(ProcessTaskSerialNumberUpdateThread.class);
 
+    private static ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
+
+    @Resource
+    public void setProcessTaskSerialNumberMapper(ProcessTaskSerialNumberMapper _processTaskSerialNumberMapper) {
+        processTaskSerialNumberMapper = _processTaskSerialNumberMapper;
+    }
     private IProcessTaskSerialNumberPolicyHandler handler;
     private ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo;
+
+    public ProcessTaskSerialNumberUpdateThread() {
+        super("PROCESSTASK-SERIALNUMBER-UPDATER");
+    }
 
     public ProcessTaskSerialNumberUpdateThread(IProcessTaskSerialNumberPolicyHandler handler, ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
         super("PROCESSTASK-SERIALNUMBER-UPDATER");
@@ -22,7 +39,13 @@ public class ProcessTaskSerialNumberUpdateThread extends CodeDriverThread {
 
     @Override
     protected void execute() {
-        handler.batchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo);
+        try {
+            handler.batchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyEndTimeByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
+        }
     }
 
 }
