@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -10,7 +10,7 @@ import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import codedriver.framework.scheduler.core.JobBase;
 import codedriver.framework.scheduler.dto.JobObject;
-import codedriver.module.process.service.ProcessTaskSerialnumberService;
+import codedriver.module.process.service.ProcessTaskSerialNumberService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.quartz.CronExpression;
@@ -35,7 +35,7 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
     private Logger logger = LoggerFactory.getLogger(YearMonthAndAutoIncrementPolicy.class);
 
     @Resource
-    private ProcessTaskSerialnumberService processTaskSerialnumberService;
+    private ProcessTaskSerialNumberService processTaskSerialnumberService;
 
     @Override
     public String getName() {
@@ -76,7 +76,7 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
         private String cron = "0 0 0 1 * ?"; // 每月1日0时0分0秒
 
         @Autowired
-        private ProcessTaskSerialnumberService processTaskSerialnumberService;
+        private ProcessTaskSerialNumberService processTaskSerialnumberService;
 
         @Override
         public String getGroupName() {

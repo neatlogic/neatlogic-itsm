@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.processtaskserialnumberpolicy.handler;
 
 import codedriver.framework.common.util.PageUtil;
@@ -9,7 +14,7 @@ import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
-import codedriver.module.process.service.ProcessTaskSerialnumberService;
+import codedriver.module.process.service.ProcessTaskSerialNumberService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -33,7 +38,7 @@ public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandle
     private ChannelTypeMapper channelTypeMapper;
 
     @Resource
-    private ProcessTaskSerialnumberService processTaskSerialnumberService;
+    private ProcessTaskSerialNumberService processTaskSerialnumberService;
 
     @Override
     public String getName() {
