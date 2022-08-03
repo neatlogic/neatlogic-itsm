@@ -10,7 +10,7 @@ import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import codedriver.framework.scheduler.core.JobBase;
 import codedriver.framework.scheduler.dto.JobObject;
-import codedriver.module.process.service.ProcessTaskSerialnumberService;
+import codedriver.module.process.service.ProcessTaskSerialNumberService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.quartz.CronExpression;
@@ -35,7 +35,7 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
     private Logger logger = LoggerFactory.getLogger(YearMonthAndAutoIncrementPolicy.class);
 
     @Resource
-    private ProcessTaskSerialnumberService processTaskSerialnumberService;
+    private ProcessTaskSerialNumberService processTaskSerialNumberService;
 
     @Override
     public String getName() {
@@ -45,28 +45,28 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
     @SuppressWarnings("serial")
     @Override
     public JSONArray makeupFormAttributeList() {
-        return processTaskSerialnumberService.makeupFormAttributeList(10, 16);
+        return processTaskSerialNumberService.makeupFormAttributeList(10, 16);
     }
 
     @Override
     public JSONObject makeupConfig(JSONObject jsonObj) {
-        return processTaskSerialnumberService.makeupConfig(jsonObj, 6);
+        return processTaskSerialNumberService.makeupConfig(jsonObj, 6);
     }
 
     @Override
-    public String genarate(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        return processTaskSerialnumberService.genarate(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMM"));
+    public String genarate(String channelTypeUuid) {
+        return processTaskSerialNumberService.genarate(channelTypeUuid, new SimpleDateFormat("yyyyMM"));
     }
 
     @Override
     public int batchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        return processTaskSerialnumberService.batchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMM"));
+        return processTaskSerialNumberService.batchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, new SimpleDateFormat("yyyyMM"));
     }
 
 
     @Override
     public Long calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo) {
-        return processTaskSerialnumberService.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, true, Date.from(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        return processTaskSerialNumberService.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo, true, Date.from(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()).atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 
     @Component
@@ -76,7 +76,7 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
         private String cron = "0 0 0 1 * ?"; // 每月1日0时0分0秒
 
         @Autowired
-        private ProcessTaskSerialnumberService processTaskSerialnumberService;
+        private ProcessTaskSerialNumberService processTaskSerialNumberService;
 
         @Override
         public String getGroupName() {
@@ -114,7 +114,7 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
 
         @Override
         public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
-            processTaskSerialnumberService.serialNumberSeedReset(YearMonthAndAutoIncrementPolicy.class.getName());
+            processTaskSerialNumberService.serialNumberSeedReset(YearMonthAndAutoIncrementPolicy.class.getName());
         }
     }
 }

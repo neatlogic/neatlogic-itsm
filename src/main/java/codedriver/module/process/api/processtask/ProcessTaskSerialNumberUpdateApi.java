@@ -22,11 +22,14 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.service.ProcessTaskSerialNumberService;
 import codedriver.module.process.thread.ProcessTaskSerialNumberUpdateThread;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.function.Function;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
@@ -36,6 +39,8 @@ public class ProcessTaskSerialNumberUpdateApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
+    @Autowired
+    private ProcessTaskSerialNumberService processTaskSerialNumberService;
 
     @Override
     public String getToken() {
@@ -58,7 +63,7 @@ public class ProcessTaskSerialNumberUpdateApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String channelTypeUuid = jsonObj.getString("channelTypeUuid");
         ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo =
-                processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(channelTypeUuid);
+                processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyByChannelTypeUuid(channelTypeUuid);
         if (processTaskSerialNumberPolicyVo == null) {
             throw new ProcessTaskSerialNumberPolicyNotFoundException(channelTypeUuid);
         }
@@ -72,14 +77,16 @@ public class ProcessTaskSerialNumberUpdateApi extends PrivateApiComponentBase {
             throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(
                     processTaskSerialNumberPolicyVo.getHandler());
         }
+        Function<ProcessTaskSerialNumberPolicyVo, Long> function = (serialNumberPolicyVo) -> {
+            IProcessTaskSerialNumberPolicyHandler policyHandler =
+                    ProcessTaskSerialNumberPolicyHandlerFactory.getHandler(serialNumberPolicyVo.getHandler());
+            if (policyHandler == null) {
+                throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(serialNumberPolicyVo.getHandler());
+            }
+            return policyHandler.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(serialNumberPolicyVo);
+        };
+        processTaskSerialNumberService.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(channelTypeUuid, function);
         processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyStartTimeByChannelTypeUuid(channelTypeUuid);
-        Long serialNumberSeed =
-                handler.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo);
-        if (serialNumberSeed != null) {
-            //TODO 封装numberSeed 的get和update 方法，统一控制
-            processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(
-                    channelTypeUuid, serialNumberSeed);
-        }
         CachedThreadPool.execute(new ProcessTaskSerialNumberUpdateThread(handler, processTaskSerialNumberPolicyVo));
         return null;
     }
