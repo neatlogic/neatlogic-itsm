@@ -29,20 +29,20 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 @Component
 public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
-    @Autowired
+    @Resource
     TeamMapper teamMapper;
 
-    @Autowired
+    @Resource
     UserMapper userMapper;
 
-    @Autowired
+    @Resource
     RoleMapper roleMapper;
 
     @Override
@@ -89,6 +89,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
                         if (ConditionConfigType.WORKCENTER.getValue().equals(configType.getValue())) {
                             this.add(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_TEAM.getValue());
                             this.add(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_DEPARTMENT.getValue());
+                            this.add(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_CENTER.getValue());
                         }
                     }
                 });
@@ -168,15 +169,25 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
             }
             stepTeamValueList.remove(loginTeam);
         }
-        //如果存在当前登录人所在部(寻找当前登录人所在部，并穿透获取所有子组)
+        //如果存在当前登录人所在部/中心(寻找当前登录人所在部/中心，并穿透获取所有子组)
         String loginDepartment = GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_DEPARTMENT.getValue();
-        List<TeamVo> departmentTeamList = new ArrayList<>();
-        if (stepTeamValueList.contains(loginDepartment)) {
-            List<TeamVo> teamTmpList = teamMapper.searchTeamByUserUuidAndLevelList(UserContext.get().getUserUuid(true), Arrays.asList(TeamLevel.TEAM.getValue(), TeamLevel.DEPARTMENT.getValue()));
+        String logincenter = GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_CENTER.getValue();
+        List<TeamVo> departmentOrCenterTeamList = new ArrayList<>();
+        if (stepTeamValueList.contains(loginDepartment) || stepTeamValueList.contains(logincenter)) {
+            List<String> titleList = new ArrayList<>();
+            titleList.add(TeamLevel.TEAM.getValue());
+            if (stepTeamValueList.contains(loginDepartment)) {
+                titleList.add(TeamLevel.DEPARTMENT.getValue());
+            }
+            if (stepTeamValueList.contains(logincenter)) {
+                titleList.add(TeamLevel.CENTER.getValue());
+            }
+            List<TeamVo> teamTmpList = teamMapper.searchTeamByUserUuidAndLevelList(UserContext.get().getUserUuid(true), titleList);
             if (CollectionUtils.isNotEmpty(teamTmpList)) {
-                departmentTeamList.addAll(teamMapper.getDepartmentTeamUuidByTeamList(teamTmpList));
-                if (CollectionUtils.isNotEmpty(departmentTeamList)) {
-                    List<TeamVo> groupTeamList = teamMapper.getAllSonTeamByParentTeamList(departmentTeamList);
+                titleList.remove(TeamLevel.TEAM.getValue());
+                departmentOrCenterTeamList.addAll(teamMapper.getTeamUuidByLevelListAndTeamList(teamTmpList, titleList));
+                if (CollectionUtils.isNotEmpty(departmentOrCenterTeamList)) {
+                    List<TeamVo> groupTeamList = teamMapper.getAllSonTeamByParentTeamList(departmentOrCenterTeamList);
                     if (CollectionUtils.isNotEmpty(groupTeamList)) {
                         for (TeamVo groupTeam : groupTeamList) {
                             stepTeamValueList.add(groupTeam.getUuid());
@@ -185,8 +196,8 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
                 }
             }
             stepTeamValueList.remove(loginDepartment);
+            stepTeamValueList.remove(logincenter);
         }
-
         //获取所有组的成员
         for (String team : stepTeamValueList) {
             teamUuidList.add(team.replaceAll(GroupSearch.TEAM.getValuePlugin(), StringUtils.EMPTY));
