@@ -71,7 +71,7 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 					resultObj.put("status", "running");
 					return resultObj;
 				} else {
-					long after = System.currentTimeMillis() - expireTime.getTime();
+					long after = expireTime.getTime() - System.currentTimeMillis();
 					if (after > 0) {
 						resultObj.put("status", "running");
 						return resultObj;
