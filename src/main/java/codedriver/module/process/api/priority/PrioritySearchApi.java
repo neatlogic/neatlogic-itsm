@@ -77,10 +77,6 @@ public class PrioritySearchApi extends PrivateApiComponentBase {
 		}
 		List<PriorityVo> priorityList = priorityMapper.searchPriorityList(priorityVo);
 		resultObj.put("tbodyList", priorityList);
-		ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("notifyAudit");
-		System.out.println(logger.getLevel());
-		System.out.println(logger.getEffectiveLevel());
-		logger.info("测试notifyAudit日志");
 		return resultObj;
 	}
 
