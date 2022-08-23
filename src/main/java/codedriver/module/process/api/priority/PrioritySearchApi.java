@@ -8,6 +8,8 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -75,6 +77,10 @@ public class PrioritySearchApi extends PrivateApiComponentBase {
 		}
 		List<PriorityVo> priorityList = priorityMapper.searchPriorityList(priorityVo);
 		resultObj.put("tbodyList", priorityList);
+		ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("notifyAudit");
+		System.out.println(logger.getLevel());
+		System.out.println(logger.getEffectiveLevel());
+		logger.info("测试notifyAudit日志");
 		return resultObj;
 	}
 
