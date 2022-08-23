@@ -92,6 +92,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
     @Override
     protected void execute() {
         try {
+            StringBuilder notifyAuditMessageStringBuilder = new StringBuilder();
             JSONObject notifyPolicyConfig = null;
             Long policyId = null;
             if (notifyTriggerType instanceof ProcessTaskNotifyTriggerType) {
@@ -102,6 +103,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                 if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
                     policyId = notifyPolicyConfig.getLong("policyId");
                 }
+                notifyAuditMessageStringBuilder.append(currentProcessTaskStepVo.getProcessTaskId());
             } else {
                 /* 获取步骤配置信息 **/
                 ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
@@ -126,6 +128,12 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                         policyId = notifyPolicyConfig.getLong("policyId");
                     }
                 }
+                notifyAuditMessageStringBuilder.append(stepVo.getProcessTaskId());
+                notifyAuditMessageStringBuilder.append("-");
+                notifyAuditMessageStringBuilder.append(stepVo.getName());
+                notifyAuditMessageStringBuilder.append("(");
+                notifyAuditMessageStringBuilder.append(stepVo.getId());
+                notifyAuditMessageStringBuilder.append(")");
             }
 
             /* 从步骤配置信息中获取通知策略信息 **/
@@ -153,7 +161,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                             fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
                         }
                         String notifyPolicyHandler = notifyPolicyVo.getHandler();
-                        NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, conditionParamData, receiverMap, currentProcessTaskStepVo, fileList);
+                        NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, notifyPolicyVo, paramMappingList, conditionParamData, receiverMap, currentProcessTaskStepVo, fileList, notifyAuditMessageStringBuilder.toString());
                     }
                 }
             }

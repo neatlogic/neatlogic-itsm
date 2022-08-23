@@ -230,6 +230,8 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                         if (CollectionUtils.isNotEmpty(paramMappingArray)) {
                             paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
                         }
+                        StringBuilder notifyAuditMessageStringBuilder = new StringBuilder();
+                        notifyAuditMessageStringBuilder.append(processTaskSlaVo.getProcessTaskId());
                         ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
                         processTaskStep.setIsAutoGenerateId(false);
                         processTaskStep.setProcessTaskId(processTaskSlaVo.getProcessTaskId());
@@ -245,6 +247,11 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                             processTaskService.getReceiverMap(processTaskStepVo, receiverMap, SlaNotifyTriggerType.TIMEOUT);
                             stepIdList.add(processTaskStepVo.getId());
                             stepNameList.add(processTaskStepVo.getName());
+                            notifyAuditMessageStringBuilder.append("-");
+                            notifyAuditMessageStringBuilder.append(processTaskStepVo.getName());
+                            notifyAuditMessageStringBuilder.append("(");
+                            notifyAuditMessageStringBuilder.append(processTaskStepVo.getId());
+                            notifyAuditMessageStringBuilder.append(")");
                         }
                         JSONObject paramObj = processTaskStep.getParamObj();
                         paramObj.put("idList", stepIdList);
@@ -253,8 +260,8 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                         if (CollectionUtils.isNotEmpty(fileList)) {
                             fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
                         }
-                        NotifyPolicyUtil.execute(notifyPolicyVo.getHandler(), SlaNotifyTriggerType.TIMEOUT, ProcessTaskMessageHandler.class, notifyPolicyVo.getConfig(), paramMappingList,
-                                conditionParamData, receiverMap, processTaskStep, fileList);
+                        NotifyPolicyUtil.execute(notifyPolicyVo.getHandler(), SlaNotifyTriggerType.TIMEOUT, ProcessTaskMessageHandler.class, notifyPolicyVo, paramMappingList,
+                                conditionParamData, receiverMap, processTaskStep, fileList, notifyAuditMessageStringBuilder.toString());
                     }
                 }
                 Date nextFireTime = context.getNextFireTime();
