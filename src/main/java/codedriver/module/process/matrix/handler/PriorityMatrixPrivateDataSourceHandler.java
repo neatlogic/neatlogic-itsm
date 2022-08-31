@@ -70,6 +70,7 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
     public String getLabel() {
         return "priority";
     }
+
     @Override
     public List<MatrixAttributeVo> getAttributeList() {
         return matrixAttributeList;
@@ -77,48 +78,29 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
 
     @Override
     public List<Map<String, String>> getTableData(MatrixDataVo dataVo) {
-        List<Map<String, String>> dataList = new ArrayList<>();
         PriorityVo searchVo = new PriorityVo();
-        searchVo.setIsActive(1);
         searchVo.setCurrentPage(dataVo.getCurrentPage());
         searchVo.setPageSize(dataVo.getPageSize());
-        List<PriorityVo> priorityList = priorityMapper.searchPriorityList(searchVo);
-        for (PriorityVo priorityVo : priorityList) {
-            Map<String, String> data = new HashMap<>();
-            data.put("uuid", priorityVo.getUuid());
-            data.put("b83b6711416847f7a78b1946607efb8c", priorityVo.getUuid());
-            data.put("dc1c6903648e417f88d52ad986b057a0", priorityVo.getName());
-            dataList.add(data);
-        }
-        return dataList;
+        List<PriorityVo> priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
+        return priorityListConvertDataList(priorityList);
     }
 
     @Override
     public List<Map<String, String>> searchTableData(MatrixDataVo dataVo) {
-        List<Map<String, String>> dataList = new ArrayList<>();
         List<PriorityVo> priorityList = new ArrayList<>();
-        JSONArray dafaultValue = dataVo.getDefaultValue();
-        if (CollectionUtils.isNotEmpty(dafaultValue)) {
-            List<String> uuidList = dafaultValue.toJavaList(String.class);
+        JSONArray defaultValue = dataVo.getDefaultValue();
+        if (CollectionUtils.isNotEmpty(defaultValue)) {
+            List<String> uuidList = defaultValue.toJavaList(String.class);
             priorityList = priorityMapper.getPriorityByUuidList(uuidList);
         } else {
             PriorityVo searchVo = new PriorityVo();
-            searchVo.setIsActive(1);
-            priorityList = priorityMapper.searchPriorityList(searchVo);
+            priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
         }
-        for (PriorityVo priorityVo : priorityList) {
-            Map<String, String> data = new HashMap<>();
-            data.put("uuid", priorityVo.getUuid());
-            data.put("b83b6711416847f7a78b1946607efb8c", priorityVo.getUuid());
-            data.put("dc1c6903648e417f88d52ad986b057a0", priorityVo.getName());
-            dataList.add(data);
-        }
-        return dataList;
+        return priorityListConvertDataList(priorityList);
     }
 
     @Override
     public List<Map<String, String>> getTableColumnDataForDefaultValue(MatrixDataVo dataVo) {
-        List<Map<String, String>> dataList = new ArrayList<>();
         PriorityVo searchVo = new PriorityVo();
         searchVo.setIsActive(1);
         List<MatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
@@ -141,41 +123,25 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
                 searchVo.setName(value);
             }
         }
-        List<PriorityVo>priorityList = priorityMapper.searchPriorityList(searchVo);
-        for (PriorityVo priorityVo : priorityList) {
-            Map<String, String> data = new HashMap<>();
-            data.put("uuid", priorityVo.getUuid());
-            data.put("b83b6711416847f7a78b1946607efb8c", priorityVo.getUuid());
-            data.put("dc1c6903648e417f88d52ad986b057a0", priorityVo.getName());
-            dataList.add(data);
-        }
-        return dataList;
+        List<PriorityVo>priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
+        return priorityListConvertDataList(priorityList);
     }
 
     @Override
     public List<Map<String, String>> searchTableColumnData(MatrixDataVo dataVo) {
-        List<Map<String, String>> dataList = new ArrayList<>();
         PriorityVo searchVo = matrixDataVoConvertSearchCondition(dataVo);
-        List<PriorityVo>priorityList = priorityMapper.searchPriorityList(searchVo);
-        for (PriorityVo priorityVo : priorityList) {
-            Map<String, String> data = new HashMap<>();
-            data.put("uuid", priorityVo.getUuid());
-            data.put("b83b6711416847f7a78b1946607efb8c", priorityVo.getUuid());
-            data.put("dc1c6903648e417f88d52ad986b057a0", priorityVo.getName());
-            dataList.add(data);
-        }
-        return dataList;
+        List<PriorityVo> priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
+        return priorityListConvertDataList(priorityList);
     }
 
     @Override
     public int getTableColumnDataCount(MatrixDataVo dataVo) {
         PriorityVo searchVo = matrixDataVoConvertSearchCondition(dataVo);
-        return priorityMapper.searchPriorityCount(searchVo);
+        return priorityMapper.searchPriorityCountForMatrix(searchVo);
     }
 
     private PriorityVo matrixDataVoConvertSearchCondition(MatrixDataVo dataVo) {
         PriorityVo searchVo = new PriorityVo();
-        searchVo.setIsActive(1);
         String keywordColumn = dataVo.getKeywordColumn();
         String keyword = dataVo.getKeyword();
         if (StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(keyword)) {
@@ -204,5 +170,22 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
             }
         }
         return searchVo;
+    }
+
+    /**
+     * 将List<PriorityVo>转换成List<Map<String, String>>
+     * @param priorityList 优先级列表
+     * @return 输出列表
+     */
+    private List<Map<String, String>> priorityListConvertDataList(List<PriorityVo> priorityList) {
+        List<Map<String, String>> dataList = new ArrayList<>();
+        for (PriorityVo priorityVo : priorityList) {
+            Map<String, String> data = new HashMap<>();
+            data.put("uuid", priorityVo.getUuid());
+            data.put("b83b6711416847f7a78b1946607efb8c", priorityVo.getUuid());
+            data.put("dc1c6903648e417f88d52ad986b057a0", priorityVo.getName());
+            dataList.add(data);
+        }
+        return dataList;
     }
 }
