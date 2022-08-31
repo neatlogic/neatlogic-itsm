@@ -11,6 +11,7 @@ import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixColumnVo;
 import codedriver.framework.matrix.dto.MatrixDataVo;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
+import codedriver.framework.process.dto.PrioritySearchVo;
 import codedriver.framework.process.dto.PriorityVo;
 import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,6 +25,7 @@ import java.util.*;
 public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDataSourceHandler {
 
     private final List<MatrixAttributeVo> matrixAttributeList = new ArrayList<>();
+
     {
         MatrixAttributeVo matrixAttributeVo = new MatrixAttributeVo();
         matrixAttributeVo.setMatrixUuid(getUuid());
@@ -38,6 +40,7 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
         matrixAttributeVo.setIsSearchable(0);
         matrixAttributeList.add(matrixAttributeVo);
     }
+
     {
         MatrixAttributeVo matrixAttributeVo = new MatrixAttributeVo();
         matrixAttributeVo.setMatrixUuid(getUuid());
@@ -78,7 +81,7 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
 
     @Override
     public List<Map<String, String>> getTableData(MatrixDataVo dataVo) {
-        PriorityVo searchVo = new PriorityVo();
+        PrioritySearchVo searchVo = new PrioritySearchVo();
         searchVo.setCurrentPage(dataVo.getCurrentPage());
         searchVo.setPageSize(dataVo.getPageSize());
         List<PriorityVo> priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
@@ -93,7 +96,7 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
             List<String> uuidList = defaultValue.toJavaList(String.class);
             priorityList = priorityMapper.getPriorityByUuidList(uuidList);
         } else {
-            PriorityVo searchVo = new PriorityVo();
+            PrioritySearchVo searchVo = new PrioritySearchVo();
             priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
         }
         return priorityListConvertDataList(priorityList);
@@ -101,8 +104,7 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
 
     @Override
     public List<Map<String, String>> getTableColumnDataForDefaultValue(MatrixDataVo dataVo) {
-        PriorityVo searchVo = new PriorityVo();
-        searchVo.setIsActive(1);
+        PrioritySearchVo searchVo = new PrioritySearchVo();
         List<MatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
         for (MatrixColumnVo matrixColumnVo : sourceColumnList) {
             String column = matrixColumnVo.getColumn();
@@ -123,25 +125,25 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
                 searchVo.setName(value);
             }
         }
-        List<PriorityVo>priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
+        List<PriorityVo> priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
         return priorityListConvertDataList(priorityList);
     }
 
     @Override
     public List<Map<String, String>> searchTableColumnData(MatrixDataVo dataVo) {
-        PriorityVo searchVo = matrixDataVoConvertSearchCondition(dataVo);
+        PrioritySearchVo searchVo = matrixDataVoConvertSearchCondition(dataVo);
         List<PriorityVo> priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
         return priorityListConvertDataList(priorityList);
     }
 
     @Override
     public int getTableColumnDataCount(MatrixDataVo dataVo) {
-        PriorityVo searchVo = matrixDataVoConvertSearchCondition(dataVo);
+        PrioritySearchVo searchVo = matrixDataVoConvertSearchCondition(dataVo);
         return priorityMapper.searchPriorityCountForMatrix(searchVo);
     }
 
-    private PriorityVo matrixDataVoConvertSearchCondition(MatrixDataVo dataVo) {
-        PriorityVo searchVo = new PriorityVo();
+    private PrioritySearchVo matrixDataVoConvertSearchCondition(MatrixDataVo dataVo) {
+        PrioritySearchVo searchVo = new PrioritySearchVo();
         String keywordColumn = dataVo.getKeywordColumn();
         String keyword = dataVo.getKeyword();
         if (StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(keyword)) {
@@ -174,6 +176,7 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
 
     /**
      * 将List<PriorityVo>转换成List<Map<String, String>>
+     *
      * @param priorityList 优先级列表
      * @return 输出列表
      */
