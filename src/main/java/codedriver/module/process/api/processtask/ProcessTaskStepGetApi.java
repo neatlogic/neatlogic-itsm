@@ -4,10 +4,11 @@ import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.ConfigMapper;
+import codedriver.framework.dto.ConfigVo;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.ProcessTaskScoreTemplateVo;
@@ -21,6 +22,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.common.config.ProcessConfig;
 import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -44,7 +46,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     private ScoreTemplateMapper scoreTemplateMapper;
 
     @Resource
-    private ChannelMapper channelMapper;
+    private ConfigMapper configMapper;
 
     @Override
     public String getToken() {
@@ -182,6 +184,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 // 回复框内容和附件暂存回显
                 processTaskService.setTemporaryData(processTaskVo, currentProcessTaskStepVo);
             }
+        }
+        ConfigVo config = configMapper.getConfigByKey("processtaskBaseInfoIsShow");
+        if (config != null && StringUtils.isNotBlank(config.getValue())) {
+            processTaskVo.setIsShowBaseInfo(Integer.valueOf(config.getValue()));
         }
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTask", processTaskVo);
