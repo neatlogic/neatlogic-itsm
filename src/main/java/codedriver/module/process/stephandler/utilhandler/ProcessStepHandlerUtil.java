@@ -754,9 +754,10 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                     /** 如果新表单属性值与旧表单属性值相同，就不用replace更新数据了 **/
                     formAttributeDataMap.remove(attributeUuid);
                     iterator.remove();
-                } else if (hidecomponentList.contains(attributeUuid)) {
-                    iterator.remove();
                 }
+                /*else if (hidecomponentList.contains(attributeUuid)) {
+                    iterator.remove();
+                }*/
             }
             if (CollectionUtils.isNotEmpty(oldProcessTaskFormAttributeDataList)) {
                 oldProcessTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
@@ -770,7 +771,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                     JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
                     String attributeUuid = formAttributeDataObj.getString("attributeUuid");
                     if (formAttributeDataMap.containsKey(attributeUuid)) {
-                        // 对于隐藏的属性，当前用户不能修改，不更新数据库中的值，不进行修改前后对比
+//                        // 对于隐藏的属性，当前用户不能修改，不更新数据库中的值，不进行修改前后对比
 //                        if (hidecomponentList.contains(attributeUuid)) {
 //                            continue;
 //                        }
