@@ -771,9 +771,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                     String attributeUuid = formAttributeDataObj.getString("attributeUuid");
                     if (formAttributeDataMap.containsKey(attributeUuid)) {
                         // 对于隐藏的属性，当前用户不能修改，不更新数据库中的值，不进行修改前后对比
-                        if (hidecomponentList.contains(attributeUuid)) {
-                            continue;
-                        }
+//                        if (hidecomponentList.contains(attributeUuid)) {
+//                            continue;
+//                        }
                         ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
                         attributeData.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
                         attributeData.setData(formAttributeDataObj.getString("dataList"));
