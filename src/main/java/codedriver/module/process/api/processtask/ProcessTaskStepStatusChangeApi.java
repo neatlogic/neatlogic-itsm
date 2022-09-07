@@ -6,42 +6,56 @@
 
 package codedriver.module.process.api.processtask;
 
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.UserVo;
-import codedriver.framework.exception.type.ParamNotExistsException;
-import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.framework.process.constvalue.ProcessStepHandlerType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
-import codedriver.framework.process.constvalue.ProcessUserType;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.*;
-import codedriver.framework.process.exception.processtask.*;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.alibaba.fastjson.JSONObject;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.type.ParamNotExistsException;
+import codedriver.framework.exception.user.UserNotFoundException;
+import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
+import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepRelVo;
+import codedriver.framework.process.dto.ProcessTaskStepUserVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskNextStepIllegalException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNextStepNameOrIdUnAssignException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepFoundMultipleException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepUserUnAssignException;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @Transactional
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class ProcessTaskStepStatusChangeApi extends PublicApiComponentBase {
+public class ProcessTaskStepStatusChangeApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
