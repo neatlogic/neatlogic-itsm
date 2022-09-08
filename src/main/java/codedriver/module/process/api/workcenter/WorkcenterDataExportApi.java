@@ -307,7 +307,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                                 }
                                 int excelHeadLength = handler.getExcelHeadLength(formAttributeVo.getConfigObj());
                                 // excelHeadLength > 1表示该表单属性为表格类属性，需要生成嵌套表格
-                                if (excelHeadLength > 1) {
+                                if (excelHeadLength > 1 && StringUtils.isNotBlank(detailedData.toString())) {
                                     JSONObject jsonObject = (JSONObject) detailedData;
                                     JSONArray _theadList = jsonObject.getJSONArray("theadList");
                                     JSONArray _tbodyList = jsonObject.getJSONArray("tbodyList");
