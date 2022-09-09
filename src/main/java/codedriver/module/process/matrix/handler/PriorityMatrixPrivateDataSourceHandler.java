@@ -96,7 +96,7 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
             List<String> uuidList = defaultValue.toJavaList(String.class);
             priorityList = priorityMapper.getPriorityByUuidList(uuidList);
         } else {
-            PrioritySearchVo searchVo = new PrioritySearchVo();
+            PrioritySearchVo searchVo = matrixDataVoConvertSearchCondition(dataVo);
             priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
         }
         return priorityListConvertDataList(priorityList);
