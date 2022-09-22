@@ -18,6 +18,7 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.framework.process.dto.SqlDecoratorVo;
 import codedriver.framework.process.workcenter.dto.JoinOnVo;
@@ -71,6 +72,23 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
             sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskFocusSqlTable().getShortName(), ProcessTaskFocusSqlTable.FieldEnum.USER_UUID.getValue(), UserContext.get().getUserUuid(true)));
             sqlSb.append(" ) ");
         });
+        mapSql.put("needScoreOfMine", (sqlSb) -> {
+            sqlSb.append(" ( ");
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.OWNER.getValue(), UserContext.get().getUserUuid(true)));
+            sqlSb.append(" ) and ( ");
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.NEED_SCORE.getValue(), "1"));
+            sqlSb.append(" ) and ( ");
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStatus.SUCCEED.getValue()));
+            sqlSb.append(" ) ");
+        });
+
+        mapSql.put("scoredOfMine", (sqlSb) -> {
+            sqlSb.append(" ( ");
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.OWNER.getValue(), UserContext.get().getUserUuid(true)));
+            sqlSb.append(" ) and ( ");
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStatus.SCORED.getValue()));
+            sqlSb.append(" ) ");
+        });
 
         joinTableSqlMap.put("doneOfMine", (list) -> {
             list.add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new ArrayList<JoinOnVo>() {{
@@ -118,6 +136,8 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
         JSONArray dataList = new JSONArray();
         dataList.add(new ValueTextVo("doneOfMine", "已办"));
         dataList.add(new ValueTextVo("focusOfMine", "已关注"));
+        dataList.add(new ValueTextVo("needScoreOfMine", "待评分"));
+        dataList.add(new ValueTextVo("scoredOfMine", "已评分"));
 
         JSONObject config = new JSONObject();
         config.put("type", formHandlerType);
