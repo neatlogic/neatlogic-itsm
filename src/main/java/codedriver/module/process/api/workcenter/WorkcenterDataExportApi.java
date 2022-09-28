@@ -399,7 +399,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                 }
             }
         }
-        String fileNameEncode = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), "工单数据" + ".xlsx");
+        String fileNameEncode = FileUtil.getEncodedFileName("工单数据" + ".xlsx");
         response.setContentType("application/vnd.ms-excel;charset=utf-8");
         response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
         try (OutputStream os = response.getOutputStream()) {
