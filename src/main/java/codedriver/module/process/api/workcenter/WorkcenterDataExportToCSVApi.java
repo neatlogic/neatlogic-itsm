@@ -102,7 +102,7 @@ public class WorkcenterDataExportToCSVApi extends PrivateBinaryStreamApiComponen
             workcenterVo.setTheadVoList(theadList);
         }
         try (OutputStream os = response.getOutputStream()) {
-            String fileNameEncode = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), "工单数据" + ".csv");
+            String fileNameEncode = FileUtil.getEncodedFileName("工单数据" + ".csv");
             response.setContentType("application/text;charset=GBK");
             response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
 
