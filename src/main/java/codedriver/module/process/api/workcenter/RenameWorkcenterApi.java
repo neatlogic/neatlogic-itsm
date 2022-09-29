@@ -36,7 +36,7 @@ import java.util.Set;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class WorkcenterRenameApi extends PrivateApiComponentBase {
+public class RenameWorkcenterApi extends PrivateApiComponentBase {
 
     @Resource
     WorkcenterMapper workcenterMapper;
@@ -60,6 +60,7 @@ public class WorkcenterRenameApi extends PrivateApiComponentBase {
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = true),
             @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, desc = "分类名", xss = true),
             @Param(name = "catalogName", type = ApiParamType.STRING, desc = "菜单分类"),
+            @Param(name = "isShowTotal", type = ApiParamType.INTEGER, desc = "是否显示总数，默认0：显示待办数")
     })
     @Description(desc = "修改工单中心分类名称接口")
     @Override

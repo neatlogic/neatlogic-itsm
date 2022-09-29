@@ -41,8 +41,8 @@ import java.util.stream.Collectors;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class WorkcenterListApi extends PrivateApiComponentBase {
-    private static final Logger logger = LoggerFactory.getLogger(WorkcenterListApi.class);
+public class ListWorkcenterApi extends PrivateApiComponentBase {
+    private static final Logger logger = LoggerFactory.getLogger(ListWorkcenterApi.class);
     @Resource
     WorkcenterMapper workcenterMapper;
 
@@ -130,7 +130,9 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
                          /*
             由于需要一直显示我的待办数量，因此无论输入条件有没有设置我的待办，都需要把我的待办设为1来查询一次数量
              */
-                        workcenter.getConditionConfig().put("isProcessingOfMine", 1);
+                        if (workcenter.getIsShowTotal() == 0) {
+                            workcenter.getConditionConfig().put("isProcessingOfMine", 1);
+                        }
                         workcenter.setExpectOffsetRowNum(100);
                         Integer ProcessingOfMineCount = newWorkcenterService.doSearchLimitCount(workcenter);
                         workcenter.setProcessingOfMineCount(ProcessingOfMineCount > 99 ? "99+" : ProcessingOfMineCount.toString());

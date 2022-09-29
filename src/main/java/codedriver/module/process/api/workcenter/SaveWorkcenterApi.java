@@ -38,7 +38,7 @@ import java.util.Set;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class WorkcenterSaveApi extends PrivateApiComponentBase {
+public class SaveWorkcenterApi extends PrivateApiComponentBase {
 
     @Resource
     WorkcenterMapper workcenterMapper;
@@ -65,7 +65,8 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
             @Param(name = "catalogName", type = ApiParamType.STRING, desc = "菜单分类"),
             @Param(name = "support", type = ApiParamType.ENUM, rule = "all,mobile,pc", desc = "使用范围，all|pc|mobile，默认值是：all"),
             @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "分类过滤配置，json格式", isRequired = true),
-            @Param(name = "authList", type = ApiParamType.JSONARRAY, desc = "授权列表，如果type是system,则必填")
+            @Param(name = "authList", type = ApiParamType.JSONARRAY, desc = "授权列表，如果type是system,则必填"),
+            @Param(name = "isShowTotal", type = ApiParamType.INTEGER, desc = "是否显示总数，默认0：显示待办数")
     })
     @Output({@Param(type = ApiParamType.STRING, desc = "分类uuid")})
     @Description(desc = "工单中心分类新增接口")

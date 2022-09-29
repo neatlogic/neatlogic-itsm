@@ -32,7 +32,7 @@ import java.util.*;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class WorkcenterGetApi extends PrivateApiComponentBase {
+public class GetWorkcenterApi extends PrivateApiComponentBase {
 
     @Resource
     WorkcenterMapper workcenterMapper;

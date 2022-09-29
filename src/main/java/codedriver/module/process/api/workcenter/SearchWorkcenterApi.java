@@ -23,7 +23,7 @@ import javax.annotation.Resource;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
+public class SearchWorkcenterApi extends PrivateApiComponentBase {
     @Resource
     WorkcenterMapper workcenterMapper;
 
@@ -44,17 +44,6 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
     public String getConfig() {
         return null;
     }
-
-    /*@Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid,有则去数据库获取对应分类的条件，无则根据传的过滤条件查询"),
-            @Param(name = "isMeWillDo", type = ApiParamType.INTEGER, desc = "是否带我处理的，1：是；0：否"),
-            @Param(name = "conditionGroupList", type = ApiParamType.JSONARRAY, desc = "条件组条件", isRequired = false),
-            @Param(name = "conditionGroupRelList", type = ApiParamType.JSONARRAY, desc = "条件组连接类型", isRequired = false),
-            @Param(name = "sortList", type = ApiParamType.JSONARRAY, desc = "排序", isRequired = false),
-            @Param(name = "headerList", type = ApiParamType.JSONARRAY, desc = "显示的字段", isRequired = false),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数", isRequired = false),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目", isRequired = false)
-    })*/
     @Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = true),
             @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "条件设置，为空则使用数据库中保存的条件"),
