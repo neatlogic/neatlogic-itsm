@@ -4,17 +4,19 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import codedriver.framework.common.RootComponent;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.user.UserNotFoundException;
+import codedriver.framework.form.constvalue.FormHandler;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.exception.FormAttributeRequiredException;
+import codedriver.framework.form.service.IFormCrossoverService;
 import codedriver.framework.notify.core.INotifyTriggerType;
 import codedriver.framework.process.audithandler.core.IProcessTaskAuditType;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
-import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.*;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.process.stepremind.core.IProcessTaskStepRemindType;
@@ -713,7 +715,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
 //            FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processTaskFormVo.getFormUuid());
             Map<String, String> attributeLabelMap = new HashMap<>();
             if (CollectionUtils.isNotEmpty(formAttributeVoList)) {
+                Map<String, FormAttributeVo> formAttributeMap = new HashMap<>();
                 for (FormAttributeVo formAttributeVo : formAttributeVoList) {
+                    formAttributeMap.put(formAttributeVo.getUuid(), formAttributeVo);
                     attributeLabelMap.put(formAttributeVo.getUuid(), formAttributeVo.getLabel());
                     if (formAttributeVo.isRequired()) {
                         if (hidecomponentList.contains(formAttributeVo.getUuid())) {
@@ -739,6 +743,19 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                             }
                         } else {
                             throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                        }
+                    }
+                }
+                // 对表格输入组件中密码password类型的单元格数据进行加密
+                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+                for (int i = 0; i < formAttributeDataList.size(); i++) {
+                    JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
+                    String attributeUuid = formAttributeDataObj.getString("attributeUuid");
+                    FormAttributeVo formAttributeVo = formAttributeMap.get(attributeUuid);
+                    if (formAttributeVo != null) {
+                        if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMSTATICLIST.getHandler())) {
+                            JSONObject dataList = formAttributeDataObj.getJSONObject("dataList");
+                            formCrossoverService.staticListPasswordEncrypt(dataList, formAttributeVo.getConfigObj());
                         }
                     }
                 }

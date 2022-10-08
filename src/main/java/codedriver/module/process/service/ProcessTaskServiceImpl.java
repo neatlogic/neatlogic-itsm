@@ -10,6 +10,7 @@ import codedriver.framework.change.constvalue.ChangeProcessStepHandlerType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.constvalue.UserType;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -20,9 +21,12 @@ import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.form.constvalue.FormHandler;
 import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.exception.FormActiveVersionNotFoundExcepiton;
+import codedriver.framework.form.service.IFormCrossoverService;
 import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
 import codedriver.framework.notify.core.INotifyTriggerType;
@@ -2074,10 +2078,19 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
         ProcessTaskStepVo startProcessTaskStepVo = null;
 
+        FormVersionVo formVersionVo = null;
         Long processTaskId = jsonObj.getLong("processTaskId");
         if (processTaskId != null) {
             checkProcessTaskParamsIsLegal(processTaskId);
             startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
+            ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
+            if (processTaskFormVo != null) {
+                String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+                formVersionVo = new FormVersionVo();
+                formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
+                formVersionVo.setFormName(processTaskFormVo.getFormName());
+                formVersionVo.setFormConfig(formContent);
+            }
         } else {
             /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
             if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
@@ -2087,11 +2100,39 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             startProcessTaskStepVo.setProcessUuid(processUuid);
             ProcessStepVo startProcessStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
             startProcessTaskStepVo.setHandler(startProcessStepVo.getHandler());
+            ProcessFormVo processFormVo = processMapper.getProcessFormByProcessUuid(processUuid);
+            if (processFormVo != null) {
+                formVersionVo = formMapper.getActionFormVersionByFormUuid(processFormVo.getFormUuid());
+            }
         }
 
         IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
         if (handler == null) {
             throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
+        }
+
+        // 对表格输入组件中密码password类型的单元格数据进行加密
+        if (formVersionVo != null) {
+            List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+            if (CollectionUtils.isNotEmpty(formAttributeList)) {
+                Map<String, FormAttributeVo> formAttributeMap = new HashMap<>();
+                for (FormAttributeVo formAttributeVo : formAttributeList) {
+                    formAttributeMap.put(formAttributeVo.getUuid(), formAttributeVo);
+                }
+                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+                JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");
+                for (int i = 0; i < formAttributeDataList.size(); i++) {
+                    JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
+                    String attributeUuid = formAttributeDataObj.getString("attributeUuid");
+                    FormAttributeVo formAttributeVo = formAttributeMap.get(attributeUuid);
+                    if (formAttributeVo != null) {
+                        if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMSTATICLIST.getHandler())) {
+                            JSONObject dataList = formAttributeDataObj.getJSONObject("dataList");
+                            formCrossoverService.staticListPasswordEncrypt(dataList, formAttributeVo.getConfigObj());
+                        }
+                    }
+                }
+            }
         }
 
         ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
