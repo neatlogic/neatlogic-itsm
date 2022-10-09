@@ -170,6 +170,10 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
                 return "已办";
             } else if (v.equalsIgnoreCase("focusOfMine")) {
                 return "已关注";
+            } else if (v.equalsIgnoreCase("needScoreOfMine")) {
+                return "待评分";
+            } else if (v.equalsIgnoreCase("scoredOfMine")) {
+                return "已评分";
             }
         } else if (value instanceof JSONArray) {
             List<String> textList = new ArrayList<>();
@@ -180,6 +184,10 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
                     textList.add("已办");
                 } else if (v.equalsIgnoreCase("focusOfMine")) {
                     textList.add("已关注");
+                } else if (v.equalsIgnoreCase("needScoreOfMine")) {
+                    textList.add("待评分");
+                } else if (v.equalsIgnoreCase("scoredOfMine")) {
+                    textList.add("已评分");
                 }
             }
             return String.join("、", textList);
