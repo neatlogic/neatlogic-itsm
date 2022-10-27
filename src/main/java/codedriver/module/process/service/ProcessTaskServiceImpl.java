@@ -11,6 +11,7 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.crossover.CrossoverServiceFactory;
+import codedriver.framework.dao.mapper.ConfigMapper;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -153,6 +154,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     private TaskConfigManager taskConfigManager;
     @Resource
     private IProcessStepHandlerUtil processStepHandlerUtil;
+    @Resource
+    private ConfigMapper configMapper;
 //    @Override
 //    public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo,
 //                                                  Map<String, String> formAttributeActionMap, int mode) {
@@ -649,9 +652,43 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     public List<ProcessTaskSlaTimeVo> getSlaTimeListByProcessTaskStepId(Long processTaskStepId) {
         List<Long> slaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskStepId(processTaskStepId);
         if (CollectionUtils.isNotEmpty(slaIdList)) {
-            return processTaskSlaMapper.getProcessTaskSlaTimeListBySlaIdList(slaIdList);
+            return getSlaTimeListBySlaIdList(slaIdList);
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public List<ProcessTaskSlaTimeVo> getSlaTimeListBySlaIdList(List<Long> slaIdList) {
+        List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskSlaMapper.getProcessTaskSlaTimeListBySlaIdList(slaIdList);
+        Set<Long> processTaskIdSet = processTaskSlaTimeList.stream().map(ProcessTaskSlaTimeVo::getProcessTaskId).collect(Collectors.toSet());
+        List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
+        Map<Long, String> worktimeUuidMap = processTaskList.stream().collect(Collectors.toMap(ProcessTaskVo::getId, ProcessTaskVo::getWorktimeUuid));
+        Long currentTimeMillis = System.currentTimeMillis();
+        String displayModeAfterTimeout = "naturalTime";
+        ConfigVo configVo = configMapper.getConfigByKey("displayModeAfterTimeout");
+        if (configVo != null) {
+            displayModeAfterTimeout = configVo.getValue();
+        }
+        for (ProcessTaskSlaTimeVo processTaskSlaTimeVo : processTaskSlaTimeList) {
+            processTaskSlaTimeVo.setDisplayModeAfterTimeout(displayModeAfterTimeout);
+            if (!Objects.equals(SlaStatus.DOING.name().toLowerCase(), processTaskSlaTimeVo.getStatus())) {
+                continue;
+            }
+            Long calculationTimeLong = processTaskSlaTimeVo.getCalculationTimeLong();
+            if (calculationTimeLong == null) {
+                continue;
+            }
+            long realCostTime = currentTimeMillis - calculationTimeLong;
+            processTaskSlaTimeVo.setRealTimeLeft(processTaskSlaTimeVo.getRealTimeLeft() - realCostTime);
+            String worktimeUuid = worktimeUuidMap.get(processTaskSlaTimeVo.getProcessTaskId());
+            if (StringUtils.isBlank(worktimeUuid)) {
+                processTaskSlaTimeVo.setTimeLeft(processTaskSlaTimeVo.getTimeLeft() - realCostTime);
+            } else {
+                long costTime = worktimeMapper.calculateCostTime(worktimeUuid, calculationTimeLong, currentTimeMillis);
+                processTaskSlaTimeVo.setTimeLeft(processTaskSlaTimeVo.getTimeLeft() - costTime);
+            }
+        }
+        return processTaskSlaTimeList;
     }
 
     @Override

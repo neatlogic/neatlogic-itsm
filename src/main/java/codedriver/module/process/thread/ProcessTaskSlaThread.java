@@ -43,6 +43,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -96,11 +97,11 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
      */
     private static long toMillis(int time, String unit) {
         if ("hour".equals(unit)) {
-            return (long) time * 60 * 60 * 1000;
+            return TimeUnit.HOURS.toMillis(time);
         } else if ("day".equals(unit)) {
-            return (long) time * 24 * 60 * 60 * 1000;
+            return TimeUnit.DAYS.toMillis(time);
         } else {
-            return (long) time * 60 * 1000;
+            return TimeUnit.MINUTES.toMillis(time);
         }
     }
 
@@ -176,6 +177,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
      */
     private ProcessTaskSlaTimeVo getSlaTime(Long slaId, Long timeSum, long currentTimeMillis, String worktimeUuid, ProcessTaskSlaTimeCostVo timeCostVo) {
         ProcessTaskSlaTimeVo slaTimeVo = new ProcessTaskSlaTimeVo();
+        slaTimeVo.setCalculationTime(new Date(currentTimeMillis));
         slaTimeVo.setTimeSum(timeSum);
         slaTimeVo.setSlaId(slaId);
         /** 非第一次进入，进行时间扣减 **/
