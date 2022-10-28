@@ -95,6 +95,13 @@ public interface ProcessTaskService {
     public List<ProcessTaskSlaTimeVo> getSlaTimeListByProcessTaskStepId(Long processTaskStepId);
 
     /**
+     * 时效列表
+     * @param slaIdList 时效ID列表
+     * @return
+     */
+    List<ProcessTaskSlaTimeVo> getSlaTimeListBySlaIdList(List<Long> slaIdList);
+
+    /**
      * 设置下一步骤列表
      *
      * @param processTaskStepVo 步骤信息
