@@ -1,10 +1,12 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import codedriver.framework.dao.mapper.ConfigMapper;
+import codedriver.framework.dto.ConfigVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
+import codedriver.framework.process.constvalue.SlaStatus;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskSlaVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -21,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 @Component
@@ -28,7 +31,10 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 
     @Autowired
     WorktimeMapper worktimeMapper;
+    @Resource
+    ConfigMapper configMapper;
 
+    private final String DISPLAY_MODE_AFTER_TIMEOUT_KEY = "displayModeAfterTimeout";
     @Override
     public String getName() {
         return "expiretime";
@@ -98,6 +104,15 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
         List<ProcessTaskSlaVo> processTaskSlaList = processTaskVo.getProcessTaskSlaVoList();
         JSONArray resultArray = new JSONArray();
         if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus()) && CollectionUtils.isNotEmpty(processTaskSlaList)) {
+            String displayModeAfterTimeout = "";
+            ConfigVo configVo = configMapper.getConfigByKey(DISPLAY_MODE_AFTER_TIMEOUT_KEY);
+            if (configVo != null) {
+                displayModeAfterTimeout = configVo.getValue();
+            }
+            if (StringUtils.isBlank(displayModeAfterTimeout)) {
+                displayModeAfterTimeout = "naturalTime";
+            }
+            long currentTimeMillis = System.currentTimeMillis();
             for (ProcessTaskSlaVo slaVo : processTaskSlaList) {
                 //判断需要 同时满足 该步骤是进行中状态，以及包含sla策略
                 if (processTaskVo.getStepList().stream().noneMatch(o -> (Objects.equals(o.getStatus(), ProcessTaskStatus.RUNNING.getValue()) || (Objects.equals(o.getStatus(), ProcessTaskStatus.PENDING.getValue()) && o.getIsActive() == 1))
@@ -106,15 +121,25 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
                     continue;
                 }
                 JSONObject tmpJson = new JSONObject();
+                tmpJson.put(DISPLAY_MODE_AFTER_TIMEOUT_KEY, displayModeAfterTimeout);
                 ProcessTaskSlaTimeVo slaTimeVo = slaVo.getSlaTimeVo();
-                if (slaTimeVo == null || Objects.equals(ProcessTaskStepUserStatus.DONE.getValue(), slaTimeVo.getStatus())) {
+                if (slaTimeVo == null) {
+                    continue;
+                }
+                String status = slaTimeVo.getStatus();
+                if (Objects.equals(SlaStatus.DONE.name().toLowerCase(), status)) {
                     continue;
                 }
                 Long expireTimeLong = slaTimeVo.getExpireTime() != null ? slaTimeVo.getExpireTime().getTime() : null;
                 Long realExpireTimeLong = slaTimeVo.getRealExpireTime() != null ? slaTimeVo.getRealExpireTime().getTime() : null;
+                Long timeLeft = slaTimeVo.getTimeLeft()!= null ? slaTimeVo.getTimeLeft() : 0L;
+                Date calculationTime = slaTimeVo.getCalculationTime();
+                if (calculationTime != null && SlaStatus.DOING.name().toLowerCase().equals(status)) {
+                    long cost = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), calculationTime.getTime(), currentTimeMillis);
+                    timeLeft -= cost;
+                }
+                tmpJson.put("timeLeft", timeLeft);
                 if (expireTimeLong != null) {
-                    long timeLeft = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), System.currentTimeMillis(), expireTimeLong);
-                    tmpJson.put("timeLeft", timeLeft);
                     tmpJson.put("expireTime", expireTimeLong);
                 }
                 if (realExpireTimeLong != null) {
@@ -165,6 +190,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
                                 , new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.TIME_LEFT.getValue(), "timeLeft")
                                 , new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.REALTIME_LEFT.getValue(), "realTimeLeft")
                                 , new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.STATUS.getValue(), "slaTimeStatus")
+                                , new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.CALCULATION_TIME.getValue(), "calculationTime")
                         )
                 ));
                 add(new TableSelectColumnVo(new ProcessTaskSqlTable(),

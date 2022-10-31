@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -85,7 +85,8 @@ public class ProcessTaskWorkTimeColumn extends ProcessTaskColumnBase implements 
 	public List<TableSelectColumnVo> getTableSelectColumn() {
 		return new ArrayList<TableSelectColumnVo>(){
 			{
-				add(new TableSelectColumnVo(new WorkTimeSqlTable(), Collections.singletonList(
+				add(new TableSelectColumnVo(new WorkTimeSqlTable(), Arrays.asList(
+						new SelectColumnVo(WorkTimeSqlTable.FieldEnum.UUID.getValue(),"worktimeUuid"),
 						new SelectColumnVo(WorkTimeSqlTable.FieldEnum.NAME.getValue(),"worktimeName")
 				)));
 			}
