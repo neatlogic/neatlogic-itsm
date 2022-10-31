@@ -7,6 +7,7 @@ package codedriver.module.process.api.workcenter;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -53,12 +54,9 @@ public class SearchWorkcenterApi extends PrivateApiComponentBase {
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
     })
     @Output({
-            @Param(name = "headerList", type = ApiParamType.JSONARRAY, desc = "展示的字段"),
-            @Param(name = "dataList", type = ApiParamType.JSONARRAY, desc = "展示的值"),
-            @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总数"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
-            @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
+            @Param(name = "theadList", type = ApiParamType.JSONARRAY, desc = "展示的字段"),
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "展示的值"),
+            @Param(explode = BasePageVo.class)
     })
     @Description(desc = "工单中心搜索接口")
     @Override
