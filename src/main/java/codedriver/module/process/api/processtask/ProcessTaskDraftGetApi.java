@@ -292,6 +292,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
         startProcessTaskStepVo.setIsRequired((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isRequired"));
         startProcessTaskStepVo.setIsNeedContent((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isNeedContent"));
+        startProcessTaskStepVo.setIsNeedUploadFile((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isNeedUploadFile"));
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 
         processTaskService.setProcessTaskFormInfo(processTaskVo);
