@@ -231,9 +231,26 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             processTaskVo.setIsNeedPriority(0);
         }
 
-        ProcessTaskStepVo oldStartProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(copyProcessTaskId);
         ProcessTaskStepVo startProcessTaskStepVo = processTaskVo.getStartProcessTaskStep();
-        startProcessTaskStepVo.setComment(oldStartProcessTaskStepVo.getComment());
+        ProcessTaskStepVo oldStartProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(copyProcessTaskId);
+        ProcessTaskStepReplyVo oldComment = oldStartProcessTaskStepVo.getComment();
+        if (oldComment != null) {
+            String processUuid = processTaskVo.getProcessUuid();
+            ProcessStepVo processStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
+            String processStepConfigStr = processStepVo.getConfig();
+            if (StringUtils.isNotBlank(processStepConfigStr)) {
+                Integer isNeedContent = (Integer) JSONPath.read(processStepConfigStr, "isNeedContent");
+                Integer isNeedUploadFile = (Integer) JSONPath.read(processStepConfigStr, "isNeedUploadFile");
+                if (Objects.equals(isNeedContent, 0) && Objects.equals(isNeedUploadFile, 0)) {
+                    oldComment = null;
+                } else if (Objects.equals(isNeedContent, 0)) {
+                    oldComment.setContent(null);
+                } else if (Objects.equals(isNeedUploadFile, 0)) {
+                    oldComment.setFileList(null);
+                }
+                startProcessTaskStepVo.setComment(oldComment);
+            }
+        }
 //        startProcessTaskStepVo.setHandlerStepInfo(oldStartProcessTaskStepVo.getHandlerStepInfo());
         /** 当前步骤特有步骤信息 **/
         IProcessStepInternalHandler startProcessStepUtilHandler =
