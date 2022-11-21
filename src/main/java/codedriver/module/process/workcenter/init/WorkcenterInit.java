@@ -5,21 +5,15 @@
 
 package codedriver.module.process.workcenter.init;
 
-import codedriver.framework.applicationlistener.core.ModuleInitializedListenerBase;
-import codedriver.framework.asynchronization.thread.CodeDriverThread;
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
-import codedriver.framework.bootstrap.CodedriverWebApplicationContext;
 import codedriver.framework.common.constvalue.DeviceType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.UserType;
-import codedriver.framework.dao.mapper.TenantMapper;
-import codedriver.framework.dto.TenantVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterInitType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterAuthorityVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.startup.StartupBase;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -37,23 +31,12 @@ import java.util.stream.Stream;
  * @Date: 2021/1/5 17:55
  **/
 @Component
-public class WorkcenterInit extends ModuleInitializedListenerBase {
+public class WorkcenterInit extends StartupBase {
     public List<WorkcenterVo> workcenterList = new ArrayList<>();
-    private List<TenantVo> tenantList = new ArrayList<>();
-
-    @Resource
-    private TenantMapper tenantMapper;
 
     @Resource
     private WorkcenterMapper workcenterMapper;
 
-    /**
-     * @Description:
-     * @Author: 89770
-     * @Date: 2021/1/5 18:01
-     * @Params: * @param null:
-     * @Returns: * @return: null
-     **/
     private WorkcenterVo all() {
         WorkcenterVo workcenterVo = new WorkcenterVo();
         workcenterVo.setUuid(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue());
@@ -188,66 +171,57 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
         return workcenterVo;
     }
 
-    @Override
-    public void onInitialized(CodedriverWebApplicationContext context) {
-        for (TenantVo tenantVo : tenantList) {
-            CachedThreadPool.execute(new InsertWorkcenterRunner(tenantVo.getUuid()));
-        }
+    {
+        workcenterList.add(all());
+        workcenterList.add(draft());
+        workcenterList.add(doneOfMine());
+        workcenterList.add(processingOfMine());
     }
 
-    class InsertWorkcenterRunner extends CodeDriverThread {
-        private final String tenantUuid;
+    @Override
+    public String getName() {
+        return "初始化工单中心出厂分类";
+    }
 
-        public InsertWorkcenterRunner(String tenantUuid) {
-            super("WORKCENTER-INIT-" + tenantUuid);
-            this.tenantUuid = tenantUuid;
-        }
-
-        @Override
-        protected void execute() {
-            if (CollectionUtils.isNotEmpty(workcenterList)) {
-                // 切换租户数据源
-                TenantContext.get().switchTenant(tenantUuid).setUseDefaultDatasource(false);
-                //获取工单中心需要初始化的分类的uuidList
-                List<String> initWorkcenterUUidList = Stream.of(ProcessWorkcenterInitType.values()).map(ProcessWorkcenterInitType::getValue).collect(Collectors.toList());
-
-                /*
-                  工单中心分类初始化分为分类初始化、分类权限初始化
-                 */
-                List<WorkcenterVo> oldWorkcenterVoList = workcenterMapper.getWorkcenterVoListByUuidList(initWorkcenterUUidList);
-                Map<String, WorkcenterVo> workcenterVoMap = new HashMap<>();
-                if (CollectionUtils.isNotEmpty(oldWorkcenterVoList)) {
-                    workcenterVoMap = oldWorkcenterVoList.stream().collect(Collectors.toMap(WorkcenterVo::getUuid, e -> e));
+    @Override
+    public void executeForCurrentTenant() {
+        if (CollectionUtils.isNotEmpty(workcenterList)) {
+            //获取工单中心需要初始化的分类的uuidList
+            List<String> initWorkcenterUUidList = Stream.of(ProcessWorkcenterInitType.values()).map(ProcessWorkcenterInitType::getValue).collect(Collectors.toList());
+            /*
+              工单中心分类初始化分为分类初始化、分类权限初始化
+             */
+            List<WorkcenterVo> oldWorkcenterVoList = workcenterMapper.getWorkcenterVoListByUuidList(initWorkcenterUUidList);
+            Map<String, WorkcenterVo> workcenterVoMap = new HashMap<>();
+            if (CollectionUtils.isNotEmpty(oldWorkcenterVoList)) {
+                workcenterVoMap = oldWorkcenterVoList.stream().collect(Collectors.toMap(WorkcenterVo::getUuid, e -> e));
+            }
+            List<WorkcenterAuthorityVo> oldAuthorityVoList = workcenterMapper.getWorkcenterAuthorityVoListByUuidList(initWorkcenterUUidList);
+            for (WorkcenterVo workcenterVo : workcenterList) {
+                String uuid = workcenterVo.getUuid();
+                //初始化工单中心分类
+                WorkcenterVo oldWorkcenterVo = workcenterVoMap.get(uuid);
+                if (oldWorkcenterVo != null) {
+                    if (StringUtils.isNotBlank(oldWorkcenterVo.getSupport())) {
+                        workcenterVo.setSupport(oldWorkcenterVo.getSupport());
+                    }
                 }
-                List<WorkcenterAuthorityVo> oldAuthorityVoList = workcenterMapper.getWorkcenterAuthorityVoListByUuidList(initWorkcenterUUidList);
-
-                for (WorkcenterVo workcenterVo : workcenterList) {
-                    String uuid = workcenterVo.getUuid();
-                    //初始化工单中心分类
-                    WorkcenterVo oldWorkcenterVo = workcenterVoMap.get(uuid);
-                    if (oldWorkcenterVo != null) {
-                        if (StringUtils.isNotBlank(oldWorkcenterVo.getSupport())) {
-                            workcenterVo.setSupport(oldWorkcenterVo.getSupport());
-                        }
-                    }
-                    workcenterMapper.insertWorkcenter(workcenterVo);
-
-                    //初始化工单中心分类权限
-                    if (oldAuthorityVoList.stream().noneMatch(o -> Objects.equals(o.getWorkcenterUuid(), uuid))) {
-                        workcenterMapper.insertWorkcenterAuthority(new WorkcenterAuthorityVo(uuid, GroupSearch.COMMON.getValue(), UserType.ALL.getValue()));
-                    }
-
+                workcenterMapper.insertWorkcenter(workcenterVo);
+                //初始化工单中心分类权限
+                if (oldAuthorityVoList.stream().noneMatch(o -> Objects.equals(o.getWorkcenterUuid(), uuid))) {
+                    workcenterMapper.insertWorkcenterAuthority(new WorkcenterAuthorityVo(uuid, GroupSearch.COMMON.getValue(), UserType.ALL.getValue()));
                 }
             }
         }
     }
 
     @Override
-    protected void myInit() {
-        tenantList = tenantMapper.getAllActiveTenant();
-        workcenterList.add(all());
-        workcenterList.add(draft());
-        workcenterList.add(doneOfMine());
-        workcenterList.add(processingOfMine());
+    public void executeForAllTenant() {
+
+    }
+
+    @Override
+    public int sort() {
+        return 0;
     }
 }
