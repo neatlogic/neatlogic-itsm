@@ -3,6 +3,7 @@ package codedriver.module.process.api.process;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -13,6 +14,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import codedriver.module.process.dao.mapper.ProcessMapper;
+import codedriver.module.process.service.CatalogService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,9 @@ public class ProcessReferenceListApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ChannelMapper channelMapper;
+
+	@Autowired
+	private CatalogService catalogService;
 
 	@Autowired
 	private ChannelTypeMapper channelTypeMapper;
@@ -68,6 +73,8 @@ public class ProcessReferenceListApi extends PrivateApiComponentBase {
 			for(ChannelVo channelVo : channelVoList){
 				ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
 				channelVo.setChannelTypeVo(channelTypeVo.clone());
+				boolean effectiveAuthority = catalogService.channelIsAuthority(channelVo.getUuid(), UserContext.get().getUserUuid(true));
+				channelVo.setEffectiveAuthority(effectiveAuthority);
 				channelVo.setAllowDesc(null);
 				channelVo.setParentUuid(null);
 				channelVo.setChannelTypeUuid(null);
