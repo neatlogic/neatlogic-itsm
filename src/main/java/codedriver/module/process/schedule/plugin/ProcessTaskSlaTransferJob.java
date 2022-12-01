@@ -71,7 +71,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
     private RoleMapper roleMapper;
 
     @Override
-    public Boolean isHealthy(JobObject jobObject) {
+    public Boolean isMyHealthy(JobObject jobObject) {
         Long slaTransferId = Long.valueOf(jobObject.getJobName());
         ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskSlaMapper.getProcessTaskSlaTransferById(slaTransferId);
         if (processTaskSlaTransferVo == null) {
