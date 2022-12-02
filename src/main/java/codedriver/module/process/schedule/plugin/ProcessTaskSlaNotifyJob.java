@@ -56,7 +56,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
     private ProcessTaskService processTaskService;
 
     @Override
-    public Boolean isHealthy(JobObject jobObject) {
+    public Boolean isMyHealthy(JobObject jobObject) {
         Long slaNotifyId = Long.valueOf(jobObject.getJobName());
         ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskSlaMapper.getProcessTaskSlaNotifyById(slaNotifyId);
         if (processTaskSlaNotifyVo == null) {

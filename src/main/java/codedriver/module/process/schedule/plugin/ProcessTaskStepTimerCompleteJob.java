@@ -40,7 +40,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
     }
 
     @Override
-    public Boolean isHealthy(JobObject jobObject) {
+    public Boolean isMyHealthy(JobObject jobObject) {
         Long id = Long.valueOf(jobObject.getJobName());
         ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerByProcessTaskStepId(id);
         if (processTaskStepTimerVo != null) {
