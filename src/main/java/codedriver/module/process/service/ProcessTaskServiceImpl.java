@@ -660,9 +660,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     @Override
     public List<ProcessTaskSlaTimeVo> getSlaTimeListBySlaIdList(List<Long> slaIdList) {
         List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskSlaMapper.getProcessTaskSlaTimeListBySlaIdList(slaIdList);
-        if (CollectionUtils.isEmpty(processTaskSlaTimeList)) {
-            return processTaskSlaTimeList;
-        }
         Set<Long> processTaskIdSet = processTaskSlaTimeList.stream().map(ProcessTaskSlaTimeVo::getProcessTaskId).collect(Collectors.toSet());
         List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
         Map<Long, String> worktimeUuidMap = processTaskList.stream().collect(Collectors.toMap(ProcessTaskVo::getId, ProcessTaskVo::getWorktimeUuid));
