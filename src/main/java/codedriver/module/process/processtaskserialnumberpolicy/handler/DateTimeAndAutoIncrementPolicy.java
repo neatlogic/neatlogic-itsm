@@ -83,7 +83,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
         }
 
         @Override
-        public Boolean isHealthy(JobObject jobObject) {
+        public Boolean isMyHealthy(JobObject jobObject) {
             return true;
         }
 
