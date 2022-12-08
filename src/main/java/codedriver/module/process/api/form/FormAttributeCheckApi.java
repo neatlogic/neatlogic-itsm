@@ -136,7 +136,8 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 					configObj.put("worktimeUuid", worktimeUuid);
 					return handler.valid(attributeDataVo, configObj);
 				}else {
-					throw new FormAttributeHandlerNotFoundException(formAttribute.getHandler());
+//					throw new FormAttributeHandlerNotFoundException(formAttribute.getHandler());
+					return false;
 				}
 			}
 		}
