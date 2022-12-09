@@ -55,7 +55,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 	private WorktimeMapper worktimeMapper;
 
 	@Override
-    public Boolean isHealthy(JobObject jobObject) {
+    public Boolean isMyHealthy(JobObject jobObject) {
         Long processTaskId = Long.valueOf(jobObject.getJobName());
         List<ProcessTaskScoreVo> processtaskScoreVos = processTaskScoreMapper.getProcessTaskScoreByProcesstaskId(processTaskId);
         if (CollectionUtils.isEmpty(processtaskScoreVos)) {

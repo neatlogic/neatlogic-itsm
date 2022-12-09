@@ -84,7 +84,7 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
         }
 
         @Override
-        public Boolean isHealthy(JobObject jobObject) {
+        public Boolean isMyHealthy(JobObject jobObject) {
             return true;
         }
 
