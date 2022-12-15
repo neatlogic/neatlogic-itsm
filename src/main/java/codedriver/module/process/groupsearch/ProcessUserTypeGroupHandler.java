@@ -42,14 +42,23 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
             includeList = new ArrayList<Object>();
         }
         List<String> includeStrList = includeList.stream().map(Object::toString).collect(Collectors.toList());
+        List<String> valuelist = new ArrayList<>();
         List<ValueTextVo> userTypeList = new ArrayList<>();
         for (ProcessUserType s : ProcessUserType.values()) {
             if (s.getIsShow() && s.getText().contains(jsonObj.getString("keyword"))) {
-                userTypeList.add(new ValueTextVo(getHeader() + s.getValue(), s.getText()));
+                String value = getHeader() + s.getValue();
+                if (!valuelist.contains(value)) {
+                    valuelist.add(value);
+                    userTypeList.add(new ValueTextVo(value, s.getText()));
+                }
             }
             if (includeStrList.contains(getHeader() + s.getValue())) {
                 if (userTypeList.stream().noneMatch(o -> Objects.equals(o.getValue(), s.getValue()))) {
-                    userTypeList.add(new ValueTextVo(getHeader() + s.getValue(), s.getText()));
+                    String value = getHeader() + s.getValue();
+                    if (!valuelist.contains(value)) {
+                        valuelist.add(value);
+                        userTypeList.add(new ValueTextVo(value, s.getText()));
+                    }
                 }
             }
         }
@@ -60,7 +69,11 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
             List<TaskConfigVo> taskConfigVoList = taskMapper.searchTaskConfig(configParam);
             if (CollectionUtils.isNotEmpty(taskConfigVoList)) {
                 for (TaskConfigVo configVo : taskConfigVoList) {
-                    userTypeList.add(new ValueTextVo(getHeader() + configVo.getId().toString(), configVo.getName() + "处理人"));
+                    String value = getHeader() + configVo.getId().toString();
+                    if (!valuelist.contains(value)) {
+                        valuelist.add(value);
+                        userTypeList.add(new ValueTextVo(value, configVo.getName() + "处理人"));
+                    }
                 }
             }
         }
