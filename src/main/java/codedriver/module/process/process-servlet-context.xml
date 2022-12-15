@@ -19,8 +19,6 @@
 
 	<context:component-scan base-package="codedriver.module.process" />
 
-	<context:component-scan base-package="codedriver.module.suzhoubank" />
-
 	<context:annotation-config />
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
