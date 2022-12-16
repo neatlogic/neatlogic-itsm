@@ -4,6 +4,8 @@ import codedriver.framework.form.attribute.core.FormAttributeDataConversionHandl
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.form.attribute.core.IFormAttributeDataConversionHandler;
 import codedriver.framework.form.attribute.core.IFormAttributeHandler;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -80,16 +82,27 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
                     selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskForm.getFormContentHash());
                 if (StringUtils.isNotBlank(formContent)) {
                     try {
-                        JSONObject formConfig = JSON.parseObject(formContent);
-                        JSONArray controllerList = formConfig.getJSONArray("controllerList");
-                        if (CollectionUtils.isNotEmpty(controllerList)) {
-                            for (int i = 0; i < controllerList.size(); i++) {
-                                JSONObject attributeObj = controllerList.getJSONObject(i);
-                                attributeLabelMap.put(attributeObj.getString("uuid"), attributeObj.getString("label"));
-                                attributeConfigMap.put(attributeObj.getString("uuid"),
-                                    attributeObj.getJSONObject("config"));
+                        FormVersionVo formVersionVo = new FormVersionVo();
+                        formVersionVo.setFormUuid(processTaskForm.getFormUuid());
+                        formVersionVo.setFormName(processTaskForm.getFormName());
+                        formVersionVo.setFormConfig(formContent);
+                        List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+                        if (CollectionUtils.isNotEmpty(formAttributeList)) {
+                            for (FormAttributeVo formAttributeVo : formAttributeList) {
+                                attributeLabelMap.put(formAttributeVo.getUuid(), formAttributeVo.getLabel());
+                                attributeConfigMap.put(formAttributeVo.getUuid(), formAttributeVo.getConfigObj());
                             }
                         }
+//                        JSONObject formConfig = JSON.parseObject(formContent);
+//                        JSONArray controllerList = formConfig.getJSONArray("controllerList");
+//                        if (CollectionUtils.isNotEmpty(controllerList)) {
+//                            for (int i = 0; i < controllerList.size(); i++) {
+//                                JSONObject attributeObj = controllerList.getJSONObject(i);
+//                                attributeLabelMap.put(attributeObj.getString("uuid"), attributeObj.getString("label"));
+//                                attributeConfigMap.put(attributeObj.getString("uuid"),
+//                                    attributeObj.getJSONObject("config"));
+//                            }
+//                        }
                     } catch (Exception ex) {
                         logger.error("hash为" + processTaskForm.getFormContentHash() + "的processtask_form内容不是合法的JSON格式",
                             ex);
