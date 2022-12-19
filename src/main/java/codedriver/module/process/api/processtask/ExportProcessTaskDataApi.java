@@ -610,10 +610,6 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
                 put(resultObj, "file", file);
             }
         }
-
-        {
-            //
-        }
         return resultObj;
     }
 
