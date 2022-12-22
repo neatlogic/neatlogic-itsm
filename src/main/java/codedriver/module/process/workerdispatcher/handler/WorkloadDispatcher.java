@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -39,38 +40,57 @@ public class WorkloadDispatcher extends WorkerDispatcherBase {
 	@Override
 	protected List<String> myGetWorker(ProcessTaskStepVo processTaskStepVo, JSONObject configObj) {
 		List<String> resultList = new ArrayList<>();
-		if(MapUtils.isNotEmpty(configObj)) {
-			String team = configObj.getString("team");
-			if(StringUtils.isNotBlank(team) && team.startsWith(GroupSearch.TEAM.getValuePlugin())) {
-				String[] split = team.split("#");
-				List<TeamUserVo> teamUserList = teamMapper.getTeamUserListByTeamUuid(split[1]);
-				if(CollectionUtils.isNotEmpty(teamUserList)) {
-					/** 找出组员的工单量，按工作量从小到大排序 **/
-					List<Map<String, Object>> workloadList = processTaskMapper.getWorkloadByTeamUuid(split[1]);
-					if(CollectionUtils.isNotEmpty(workloadList)) {
-						int minWorkload = Integer.MAX_VALUE;
-						List<String> minWorkloadUserUuidList = new ArrayList<>();
-						for(Map<String, Object> workloadMap : workloadList) {
-							int count = (int) workloadMap.get("count");
-							if(count <= minWorkload) {
-								minWorkload = count;
-								Object userUuid = workloadMap.get("userUuid");
-								if(userUuid != null) {
-									minWorkloadUserUuidList.add(userUuid.toString());									
-								}
-							}else {
-								break;
-							}
+		if(MapUtils.isEmpty(configObj)) {
+			return resultList;
+		}
+		String team = configObj.getString("team");
+		if(StringUtils.isBlank(team)) {
+			return resultList;
+		}
+		if (!team.startsWith(GroupSearch.TEAM.getValuePlugin())) {
+			return resultList;
+		}
+		String[] split = team.split("#");
+		List<TeamUserVo> teamUserList = teamMapper.getTeamUserListByTeamUuid(split[1]);
+		if(CollectionUtils.isEmpty(teamUserList)) {
+			return resultList;
+		}
+		List<String> teamUserUuidList = teamUserList.stream().map(TeamUserVo::getUserUuid).collect(Collectors.toList());
+		/** 找出组员中工单量最小的组员集合 **/
+		List<String> minWorkloadUserUuidList = new ArrayList<>();
+		List<Map<String, Object>> workloadList = processTaskMapper.getWorkloadByTeamUuid(split[1]);
+		if(CollectionUtils.isNotEmpty(workloadList)) {
+			List<String> userUuidList = new ArrayList<>();
+			for (Map<String, Object> workloadMap : workloadList) {
+				userUuidList.add(workloadMap.get("userUuid").toString());
+			}
+			// 先看看有没有无工作量的员工
+			teamUserUuidList.removeAll(userUuidList);
+			if (CollectionUtils.isNotEmpty(teamUserUuidList)) {
+				minWorkloadUserUuidList = teamUserUuidList;
+			} else {
+				long minWorkload = Integer.MAX_VALUE;
+				for(Map<String, Object> workloadMap : workloadList) {
+					long count = (long) workloadMap.get("count");
+					if(count <= minWorkload) {
+						minWorkload = count;
+						Object userUuid = workloadMap.get("userUuid");
+						if(userUuid != null) {
+							minWorkloadUserUuidList.add(userUuid.toString());
 						}
-						/** 随机选取一位用户作为处理人 **/
-						if(CollectionUtils.isNotEmpty(minWorkloadUserUuidList)) {
-							Random random = new Random();
-							int index = random.nextInt(minWorkloadUserUuidList.size());
-							resultList.add(minWorkloadUserUuidList.get(index));
-						}
+					}else {
+						break;
 					}
 				}
 			}
+		} else {
+			minWorkloadUserUuidList = teamUserUuidList;
+		}
+		/** 随机选取一位用户作为处理人 **/
+		if(CollectionUtils.isNotEmpty(minWorkloadUserUuidList)) {
+			Random random = new Random();
+			int index = random.nextInt(minWorkloadUserUuidList.size());
+			resultList.add(minWorkloadUserUuidList.get(index));
 		}
 		return resultList;
 	}
