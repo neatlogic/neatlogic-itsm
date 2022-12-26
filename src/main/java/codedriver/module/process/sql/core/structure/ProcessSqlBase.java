@@ -67,11 +67,13 @@ public abstract class ProcessSqlBase<T extends SqlDecoratorVo> implements IProce
 
     /**
      * @Description: count , distinct id 则 需要 根据条件获取需要的表。
+     * 已过期 应该使用ConditionConfigVo.buildConditionWhereSql
      * @Author: 89770
      * @Date: 2021/2/8 16:33
      * @Params: [sqlSb, sqlDecoratorVo]
      * @Returns: void
      **/
+    @Deprecated
     protected void buildOtherConditionWhereSql(StringBuilder sqlSb, ConditionConfigVo conditionConfigVo) {
         // 将group 以连接表达式 存 Map<fromUuid_toUuid,joinType>
         Map<String, String> groupRelMap = new HashMap<>();

@@ -27,7 +27,7 @@ public class ProcessTaskWhereDistinctIdSqlStructure extends WorkcenterProcessSql
     public void doService(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         sqlSb.append(" where ");
         buildCommonConditionWhereSql(sqlSb, workcenterVo);
-        buildOtherConditionWhereSql(sqlSb, workcenterVo);
+        workcenterVo.buildConditionWhereSql(sqlSb, workcenterVo);
         draftCondition(sqlSb, workcenterVo);
     }
 }
