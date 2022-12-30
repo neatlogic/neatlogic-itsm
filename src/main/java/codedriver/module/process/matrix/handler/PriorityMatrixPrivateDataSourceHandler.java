@@ -8,8 +8,8 @@ package codedriver.module.process.matrix.handler;
 import codedriver.framework.matrix.constvalue.MatrixAttributeType;
 import codedriver.framework.matrix.core.IMatrixPrivateDataSourceHandler;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
-import codedriver.framework.matrix.dto.MatrixColumnVo;
 import codedriver.framework.matrix.dto.MatrixDataVo;
+import codedriver.framework.matrix.dto.MatrixFilterVo;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dto.PrioritySearchVo;
 import codedriver.framework.process.dto.PriorityVo;
@@ -79,14 +79,6 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
         return matrixAttributeList;
     }
 
-    @Override
-    public List<Map<String, String>> getTableData(MatrixDataVo dataVo) {
-        PrioritySearchVo searchVo = new PrioritySearchVo();
-        searchVo.setCurrentPage(dataVo.getCurrentPage());
-        searchVo.setPageSize(dataVo.getPageSize());
-        List<PriorityVo> priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
-        return priorityListConvertDataList(priorityList);
-    }
 
     @Override
     public List<Map<String, String>> searchTableData(MatrixDataVo dataVo) {
@@ -97,67 +89,24 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
             priorityList = priorityMapper.getPriorityByUuidList(uuidList);
         } else {
             PrioritySearchVo searchVo = matrixDataVoConvertSearchCondition(dataVo);
-            priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
-        }
-        return priorityListConvertDataList(priorityList);
-    }
-
-    @Override
-    public List<Map<String, String>> getTableColumnDataForDefaultValue(MatrixDataVo dataVo) {
-        PrioritySearchVo searchVo = new PrioritySearchVo();
-        List<MatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
-        for (MatrixColumnVo matrixColumnVo : sourceColumnList) {
-            String column = matrixColumnVo.getColumn();
-            if (StringUtils.isBlank(column)) {
-                continue;
-            }
-            List<String> valueList = matrixColumnVo.getValueList();
-            if (CollectionUtils.isEmpty(valueList)) {
-                continue;
-            }
-            String value = valueList.get(0);
-            if (StringUtils.isBlank(value)) {
-                continue;
-            }
-            if ("b83b6711416847f7a78b1946607efb8c".equals(column)) {
-                searchVo.setUuid(value);
-            } else if ("dc1c6903648e417f88d52ad986b057a0".equals(column)) {
-                searchVo.setName(value);
+            int rowNum = priorityMapper.searchPriorityCountForMatrix(searchVo);
+            if (rowNum > 0) {
+                dataVo.setRowNum(rowNum);
+                priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
             }
         }
-        List<PriorityVo> priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
         return priorityListConvertDataList(priorityList);
-    }
-
-    @Override
-    public List<Map<String, String>> searchTableColumnData(MatrixDataVo dataVo) {
-        PrioritySearchVo searchVo = matrixDataVoConvertSearchCondition(dataVo);
-        List<PriorityVo> priorityList = priorityMapper.searchPriorityListForMatrix(searchVo);
-        return priorityListConvertDataList(priorityList);
-    }
-
-    @Override
-    public int getTableColumnDataCount(MatrixDataVo dataVo) {
-        PrioritySearchVo searchVo = matrixDataVoConvertSearchCondition(dataVo);
-        return priorityMapper.searchPriorityCountForMatrix(searchVo);
     }
 
     private PrioritySearchVo matrixDataVoConvertSearchCondition(MatrixDataVo dataVo) {
         PrioritySearchVo searchVo = new PrioritySearchVo();
-        String keywordColumn = dataVo.getKeywordColumn();
-        String keyword = dataVo.getKeyword();
-        if (StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(keyword)) {
-            if ("dc1c6903648e417f88d52ad986b057a0".equals(keywordColumn)) {
-                searchVo.setKeyword(keyword);
-            }
-        }
-        List<MatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
-        for (MatrixColumnVo matrixColumnVo : sourceColumnList) {
-            String column = matrixColumnVo.getColumn();
-            if (StringUtils.isBlank(column)) {
+        List<MatrixFilterVo> filterList = dataVo.getFilterList();
+        for (MatrixFilterVo filter : filterList) {
+            String uuid = filter.getUuid();
+            if (StringUtils.isBlank(uuid)) {
                 continue;
             }
-            List<String> valueList = matrixColumnVo.getValueList();
+            List<String> valueList = filter.getValueList();
             if (CollectionUtils.isEmpty(valueList)) {
                 continue;
             }
@@ -165,9 +114,9 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
             if (StringUtils.isBlank(value)) {
                 continue;
             }
-            if ("b83b6711416847f7a78b1946607efb8c".equals(column)) {
+            if ("b83b6711416847f7a78b1946607efb8c".equals(uuid)) {
                 searchVo.setUuid(value);
-            } else if ("dc1c6903648e417f88d52ad986b057a0".equals(column)) {
+            } else if ("dc1c6903648e417f88d52ad986b057a0".equals(uuid)) {
                 searchVo.setName(value);
             }
         }
