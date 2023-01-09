@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import codedriver.framework.common.constvalue.SystemUser;
+import codedriver.framework.notify.dto.InvokeNotifyPolicyConfigVo;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -82,9 +83,9 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
     public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
         /** 组装通知策略id **/
         JSONObject notifyPolicyConfig = stepConfigObj.getJSONObject("notifyPolicyConfig");
-        NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
-        if (notifyPolicyConfigVo != null) {
-            processStepVo.setNotifyPolicyConfig(notifyPolicyConfigVo);
+        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
+        if (invokeNotifyPolicyConfigVo != null) {
+            processStepVo.setNotifyPolicyConfig(invokeNotifyPolicyConfigVo);
         }
 
 //        JSONObject actionConfig = stepConfigObj.getJSONObject("actionConfig");
@@ -206,12 +207,12 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 
         /** 通知 **/
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
-        NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
-        if (notifyPolicyConfigVo == null) {
-            notifyPolicyConfigVo = new NotifyPolicyConfigVo();
+        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
+        if (invokeNotifyPolicyConfigVo == null) {
+            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
         }
-        notifyPolicyConfigVo.setHandler(AutomaticNotifyPolicyHandler.class.getName());
-        resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
+        invokeNotifyPolicyConfigVo.setHandler(AutomaticNotifyPolicyHandler.class.getName());
+        resultObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
 
         return resultObj;
     }
@@ -241,12 +242,12 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 
         /** 通知 **/
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
-        NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
-        if (notifyPolicyConfigVo == null) {
-            notifyPolicyConfigVo = new NotifyPolicyConfigVo();
+        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
+        if (invokeNotifyPolicyConfigVo == null) {
+            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
         }
-        notifyPolicyConfigVo.setHandler(AutomaticNotifyPolicyHandler.class.getName());
-        resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
+        invokeNotifyPolicyConfigVo.setHandler(AutomaticNotifyPolicyHandler.class.getName());
+        resultObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
 
         /** 按钮映射列表 **/
         ProcessTaskOperationType[] stepButtons = {

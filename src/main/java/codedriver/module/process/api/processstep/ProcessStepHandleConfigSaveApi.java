@@ -7,7 +7,7 @@ import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
-import codedriver.framework.process.dto.processconfig.NotifyPolicyConfigVo;
+import codedriver.framework.notify.dto.InvokeNotifyPolicyConfigVo;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -78,9 +78,9 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
                     stepHandlerMapper.replaceProcessStepHandlerConfig(stepHandlerVo);
                     DependencyManager.delete(NotifyPolicyProcessStepHandlerDependencyHandler.class, handler);
                     JSONObject notifyPolicyConfig = config.getJSONObject("notifyPolicyConfig");
-                    NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
-                    if (notifyPolicyConfigVo != null) {
-                        Long policyId = notifyPolicyConfigVo.getPolicyId();
+                    InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
+                    if (invokeNotifyPolicyConfigVo != null) {
+                        Long policyId = invokeNotifyPolicyConfigVo.getPolicyId();
                         if (policyId != null) {
                             if(notifyMapper.checkNotifyPolicyIsExists(policyId) == 0){
                                 throw new NotifyPolicyNotFoundException(policyId.toString());
