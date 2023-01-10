@@ -101,6 +101,9 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
     private PrioritySearchVo matrixDataVoConvertSearchCondition(MatrixDataVo dataVo) {
         PrioritySearchVo searchVo = new PrioritySearchVo();
         List<MatrixFilterVo> filterList = dataVo.getFilterList();
+        if (CollectionUtils.isEmpty(filterList)) {
+            return searchVo;
+        }
         for (MatrixFilterVo filter : filterList) {
             String uuid = filter.getUuid();
             if (StringUtils.isBlank(uuid)) {
