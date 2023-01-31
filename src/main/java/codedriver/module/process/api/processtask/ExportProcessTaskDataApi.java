@@ -610,6 +610,25 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
                 put(resultObj, "file", file);
             }
         }
+
+        {
+            // 节点管理
+            String sql = "SELECT * FROM `process_step_handler`";
+            List<Map<String, Object>> process_step_handler = processTaskDataMapper.getList(sql);
+            put(resultObj, "process_step_handler", process_step_handler);
+        }
+
+        {
+            // 个人设置-任务授权
+            String sql = "SELECT * FROM `processtask_agent`";
+            List<Map<String, Object>> processtask_agent = processTaskDataMapper.getList(sql);
+            put(resultObj, "processtask_agent", processtask_agent);
+
+            sql = "SELECT * FROM `processtask_agent_target`";
+            List<Map<String, Object>> processtask_agent_target = processTaskDataMapper.getList(sql);
+            put(resultObj, "processtask_agent_target", processtask_agent_target);
+        }
+
         return resultObj;
     }
 
