@@ -2,6 +2,7 @@ package codedriver.module.process.stephandler.utilhandler;
 
 import java.util.*;
 
+import codedriver.framework.notify.dto.InvokeNotifyPolicyConfigVo;
 import codedriver.framework.process.dto.processconfig.*;
 import codedriver.framework.process.util.ProcessConfigUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -77,12 +78,12 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
         /** 通知 **/
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
-        NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
-        if (notifyPolicyConfigVo == null) {
-            notifyPolicyConfigVo = new NotifyPolicyConfigVo();
+        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
+        if (invokeNotifyPolicyConfigVo == null) {
+            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
         }
-        notifyPolicyConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
-        resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
+        invokeNotifyPolicyConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
+        resultObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
         return resultObj;
     }
 
@@ -139,12 +140,12 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
         /** 通知 **/
         JSONObject notifyPolicyConfig = processConfig.getJSONObject("notifyPolicyConfig");
-        NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
-        if (notifyPolicyConfigVo == null) {
-            notifyPolicyConfigVo = new NotifyPolicyConfigVo();
+        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
+        if (invokeNotifyPolicyConfigVo == null) {
+            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
         }
-        notifyPolicyConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
-        processObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
+        invokeNotifyPolicyConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
+        processObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
 
         /** 动作 **/
         JSONObject actionConfig = processConfig.getJSONObject("actionConfig");

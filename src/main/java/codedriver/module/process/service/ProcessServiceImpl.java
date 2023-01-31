@@ -16,7 +16,7 @@ import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.process.dao.mapper.ProcessTagMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.*;
-import codedriver.framework.process.dto.processconfig.NotifyPolicyConfigVo;
+import codedriver.framework.notify.dto.InvokeNotifyPolicyConfigVo;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 import codedriver.framework.process.exception.sla.SlaCalculateHandlerNotFoundException;
 import codedriver.framework.process.sla.core.ISlaCalculateHandler;
@@ -110,7 +110,7 @@ public class ProcessServiceImpl implements ProcessService {
                     for (String stepUuid : slaVo.getProcessStepUuidList()) {
                         processMapper.insertProcessStepSla(stepUuid, slaVo.getUuid());
                     }
-                    for (NotifyPolicyConfigVo notifyPolicyConfig : slaVo.getNotifyPolicyConfigList()) {
+                    for (InvokeNotifyPolicyConfigVo notifyPolicyConfig : slaVo.getNotifyPolicyConfigList()) {
                         if (notifyPolicyConfig.getPolicyId() == null) {
                             continue;
                         }
@@ -129,7 +129,7 @@ public class ProcessServiceImpl implements ProcessService {
                         slaVo.setUuid(UuidUtil.randomUuid());
                         processMapper.insertProcessSla(slaVo);
                         processMapper.insertProcessStepSla(stepUuid, slaVo.getUuid());
-                        for (NotifyPolicyConfigVo notifyPolicyConfig : slaVo.getNotifyPolicyConfigList()) {
+                        for (InvokeNotifyPolicyConfigVo notifyPolicyConfig : slaVo.getNotifyPolicyConfigList()) {
                             if (notifyPolicyConfig.getPolicyId() == null) {
                                 continue;
                             }
@@ -169,16 +169,16 @@ public class ProcessServiceImpl implements ProcessService {
                         processMapper.insertProcessStepWorkerPolicy(processStepWorkerPolicyVo);
                     }
                 }
-                NotifyPolicyConfigVo notifyPolicyConfigVo = stepVo.getNotifyPolicyConfig();
-                if (notifyPolicyConfigVo != null && notifyPolicyConfigVo.getPolicyId() != null) {
-                    if (notifyMapper.checkNotifyPolicyIsExists(notifyPolicyConfigVo.getPolicyId()) == 0) {
-                        if (StringUtils.isNotBlank(notifyPolicyConfigVo.getPolicyPath())) {
-                            throw new NotifyPolicyNotFoundException(notifyPolicyConfigVo.getPolicyPath());
+                InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = stepVo.getNotifyPolicyConfig();
+                if (invokeNotifyPolicyConfigVo != null && invokeNotifyPolicyConfigVo.getPolicyId() != null) {
+                    if (notifyMapper.checkNotifyPolicyIsExists(invokeNotifyPolicyConfigVo.getPolicyId()) == 0) {
+                        if (StringUtils.isNotBlank(invokeNotifyPolicyConfigVo.getPolicyPath())) {
+                            throw new NotifyPolicyNotFoundException(invokeNotifyPolicyConfigVo.getPolicyPath());
                         } else {
-                            throw new NotifyPolicyNotFoundException(notifyPolicyConfigVo.getPolicyId());
+                            throw new NotifyPolicyNotFoundException(invokeNotifyPolicyConfigVo.getPolicyId());
                         }
                     }
-                    DependencyManager.insert(NotifyPolicyProcessStepDependencyHandler.class, notifyPolicyConfigVo.getPolicyId(), stepVo.getUuid());
+                    DependencyManager.insert(NotifyPolicyProcessStepDependencyHandler.class, invokeNotifyPolicyConfigVo.getPolicyId(), stepVo.getUuid());
                 }
                 processMapper.deleteProcessStepCommentTemplate(stepVo.getUuid());
                 if (stepVo.getCommentTemplateId() != null) {
@@ -229,7 +229,7 @@ public class ProcessServiceImpl implements ProcessService {
             scoreTemplateMapper.insertProcessScoreTemplate(processVo.getProcessScoreTemplateVo());
         }
 
-        NotifyPolicyConfigVo notifyPolicyConfig = processVo.getNotifyPolicyConfig();
+        InvokeNotifyPolicyConfigVo notifyPolicyConfig = processVo.getNotifyPolicyConfig();
         if (notifyPolicyConfig != null && notifyPolicyConfig.getPolicyId() != null) {
             if (notifyMapper.checkNotifyPolicyIsExists(notifyPolicyConfig.getPolicyId()) == 0) {
                 if (StringUtils.isNotBlank(notifyPolicyConfig.getPolicyPath())) {
