@@ -1995,24 +1995,52 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             builder.addOperationType(ProcessTaskOperationType.STEP_START);
             builder.addOperationType(ProcessTaskOperationType.STEP_COMPLETE);
         }
-
+        String userUuid = UserContext.get().getUserUuid(true);
+        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
         Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap = builder.build().getOperateMap();
         for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
             Set<ProcessTaskOperationType> set = operationTypeSetMap.get(processTaskStepVo.getId());
-            if (CollectionUtils.isEmpty(set)) {
-                continue;
-            }
-            if (actionType != null) {
-                if (set.contains(actionType)) {
-                    resultList.add(processTaskStepVo);
+            if (CollectionUtils.isNotEmpty(set)) {
+                if (actionType != null) {
+                    if (set.contains(actionType)) {
+                        resultList.add(processTaskStepVo);
+                    }
+                } else {
+                    if (set.contains(ProcessTaskOperationType.STEP_ACCEPT)) {
+                        resultList.add(processTaskStepVo);
+                    } else if (set.contains(ProcessTaskOperationType.STEP_START)) {
+                        resultList.add(processTaskStepVo);
+                    } else if (set.contains(ProcessTaskOperationType.STEP_COMPLETE)) {
+                        resultList.add(processTaskStepVo);
+                    }
                 }
             } else {
-                if (set.contains(ProcessTaskOperationType.STEP_ACCEPT)) {
+                // 如果没有步骤处理权限，还需要判断是否有当前步骤的子任务或变更步骤处理权限
+                if (processTaskMapper.checkIsWorker(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), ProcessUserType.MINOR.getValue(), authenticationInfoVo) > 0) {
                     resultList.add(processTaskStepVo);
-                } else if (set.contains(ProcessTaskOperationType.STEP_START)) {
+                    continue;
+                }
+                // 子任务处理人可以重复回复
+                ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
+                processTaskStepUserVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());
+                processTaskStepUserVo.setProcessTaskStepId(processTaskStepVo.getId());
+                processTaskStepUserVo.setUserUuid(userUuid);
+                processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
+                if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
                     resultList.add(processTaskStepVo);
-                }else if (set.contains(ProcessTaskOperationType.STEP_COMPLETE)) {
-                    resultList.add(processTaskStepVo);
+                    continue;
+                }
+                // 子任务用户A授权给B，B处理后，A也能处理
+                List<ProcessTaskStepTaskVo> processTaskStepTaskList = processTaskStepTaskMapper.getStepTaskListByProcessTaskStepId(processTaskStepVo.getId());
+                if (CollectionUtils.isNotEmpty(processTaskStepTaskList)) {
+                    List<Long> stepTaskIdList = processTaskStepTaskList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList());
+                    List<ProcessTaskStepTaskUserAgentVo> processTaskStepTaskUserAgentList = processTaskStepTaskMapper.getProcessTaskStepTaskUserAgentListByStepTaskIdList(stepTaskIdList);
+                    for (ProcessTaskStepTaskUserAgentVo processTaskStepTaskUserAgentVo : processTaskStepTaskUserAgentList) {
+                        if (Objects.equals(processTaskStepTaskUserAgentVo.getUserUuid(), userUuid)) {
+                            resultList.add(processTaskStepVo);
+                            break;
+                        }
+                    }
                 }
             }
         }
