@@ -4,6 +4,7 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import neatlogic.framework.common.RootComponent;
 import neatlogic.framework.common.constvalue.GroupSearch;
+import neatlogic.framework.common.util.RC4Util;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.exception.user.UserNotFoundException;
@@ -775,6 +776,13 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                         if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMTABLEINPUTER.getHandler())) {
                             JSONArray dataList = formAttributeDataObj.getJSONArray("dataList");
                             formCrossoverService.staticListPasswordEncrypt(dataList, formAttributeVo.getConfigObj());
+                        } else if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMPASSWORD.getHandler())) {
+                            String dataList = formAttributeDataObj.getString("dataList");
+                            if (StringUtils.isNotBlank(dataList)) {
+                                dataList = RC4Util.encrypt(dataList);
+                                formAttributeDataObj.put("dataList", dataList);
+                                formAttributeDataMap.put(attributeUuid, dataList);
+                            }
                         }
                     }
                 }

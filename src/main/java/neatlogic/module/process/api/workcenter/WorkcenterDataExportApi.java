@@ -40,7 +40,6 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.FileUtil;
-import neatlogic.module.framework.form.attribute.handler.DivideHandler;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
 import neatlogic.module.process.service.NewWorkcenterService;
 import neatlogic.module.process.sql.decorator.SqlBuilder;
@@ -192,7 +191,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                                             formLabelCellRangeMap = new HashMap<>();
                                             for (FormAttributeVo formAttributeVo : formAttributeList) {
                                                 IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo.getHandler());
-                                                if (handler == null || handler instanceof DivideHandler) {
+                                                if (handler == null) {
                                                     continue;
                                                 }
                                                 formLabelCellRangeMap.put(formAttributeVo.getLabel(), handler.getExcelHeadLength(formAttributeVo.getConfigObj()));
@@ -268,7 +267,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                                         continue;
                                     }
                                     IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo.getHandler());
-                                    if (handler == null || handler instanceof DivideHandler) {
+                                    if (handler == null) {
                                         continue;
                                     }
                                     int excelRowCount = handler.getExcelRowCount(formAttributeDataVo, JSONObject.parseObject(formAttributeVo.getConfig()));
@@ -304,7 +303,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                             Map<Integer, Row> rowMap = new HashMap<>();
                             for (FormAttributeVo formAttributeVo : formAttributeList) {
                                 IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo.getHandler());
-                                if (handler == null || handler instanceof DivideHandler) {
+                                if (handler == null) {
                                     continue;
                                 }
                                 Object detailedData = "";
