@@ -93,7 +93,7 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
             attributeDataVo.setAttributeLabel(formAttribute.getLabel());
             IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttribute.getHandler());
             if (handler != null) {
-                Object value = handler.dataTransformationForEmail(attributeDataVo, JSONObject.parseObject(formAttribute.getConfig()));
+                Object value = handler.dataTransformationForEmail(attributeDataVo, formAttribute.getConfigObj());
                 attributeDataVo.setDataObj(value);
                 processTaskFormAttributeDataVoList.add(attributeDataVo);
             }
