@@ -702,11 +702,6 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 /** 如果参数中没有formAttributeDataList字段，则不改变表单属性值，这样可以兼容自动节点自动完成场景 **/
                 return;
             }
-            Map<String, Object> formAttributeDataMap = new HashMap<>();
-            for (int i = 0; i < formAttributeDataList.size(); i++) {
-                JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
-                formAttributeDataMap.put(formAttributeDataObj.getString("attributeUuid"), formAttributeDataObj.get("dataList"));
-            }
             /** 隐藏的属性uuid列表 **/
             List<String> hidecomponentList = new ArrayList<>();
             JSONArray hidecomponentArray = paramObj.getJSONArray("hidecomponentList");
@@ -731,14 +726,22 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 currentProcessTaskStepVo.setConfigHash(stepVo.getConfigHash());
             }
             formVersionVo.setSceneUuid(currentProcessTaskStepVo.getFormSceneUuid());
+            IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+            formCrossoverService.formAttributeValueValid(formVersionVo, formAttributeDataList);
             List<FormAttributeVo> formAttributeVoList = formVersionVo.getFormAttributeList();
+
+            Map<String, Object> formAttributeDataMap = new HashMap<>();
+            for (int i = 0; i < formAttributeDataList.size(); i++) {
+                JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
+                formAttributeDataMap.put(formAttributeDataObj.getString("attributeUuid"), formAttributeDataObj.get("dataList"));
+            }
 //            FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processTaskFormVo.getFormUuid());
             Map<String, String> attributeLabelMap = new HashMap<>();
             if (CollectionUtils.isNotEmpty(formAttributeVoList)) {
                 Map<String, FormAttributeVo> formAttributeMap = new HashMap<>();
                 for (FormAttributeVo formAttributeVo : formAttributeVoList) {
                     formAttributeMap.put(formAttributeVo.getUuid(), formAttributeVo);
-                    attributeLabelMap.put(formAttributeVo.getUuid(), formAttributeVo.getLabel());
+//                    attributeLabelMap.put(formAttributeVo.getUuid(), formAttributeVo.getLabel());
                     if (formAttributeVo.isRequired()) {
                         if (hidecomponentList.contains(formAttributeVo.getUuid())) {
                             continue;
@@ -767,25 +770,25 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                     }
                 }
                 // 对表格输入组件中密码password类型的单元格数据进行加密
-                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-                for (int i = 0; i < formAttributeDataList.size(); i++) {
-                    JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
-                    String attributeUuid = formAttributeDataObj.getString("attributeUuid");
-                    FormAttributeVo formAttributeVo = formAttributeMap.get(attributeUuid);
-                    if (formAttributeVo != null) {
-                        if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMTABLEINPUTER.getHandler())) {
-                            JSONArray dataList = formAttributeDataObj.getJSONArray("dataList");
-                            formCrossoverService.staticListPasswordEncrypt(dataList, formAttributeVo.getConfigObj());
-                        } else if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMPASSWORD.getHandler())) {
-                            String dataList = formAttributeDataObj.getString("dataList");
-                            if (StringUtils.isNotBlank(dataList)) {
-                                dataList = RC4Util.encrypt(dataList);
-                                formAttributeDataObj.put("dataList", dataList);
-                                formAttributeDataMap.put(attributeUuid, dataList);
-                            }
-                        }
-                    }
-                }
+//                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+//                for (int i = 0; i < formAttributeDataList.size(); i++) {
+//                    JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
+//                    String attributeUuid = formAttributeDataObj.getString("attributeUuid");
+//                    FormAttributeVo formAttributeVo = formAttributeMap.get(attributeUuid);
+//                    if (formAttributeVo != null) {
+//                        if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMTABLEINPUTER.getHandler())) {
+//                            JSONArray dataList = formAttributeDataObj.getJSONArray("dataList");
+//                            formCrossoverService.staticListPasswordEncrypt(dataList, formAttributeVo.getConfigObj());
+//                        } else if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMPASSWORD.getHandler())) {
+//                            String dataList = formAttributeDataObj.getString("dataList");
+//                            if (StringUtils.isNotBlank(dataList)) {
+//                                dataList = RC4Util.encrypt(dataList);
+//                                formAttributeDataObj.put("dataList", dataList);
+//                                formAttributeDataMap.put(attributeUuid, dataList);
+//                            }
+//                        }
+//                    }
+//                }
             }
             /** 获取旧表单数据 **/
             List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());

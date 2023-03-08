@@ -119,10 +119,12 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
                         attributeConfigMap.get(attributeDataVo.getAttributeUuid()));
                     if (value != null) {
                         if (value instanceof String) {
-                            result = (String)value;
+                            result = (String) value;
                         } else if (value instanceof List) {
                             List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
                             result = String.join("、", valueList);
+                        } else {
+                            result = value.toString();
                         }
                     }
                     oldContentMap.put(attributeDataVo.getAttributeUuid(), result);
@@ -153,10 +155,12 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
                         attributeConfigMap.get(attributeDataVo.getAttributeUuid()));
                     if (value != null) {
                         if (value instanceof String) {
-                            result = (String)value;
+                            result = (String) value;
                         } else if (value instanceof List) {
                             List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
                             result = String.join("、", valueList);
+                        } else {
+                            result = value.toString();
                         }
                     }
                     content.put("newContent", result);
