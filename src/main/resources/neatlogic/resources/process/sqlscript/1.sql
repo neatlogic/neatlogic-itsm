@@ -1,7 +1,7 @@
 -- ----------------------------
 -- Table structure for priority
 -- ----------------------------
-CREATE TABLE `priority` (
+CREATE TABLE IF NOT EXISTS `priority` (
   `uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '全局唯一id，跨环境导入用',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '名称',
   `is_active` tinyint(1) DEFAULT '1' COMMENT '是否激活，1:激活,0:禁用',
@@ -15,7 +15,7 @@ CREATE TABLE `priority` (
 -- ----------------------------
 -- Table structure for process
 -- ----------------------------
-CREATE TABLE `process` (
+CREATE TABLE IF NOT EXISTS `process` (
   `uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '全局唯一id，跨环境导入用',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '名称',
   `is_active` tinyint DEFAULT NULL COMMENT '是否激活',
@@ -30,7 +30,7 @@ CREATE TABLE `process` (
 -- ----------------------------
 -- Table structure for process_comment_template
 -- ----------------------------
-CREATE TABLE `process_comment_template` (
+CREATE TABLE IF NOT EXISTS `process_comment_template` (
   `id` bigint NOT NULL COMMENT '主键',
   `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '回复内容',
   `type` enum('system','custom') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'system:系统模版；custom:自定义模版',
@@ -44,7 +44,7 @@ CREATE TABLE `process_comment_template` (
 -- ----------------------------
 -- Table structure for process_comment_template_authority
 -- ----------------------------
-CREATE TABLE `process_comment_template_authority` (
+CREATE TABLE IF NOT EXISTS `process_comment_template_authority` (
   `comment_template_id` bigint NOT NULL COMMENT '回复模版ID',
   `type` enum('common','user','team','role') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '授权对象类型',
   `uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '授权对象UUID',
@@ -54,7 +54,7 @@ CREATE TABLE `process_comment_template_authority` (
 -- ----------------------------
 -- Table structure for process_comment_template_usecount
 -- ----------------------------
-CREATE TABLE `process_comment_template_usecount` (
+CREATE TABLE IF NOT EXISTS `process_comment_template_usecount` (
   `comment_template_id` bigint NOT NULL COMMENT '回复模版ID',
   `user_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户uuid',
   `count` int DEFAULT NULL COMMENT '使用次数',
@@ -64,7 +64,7 @@ CREATE TABLE `process_comment_template_usecount` (
 -- ----------------------------
 -- Table structure for process_draft
 -- ----------------------------
-CREATE TABLE `process_draft` (
+CREATE TABLE IF NOT EXISTS `process_draft` (
   `uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '全局唯一id，跨环境导入用',
   `process_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程uuid',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '名称',
@@ -78,7 +78,7 @@ CREATE TABLE `process_draft` (
 -- ----------------------------
 -- Table structure for process_form
 -- ----------------------------
-CREATE TABLE `process_form` (
+CREATE TABLE IF NOT EXISTS `process_form` (
   `process_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程uuid',
   `form_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '关联的表单uuid',
   PRIMARY KEY (`process_uuid`,`form_uuid`) USING BTREE
@@ -87,7 +87,7 @@ CREATE TABLE `process_form` (
 -- ----------------------------
 -- Table structure for process_integration
 -- ----------------------------
-CREATE TABLE `process_integration` (
+CREATE TABLE IF NOT EXISTS `process_integration` (
   `process_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程uuid',
   `integration_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '集成uuid',
   PRIMARY KEY (`process_uuid`,`integration_uuid`) USING BTREE,
@@ -97,7 +97,7 @@ CREATE TABLE `process_integration` (
 -- ----------------------------
 -- Table structure for process_notify_policy
 -- ----------------------------
-CREATE TABLE `process_notify_policy` (
+CREATE TABLE IF NOT EXISTS `process_notify_policy` (
   `process_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程uuid',
   `notify_policy_id` bigint NOT NULL COMMENT '通知策略id',
   PRIMARY KEY (`process_uuid`) USING BTREE,
@@ -107,7 +107,7 @@ CREATE TABLE `process_notify_policy` (
 -- ----------------------------
 -- Table structure for process_score_template
 -- ----------------------------
-CREATE TABLE `process_score_template` (
+CREATE TABLE IF NOT EXISTS `process_score_template` (
   `score_template_id` bigint NOT NULL COMMENT '评分模版ID',
   `process_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程UUID',
   `is_active` tinyint DEFAULT NULL COMMENT '是否启用评分（0：否，1：是）',
@@ -119,7 +119,7 @@ CREATE TABLE `process_score_template` (
 -- ----------------------------
 -- Table structure for process_sla
 -- ----------------------------
-CREATE TABLE `process_sla` (
+CREATE TABLE IF NOT EXISTS `process_sla` (
   `uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'uuid',
   `process_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程uuid',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '名称',
@@ -130,7 +130,7 @@ CREATE TABLE `process_sla` (
 -- ----------------------------
 -- Table structure for process_sla_notify_policy
 -- ----------------------------
-CREATE TABLE `process_sla_notify_policy` (
+CREATE TABLE IF NOT EXISTS `process_sla_notify_policy` (
   `sla_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '时效uuid',
   `notify_policy_id` bigint NOT NULL COMMENT '通知策略id',
   PRIMARY KEY (`sla_uuid`,`notify_policy_id`) USING BTREE,
@@ -140,7 +140,7 @@ CREATE TABLE `process_sla_notify_policy` (
 -- ----------------------------
 -- Table structure for process_step
 -- ----------------------------
-CREATE TABLE `process_step` (
+CREATE TABLE IF NOT EXISTS `process_step` (
   `process_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程uuid',
   `uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'uuid',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '名称',
@@ -155,7 +155,7 @@ CREATE TABLE `process_step` (
 -- ----------------------------
 -- Table structure for process_step_comment_template
 -- ----------------------------
-CREATE TABLE `process_step_comment_template` (
+CREATE TABLE IF NOT EXISTS `process_step_comment_template` (
   `process_step_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程步骤uuid',
   `comment_template_id` bigint NOT NULL COMMENT '回复模版ID',
   PRIMARY KEY (`process_step_uuid`,`comment_template_id`) USING BTREE
@@ -164,7 +164,7 @@ CREATE TABLE `process_step_comment_template` (
 -- ----------------------------
 -- Table structure for process_step_formattribute
 -- ----------------------------
-CREATE TABLE `process_step_formattribute` (
+CREATE TABLE IF NOT EXISTS `process_step_formattribute` (
   `process_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程uuid',
   `process_step_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '步骤uuid',
   `form_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '表单uuid',
@@ -177,7 +177,7 @@ CREATE TABLE `process_step_formattribute` (
 -- ----------------------------
 -- Table structure for process_step_handler
 -- ----------------------------
-CREATE TABLE `process_step_handler` (
+CREATE TABLE IF NOT EXISTS `process_step_handler` (
   `handler` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点组件',
   `config` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '组件配置信息',
   PRIMARY KEY (`handler`) USING BTREE
@@ -186,7 +186,7 @@ CREATE TABLE `process_step_handler` (
 -- ----------------------------
 -- Table structure for process_step_handler_integration
 -- ----------------------------
-CREATE TABLE `process_step_handler_integration` (
+CREATE TABLE IF NOT EXISTS `process_step_handler_integration` (
   `handler` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点组件类型',
   `integration_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '集成uuid',
   PRIMARY KEY (`handler`,`integration_uuid`) USING BTREE,
@@ -196,7 +196,7 @@ CREATE TABLE `process_step_handler_integration` (
 -- ----------------------------
 -- Table structure for process_step_handler_notify_policy
 -- ----------------------------
-CREATE TABLE `process_step_handler_notify_policy` (
+CREATE TABLE IF NOT EXISTS `process_step_handler_notify_policy` (
   `handler` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点组件类型',
   `notify_policy_id` bigint NOT NULL COMMENT '通知策略id',
   PRIMARY KEY (`handler`) USING BTREE,
@@ -206,7 +206,7 @@ CREATE TABLE `process_step_handler_notify_policy` (
 -- ----------------------------
 -- Table structure for process_step_integration
 -- ----------------------------
-CREATE TABLE `process_step_integration` (
+CREATE TABLE IF NOT EXISTS `process_step_integration` (
   `process_step_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '步骤uuid',
   `integration_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '集成配置uuid',
   PRIMARY KEY (`process_step_uuid`,`integration_uuid`) USING BTREE,
@@ -216,7 +216,7 @@ CREATE TABLE `process_step_integration` (
 -- ----------------------------
 -- Table structure for process_step_notify_policy
 -- ----------------------------
-CREATE TABLE `process_step_notify_policy` (
+CREATE TABLE IF NOT EXISTS `process_step_notify_policy` (
   `process_step_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程步骤uuid',
   `notify_policy_id` bigint NOT NULL COMMENT '通知策略id',
   PRIMARY KEY (`process_step_uuid`) USING BTREE,
@@ -226,7 +226,7 @@ CREATE TABLE `process_step_notify_policy` (
 -- ----------------------------
 -- Table structure for process_step_rel
 -- ----------------------------
-CREATE TABLE `process_step_rel` (
+CREATE TABLE IF NOT EXISTS `process_step_rel` (
   `process_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程uuid',
   `uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '全局唯一id',
   `from_step_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '源步骤uuid',
@@ -241,7 +241,7 @@ CREATE TABLE `process_step_rel` (
 -- ----------------------------
 -- Table structure for process_step_sla
 -- ----------------------------
-CREATE TABLE `process_step_sla` (
+CREATE TABLE IF NOT EXISTS `process_step_sla` (
   `sla_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'sla uuid',
   `step_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '步骤uuid',
   PRIMARY KEY (`sla_uuid`,`step_uuid`) USING BTREE
@@ -250,7 +250,7 @@ CREATE TABLE `process_step_sla` (
 -- ----------------------------
 -- Table structure for process_step_tag
 -- ----------------------------
-CREATE TABLE `process_step_tag` (
+CREATE TABLE IF NOT EXISTS `process_step_tag` (
   `process_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '流程uuid',
   `process_step_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '步骤uuid',
   `tag_id` bigint NOT NULL COMMENT '标签id',
@@ -262,7 +262,7 @@ CREATE TABLE `process_step_tag` (
 -- ----------------------------
 -- Table structure for process_step_task_config
 -- ----------------------------
-CREATE TABLE `process_step_task_config` (
+CREATE TABLE IF NOT EXISTS `process_step_task_config` (
   `process_step_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程步骤uuid',
   `task_config_id` bigint NOT NULL COMMENT '任务id',
   PRIMARY KEY (`process_step_uuid`,`task_config_id`) USING BTREE
@@ -271,7 +271,7 @@ CREATE TABLE `process_step_task_config` (
 -- ----------------------------
 -- Table structure for process_step_worker_dispatcher
 -- ----------------------------
-CREATE TABLE `process_step_worker_dispatcher` (
+CREATE TABLE IF NOT EXISTS `process_step_worker_dispatcher` (
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '名称',
   `handler` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '处理器',
   `config` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '配置',
@@ -283,7 +283,7 @@ CREATE TABLE `process_step_worker_dispatcher` (
 -- ----------------------------
 -- Table structure for process_step_worker_policy
 -- ----------------------------
-CREATE TABLE `process_step_worker_policy` (
+CREATE TABLE IF NOT EXISTS `process_step_worker_policy` (
   `process_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '流程uuid',
   `process_step_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '步骤uuid',
   `policy` enum('manual','automatic','assign','copy','fromer','form','attribute','prestepassign') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '策略',
@@ -296,7 +296,7 @@ CREATE TABLE `process_step_worker_policy` (
 -- ----------------------------
 -- Table structure for process_tag
 -- ----------------------------
-CREATE TABLE `process_tag` (
+CREATE TABLE IF NOT EXISTS `process_tag` (
   `id` bigint NOT NULL COMMENT 'id',
   `name` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '标签名',
   PRIMARY KEY (`id`) USING BTREE,
@@ -306,7 +306,7 @@ CREATE TABLE `process_tag` (
 -- ----------------------------
 -- Table structure for process_workcenter
 -- ----------------------------
-CREATE TABLE `process_workcenter` (
+CREATE TABLE IF NOT EXISTS `process_workcenter` (
   `uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分类唯一标识',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '分类名',
   `type` enum('factory','system','custom') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'default:默认出厂  system：系统分类  custom：自定义分类',
@@ -324,7 +324,7 @@ CREATE TABLE `process_workcenter` (
 -- ----------------------------
 -- Table structure for process_workcenter_authority
 -- ----------------------------
-CREATE TABLE `process_workcenter_authority` (
+CREATE TABLE IF NOT EXISTS `process_workcenter_authority` (
   `workcenter_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '工单分类uuid',
   `type` enum('common','user','role','team') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '类型',
   `uuid` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'uuid',
@@ -336,7 +336,7 @@ CREATE TABLE `process_workcenter_authority` (
 -- ----------------------------
 -- Table structure for process_workcenter_catalog
 -- ----------------------------
-CREATE TABLE `process_workcenter_catalog` (
+CREATE TABLE IF NOT EXISTS `process_workcenter_catalog` (
   `id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '菜单类型唯一标识',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '菜单名称',
   PRIMARY KEY (`id`) USING BTREE,
@@ -346,7 +346,7 @@ CREATE TABLE `process_workcenter_catalog` (
 -- ----------------------------
 -- Table structure for process_workcenter_owner
 -- ----------------------------
-CREATE TABLE `process_workcenter_owner` (
+CREATE TABLE IF NOT EXISTS `process_workcenter_owner` (
   `workcenter_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分类唯一标识uuid',
   `user_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '如果属于私人分类，分类所属人',
   PRIMARY KEY (`workcenter_uuid`) USING BTREE,
@@ -356,7 +356,7 @@ CREATE TABLE `process_workcenter_owner` (
 -- ----------------------------
 -- Table structure for process_workcenter_thead
 -- ----------------------------
-CREATE TABLE `process_workcenter_thead` (
+CREATE TABLE IF NOT EXISTS `process_workcenter_thead` (
   `workcenter_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分类唯一标识',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '字段名（表单属性则存属性uuid）',
   `sort` int NOT NULL COMMENT '字段排序',
@@ -371,7 +371,7 @@ CREATE TABLE `process_workcenter_thead` (
 -- ----------------------------
 -- Table structure for process_workcenter_user_profile
 -- ----------------------------
-CREATE TABLE `process_workcenter_user_profile` (
+CREATE TABLE IF NOT EXISTS `process_workcenter_user_profile` (
   `user_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户uuid',
   `config` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '用户个性化配置，如排序等',
   PRIMARY KEY (`user_uuid`) USING BTREE
@@ -380,7 +380,7 @@ CREATE TABLE `process_workcenter_user_profile` (
 -- ----------------------------
 -- Table structure for processtask
 -- ----------------------------
-CREATE TABLE `processtask` (
+CREATE TABLE IF NOT EXISTS `processtask` (
   `id` bigint NOT NULL COMMENT '工单id',
   `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '标题',
   `process_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程uuid',
@@ -416,7 +416,7 @@ CREATE TABLE `processtask` (
 -- ----------------------------
 -- Table structure for processtask_agent
 -- ----------------------------
-CREATE TABLE `processtask_agent` (
+CREATE TABLE IF NOT EXISTS `processtask_agent` (
   `id` bigint NOT NULL COMMENT '主键ID',
   `from_user_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '来源用户uuid',
   `to_user_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '目标用户uuid',
@@ -431,7 +431,7 @@ CREATE TABLE `processtask_agent` (
 -- ----------------------------
 -- Table structure for processtask_agent_target
 -- ----------------------------
-CREATE TABLE `processtask_agent_target` (
+CREATE TABLE IF NOT EXISTS `processtask_agent_target` (
   `processtask_agent_id` bigint NOT NULL COMMENT '代办id',
   `target` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '目标uuid,目录或服务',
   `type` enum('catalog','channel') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '目标类型',
@@ -442,7 +442,7 @@ CREATE TABLE `processtask_agent_target` (
 -- ----------------------------
 -- Table structure for processtask_assignworker
 -- ----------------------------
-CREATE TABLE `processtask_assignworker` (
+CREATE TABLE IF NOT EXISTS `processtask_assignworker` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `processtask_step_id` bigint NOT NULL COMMENT '被指派步骤id',
   `from_processtask_step_id` bigint NOT NULL COMMENT '指派步骤id',
@@ -457,7 +457,7 @@ CREATE TABLE `processtask_assignworker` (
 -- ----------------------------
 -- Table structure for processtask_auto_score
 -- ----------------------------
-CREATE TABLE `processtask_auto_score` (
+CREATE TABLE IF NOT EXISTS `processtask_auto_score` (
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `trigger_time` timestamp NULL DEFAULT NULL COMMENT '自动评分时间',
   `config` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '配置',
@@ -467,7 +467,7 @@ CREATE TABLE `processtask_auto_score` (
 -- ----------------------------
 -- Table structure for processtask_config
 -- ----------------------------
-CREATE TABLE `processtask_config` (
+CREATE TABLE IF NOT EXISTS `processtask_config` (
   `hash` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '通过process表中config生成的md5唯一标识',
   `config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '历史流程配置',
   PRIMARY KEY (`hash`) USING BTREE
@@ -476,7 +476,7 @@ CREATE TABLE `processtask_config` (
 -- ----------------------------
 -- Table structure for processtask_content
 -- ----------------------------
-CREATE TABLE `processtask_content` (
+CREATE TABLE IF NOT EXISTS `processtask_content` (
   `hash` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'hash',
   `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '内容',
   PRIMARY KEY (`hash`) USING BTREE
@@ -485,7 +485,7 @@ CREATE TABLE `processtask_content` (
 -- ----------------------------
 -- Table structure for processtask_converge
 -- ----------------------------
-CREATE TABLE `processtask_converge` (
+CREATE TABLE IF NOT EXISTS `processtask_converge` (
   `converge_id` bigint NOT NULL COMMENT '汇集',
   `processtask_step_id` bigint NOT NULL COMMENT '作业步骤id',
   `processtask_id` bigint NOT NULL COMMENT '作业id',
@@ -498,7 +498,7 @@ CREATE TABLE `processtask_converge` (
 -- ----------------------------
 -- Table structure for processtask_file
 -- ----------------------------
-CREATE TABLE `processtask_file` (
+CREATE TABLE IF NOT EXISTS `processtask_file` (
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤ID',
   `file_id` bigint NOT NULL COMMENT '文件ID',
@@ -512,7 +512,7 @@ CREATE TABLE `processtask_file` (
 -- ----------------------------
 -- Table structure for processtask_focus
 -- ----------------------------
-CREATE TABLE `processtask_focus` (
+CREATE TABLE IF NOT EXISTS `processtask_focus` (
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `user_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户UUID',
   PRIMARY KEY (`processtask_id`,`user_uuid`) USING BTREE
@@ -521,7 +521,7 @@ CREATE TABLE `processtask_focus` (
 -- ----------------------------
 -- Table structure for processtask_form
 -- ----------------------------
-CREATE TABLE `processtask_form` (
+CREATE TABLE IF NOT EXISTS `processtask_form` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `form_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '工单绑定的表单uuid',
   `form_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '工单绑定的表单名',
@@ -532,7 +532,7 @@ CREATE TABLE `processtask_form` (
 -- ----------------------------
 -- Table structure for processtask_form_content
 -- ----------------------------
-CREATE TABLE `processtask_form_content` (
+CREATE TABLE IF NOT EXISTS `processtask_form_content` (
   `hash` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'hash',
   `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '内容',
   PRIMARY KEY (`hash`) USING BTREE
@@ -541,7 +541,7 @@ CREATE TABLE `processtask_form_content` (
 -- ----------------------------
 -- Table structure for processtask_formattribute_data
 -- ----------------------------
-CREATE TABLE `processtask_formattribute_data` (
+CREATE TABLE IF NOT EXISTS `processtask_formattribute_data` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '插件类型',
   `attribute_label` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '属性名',
@@ -555,7 +555,7 @@ CREATE TABLE `processtask_formattribute_data` (
 -- ----------------------------
 -- Table structure for processtask_import_audit
 -- ----------------------------
-CREATE TABLE `processtask_import_audit` (
+CREATE TABLE IF NOT EXISTS `processtask_import_audit` (
   `id` bigint NOT NULL COMMENT '主键',
   `processtask_id` bigint DEFAULT NULL COMMENT '工单ID',
   `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '工单标题',
@@ -570,7 +570,7 @@ CREATE TABLE `processtask_import_audit` (
 -- ----------------------------
 -- Table structure for processtask_old_form_prop
 -- ----------------------------
-CREATE TABLE `processtask_old_form_prop` (
+CREATE TABLE IF NOT EXISTS `processtask_old_form_prop` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `form` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '工单表单html',
   `prop` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '工单自定义属性json',
@@ -580,7 +580,7 @@ CREATE TABLE `processtask_old_form_prop` (
 -- ----------------------------
 -- Table structure for processtask_relation
 -- ----------------------------
-CREATE TABLE `processtask_relation` (
+CREATE TABLE IF NOT EXISTS `processtask_relation` (
   `id` bigint NOT NULL COMMENT '唯一标识',
   `channel_type_relation_id` bigint NOT NULL COMMENT '关系类型',
   `source` bigint NOT NULL COMMENT '来源工单id',
@@ -594,7 +594,7 @@ CREATE TABLE `processtask_relation` (
 -- ----------------------------
 -- Table structure for processtask_repeat
 -- ----------------------------
-CREATE TABLE `processtask_repeat` (
+CREATE TABLE IF NOT EXISTS `processtask_repeat` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `repeat_group_id` bigint NOT NULL COMMENT '重复组id',
   PRIMARY KEY (`processtask_id`) USING BTREE,
@@ -604,7 +604,7 @@ CREATE TABLE `processtask_repeat` (
 -- ----------------------------
 -- Table structure for processtask_score
 -- ----------------------------
-CREATE TABLE `processtask_score` (
+CREATE TABLE IF NOT EXISTS `processtask_score` (
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `score_template_id` bigint NOT NULL COMMENT '评分模版ID',
   `score_dimension_id` bigint NOT NULL COMMENT '评分维度ID',
@@ -618,7 +618,7 @@ CREATE TABLE `processtask_score` (
 -- ----------------------------
 -- Table structure for processtask_score_content
 -- ----------------------------
-CREATE TABLE `processtask_score_content` (
+CREATE TABLE IF NOT EXISTS `processtask_score_content` (
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `content_hash` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '评价内容hash',
   `fcu` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '评价人',
@@ -629,7 +629,7 @@ CREATE TABLE `processtask_score_content` (
 -- ----------------------------
 -- Table structure for processtask_score_template
 -- ----------------------------
-CREATE TABLE `processtask_score_template` (
+CREATE TABLE IF NOT EXISTS `processtask_score_template` (
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `score_template_id` bigint DEFAULT NULL COMMENT '评分模版ID',
   `is_auto` tinyint(1) DEFAULT NULL COMMENT '是否自动评分',
@@ -640,7 +640,7 @@ CREATE TABLE `processtask_score_template` (
 -- ----------------------------
 -- Table structure for processtask_score_template_config
 -- ----------------------------
-CREATE TABLE `processtask_score_template_config` (
+CREATE TABLE IF NOT EXISTS `processtask_score_template_config` (
   `hash` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '内容hash',
   `config` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '配置',
   PRIMARY KEY (`hash`) USING BTREE
@@ -649,7 +649,7 @@ CREATE TABLE `processtask_score_template_config` (
 -- ----------------------------
 -- Table structure for processtask_serial_number
 -- ----------------------------
-CREATE TABLE `processtask_serial_number` (
+CREATE TABLE IF NOT EXISTS `processtask_serial_number` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `serial_number` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '工单序列号',
   PRIMARY KEY (`processtask_id`,`serial_number`) USING BTREE,
@@ -659,7 +659,7 @@ CREATE TABLE `processtask_serial_number` (
 -- ----------------------------
 -- Table structure for processtask_serial_number_policy
 -- ----------------------------
-CREATE TABLE `processtask_serial_number_policy` (
+CREATE TABLE IF NOT EXISTS `processtask_serial_number_policy` (
   `channel_type_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '服务类型uuid',
   `handler` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '工单号生成策略类名',
   `config` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '配置信息',
@@ -672,7 +672,7 @@ CREATE TABLE `processtask_serial_number_policy` (
 -- ----------------------------
 -- Table structure for processtask_sla
 -- ----------------------------
-CREATE TABLE `processtask_sla` (
+CREATE TABLE IF NOT EXISTS `processtask_sla` (
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'id',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '名称',
@@ -685,7 +685,7 @@ CREATE TABLE `processtask_sla` (
 -- ----------------------------
 -- Table structure for processtask_sla_notify
 -- ----------------------------
-CREATE TABLE `processtask_sla_notify` (
+CREATE TABLE IF NOT EXISTS `processtask_sla_notify` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'id',
   `sla_id` bigint NOT NULL COMMENT 'sla id',
   `hash` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'hash',
@@ -698,7 +698,7 @@ CREATE TABLE `processtask_sla_notify` (
 -- ----------------------------
 -- Table structure for processtask_sla_time
 -- ----------------------------
-CREATE TABLE `processtask_sla_time` (
+CREATE TABLE IF NOT EXISTS `processtask_sla_time` (
   `sla_id` bigint NOT NULL COMMENT 'id',
   `time_sum` bigint DEFAULT NULL COMMENT '总耗时，毫秒',
   `expire_time` timestamp(3) NULL DEFAULT NULL COMMENT '超时时间（根据工作日历计算）',
@@ -713,7 +713,7 @@ CREATE TABLE `processtask_sla_time` (
 -- ----------------------------
 -- Table structure for processtask_sla_transfer
 -- ----------------------------
-CREATE TABLE `processtask_sla_transfer` (
+CREATE TABLE IF NOT EXISTS `processtask_sla_transfer` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'id',
   `sla_id` bigint NOT NULL COMMENT 'sla id',
   `hash` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'hash',
@@ -726,7 +726,7 @@ CREATE TABLE `processtask_sla_transfer` (
 -- ----------------------------
 -- Table structure for processtask_step
 -- ----------------------------
-CREATE TABLE `processtask_step` (
+CREATE TABLE IF NOT EXISTS `processtask_step` (
   `id` bigint NOT NULL COMMENT 'id',
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '步骤名称',
@@ -751,7 +751,7 @@ CREATE TABLE `processtask_step` (
 -- ----------------------------
 -- Table structure for processtask_step_agent
 -- ----------------------------
-CREATE TABLE `processtask_step_agent` (
+CREATE TABLE IF NOT EXISTS `processtask_step_agent` (
   `processtask_id` bigint DEFAULT NULL COMMENT '工单ID',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤ID',
   `user_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '用户uuid',
@@ -763,7 +763,7 @@ CREATE TABLE `processtask_step_agent` (
 -- ----------------------------
 -- Table structure for processtask_step_audit
 -- ----------------------------
-CREATE TABLE `processtask_step_audit` (
+CREATE TABLE IF NOT EXISTS `processtask_step_audit` (
   `id` bigint NOT NULL COMMENT 'id',
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `processtask_step_id` bigint DEFAULT NULL COMMENT '步骤ID',
@@ -782,7 +782,7 @@ CREATE TABLE `processtask_step_audit` (
 -- ----------------------------
 -- Table structure for processtask_step_audit_detail
 -- ----------------------------
-CREATE TABLE `processtask_step_audit_detail` (
+CREATE TABLE IF NOT EXISTS `processtask_step_audit_detail` (
   `audit_id` bigint NOT NULL COMMENT 'id',
   `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '类型',
   `old_content` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT 'old content',
@@ -793,7 +793,7 @@ CREATE TABLE `processtask_step_audit_detail` (
 -- ----------------------------
 -- Table structure for processtask_step_automatic_request
 -- ----------------------------
-CREATE TABLE `processtask_step_automatic_request` (
+CREATE TABLE IF NOT EXISTS `processtask_step_automatic_request` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤id',
@@ -805,7 +805,7 @@ CREATE TABLE `processtask_step_automatic_request` (
 -- ----------------------------
 -- Table structure for processtask_step_change_create
 -- ----------------------------
-CREATE TABLE `processtask_step_change_create` (
+CREATE TABLE IF NOT EXISTS `processtask_step_change_create` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤id',
   `change_id` bigint NOT NULL COMMENT '变更id',
@@ -817,7 +817,7 @@ CREATE TABLE `processtask_step_change_create` (
 -- ----------------------------
 -- Table structure for processtask_step_change_handle
 -- ----------------------------
-CREATE TABLE `processtask_step_change_handle` (
+CREATE TABLE IF NOT EXISTS `processtask_step_change_handle` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤id',
   `change_id` bigint NOT NULL COMMENT '变更id',
@@ -828,7 +828,7 @@ CREATE TABLE `processtask_step_change_handle` (
 -- ----------------------------
 -- Table structure for processtask_step_config
 -- ----------------------------
-CREATE TABLE `processtask_step_config` (
+CREATE TABLE IF NOT EXISTS `processtask_step_config` (
   `hash` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'hash',
   `config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT 'config',
   PRIMARY KEY (`hash`) USING BTREE
@@ -837,7 +837,7 @@ CREATE TABLE `processtask_step_config` (
 -- ----------------------------
 -- Table structure for processtask_step_content
 -- ----------------------------
-CREATE TABLE `processtask_step_content` (
+CREATE TABLE IF NOT EXISTS `processtask_step_content` (
   `id` bigint NOT NULL COMMENT 'id',
   `processtask_id` bigint DEFAULT NULL COMMENT '工单ID',
   `processtask_step_id` bigint DEFAULT NULL COMMENT '步骤ID',
@@ -857,7 +857,7 @@ CREATE TABLE `processtask_step_content` (
 -- ----------------------------
 -- Table structure for processtask_step_data
 -- ----------------------------
-CREATE TABLE `processtask_step_data` (
+CREATE TABLE IF NOT EXISTS `processtask_step_data` (
   `id` bigint NOT NULL COMMENT '唯一标识',
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `processtask_step_id` bigint NOT NULL COMMENT '工单步骤id',
@@ -871,7 +871,7 @@ CREATE TABLE `processtask_step_data` (
 -- ----------------------------
 -- Table structure for processtask_step_event
 -- ----------------------------
-CREATE TABLE `processtask_step_event` (
+CREATE TABLE IF NOT EXISTS `processtask_step_event` (
   `processtask_id` bigint DEFAULT NULL COMMENT '工单ID',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤ID',
   `event_id` bigint DEFAULT NULL COMMENT '事件ID',
@@ -882,7 +882,7 @@ CREATE TABLE `processtask_step_event` (
 -- ----------------------------
 -- Table structure for processtask_step_formattribute
 -- ----------------------------
-CREATE TABLE `processtask_step_formattribute` (
+CREATE TABLE IF NOT EXISTS `processtask_step_formattribute` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `processtask_step_id` bigint NOT NULL COMMENT '工单步骤id',
   `attribute_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '属性uuid',
@@ -894,7 +894,7 @@ CREATE TABLE `processtask_step_formattribute` (
 -- ----------------------------
 -- Table structure for processtask_step_in_operation
 -- ----------------------------
-CREATE TABLE `processtask_step_in_operation` (
+CREATE TABLE IF NOT EXISTS `processtask_step_in_operation` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤ID',
@@ -908,7 +908,7 @@ CREATE TABLE `processtask_step_in_operation` (
 -- ----------------------------
 -- Table structure for processtask_step_notify_policy
 -- ----------------------------
-CREATE TABLE `processtask_step_notify_policy` (
+CREATE TABLE IF NOT EXISTS `processtask_step_notify_policy` (
   `processtask_step_id` bigint NOT NULL COMMENT '步骤ID',
   `policy_id` bigint NOT NULL COMMENT '通知策略ID',
   `policy_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '通知策略名称',
@@ -920,7 +920,7 @@ CREATE TABLE `processtask_step_notify_policy` (
 -- ----------------------------
 -- Table structure for processtask_step_notify_policy_config
 -- ----------------------------
-CREATE TABLE `processtask_step_notify_policy_config` (
+CREATE TABLE IF NOT EXISTS `processtask_step_notify_policy_config` (
   `hash` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'hash',
   `config` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT 'config',
   PRIMARY KEY (`hash`) USING BTREE
@@ -929,7 +929,7 @@ CREATE TABLE `processtask_step_notify_policy_config` (
 -- ----------------------------
 -- Table structure for processtask_step_reapproval_restore_backup
 -- ----------------------------
-CREATE TABLE `processtask_step_reapproval_restore_backup` (
+CREATE TABLE IF NOT EXISTS `processtask_step_reapproval_restore_backup` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤id',
   `backup_step_id` bigint NOT NULL COMMENT '备份步骤id',
@@ -941,7 +941,7 @@ CREATE TABLE `processtask_step_reapproval_restore_backup` (
 -- ----------------------------
 -- Table structure for processtask_step_rel
 -- ----------------------------
-CREATE TABLE `processtask_step_rel` (
+CREATE TABLE IF NOT EXISTS `processtask_step_rel` (
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `from_process_step_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '源步骤uuid',
   `to_process_step_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '目标步骤uuid',
@@ -962,7 +962,7 @@ CREATE TABLE `processtask_step_rel` (
 -- ----------------------------
 -- Table structure for processtask_step_remind
 -- ----------------------------
-CREATE TABLE `processtask_step_remind` (
+CREATE TABLE IF NOT EXISTS `processtask_step_remind` (
   `processtask_id` bigint DEFAULT NULL COMMENT '工单ID',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤ID',
   `action` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '动作',
@@ -977,7 +977,7 @@ CREATE TABLE `processtask_step_remind` (
 -- ----------------------------
 -- Table structure for processtask_step_sla
 -- ----------------------------
-CREATE TABLE `processtask_step_sla` (
+CREATE TABLE IF NOT EXISTS `processtask_step_sla` (
   `processtask_step_id` bigint NOT NULL COMMENT '步骤ID',
   `sla_id` bigint NOT NULL COMMENT 'sla id',
   PRIMARY KEY (`processtask_step_id`,`sla_id`) USING BTREE,
@@ -987,7 +987,7 @@ CREATE TABLE `processtask_step_sla` (
 -- ----------------------------
 -- Table structure for processtask_step_sla_time
 -- ----------------------------
-CREATE TABLE `processtask_step_sla_time` (
+CREATE TABLE IF NOT EXISTS `processtask_step_sla_time` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤id',
   `sla_id` bigint NOT NULL COMMENT '时效id',
@@ -1003,7 +1003,7 @@ CREATE TABLE `processtask_step_sla_time` (
 -- ----------------------------
 -- Table structure for processtask_step_tag
 -- ----------------------------
-CREATE TABLE `processtask_step_tag` (
+CREATE TABLE IF NOT EXISTS `processtask_step_tag` (
   `processtask_id` bigint DEFAULT NULL COMMENT '工单ID',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤ID',
   `tag_id` bigint NOT NULL COMMENT '标签ID',
@@ -1015,7 +1015,7 @@ CREATE TABLE `processtask_step_tag` (
 -- ----------------------------
 -- Table structure for processtask_step_task
 -- ----------------------------
-CREATE TABLE `processtask_step_task` (
+CREATE TABLE IF NOT EXISTS `processtask_step_task` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '任务id',
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤id',
@@ -1033,7 +1033,7 @@ CREATE TABLE `processtask_step_task` (
 -- ----------------------------
 -- Table structure for processtask_step_task_user
 -- ----------------------------
-CREATE TABLE `processtask_step_task_user` (
+CREATE TABLE IF NOT EXISTS `processtask_step_task_user` (
   `id` bigint NOT NULL COMMENT 'id',
   `processtask_step_task_id` bigint DEFAULT NULL COMMENT '任务id',
   `user_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '任务用户',
@@ -1046,7 +1046,7 @@ CREATE TABLE `processtask_step_task_user` (
 -- ----------------------------
 -- Table structure for processtask_step_task_user_agent
 -- ----------------------------
-CREATE TABLE `processtask_step_task_user_agent` (
+CREATE TABLE IF NOT EXISTS `processtask_step_task_user_agent` (
   `processtask_step_task_user_id` bigint NOT NULL COMMENT '步骤任务用户ID',
   `processtask_step_task_id` bigint DEFAULT NULL COMMENT '步骤任务ID',
   `user_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '用户uuid',
@@ -1058,7 +1058,7 @@ CREATE TABLE `processtask_step_task_user_agent` (
 -- ----------------------------
 -- Table structure for processtask_step_task_user_content
 -- ----------------------------
-CREATE TABLE `processtask_step_task_user_content` (
+CREATE TABLE IF NOT EXISTS `processtask_step_task_user_content` (
   `id` bigint NOT NULL COMMENT 'id',
   `processtask_step_task_id` bigint DEFAULT NULL COMMENT '步骤任务id',
   `processtask_step_task_user_id` bigint DEFAULT NULL COMMENT '步骤任务用户id',
@@ -1073,7 +1073,7 @@ CREATE TABLE `processtask_step_task_user_content` (
 -- ----------------------------
 -- Table structure for processtask_step_task_user_file
 -- ----------------------------
-CREATE TABLE `processtask_step_task_user_file` (
+CREATE TABLE IF NOT EXISTS `processtask_step_task_user_file` (
   `processtask_step_task_id` bigint NOT NULL COMMENT '步骤任务id',
   `processtask_step_task_user_id` bigint NOT NULL COMMENT '步骤任务用户id',
   `file_id` bigint NOT NULL COMMENT '附件id',
@@ -1085,7 +1085,7 @@ CREATE TABLE `processtask_step_task_user_file` (
 -- ----------------------------
 -- Table structure for processtask_step_timeaudit
 -- ----------------------------
-CREATE TABLE `processtask_step_timeaudit` (
+CREATE TABLE IF NOT EXISTS `processtask_step_timeaudit` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'id',
   `processtask_step_id` bigint DEFAULT NULL COMMENT '工单ID',
   `active_time` timestamp(3) NULL DEFAULT NULL COMMENT '激活时间',
@@ -1101,7 +1101,7 @@ CREATE TABLE `processtask_step_timeaudit` (
 -- ----------------------------
 -- Table structure for processtask_step_timer
 -- ----------------------------
-CREATE TABLE `processtask_step_timer` (
+CREATE TABLE IF NOT EXISTS `processtask_step_timer` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤id',
   `trigger_time` timestamp NULL DEFAULT NULL COMMENT '触发时间',
@@ -1111,7 +1111,7 @@ CREATE TABLE `processtask_step_timer` (
 -- ----------------------------
 -- Table structure for processtask_step_user
 -- ----------------------------
-CREATE TABLE `processtask_step_user` (
+CREATE TABLE IF NOT EXISTS `processtask_step_user` (
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤ID',
   `user_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '处理人uuid',
@@ -1132,7 +1132,7 @@ CREATE TABLE `processtask_step_user` (
 -- ----------------------------
 -- Table structure for processtask_step_worker
 -- ----------------------------
-CREATE TABLE `processtask_step_worker` (
+CREATE TABLE IF NOT EXISTS `processtask_step_worker` (
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤ID',
   `type` enum('user','team','role') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '类型',
@@ -1147,7 +1147,7 @@ CREATE TABLE `processtask_step_worker` (
 -- ----------------------------
 -- Table structure for processtask_step_worker_policy
 -- ----------------------------
-CREATE TABLE `processtask_step_worker_policy` (
+CREATE TABLE IF NOT EXISTS `processtask_step_worker_policy` (
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤ID',
   `process_step_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '步骤uuid',
@@ -1161,7 +1161,7 @@ CREATE TABLE `processtask_step_worker_policy` (
 -- ----------------------------
 -- Table structure for processtask_tag
 -- ----------------------------
-CREATE TABLE `processtask_tag` (
+CREATE TABLE IF NOT EXISTS `processtask_tag` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `tag_id` bigint NOT NULL COMMENT '标签id',
   PRIMARY KEY (`processtask_id`,`tag_id`) USING BTREE
@@ -1170,7 +1170,7 @@ CREATE TABLE `processtask_tag` (
 -- ----------------------------
 -- Table structure for processtask_time_cost
 -- ----------------------------
-CREATE TABLE `processtask_time_cost` (
+CREATE TABLE IF NOT EXISTS `processtask_time_cost` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
   `time_cost` bigint NOT NULL COMMENT '耗时，毫秒，根据工作日历计算',
   `realtime_cost` bigint NOT NULL COMMENT '耗时，毫秒，直接计算',
@@ -1180,7 +1180,7 @@ CREATE TABLE `processtask_time_cost` (
 -- ----------------------------
 -- Table structure for processtask_tranfer_report
 -- ----------------------------
-CREATE TABLE `processtask_tranfer_report` (
+CREATE TABLE IF NOT EXISTS `processtask_tranfer_report` (
   `id` bigint NOT NULL COMMENT 'id',
   `channel_type_relation_id` bigint NOT NULL COMMENT '服务类型关系id',
   `from_processtask_id` bigint NOT NULL COMMENT '源工单ID',
@@ -1195,7 +1195,7 @@ CREATE TABLE `processtask_tranfer_report` (
 -- ----------------------------
 -- Table structure for catalog
 -- ----------------------------
-CREATE TABLE `catalog` (
+CREATE TABLE IF NOT EXISTS `catalog` (
   `uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '全局唯一id，跨环境导入用',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '名称',
   `parent_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '父级uuid',
@@ -1211,7 +1211,7 @@ CREATE TABLE `catalog` (
 -- ----------------------------
 -- Table structure for catalog_authority
 -- ----------------------------
-CREATE TABLE `catalog_authority` (
+CREATE TABLE IF NOT EXISTS `catalog_authority` (
   `catalog_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '目录uuid',
   `type` enum('common','user','team','role') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '类型',
   `uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'uuid',
@@ -1225,7 +1225,7 @@ CREATE TABLE `catalog_authority` (
 -- ----------------------------
 -- Table structure for channel
 -- ----------------------------
-CREATE TABLE `channel` (
+CREATE TABLE IF NOT EXISTS `channel` (
   `uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '全局唯一id，跨环境导入用',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '名称',
   `parent_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'catalog的uuid',
@@ -1249,7 +1249,7 @@ CREATE TABLE `channel` (
 -- ----------------------------
 -- Table structure for channel_authority
 -- ----------------------------
-CREATE TABLE `channel_authority` (
+CREATE TABLE IF NOT EXISTS `channel_authority` (
   `channel_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '服务uuid',
   `type` enum('common','user','team','role') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '类型',
   `uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'uuid',
@@ -1261,7 +1261,7 @@ CREATE TABLE `channel_authority` (
 -- ----------------------------
 -- Table structure for channel_priority
 -- ----------------------------
-CREATE TABLE `channel_priority` (
+CREATE TABLE IF NOT EXISTS `channel_priority` (
   `channel_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'channel表的uuid',
   `priority_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'priority表的uuid',
   `is_default` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1:默认优先级,0:否',
@@ -1271,7 +1271,7 @@ CREATE TABLE `channel_priority` (
 -- ----------------------------
 -- Table structure for channel_process
 -- ----------------------------
-CREATE TABLE `channel_process` (
+CREATE TABLE IF NOT EXISTS `channel_process` (
   `channel_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'channel表的uuid',
   `process_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'process表的uuid',
   PRIMARY KEY (`channel_uuid`) USING BTREE
@@ -1280,7 +1280,7 @@ CREATE TABLE `channel_process` (
 -- ----------------------------
 -- Table structure for channel_relation
 -- ----------------------------
-CREATE TABLE `channel_relation` (
+CREATE TABLE IF NOT EXISTS `channel_relation` (
   `source` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '来源服务uuid',
   `channel_type_relation_id` bigint NOT NULL COMMENT '关系类型id',
   `type` enum('channel','catalog') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '标识目标是服务还是目录',
@@ -1293,7 +1293,7 @@ CREATE TABLE `channel_relation` (
 -- ----------------------------
 -- Table structure for channel_relation_authority
 -- ----------------------------
-CREATE TABLE `channel_relation_authority` (
+CREATE TABLE IF NOT EXISTS `channel_relation_authority` (
   `source` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '服务uuid',
   `channel_type_relation_id` bigint NOT NULL COMMENT '关系类型id',
   `type` char(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '授权对象类型',
@@ -1305,7 +1305,7 @@ CREATE TABLE `channel_relation_authority` (
 -- ----------------------------
 -- Table structure for channel_relation_isusepreowner
 -- ----------------------------
-CREATE TABLE `channel_relation_isusepreowner` (
+CREATE TABLE IF NOT EXISTS `channel_relation_isusepreowner` (
   `source` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '服务uuid',
   `channel_type_relation_id` bigint NOT NULL COMMENT '关系类型id',
   `is_use_pre_owner` tinyint(1) NOT NULL COMMENT '是否使用原用户上报',
@@ -1315,7 +1315,7 @@ CREATE TABLE `channel_relation_isusepreowner` (
 -- ----------------------------
 -- Table structure for channel_type
 -- ----------------------------
-CREATE TABLE `channel_type` (
+CREATE TABLE IF NOT EXISTS `channel_type` (
   `uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '全局唯一id，跨环境导入用',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '名称',
   `is_active` tinyint(1) DEFAULT NULL COMMENT '是否激活',
@@ -1330,7 +1330,7 @@ CREATE TABLE `channel_type` (
 -- ----------------------------
 -- Table structure for channel_type_relation
 -- ----------------------------
-CREATE TABLE `channel_type_relation` (
+CREATE TABLE IF NOT EXISTS `channel_type_relation` (
   `id` bigint NOT NULL COMMENT '唯一主键',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '名称',
   `is_active` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否激活',
@@ -1341,7 +1341,7 @@ CREATE TABLE `channel_type_relation` (
 -- ----------------------------
 -- Table structure for channel_type_relation_source
 -- ----------------------------
-CREATE TABLE `channel_type_relation_source` (
+CREATE TABLE IF NOT EXISTS `channel_type_relation_source` (
   `channel_type_relation_id` bigint NOT NULL COMMENT '关系类型id',
   `channel_type_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '服务类型uuid',
   PRIMARY KEY (`channel_type_relation_id`,`channel_type_uuid`) USING BTREE
@@ -1350,7 +1350,7 @@ CREATE TABLE `channel_type_relation_source` (
 -- ----------------------------
 -- Table structure for channel_type_relation_target
 -- ----------------------------
-CREATE TABLE `channel_type_relation_target` (
+CREATE TABLE IF NOT EXISTS `channel_type_relation_target` (
   `channel_type_relation_id` bigint NOT NULL COMMENT '关系类型id',
   `channel_type_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '服务类型uuid',
   PRIMARY KEY (`channel_type_relation_id`,`channel_type_uuid`) USING BTREE
@@ -1359,7 +1359,7 @@ CREATE TABLE `channel_type_relation_target` (
 -- ----------------------------
 -- Table structure for channel_user
 -- ----------------------------
-CREATE TABLE `channel_user` (
+CREATE TABLE IF NOT EXISTS `channel_user` (
   `user_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'user的uuid',
   `channel_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'channel的uuid',
   `insert_time` timestamp NULL DEFAULT NULL COMMENT '创建时间',
@@ -1369,7 +1369,7 @@ CREATE TABLE `channel_user` (
 -- ----------------------------
 -- Table structure for channel_worktime
 -- ----------------------------
-CREATE TABLE `channel_worktime` (
+CREATE TABLE IF NOT EXISTS `channel_worktime` (
   `channel_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'channel表的uuid',
   `worktime_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'worktime表的uuid',
   PRIMARY KEY (`channel_uuid`) USING BTREE,
@@ -1379,7 +1379,7 @@ CREATE TABLE `channel_worktime` (
 -- ----------------------------
 -- Table structure for task_config
 -- ----------------------------
-CREATE TABLE `task_config` (
+CREATE TABLE IF NOT EXISTS `task_config` (
   `id` bigint NOT NULL COMMENT '自增id',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '任务名称',
   `num` int DEFAULT NULL COMMENT '参与人数。-1：不做限制。',
