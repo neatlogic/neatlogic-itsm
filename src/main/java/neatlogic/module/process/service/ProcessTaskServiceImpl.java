@@ -25,6 +25,7 @@ import neatlogic.framework.change.constvalue.ChangeProcessStepHandlerType;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.common.constvalue.UserType;
+import neatlogic.framework.common.util.RC4Util;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dao.mapper.ConfigMapper;
 import neatlogic.framework.dao.mapper.RoleMapper;
@@ -55,7 +56,6 @@ import neatlogic.framework.process.crossover.IProcessTaskCrossoverService;
 import neatlogic.framework.process.dao.mapper.*;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
-import neatlogic.framework.process.exception.core.ProcessTaskRuntimeException;
 import neatlogic.framework.process.exception.file.ProcessTaskFileDownloadException;
 import neatlogic.framework.process.exception.operationauth.*;
 import neatlogic.framework.process.exception.process.ProcessNotFoundException;
@@ -2200,6 +2200,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                         if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMTABLEINPUTER.getHandler())) {
                             JSONArray dataList = formAttributeDataObj.getJSONArray("dataList");
                             formCrossoverService.staticListPasswordEncrypt(dataList, formAttributeVo.getConfigObj());
+                        } else if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMPASSWORD.getHandler())) {
+                            String dataList = formAttributeDataObj.getString("dataList");
+                            if (StringUtils.isNotBlank(dataList)) {
+                                formAttributeDataObj.put("dataList", RC4Util.encrypt(dataList));
+                            }
                         }
                     }
                 }

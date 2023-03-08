@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -59,37 +60,44 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
-        if (processTaskVo != null) {
-            ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskVo.getId());
-            if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
-                String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-                if (StringUtils.isNotBlank(formContent)) {
-                    List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskVo.getId());
-                    if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
-                        Map<String, ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
-                        List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataVoList = new ArrayList<>();
-                        FormVersionVo formVersionVo = new FormVersionVo();
-                        formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
-                        List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
-                        for (FormAttributeVo formAttribute : formAttributeList) {
-                            ProcessTaskFormAttributeDataVo attributeDataVo = processTaskFormAttributeDataMap.get(formAttribute.getUuid());
-                            if (attributeDataVo != null) {
-                                attributeDataVo.setAttributeLabel(formAttribute.getLabel());
-                                if (attributeDataVo.getData() != null) {
-                                    IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttribute.getHandler());
-                                    if (handler != null) {
-                                        Object value = handler.dataTransformationForEmail(attributeDataVo, JSONObject.parseObject(formAttribute.getConfig()));
-                                        attributeDataVo.setDataObj(value);
-                                        processTaskFormAttributeDataVoList.add(attributeDataVo);
-                                    }
-                                }
-                            }
-                        }
-                        return processTaskFormAttributeDataVoList;
-                    }
-                }
+        if (processTaskVo == null) {
+            return null;
+        }
+        ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskVo.getId());
+        if (processTaskFormVo == null) {
+            return null;
+        }
+        if (StringUtils.isBlank(processTaskFormVo.getFormContentHash())) {
+            return null;
+        }
+        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+        if (StringUtils.isBlank(formContent)) {
+            return null;
+        }
+        Map<String, ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataMap = new HashMap<>();
+                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskVo.getId());
+        if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
+            processTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
+        }
+        List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataVoList = new ArrayList<>();
+        FormVersionVo formVersionVo = new FormVersionVo();
+        formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
+        List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+        for (FormAttributeVo formAttribute : formAttributeList) {
+            ProcessTaskFormAttributeDataVo attributeDataVo = processTaskFormAttributeDataMap.get(formAttribute.getUuid());
+            if (attributeDataVo == null) {
+                attributeDataVo = new ProcessTaskFormAttributeDataVo();
+                attributeDataVo.setAttributeUuid(formAttribute.getUuid());
+                attributeDataVo.setType(formAttribute.getHandler());
+            }
+            attributeDataVo.setAttributeLabel(formAttribute.getLabel());
+            IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttribute.getHandler());
+            if (handler != null) {
+                Object value = handler.dataTransformationForEmail(attributeDataVo, formAttribute.getConfigObj());
+                attributeDataVo.setDataObj(value);
+                processTaskFormAttributeDataVoList.add(attributeDataVo);
             }
         }
-        return null;
+        return processTaskFormAttributeDataVoList;
     }
 }

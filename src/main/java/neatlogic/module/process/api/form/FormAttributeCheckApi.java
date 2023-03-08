@@ -81,9 +81,9 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 	@Description(desc = "表单属性值校验接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject configObj = jsonObj.getJSONObject("config");
-		Long processTaskId = configObj.getLong("processTaskId");
-		String channelUuid = configObj.getString("channelUuid");
+		JSONObject config = jsonObj.getJSONObject("config");
+		Long processTaskId = config.getLong("processTaskId");
+		String channelUuid = config.getString("channelUuid");
 		FormVersionVo formVersionVo = null;
 		String worktimeUuid = null;
 		if(processTaskId != null) {
@@ -132,7 +132,7 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 					AttributeDataVo attributeDataVo = new AttributeDataVo();
 					attributeDataVo.setAttributeUuid(attributeUuid);
 					attributeDataVo.setData(jsonObj.getString("data"));
-					configObj.put("attributeConfig", formAttribute.getConfig());
+					JSONObject configObj = formAttribute.getConfigObj();
 					configObj.put("worktimeUuid", worktimeUuid);
 					return handler.valid(attributeDataVo, configObj);
 				}else {
