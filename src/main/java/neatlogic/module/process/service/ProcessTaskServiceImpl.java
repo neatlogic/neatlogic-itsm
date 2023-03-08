@@ -2177,39 +2177,42 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
 
+        JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");
+        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+        formCrossoverService.formAttributeValueValid(formVersionVo, formAttributeDataList);
+
         IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
         if (handler == null) {
             throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
         }
-
         // 对表格输入组件中密码password类型的单元格数据进行加密
-        if (formVersionVo != null) {
-            List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
-            if (CollectionUtils.isNotEmpty(formAttributeList)) {
-                Map<String, FormAttributeVo> formAttributeMap = new HashMap<>();
-                for (FormAttributeVo formAttributeVo : formAttributeList) {
-                    formAttributeMap.put(formAttributeVo.getUuid(), formAttributeVo);
-                }
-                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-                JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");
-                for (int i = 0; i < formAttributeDataList.size(); i++) {
-                    JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
-                    String attributeUuid = formAttributeDataObj.getString("attributeUuid");
-                    FormAttributeVo formAttributeVo = formAttributeMap.get(attributeUuid);
-                    if (formAttributeVo != null) {
-                        if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMTABLEINPUTER.getHandler())) {
-                            JSONArray dataList = formAttributeDataObj.getJSONArray("dataList");
-                            formCrossoverService.staticListPasswordEncrypt(dataList, formAttributeVo.getConfigObj());
-                        } else if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMPASSWORD.getHandler())) {
-                            String dataList = formAttributeDataObj.getString("dataList");
-                            if (StringUtils.isNotBlank(dataList)) {
-                                formAttributeDataObj.put("dataList", RC4Util.encrypt(dataList));
-                            }
-                        }
-                    }
-                }
-            }
-        }
+//        if (formVersionVo != null) {
+//            List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+//            if (CollectionUtils.isNotEmpty(formAttributeList)) {
+//                Map<String, FormAttributeVo> formAttributeMap = new HashMap<>();
+//                for (FormAttributeVo formAttributeVo : formAttributeList) {
+//                    formAttributeMap.put(formAttributeVo.getUuid(), formAttributeVo);
+//                }
+//                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+//                JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");
+//                for (int i = 0; i < formAttributeDataList.size(); i++) {
+//                    JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
+//                    String attributeUuid = formAttributeDataObj.getString("attributeUuid");
+//                    FormAttributeVo formAttributeVo = formAttributeMap.get(attributeUuid);
+//                    if (formAttributeVo != null) {
+//                        if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMTABLEINPUTER.getHandler())) {
+//                            JSONArray dataList = formAttributeDataObj.getJSONArray("dataList");
+//                            formCrossoverService.staticListPasswordEncrypt(dataList, formAttributeVo.getConfigObj());
+//                        } else if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMPASSWORD.getHandler())) {
+//                            String dataList = formAttributeDataObj.getString("dataList");
+//                            if (StringUtils.isNotBlank(dataList)) {
+//                                formAttributeDataObj.put("dataList", RC4Util.encrypt(dataList));
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
         ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
         processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
