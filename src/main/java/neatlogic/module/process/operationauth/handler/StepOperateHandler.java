@@ -2,7 +2,9 @@ package neatlogic.module.process.operationauth.handler;
 
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.common.constvalue.SystemUser;
+import neatlogic.framework.dao.mapper.ConfigMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.ConfigVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.constvalue.ProcessFlowDirection;
@@ -34,6 +36,8 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
 
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private ConfigMapper configMapper;
     @Resource
     private ProcessTaskService processTaskService;
 
@@ -516,6 +520,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMMENT, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
+            ConfigVo configVo = configMapper.getConfigByKey("processTaskStepEnableComment");
+            if (configVo == null) {
+                return false;
+            }
+            if (!Objects.equals(configVo.getValue(), "1")) {
+                return false;
+            }
             Long id = processTaskStepVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_COMMENT;
             //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
