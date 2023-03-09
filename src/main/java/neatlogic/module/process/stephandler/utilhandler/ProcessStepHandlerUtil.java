@@ -741,7 +741,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 Map<String, FormAttributeVo> formAttributeMap = new HashMap<>();
                 for (FormAttributeVo formAttributeVo : formAttributeVoList) {
                     formAttributeMap.put(formAttributeVo.getUuid(), formAttributeVo);
-//                    attributeLabelMap.put(formAttributeVo.getUuid(), formAttributeVo.getLabel());
+                    attributeLabelMap.put(formAttributeVo.getUuid(), formAttributeVo.getLabel());
                     if (formAttributeVo.isRequired()) {
                         if (hidecomponentList.contains(formAttributeVo.getUuid())) {
                             continue;
