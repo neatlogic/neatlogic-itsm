@@ -16,19 +16,28 @@
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.framework.process.dto.ProcessTaskStepContentVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 public class StepTransferContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private SelectContentByHashMapper selectContentByHashMapper;
 
     @Override
     public String getValue() {
@@ -37,6 +46,19 @@ public class StepTransferContentParamHandler extends ProcessTaskNotifyParamHandl
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+        // 查询步骤的所有处理内容，已倒序排好
+        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepVo.getId());
+        // 遍历列表，找出最近一次转交内容
+        for (ProcessTaskStepContentVo contentVo : processTaskStepContentList) {
+            if (Objects.equals(contentVo.getType(), ProcessTaskOperationType.STEP_TRANSFER.getValue())) {
+                String contentHash = contentVo.getContentHash();
+                if (StringUtils.isBlank(contentHash)) {
+                    return null;
+                }
+                String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentHash);
+                return content;
+            }
+        }
         return null;
     }
 }

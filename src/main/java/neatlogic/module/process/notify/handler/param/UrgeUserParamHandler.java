@@ -16,25 +16,37 @@
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import javax.annotation.Resource;
 
 @Component
-public class StepTransferTimeParamHandler extends ProcessTaskNotifyParamHandlerBase {
+public class UrgeUserParamHandler extends ProcessTaskNotifyParamHandlerBase {
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private UserMapper userMapper;
 
     @Override
     public String getValue() {
-        return ProcessTaskStepNotifyParam.PROCESS_TASK_STEP_TRANSFER_TIME.getValue();
+        return ProcessTaskNotifyParam.PROCESS_TASK_URGE_USER.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return sdf.format(new Date());
+        String userUuid = processTaskMapper.getProcessTaskLastUrgeUserUuidByProcessTaskId(processTaskStepVo.getProcessTaskId());
+        UserVo userVo = userMapper.getUserBaseInfoByUuid(userUuid);
+        if (userVo != null) {
+            return userVo.getUserName() + "(" + userVo.getUserId() + ")";
+        }
+        return null;
     }
 }

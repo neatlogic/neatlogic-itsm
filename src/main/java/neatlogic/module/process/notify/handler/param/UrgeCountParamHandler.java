@@ -16,25 +16,27 @@
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import javax.annotation.Resource;
 
 @Component
-public class StepTransferTimeParamHandler extends ProcessTaskNotifyParamHandlerBase {
+public class UrgeCountParamHandler extends ProcessTaskNotifyParamHandlerBase {
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getValue() {
-        return ProcessTaskStepNotifyParam.PROCESS_TASK_STEP_TRANSFER_TIME.getValue();
+        return ProcessTaskNotifyParam.PROCESS_TASK_URGE_COUNT.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return sdf.format(new Date());
+        return processTaskMapper.getProcessTaskUrgeCountByProcessTaskId(processTaskStepVo.getProcessTaskId());
     }
 }
