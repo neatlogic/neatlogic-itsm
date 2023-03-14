@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-public class StepCompleteContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
+public class CurrentStepCompleteContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
@@ -41,7 +41,7 @@ public class StepCompleteContentParamHandler extends ProcessTaskNotifyParamHandl
 
     @Override
     public String getValue() {
-        return ProcessTaskStepNotifyParam.PROCESS_TASK_STEP_COMPLETE_CONTENT.getValue();
+        return ProcessTaskStepNotifyParam.PROCESS_TASK_CURRENT_STEP_COMPLETE_CONTENT.getValue();
     }
 
     @Override
