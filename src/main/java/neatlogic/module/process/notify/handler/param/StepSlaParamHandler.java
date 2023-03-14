@@ -50,13 +50,13 @@ public class StepSlaParamHandler extends ProcessTaskNotifyParamHandlerBase {
         List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskService.getSlaTimeListByProcessTaskStepId(processTaskStepVo.getId());
         for (ProcessTaskSlaTimeVo slaTimeVo : processTaskSlaTimeList) {
             StringBuilder stringBuilder = new StringBuilder(slaTimeVo.getName());
-            stringBuilder.append("/t");
+            stringBuilder.append(" ");
             if (Objects.equals(slaTimeVo.getStatus(), SlaStatus.DONE.name().toLowerCase())) {
 //                stringBuilder.append("耗时 ");
                 stringBuilder.append(I18nUtils.getMessage("const.timeconsuming"));
                 stringBuilder.append(" ");
                 stringBuilder.append(TimeUtil.millisecondsFormat((slaTimeVo.getTimeSum() - slaTimeVo.getTimeLeft()), 3, TimeUnit.MINUTES, " "));
-                stringBuilder.append("/t");
+                stringBuilder.append(" ");
                 stringBuilder.append(I18nUtils.getMessage("const.completed"));
 //                stringBuilder.append("完成");
             } else {
@@ -75,17 +75,18 @@ public class StepSlaParamHandler extends ProcessTaskNotifyParamHandlerBase {
                     stringBuilder.append(TimeUtil.millisecondsFormat((System.currentTimeMillis() - slaTimeVo.getExpireTime().getTime()), 3, TimeUnit.MINUTES, " "));
                 }
                 if (Objects.equals(slaTimeVo.getStatus(), SlaStatus.DOING.name().toLowerCase())) {
-                    stringBuilder.append("/t");
+                    stringBuilder.append(" ");
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     stringBuilder.append(sdf.format(slaTimeVo.getExpireTime()));
 //                    stringBuilder.append("截止");
                     stringBuilder.append(I18nUtils.getMessage("const.deadline"));
                 } else if (Objects.equals(slaTimeVo.getStatus(), SlaStatus.PAUSE.name().toLowerCase())) {
-                    stringBuilder.append("/t");
+                    stringBuilder.append(" ");
 //                    stringBuilder.append("已暂停");
                     stringBuilder.append(I18nUtils.getMessage("const.paused"));
                 }
             }
+            slaTimeList.add(stringBuilder.toString());
         }
         return slaTimeList;
     }

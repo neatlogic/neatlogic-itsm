@@ -87,7 +87,7 @@ public class ScoreParamHandler extends ProcessTaskNotifyParamHandlerBase {
             if (score == null) {
                 continue;
             }
-            resultList.add(dimensionName + "：" + score + "分");
+            resultList.add(dimensionName + "：" + score);
         }
         return String.join("、", resultList);
     }
