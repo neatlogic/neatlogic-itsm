@@ -52,7 +52,7 @@ public class ApprovalCommentListParamHandler extends ProcessTaskNotifyParamHandl
     private ProcessTaskMapper processTaskMapper;
 
     @Resource
-    private SelectContentByHashMapper selectContntByHashMapper;
+    private SelectContentByHashMapper selectContentByHashMapper;
 
     @Resource
     private UserMapper userMapper;
@@ -71,7 +71,7 @@ public class ApprovalCommentListParamHandler extends ProcessTaskNotifyParamHandl
         if (CollectionUtils.isNotEmpty(processTaskStepContentList)) {
             List<String> commentList = new ArrayList<>();
             for (ProcessTaskStepContentVo contentVo : processTaskStepContentList) {
-                String content = selectContntByHashMapper.getProcessTaskContentStringByHash(contentVo.getContentHash());
+                String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentVo.getContentHash());
                 if (StringUtils.isNotBlank(content)) {
                     if (content.startsWith("<p>")) {
                         content = content.substring(3);

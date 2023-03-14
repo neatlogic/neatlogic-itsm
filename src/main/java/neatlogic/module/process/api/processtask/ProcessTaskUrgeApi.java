@@ -3,13 +3,12 @@ package neatlogic.module.process.api.processtask;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
+import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
-import neatlogic.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.service.ProcessTaskAgentService;
@@ -22,7 +21,6 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -33,6 +31,8 @@ import java.util.List;
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
     
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
     @Resource
     private ProcessTaskService processTaskService;
     @Resource
@@ -78,6 +78,8 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 			IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.URGE);
 			IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.URGE);
 		}
+		// 催办记录
+		processTaskMapper.insertProcessTaskUrge(processTaskId, UserContext.get().getUserUuid(true));
 		/*生成催办活动*/
 		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
 		processTaskStepVo.setProcessTaskId(processTaskId);
