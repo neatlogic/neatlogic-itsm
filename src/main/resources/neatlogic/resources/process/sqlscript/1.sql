@@ -1393,3 +1393,10 @@ CREATE TABLE IF NOT EXISTS `task_config` (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `uniq_name` (`name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='task_config';
+
+CREATE TABLE IF NOT EXISTS `processtask_urge` (
+  `processtask_id` bigint NOT NULL COMMENT '工单ID',
+  `lcu` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '催办用户',
+  `lcd` timestamp(3) NOT NULL COMMENT '催办时间',
+  PRIMARY KEY (`processtask_id`,`lcu`,`lcd`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
