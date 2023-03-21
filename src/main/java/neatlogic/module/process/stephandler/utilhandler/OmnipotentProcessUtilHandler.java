@@ -131,13 +131,6 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                 ProcessTaskOperationType.STEP_RETREAT
         };
         JSONArray authorityList = configObj.getJSONArray("authorityList");
-//        Integer enableAuthority = configObj.getInteger("enableAuthority");
-//        if (Objects.equals(enableAuthority, 1)) {
-//            authorityList = configObj.getJSONArray("authorityList");
-//        } else {
-//            enableAuthority = 0;
-//        }
-//        resultObj.put("enableAuthority", enableAuthority);
         JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
         resultObj.put("authorityList", authorityArray);
 
