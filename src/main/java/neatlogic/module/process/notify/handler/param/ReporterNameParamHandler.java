@@ -49,9 +49,9 @@ public class ReporterNameParamHandler extends ProcessTaskNotifyParamHandlerBase 
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
         if (processTaskVo != null) {
-            String owner = processTaskVo.getOwner();
-            if (StringUtils.isNotBlank(owner)) {
-                UserVo userVo = userMapper.getUserBaseInfoByUuid(owner);
+            String reporter = processTaskVo.getReporter();
+            if (StringUtils.isNotBlank(reporter)) {
+                UserVo userVo = userMapper.getUserBaseInfoByUuid(reporter);
                 if (userVo != null) {
                     return userVo.getUserName();
                 }
