@@ -1981,16 +1981,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     resultList.add(processTaskStepVo);
                     continue;
                 }
-                // 子任务处理人可以重复回复
-                ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
-                processTaskStepUserVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());
-                processTaskStepUserVo.setProcessTaskStepId(processTaskStepVo.getId());
-                processTaskStepUserVo.setUserUuid(userUuid);
-                processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
-                if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
-                    resultList.add(processTaskStepVo);
-                    continue;
-                }
                 // 子任务用户A授权给B，B处理后，A也能处理
                 List<ProcessTaskStepTaskVo> processTaskStepTaskList = processTaskStepTaskMapper.getStepTaskListByProcessTaskStepId(processTaskStepVo.getId());
                 if (CollectionUtils.isNotEmpty(processTaskStepTaskList)) {
