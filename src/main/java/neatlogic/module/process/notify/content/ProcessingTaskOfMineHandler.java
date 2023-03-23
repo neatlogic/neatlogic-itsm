@@ -22,6 +22,7 @@ import neatlogic.framework.notify.dto.job.NotifyJobVo;
 import neatlogic.framework.notify.exception.NotifyHandlerNotFoundException;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
+import neatlogic.framework.util.I18nUtils;
 import neatlogic.module.process.service.ProcessTaskService;
 import neatlogic.module.framework.message.handler.TimedTaskMessgeHandler;
 import neatlogic.module.framework.notify.handler.MessageNotifyHandler;
@@ -66,7 +67,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
     protected ProcessTaskService processTaskService;
 
 	public enum ConditionOptions{
-		STEPTEAM("stepteam","处理组",Expression.INCLUDE.getExpression());
+		STEPTEAM("stepteam","enum.process.conditionoptions.stepteam",Expression.INCLUDE.getExpression());
 
 		private String value;
 		private String text;
@@ -80,7 +81,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			return value;
 		}
 		public String getText() {
-			return text;
+			return I18nUtils.getMessage(text);
 		}
 		public String getExpression() {
 			return expression;
