@@ -55,9 +55,6 @@ public class ContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
         if (processTaskVo != null) {
             ProcessTaskStepVo startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId());
-            ProcessTaskStepReplyVo comment = new ProcessTaskStepReplyVo();
-            // 获取上报描述内容
-            List<Long> fileIdList = new ArrayList<>();
             List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepVo.getId());
             for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
                 if (ProcessTaskOperationType.PROCESSTASK_START.getValue().equals(processTaskStepContent.getType())) {

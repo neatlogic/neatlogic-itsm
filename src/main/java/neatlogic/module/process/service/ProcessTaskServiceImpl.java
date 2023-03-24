@@ -597,11 +597,20 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskStepId(Long processTaskStepId,
                                                                                        List<String> typeList) {
         List<ProcessTaskStepReplyVo> processTaskStepReplyList = new ArrayList<>();
+        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepId);
         for (ProcessTaskStepContentVo processTaskStepContentVo : processTaskStepContentList) {
             if (typeList.contains(processTaskStepContentVo.getType())) {
                 ProcessTaskStepReplyVo processTaskStepReplyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
                 parseProcessTaskStepReply(processTaskStepReplyVo);
+                if(Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())
+                        && Objects.equals(UserContext.get().getUserUuid(), processTaskStepReplyVo.getFcu())) {
+                    processTaskStepReplyVo.setIsEditable(1);
+                    processTaskStepReplyVo.setIsDeletable(1);
+                }else {
+                    processTaskStepReplyVo.setIsEditable(0);
+                    processTaskStepReplyVo.setIsDeletable(0);
+                }
                 processTaskStepReplyList.add(processTaskStepReplyVo);
             }
         }
