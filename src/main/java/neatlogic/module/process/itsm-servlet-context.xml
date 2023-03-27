@@ -15,7 +15,7 @@
 		http://neatlogic.com/schema/neatlogic
 		http://neatlogic.com/schema/neatlogic.xsd">
 
-	<neatlogic:module id="process" name="工作流引擎模块" groupName="IT服务" group="process" groupSort="1" groupDescription="一站式服务上报-跟踪-处理平台" />
+	<neatlogic:module id="process" name="工作流引擎模块" groupName="modulegroup.itsm" group="process" groupSort="1" groupDescription="modulegroup.itsm.desc" />
 
 	<context:component-scan base-package="neatlogic.module.process" />
 
