@@ -88,7 +88,15 @@ public class StepWorkerParamHandler extends ProcessTaskNotifyParamHandlerBase {
             return String.join("、", workerNameList);
         } else {
             List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), null);
-            List<String> userNameList = userList.stream().filter(e -> e.getUserType().equals(ProcessUserType.MAJOR.getValue())).map(e -> e.getUserName()).collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(userList)) {
+                return null;
+            }
+            List<String> userUuidList = userList.stream().filter(e -> e.getUserType().equals(ProcessUserType.MAJOR.getValue())).map(e -> e.getUserUuid()).collect(Collectors.toList());
+            List<UserVo> userVoList = userMapper.getUserByUserUuidList(userUuidList);
+            if (CollectionUtils.isEmpty(userVoList)) {
+                return null;
+            }
+            List<String> userNameList = userVoList.stream().map(UserVo::getUserName).collect(Collectors.toList());
             return String.join("、", userNameList);
         }
     }
