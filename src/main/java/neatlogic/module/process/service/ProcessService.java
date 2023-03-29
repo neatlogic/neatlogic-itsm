@@ -7,4 +7,9 @@ public interface ProcessService {
 
 	public int saveProcess(ProcessVo processVo) throws ProcessNameRepeatException;
 
+	/**
+	 * 删除流程相关数据
+	 * @param uuid 流程uuid
+	 */
+	void deleteProcessRelevantData(String uuid);
 }

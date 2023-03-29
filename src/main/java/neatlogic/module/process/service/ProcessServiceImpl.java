@@ -72,27 +72,8 @@ public class ProcessServiceImpl implements ProcessService {
         }
         String uuid = processVo.getUuid();
         if (processMapper.checkProcessIsExists(uuid) > 0) {
-            List<String> slaUuidList = processMapper.getSlaUuidListByProcessUuid(uuid);
-            List<String> processStepUuidList = processMapper.getProcessStepUuidListByProcessUuid(uuid);
-            DependencyManager.delete(NotifyPolicyProcessSlaDependencyHandler.class, slaUuidList);
-            DependencyManager.delete(NotifyPolicyProcessStepDependencyHandler.class, processStepUuidList);
-            DependencyManager.delete(IntegrationProcessStepDependencyHandler.class, processStepUuidList);
-            DependencyManager.delete(NotifyPolicyProcessDependencyHandler.class, uuid);
-            DependencyManager.delete(IntegrationProcessDependencyHandler.class, uuid);
-            processMapper.deleteProcessStepWorkerPolicyByProcessUuid(uuid);
-            processMapper.deleteProcessStepByProcessUuid(uuid);
-            processMapper.deleteProcessStepRelByProcessUuid(uuid);
-//            processMapper.deleteProcessStepFormAttributeByProcessUuid(uuid);
-            processMapper.deleteProcessFormByProcessUuid(uuid);
-            processMapper.deleteProcessSlaByProcessUuid(uuid);
-            scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(uuid);
-            processMapper.deleteProcessStepTagByProcessUuid(uuid);
+            deleteProcessRelevantData(uuid);
             processMapper.updateProcess(processVo);
-            if (CollectionUtils.isNotEmpty(processVo.getStepList())) {
-                for (ProcessStepVo stepVo : processVo.getStepList()) {
-                    DependencyManager.delete(FormScene2ProcessStepDependencyHandler.class, stepVo.getUuid());
-                }
-            }
         } else {
             processVo.setFcu(UserContext.get().getUserUuid(true));
             processMapper.insertProcess(processVo);
@@ -274,6 +255,27 @@ public class ProcessServiceImpl implements ProcessService {
             }
         }
         return 1;
+    }
+
+    @Override
+    public void deleteProcessRelevantData(String uuid) {
+        List<String> slaUuidList = processMapper.getSlaUuidListByProcessUuid(uuid);
+        List<String> processStepUuidList = processMapper.getProcessStepUuidListByProcessUuid(uuid);
+        DependencyManager.delete(NotifyPolicyProcessSlaDependencyHandler.class, slaUuidList);
+        DependencyManager.delete(NotifyPolicyProcessStepDependencyHandler.class, processStepUuidList);
+        DependencyManager.delete(IntegrationProcessStepDependencyHandler.class, processStepUuidList);
+        DependencyManager.delete(NotifyPolicyProcessDependencyHandler.class, uuid);
+        DependencyManager.delete(IntegrationProcessDependencyHandler.class, uuid);
+        processMapper.deleteProcessStepWorkerPolicyByProcessUuid(uuid);
+        processMapper.deleteProcessStepByProcessUuid(uuid);
+        processMapper.deleteProcessStepRelByProcessUuid(uuid);
+        processMapper.deleteProcessFormByProcessUuid(uuid);
+        processMapper.deleteProcessSlaByProcessUuid(uuid);
+        scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(uuid);
+        processMapper.deleteProcessStepTagByProcessUuid(uuid);
+        for (String stepUuid : processStepUuidList) {
+            DependencyManager.delete(FormScene2ProcessStepDependencyHandler.class, stepUuid);
+        }
     }
 
 }

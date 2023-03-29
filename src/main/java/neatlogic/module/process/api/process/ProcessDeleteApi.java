@@ -9,6 +9,7 @@ import neatlogic.framework.process.auth.PROCESS_MODIFY;
 
 import neatlogic.module.process.dao.mapper.ProcessMapper;
 import neatlogic.module.process.dependency.handler.*;
+import neatlogic.module.process.service.ProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,7 @@ public class ProcessDeleteApi extends PrivateApiComponentBase {
 	private ProcessMapper processMapper;
 
 	@Autowired
-	private ScoreTemplateMapper scoreTemplateMapper;
+	private ProcessService processService;
 	
 	@Override
 	public String getToken() {
@@ -66,24 +67,11 @@ public class ProcessDeleteApi extends PrivateApiComponentBase {
 		if(processMapper.getProcessReferenceCount(uuid) > 0) {
 			throw new ProcessReferencedCannotBeDeleteException(uuid);
 		}
-		List<String> slaUuidList = processMapper.getSlaUuidListByProcessUuid(uuid);
-		List<String> processStepUuidList = processMapper.getProcessStepUuidListByProcessUuid(uuid);
-		DependencyManager.delete(NotifyPolicyProcessDependencyHandler.class, uuid);
-		DependencyManager.delete(NotifyPolicyProcessStepDependencyHandler.class, processStepUuidList);
-		DependencyManager.delete(NotifyPolicyProcessSlaDependencyHandler.class, slaUuidList);
-		DependencyManager.delete(IntegrationProcessDependencyHandler.class, uuid);
-		DependencyManager.delete(IntegrationProcessStepDependencyHandler.class, processStepUuidList);
+		processService.deleteProcessRelevantData(uuid);
 		processMapper.deleteProcessByUuid(uuid);
-		processMapper.deleteProcessStepByProcessUuid(uuid);
-		processMapper.deleteProcessStepWorkerPolicyByProcessUuid(uuid);
-		processMapper.deleteProcessStepRelByProcessUuid(uuid);
-//		processMapper.deleteProcessStepFormAttributeByProcessUuid(uuid);
 		ProcessDraftVo processDraftVo = new ProcessDraftVo();
 		processDraftVo.setProcessUuid(uuid);
 		processMapper.deleteProcessDraft(processDraftVo);
-		processMapper.deleteProcessFormByProcessUuid(uuid);
-		processMapper.deleteProcessSlaByProcessUuid(uuid);
-		scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(uuid);
 		return uuid;
 	}
 
