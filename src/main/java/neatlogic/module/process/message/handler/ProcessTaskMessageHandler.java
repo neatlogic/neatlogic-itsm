@@ -18,12 +18,12 @@ public class ProcessTaskMessageHandler extends MessageHandlerBase {
 
     @Override
     public String getName() {
-        return "IT服务";
+        return "modulegroup.itsm";
     }
 
     @Override
     public String getDescription() {
-        return "实时显示待处理工单信息，支持快速审批";
+        return "handler.message.itsm.description";
     }
 
     @Override
