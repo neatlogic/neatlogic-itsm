@@ -32,7 +32,7 @@ public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase impl
 
     @Override
     public String getDisplayName() {
-        return "当前步骤名";
+        return "handler.processtask.column.currentstepname";
     }
 
     @Override

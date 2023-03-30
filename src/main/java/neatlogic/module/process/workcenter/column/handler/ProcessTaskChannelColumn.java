@@ -35,7 +35,7 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
 
     @Override
     public String getDisplayName() {
-        return "服务";
+        return "handler.processtask.column.channel";
     }
 
     @Override

@@ -32,6 +32,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.FileUtil;
+import neatlogic.framework.util.I18nUtils;
 import neatlogic.module.process.service.NewWorkcenterService;
 import neatlogic.module.process.sql.decorator.SqlBuilder;
 import neatlogic.module.process.workcenter.column.handler.ProcessTaskCurrentStepColumn;
@@ -147,7 +148,7 @@ public class WorkcenterDataExportToCSVApi extends PrivateBinaryStreamApiComponen
                         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                             IProcessTaskColumn column = entry.getValue();
                             if (column.getIsShow() && column.getIsExport() && !column.getDisabled()) {
-                                map.put(column.getDisplayName(), column.getSimpleValue(taskVo));
+                                map.put(I18nUtils.getMessage(column.getDisplayName()), column.getSimpleValue(taskVo));
                             }
                         }
                         for (String head : headList) {

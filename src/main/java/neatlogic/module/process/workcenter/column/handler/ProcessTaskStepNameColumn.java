@@ -35,7 +35,7 @@ public class ProcessTaskStepNameColumn extends ProcessTaskColumnBase implements 
 
 	@Override
 	public String getDisplayName() {
-		return "步骤名";
+		return "handler.processtask.column.stepname";
 	}
 
 	@Override

@@ -28,7 +28,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 
 	@Override
 	public String getDisplayName() {
-		return "当前步骤";
+		return "handler.processtask.column.currentstep";
 	}
 
 	@Override

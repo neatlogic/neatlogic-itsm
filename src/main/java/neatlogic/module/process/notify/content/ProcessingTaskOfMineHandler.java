@@ -193,7 +193,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				JSONArray dataColumnList = config.getJSONArray("dataColumnList");
 				List<String> columnNameList = new ArrayList<>();
 				Map<String, String> collect = ProcessTaskColumnFactory.columnComponentMap.values()
-						.stream().collect(Collectors.toMap(e -> e.getName(), e -> e.getDisplayName()));
+						.stream().collect(Collectors.toMap(IProcessTaskColumn::getName, e -> I18nUtils.getMessage(e.getDisplayName())));
 				for(Object column : dataColumnList){
 					columnNameList.add(collect.get(column.toString()));
 				}
@@ -224,7 +224,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				taskTable.append("<thead>");
 				taskTable.append("<tr class=\"th-left\">");
 				for(String column : columnNameList){
-					taskTable.append("<th>" + column + "</th>");
+					taskTable.append("<th>").append(column).append("</th>");
 				}
 				taskTable.append("</tr>");
 				taskTable.append("</thead>");
@@ -232,7 +232,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				for(Map<String, String> map : dataList){
 					taskTable.append("<tr>");
 					for(String column : columnNameList){
-						taskTable.append("<td>" + map.get(column) + "</td>");
+						taskTable.append("<td>").append(map.get(column)).append("</td>");
 					}
 					taskTable.append("</tr>");
 				}
@@ -259,10 +259,10 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 					JSONArray dataColumns = config.getJSONArray("dataColumnList");
 					List<String> columnList = new ArrayList<>();
 					if(CollectionUtils.isNotEmpty(dataColumns)){
-						dataColumns.stream().forEach(o -> columnList.add(ProcessTaskColumnFactory.columnComponentMap.get(o.toString()).getDisplayName()));
+						dataColumns.forEach(o -> columnList.add(I18nUtils.getMessage(ProcessTaskColumnFactory.columnComponentMap.get(o.toString()).getDisplayName())));
 					}else{
 						for(Map.Entry<String, IProcessTaskColumn> entry : ProcessTaskColumnFactory.columnComponentMap.entrySet()){
-							columnList.add(entry.getValue().getDisplayName());
+							columnList.add(I18nUtils.getMessage(entry.getValue().getDisplayName()));
 						}
 					}
 					/** 获取按用户分好类的工单列表 **/
@@ -551,7 +551,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			Collection<IProcessTaskColumn> values = ProcessTaskColumnFactory.columnComponentMap.values();
 			values.stream().sorted(Comparator.comparing(IProcessTaskColumn::getSort)).forEach(o -> {
 				if(!o.getDisabled() && o.getIsShow() && o.getIsExport()){
-					result.add(new ValueTextVo(o.getName(),o.getDisplayName()));
+					result.add(new ValueTextVo(o.getName(),I18nUtils.getMessage(o.getDisplayName())));
 				}
 			});
 		}

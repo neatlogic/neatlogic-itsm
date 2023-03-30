@@ -31,7 +31,7 @@ public class ProcessTaskWorkTimeColumn extends ProcessTaskColumnBase implements 
 
 	@Override
 	public String getDisplayName() {
-		return "时间窗口";
+		return "handler.processtask.column.worktime";
 	}
 
 	/*@Override

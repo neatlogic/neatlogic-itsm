@@ -25,7 +25,6 @@ import neatlogic.framework.change.constvalue.ChangeProcessStepHandlerType;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.common.constvalue.UserType;
-import neatlogic.framework.common.util.RC4Util;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dao.mapper.ConfigMapper;
 import neatlogic.framework.dao.mapper.RoleMapper;
@@ -39,9 +38,7 @@ import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
-import neatlogic.framework.form.constvalue.FormHandler;
 import neatlogic.framework.form.dao.mapper.FormMapper;
-import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormActiveVersionNotFoundExcepiton;
 import neatlogic.framework.form.service.IFormCrossoverService;
@@ -73,6 +70,7 @@ import neatlogic.framework.process.task.TaskConfigManager;
 import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import neatlogic.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import neatlogic.framework.service.AuthenticationInfoService;
+import neatlogic.framework.util.I18nUtils;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
@@ -1576,7 +1574,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                         Map<String, Object> map = new HashMap<>();
                         for (IProcessTaskColumn column : ProcessTaskColumnFactory.columnComponentMap.values()) {
                             if (!column.getDisabled() && column.getIsShow() && column.getIsExport()) {
-                                map.put(column.getDisplayName(), column.getSimpleValue(processTaskVo));
+                                map.put(I18nUtils.getMessage(column.getDisplayName()), column.getSimpleValue(processTaskVo));
                             }
                         }
                         taskList.add(map);

@@ -40,6 +40,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.FileUtil;
+import neatlogic.framework.util.I18nUtils;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
 import neatlogic.module.process.service.NewWorkcenterService;
 import neatlogic.module.process.sql.decorator.SqlBuilder;
@@ -282,7 +283,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                             IProcessTaskColumn column = entry.getValue();
                             if (column.getIsShow() && column.getIsExport() && !column.getDisabled()) {
-                                map.put(column.getDisplayName(), column.getSimpleValue(taskVo));
+                                map.put(I18nUtils.getMessage(column.getDisplayName()), column.getSimpleValue(taskVo));
                             }
                         }
                         // 填充工单属性&记录每个工单属性的单元格合并

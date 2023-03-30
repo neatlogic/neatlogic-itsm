@@ -29,7 +29,7 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
 
     @Override
     public String getDisplayName() {
-        return "服务目录";
+        return "handler.processtask.column.catalog";
     }
 
     /*@Override

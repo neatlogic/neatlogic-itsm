@@ -40,7 +40,7 @@ public class ProcessTaskStepStatusColumn extends ProcessTaskColumnBase implement
 
     @Override
     public String getDisplayName() {
-        return "步骤状态";
+        return "handler.processtask.column.stepstatus";
     }
 
     @Override

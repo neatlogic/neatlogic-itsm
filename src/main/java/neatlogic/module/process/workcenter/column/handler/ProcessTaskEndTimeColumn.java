@@ -24,7 +24,7 @@ public class ProcessTaskEndTimeColumn extends ProcessTaskColumnBase implements I
 
 	@Override
 	public String getDisplayName() {
-		return "结束时间";
+		return "handler.processtask.column.endtime";
 	}
 
 	/*@Override

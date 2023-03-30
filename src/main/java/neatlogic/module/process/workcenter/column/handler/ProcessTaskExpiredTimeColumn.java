@@ -42,7 +42,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 
     @Override
     public String getDisplayName() {
-        return "剩余时间";
+        return "handler.processtask.column.expiretime";
     }
 
     @Override

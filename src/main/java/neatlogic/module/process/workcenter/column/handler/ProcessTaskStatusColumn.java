@@ -27,7 +27,7 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
 
     @Override
     public String getDisplayName() {
-        return "工单状态";
+        return "handler.processtask.column.status";
     }
 
     @Override
