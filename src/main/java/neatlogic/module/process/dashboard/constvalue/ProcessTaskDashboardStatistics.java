@@ -17,12 +17,13 @@ limitations under the License.
 package neatlogic.module.process.dashboard.constvalue;
 
 import neatlogic.framework.dashboard.constvalue.IDashboardGroupField;
+import neatlogic.framework.util.I18nUtils;
 
 public enum ProcessTaskDashboardStatistics implements IDashboardGroupField {
-    AVG_HANDLE_COST_TIME("avgCostTime","平均耗时"),
-    AVG_RESPONSE_COST_TIME("avgResponseCostTime","平均响应耗时"),
-    RESPONSE_PUNCTUALITY("responsePunctuality","响应准时率"),
-    HANDLE_PUNCTUALITY("handlePunctuality","处理准时率"),
+    AVG_HANDLE_COST_TIME("avgCostTime","enum.process.processtaskdashboardstatistics.avg_handle_cost_time"),
+    AVG_RESPONSE_COST_TIME("avgResponseCostTime","enum.process.processtaskdashboardstatistics.avg_response_cost_time"),
+    RESPONSE_PUNCTUALITY("responsePunctuality","enum.process.processtaskdashboardstatistics.response_punctuality"),
+    HANDLE_PUNCTUALITY("handlePunctuality","enum.process.processtaskdashboardstatistics.handle_punctuality"),
     ;
 
     private final String value;
@@ -40,7 +41,7 @@ public enum ProcessTaskDashboardStatistics implements IDashboardGroupField {
 
     @Override
     public String getText() {
-        return text;
+        return I18nUtils.getMessage(text);
     }
 
     public static String getValue(String _value) {
