@@ -19,12 +19,20 @@ package neatlogic.module.process.job.source.handler;
 import neatlogic.framework.autoexec.source.IAutoexecJobSource;
 import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.process.constvalue.AutoExecJobProcessSource;
+import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class ItsmJobSourceHandler implements IAutoexecJobSource {
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getValue() {
@@ -38,6 +46,14 @@ public class ItsmJobSourceHandler implements IAutoexecJobSource {
 
     @Override
     public List<ValueTextVo> getListByIdList(List<Long> idList) {
-        return null;
+        if (CollectionUtils.isEmpty(idList)) {
+            return null;
+        }
+        List<ValueTextVo> resultList = new ArrayList<>();
+        List<ProcessTaskStepVo> list = processTaskMapper.getProcessTaskStepListByIdList(idList);
+        for (ProcessTaskStepVo stepVo : list) {
+            resultList.add(new ValueTextVo(stepVo.getId(), stepVo.getName()));
+        }
+        return resultList;
     }
 }
