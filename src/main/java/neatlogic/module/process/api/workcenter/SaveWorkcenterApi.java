@@ -16,6 +16,7 @@
 
 package neatlogic.module.process.api.workcenter;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
@@ -24,7 +25,7 @@ import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.auth.WORKCENTER_MODIFY;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterType;
 import neatlogic.framework.process.dao.mapper.workcenter.WorkcenterMapper;
-import neatlogic.framework.process.exception.workcenter.WorkcenterNoAuthException;
+import neatlogic.framework.process.exception.workcenter.WorkcenterNoModifyAuthException;
 import neatlogic.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import neatlogic.framework.process.exception.workcenter.WorkcenterParamException;
 import neatlogic.framework.process.workcenter.dto.WorkcenterAuthorityVo;
@@ -34,7 +35,6 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.RegexUtils;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -103,7 +103,7 @@ public class SaveWorkcenterApi extends PrivateApiComponentBase {
         if (systemAuthSet.contains(workcenterVo.getType()) || (oldWorkcenterVo != null && systemAuthSet.contains(oldWorkcenterVo.getType()))) {
             //判断是否有管理员权限
             if (!AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName())) {
-                throw new WorkcenterNoAuthException("管理");
+                throw new WorkcenterNoModifyAuthException();
             }
             workcenterMapper.deleteWorkcenterAuthorityByUuid(workcenterVo.getUuid());
         }
