@@ -16,11 +16,13 @@
 
 package neatlogic.module.process.job.source.handler;
 
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.autoexec.dto.job.AutoexecJobRouteVo;
 import neatlogic.framework.autoexec.source.IAutoexecJobSource;
-import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.process.constvalue.AutoExecJobProcessSource;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.dto.ProcessStepVo;
+import neatlogic.module.process.dao.mapper.ProcessMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +34,7 @@ import java.util.List;
 public class ItsmJobSourceHandler implements IAutoexecJobSource {
 
     @Resource
-    private ProcessTaskMapper processTaskMapper;
+    private ProcessMapper processMapper;
 
     @Override
     public String getValue() {
@@ -45,15 +47,29 @@ public class ItsmJobSourceHandler implements IAutoexecJobSource {
     }
 
     @Override
-    public List<ValueTextVo> getListByIdList(List<Long> idList) {
-        if (CollectionUtils.isEmpty(idList)) {
+    public List<AutoexecJobRouteVo> getListByUniqueKeyList(List<String> uniqueKeyList) {
+        if (CollectionUtils.isEmpty(uniqueKeyList)) {
             return null;
         }
-        List<ValueTextVo> resultList = new ArrayList<>();
-        List<ProcessTaskStepVo> list = processTaskMapper.getProcessTaskStepListByIdList(idList);
-        for (ProcessTaskStepVo stepVo : list) {
-            resultList.add(new ValueTextVo(stepVo.getId(), stepVo.getName()));
+        List<AutoexecJobRouteVo> resultList = new ArrayList<>();
+        List<ProcessStepVo> processStepList = processMapper.getProcessStepListByUuidList(uniqueKeyList);
+        for (ProcessStepVo processStepVo : processStepList) {
+            JSONObject config = new JSONObject();
+            config.put("stepUuid", processStepVo.getUuid());
+            config.put("uuid", processStepVo.getProcessUuid());
+            resultList.add(new AutoexecJobRouteVo(processStepVo.getUuid(), processStepVo.getName(), config));
         }
+//        List<AutoexecJobRouteVo> resultList = new ArrayList<>();
+//        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(idList);
+//        Set<Long> processTaskIdSet = processTaskStepList.stream().map(ProcessTaskStepVo::getProcessTaskId).collect(Collectors.toSet());
+//        List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
+//        Map<Long, String> processTaskIdToProcessUuidMap = processTaskList.stream().collect(Collectors.toMap(ProcessTaskVo::getId, ProcessTaskVo::getProcessUuid));
+//        for (ProcessTaskStepVo stepVo : processTaskStepList) {
+//            JSONObject config = new JSONObject();
+//            config.put("stepUuid", stepVo.getProcessStepUuid());
+//            config.put("uuid", processTaskIdToProcessUuidMap.get(stepVo.getProcessTaskId()));
+//            resultList.add(new AutoexecJobRouteVo(stepVo.getId(), stepVo.getName(), config));
+//        }
         return resultList;
     }
 }

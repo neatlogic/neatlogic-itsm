@@ -217,6 +217,23 @@ limitations under the License.
 		</if>
 	</select>
 
+	<select id="getProcessStepListByUuidList" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessStepVo">
+		SELECT
+		`process_uuid` AS processUuid,
+		`uuid`,
+		`name`,
+		`type`,
+		`handler`,
+		`config`
+		FROM
+		`process_step`
+		WHERE `uuid` IN
+		<foreach collection="list" item="uuid" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+
+	</select>
+
 	<select id="getAllProcessType" resultType="neatlogic.framework.process.dto.ProcessTypeVo">
 		SELECT `id`, `name` FROM `process_type`
 	</select>

@@ -49,6 +49,8 @@ public interface ProcessMapper extends IProcessCrossoverMapper {
 
     List<ProcessStepVo> searchProcessStep(ProcessStepVo processStepVo);
 
+    List<ProcessStepVo> getProcessStepListByUuidList(List<String> uuidList);
+
     List<ProcessTypeVo> getAllProcessType();
 
     int checkProcessNameIsRepeat(ProcessVo processVo);
