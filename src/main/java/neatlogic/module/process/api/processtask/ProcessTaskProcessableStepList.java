@@ -49,7 +49,7 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
-		@Param(name = "action", type = ApiParamType.ENUM, rule = "accept,start,complete", desc = "操作类型")
+		@Param(name = "action", type = ApiParamType.ENUM, rule = "accept,start,complete,recover", desc = "操作类型")
 	})
 	@Output({
 		@Param(name = "tbodyList", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表"),
