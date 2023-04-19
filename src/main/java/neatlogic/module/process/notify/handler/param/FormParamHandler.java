@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  * @author linbq
  * @since 2021/10/16 15:52
  **/
-@Component
+//@Component
 public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Resource
@@ -54,7 +54,8 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Override
     public String getValue() {
-        return ProcessTaskNotifyParam.FORM.getValue();
+        return null;
+//        return ProcessTaskNotifyParam.FORM.getValue();
     }
 
     @Override
