@@ -10,6 +10,7 @@ import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.service.ProcessTaskAgentService;
 import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
@@ -36,7 +37,7 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
     @Resource
     private ProcessTaskService processTaskService;
     @Resource
-    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 	@Resource
 	private ProcessTaskAgentService processTaskAgentService;
 
@@ -75,8 +76,8 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 		}
 		for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
 			/** 触发通知 **/
-			IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.URGE);
-			IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.URGE);
+			processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepNotifyTriggerType.URGE);
+			processStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.URGE);
 		}
 		// 催办记录
 		processTaskMapper.insertProcessTaskUrge(processTaskId, UserContext.get().getUserUuid(true));
@@ -84,7 +85,7 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
 		processTaskStepVo.setProcessTaskId(processTaskId);
 		processTaskStepVo.getParamObj().put("source", jsonObj.getString("source"));
-		IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.URGE);
+		processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.URGE);
 		return null;
 	}
 
