@@ -105,8 +105,8 @@ public class StepSlaParamHandler extends ProcessTaskNotifyParamHandlerBase {
                 jsonObj.put("timeLeftFormat", TimeUtil.millisecondsFormat((0 - slaTimeVo.getTimeLeft()), 3, TimeUnit.MINUTES, " "));
             }
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            jsonObj.put("expireTime", sdf.format(slaTimeVo.getExpireTime()));
-            jsonObj.put("timeCost", TimeUtil.millisecondsFormat((slaTimeVo.getTimeSum() - slaTimeVo.getTimeLeft()), 3, TimeUnit.MINUTES, " "));
+            jsonObj.put("expireTimeFormat", sdf.format(slaTimeVo.getExpireTime()));
+            jsonObj.put("timeCostFormat", TimeUtil.millisecondsFormat((slaTimeVo.getTimeSum() - slaTimeVo.getTimeLeft()), 3, TimeUnit.MINUTES, " "));
             resultList.add(jsonObj);
         }
         return resultList;
