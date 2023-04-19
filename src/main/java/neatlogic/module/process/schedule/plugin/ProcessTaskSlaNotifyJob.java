@@ -236,43 +236,64 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                     Long policyId = notifyPolicyConfig.getLong("policyId");
                     NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
                     if (notifyPolicyVo != null) {
+//                        List<ParamMappingVo> paramMappingList = new ArrayList<>();
+//                        JSONArray paramMappingArray = notifyPolicyConfig.getJSONArray("paramMappingList");
+//                        if (CollectionUtils.isNotEmpty(paramMappingArray)) {
+//                            paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
+//                        }
+//                        StringBuilder notifyAuditMessageStringBuilder = new StringBuilder();
+//                        notifyAuditMessageStringBuilder.append(processTaskSlaVo.getProcessTaskId());
+//                        ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
+//                        processTaskStep.setIsAutoGenerateId(false);
+//                        processTaskStep.setProcessTaskId(processTaskSlaVo.getProcessTaskId());
+//                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList()), processTaskStep);
+//                        List<Long> stepIdList = new ArrayList<>();
+//                        List<String> stepNameList = new ArrayList<>();
+//                        Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
+//                        for (ProcessTaskStepVo processTaskStepVo : needNotifyStepList) {
+//                            processTaskService.getReceiverMap(processTaskStepVo, receiverMap, SlaNotifyTriggerType.TIMEOUT);
+//                            stepIdList.add(processTaskStepVo.getId());
+//                            stepNameList.add(processTaskStepVo.getName());
+//                            notifyAuditMessageStringBuilder.append("-");
+//                            notifyAuditMessageStringBuilder.append(processTaskStepVo.getName());
+//                            notifyAuditMessageStringBuilder.append("(");
+//                            notifyAuditMessageStringBuilder.append(processTaskStepVo.getId());
+//                            notifyAuditMessageStringBuilder.append(")");
+//                        }
+//                        JSONObject paramObj = processTaskStep.getParamObj();
+//                        paramObj.put("idList", stepIdList);
+//                        paramObj.put("nameList", stepNameList);
+//                        List<FileVo> fileList = processTaskMapper.getFileListByProcessTaskId(processTaskSlaVo.getProcessTaskId());
+//                        if (CollectionUtils.isNotEmpty(fileList)) {
+//                            fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
+//                        }
+//                        NotifyPolicyUtil.execute(notifyPolicyVo.getHandler(), SlaNotifyTriggerType.TIMEOUT, ProcessTaskMessageHandler.class, notifyPolicyVo, paramMappingList,
+//                                conditionParamData, receiverMap, processTaskStep, fileList, notifyAuditMessageStringBuilder.toString());
                         List<ParamMappingVo> paramMappingList = new ArrayList<>();
                         JSONArray paramMappingArray = notifyPolicyConfig.getJSONArray("paramMappingList");
                         if (CollectionUtils.isNotEmpty(paramMappingArray)) {
                             paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
                         }
-                        StringBuilder notifyAuditMessageStringBuilder = new StringBuilder();
-                        notifyAuditMessageStringBuilder.append(processTaskSlaVo.getProcessTaskId());
-                        ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
-                        processTaskStep.setIsAutoGenerateId(false);
-                        processTaskStep.setProcessTaskId(processTaskSlaVo.getProcessTaskId());
-                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList()), processTaskStep);
-//                        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskSlaVo.getProcessTaskId());
-//                        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
-//                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
-//                        JSONObject templateParamData = ProcessTaskUtil.getProcessTaskParamData(processTaskVo);
-                        List<Long> stepIdList = new ArrayList<>();
-                        List<String> stepNameList = new ArrayList<>();
+
+                        List<FileVo> fileList = processTaskMapper.getFileListByProcessTaskId(processTaskSlaVo.getProcessTaskId());
+                        if (CollectionUtils.isNotEmpty(fileList)) {
+                            fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
+                        }
                         Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
                         for (ProcessTaskStepVo processTaskStepVo : needNotifyStepList) {
+                            JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList()), processTaskStepVo);
                             processTaskService.getReceiverMap(processTaskStepVo, receiverMap, SlaNotifyTriggerType.TIMEOUT);
-                            stepIdList.add(processTaskStepVo.getId());
-                            stepNameList.add(processTaskStepVo.getName());
+
+                            StringBuilder notifyAuditMessageStringBuilder = new StringBuilder();
+                            notifyAuditMessageStringBuilder.append(processTaskSlaVo.getProcessTaskId());
                             notifyAuditMessageStringBuilder.append("-");
                             notifyAuditMessageStringBuilder.append(processTaskStepVo.getName());
                             notifyAuditMessageStringBuilder.append("(");
                             notifyAuditMessageStringBuilder.append(processTaskStepVo.getId());
                             notifyAuditMessageStringBuilder.append(")");
+                            NotifyPolicyUtil.execute(notifyPolicyVo.getHandler(), SlaNotifyTriggerType.TIMEOUT, ProcessTaskMessageHandler.class, notifyPolicyVo, paramMappingList,
+                                    conditionParamData, receiverMap, processTaskStepVo, fileList, notifyAuditMessageStringBuilder.toString());
                         }
-                        JSONObject paramObj = processTaskStep.getParamObj();
-                        paramObj.put("idList", stepIdList);
-                        paramObj.put("nameList", stepNameList);
-                        List<FileVo> fileList = processTaskMapper.getFileListByProcessTaskId(processTaskSlaVo.getProcessTaskId());
-                        if (CollectionUtils.isNotEmpty(fileList)) {
-                            fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
-                        }
-                        NotifyPolicyUtil.execute(notifyPolicyVo.getHandler(), SlaNotifyTriggerType.TIMEOUT, ProcessTaskMessageHandler.class, notifyPolicyVo, paramMappingList,
-                                conditionParamData, receiverMap, processTaskStep, fileList, notifyAuditMessageStringBuilder.toString());
                     }
                 }
                 Date nextFireTime = context.getNextFireTime();

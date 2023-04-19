@@ -1039,6 +1039,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             String action = authorityObj.getString("action");
             if (operationType.getValue().equals(action)) {
                 JSONArray acceptList = authorityObj.getJSONArray("acceptList");
+                if (acceptList == null) {
+                    acceptList = authorityObj.getJSONArray("defaultValue");
+                }
                 if (CollectionUtils.isNotEmpty(acceptList)) {
                     AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
                     List<String> teamUuidList = authenticationInfoVo.getTeamUuidList();
@@ -1149,8 +1152,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                             resultList.add(fromStep);
                         }
                     } else {// 自动处理节点，继续找前置节点
-                        resultList
-                                .addAll(getRetractableStepListByProcessTaskStepId(processTaskVo, fromStep.getId(), userUuid));
+                        resultList.addAll(getRetractableStepListByProcessTaskStepId(processTaskVo, fromStep.getId(), userUuid));
                     }
                 } else {
                     throw new ProcessStepHandlerNotFoundException(fromStep.getHandler());
