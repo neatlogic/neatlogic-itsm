@@ -32,14 +32,16 @@ CREATE TABLE IF NOT EXISTS `process` (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `process_comment_template` (
   `id` bigint NOT NULL COMMENT '主键',
+  `name` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '名称',
   `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '回复内容',
-  `type` enum('system','custom') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'system:系统模版；custom:自定义模版',
+  `type` enum('system','custom') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'system:系统模版;custom:自定义模版',
   `fcd` timestamp(3) NULL DEFAULT NULL COMMENT '创建时间',
   `fcu` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '创建人',
   `lcd` timestamp(3) NULL DEFAULT NULL COMMENT '修改时间',
   `lcu` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '修改人',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='系统回复模版表';
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_name` (`name`) USING BTREE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='系统回复模版表';
 
 -- ----------------------------
 -- Table structure for process_comment_template_authority
