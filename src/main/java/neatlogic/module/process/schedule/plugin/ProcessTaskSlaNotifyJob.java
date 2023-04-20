@@ -27,10 +27,7 @@ import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.ProcessTaskSlaMapper;
-import neatlogic.framework.process.dto.ProcessTaskSlaNotifyVo;
-import neatlogic.framework.process.dto.ProcessTaskSlaTimeVo;
-import neatlogic.framework.process.dto.ProcessTaskSlaVo;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.dto.*;
 import neatlogic.framework.scheduler.core.JobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.util.NotifyPolicyUtil;
@@ -196,17 +193,22 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
             List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
             if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
                 List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
-                for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-                    // 未处理、处理中和挂起的步骤才需要发送通知
-                    if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
-                        if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
-                            needNotifyStepList.add(processTaskStepVo);
-                        }
-                        if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
-                            needNotifyStepList.add(processTaskStepVo);
-                        }
-                        if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.HANG.getValue())) {
-                            needNotifyStepList.add(processTaskStepVo);
+                if (CollectionUtils.isNotEmpty(processTaskStepList)) {
+                    ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskStepList.get(0).getProcessTaskId());
+                    if (processTaskVo != null) {
+                        for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+                            // 未处理、处理中和挂起的步骤才需要发送通知
+                            if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
+                                if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
+                                    needNotifyStepList.add(processTaskStepVo);
+                                }
+                                if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
+                                    needNotifyStepList.add(processTaskStepVo);
+                                }
+                                if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.HANG.getValue())) {
+                                    needNotifyStepList.add(processTaskStepVo);
+                                }
+                            }
                         }
                     }
                 }
