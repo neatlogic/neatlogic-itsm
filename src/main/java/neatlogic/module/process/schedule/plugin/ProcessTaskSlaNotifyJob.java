@@ -225,7 +225,6 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
         if (expression.equalsIgnoreCase("before") && new Date().after(processTaskSlaTimeVo.getExpireTime())) {
             schedulerManager.unloadJob(jobObject);
             processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-            System.out.println("如果是超时前触发通知，当前时间已经超过了超时时间点，则不再发送通知");
             return;
         }
         List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
