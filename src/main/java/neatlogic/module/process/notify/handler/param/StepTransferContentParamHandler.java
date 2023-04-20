@@ -16,6 +16,7 @@
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.dto.UrlInfoVo;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
@@ -23,6 +24,7 @@ import neatlogic.framework.process.dto.ProcessTaskStepContentVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import neatlogic.framework.util.HtmlUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -56,6 +58,10 @@ public class StepTransferContentParamHandler extends ProcessTaskNotifyParamHandl
                     return null;
                 }
                 String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentHash);
+                if (StringUtils.isNotBlank(content)) {
+                    List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
+                    content = HtmlUtil.urlReplace(content, urlInfoVoList);
+                }
                 return content;
             }
         }

@@ -53,11 +53,9 @@ public class ReasonParamHandler extends ProcessTaskNotifyParamHandlerBase {
             String reason = paramObj.getString("content");
             if (StringUtils.isNotBlank(reason)) {
                 List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(reason, "<img src=\"", "\"");
-                if (CollectionUtils.isNotEmpty(urlInfoVoList)) {
-                    reason = HtmlUtil.urlReplace(reason, urlInfoVoList);
-                    return reason;
-                }
+                reason = HtmlUtil.urlReplace(reason, urlInfoVoList);
             }
+            return reason;
         }
         return null;
     }

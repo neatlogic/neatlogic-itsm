@@ -16,11 +16,16 @@ limitations under the License.
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.dto.UrlInfoVo;
 import neatlogic.framework.process.dto.ProcessTaskStepTaskVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyParam;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import neatlogic.framework.util.HtmlUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author linbq
@@ -38,7 +43,12 @@ public class TaskContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
         ProcessTaskStepTaskVo stepTaskVo = processTaskStepVo.getProcessTaskStepTaskVo();
         if(stepTaskVo != null ){
-            return stepTaskVo.getContent();
+            String content= stepTaskVo.getContent();
+            if (StringUtils.isNotBlank(content)) {
+                List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
+                content = HtmlUtil.urlReplace(content, urlInfoVoList);
+            }
+            return content;
         }
         return null;
     }

@@ -16,15 +16,18 @@
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.dto.UrlInfoVo;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import neatlogic.framework.util.HtmlUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Component
 public class ScoreContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
@@ -47,6 +50,10 @@ public class ScoreContentParamHandler extends ProcessTaskNotifyParamHandlerBase 
             return null;
         }
         String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentHash);
+        if (StringUtils.isNotBlank(content)) {
+            List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
+            content = HtmlUtil.urlReplace(content, urlInfoVoList);
+        }
         return content;
     }
 }
