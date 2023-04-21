@@ -17,20 +17,19 @@ limitations under the License.
 package neatlogic.module.process.notify.constvalue;
 
 import neatlogic.framework.notify.core.INotifyTriggerType;
-import neatlogic.framework.util.I18n;
 
 /**
  * @author: linbq
  * @since: 2021/4/8 17:40
  **/
 public enum TimedTaskTriggerType implements INotifyTriggerType {
-    PENDINGPROCESSTASK("pendingprocesstask", new I18n("enum.process.timedtasktriggertype.pendingprocesstask"), new I18n("enum.process.timedtasktriggertype.pendingprocesstask.1"));
+    PENDINGPROCESSTASK("pendingprocesstask", "enum.process.timedtasktriggertype.pendingprocesstask", "enum.process.timedtasktriggertype.pendingprocesstask.1");
 
     private String trigger;
-    private I18n text;
-    private I18n description;
+    private String text;
+    private String description;
 
-    TimedTaskTriggerType(String trigger, I18n text, I18n description) {
+    TimedTaskTriggerType(String trigger, String text, String description) {
         this.trigger = trigger;
         this.text = text;
         this.description = description;
@@ -43,11 +42,11 @@ public enum TimedTaskTriggerType implements INotifyTriggerType {
 
     @Override
     public String getText() {
-        return text.toString();
+        return text;
     }
 
     @Override
     public String getDescription() {
-        return description.toString();
+        return description;
     }
 }

@@ -1,16 +1,15 @@
 package neatlogic.module.process.notify.constvalue;
 
 import neatlogic.framework.notify.core.INotifyTriggerType;
-import neatlogic.framework.util.I18n;
 
 public enum SlaNotifyTriggerType implements INotifyTriggerType {
-    TIMEOUT("timeout", new I18n("enum.process.slanotifytriggertype.timeout"), new I18n("enum.process.slanotifytriggertype.timeout.1"));
+    TIMEOUT("timeout", "enum.process.slanotifytriggertype.timeout", "enum.process.slanotifytriggertype.timeout.1");
 
     private String trigger;
-    private I18n text;
-    private I18n description;
+    private String text;
+    private String description;
 
-    private SlaNotifyTriggerType(String _trigger, I18n _text, I18n _description) {
+    private SlaNotifyTriggerType(String _trigger, String _text, String _description) {
         this.trigger = _trigger;
         this.text = _text;
         this.description = _description;
@@ -23,12 +22,12 @@ public enum SlaNotifyTriggerType implements INotifyTriggerType {
 
     @Override
     public String getText() {
-        return text.toString();
+        return text;
     }
 
     @Override
     public String getDescription() {
-        return description.toString();
+        return description;
     }
 
     public static String getText(String trigger) {
