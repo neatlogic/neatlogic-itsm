@@ -74,7 +74,7 @@ public class ScoreParamHandler extends ProcessTaskNotifyParamHandlerBase {
         if (CollectionUtils.isEmpty(scoreTemplateDimensionArray)) {
             return null;
         }
-        List<String> resultList = new ArrayList<>();
+        JSONArray resultArray = new JSONArray();
         List<ScoreTemplateDimensionVo> scoreTemplateDimensionList = scoreTemplateDimensionArray.toJavaList(ScoreTemplateDimensionVo.class);
         Map<Long, String> dimensionNameMap = scoreTemplateDimensionList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e.getName()));
         List<ProcessTaskScoreVo> processTaskScoreList = processTaskScoreMapper.getProcessTaskScoreByProcesstaskId(processTaskId);
@@ -87,8 +87,11 @@ public class ScoreParamHandler extends ProcessTaskNotifyParamHandlerBase {
             if (score == null) {
                 continue;
             }
-            resultList.add(dimensionName + "：" + score);
+            JSONObject jsonObj = new JSONObject();
+            jsonObj.put("dimensionName", dimensionName);
+            jsonObj.put("score", score);
+            resultArray.add(jsonObj);
         }
-        return String.join("、", resultList);
+        return resultArray;
     }
 }
