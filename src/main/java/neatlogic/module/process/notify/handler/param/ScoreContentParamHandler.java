@@ -51,6 +51,9 @@ public class ScoreContentParamHandler extends ProcessTaskNotifyParamHandlerBase 
         }
         String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentHash);
         if (StringUtils.isNotBlank(content)) {
+            content = content.replace("<p>", "");
+            content = content.replace("</p>", "");
+            content = content.replace("<br>", "");
             List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
             content = HtmlUtil.urlReplace(content, urlInfoVoList);
         }

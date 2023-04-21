@@ -54,7 +54,7 @@ public class StepCommentListParamHandler extends ProcessTaskNotifyParamHandlerBa
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
-        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskId(processTaskStepVo.getId());
+        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepVo.getId());
         if (CollectionUtils.isEmpty(processTaskStepContentList)) {
             return null;
         }
@@ -76,12 +76,9 @@ public class StepCommentListParamHandler extends ProcessTaskNotifyParamHandlerBa
             if (StringUtils.isBlank(content)) {
                 continue;
             }
-            if (content.startsWith("<p>")) {
-                content = content.substring(3);
-            }
-            if (content.endsWith("</p>")) {
-                content = content.substring(0, content.length() - 4);
-            }
+            content = content.replace("<p>", "");
+            content = content.replace("</p>", "");
+            content = content.replace("<br>", "");
             if (StringUtils.isBlank(content)) {
                 continue;
             }
