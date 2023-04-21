@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -99,10 +100,10 @@ public class StepSlaParamHandler extends ProcessTaskNotifyParamHandlerBase {
             jsonObj.put("name", slaTimeVo.getName());
             jsonObj.put("status", slaTimeVo.getStatus());
             jsonObj.put("timeLeft", slaTimeVo.getTimeLeft());
-            if (slaTimeVo.getTimeLeft() > 0) {
+            if (slaTimeVo.getTimeLeft() > 0 || Objects.equals(slaTimeVo.getDisplayModeAfterTimeout(), "workTime")) {
                 jsonObj.put("timeLeftFormat", TimeUtil.millisecondsFormat(slaTimeVo.getTimeLeft(), 3, TimeUnit.MINUTES, " "));
             } else {
-                jsonObj.put("timeLeftFormat", TimeUtil.millisecondsFormat((0 - slaTimeVo.getTimeLeft()), 3, TimeUnit.MINUTES, " "));
+                jsonObj.put("timeLeftFormat", TimeUtil.millisecondsFormat((System.currentTimeMillis() - slaTimeVo.getExpireTime().getTime()), 3, TimeUnit.MINUTES, " "));
             }
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             jsonObj.put("expireTimeFormat", sdf.format(slaTimeVo.getExpireTime()));
