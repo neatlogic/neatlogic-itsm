@@ -31,6 +31,7 @@ import neatlogic.framework.process.dto.score.ScoreTemplateVo;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.scheduler.core.JobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.util.I18n;
 import neatlogic.framework.util.WorkTimeUtil;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import com.alibaba.fastjson.JSONObject;
@@ -145,7 +146,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 	                    JSONObject paramObj = new JSONObject();
 	                    paramObj.put("scoreTemplateId", scoreTemplateId);
 	                    paramObj.put("scoreDimensionList", dimensionList);
-	                    //paramObj.put("content", "系统自动评价");
+	                    paramObj.put("content", new I18n("const.systemautoscore").toString());
 	                    task.setParamObj(paramObj);
                         /** 执行转交前，设置当前用户为system,用于权限校验 **/
                         UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());

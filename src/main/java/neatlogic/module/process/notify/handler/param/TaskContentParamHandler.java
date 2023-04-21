@@ -45,6 +45,9 @@ public class TaskContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
         if(stepTaskVo != null ){
             String content= stepTaskVo.getContent();
             if (StringUtils.isNotBlank(content)) {
+                content = content.replace("<p>", "");
+                content = content.replace("</p>", "");
+                content = content.replace("<br>", "");
                 List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
                 content = HtmlUtil.urlReplace(content, urlInfoVoList);
             }
