@@ -16,6 +16,7 @@ import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import neatlogic.framework.restful.annotation.*;
@@ -163,7 +164,8 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
         // 生成活动
         processTaskStepVo.getParamObj().putAll(jsonObj);
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
-
+        IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepNotifyTriggerType.COMMENT);
+        IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskStepNotifyTriggerType.COMMENT);
         JSONObject resultObj = new JSONObject();
         List<String> typeList = new ArrayList<>();
         typeList.add(ProcessTaskOperationType.STEP_COMMENT.getValue());
