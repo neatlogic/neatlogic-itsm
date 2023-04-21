@@ -21,16 +21,15 @@ import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepContentVo;
-import neatlogic.framework.process.dto.ProcessTaskStepReplyVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import neatlogic.framework.util.HtmlUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -59,8 +58,10 @@ public class ContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
             for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
                 if (ProcessTaskOperationType.PROCESSTASK_START.getValue().equals(processTaskStepContent.getType())) {
                     String content = selectContentByHashMapper.getProcessTaskContentStringByHash(processTaskStepContent.getContentHash());
-                    List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
-                    content = HtmlUtil.urlReplace(content, urlInfoVoList);
+                    if (StringUtils.isNotBlank(content)) {
+                        List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
+                        content = HtmlUtil.urlReplace(content, urlInfoVoList);
+                    }
                     return content;
                 }
             }
