@@ -191,6 +191,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         }
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTask", processTaskVo);
+        resultObj.put("processTaskRelationCount", processTaskMapper.getProcessTaskRelationCountByProcessTaskId(processTaskVo.getId()));
         return resultObj;
     }
 
