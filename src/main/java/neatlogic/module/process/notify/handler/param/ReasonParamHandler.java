@@ -50,14 +50,15 @@ public class ReasonParamHandler extends ProcessTaskNotifyParamHandlerBase {
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
         JSONObject paramObj = processTaskStepVo.getParamObj();
         if (MapUtils.isNotEmpty(paramObj)) {
-            String reason = paramObj.getString("content");
-            if (StringUtils.isNotBlank(reason)) {
-                List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(reason, "<img src=\"", "\"");
-                if (CollectionUtils.isNotEmpty(urlInfoVoList)) {
-                    reason = HtmlUtil.urlReplace(reason, urlInfoVoList);
-                    return reason;
-                }
+            String content = paramObj.getString("content");
+            if (StringUtils.isNotBlank(content)) {
+                content = content.replace("<p>", "");
+                content = content.replace("</p>", "");
+                content = content.replace("<br>", "");
+                List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
+                content = HtmlUtil.urlReplace(content, urlInfoVoList);
             }
+            return content;
         }
         return null;
     }

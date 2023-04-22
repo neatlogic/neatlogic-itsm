@@ -16,40 +16,35 @@
 
 package neatlogic.module.process.notify.handler.param;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.dto.UrlInfoVo;
-import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
-import neatlogic.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import neatlogic.framework.util.HtmlUtil;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 @Component
-public class ScoreContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
-
-    @Resource
-    private ProcessTaskScoreMapper processTaskScoreMapper;
-
-    @Resource
-    private SelectContentByHashMapper selectContentByHashMapper;
-
+public class StepCommentParamHandler extends ProcessTaskNotifyParamHandlerBase {
     @Override
     public String getValue() {
-        return ProcessTaskNotifyParam.PROCESS_TASK_SCORE_CONTENT.getValue();
+        return ProcessTaskStepNotifyParam.STEP_COMMENT.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
-        String contentHash = processTaskScoreMapper.getProcessTaskScoreContentHashByProcessTaskId(processTaskStepVo.getProcessTaskId());
-        if (StringUtils.isBlank(contentHash)) {
+        if (processTaskStepVo == null) {
             return null;
         }
-        String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentHash);
+        JSONObject paramObj = processTaskStepVo.getParamObj();
+        if (MapUtils.isEmpty(paramObj)) {
+            return null;
+        }
+        String content = paramObj.getString("content");
         if (StringUtils.isNotBlank(content)) {
             content = content.replace("<p>", "");
             content = content.replace("</p>", "");

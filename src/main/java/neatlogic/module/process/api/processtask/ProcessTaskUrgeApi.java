@@ -77,7 +77,7 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 		for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
 			/** 触发通知 **/
 			processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepNotifyTriggerType.URGE);
-			processStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.URGE);
+			processStepHandlerUtil.action(processTaskStepVo, ProcessTaskStepNotifyTriggerType.URGE);
 		}
 		// 催办记录
 		processTaskMapper.insertProcessTaskUrge(processTaskId, UserContext.get().getUserUuid(true));

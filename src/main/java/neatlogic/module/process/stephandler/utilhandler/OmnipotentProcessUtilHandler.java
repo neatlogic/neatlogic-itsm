@@ -183,6 +183,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         ProcessTaskOperationType[] stepActions = {
                 ProcessTaskOperationType.STEP_VIEW,
                 ProcessTaskOperationType.STEP_TRANSFER,
+                ProcessTaskOperationType.STEP_PAUSE,
                 ProcessTaskOperationType.STEP_RETREAT
         };
         JSONArray authorityList = null;

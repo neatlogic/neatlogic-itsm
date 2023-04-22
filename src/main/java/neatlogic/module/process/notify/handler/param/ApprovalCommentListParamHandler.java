@@ -19,16 +19,14 @@ package neatlogic.module.process.notify.handler.param;
 import neatlogic.framework.common.constvalue.TeamLevel;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.TeamUserTitleVo;
-import neatlogic.framework.dto.TeamVo;
-import neatlogic.framework.dto.UserTitleVo;
-import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.dto.*;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepContentVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import neatlogic.framework.util.HtmlUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -80,6 +78,8 @@ public class ApprovalCommentListParamHandler extends ProcessTaskNotifyParamHandl
                         content = content.substring(0, content.length() - 4);
                     }
                     if (StringUtils.isNotBlank(content)) {
+                        List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
+                        content = HtmlUtil.urlReplace(content, urlInfoVoList);
                         StringBuilder commentStringBuilder = new StringBuilder();
                         commentStringBuilder.append("<p>");
                         commentStringBuilder.append(content);

@@ -38,7 +38,7 @@ import java.util.List;
 public class TimedTaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     @Override
     public String getName() {
-        return "定时任务";
+        return "handler.notify.timedtask";
     }
 
 //    @Override
