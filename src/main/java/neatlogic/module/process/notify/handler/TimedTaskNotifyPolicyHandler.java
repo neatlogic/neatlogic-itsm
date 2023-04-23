@@ -22,6 +22,7 @@ import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerBase;
 import neatlogic.framework.notify.dto.NotifyTriggerTemplateVo;
 import neatlogic.framework.notify.dto.NotifyTriggerVo;
+import neatlogic.framework.util.I18nUtils;
 import neatlogic.module.process.notify.constvalue.TimedTaskTriggerType;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -54,7 +55,7 @@ public class TimedTaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     protected List<NotifyTriggerVo> myNotifyTriggerList() {
         List<NotifyTriggerVo> returnList = new ArrayList<>();
         for (TimedTaskTriggerType type : TimedTaskTriggerType.values()) {
-            returnList.add(new NotifyTriggerVo(type.getTrigger(), type.getText(), type.getDescription()));
+            returnList.add(new NotifyTriggerVo(type.getTrigger(),  I18nUtils.getMessage(type.getText()), I18nUtils.getMessage(type.getDescription())));
         }
         return returnList;
     }

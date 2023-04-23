@@ -17,15 +17,16 @@ limitations under the License.
 package neatlogic.module.process.dashboard.constvalue;
 
 import neatlogic.framework.dashboard.constvalue.IDashboardGroupField;
+import neatlogic.framework.util.I18n;
 
 public enum ProcessTaskStepDashboardGroupField implements IDashboardGroupField {
-    EVERY_DAY("stepEveryday","每天"),
-    EVERY_MONTH("stepEveryMonth","每月"),
-    EVERY_QUARTER("stepEveryQuarter","每季度");
+    EVERY_DAY("stepEveryday", new I18n("enum.process.processtaskstepdashboardgroupfield.every_day")),
+    EVERY_MONTH("stepEveryMonth", new I18n("enum.process.processtaskstepdashboardgroupfield.every_month")),
+    EVERY_QUARTER("stepEveryQuarter", new I18n("enum.process.processtaskstepdashboardgroupfield.every_quarter"));
     private final String value;
-    private final String text;
+    private final I18n text;
 
-    ProcessTaskStepDashboardGroupField(String _value, String _text){
+    ProcessTaskStepDashboardGroupField(String _value, I18n _text) {
         value = _value;
         text = _text;
     }
@@ -37,7 +38,7 @@ public enum ProcessTaskStepDashboardGroupField implements IDashboardGroupField {
 
     @Override
     public String getText() {
-        return text;
+        return text.toString();
     }
 
     public static String getValue(String _value) {
