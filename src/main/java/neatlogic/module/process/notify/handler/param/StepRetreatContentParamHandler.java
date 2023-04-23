@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.dto.UrlInfoVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import neatlogic.framework.util.HtmlUtil;
 import org.apache.commons.collections4.MapUtils;
@@ -29,11 +30,11 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class ProcessTaskRecoverContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
+public class StepRetreatContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Override
     public String getValue() {
-        return ProcessTaskNotifyParam.PROCESS_TASK_RECOVER_CONTENT.getValue();
+        return ProcessTaskStepNotifyParam.PROCESS_TASK_STEP_RETREAT_CONTENT.getValue();
     }
 
     @Override

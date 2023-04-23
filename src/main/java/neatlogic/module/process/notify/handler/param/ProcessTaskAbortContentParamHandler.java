@@ -28,10 +28,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/**
- * @author linbq
- * @since 2021/10/16 15:52
- **/
 @Component
 public class ProcessTaskAbortContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
 

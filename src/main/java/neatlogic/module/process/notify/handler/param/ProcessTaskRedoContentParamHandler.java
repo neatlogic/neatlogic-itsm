@@ -29,11 +29,11 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class ProcessTaskRecoverContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
+public class ProcessTaskRedoContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Override
     public String getValue() {
-        return ProcessTaskNotifyParam.PROCESS_TASK_RECOVER_CONTENT.getValue();
+        return ProcessTaskNotifyParam.PROCESS_TASK_REDO_CONTENT.getValue();
     }
 
     @Override
