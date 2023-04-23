@@ -2,12 +2,10 @@ package neatlogic.module.process.api.processtask;
 
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.process.ProcessStepHandlerNotFoundException;
-import neatlogic.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.restful.annotation.Description;
@@ -43,9 +41,10 @@ public class ProcessTaskStepPauseApi extends PrivateApiComponentBase {
         return null;
     }
     @Input({
-        @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤id"),
-        @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤id"),
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
     })
     @Description(desc ="暂停工单步骤")
     @Override
@@ -59,6 +58,7 @@ public class ProcessTaskStepPauseApi extends PrivateApiComponentBase {
             throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());      
         }
         currentProcessTaskStepVo.getParamObj().put("source", jsonObj.getString("source"));
+        currentProcessTaskStepVo.getParamObj().put("content", jsonObj.getString("content"));
         handler.pause(currentProcessTaskStepVo);
         return null;
     }

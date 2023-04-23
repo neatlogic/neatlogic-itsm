@@ -602,6 +602,29 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     @Override
+    public void saveProcessTaskOperationContent(ProcessTaskVo currentProcessTaskVo, ProcessTaskOperationType action) {
+        JSONObject paramObj = currentProcessTaskVo.getParamObj();
+        String content = paramObj.getString("content");
+        if (content == null) {
+            return;
+        } else if (StringUtils.isBlank(content)) {
+            paramObj.remove("content");
+            return;
+        }
+        ProcessTaskOperationContentVo processTaskOperationContentVo = new ProcessTaskOperationContentVo();
+        processTaskOperationContentVo.setProcessTaskId(currentProcessTaskVo.getId());
+        processTaskOperationContentVo.setType(action.getValue());
+        ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+        processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
+        processTaskOperationContentVo.setContentHash(contentVo.getHash());
+        String source = paramObj.getString("source");
+        if (StringUtils.isNotBlank(source)) {
+            processTaskOperationContentVo.setSource(source);
+        }
+        processTaskMapper.insertProcessTaskOperationContent(processTaskOperationContentVo);
+    }
+
+    @Override
     public void chechContentIsRequired(ProcessTaskStepVo currentProcessTaskStepVo) {
         if (Objects.equals(currentProcessTaskStepVo.getIsNeedContent(), 0)) {
             return;
