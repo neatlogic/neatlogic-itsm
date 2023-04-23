@@ -23,6 +23,7 @@ import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.notify.core.IDefaultTemplate;
 import neatlogic.framework.process.notify.core.NotifyDefaultTemplateFactory;
+import neatlogic.framework.util.I18nUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +44,7 @@ public class TaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	public List<NotifyTriggerVo> myNotifyTriggerList() {
 		List<NotifyTriggerVo> returnList = new ArrayList<>();
 		for (ProcessTaskNotifyTriggerType notifyTriggerType : ProcessTaskNotifyTriggerType.values()) {
-			returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(),notifyTriggerType.getDescription()));
+            returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), I18nUtils.getMessage(notifyTriggerType.getText()), I18nUtils.getMessage(notifyTriggerType.getDescription())));
 		}
 		return returnList;
 	}

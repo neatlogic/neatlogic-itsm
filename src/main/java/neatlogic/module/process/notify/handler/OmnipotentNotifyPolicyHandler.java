@@ -24,6 +24,7 @@ import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.notify.constvalue.*;
 import neatlogic.framework.process.notify.core.IDefaultTemplate;
 import neatlogic.framework.process.notify.core.NotifyDefaultTemplateFactory;
+import neatlogic.framework.util.I18nUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -45,11 +46,11 @@ public class OmnipotentNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	public List<NotifyTriggerVo> myNotifyTriggerList() {
 		List<NotifyTriggerVo> returnList = new ArrayList<>();
 		for (ProcessTaskStepNotifyTriggerType notifyTriggerType : ProcessTaskStepNotifyTriggerType.values()) {
-			returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(),notifyTriggerType.getDescription()));
+            returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), I18nUtils.getMessage(notifyTriggerType.getText()), I18nUtils.getMessage(notifyTriggerType.getDescription())));
 		}
 		//任务
         for (ProcessTaskStepTaskNotifyTriggerType notifyTriggerType : ProcessTaskStepTaskNotifyTriggerType.values()) {
-            returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(),notifyTriggerType.getDescription()));
+            returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), I18nUtils.getMessage(notifyTriggerType.getText()), I18nUtils.getMessage(notifyTriggerType.getDescription())));
         }
 		return returnList;
 	}

@@ -25,6 +25,7 @@ import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyParam;
 import neatlogic.framework.process.notify.core.IDefaultTemplate;
 import neatlogic.framework.process.notify.core.NotifyDefaultTemplateFactory;
+import neatlogic.framework.util.I18nUtils;
 import neatlogic.module.process.notify.constvalue.SlaNotifyTriggerType;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -47,7 +48,7 @@ public class SlaNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	protected List<NotifyTriggerVo> myNotifyTriggerList() {
 		List<NotifyTriggerVo> returnList = new ArrayList<>();
 		for (SlaNotifyTriggerType notifyTriggerType : SlaNotifyTriggerType.values()) {
-            returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(),notifyTriggerType.getDescription()));
+            returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), I18nUtils.getMessage(notifyTriggerType.getText()), I18nUtils.getMessage(notifyTriggerType.getDescription())));
         }
 		return returnList;
 	}
