@@ -3,7 +3,7 @@ package neatlogic.module.process.notify.constvalue;
 import neatlogic.framework.notify.core.INotifyTriggerType;
 
 public enum SlaNotifyTriggerType implements INotifyTriggerType {
-    TIMEOUT("timeout", "enum.process.slanotifytriggertype.timeout", "enum.process.slanotifytriggertype.timeout.1");
+    TIMEOUT("timeout", "enum.process.slanotifytriggertype.timeout", "enum.process.slanotifytriggertype.timeout");
 
     private String trigger;
     private String text;
