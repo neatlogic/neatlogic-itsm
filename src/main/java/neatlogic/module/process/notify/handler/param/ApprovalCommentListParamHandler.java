@@ -20,6 +20,7 @@ import neatlogic.framework.common.constvalue.TeamLevel;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.*;
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepContentVo;
@@ -64,7 +65,7 @@ public class ApprovalCommentListParamHandler extends ProcessTaskNotifyParamHandl
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskId(processTaskStepVo.getProcessTaskId());
         if (CollectionUtils.isNotEmpty(processTaskStepContentList)) {
             List<String> commentList = new ArrayList<>();

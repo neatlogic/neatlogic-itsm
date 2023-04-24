@@ -17,6 +17,7 @@ limitations under the License.
 package neatlogic.module.process.notify.handler.param;
 
 import neatlogic.framework.dto.UrlInfoVo;
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
@@ -47,7 +48,7 @@ public class ReasonParamHandler extends ProcessTaskNotifyParamHandlerBase {
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
         JSONObject paramObj = processTaskStepVo.getParamObj();
         if (MapUtils.isNotEmpty(paramObj)) {
             String content = paramObj.getString("content");

@@ -18,9 +18,11 @@ package neatlogic.module.process.notify.handler.param;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.dto.UrlInfoVo;
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import neatlogic.framework.util.HtmlUtil;
 import org.apache.commons.collections4.MapUtils;
@@ -38,7 +40,10 @@ public class StepRetreatContentParamHandler extends ProcessTaskNotifyParamHandle
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
+        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.RETREAT)) {
+            return null;
+        }
         JSONObject paramObj = processTaskStepVo.getParamObj();
         if (MapUtils.isNotEmpty(paramObj)) {
             String content = paramObj.getString("content");
