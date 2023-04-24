@@ -16,7 +16,7 @@ limitations under the License.
 
 package neatlogic.module.process.matrix.handler;
 
-import neatlogic.framework.matrix.constvalue.MatrixAttributeType;
+import com.alibaba.fastjson.JSONArray;
 import neatlogic.framework.matrix.core.IMatrixPrivateDataSourceHandler;
 import neatlogic.framework.matrix.dto.MatrixAttributeVo;
 import neatlogic.framework.matrix.dto.MatrixDataVo;
@@ -24,55 +24,30 @@ import neatlogic.framework.matrix.dto.MatrixFilterVo;
 import neatlogic.framework.process.dao.mapper.PriorityMapper;
 import neatlogic.framework.process.dto.PrioritySearchVo;
 import neatlogic.framework.process.dto.PriorityVo;
-import com.alibaba.fastjson.JSONArray;
+import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDataSourceHandler {
 
     private final List<MatrixAttributeVo> matrixAttributeList = new ArrayList<>();
 
-    {
-        MatrixAttributeVo matrixAttributeVo = new MatrixAttributeVo();
-        matrixAttributeVo.setMatrixUuid(getUuid());
-        matrixAttributeVo.setUuid("b83b6711416847f7a78b1946607efb8c");
-        matrixAttributeVo.setName("uuid");
-        matrixAttributeVo.setLabel("uuid");
-        matrixAttributeVo.setType(MatrixAttributeType.INPUT.getValue());
-        matrixAttributeVo.setIsRequired(0);
-        matrixAttributeVo.setIsDeletable(0);
-        matrixAttributeVo.setSort(0);
-        matrixAttributeVo.setPrimaryKey(1);
-        matrixAttributeVo.setIsSearchable(0);
-        matrixAttributeList.add(matrixAttributeVo);
-    }
-
-    {
-        MatrixAttributeVo matrixAttributeVo = new MatrixAttributeVo();
-        matrixAttributeVo.setMatrixUuid(getUuid());
-        matrixAttributeVo.setUuid("dc1c6903648e417f88d52ad986b057a0");
-        matrixAttributeVo.setName("名称");
-        matrixAttributeVo.setLabel("name");
-        matrixAttributeVo.setType(MatrixAttributeType.INPUT.getValue());
-        matrixAttributeVo.setIsRequired(0);
-        matrixAttributeVo.setIsDeletable(0);
-        matrixAttributeVo.setSort(1);
-        matrixAttributeVo.setPrimaryKey(0);
-        matrixAttributeVo.setIsSearchable(1);
-        matrixAttributeList.add(matrixAttributeVo);
-    }
+    private final Map<String , String> columnsMap = new HashMap<>();
 
     @Resource
     private PriorityMapper priorityMapper;
 
     @Override
     public String getUuid() {
-        return "1218cb14a0e94202b4f01eb640bc85cb";
+        return UuidUtil.getCustomUUID(getLabel());
     }
 
     @Override
@@ -87,6 +62,17 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
 
     @Override
     public List<MatrixAttributeVo> getAttributeList() {
+        String attributeDefined = "[" +
+                "{\"name\":\"uuid\" , \"label\":\"uuid\",\"isPrimaryKey\":1}," +
+                "{\"name\":\"名称\",\"label\":\"name\",\"isSearchable\":1}" +
+                "]";
+        if (matrixAttributeList.size() == 0) {
+            this.setAttribute(matrixAttributeList , attributeDefined);
+
+            for(MatrixAttributeVo matrixAttributeVo : matrixAttributeList){
+                columnsMap.put(matrixAttributeVo.getLabel() , matrixAttributeVo.getUuid());
+            }
+        }
         return matrixAttributeList;
     }
 
@@ -129,12 +115,10 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
             if (StringUtils.isBlank(value)) {
                 continue;
             }
-            if ("b83b6711416847f7a78b1946607efb8c".equals(uuid)) {
+            if (columnsMap.get("uuid").equals(uuid)) {
                 newFilterList.add(new MatrixFilterVo("uuid", filter.getExpression(), filter.getValueList()));
-//                searchVo.setUuid(value);
-            } else if ("dc1c6903648e417f88d52ad986b057a0".equals(uuid)) {
+            } else if (columnsMap.get("name").equals(uuid)) {
                 newFilterList.add(new MatrixFilterVo("name", filter.getExpression(), filter.getValueList()));
-//                searchVo.setName(value);
             }
         }
         searchVo.setFilterList(newFilterList);
@@ -152,8 +136,8 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
         for (PriorityVo priorityVo : priorityList) {
             Map<String, String> data = new HashMap<>();
             data.put("uuid", priorityVo.getUuid());
-            data.put("b83b6711416847f7a78b1946607efb8c", priorityVo.getUuid());
-            data.put("dc1c6903648e417f88d52ad986b057a0", priorityVo.getName());
+            data.put(columnsMap.get("uuid"), priorityVo.getUuid());
+            data.put(columnsMap.get("name"), priorityVo.getName());
             dataList.add(data);
         }
         return dataList;
