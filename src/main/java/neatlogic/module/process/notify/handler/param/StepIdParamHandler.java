@@ -16,8 +16,10 @@ limitations under the License.
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -41,7 +43,10 @@ public class StepIdParamHandler extends ProcessTaskNotifyParamHandlerBase {
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
+        if (!(notifyTriggerType instanceof ProcessTaskStepNotifyTriggerType)) {
+            return null;
+        }
         Long id = processTaskStepVo.getId();
         if (id != null) {
             return id;

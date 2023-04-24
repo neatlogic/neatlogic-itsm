@@ -18,9 +18,11 @@ package neatlogic.module.process.notify.handler.param;
 
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +43,10 @@ public class UrgeUserParamHandler extends ProcessTaskNotifyParamHandlerBase {
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
+        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.URGE)) {
+            return null;
+        }
         String userUuid = processTaskMapper.getProcessTaskLastUrgeUserUuidByProcessTaskId(processTaskStepVo.getProcessTaskId());
         UserVo userVo = userMapper.getUserBaseInfoByUuid(userUuid);
         if (userVo != null) {

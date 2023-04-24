@@ -16,14 +16,15 @@ limitations under the License.
 
 package neatlogic.module.process.notify.handler.param;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.dto.UrlInfoVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
-import neatlogic.framework.process.dto.ProcessTaskStepTaskVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyParam;
-import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import neatlogic.framework.util.HtmlUtil;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -34,21 +35,21 @@ import java.util.List;
  * @since 2021/10/16 15:52
  **/
 @Component
-public class TaskContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
+public class StepRecoverContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Override
     public String getValue() {
-        return ProcessTaskStepTaskNotifyParam.TASKCONTENT.getValue();
+        return ProcessTaskStepNotifyParam.PROCESS_TASK_STEP_RECOVER_CONTENT.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
-        if (!(notifyTriggerType instanceof ProcessTaskStepTaskNotifyTriggerType)) {
+        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.RECOVER)) {
             return null;
         }
-        ProcessTaskStepTaskVo stepTaskVo = processTaskStepVo.getProcessTaskStepTaskVo();
-        if(stepTaskVo != null ){
-            String content= stepTaskVo.getContent();
+        JSONObject paramObj = processTaskStepVo.getParamObj();
+        if (MapUtils.isNotEmpty(paramObj)) {
+            String content = paramObj.getString("content");
             if (StringUtils.isNotBlank(content)) {
                 content = content.replace("<p>", "");
                 content = content.replace("</p>", "");

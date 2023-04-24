@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-public class StepTransferContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
+public class CurrentStepBackContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
@@ -45,19 +45,19 @@ public class StepTransferContentParamHandler extends ProcessTaskNotifyParamHandl
 
     @Override
     public String getValue() {
-        return ProcessTaskStepNotifyParam.PROCESS_TASK_STEP_TRANSFER_CONTENT.getValue();
+        return ProcessTaskStepNotifyParam.PROCESS_TASK_CURRENT_STEP_BACK_CONTENT.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
-        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.TRANSFER)) {
+        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.BACK)) {
             return null;
         }
         // 查询步骤的所有处理内容，已倒序排好
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepVo.getId());
-        // 遍历列表，找出最近一次转交内容
+        // 遍历列表，找出最近一次处理内容
         for (ProcessTaskStepContentVo contentVo : processTaskStepContentList) {
-            if (Objects.equals(contentVo.getType(), ProcessTaskOperationType.STEP_TRANSFER.getValue())) {
+            if (Objects.equals(contentVo.getType(), ProcessTaskOperationType.STEP_BACK.getValue())) {
                 String contentHash = contentVo.getContentHash();
                 if (StringUtils.isBlank(contentHash)) {
                     return null;

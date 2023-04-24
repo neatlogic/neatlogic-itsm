@@ -17,9 +17,11 @@ limitations under the License.
 package neatlogic.module.process.notify.handler.param;
 
 import neatlogic.framework.dto.UrlInfoVo;
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dto.ProcessTaskStepTaskVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import neatlogic.framework.util.HtmlUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +42,10 @@ public class TaskUserContentParamHandler extends ProcessTaskNotifyParamHandlerBa
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
+        if (!(notifyTriggerType instanceof ProcessTaskStepTaskNotifyTriggerType)) {
+            return null;
+        }
         ProcessTaskStepTaskVo stepTaskVo = processTaskStepVo.getProcessTaskStepTaskVo();
         if(stepTaskVo != null ){
             String content = stepTaskVo.getTaskStepTaskUserContent();

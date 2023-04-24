@@ -24,12 +24,14 @@ import neatlogic.framework.dto.RoleVo;
 import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.dto.WorkAssignmentUnitVo;
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -58,7 +60,10 @@ public class StepTransferWorkerParamHandler extends ProcessTaskNotifyParamHandle
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
+        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.TRANSFER)) {
+            return null;
+        }
         List<ProcessTaskStepUserVo> stepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
         if (CollectionUtils.isNotEmpty(stepUserList)) {
             List<String> userNameList = new ArrayList<>();
