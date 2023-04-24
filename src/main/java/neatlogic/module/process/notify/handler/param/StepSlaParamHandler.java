@@ -48,9 +48,6 @@ public class StepSlaParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
-        if (!(notifyTriggerType instanceof ProcessTaskStepNotifyTriggerType)) {
-            return null;
-        }
 //        List<String> slaTimeList = new ArrayList<>();
 //        List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskService.getSlaTimeListByProcessTaskStepId(processTaskStepVo.getId());
 //        for (ProcessTaskSlaTimeVo slaTimeVo : processTaskSlaTimeList) {
