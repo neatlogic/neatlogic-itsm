@@ -18,6 +18,7 @@ package neatlogic.module.process.notify.handler.param;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
@@ -26,6 +27,7 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.score.ProcessTaskScoreVo;
 import neatlogic.framework.process.dto.score.ScoreTemplateDimensionVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -56,7 +58,10 @@ public class ScoreParamHandler extends ProcessTaskNotifyParamHandlerBase {
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
+        if (!(notifyTriggerType == ProcessTaskNotifyTriggerType.SCOREPROCESSTASK)) {
+            return null;
+        }
         Long processTaskId = processTaskStepVo.getProcessTaskId();
         ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskId);
         if (processTaskScoreTemplateVo == null) {

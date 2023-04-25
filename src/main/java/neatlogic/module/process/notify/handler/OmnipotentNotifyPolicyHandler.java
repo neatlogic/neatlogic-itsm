@@ -10,10 +10,7 @@ import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.dto.ConditionParamVo;
 import neatlogic.framework.dto.ExpressionVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
-import neatlogic.framework.notify.core.INotifyPolicyHandlerGroup;
-import neatlogic.framework.notify.core.NotifyHandlerFactory;
-import neatlogic.framework.notify.core.NotifyHandlerType;
-import neatlogic.framework.notify.core.NotifyPolicyHandlerBase;
+import neatlogic.framework.notify.core.*;
 import neatlogic.framework.notify.dto.NotifyTriggerTemplateVo;
 import neatlogic.framework.notify.dto.NotifyTriggerVo;
 import neatlogic.framework.process.auth.PROCESS_MODIFY;
@@ -24,6 +21,7 @@ import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.notify.constvalue.*;
 import neatlogic.framework.process.notify.core.IDefaultTemplate;
 import neatlogic.framework.process.notify.core.NotifyDefaultTemplateFactory;
+import neatlogic.framework.util.I18nUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -45,11 +43,11 @@ public class OmnipotentNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	public List<NotifyTriggerVo> myNotifyTriggerList() {
 		List<NotifyTriggerVo> returnList = new ArrayList<>();
 		for (ProcessTaskStepNotifyTriggerType notifyTriggerType : ProcessTaskStepNotifyTriggerType.values()) {
-			returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(),notifyTriggerType.getDescription()));
+            returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), I18nUtils.getMessage(notifyTriggerType.getText()), I18nUtils.getMessage(notifyTriggerType.getDescription())));
 		}
 		//任务
         for (ProcessTaskStepTaskNotifyTriggerType notifyTriggerType : ProcessTaskStepTaskNotifyTriggerType.values()) {
-            returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(),notifyTriggerType.getDescription()));
+            returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), I18nUtils.getMessage(notifyTriggerType.getText()), I18nUtils.getMessage(notifyTriggerType.getDescription())));
         }
 		return returnList;
 	}
@@ -94,45 +92,14 @@ public class OmnipotentNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     @Override
 	protected List<ConditionParamVo> mySystemParamList() {
 		List<ConditionParamVo> notifyPolicyParamList = new ArrayList<>();
-//		for(ProcessTaskParams processTaskParams : ProcessTaskParams.values()) {
-//		    ConditionParamVo param = new ConditionParamVo();
-//		    param.setName(processTaskParams.getValue());
-//            param.setLabel(processTaskParams.getText());
-//            param.setParamType(processTaskParams.getParamType().getName());
-//            param.setParamTypeName(processTaskParams.getParamType().getText());
-//            param.setFreemarkerTemplate(processTaskParams.getFreemarkerTemplate());
-//            param.setIsEditable(0);
-//            notifyPolicyParamList.add(param);
-//		}
 		for(ProcessTaskNotifyParam param : ProcessTaskNotifyParam.values()) {
-		    ConditionParamVo paramVo = new ConditionParamVo();
-            paramVo.setName(param.getValue());
-            paramVo.setLabel(param.getText());
-            paramVo.setParamType(param.getParamType().getName());
-            paramVo.setParamTypeName(param.getParamType().getText());
-            paramVo.setFreemarkerTemplate(param.getFreemarkerTemplate());
-            paramVo.setIsEditable(0);
-            notifyPolicyParamList.add(paramVo);
+            notifyPolicyParamList.add(createConditionParam(param));
 		}
 		for(ProcessTaskStepNotifyParam param : ProcessTaskStepNotifyParam.values()) {
-            ConditionParamVo paramVo = new ConditionParamVo();
-            paramVo.setName(param.getValue());
-            paramVo.setLabel(param.getText());
-            paramVo.setParamType(param.getParamType().getName());
-            paramVo.setParamTypeName(param.getParamType().getText());
-            paramVo.setFreemarkerTemplate(param.getFreemarkerTemplate());
-            paramVo.setIsEditable(0);
-            notifyPolicyParamList.add(paramVo);
+            notifyPolicyParamList.add(createConditionParam(param));
 		}
 		for(ProcessTaskStepTaskNotifyParam param : ProcessTaskStepTaskNotifyParam.values()) {
-            ConditionParamVo paramVo = new ConditionParamVo();
-            paramVo.setName(param.getValue());
-            paramVo.setLabel(param.getText());
-            paramVo.setParamType(param.getParamType().getName());
-            paramVo.setParamTypeName(param.getParamType().getText());
-            paramVo.setFreemarkerTemplate(param.getFreemarkerTemplate());
-            paramVo.setIsEditable(0);
-            notifyPolicyParamList.add(paramVo);
+            notifyPolicyParamList.add(createConditionParam(param));
 		}
 		return notifyPolicyParamList;
 	}
@@ -175,6 +142,7 @@ public class OmnipotentNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 		config.put("groupList", groupList);
         List<String> includeList = JSON.parseArray(config.getJSONArray("includeList").toJSONString(), String.class);
         includeList.add(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue() + "#" + ProcessUserType.DEFAULT_WORKER.getValue());
+        includeList.add(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue() + "#" + ProcessUserType.FOCUS_USER.getValue());
         config.put("includeList", includeList);
 	}
 

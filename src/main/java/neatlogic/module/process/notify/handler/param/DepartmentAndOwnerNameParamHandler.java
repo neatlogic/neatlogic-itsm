@@ -21,6 +21,7 @@ import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
@@ -52,7 +53,7 @@ public class DepartmentAndOwnerNameParamHandler extends ProcessTaskNotifyParamHa
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
         if (processTaskVo != null) {
             String owner = processTaskVo.getOwner();

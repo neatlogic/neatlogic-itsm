@@ -16,36 +16,38 @@ limitations under the License.
 
 package neatlogic.module.process.notify.handler.param;
 
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.dto.UrlInfoVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import neatlogic.framework.util.HtmlUtil;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import java.util.List;
 
-/**
- * @author linbq
- * @since 2021/10/16 15:52
- **/
 @Component
-public class SerialNumberParamHandler extends ProcessTaskNotifyParamHandlerBase {
-
-    @Resource
-    private ProcessTaskMapper processTaskMapper;
+public class ProcessTaskAbortContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Override
     public String getValue() {
-        return ProcessTaskNotifyParam.SERIALNUMBER.getValue();
+        return ProcessTaskNotifyParam.PROCESS_TASK_ABORT_CONTENT.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
-        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
-        if (processTaskVo != null) {
-            return processTaskVo.getSerialNumber();
+        if (!(notifyTriggerType == ProcessTaskNotifyTriggerType.ABORTPROCESSTASK)) {
+            return null;
+        }
+        JSONObject paramObj = processTaskStepVo.getParamObj();
+        if (MapUtils.isNotEmpty(paramObj)) {
+            String content = paramObj.getString("content");
+            content= processContent(content);
+            return content;
         }
         return null;
     }

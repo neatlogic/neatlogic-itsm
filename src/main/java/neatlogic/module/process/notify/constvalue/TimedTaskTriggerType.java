@@ -23,7 +23,7 @@ import neatlogic.framework.notify.core.INotifyTriggerType;
  * @since: 2021/4/8 17:40
  **/
 public enum TimedTaskTriggerType implements INotifyTriggerType {
-    PENDINGPROCESSTASK("pendingprocesstask", "待我处理的工单", "定时任务触发通知");
+    PENDINGPROCESSTASK("pendingprocesstask", "enum.process.timedtasktriggertype.pendingprocesstask", "enum.process.timedtasktriggertype.pendingprocesstask.1");
 
     private String trigger;
     private String text;

@@ -2,10 +2,8 @@ package neatlogic.module.process.api.processtask;
 
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.dto.ProcessTaskVo;
-import neatlogic.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -41,6 +39,7 @@ public class ProcessTaskRecoverApi extends PrivateApiComponentBase {
 	@Override
 	@Input({
 			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
+			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述"),
 			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
 	})
 	@Output({})
@@ -49,6 +48,7 @@ public class ProcessTaskRecoverApi extends PrivateApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		processTaskVo.getParamObj().put("source", jsonObj.getString("source"));
+		processTaskVo.getParamObj().put("content", jsonObj.getString("content"));
 		ProcessStepHandlerFactory.getHandler().recoverProcessTask(processTaskVo);
 		return null;
 	}

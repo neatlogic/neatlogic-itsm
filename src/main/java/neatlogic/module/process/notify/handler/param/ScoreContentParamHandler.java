@@ -17,10 +17,12 @@
 package neatlogic.module.process.notify.handler.param;
 
 import neatlogic.framework.dto.UrlInfoVo;
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import neatlogic.framework.util.HtmlUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -44,19 +46,16 @@ public class ScoreContentParamHandler extends ProcessTaskNotifyParamHandlerBase 
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
+        if (!(notifyTriggerType == ProcessTaskNotifyTriggerType.SCOREPROCESSTASK)) {
+            return null;
+        }
         String contentHash = processTaskScoreMapper.getProcessTaskScoreContentHashByProcessTaskId(processTaskStepVo.getProcessTaskId());
         if (StringUtils.isBlank(contentHash)) {
             return null;
         }
         String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentHash);
-        if (StringUtils.isNotBlank(content)) {
-            content = content.replace("<p>", "");
-            content = content.replace("</p>", "");
-            content = content.replace("<br>", "");
-            List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
-            content = HtmlUtil.urlReplace(content, urlInfoVoList);
-        }
+        content= processContent(content);
         return content;
     }
 }

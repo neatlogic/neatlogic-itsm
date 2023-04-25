@@ -16,6 +16,7 @@ limitations under the License.
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dao.mapper.PriorityMapper;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.PriorityVo;
@@ -46,7 +47,7 @@ public class PriorityNameParamHandler extends ProcessTaskNotifyParamHandlerBase 
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
         if (processTaskVo != null) {
             PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());

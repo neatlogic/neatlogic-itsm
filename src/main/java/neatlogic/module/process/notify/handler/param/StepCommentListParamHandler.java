@@ -18,12 +18,14 @@ package neatlogic.module.process.notify.handler.param;
 
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.*;
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskContentVo;
 import neatlogic.framework.process.dto.ProcessTaskStepContentVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import neatlogic.framework.util.HtmlUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -53,7 +55,10 @@ public class StepCommentListParamHandler extends ProcessTaskNotifyParamHandlerBa
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
+        if (!(notifyTriggerType instanceof ProcessTaskStepNotifyTriggerType)) {
+            return null;
+        }
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepVo.getId());
         if (CollectionUtils.isEmpty(processTaskStepContentList)) {
             return null;
@@ -76,14 +81,10 @@ public class StepCommentListParamHandler extends ProcessTaskNotifyParamHandlerBa
             if (StringUtils.isBlank(content)) {
                 continue;
             }
-            content = content.replace("<p>", "");
-            content = content.replace("</p>", "");
-            content = content.replace("<br>", "");
+            content= processContent(content);
             if (StringUtils.isBlank(content)) {
                 continue;
             }
-            List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
-            content = HtmlUtil.urlReplace(content, urlInfoVoList);
             StringBuilder commentStringBuilder = new StringBuilder();
             commentStringBuilder.append("<p>");
             commentStringBuilder.append(content);

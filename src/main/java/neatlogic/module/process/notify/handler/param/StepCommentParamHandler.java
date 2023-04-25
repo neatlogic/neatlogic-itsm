@@ -18,8 +18,10 @@ package neatlogic.module.process.notify.handler.param;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.dto.UrlInfoVo;
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import neatlogic.framework.util.HtmlUtil;
 import org.apache.commons.collections4.MapUtils;
@@ -36,7 +38,10 @@ public class StepCommentParamHandler extends ProcessTaskNotifyParamHandlerBase {
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
+        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.COMMENT)) {
+            return null;
+        }
         if (processTaskStepVo == null) {
             return null;
         }
@@ -45,13 +50,7 @@ public class StepCommentParamHandler extends ProcessTaskNotifyParamHandlerBase {
             return null;
         }
         String content = paramObj.getString("content");
-        if (StringUtils.isNotBlank(content)) {
-            content = content.replace("<p>", "");
-            content = content.replace("</p>", "");
-            content = content.replace("<br>", "");
-            List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
-            content = HtmlUtil.urlReplace(content, urlInfoVoList);
-        }
+        content= processContent(content);
         return content;
     }
 }

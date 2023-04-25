@@ -16,47 +16,55 @@
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.dto.UrlInfoVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
+import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.framework.process.dto.ProcessTaskStepContentVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import neatlogic.framework.util.HtmlUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 @Component
-public class StepActiveTimeParamHandler extends ProcessTaskNotifyParamHandlerBase {
+public class CurrentStepBackContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
 
+    @Resource
+    private SelectContentByHashMapper selectContentByHashMapper;
+
     @Override
     public String getValue() {
-        return ProcessTaskStepNotifyParam.PROCESS_TASK_STEP_ACTIVE_TIME.getValue();
+        return ProcessTaskStepNotifyParam.PROCESS_TASK_CURRENT_STEP_BACK_CONTENT.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
-        if (!(notifyTriggerType instanceof ProcessTaskStepNotifyTriggerType)) {
+        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.BACK)) {
             return null;
         }
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date activeTime = processTaskStepVo.getActiveTime();
-        if (activeTime != null) {
-            return sdf.format(activeTime);
-        }
-        Long id = processTaskStepVo.getId();
-        if (id != null) {
-            ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(id);
-            if (stepVo != null) {
-                activeTime = stepVo.getActiveTime();
-                if (activeTime != null) {
-                    return sdf.format(activeTime);
+        // 查询步骤的所有处理内容，已倒序排好
+        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepVo.getId());
+        // 遍历列表，找出最近一次处理内容
+        for (ProcessTaskStepContentVo contentVo : processTaskStepContentList) {
+            if (Objects.equals(contentVo.getType(), ProcessTaskOperationType.STEP_BACK.getValue())) {
+                String contentHash = contentVo.getContentHash();
+                if (StringUtils.isBlank(contentHash)) {
+                    return null;
                 }
+                String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentHash);
+                content= processContent(content);
+                return content;
             }
         }
         return null;

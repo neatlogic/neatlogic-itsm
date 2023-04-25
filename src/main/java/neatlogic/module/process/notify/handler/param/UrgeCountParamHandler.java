@@ -16,6 +16,7 @@
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
@@ -36,7 +37,7 @@ public class UrgeCountParamHandler extends ProcessTaskNotifyParamHandlerBase {
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
         return processTaskMapper.getProcessTaskUrgeCountByProcessTaskId(processTaskStepVo.getProcessTaskId());
     }
 }
