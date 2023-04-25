@@ -19,6 +19,7 @@ import neatlogic.framework.notify.dto.NotifyTriggerVo;
 import neatlogic.framework.process.auth.PROCESS_MODIFY;
 import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
 import neatlogic.framework.process.constvalue.ProcessTaskGroupSearch;
+import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.notify.core.IDefaultTemplate;
@@ -79,25 +80,8 @@ public class TaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     @Override
 	protected List<ConditionParamVo> mySystemParamList() {
 		List<ConditionParamVo> notifyPolicyParamList = new ArrayList<>();
-//		for(ProcessTaskParams processTaskParams : ProcessTaskParams.values()) {
-//		    ConditionParamVo param = new ConditionParamVo();
-//		    param.setName(processTaskParams.getValue());
-//            param.setLabel(processTaskParams.getText());
-//            param.setParamType(processTaskParams.getParamType().getName());
-//            param.setParamTypeName(processTaskParams.getParamType().getText());
-//            param.setFreemarkerTemplate(processTaskParams.getFreemarkerTemplate());
-//            param.setIsEditable(0);
-//            notifyPolicyParamList.add(param);
-//		}
         for(ProcessTaskNotifyParam param : ProcessTaskNotifyParam.values()) {
-            ConditionParamVo paramVo = new ConditionParamVo();
-            paramVo.setName(param.getValue());
-            paramVo.setLabel(param.getText());
-            paramVo.setParamType(param.getParamType().getName());
-            paramVo.setParamTypeName(param.getParamType().getText());
-            paramVo.setFreemarkerTemplate(param.getFreemarkerTemplate());
-            paramVo.setIsEditable(0);
-            notifyPolicyParamList.add(paramVo);
+            notifyPolicyParamList.add(createConditionParam(param));
         }
 		return notifyPolicyParamList;
 	}
@@ -138,6 +122,9 @@ public class TaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 		List<String> groupList = JSON.parseArray(config.getJSONArray("groupList").toJSONString(), String.class);
 		groupList.add(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue());
 		config.put("groupList", groupList);
+        List<String> includeList = JSON.parseArray(config.getJSONArray("includeList").toJSONString(), String.class);
+        includeList.add(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue() + "#" + ProcessUserType.FOCUS_USER.getValue());
+        config.put("includeList", includeList);
 	}
 
     @Override

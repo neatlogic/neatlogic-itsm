@@ -49,13 +49,7 @@ public class TaskUserContentParamHandler extends ProcessTaskNotifyParamHandlerBa
         ProcessTaskStepTaskVo stepTaskVo = processTaskStepVo.getProcessTaskStepTaskVo();
         if(stepTaskVo != null ){
             String content = stepTaskVo.getTaskStepTaskUserContent();
-            if (StringUtils.isNotBlank(content)) {
-                content = content.replace("<p>", "");
-                content = content.replace("</p>", "");
-                content = content.replace("<br>", "");
-                List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
-                content = HtmlUtil.urlReplace(content, urlInfoVoList);
-            }
+            content= processContent(content);
             return content;
         }
         return null;

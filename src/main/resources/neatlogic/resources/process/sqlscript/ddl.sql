@@ -857,6 +857,24 @@ CREATE TABLE IF NOT EXISTS `processtask_step_content` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='工单步骤内容表';
 
 -- ----------------------------
+-- Table structure for processtask_operation_content
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS  `processtask_operation_content` (
+  `id` bigint NOT NULL COMMENT 'id',
+  `processtask_id` bigint DEFAULT NULL COMMENT '工单ID',
+  `content_hash` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'hash',
+  `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '类型',
+  `source` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '来源',
+  `fcd` timestamp(3) NULL DEFAULT NULL COMMENT '创建时间',
+  `fcu` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '创建人',
+  `lcd` timestamp(3) NULL DEFAULT NULL COMMENT '修改时间',
+  `lcu` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '修改人',
+  PRIMARY KEY (`id`),
+  KEY `idx_contentid` (`content_hash`),
+  KEY `idx_processtask_id` (`processtask_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='工单操作内容表';
+
+-- ----------------------------
 -- Table structure for processtask_step_data
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `processtask_step_data` (

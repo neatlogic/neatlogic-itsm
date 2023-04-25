@@ -1397,7 +1397,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     public void getReceiverMap(ProcessTaskStepVo currentProcessTaskStepVo,
                                Map<String, List<NotifyReceiverVo>> receiverMap, INotifyTriggerType notifyTriggerType) {
         ProcessTaskVo processTaskVo =
-                processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
+                processTaskMapper.getProcessTaskBaseInfoByIdIncludeIsDeleted(currentProcessTaskStepVo.getProcessTaskId());
         if (processTaskVo != null) {
             /** 上报人 **/
             if (StringUtils.isNotBlank(processTaskVo.getOwner())) {

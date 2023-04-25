@@ -81,14 +81,10 @@ public class StepCommentListParamHandler extends ProcessTaskNotifyParamHandlerBa
             if (StringUtils.isBlank(content)) {
                 continue;
             }
-            content = content.replace("<p>", "");
-            content = content.replace("</p>", "");
-            content = content.replace("<br>", "");
+            content= processContent(content);
             if (StringUtils.isBlank(content)) {
                 continue;
             }
-            List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
-            content = HtmlUtil.urlReplace(content, urlInfoVoList);
             StringBuilder commentStringBuilder = new StringBuilder();
             commentStringBuilder.append("<p>");
             commentStringBuilder.append(content);

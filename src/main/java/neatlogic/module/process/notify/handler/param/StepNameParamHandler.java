@@ -22,15 +22,10 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * @author linbq
@@ -61,14 +56,6 @@ public class StepNameParamHandler extends ProcessTaskNotifyParamHandlerBase {
             ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(id);
             if (stepVo != null) {
                 return stepVo.getName();
-            }
-        }
-        JSONObject paramObj = processTaskStepVo.getParamObj();
-        if (MapUtils.isNotEmpty(paramObj)) {
-            JSONArray nameArray = paramObj.getJSONArray("nameList");
-            if (CollectionUtils.isNotEmpty(nameArray)) {
-                List<String> idList = nameArray.toJavaList(String.class);
-                return String.join("、", idList);
             }
         }
         return null;

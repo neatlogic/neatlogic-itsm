@@ -20,8 +20,8 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.dto.UrlInfoVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
-import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepAutomaticNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepAutomaticNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import neatlogic.framework.util.HtmlUtil;
 import org.apache.commons.collections4.MapUtils;
@@ -31,15 +31,15 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class StepCommentParamHandler extends ProcessTaskNotifyParamHandlerBase {
+public class AutomaticActionFailedContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
     @Override
     public String getValue() {
-        return ProcessTaskStepNotifyParam.STEP_COMMENT.getValue();
+        return ProcessTaskStepAutomaticNotifyParam.ACTION_FAILED_CONTENT.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
-        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.COMMENT)) {
+        if (!(notifyTriggerType == ProcessTaskStepAutomaticNotifyTriggerType.ACTION_FAILED)) {
             return null;
         }
         if (processTaskStepVo == null) {
@@ -49,7 +49,7 @@ public class StepCommentParamHandler extends ProcessTaskNotifyParamHandlerBase {
         if (MapUtils.isEmpty(paramObj)) {
             return null;
         }
-        String content = paramObj.getString("content");
+        String content = paramObj.getString("actionFailedContent");
         content= processContent(content);
         return content;
     }
