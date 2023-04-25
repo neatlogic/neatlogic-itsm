@@ -9,7 +9,7 @@ import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.dto.FormVo;
 import neatlogic.framework.form.exception.FormActiveVersionNotFoundExcepiton;
 import neatlogic.framework.form.exception.FormNotFoundException;
-import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
+import neatlogic.framework.process.auth.BATCH_REPORT_PROCESS_TASK;
 import neatlogic.framework.process.constvalue.ProcessTaskSource;
 import neatlogic.framework.process.dao.mapper.ChannelMapper;
 import neatlogic.framework.process.dao.mapper.PriorityMapper;
@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
 @Service
-@AuthAction(action = PROCESSTASK_MODIFY.class)
+@AuthAction(action = BATCH_REPORT_PROCESS_TASK.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiComponentBase {
     static Logger logger = LoggerFactory.getLogger(ProcessTaskImportFromExcelApi.class);
