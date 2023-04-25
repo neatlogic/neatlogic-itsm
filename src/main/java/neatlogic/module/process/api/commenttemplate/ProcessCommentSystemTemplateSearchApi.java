@@ -67,6 +67,7 @@ public class ProcessCommentSystemTemplateSearchApi extends PrivateApiComponentBa
             vo.setAuthList(Collections.singletonList(UserContext.get().getUserUuid()));
             vo.setType(ProcessCommentTemplateVo.TempalteType.CUSTOM.getValue());
         }
+        vo.setSearchByFcu(1);
         JSONObject returnObj = new JSONObject();
         if (vo.getNeedPage()) {
             int rowNum = commentTemplateMapper.searchTemplateCount(vo);
