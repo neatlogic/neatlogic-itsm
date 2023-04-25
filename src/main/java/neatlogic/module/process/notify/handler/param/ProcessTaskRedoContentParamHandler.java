@@ -46,13 +46,7 @@ public class ProcessTaskRedoContentParamHandler extends ProcessTaskNotifyParamHa
         JSONObject paramObj = processTaskStepVo.getParamObj();
         if (MapUtils.isNotEmpty(paramObj)) {
             String content = paramObj.getString("content");
-            if (StringUtils.isNotBlank(content)) {
-                content = content.replace("<p>", "");
-                content = content.replace("</p>", "");
-                content = content.replace("<br>", "");
-                List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
-                content = HtmlUtil.urlReplace(content, urlInfoVoList);
-            }
+            content= processContent(content);
             return content;
         }
         return null;

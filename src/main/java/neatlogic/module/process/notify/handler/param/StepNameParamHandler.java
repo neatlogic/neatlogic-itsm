@@ -63,14 +63,14 @@ public class StepNameParamHandler extends ProcessTaskNotifyParamHandlerBase {
                 return stepVo.getName();
             }
         }
-        JSONObject paramObj = processTaskStepVo.getParamObj();
-        if (MapUtils.isNotEmpty(paramObj)) {
-            JSONArray nameArray = paramObj.getJSONArray("nameList");
-            if (CollectionUtils.isNotEmpty(nameArray)) {
-                List<String> idList = nameArray.toJavaList(String.class);
-                return String.join("、", idList);
-            }
-        }
+//        JSONObject paramObj = processTaskStepVo.getParamObj();
+//        if (MapUtils.isNotEmpty(paramObj)) {
+//            JSONArray nameArray = paramObj.getJSONArray("nameList");
+//            if (CollectionUtils.isNotEmpty(nameArray)) {
+//                List<String> idList = nameArray.toJavaList(String.class);
+//                return String.join("、", idList);
+//            }
+//        }
         return null;
     }
 }

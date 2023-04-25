@@ -59,13 +59,7 @@ public class ContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
             for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
                 if (ProcessTaskOperationType.PROCESSTASK_START.getValue().equals(processTaskStepContent.getType())) {
                     String content = selectContentByHashMapper.getProcessTaskContentStringByHash(processTaskStepContent.getContentHash());
-                    if (StringUtils.isNotBlank(content)) {
-                        content = content.replace("<p>", "");
-                        content = content.replace("</p>", "");
-                        content = content.replace("<br>", "");
-                        List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
-                        content = HtmlUtil.urlReplace(content, urlInfoVoList);
-                    }
+                    content= processContent(content);
                     return content;
                 }
             }

@@ -51,14 +51,14 @@ public class StepIdParamHandler extends ProcessTaskNotifyParamHandlerBase {
         if (id != null) {
             return id;
         }
-        JSONObject paramObj = processTaskStepVo.getParamObj();
-        if (MapUtils.isNotEmpty(paramObj)) {
-            JSONArray idArray = paramObj.getJSONArray("idList");
-            if (CollectionUtils.isNotEmpty(idArray)) {
-                List<String> idList = idArray.toJavaList(String.class);
-                return String.join("、", idList);
-            }
-        }
+//        JSONObject paramObj = processTaskStepVo.getParamObj();
+//        if (MapUtils.isNotEmpty(paramObj)) {
+//            JSONArray idArray = paramObj.getJSONArray("idList");
+//            if (CollectionUtils.isNotEmpty(idArray)) {
+//                List<String> idList = idArray.toJavaList(String.class);
+//                return String.join("、", idList);
+//            }
+//        }
         return null;
     }
 }
