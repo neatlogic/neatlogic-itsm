@@ -16,42 +16,41 @@
 
 package neatlogic.module.process.notify.handler.param;
 
-import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.UserVo;
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.dto.UrlInfoVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
-import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepAutomaticNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepAutomaticNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import neatlogic.framework.util.HtmlUtil;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import java.util.List;
 
 @Component
-public class UrgeUserParamHandler extends ProcessTaskNotifyParamHandlerBase {
-
-    @Resource
-    private ProcessTaskMapper processTaskMapper;
-
-    @Resource
-    private UserMapper userMapper;
-
+public class AutomaticActionFailedContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
     @Override
     public String getValue() {
-        return ProcessTaskNotifyParam.PROCESS_TASK_URGE_USER.getValue();
+        return ProcessTaskStepAutomaticNotifyParam.ACTION_FAILED_CONTENT.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
-        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.URGE)) {
+        if (!(notifyTriggerType == ProcessTaskStepAutomaticNotifyTriggerType.ACTION_FAILED)) {
             return null;
         }
-        String userUuid = processTaskMapper.getProcessTaskLastUrgeUserUuidByProcessTaskId(processTaskStepVo.getProcessTaskId());
-        UserVo userVo = userMapper.getUserBaseInfoByUuid(userUuid);
-        if (userVo != null) {
-            return userVo.getUserName() + "(" + userVo.getUserId() + ")";
+        if (processTaskStepVo == null) {
+            return null;
         }
-        return null;
+        JSONObject paramObj = processTaskStepVo.getParamObj();
+        if (MapUtils.isEmpty(paramObj)) {
+            return null;
+        }
+        String content = paramObj.getString("actionFailedContent");
+        content= processContent(content);
+        return content;
     }
 }

@@ -18,10 +18,12 @@ package neatlogic.module.process.notify.handler.param;
 
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dto.ProcessTaskStepTaskUserVo;
 import neatlogic.framework.process.dto.ProcessTaskStepTaskVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyParam;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -47,7 +49,10 @@ public class TaskWorkerParamHandler extends ProcessTaskNotifyParamHandlerBase {
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
+        if (!(notifyTriggerType instanceof ProcessTaskStepTaskNotifyTriggerType)) {
+            return null;
+        }
         ProcessTaskStepTaskVo stepTaskVo = processTaskStepVo.getProcessTaskStepTaskVo();
         if(stepTaskVo != null ){
             List<ProcessTaskStepTaskUserVo> processTaskStepTaskUserList = stepTaskVo.getStepTaskUserVoList();

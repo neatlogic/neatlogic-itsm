@@ -16,6 +16,7 @@ limitations under the License.
 
 package neatlogic.module.process.service;
 
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
@@ -37,7 +38,9 @@ import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.dto.automatic.AutomaticConfigVo;
 import neatlogic.framework.process.dto.automatic.ProcessTaskStepAutomaticRequestVo;
 import neatlogic.framework.process.handler.ProcessRequestFrom;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepAutomaticNotifyTriggerType;
 import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
+import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.scheduler.core.IJob;
 import neatlogic.framework.scheduler.core.SchedulerManager;
@@ -84,6 +87,8 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
     private ProcessTaskService processTaskService;
     @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
+    @Resource
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 
 //    @Override
 //    public Boolean runRequest(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo) {
@@ -495,6 +500,8 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 auditDataVo.setData(data.toJSONString());
                 auditDataVo.setFcu(SystemUser.SYSTEM.getUserUuid());
                 processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
+                currentProcessTaskStepVo.getParamObj().put("actionFailedContent", failedReason);
+                processStepHandlerUtil.notify(currentProcessTaskStepVo, ProcessTaskStepAutomaticNotifyTriggerType.ACTION_FAILED);
             }
 
         } catch (Exception ex) {
@@ -503,15 +510,18 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
             requestAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
             if (resultVo != null && StringUtils.isNotEmpty(resultVo.getError())) {
                 requestAudit.put("failedReason", resultVo.getError());
+                currentProcessTaskStepVo.getParamObj().put("actionFailedContent", resultVo.getError());
             } else {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
                 ex.printStackTrace(pw);
                 requestAudit.put("failedReason", sw.toString());
+                currentProcessTaskStepVo.getParamObj().put("actionFailedContent", sw.toString());
             }
             auditDataVo.setData(data.toJSONString());
             auditDataVo.setFcu(SystemUser.SYSTEM.getUserUuid());
             processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
+            processStepHandlerUtil.notify(currentProcessTaskStepVo, ProcessTaskStepAutomaticNotifyTriggerType.ACTION_FAILED);
         }
 //        System.out.println("firstRequest end");
     }

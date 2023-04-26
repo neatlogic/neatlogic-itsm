@@ -16,23 +16,29 @@
 
 package neatlogic.module.process.job.source.handler;
 
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.autoexec.dto.job.AutoexecJobRouteVo;
 import neatlogic.framework.autoexec.source.IAutoexecJobSource;
-import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.process.constvalue.AutoExecJobProcessSource;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.dto.ProcessStepVo;
+import neatlogic.framework.process.dto.ProcessVo;
+import neatlogic.module.process.dao.mapper.ProcessMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class ItsmJobSourceHandler implements IAutoexecJobSource {
 
     @Resource
-    private ProcessTaskMapper processTaskMapper;
+    private ProcessMapper processMapper;
 
     @Override
     public String getValue() {
@@ -45,14 +51,26 @@ public class ItsmJobSourceHandler implements IAutoexecJobSource {
     }
 
     @Override
-    public List<ValueTextVo> getListByIdList(List<Long> idList) {
-        if (CollectionUtils.isEmpty(idList)) {
+    public List<AutoexecJobRouteVo> getListByUniqueKeyList(List<String> uniqueKeyList) {
+        if (CollectionUtils.isEmpty(uniqueKeyList)) {
             return null;
         }
-        List<ValueTextVo> resultList = new ArrayList<>();
-        List<ProcessTaskStepVo> list = processTaskMapper.getProcessTaskStepListByIdList(idList);
-        for (ProcessTaskStepVo stepVo : list) {
-            resultList.add(new ValueTextVo(stepVo.getId(), stepVo.getName()));
+        List<AutoexecJobRouteVo> resultList = new ArrayList<>();
+        List<ProcessStepVo> processStepList = processMapper.getProcessStepListByUuidList(uniqueKeyList);
+        Set<String> processUuidSet = processStepList.stream().map(ProcessStepVo::getProcessUuid).collect(Collectors.toSet());
+        List<ProcessVo> processList = processMapper.getProcessListByUuidList(new ArrayList<>(processUuidSet));
+        Map<String, String> processNameMap = processList.stream().collect(Collectors.toMap(e -> e.getUuid(), e -> e.getName()));
+        for (ProcessStepVo processStepVo : processStepList) {
+            JSONObject config = new JSONObject();
+            config.put("stepUuid", processStepVo.getUuid());
+            config.put("uuid", processStepVo.getProcessUuid());
+            String label = "";
+            String processName = processNameMap.get(processStepVo.getProcessUuid());
+            if (StringUtils.isNotBlank(processName)) {
+                label = processName + "/";
+            }
+            label += processStepVo.getName();
+            resultList.add(new AutoexecJobRouteVo(processStepVo.getUuid(), label, config));
         }
         return resultList;
     }

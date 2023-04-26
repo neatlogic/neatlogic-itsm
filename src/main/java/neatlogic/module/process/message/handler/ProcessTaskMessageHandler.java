@@ -54,6 +54,33 @@ public class ProcessTaskMessageHandler extends MessageHandlerBase {
         if (policyHandler != null) {
             policyHandlerName = policyHandler.getName();
         }
-        return "<p>" + I18nUtils.getMessage("modulegroup.itsm") + "-" + I18nUtils.getMessage(policyHandlerName) + "-" + notifyVo.getCallerNotifyPolicyVo().getName() + "-" + notifyVo.getTriggerType().getText() + "</p>" + I18nUtils.getMessage("handler.message.itsm.callermessage", taskStepVo.getProcessTaskId().toString(), taskStepVo.getName(), taskStepVo.getId().toString());
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<p>");
+        stringBuilder.append(I18nUtils.getMessage("modulegroup.itsm"));
+        stringBuilder.append("-");
+        stringBuilder.append(I18nUtils.getMessage(policyHandlerName));
+        stringBuilder.append("-");
+        stringBuilder.append(notifyVo.getCallerNotifyPolicyVo().getName());
+        stringBuilder.append("-");
+        stringBuilder.append(notifyVo.getTriggerType().getText());
+        stringBuilder.append("</p>");
+        String processTaskIdStr = "";
+        String stepName = "";
+        String stepIdStr = "";
+        if (taskStepVo != null) {
+            Long processTaskId = taskStepVo.getProcessTaskId();
+            if (processTaskId != null) {
+                processTaskIdStr = processTaskId.toString();
+            }
+            Long stepId = taskStepVo.getId();
+            if (stepId != null) {
+                stepIdStr = stepId.toString();
+            }
+            if (StringUtils.isNotBlank(taskStepVo.getName())) {
+                stepName = taskStepVo.getName();
+            }
+        }
+        stringBuilder.append(I18nUtils.getMessage("handler.message.itsm.callermessage", processTaskIdStr, stepName, stepIdStr));
+        return stringBuilder.toString();
     }
 }

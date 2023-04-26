@@ -16,6 +16,7 @@ limitations under the License.
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dao.mapper.CatalogMapper;
 import neatlogic.framework.process.dao.mapper.ChannelMapper;
 import neatlogic.framework.process.dao.mapper.ChannelTypeMapper;
@@ -49,7 +50,7 @@ public class ChannelPathParamHandler extends ProcessTaskNotifyParamHandlerBase {
     }
 
     @Override
-    public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+    public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
         if (processTaskVo != null) {
             ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
