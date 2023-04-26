@@ -363,18 +363,34 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 String resultValue = null;
                 String transformedResult = resultVo.getTransformedResult();
                 if (StringUtils.isNotBlank(transformedResult)) {
-                    JSONObject transformedResultObj = JSON.parseObject(transformedResult);
-                    if (MapUtils.isNotEmpty(transformedResultObj)) {
-                        resultValue = transformedResultObj.getString(name);
+                    Object value = JSONPath.read(transformedResult, name);
+                    if (value != null) {
+                        if (value instanceof String) {
+                            resultValue = (String) value;
+                        } else {
+                            resultValue = value.toString();
+                        }
                     }
+//                    JSONObject transformedResultObj = JSON.parseObject(transformedResult);
+//                    if (MapUtils.isNotEmpty(transformedResultObj)) {
+//                        resultValue = transformedResultObj.getString(name);
+//                    }
                 }
                 if (resultValue == null) {
                     String rawResult = resultVo.getRawResult();
                     if (StringUtils.isNotEmpty(rawResult)) {
-                        JSONObject rawResultObj = JSON.parseObject(rawResult);
-                        if (MapUtils.isNotEmpty(rawResultObj)) {
-                            resultValue = rawResultObj.getString(name);
+                        Object value = JSONPath.read(transformedResult, name);
+                        if (value != null) {
+                            if (value instanceof String) {
+                                resultValue = (String) value;
+                            } else {
+                                resultValue = value.toString();
+                            }
                         }
+//                        JSONObject rawResultObj = JSON.parseObject(rawResult);
+//                        if (MapUtils.isNotEmpty(rawResultObj)) {
+//                            resultValue = rawResultObj.getString(name);
+//                        }
                     }
                 }
                 if (resultValue != null) {
