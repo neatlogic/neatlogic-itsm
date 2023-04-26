@@ -17,6 +17,7 @@ limitations under the License.
 package neatlogic.module.process.matrix.handler;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.matrix.core.IMatrixPrivateDataSourceHandler;
 import neatlogic.framework.matrix.dto.MatrixAttributeVo;
 import neatlogic.framework.matrix.dto.MatrixDataVo;
@@ -62,12 +63,25 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
 
     @Override
     public List<MatrixAttributeVo> getAttributeList() {
-        String attributeDefined = "[" +
-                "{\"name\":\"uuid\" , \"label\":\"uuid\",\"isPrimaryKey\":1}," +
-                "{\"name\":\"名称\",\"label\":\"name\",\"isSearchable\":1}" +
-                "]";
+        JSONArray attributeDefinedList = new JSONArray();
+        {
+            JSONObject jsonObj = new JSONObject();
+            jsonObj.put("name", "uuid");
+            jsonObj.put("label", "uuid");
+            jsonObj.put("isPrimaryKey", 1);
+            jsonObj.put("isSearchable", 0);
+            attributeDefinedList.add(jsonObj);
+        }
+        {
+            JSONObject jsonObj = new JSONObject();
+            jsonObj.put("name", "名称");
+            jsonObj.put("label", "name");
+            jsonObj.put("isPrimaryKey", 0);
+            jsonObj.put("isSearchable", 1);
+            attributeDefinedList.add(jsonObj);
+        }
         if (matrixAttributeList.size() == 0) {
-            this.setAttribute(matrixAttributeList , attributeDefined);
+            this.setAttribute(matrixAttributeList , attributeDefinedList);
 
             for(MatrixAttributeVo matrixAttributeVo : matrixAttributeList){
                 columnsMap.put(matrixAttributeVo.getLabel() , matrixAttributeVo.getUuid());

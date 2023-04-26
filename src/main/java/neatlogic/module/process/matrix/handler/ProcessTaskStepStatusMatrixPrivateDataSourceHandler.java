@@ -1,5 +1,7 @@
 package neatlogic.module.process.matrix.handler;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.matrix.core.IMatrixPrivateDataSourceHandler;
 import neatlogic.framework.matrix.dto.MatrixAttributeVo;
 import neatlogic.framework.matrix.dto.MatrixDataVo;
@@ -37,12 +39,25 @@ public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMat
 
     @Override
     public List<MatrixAttributeVo> getAttributeList() {
-        String attributeDefined = "[" +
-                "{\"name\":\"状态码\" , \"label\":\"status\",\"isPrimaryKey\":1,\"isSearchable\":1}," +
-                "{\"name\":\"状态名称\",\"label\":\"statusText\",\"isSearchable\":1}" +
-                "]";
+        JSONArray attributeDefinedList = new JSONArray();
+        {
+            JSONObject jsonObj = new JSONObject();
+            jsonObj.put("name", "状态码");
+            jsonObj.put("label", "status");
+            jsonObj.put("isPrimaryKey", 1);
+            jsonObj.put("isSearchable", 1);
+            attributeDefinedList.add(jsonObj);
+        }
+        {
+            JSONObject jsonObj = new JSONObject();
+            jsonObj.put("name", "状态名称");
+            jsonObj.put("label", "statusText");
+            jsonObj.put("isPrimaryKey", 0);
+            jsonObj.put("isSearchable", 1);
+            attributeDefinedList.add(jsonObj);
+        }
         if (matrixAttributeList.size() == 0) {
-            this.setAttribute(matrixAttributeList , attributeDefined);
+            this.setAttribute(matrixAttributeList , attributeDefinedList);
 
             for(MatrixAttributeVo matrixAttributeVo : matrixAttributeList){
                 columnsMap.put(matrixAttributeVo.getLabel() , matrixAttributeVo.getUuid());
@@ -59,6 +74,7 @@ public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMat
         if (CollectionUtils.isEmpty(filterList)) {
             for (ProcessTaskStatus type : ProcessTaskStatus.values()) {
                 Map<String, String> data = new HashMap<>();
+                data.put("uuid", UuidUtil.getCustomUUID(getLabel() + type.getValue()));
                 data.put(columnsMap.get("status"), type.getValue());
                 data.put(columnsMap.get("statusText"), type.getText());
                 dataList.add(data);
@@ -67,6 +83,7 @@ public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMat
             for (ProcessTaskStatus type : ProcessTaskStatus.values()) {
                 if(checkFilter(type , filterList)){
                     Map<String, String> data = new HashMap<>();
+                    data.put("uuid", UuidUtil.getCustomUUID(getLabel() + type.getValue()));
                     data.put(columnsMap.get("status"), type.getValue());
                     data.put(columnsMap.get("statusText"), type.getText());
                     dataList.add(data);
