@@ -1,8 +1,10 @@
 package neatlogic.module.process.api.processtask;
 
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.file.*;
+import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
@@ -22,6 +24,7 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.ExcelUtil;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
+import neatlogic.module.process.service.CatalogService;
 import neatlogic.module.process.service.ProcessTaskCreatePublicService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -65,6 +68,8 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
     private ProcessTaskMapper processTaskMapper;
     @Resource
     private ProcessTaskCreatePublicService processTaskCreatePublicService;
+    @Resource
+    private CatalogService catalogService;
 
     @Override
     public String getToken() {
@@ -126,6 +131,10 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
             if (channel == null) {
                 throw new ChannelNotFoundException(channelUuid);
+            }
+            // 判断当前用户有没有服务上报权限
+            if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
+                throw new PermissionDeniedException();
             }
             String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
             ProcessVo processVo = processMapper.getProcessBaseInfoByUuid(processUuid);

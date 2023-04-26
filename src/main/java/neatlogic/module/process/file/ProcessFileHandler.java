@@ -16,11 +16,15 @@
 
 package neatlogic.module.process.file;
 
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.file.core.FileTypeHandlerBase;
 import neatlogic.framework.file.dto.FileVo;
+import neatlogic.framework.process.constvalue.ProcessTaskStepUserStatus;
+import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.crossover.ICatalogCrossoverService;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import neatlogic.module.process.service.ProcessTaskService;
@@ -30,6 +34,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -55,6 +60,19 @@ public class ProcessFileHandler extends FileTypeHandlerBase {
         throw new ProcessTaskNotFoundException();
     }
 
+    @Override
+    public boolean validDeleteFile(FileVo fileVo) {
+        // 根据fileId查找工单信息，如果找不到工单信息，说明工单未上报，当前用户是附件上传者时有删除权限，否则没有。
+        List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskStepVoListByFileId(fileVo.getId());
+        if (CollectionUtils.isEmpty(processTaskVoList)) {
+            if (Objects.equals(fileVo.getUserUuid(), UserContext.get().getUserUuid())) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return false;
+    }
     @Override
     public String getDisplayName() {
         return "IT服务附件";
