@@ -84,6 +84,7 @@ public class SearchProcessTaskListForOwnerApi extends PrivateApiComponentBase {
         if (rowNum == 0) {
             return TableResultUtil.getResult(new ArrayList(), searchVo);
         }
+        searchVo.setRowNum(rowNum);
         Map<String, PriorityVo> priorityMap = new HashMap<>();
         Map<String, ChannelVo> channelMap = new HashMap<>();
         Map<String, CatalogVo> catalogMap = new HashMap<>();
@@ -109,14 +110,12 @@ public class SearchProcessTaskListForOwnerApi extends PrivateApiComponentBase {
             // 服务目录
             ChannelVo channelVo = channelMap.get(processTaskVo.getChannelUuid());
             if (channelVo != null) {
-                List<String> nameList = new ArrayList<>();
                 CatalogVo catalogVo = catalogMap.get(channelVo.getParentUuid());
                 if (catalogVo != null) {
-                    List<CatalogVo> upwardList = catalogMapper.getAncestorsAndSelfByLftRht(catalogVo.getLft(), catalogVo.getRht());
-                    nameList = upwardList.stream().map(CatalogVo::getName).collect(Collectors.toList());
+                    processTaskVo.setCatalogName(catalogVo.getName());
                 }
-                nameList.add(channelVo.getName());
-                processTaskVo.setChannelPath(String.join("/", nameList));
+                processTaskVo.setChannelName(channelVo.getName());
+                processTaskVo.setChannelVo(channelVo);
             }
         }
         return TableResultUtil.getResult(processTaskList, searchVo);
