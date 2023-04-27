@@ -65,8 +65,7 @@ public class ProcessCommentSystemTemplateSearchApi extends PrivateApiComponentBa
         });
 //        vo.setType(ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue());
 
-        /** 根据当前用户所在组、角色筛选其能看到的模版 */
-
+        //根据当前用户所在组、角色筛选其能看到的模版
         List<String> uuidList = UserContext.get().getUuidList();
         uuidList.add(UserType.ALL.getValue());
         vo.setAuthList(uuidList);
