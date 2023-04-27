@@ -85,7 +85,7 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
             if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(_vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())) {
                 throw new PermissionDeniedException(PROCESS_COMMENT_TEMPLATE_MODIFY.class);
             }
-            vo.setType(_vo.getType());
+//            vo.setType(_vo.getType());
             commentTemplateMapper.updateTemplate(vo);
             commentTemplateMapper.deleteTemplateAuthority(id);
         } else {
