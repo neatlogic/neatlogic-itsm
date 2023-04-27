@@ -10,7 +10,6 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.UserType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.PageUtil;
-import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.auth.PROCESS_COMMENT_TEMPLATE_MODIFY;
 import neatlogic.framework.process.dao.mapper.ProcessCommentTemplateMapper;
@@ -21,13 +20,10 @@ import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.service.AuthenticationInfoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -38,8 +34,6 @@ public class ProcessCommentSystemTemplateSearchApi extends PrivateApiComponentBa
     @Autowired
     private ProcessCommentTemplateMapper commentTemplateMapper;
 
-    @Resource
-    private AuthenticationInfoService authenticationInfoService;
 
     @Override
     public String getToken() {
@@ -72,11 +66,8 @@ public class ProcessCommentSystemTemplateSearchApi extends PrivateApiComponentBa
 //        vo.setType(ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue());
 
         /** 根据当前用户所在组、角色筛选其能看到的模版 */
-        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
-        List<String> uuidList = new ArrayList<>();
-        uuidList.addAll(authenticationInfoVo.getTeamUuidList());
-        uuidList.addAll(authenticationInfoVo.getRoleUuidList());
-        uuidList.add(UserContext.get().getUserUuid());
+
+        List<String> uuidList = UserContext.get().getUuidList();
         uuidList.add(UserType.ALL.getValue());
         vo.setAuthList(uuidList);
 
