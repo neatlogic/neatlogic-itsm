@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import neatlogic.framework.process.constvalue.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,10 +41,6 @@ import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
-import neatlogic.framework.process.constvalue.ProcessTaskStepUserStatus;
-import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepRelVo;
 import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
@@ -148,13 +145,13 @@ public class ProcessTaskStepStatusChangeApi extends PrivateApiComponentBase {
 
     @PostConstruct
     private void init() {
-        map.put(ProcessTaskStatus.PENDING.getValue(), processTaskStepVo -> {
+        map.put(ProcessTaskStepStatus.PENDING.getValue(), processTaskStepVo -> {
             if ("process".equals(processTaskStepVo.getType()) && processTaskStepVo.getOriginalUserVo() == null) {
                 throw new ProcessTaskStepUserUnAssignException();
             }
             changeProcessTaskStepStatusToPending(processTaskStepVo);
         });
-        map.put(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo -> {
+        map.put(ProcessTaskStepStatus.RUNNING.getValue(), processTaskStepVo -> {
             if ("process".equals(processTaskStepVo.getType())) {
                 if (processTaskStepVo.getOriginalUserVo() == null) {
                     List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
@@ -177,7 +174,7 @@ public class ProcessTaskStepStatusChangeApi extends PrivateApiComponentBase {
                 changeProcessTaskStepStatusToRunning(processTaskStepVo);
             }
         });
-        map.put(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepVo -> {
+        map.put(ProcessTaskStepStatus.SUCCEED.getValue(), processTaskStepVo -> {
             if (!ProcessStepHandlerType.END.getHandler().equals(processTaskStepVo.getHandler()) && StringUtils.isBlank(processTaskStepVo.getNextStepName())
                     && processTaskStepVo.getNextStepId() == null) {
                 throw new ProcessTaskNextStepNameOrIdUnAssignException();
@@ -222,17 +219,17 @@ public class ProcessTaskStepStatusChangeApi extends PrivateApiComponentBase {
             }
             // 更改当前步骤状态为SUCCEED
             processTaskStepVo.setIsActive(2);
-            processTaskStepVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
+            processTaskStepVo.setStatus(ProcessTaskStepStatus.SUCCEED.getValue());
             processTaskStepVo.setUpdateEndTime(1);
             processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
             // 激活与下个节点之间的路径、更改工单状态
             if (ProcessStepHandlerType.END.getHandler().equals(processTaskStepVo.getHandler())) {
-                processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.SUCCEED.getValue()));
+                processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.SUCCEED));
             } else if (nextStep != null) {
                 processTaskMapper.updateProcessTaskStepRelIsHit(new ProcessTaskStepRelVo(processTaskStepVo.getId(), nextStep.getId(), 1));
             }
         });
-        map.put(ProcessTaskStatus.HANG.getValue(), processTaskStepVo -> {
+        map.put(ProcessTaskStepStatus.HANG.getValue(), processTaskStepVo -> {
             ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
             processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
             processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
@@ -240,7 +237,7 @@ public class ProcessTaskStepStatusChangeApi extends PrivateApiComponentBase {
             processTaskStepVo.setStatus(ProcessTaskStatus.HANG.getValue());
             processTaskStepVo.setUpdateEndTime(1);
             processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
-            processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.HANG.getValue()));
+            processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.HANG));
         });
     }
 
@@ -256,8 +253,8 @@ public class ProcessTaskStepStatusChangeApi extends PrivateApiComponentBase {
             processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId()
                     , GroupSearch.USER.getValue(), processTaskStepVo.getOriginalUserVo().getUuid(), ProcessUserType.MAJOR.getValue()));
         }
-        processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStepVo.getId(), ProcessTaskStatus.PENDING.getValue(), 1));
-        processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
+        processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStepVo.getId(), ProcessTaskStepStatus.PENDING, 1));
+        processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING));
     }
 
     /**
@@ -266,8 +263,8 @@ public class ProcessTaskStepStatusChangeApi extends PrivateApiComponentBase {
      * @param processTaskStep 步骤
      */
     private void changeProcessTaskStepStatusToRunning(ProcessTaskStepVo processTaskStep) {
-        processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStep.getId(), ProcessTaskStatus.RUNNING.getValue(), 1));
-        processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStep.getProcessTaskId(), ProcessTaskStatus.RUNNING.getValue()));
+        processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStep.getId(), ProcessTaskStepStatus.RUNNING, 1));
+        processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStep.getProcessTaskId(), ProcessTaskStatus.RUNNING));
     }
 
     /**

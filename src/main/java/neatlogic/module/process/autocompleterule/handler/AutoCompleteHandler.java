@@ -22,10 +22,7 @@ import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.process.autocompleterule.core.IAutoCompleteRuleHandler;
-import neatlogic.framework.process.constvalue.ProcessFlowDirection;
-import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
-import neatlogic.framework.process.constvalue.ProcessUserType;
+import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepInOperationVo;
 import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
@@ -75,7 +72,7 @@ public class AutoCompleteHandler implements IAutoCompleteRuleHandler {
             return false;
         }
         if (Objects.equals(currentProcessTaskStepVo.getIsActive(), 1)) {
-            if (ProcessTaskStatus.RUNNING.getValue().equals(currentProcessTaskStepVo.getStatus())) {
+            if (ProcessTaskStepStatus.RUNNING.getValue().equals(currentProcessTaskStepVo.getStatus())) {
                 List<ProcessTaskStepUserVo> stepUserVoList =  processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
                 if (stepUserVoList.size() == 1) {
                     UserVo currentUserVo = userMapper.getUserBaseInfoByUuid(stepUserVoList.get(0).getUserUuid());

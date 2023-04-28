@@ -19,7 +19,7 @@ package neatlogic.module.process.api.processtask.task;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
@@ -74,7 +74,7 @@ public class ProcessTaskStepTaskGetApi extends PrivateApiComponentBase {
         if(processTaskStepVo == null){
             throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
         }
-        if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+        if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStepStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
             processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
         }
         return processTaskStepVo.getProcessTaskStepTask();

@@ -31,10 +31,7 @@ import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
-import neatlogic.framework.process.constvalue.ProcessFieldType;
-import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
-import neatlogic.framework.process.constvalue.ProcessUserType;
+import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dao.mapper.ChannelMapper;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
@@ -464,9 +461,9 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
     @Override
     public void getStepTaskWorkerList(JSONArray workerArray, ProcessTaskStepVo stepVo) {
-        if (ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
-                ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
-                ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1
+        if (ProcessTaskStepStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
+                ProcessTaskStepStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
+                ProcessTaskStepStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1
         ) {
             List<ProcessTaskStepWorkerVo> majorWorkerList = stepVo.getWorkerList().stream().filter(o -> Objects.equals(o.getUserType(), ProcessUserType.MAJOR.getValue())).collect(Collectors.toList());
             for (ProcessTaskStepWorkerVo majorWorker : majorWorkerList) {
@@ -504,7 +501,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             List<ProcessTaskStepTaskVo> stepTaskVoList = processTaskStepTaskMapper.getStepTaskWithUserByProcessTaskStepId(stepVo.getId());
             for (ProcessTaskStepTaskVo stepTaskVo : stepTaskVoList) {
                 for (ProcessTaskStepTaskUserVo userVo : stepTaskVo.getStepTaskUserVoList()) {
-                    if (Objects.equals(userVo.getUserUuid(), workerVo.getUuid()) && !Objects.equals(ProcessTaskStatus.SUCCEED.getValue(), userVo.getStatus())) {
+                    if (Objects.equals(userVo.getUserUuid(), workerVo.getUuid()) && !Objects.equals(ProcessTaskStepStatus.SUCCEED.getValue(), userVo.getStatus())) {
                         String workerUuidType = workerVo.getUuid() + stepTaskVo.getTaskConfigName();
                         if (!workerUuidTypeList.contains(workerUuidType)) {
                             JSONObject workerJson = new JSONObject();

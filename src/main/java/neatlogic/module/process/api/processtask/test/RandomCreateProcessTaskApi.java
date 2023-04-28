@@ -25,6 +25,7 @@ import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.ProcessTaskStepUserStatus;
 import neatlogic.framework.process.dao.mapper.ChannelMapper;
 import neatlogic.framework.process.dao.mapper.PriorityMapper;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
@@ -123,7 +124,7 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
             Integer count = jsonParam.getInteger("count");
             List<ProcessTaskVo> processTaskVoList = processtaskMapper.getProcessTaskByStatusList(Collections.singletonList(ProcessTaskStatus.RUNNING.getValue()), count);
             List<Long> taskIdList = processTaskVoList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList());
-            List<ProcessTaskStepUserVo> stepUserVoList = processtaskMapper.getProcessTaskStepUserListByProcessTaskIdListAndStatusList(taskIdList, Collections.singletonList(ProcessTaskStatus.RUNNING.getValue()));
+            List<ProcessTaskStepUserVo> stepUserVoList = processtaskMapper.getProcessTaskStepUserListByProcessTaskIdListAndStatusList(taskIdList, Collections.singletonList(ProcessTaskStepUserStatus.DOING.getValue()));
             List<Long> stepIdList = stepUserVoList.stream().map(ProcessTaskStepUserVo::getProcessTaskStepId).collect(Collectors.toList());
             ProcessTaskCompleteApi completeProcessApi = (ProcessTaskCompleteApi) PrivateApiComponentFactory.getInstance(ProcessTaskCompleteApi.class.getName());
             Map<String, Long> processTaskNextStepMap = new HashMap<>();

@@ -601,7 +601,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             if (typeList.contains(processTaskStepContentVo.getType())) {
                 ProcessTaskStepReplyVo processTaskStepReplyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
                 parseProcessTaskStepReply(processTaskStepReplyVo);
-                if(Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())
+                if(Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())
                         && Objects.equals(UserContext.get().getUserUuid(), processTaskStepReplyVo.getFcu())) {
                     processTaskStepReplyVo.setIsEditable(1);
                     processTaskStepReplyVo.setIsDeletable(1);
@@ -1750,7 +1750,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         //重新插入pending任务用户到 工单步骤worker
         List<ProcessTaskStepTaskUserVo> taskUserVoList = processTaskStepTaskMapper.getStepTaskUserListByProcessTaskStepId(processTaskStepVo.getId());
         for (ProcessTaskStepTaskUserVo taskUserVo : taskUserVoList) {
-            if (taskUserVo.getIsDelete() != 1 && Objects.equals(ProcessTaskStatus.PENDING.getValue(), taskUserVo.getStatus())) {
+            if (taskUserVo.getIsDelete() != 1 && Objects.equals(ProcessTaskStepStatus.PENDING.getValue(), taskUserVo.getStatus())) {
                 workerVoList.add(new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), GroupSearch.USER.getValue(), taskUserVo.getUserUuid(), ProcessUserType.MINOR.getValue()));
             }
         }
@@ -1771,11 +1771,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<ProcessTaskStepUserVo> stepUserVoList = new ArrayList<>();
         //如果存在子任务已完成的用户,且该用户为succeed， 则更新到 processtask_step_user ，且status 为 done，type 为minor
         List<ProcessTaskStepTaskUserVo> taskUserVoList = processTaskStepTaskMapper.getStepTaskUserListByProcessTaskStepId(processTaskStepVo.getId());
-        taskUserVoList = taskUserVoList.stream().filter(user -> Objects.equals(ProcessTaskStatus.SUCCEED.getValue(), user.getStatus())).collect(collectingAndThen(toCollection(() -> new TreeSet<>(Comparator.comparing(ProcessTaskStepTaskUserVo::getUserUuid))), ArrayList::new));
+        taskUserVoList = taskUserVoList.stream().filter(user -> Objects.equals(ProcessTaskStepStatus.SUCCEED.getValue(), user.getStatus())).collect(collectingAndThen(toCollection(() -> new TreeSet<>(Comparator.comparing(ProcessTaskStepTaskUserVo::getUserUuid))), ArrayList::new));
         for (ProcessTaskStepTaskUserVo taskUserVo : taskUserVoList) {
             if (taskUserVo.getIsDelete() != 1) {
                 String status = ProcessTaskStepUserStatus.DOING.getValue();
-                if (Objects.equals(taskUserVo.getStatus(), ProcessTaskStatus.SUCCEED.getValue())) {
+                if (Objects.equals(taskUserVo.getStatus(), ProcessTaskStepStatus.SUCCEED.getValue())) {
                     status = ProcessTaskStepUserStatus.DONE.getValue();
                 }
                 UserVo userVo = userMapper.getUserBaseInfoByUuid(taskUserVo.getUserUuid());
@@ -1824,7 +1824,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         processTaskStepVo.setCommentList(getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, typeList));
 
         //任务列表
-        if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+        if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStepStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
             processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
             List<TaskConfigVo> taskConfigList = processTaskStepTaskService.getTaskConfigList(processTaskStepVo);
             processTaskStepVo.setTaskConfigList(taskConfigList);
@@ -2597,37 +2597,37 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
      * @return
      */
     @Override
-    public ProcessTaskPermissionDeniedException checkProcessTaskStepStatus(String stepStatus, ProcessTaskStatus... statuss) {
+    public ProcessTaskPermissionDeniedException checkProcessTaskStepStatus(String stepStatus, ProcessTaskStepStatus... statuss) {
         if (statuss != null) {
-            for (ProcessTaskStatus status : statuss) {
+            for (ProcessTaskStepStatus status : statuss) {
                 switch (status) {
                     case DRAFT:
-                        if (ProcessTaskStatus.DRAFT.getValue().equals(stepStatus)) {
+                        if (ProcessTaskStepStatus.DRAFT.getValue().equals(stepStatus)) {
                             return new ProcessTaskStepUnsubmittedException();
                         }
                         break;
                     case PENDING:
-                        if (ProcessTaskStatus.PENDING.getValue().equals(stepStatus)) {
+                        if (ProcessTaskStepStatus.PENDING.getValue().equals(stepStatus)) {
                             return new ProcessTaskStepPendingException();
                         }
                         break;
                     case RUNNING:
-                        if (ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)) {
+                        if (ProcessTaskStepStatus.RUNNING.getValue().equals(stepStatus)) {
                             return new ProcessTaskStepRunningException();
                         }
                         break;
                     case SUCCEED:
-                        if (ProcessTaskStatus.SUCCEED.getValue().equals(stepStatus)) {
+                        if (ProcessTaskStepStatus.SUCCEED.getValue().equals(stepStatus)) {
                             return new ProcessTaskStepSucceededException();
                         }
                         break;
                     case FAILED:
-                        if (ProcessTaskStatus.FAILED.getValue().equals(stepStatus)) {
+                        if (ProcessTaskStepStatus.FAILED.getValue().equals(stepStatus)) {
                             return new ProcessTaskStepFailedException();
                         }
                         break;
                     case HANG:
-                        if (ProcessTaskStatus.HANG.getValue().equals(stepStatus)) {
+                        if (ProcessTaskStepStatus.HANG.getValue().equals(stepStatus)) {
                             return new ProcessTaskStepHangException();
                         }
                         break;

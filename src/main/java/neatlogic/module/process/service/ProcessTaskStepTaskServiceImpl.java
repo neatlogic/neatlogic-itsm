@@ -22,10 +22,7 @@ import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
-import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;
-import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
-import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
@@ -134,7 +131,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             checkUserIsLegal(processTaskStepTaskVo.getUserList().stream().map(Object::toString).collect(Collectors.toList()), rangeList.stream().map(Object::toString).collect(Collectors.toList()));
         }
         processTaskStepTaskVo.getUserList().forEach(t -> {
-            processTaskStepTaskMapper.insertIgnoreTaskUser(new ProcessTaskStepTaskUserVo(processTaskStepTaskVo.getId(), t, ProcessTaskStatus.PENDING.getValue()));
+            processTaskStepTaskMapper.insertIgnoreTaskUser(new ProcessTaskStepTaskUserVo(processTaskStepTaskVo.getId(), t, ProcessTaskStepStatus.PENDING.getValue()));
         });
 //        processTaskService.refreshStepMinorWorker(processTaskStepVo, processTaskStepTaskVo);
 //        processTaskService.refreshStepMinorUser(processTaskStepVo, processTaskStepTaskVo);
@@ -329,11 +326,11 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                         isChangeContent = true;
                     }
                 }
-                if (isChangeContent || Objects.equals(oldProcessTaskStepTaskUserVo.getStatus(), ProcessTaskStatus.PENDING) || !Objects.equals(oldProcessTaskStepTaskUserVo.getUserUuid(), UserContext.get().getUserUuid())) {
+                if (isChangeContent || Objects.equals(oldProcessTaskStepTaskUserVo.getStatus(), ProcessTaskStepStatus.PENDING) || !Objects.equals(oldProcessTaskStepTaskUserVo.getUserUuid(), UserContext.get().getUserUuid())) {
                     ProcessTaskStepTaskUserVo processTaskStepTaskUserVo = new ProcessTaskStepTaskUserVo();
                     processTaskStepTaskUserVo.setId(stepTaskUserId);
                     processTaskStepTaskUserVo.setUserUuid(UserContext.get().getUserUuid());
-                    processTaskStepTaskUserVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
+                    processTaskStepTaskUserVo.setStatus(ProcessTaskStepStatus.SUCCEED.getValue());
                     processTaskStepTaskMapper.updateTaskUserById(processTaskStepTaskUserVo);
                     isChange = true;
                 }
@@ -696,10 +693,10 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
         //11.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
         //12.判断步骤状态是否是“待处理”，如果是，则提示“步骤未开始”；
-        exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                ProcessTaskStatus.FAILED,
-                ProcessTaskStatus.HANG,
-                ProcessTaskStatus.PENDING);
+        exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                ProcessTaskStepStatus.FAILED,
+                ProcessTaskStepStatus.HANG,
+                ProcessTaskStepStatus.PENDING);
         if (exception != null) {
             throw exception;
         }

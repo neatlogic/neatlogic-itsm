@@ -2,6 +2,7 @@ package neatlogic.module.process.api.process;
 
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
 import neatlogic.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
@@ -79,7 +79,7 @@ public class ProcessCustomButtonStatusList extends PrivateApiComponentBase {
             }
 		}		
 		JSONArray customStatusList = new JSONArray();
-		for (ProcessTaskStatus status : ProcessTaskStatus.values()) {
+		for (ProcessTaskStepStatus status : ProcessTaskStepStatus.values()) {
 			customStatusList.add(new JSONObject() {{this.put("name", status.getValue());this.put("text", status.getText());this.put("value", "");}});
 		}
 		resultObj.put("customStatusList", customStatusList);

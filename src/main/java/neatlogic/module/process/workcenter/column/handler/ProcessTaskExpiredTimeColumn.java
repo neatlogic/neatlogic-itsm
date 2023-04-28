@@ -6,6 +6,7 @@ import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnBase;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.constvalue.SlaStatus;
 import neatlogic.framework.process.dto.ProcessTaskSlaTimeVo;
 import neatlogic.framework.process.dto.ProcessTaskSlaVo;
@@ -115,7 +116,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
             long currentTimeMillis = System.currentTimeMillis();
             for (ProcessTaskSlaVo slaVo : processTaskSlaList) {
                 //判断需要 同时满足 该步骤是进行中状态，以及包含sla策略
-                if (processTaskVo.getStepList().stream().noneMatch(o -> (Objects.equals(o.getStatus(), ProcessTaskStatus.RUNNING.getValue()) || (Objects.equals(o.getStatus(), ProcessTaskStatus.PENDING.getValue()) && o.getIsActive() == 1))
+                if (processTaskVo.getStepList().stream().noneMatch(o -> (Objects.equals(o.getStatus(), ProcessTaskStepStatus.RUNNING.getValue()) || (Objects.equals(o.getStatus(), ProcessTaskStepStatus.PENDING.getValue()) && o.getIsActive() == 1))
                         && CollectionUtils.isNotEmpty(o.getSlaTimeList())
                         && o.getSlaTimeList().stream().anyMatch(c -> Objects.equals(c.getSlaId(), slaVo.getId())))) {
                     continue;

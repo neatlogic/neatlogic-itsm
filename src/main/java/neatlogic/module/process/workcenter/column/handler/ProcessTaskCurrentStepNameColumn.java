@@ -7,6 +7,7 @@ import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnBase;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -73,7 +74,7 @@ public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase impl
         List<String> stepNameList = new ArrayList<>();
         if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
             for (ProcessTaskStepVo stepVo : stepVoList) {
-                if ((ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) || (ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1) || ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()))) {
+                if ((ProcessTaskStepStatus.DRAFT.getValue().equals(stepVo.getStatus()) || (ProcessTaskStepStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1) || ProcessTaskStepStatus.RUNNING.getValue().equals(stepVo.getStatus()))) {
                     stepNameList.add(stepVo.getName());
                 }
             }

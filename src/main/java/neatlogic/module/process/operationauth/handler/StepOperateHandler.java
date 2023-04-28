@@ -7,10 +7,7 @@ import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.ConfigVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
-import neatlogic.framework.process.constvalue.ProcessFlowDirection;
-import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
-import neatlogic.framework.process.constvalue.ProcessUserType;
+import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.operationauth.*;
 import neatlogic.framework.process.operationauth.core.OperationAuthHandlerBase;
@@ -138,9 +135,9 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
                 //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
                 //11.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
-                exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                        ProcessTaskStatus.FAILED,
-                        ProcessTaskStatus.HANG);
+                exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                        ProcessTaskStepStatus.FAILED,
+                        ProcessTaskStepStatus.HANG);
                 if (exception != null) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, exception);
@@ -199,14 +196,14 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             }
             //9.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
             //10.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
-            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.FAILED,
-                    ProcessTaskStatus.HANG);
+            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.FAILED,
+                    ProcessTaskStepStatus.HANG);
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
                 return false;
             }
-            if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {
+            if (ProcessTaskStepStatus.SUCCEED.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStepStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStepStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {
                 List<ProcessTaskStepUserVo> userList = processTaskStepVo.getUserList();
                 if (CollectionUtils.isNotEmpty(userList)) {
                     for (ProcessTaskStepUserVo processTaskStepUserVo : userList) {
@@ -214,8 +211,8 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                             if (Objects.equals(processTaskStepUserVo.getUserUuid(), userUuid)) {
                                 //11.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
                                 //12.判断步骤状态是否是“处理中”，如果是，则提示“步骤处理中”；
-                                exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                                        ProcessTaskStatus.RUNNING);
+                                exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                                        ProcessTaskStepStatus.RUNNING);
                                 if (exception != null) {
                                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                             .put(operationType, exception);
@@ -293,10 +290,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
             //11.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
             //12.判断步骤状态是否是“处理中”，如果是，则提示“步骤处理中”；
-            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                    ProcessTaskStatus.FAILED,
-                    ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.RUNNING);
+            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                    ProcessTaskStepStatus.FAILED,
+                    ProcessTaskStepStatus.HANG,
+                    ProcessTaskStepStatus.RUNNING);
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
@@ -355,10 +352,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             //9.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
             //10.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
             //11.判断步骤状态是否是“待处理”，如果是，则提示“步骤未开始”；
-            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                    ProcessTaskStatus.FAILED,
-                    ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.PENDING);
+            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                    ProcessTaskStepStatus.FAILED,
+                    ProcessTaskStepStatus.HANG,
+                    ProcessTaskStepStatus.PENDING);
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
@@ -424,10 +421,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
             //11.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
             //12.判断步骤状态是否是“待处理”，如果是，则提示“步骤未开始”；
-            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                    ProcessTaskStatus.FAILED,
-                    ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.PENDING);
+            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                    ProcessTaskStepStatus.FAILED,
+                    ProcessTaskStepStatus.HANG,
+                    ProcessTaskStepStatus.PENDING);
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
@@ -493,10 +490,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
             //11.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
             //12.判断步骤状态是否是“待处理”，如果是，则提示“步骤未开始”；
-            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                    ProcessTaskStatus.FAILED,
-                    ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.PENDING);
+            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                    ProcessTaskStepStatus.FAILED,
+                    ProcessTaskStepStatus.HANG,
+                    ProcessTaskStepStatus.PENDING);
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
@@ -563,10 +560,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
             //11.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
             //12.判断步骤状态是否是“待处理”，如果是，则提示“步骤未开始”；
-            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                    ProcessTaskStatus.FAILED,
-                    ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.PENDING);
+            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                    ProcessTaskStepStatus.FAILED,
+                    ProcessTaskStepStatus.HANG,
+                    ProcessTaskStepStatus.PENDING);
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
@@ -626,10 +623,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
             //11.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
             //12.判断步骤状态是否是“待处理”，如果是，则提示“步骤未开始”；
-            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                    ProcessTaskStatus.FAILED,
-                    ProcessTaskStatus.HANG,
-                    ProcessTaskStatus.PENDING);
+            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                    ProcessTaskStepStatus.FAILED,
+                    ProcessTaskStepStatus.HANG,
+                    ProcessTaskStepStatus.PENDING);
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
@@ -687,10 +684,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
             //11.判断步骤状态是否是“处理中”，如果是，则提示“步骤处理中”；
             //12.判断步骤状态是否是“待处理”，如果是，则提示“步骤未开始”；
-            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                    ProcessTaskStatus.FAILED,
-                    ProcessTaskStatus.RUNNING,
-                    ProcessTaskStatus.PENDING);
+            exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                    ProcessTaskStepStatus.FAILED,
+                    ProcessTaskStepStatus.RUNNING,
+                    ProcessTaskStepStatus.PENDING);
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
@@ -809,10 +806,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
                     //11.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
                     //12.判断步骤状态是否是“待处理”，如果是，则提示“步骤未开始”；
-                    exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                            ProcessTaskStatus.FAILED,
-                            ProcessTaskStatus.HANG,
-                            ProcessTaskStatus.PENDING);
+                    exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                            ProcessTaskStepStatus.FAILED,
+                            ProcessTaskStepStatus.HANG,
+                            ProcessTaskStepStatus.PENDING);
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
@@ -895,9 +892,9 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
                 //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
                 //11.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
-                exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                        ProcessTaskStatus.FAILED,
-                        ProcessTaskStatus.HANG);
+                exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                        ProcessTaskStepStatus.FAILED,
+                        ProcessTaskStepStatus.HANG);
                 if (exception != null) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, exception);
@@ -959,10 +956,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
                     //11.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
                     //12.判断步骤状态是否是“待处理”，如果是，则提示“步骤未开始”；
-                    exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                            ProcessTaskStatus.FAILED,
-                            ProcessTaskStatus.HANG,
-                            ProcessTaskStatus.PENDING);
+                    exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                            ProcessTaskStepStatus.FAILED,
+                            ProcessTaskStepStatus.HANG,
+                            ProcessTaskStepStatus.PENDING);
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
@@ -1023,9 +1020,9 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
                     //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
                     //11.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
-                    exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStatus.SUCCEED,
-                            ProcessTaskStatus.FAILED,
-                            ProcessTaskStatus.HANG);
+                    exception = processTaskService.checkProcessTaskStepStatus(processTaskStepVo.getStatus(), ProcessTaskStepStatus.SUCCEED,
+                            ProcessTaskStepStatus.FAILED,
+                            ProcessTaskStepStatus.HANG);
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);

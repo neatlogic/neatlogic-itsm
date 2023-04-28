@@ -17,13 +17,12 @@ limitations under the License.
 package neatlogic.module.process.notify.handler.param;
 
 import neatlogic.framework.notify.core.INotifyTriggerType;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -52,13 +51,13 @@ public class StepStayTimeParamHandler extends ProcessTaskNotifyParamHandlerBase 
         ProcessTaskStepVo stepVo =  processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepVo.getId());
         if (stepVo != null) {
             String status = stepVo.getStatus();
-            if (ProcessTaskStatus.PENDING.getValue().equals(status)) {
+            if (ProcessTaskStepStatus.PENDING.getValue().equals(status)) {
                 Date activeTime = stepVo.getActiveTime();
                 if (activeTime != null) {
                     long stayTime = System.currentTimeMillis() - activeTime.getTime();
                     return millisecondsTransferDayHourTimeUnit(stayTime);
                 }
-            } else if (ProcessTaskStatus.RUNNING.getValue().equals(status)) {
+            } else if (ProcessTaskStepStatus.RUNNING.getValue().equals(status)) {
                 Date startTime = stepVo.getStartTime();
                 if (startTime != null) {
                     long stayTime = System.currentTimeMillis() - startTime.getTime();

@@ -218,12 +218,12 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 }
                 break;
             case PROCESSTASK_RECOVER:
-                if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
+                if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStepStatus.PENDING.getValue())) {
                     newAuditVo.setActiveTime("now");
                     if (lastTimeAuditVo == null || StringUtils.isNotBlank(lastTimeAuditVo.getActiveTime())) {
                         processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
                     }
-                } else if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
+                } else if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStepStatus.RUNNING.getValue())) {
                     newAuditVo.setStartTime("now");
                     if (lastTimeAuditVo == null || StringUtils.isNotBlank(lastTimeAuditVo.getStartTime())) {
                         processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);

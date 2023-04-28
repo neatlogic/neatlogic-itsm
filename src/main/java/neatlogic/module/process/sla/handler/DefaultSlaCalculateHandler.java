@@ -16,7 +16,7 @@ limitations under the License.
 
 package neatlogic.module.process.sla.handler;
 
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.constvalue.SlaStatus;
 import neatlogic.framework.process.constvalue.SlaType;
 import neatlogic.framework.process.dto.ProcessTaskSlaTimeCostVo;
@@ -73,17 +73,17 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
             String status = processTaskStepVo.getStatus();
             if (Objects.equals(processTaskStepVo.getIsActive(),1)) {
                 // 未处理、处理中和挂起的步骤才需要计算SLA
-                if (ProcessTaskStatus.PENDING.getValue().equals(status)) {
+                if (ProcessTaskStepStatus.PENDING.getValue().equals(status)) {
                     doing++;
                     continue;
-                } else if (ProcessTaskStatus.RUNNING.getValue().equals(status)) {
+                } else if (ProcessTaskStepStatus.RUNNING.getValue().equals(status)) {
                     doing++;
                     continue;
-                } else if (ProcessTaskStatus.HANG.getValue().equals(status)) {
+                } else if (ProcessTaskStepStatus.HANG.getValue().equals(status)) {
                     pause++;
                     continue;
                 }
-            } else if (ProcessTaskStatus.SUCCEED.getValue().equals(status) || ProcessTaskStatus.ABORTED.getValue().equals(status)) {
+            } else if (ProcessTaskStepStatus.SUCCEED.getValue().equals(status)) {
                 done++;
             }
         }
