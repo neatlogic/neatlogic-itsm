@@ -924,33 +924,6 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             formAttributeDataMap.put(attributeUuid, data);
         }
 
-        Map<String, ProcessTaskAuditFormAttributeDataVo> auditFormAttributeDataMap = new HashMap<>();
-        Map<String, ProcessTaskFormAttributeDataVo> newProcessTaskFormAttributeDataMap = new HashMap<>();
-        int i = 0;
-        for (FormAttributeVo formAttributeVo : defaultSceneFormAttributeList) {
-            String attributeUuid = formAttributeVo.getUuid();
-            if (formAttributeDataMap.containsKey(attributeUuid)) {
-                Object data = formAttributeDataMap.get(attributeUuid);
-
-                ProcessTaskFormAttributeDataVo formAttributeDataVo = new ProcessTaskFormAttributeDataVo();
-                formAttributeDataVo.setProcessTaskId(processTaskId);
-                formAttributeDataVo.setAttributeUuid(attributeUuid);
-                formAttributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
-                formAttributeDataVo.setType(formAttributeVo.getHandler());
-                formAttributeDataVo.setDataObj(data);
-                formAttributeDataVo.setSort(i);
-                newProcessTaskFormAttributeDataMap.put(attributeUuid, formAttributeDataVo);
-
-                ProcessTaskAuditFormAttributeDataVo auditFormAttributeDataVo = new ProcessTaskAuditFormAttributeDataVo();
-                auditFormAttributeDataVo.setAttributeUuid(attributeUuid);
-                auditFormAttributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
-                auditFormAttributeDataVo.setType(formAttributeVo.getHandler());
-                auditFormAttributeDataVo.setDataObj(data);
-                auditFormAttributeDataVo.setSort(i);
-                auditFormAttributeDataMap.put(attributeUuid, auditFormAttributeDataVo);
-            }
-            i++;
-        }
         // 工单步骤指定场景的表单
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
@@ -999,90 +972,49 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
 
         /** 获取旧表单数据 **/
         List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
+        paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldProcessTaskFormAttributeDataList));
         Map<String, ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataMap = oldProcessTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
+
+        List<ProcessTaskFormAttributeDataVo> newProcessTaskFormAttributeDataList = new ArrayList<>();
+        int i = 0;
         for (FormAttributeVo formAttributeVo : defaultSceneFormAttributeList) {
             String attributeUuid = formAttributeVo.getUuid();
-            ProcessTaskAuditFormAttributeDataVo auditFormAttributeDataVo = auditFormAttributeDataMap.get(attributeUuid);
-            ProcessTaskFormAttributeDataVo newProcessTaskFormAttributeDataVo = newProcessTaskFormAttributeDataMap.get(attributeUuid);
-            ProcessTaskFormAttributeDataVo oldProcessTaskFormAttributeDataVo = oldProcessTaskFormAttributeDataMap.get(attributeUuid);
-            if (oldProcessTaskFormAttributeDataVo == null && newProcessTaskFormAttributeDataVo == null) {
-                // 这里auditFormAttributeDataVo为null，不用setModified(0)
-                continue;
-            }
-            // 在此之前如果该属性的值，在数据库中没有对应的旧数据
-            if (oldProcessTaskFormAttributeDataVo == null) {
-                // 现在要保存该属性的值为null，则将该属性值保存到数据库中，但不标记为已修改
-                if (newProcessTaskFormAttributeDataVo.getDataObj() == null) {
-                    auditFormAttributeDataVo.setModified(0);
-                    continue;
-                } else {
-                    // 现在要保存该属性的值不为null，则将该属性值保存到数据库中，但标记为已修改
-                    auditFormAttributeDataVo.setModified(1);
-                    continue;
-                }
-            }
-            // 如果现在接口参数中没有该属性值，则表示不修改该属性值
-            if (newProcessTaskFormAttributeDataVo == null) {
-                // 将该属性旧值添加到stepFormAttributeDataMap，记录该步骤流转时该属性值
-                ProcessTaskAuditFormAttributeDataVo oldAuditFormAttributeDataVo = new ProcessTaskAuditFormAttributeDataVo();
-                oldAuditFormAttributeDataVo.setAttributeUuid(attributeUuid);
-                oldAuditFormAttributeDataVo.setDataObj(oldProcessTaskFormAttributeDataVo.getDataObj());
-                oldAuditFormAttributeDataVo.setSort(oldProcessTaskFormAttributeDataVo.getSort());
-                oldAuditFormAttributeDataVo.setModified(0);
-                auditFormAttributeDataMap.put(attributeUuid, oldAuditFormAttributeDataVo);
-                continue;
-            }
-            if (Objects.equals(oldProcessTaskFormAttributeDataVo.getDataObj(), newProcessTaskFormAttributeDataVo.getDataObj())) {
-                // 如果新表单属性值与旧表单属性值相同，就不用replace更新数据了
-                oldProcessTaskFormAttributeDataMap.remove(attributeUuid);
-                newProcessTaskFormAttributeDataMap.remove(attributeUuid);
-                auditFormAttributeDataVo.setModified(0);
-                continue;
-            }
-            auditFormAttributeDataVo.setModified(1);
-        }
+            if (formAttributeDataMap.containsKey(attributeUuid)) {
+                Object data = formAttributeDataMap.get(attributeUuid);
 
-        if (MapUtils.isNotEmpty(oldProcessTaskFormAttributeDataMap)) {
-            List<ProcessTaskFormAttributeDataVo> oldDataList = new ArrayList<>(oldProcessTaskFormAttributeDataMap.values());
-            oldDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
-            paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldDataList));
-        }
-        // 写入当前工单的表单属性值
-        if (MapUtils.isNotEmpty(newProcessTaskFormAttributeDataMap)) {
-            List<ProcessTaskFormAttributeDataVo> newDataList = new ArrayList<>(newProcessTaskFormAttributeDataMap.values());
-            newDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
-            for (ProcessTaskFormAttributeDataVo dataVo : newDataList) {
-                Object dataObj = dataVo.getDataObj();
-                if (dataObj != null) {
-                    if (dataObj instanceof JSONObject || dataObj instanceof JSONArray) {
-                        dataVo.setData(JSONObject.toJSONString(dataObj));
-                    } else if (dataObj instanceof String) {
-                        dataVo.setData((String) dataObj);
-                    } else {
-                        dataVo.setData(dataObj.toString());
-                    }
-                }
-                processTaskMapper.insertProcessTaskFormAttributeData(dataVo);
+                ProcessTaskFormAttributeDataVo formAttributeDataVo = new ProcessTaskFormAttributeDataVo();
+                formAttributeDataVo.setProcessTaskId(processTaskId);
+                formAttributeDataVo.setAttributeUuid(attributeUuid);
+                formAttributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
+                formAttributeDataVo.setType(formAttributeVo.getHandler());
+                formAttributeDataVo.setDataObj(data);
+                formAttributeDataVo.setSort(i);
+                newProcessTaskFormAttributeDataList.add(formAttributeDataVo);
             }
-            paramObj.put(ProcessTaskAuditDetailType.FORM.getParamName(), JSON.toJSONString(newDataList));
+            i++;
         }
-        // 写入当前步骤流转时的表单属性值
-        if (MapUtils.isNotEmpty(auditFormAttributeDataMap)) {
-            List<ProcessTaskAuditFormAttributeDataVo> stepFormAttributeDataList = new ArrayList<>(auditFormAttributeDataMap.values());
-//            for (ProcessTaskAuditFormAttributeDataVo dataVo : stepFormAttributeDataList) {
-//                Object dataObj = dataVo.getDataObj();
-//                if (dataObj != null) {
-//                    if (dataObj instanceof JSONObject || dataObj instanceof JSONArray) {
-//                        dataVo.setData(JSONObject.toJSONString(dataObj));
-//                    } else if (dataObj instanceof String) {
-//                        dataVo.setData((String) dataObj);
-//                    } else {
-//                        dataVo.setData(dataObj.toString());
-//                    }
-//                }
-//                processTaskMapper.insertProcessTaskStepFormAttributeData(dataVo);
-//            }
-            paramObj.put(ProcessTaskAuditDetailType.FORM_ATTRIBUTE_LIST.getParamName(), JSON.toJSONString(stepFormAttributeDataList));
+        paramObj.put(ProcessTaskAuditDetailType.FORM.getParamName(), JSON.toJSONString(newProcessTaskFormAttributeDataList));
+
+        // 写入当前工单的表单属性值
+        for (ProcessTaskFormAttributeDataVo dataVo : newProcessTaskFormAttributeDataList) {
+            String attributeUuid = dataVo.getAttributeUuid();
+            ProcessTaskFormAttributeDataVo oldProcessTaskFormAttributeDataVo = oldProcessTaskFormAttributeDataMap.get(attributeUuid);
+            if (oldProcessTaskFormAttributeDataVo != null) {
+                if (Objects.equals(oldProcessTaskFormAttributeDataVo.getDataObj(), dataVo.getDataObj())) {
+                    continue;
+                }
+            }
+            Object dataObj = dataVo.getDataObj();
+            if (dataObj != null) {
+                if (dataObj instanceof JSONObject || dataObj instanceof JSONArray) {
+                    dataVo.setData(JSONObject.toJSONString(dataObj));
+                } else if (dataObj instanceof String) {
+                    dataVo.setData((String) dataObj);
+                } else {
+                    dataVo.setData(dataObj.toString());
+                }
+            }
+            processTaskMapper.insertProcessTaskFormAttributeData(dataVo);
         }
     }
 }
