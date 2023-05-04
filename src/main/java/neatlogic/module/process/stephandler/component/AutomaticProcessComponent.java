@@ -110,7 +110,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
         requestAudit.put("integrationUuid", automaticConfigVo.getBaseIntegrationUuid());
         requestAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
         requestAudit.put("failPolicyName", FailPolicy.getText(automaticConfigVo.getBaseFailPolicy()));
-        requestAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
+        requestAudit.put("status", ProcessTaskStepStatus.getJson(ProcessTaskStepStatus.PENDING.getValue()));
         JSONObject baseSuccessConfig = automaticConfigVo.getBaseSuccessConfig();
         if (MapUtils.isNotEmpty(baseSuccessConfig)) {
             requestAudit.put("successConfig", baseSuccessConfig);
