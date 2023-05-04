@@ -158,13 +158,13 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         resultObj.put("replaceableTextList", ProcessConfigUtil.regulateReplaceableTextList(configObj.getJSONArray("replaceableTextList")));
 
         /* 通知 */
-        JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
-        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
-        if (invokeNotifyPolicyConfigVo == null) {
-            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
-        }
-        invokeNotifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
-        resultObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
+//        JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
+//        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
+//        if (invokeNotifyPolicyConfigVo == null) {
+//            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
+//        }
+//        invokeNotifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
+//        resultObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
 
         /* 任务 */
         JSONObject taskConfig = configObj.getJSONObject("taskConfig");
@@ -199,11 +199,12 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
 
         /** 通知 **/
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
-        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
-        if (invokeNotifyPolicyConfigVo == null) {
-            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
-        }
-        invokeNotifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
+//        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
+//        if (invokeNotifyPolicyConfigVo == null) {
+//            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
+//        }
+//        invokeNotifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
+        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = regulateNotifyPolicyConfig(notifyPolicyConfig, OmnipotentNotifyPolicyHandler.class);
         resultObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
 
         /** 动作 **/

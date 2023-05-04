@@ -204,13 +204,13 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
         resultObj.put("replaceableTextList", ProcessConfigUtil.regulateReplaceableTextList(configObj.getJSONArray("replaceableTextList")));
 
         /** 通知 **/
-        JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
-        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
-        if (invokeNotifyPolicyConfigVo == null) {
-            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
-        }
-        invokeNotifyPolicyConfigVo.setHandler(AutomaticNotifyPolicyHandler.class.getName());
-        resultObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
+//        JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
+//        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
+//        if (invokeNotifyPolicyConfigVo == null) {
+//            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
+//        }
+//        invokeNotifyPolicyConfigVo.setHandler(AutomaticNotifyPolicyHandler.class.getName());
+//        resultObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
 
         return resultObj;
     }
@@ -240,11 +240,12 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 
         /** 通知 **/
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
-        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
-        if (invokeNotifyPolicyConfigVo == null) {
-            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
-        }
-        invokeNotifyPolicyConfigVo.setHandler(AutomaticNotifyPolicyHandler.class.getName());
+//        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
+//        if (invokeNotifyPolicyConfigVo == null) {
+//            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
+//        }
+//        invokeNotifyPolicyConfigVo.setHandler(AutomaticNotifyPolicyHandler.class.getName());
+        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = regulateNotifyPolicyConfig(notifyPolicyConfig, AutomaticNotifyPolicyHandler.class);
         resultObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
 
         /** 按钮映射列表 **/
