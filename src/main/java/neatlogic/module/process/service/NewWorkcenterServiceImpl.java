@@ -501,7 +501,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             List<ProcessTaskStepTaskVo> stepTaskVoList = processTaskStepTaskMapper.getStepTaskWithUserByProcessTaskStepId(stepVo.getId());
             for (ProcessTaskStepTaskVo stepTaskVo : stepTaskVoList) {
                 for (ProcessTaskStepTaskUserVo userVo : stepTaskVo.getStepTaskUserVoList()) {
-                    if (Objects.equals(userVo.getUserUuid(), workerVo.getUuid()) && !Objects.equals(ProcessTaskStepStatus.SUCCEED.getValue(), userVo.getStatus())) {
+                    if (Objects.equals(userVo.getUserUuid(), workerVo.getUuid()) && !Objects.equals(ProcessTaskStepTaskUserStatus.SUCCEED.getValue(), userVo.getStatus())) {
                         String workerUuidType = workerVo.getUuid() + stepTaskVo.getTaskConfigName();
                         if (!workerUuidTypeList.contains(workerUuidType)) {
                             JSONObject workerJson = new JSONObject();

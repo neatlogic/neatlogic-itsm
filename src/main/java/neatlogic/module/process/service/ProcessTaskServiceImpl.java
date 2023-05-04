@@ -1750,7 +1750,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         //重新插入pending任务用户到 工单步骤worker
         List<ProcessTaskStepTaskUserVo> taskUserVoList = processTaskStepTaskMapper.getStepTaskUserListByProcessTaskStepId(processTaskStepVo.getId());
         for (ProcessTaskStepTaskUserVo taskUserVo : taskUserVoList) {
-            if (taskUserVo.getIsDelete() != 1 && Objects.equals(ProcessTaskStepStatus.PENDING.getValue(), taskUserVo.getStatus())) {
+            if (taskUserVo.getIsDelete() != 1 && Objects.equals(ProcessTaskStepTaskUserStatus.PENDING.getValue(), taskUserVo.getStatus())) {
                 workerVoList.add(new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), GroupSearch.USER.getValue(), taskUserVo.getUserUuid(), ProcessUserType.MINOR.getValue()));
             }
         }
@@ -1771,11 +1771,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<ProcessTaskStepUserVo> stepUserVoList = new ArrayList<>();
         //如果存在子任务已完成的用户,且该用户为succeed， 则更新到 processtask_step_user ，且status 为 done，type 为minor
         List<ProcessTaskStepTaskUserVo> taskUserVoList = processTaskStepTaskMapper.getStepTaskUserListByProcessTaskStepId(processTaskStepVo.getId());
-        taskUserVoList = taskUserVoList.stream().filter(user -> Objects.equals(ProcessTaskStepStatus.SUCCEED.getValue(), user.getStatus())).collect(collectingAndThen(toCollection(() -> new TreeSet<>(Comparator.comparing(ProcessTaskStepTaskUserVo::getUserUuid))), ArrayList::new));
+        taskUserVoList = taskUserVoList.stream().filter(user -> Objects.equals(ProcessTaskStepTaskUserStatus.SUCCEED.getValue(), user.getStatus())).collect(collectingAndThen(toCollection(() -> new TreeSet<>(Comparator.comparing(ProcessTaskStepTaskUserVo::getUserUuid))), ArrayList::new));
         for (ProcessTaskStepTaskUserVo taskUserVo : taskUserVoList) {
             if (taskUserVo.getIsDelete() != 1) {
                 String status = ProcessTaskStepUserStatus.DOING.getValue();
-                if (Objects.equals(taskUserVo.getStatus(), ProcessTaskStepStatus.SUCCEED.getValue())) {
+                if (Objects.equals(taskUserVo.getStatus(), ProcessTaskStepTaskUserStatus.SUCCEED.getValue())) {
                     status = ProcessTaskStepUserStatus.DONE.getValue();
                 }
                 UserVo userVo = userMapper.getUserBaseInfoByUuid(taskUserVo.getUserUuid());

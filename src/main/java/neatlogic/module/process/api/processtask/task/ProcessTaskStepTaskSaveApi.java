@@ -258,7 +258,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(newUserUuidSet)) {
             ProcessTaskStepTaskUserVo processTaskStepTaskUserVo = new ProcessTaskStepTaskUserVo();
             processTaskStepTaskUserVo.setProcessTaskStepTaskId(processTaskStepTaskVo.getId());
-            processTaskStepTaskUserVo.setStatus(ProcessTaskStepStatus.PENDING.getValue());
+            processTaskStepTaskUserVo.setStatus(ProcessTaskStepTaskUserStatus.PENDING.getValue());
             for (String userUuid : newUserUuidSet) {
                 processTaskStepTaskUserVo.setId(null);
                 processTaskStepTaskUserVo.setUserUuid(userUuid);
