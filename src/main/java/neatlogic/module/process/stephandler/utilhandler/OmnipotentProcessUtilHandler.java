@@ -22,9 +22,6 @@ import java.util.*;
 @Service
 public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
-    @Resource
-    private ProcessTaskStepTaskMapper processTaskStepTaskMapper;
-
     @Override
     public String getHandler() {
         return ProcessStepHandlerType.OMNIPOTENT.getHandler();
