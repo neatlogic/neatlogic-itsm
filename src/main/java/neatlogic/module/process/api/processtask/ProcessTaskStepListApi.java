@@ -6,20 +6,14 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.constvalue.ProcessFlowDirection;
 import neatlogic.framework.process.constvalue.ProcessStepType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
-import neatlogic.framework.process.dao.mapper.ChannelMapper;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import neatlogic.framework.process.dto.*;
-import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import neatlogic.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import neatlogic.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
-import neatlogic.framework.process.exception.processtask.ProcessTaskNoPermissionException;
-import neatlogic.framework.process.exception.processtask.ProcessTaskViewDeniedException;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.module.process.service.ProcessTaskService;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
@@ -30,7 +24,6 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.service.ProcessTaskStepTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -53,9 +46,6 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskStepTaskService processTaskStepTaskService;
-
-    @Resource
-    private ChannelMapper channelMapper;
 
     @Override
     public String getToken() {

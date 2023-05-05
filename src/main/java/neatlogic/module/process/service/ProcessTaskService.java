@@ -22,6 +22,7 @@ import neatlogic.framework.notify.dto.NotifyReceiverVo;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
 import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
+import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import com.alibaba.fastjson.JSONArray;
@@ -439,4 +440,12 @@ public interface ProcessTaskService {
 //     * @return
 //     */
 //    boolean checkTransferReportAuthorization(ProcessTaskVo processTaskVo, String userUuid, Long relationId);
+
+    /**
+     * 查询步骤工单干系人数据
+     * @param processTaskStepVo 步骤信息
+     * @param processUserTypeList 工单干系人类型列表
+     * @return
+     */
+    Map<ProcessUserType, List<String>> getProcessTaskStepProcessUserTypeData(ProcessTaskStepVo processTaskStepVo, List<ProcessUserType> processUserTypeList);
 }
