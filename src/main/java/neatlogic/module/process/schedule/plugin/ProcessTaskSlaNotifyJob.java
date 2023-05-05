@@ -17,8 +17,11 @@ limitations under the License.
 package neatlogic.module.process.schedule.plugin;
 
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.file.dto.FileVo;
+import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.notify.dao.mapper.NotifyMapper;
+import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
 import neatlogic.framework.notify.dto.NotifyPolicyVo;
 import neatlogic.framework.notify.dto.NotifyReceiverVo;
 import neatlogic.framework.notify.dto.ParamMappingVo;
@@ -34,7 +37,6 @@ import neatlogic.framework.util.NotifyPolicyUtil;
 import neatlogic.module.process.message.handler.ProcessTaskMessageHandler;
 import neatlogic.module.process.notify.constvalue.SlaNotifyTriggerType;
 import neatlogic.module.process.service.ProcessTaskService;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -262,23 +264,21 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 //            System.out.println("时效id=" + slaId);
 //            System.out.println("时效name=" + processTaskSlaVo.getName());
         JSONObject notifyPolicyConfig = policyObj.getJSONObject("notifyPolicyConfig");
-        if (MapUtils.isEmpty(notifyPolicyConfig)) {
+        INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
+        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = notifyServiceCrossoverService.regulateNotifyPolicyConfig(notifyPolicyConfig);
+        if (invokeNotifyPolicyConfigVo == null) {
             schedulerManager.unloadJob(jobObject);
             processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
             return;
         }
-        Long policyId = notifyPolicyConfig.getLong("policyId");
+        Long policyId = invokeNotifyPolicyConfigVo.getPolicyId();
         NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
-        if (notifyPolicyVo == null) {
+        if (notifyPolicyVo == null || notifyPolicyVo.getConfig() == null) {
             schedulerManager.unloadJob(jobObject);
             processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
             return;
         }
-        List<ParamMappingVo> paramMappingList = new ArrayList<>();
-        JSONArray paramMappingArray = notifyPolicyConfig.getJSONArray("paramMappingList");
-        if (CollectionUtils.isNotEmpty(paramMappingArray)) {
-            paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
-        }
+        List<ParamMappingVo> paramMappingList = invokeNotifyPolicyConfigVo.getParamMappingList();
 
         List<FileVo> fileList = processTaskMapper.getFileListByProcessTaskId(processTaskSlaVo.getProcessTaskId());
         if (CollectionUtils.isNotEmpty(fileList)) {

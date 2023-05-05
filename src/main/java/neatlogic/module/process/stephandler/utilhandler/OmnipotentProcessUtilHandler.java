@@ -1,7 +1,8 @@
 package neatlogic.module.process.stephandler.utilhandler;
 
+import neatlogic.framework.crossover.CrossoverServiceFactory;
+import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.process.constvalue.*;
-import neatlogic.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.dto.processconfig.ActionConfigActionVo;
 import neatlogic.framework.process.dto.processconfig.ActionConfigVo;
@@ -16,14 +17,10 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.*;
 
 @Service
 public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase {
-
-    @Resource
-    private ProcessTaskStepTaskMapper processTaskStepTaskMapper;
 
     @Override
     public String getHandler() {
@@ -157,15 +154,6 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         /* 可替换文本列表 */
         resultObj.put("replaceableTextList", ProcessConfigUtil.regulateReplaceableTextList(configObj.getJSONArray("replaceableTextList")));
 
-        /* 通知 */
-        JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
-        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
-        if (invokeNotifyPolicyConfigVo == null) {
-            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
-        }
-        invokeNotifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
-        resultObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
-
         /* 任务 */
         JSONObject taskConfig = configObj.getJSONObject("taskConfig");
         resultObj.put("taskConfig",taskConfig);
@@ -199,11 +187,8 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
 
         /** 通知 **/
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
-        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
-        if (invokeNotifyPolicyConfigVo == null) {
-            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
-        }
-        invokeNotifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
+        INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
+        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = notifyServiceCrossoverService.regulateNotifyPolicyConfig(notifyPolicyConfig, OmnipotentNotifyPolicyHandler.class);
         resultObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
 
         /** 动作 **/
