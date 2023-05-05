@@ -27,7 +27,7 @@ import neatlogic.framework.notify.dto.NotifyReceiverVo;
 import neatlogic.framework.notify.dto.ParamMappingVo;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.ProcessTaskSlaMapper;
 import neatlogic.framework.process.dto.*;
@@ -245,13 +245,13 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
         for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
             // 未处理、处理中和挂起的步骤才需要发送通知
             if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
-                if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
+                if (processTaskStepVo.getStatus().equals(ProcessTaskStepStatus.PENDING.getValue())) {
                     needNotifyStepList.add(processTaskStepVo);
                 }
-                if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
+                if (processTaskStepVo.getStatus().equals(ProcessTaskStepStatus.RUNNING.getValue())) {
                     needNotifyStepList.add(processTaskStepVo);
                 }
-                if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.HANG.getValue())) {
+                if (processTaskStepVo.getStatus().equals(ProcessTaskStepStatus.HANG.getValue())) {
                     needNotifyStepList.add(processTaskStepVo);
                 }
             }

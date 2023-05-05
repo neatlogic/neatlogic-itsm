@@ -10,7 +10,7 @@ import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.dto.SqlDecoratorVo;
 import neatlogic.framework.process.workcenter.dto.JoinOnVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
@@ -57,11 +57,11 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
     @Override
     public JSONObject getConfig(ConditionConfigType type) {
         JSONArray dataList = new JSONArray();
-        dataList.add(new ValueTextVo(ProcessTaskStatus.PENDING.getValue(), ProcessTaskStatus.PENDING.getText()));
-        dataList.add(new ValueTextVo(ProcessTaskStatus.RUNNING.getValue(), ProcessTaskStatus.RUNNING.getText()));
-        dataList.add(new ValueTextVo(ProcessTaskStatus.FAILED.getValue(), ProcessTaskStatus.FAILED.getText()));
-        dataList.add(new ValueTextVo(ProcessTaskStatus.SUCCEED.getValue(), ProcessTaskStatus.SUCCEED.getText()));
-        dataList.add(new ValueTextVo(ProcessTaskStatus.HANG.getValue(), ProcessTaskStatus.HANG.getText()));
+        dataList.add(new ValueTextVo(ProcessTaskStepStatus.PENDING.getValue(), ProcessTaskStepStatus.PENDING.getText()));
+        dataList.add(new ValueTextVo(ProcessTaskStepStatus.RUNNING.getValue(), ProcessTaskStepStatus.RUNNING.getText()));
+        dataList.add(new ValueTextVo(ProcessTaskStepStatus.FAILED.getValue(), ProcessTaskStepStatus.FAILED.getText()));
+        dataList.add(new ValueTextVo(ProcessTaskStepStatus.SUCCEED.getValue(), ProcessTaskStepStatus.SUCCEED.getText()));
+        dataList.add(new ValueTextVo(ProcessTaskStepStatus.HANG.getValue(), ProcessTaskStepStatus.HANG.getText()));
 
         JSONObject config = new JSONObject();
         config.put("type", formHandlerType);
@@ -89,7 +89,7 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
     public Object valueConversionText(Object value, JSONObject config) {
         if (value != null) {
             if (value instanceof String) {
-                String text = ProcessTaskStatus.getText(value.toString());
+                String text = ProcessTaskStepStatus.getText(value.toString());
                 if (text != null) {
                     return text;
                 }
@@ -97,7 +97,7 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
                 List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
                 List<String> textList = new ArrayList<>();
                 for (String valueStr : valueList) {
-                    String text = ProcessTaskStatus.getText(valueStr);
+                    String text = ProcessTaskStepStatus.getText(valueStr);
                     if (text != null) {
                         textList.add(text);
                     } else {

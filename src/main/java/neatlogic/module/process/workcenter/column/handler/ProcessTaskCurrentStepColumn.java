@@ -4,6 +4,7 @@ import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnBase;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -58,7 +59,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 		List<String> stepNameList = new ArrayList<>();
 		if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
 			for (ProcessTaskStepVo stepVo : stepVoList) {
-				if (((ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1) || ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()))) {
+				if (((ProcessTaskStepStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1) || ProcessTaskStepStatus.RUNNING.getValue().equals(stepVo.getStatus()))) {
 					stepNameList.add(stepVo.getName());
 				}
 			}
@@ -82,16 +83,16 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 		List<ProcessTaskStepVo> stepVoList =  processTaskVo.getStepList();
 		if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
 			for (ProcessTaskStepVo stepVo : stepVoList) {
-				if(ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
-						ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
-						(ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus())&& stepVo.getIsActive() == 1)
+				if(ProcessTaskStepStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
+						ProcessTaskStepStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
+						(ProcessTaskStepStatus.PENDING.getValue().equals(stepVo.getStatus())&& stepVo.getIsActive() == 1)
 				) {
 					JSONObject currentStepJson  = new JSONObject();
 					currentStepJson.put("name",stepVo.getName());
 					JSONObject currentStepStatusJson = new JSONObject();
 					currentStepStatusJson.put("name",stepVo.getStatus());
-					currentStepStatusJson.put("text", ProcessTaskStatus.getText(stepVo.getStatus()));
-					currentStepStatusJson.put("color", ProcessTaskStatus.getColor(stepVo.getStatus()));
+					currentStepStatusJson.put("text", ProcessTaskStepStatus.getText(stepVo.getStatus()));
+					currentStepStatusJson.put("color", ProcessTaskStepStatus.getColor(stepVo.getStatus()));
 					currentStepJson.put("status",currentStepStatusJson);
 
 					//查询其它步骤handler minorList

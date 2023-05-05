@@ -180,7 +180,7 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
         ProcessTaskStepVo startStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(preApprovalStepId);
         if (startStepVo != null) {
             if (Objects.equals(startStepVo.getIsActive(), 2)) {
-                if (ProcessTaskStatus.SUCCEED.getValue().equals(startStepVo.getStatus())) {
+                if (ProcessTaskStepStatus.SUCCEED.getValue().equals(startStepVo.getStatus())) {
 //                    Long tagId = processTagMapper.getProcessTagIdByName("审批");
 //                    if (tagId != null) {
 //                        ProcessTaskStepTagVo processTaskStepTagVo = new ProcessTaskStepTagVo();

@@ -19,8 +19,8 @@ package neatlogic.module.process.schedule.plugin;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.SystemUser;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
 import neatlogic.framework.process.constvalue.ProcessTaskStepDataType;
+import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
@@ -160,7 +160,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 			schedulerManager.unloadJob(jobObject);
 			return;
 		}
-		if (!ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus()) && !ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+		if (!ProcessTaskStepStatus.PENDING.getValue().equals(processTaskStepVo.getStatus()) && !ProcessTaskStepStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
 			processTaskMapper.deleteProcessTaskStepAutomaticRequestById(requestId);
 			schedulerManager.unloadJob(jobObject);
 			return;

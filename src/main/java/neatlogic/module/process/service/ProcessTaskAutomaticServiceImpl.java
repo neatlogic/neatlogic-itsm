@@ -453,7 +453,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
             if (predicate(successConfig, resultVo, true)) {// 如果执行成功
 //                System.out.println("firstRequest 成功");
-                requestAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
+                requestAudit.put("status", ProcessTaskStepStatus.getJson(ProcessTaskStepStatus.SUCCEED.getValue()));
                 if (automaticConfigVo.getIsHasCallback()) {// 第一次请求
 //                    System.out.println("需要回调");
                     // 回调请求
@@ -497,7 +497,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 }
             } else {// 失败
 //                System.out.println("firstRequest 失败");
-                requestAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
+                requestAudit.put("status", ProcessTaskStepStatus.getJson(ProcessTaskStepStatus.FAILED.getValue()));
                 //拼凑失败原因
                 String failedReason = StringUtils.EMPTY;
                 if (StringUtils.isNotBlank(resultVo.getError())) {
@@ -523,7 +523,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
         } catch (Exception ex) {
 //            System.out.println("firstRequest 异常");
             logger.error(ex.getMessage(), ex);
-            requestAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
+            requestAudit.put("status", ProcessTaskStepStatus.getJson(ProcessTaskStepStatus.FAILED.getValue()));
             if (resultVo != null && StringUtils.isNotEmpty(resultVo.getError())) {
                 requestAudit.put("failedReason", resultVo.getError());
                 currentProcessTaskStepVo.getParamObj().put("actionFailedContent", resultVo.getError());
@@ -599,7 +599,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
             if (predicate(successConfig, resultVo, true)) {// 如果执行成功
 //                System.out.println("callbackRequest 成功");
-                callbackAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
+                callbackAudit.put("status", ProcessTaskStepStatus.getJson(ProcessTaskStepStatus.SUCCEED.getValue()));
                 //补充下一步骤id
                 List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
 //                currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepIdList.get(0));
@@ -611,7 +611,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 isUnloadJob = true;
             } else if (predicate(failConfig, resultVo, false)) {// 失败
 //                System.out.println("callbackRequest 失败");
-                callbackAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
+                callbackAudit.put("status", ProcessTaskStepStatus.getJson(ProcessTaskStepStatus.FAILED.getValue()));
                 //拼凑失败原因
                 String failedReason = StringUtils.EMPTY;
                 if (StringUtils.isNotBlank(resultVo.getError())) {
@@ -630,12 +630,12 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 isUnloadJob = true;
             } else {
 //                System.out.println("callbackRequest 继续轮询回调");
-                callbackAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.RUNNING.getValue()));
+                callbackAudit.put("status", ProcessTaskStepStatus.getJson(ProcessTaskStepStatus.RUNNING.getValue()));
             }
 
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            callbackAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
+            callbackAudit.put("status", ProcessTaskStepStatus.getJson(ProcessTaskStepStatus.FAILED.getValue()));
             if (resultVo != null && StringUtils.isNotEmpty(resultVo.getError())) {
                 callbackAudit.put("failedReason", resultVo.getError());
             } else {
@@ -721,7 +721,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
         callbackAudit.put("type", automaticConfigVo.getCallbackType());
         callbackAudit.put("typeName", CallbackType.getText(automaticConfigVo.getCallbackType()));
         callbackAudit.put("interval", automaticConfigVo.getCallbackInterval());
-        callbackAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
+        callbackAudit.put("status", ProcessTaskStepStatus.getJson(ProcessTaskStepStatus.PENDING.getValue()));
         callbackAudit.put("successConfig", automaticConfigVo.getCallbackSuccessConfig());
         if (automaticConfigVo.getCallbackFailConfig() == null) {
             callbackAudit.put("failConfig", failConfig);

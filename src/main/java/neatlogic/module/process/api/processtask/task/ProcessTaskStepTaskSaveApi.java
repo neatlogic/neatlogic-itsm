@@ -24,10 +24,7 @@ import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;
-import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
-import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
 import neatlogic.framework.process.dao.mapper.task.TaskMapper;
@@ -261,7 +258,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(newUserUuidSet)) {
             ProcessTaskStepTaskUserVo processTaskStepTaskUserVo = new ProcessTaskStepTaskUserVo();
             processTaskStepTaskUserVo.setProcessTaskStepTaskId(processTaskStepTaskVo.getId());
-            processTaskStepTaskUserVo.setStatus(ProcessTaskStatus.PENDING.getValue());
+            processTaskStepTaskUserVo.setStatus(ProcessTaskStepTaskUserStatus.PENDING.getValue());
             for (String userUuid : newUserUuidSet) {
                 processTaskStepTaskUserVo.setId(null);
                 processTaskStepTaskUserVo.setUserUuid(userUuid);

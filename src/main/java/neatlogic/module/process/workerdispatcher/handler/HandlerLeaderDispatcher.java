@@ -6,7 +6,7 @@ import neatlogic.framework.dto.TeamUserTitleVo;
 import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserTitleVo;
 import neatlogic.framework.exception.team.TeamUserTitleNotFoundException;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.constvalue.ProcessTaskStepUserStatus;
 import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
@@ -92,7 +92,7 @@ public class HandlerLeaderDispatcher extends WorkerDispatcherBase {
                 }
                 /* 找出该工单所有前置步骤已完成的处理人的所在组s */
                 List<ProcessTaskStepVo> processTaskStepVoList = processTaskMapper.getProcessTaskStepListByProcessTaskIdAndProcessStepUuidList(processTaskStepVo.getProcessTaskId(), preStepArray.stream().map(Object::toString).collect(Collectors.toList()));
-                processTaskStepVoList = processTaskStepVoList.stream().filter(o->Objects.equals(o.getStatus(),ProcessTaskStatus.SUCCEED.getValue())).collect(Collectors.toList());
+                processTaskStepVoList = processTaskStepVoList.stream().filter(o->Objects.equals(o.getStatus(), ProcessTaskStepStatus.SUCCEED.getValue())).collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(processTaskStepVoList)) {
                     List<ProcessTaskStepUserVo> userVos = processTaskMapper.getProcessTaskStepUserByStepIdList(processTaskStepVoList.stream().map(ProcessTaskStepVo::getId).collect(Collectors.toList()), ProcessUserType.MAJOR.getValue());
                     userVos = userVos.stream().filter(o -> Objects.equals(ProcessTaskStepUserStatus.DONE.getValue(), o.getStatus())).collect(Collectors.toList());
