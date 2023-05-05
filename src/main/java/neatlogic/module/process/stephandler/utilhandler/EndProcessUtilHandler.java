@@ -2,6 +2,8 @@ package neatlogic.module.process.stephandler.utilhandler;
 
 import java.util.*;
 
+import neatlogic.framework.crossover.CrossoverServiceFactory;
+import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
 import neatlogic.framework.process.dto.processconfig.*;
 import neatlogic.framework.process.util.ProcessConfigUtil;
@@ -69,14 +71,6 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
         resultObj.put("authorityList", authorityArray);
 
-        /** 通知 **/
-//        JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
-//        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
-//        if (invokeNotifyPolicyConfigVo == null) {
-//            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
-//        }
-//        invokeNotifyPolicyConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
-//        resultObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
         return resultObj;
     }
 
@@ -133,12 +127,8 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
         /** 通知 **/
         JSONObject notifyPolicyConfig = processConfig.getJSONObject("notifyPolicyConfig");
-//        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
-//        if (invokeNotifyPolicyConfigVo == null) {
-//            invokeNotifyPolicyConfigVo = new InvokeNotifyPolicyConfigVo();
-//        }
-//        invokeNotifyPolicyConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
-        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = regulateNotifyPolicyConfig(notifyPolicyConfig, TaskNotifyPolicyHandler.class);
+        INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
+        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = notifyServiceCrossoverService.regulateNotifyPolicyConfig(notifyPolicyConfig, TaskNotifyPolicyHandler.class);
         processObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
 
         /** 动作 **/
