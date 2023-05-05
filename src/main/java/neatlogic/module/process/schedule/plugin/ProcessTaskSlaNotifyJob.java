@@ -273,7 +273,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
         }
         Long policyId = invokeNotifyPolicyConfigVo.getPolicyId();
         NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
-        if (notifyPolicyVo == null) {
+        if (notifyPolicyVo == null || notifyPolicyVo.getConfig() == null) {
             schedulerManager.unloadJob(jobObject);
             processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
             return;

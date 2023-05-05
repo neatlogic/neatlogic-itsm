@@ -134,10 +134,7 @@ public class ProcessTaskNotifyThread extends NeatLogicThread {
                 return;
             }
             NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
-            if (notifyPolicyVo == null) {
-                return;
-            }
-            if (notifyPolicyVo.getConfig() != null) {
+            if (notifyPolicyVo == null || notifyPolicyVo.getConfig() == null) {
                 return;
             }
             JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList()), currentProcessTaskStepVo);
