@@ -595,7 +595,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskStepId(Long processTaskStepId,
                                                                                        List<String> typeList) {
         List<ProcessTaskStepReplyVo> processTaskStepReplyList = new ArrayList<>();
+        List<ProcessUserType> processUserTypeList = new ArrayList<>();
+        processUserTypeList.add(ProcessUserType.OWNER);
+        processUserTypeList.add(ProcessUserType.REPORTER);
+        processUserTypeList.add(ProcessUserType.MAJOR);
+        processUserTypeList.add(ProcessUserType.MINOR);
+        processUserTypeList.add(ProcessUserType.FOCUS_USER);
         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+        Map<ProcessUserType, List<String>> processUserTypeListMap = getProcessTaskStepProcessUserTypeData(processTaskStepVo, processUserTypeList);
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepId);
         for (ProcessTaskStepContentVo processTaskStepContentVo : processTaskStepContentList) {
             if (typeList.contains(processTaskStepContentVo.getType())) {
@@ -609,6 +616,27 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     processTaskStepReplyVo.setIsEditable(0);
                     processTaskStepReplyVo.setIsDeletable(0);
                 }
+                List<ProcessUserType> operatorProcessUserTypeList = new ArrayList<>();
+                for (Map.Entry<ProcessUserType, List<String>> entry : processUserTypeListMap.entrySet()) {
+                    List<String> uuidList = entry.getValue();
+                    if (CollectionUtils.isEmpty(uuidList)) {
+                        continue;
+                    }
+                    for (String uuid : uuidList) {
+                        if (uuid.contains(processTaskStepReplyVo.getLcu())) {
+                            operatorProcessUserTypeList.add(entry.getKey());
+                            break;
+                        }
+                    }
+                }
+                if (operatorProcessUserTypeList.contains(ProcessUserType.OWNER) && operatorProcessUserTypeList.contains(ProcessUserType.REPORTER)) {
+                    operatorProcessUserTypeList.remove(ProcessUserType.REPORTER);
+                }
+                List<String> operatorProcessUserTypeTextList = new ArrayList<>(operatorProcessUserTypeList.size());
+                for (ProcessUserType processUserType : operatorProcessUserTypeList) {
+                    operatorProcessUserTypeTextList.add(processUserType.getText());
+                }
+                processTaskStepReplyVo.setOperatorRole(String.join("、", operatorProcessUserTypeTextList));
                 processTaskStepReplyList.add(processTaskStepReplyVo);
             }
         }
@@ -1918,6 +1946,72 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             return commentTemplateMapper.getTemplateByStepUuidAndAuth(processStepUuid, authList);
         }
         return null;
+    }
+
+    @Override
+    public Map<ProcessUserType, List<String>> getProcessTaskStepProcessUserTypeData(ProcessTaskStepVo processTaskStepVo, List<ProcessUserType> processUserTypeList) {
+        Map<ProcessUserType, List<String>> resultMap = new HashMap<>();
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoByIdIncludeIsDeleted(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo != null) {
+            /** 上报人 **/
+            if (StringUtils.isNotBlank(processTaskVo.getOwner()) && processUserTypeList.contains(ProcessUserType.OWNER)) {
+                resultMap.computeIfAbsent(ProcessUserType.OWNER, k -> new ArrayList<>())
+                        .add(GroupSearch.USER.addPrefix(processTaskVo.getOwner()));
+            }
+            /** 代报人 **/
+            if (StringUtils.isNotBlank(processTaskVo.getReporter()) && processUserTypeList.contains(ProcessUserType.REPORTER)) {
+                resultMap.computeIfAbsent(ProcessUserType.REPORTER, k -> new ArrayList<>())
+                        .add(GroupSearch.USER.addPrefix(processTaskVo.getReporter()));
+            }
+        }
+        ProcessTaskStepUserVo processTaskStepUser = new ProcessTaskStepUserVo();
+        processTaskStepUser.setProcessTaskId(processTaskStepVo.getProcessTaskId());
+        processTaskStepUser.setProcessTaskStepId(processTaskStepVo.getId());
+        if (processUserTypeList.contains(ProcessUserType.MAJOR)) {
+            /** 主处理人 **/
+            processTaskStepUser.setUserType(ProcessUserType.MAJOR.getValue());
+            List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserList(processTaskStepUser);
+            for (ProcessTaskStepUserVo processTaskStepUserVo : majorUserList) {
+                resultMap.computeIfAbsent(ProcessUserType.MAJOR, k -> new ArrayList<>())
+                        .add(GroupSearch.USER.addPrefix(processTaskStepUserVo.getUserUuid()));
+            }
+        }
+        if (processUserTypeList.contains(ProcessUserType.MINOR)) {
+            /** 所有任务处理人 **/
+            processTaskStepUser.setUserType(ProcessUserType.MINOR.getValue());
+            List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserList(processTaskStepUser);
+            for (ProcessTaskStepUserVo processTaskStepUserVo : minorUserList) {
+                resultMap.computeIfAbsent(ProcessUserType.MINOR, k -> new ArrayList<>())
+                        .add(GroupSearch.USER.addPrefix(processTaskStepUserVo.getUserUuid()));
+            }
+        }
+        if (processUserTypeList.contains(ProcessUserType.WORKER)) {
+            /** 待处理人 **/
+            List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId());
+            for (ProcessTaskStepWorkerVo processTaskStepWorkerVo : workerList) {
+                resultMap.computeIfAbsent(ProcessUserType.WORKER, k -> new ArrayList<>()).add(processTaskStepWorkerVo.getType() + "#" + processTaskStepWorkerVo.getUuid());
+            }
+        }
+        if (processUserTypeList.contains(ProcessUserType.FOCUS_USER)) {
+            /** 工单关注人 */
+            List<String> focusUserList = processTaskMapper.getFocusUserListByTaskId(processTaskStepVo.getProcessTaskId());
+            for (String focusUser : focusUserList) {
+                resultMap.computeIfAbsent(ProcessUserType.FOCUS_USER, k -> new ArrayList<>())
+                        .add(focusUser);
+            }
+        }
+        if (processUserTypeList.contains(ProcessUserType.DEFAULT_WORKER)) {
+            /** 异常处理人 **/
+            String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+            if (StringUtils.isNotBlank(stepConfig)) {
+                String defaultWorker = (String) JSONPath.read(stepConfig, "workerPolicyConfig.defaultWorker");
+                if (StringUtils.isNotBlank(defaultWorker)) {
+                    resultMap.computeIfAbsent(ProcessUserType.DEFAULT_WORKER, k -> new ArrayList<>())
+                            .add(defaultWorker);
+                }
+            }
+        }
+        return resultMap;
     }
 
     /**
