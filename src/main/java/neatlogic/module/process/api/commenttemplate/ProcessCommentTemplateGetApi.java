@@ -54,12 +54,14 @@ public class ProcessCommentTemplateGetApi extends PrivateApiComponentBase {
         if(vo == null){
             throw new ProcessCommentTemplateNotFoundException(id);
         }
-        List<String> authList = new ArrayList<>();
-        List<ProcessCommentTemplateAuthVo> authVoList = commentTemplateMapper.getProcessCommentTemplateAuthListByCommentTemplateIdList(Arrays.asList(id));
-        for (ProcessCommentTemplateAuthVo authVo : authVoList) {
-            authList.add(authVo.getType() + "#" + authVo.getUuid());
+        if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(vo.getType())) {
+            List<String> authList = new ArrayList<>();
+            List<ProcessCommentTemplateAuthVo> authVoList = commentTemplateMapper.getProcessCommentTemplateAuthListByCommentTemplateId(id);
+            for (ProcessCommentTemplateAuthVo authVo : authVoList) {
+                authList.add(authVo.getType() + "#" + authVo.getUuid());
+            }
+            vo.setAuthList(authList);
         }
-        vo.setAuthList(authList);
         returnObj.put("template", vo);
         return returnObj;
     }

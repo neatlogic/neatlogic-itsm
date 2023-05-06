@@ -10,7 +10,6 @@ import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.auth.PROCESS_COMMENT_TEMPLATE_MODIFY;
 import neatlogic.framework.process.dao.mapper.ProcessCommentTemplateMapper;
-import neatlogic.framework.process.dto.ProcessCommentTemplateAuthVo;
 import neatlogic.framework.process.dto.ProcessCommentTemplateSearchVo;
 import neatlogic.framework.process.dto.ProcessCommentTemplateVo;
 import neatlogic.framework.restful.annotation.Input;
@@ -25,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -83,27 +81,10 @@ public class ProcessCommentSystemTemplateSearchApi extends PrivateApiComponentBa
         }
         searchVo.setRowNum(rowNum);
         List<ProcessCommentTemplateVo> tbodyList = commentTemplateMapper.searchCommentTemplateList(searchVo);
-        List<Long> systemTemplateIdList = tbodyList.stream().filter(e -> ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(e.getType())).map(ProcessCommentTemplateVo::getId).collect(Collectors.toList());
-        Map<Long, List<ProcessCommentTemplateAuthVo>> authMap = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(systemTemplateIdList)) {
-            List<ProcessCommentTemplateAuthVo> authVoList = commentTemplateMapper.getProcessCommentTemplateAuthListByCommentTemplateIdList(systemTemplateIdList);
-            for (ProcessCommentTemplateAuthVo authVo : authVoList) {
-                Long commentTemplateId = authVo.getCommentTemplateId();
-                authMap.computeIfAbsent(commentTemplateId, key -> new ArrayList<>()).add(authVo);
-            }
-        }
         if(CollectionUtils.isNotEmpty(tbodyList)){
             //有系统模版管理权限才能编辑系统模版
             for (ProcessCommentTemplateVo processCommentTemplateVo : tbodyList) {
                 if(ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(processCommentTemplateVo.getType())){
-                    List<ProcessCommentTemplateAuthVo> authVoList = authMap.get(processCommentTemplateVo.getId());
-                    if (CollectionUtils.isNotEmpty(authVoList)) {
-                        List<String> authList = new ArrayList<>(authVoList.size());
-                        for (ProcessCommentTemplateAuthVo authVo : authVoList) {
-                            authList.add(authVo.getType() + "#" + authVo.getUuid());
-                        }
-                        processCommentTemplateVo.setAuthList(authList);
-                    }
                     if (AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())) {
                         processCommentTemplateVo.setIsEditable(1);
                     } else{
