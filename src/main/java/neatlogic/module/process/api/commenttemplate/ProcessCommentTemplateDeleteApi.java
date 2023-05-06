@@ -51,16 +51,17 @@ public class ProcessCommentTemplateDeleteApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");
-        if(commentTemplateMapper.checkTemplateExistsById(id) == 0){
+        ProcessCommentTemplateVo vo = commentTemplateMapper.getTemplateById(id);
+        if(vo == null){
             throw new ProcessCommentTemplateNotFoundException(id);
         }
-        ProcessCommentTemplateVo vo = commentTemplateMapper.getTemplateById(id);
         /** 没有权限则不允许删除系统模版 */
         if(ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())){
             throw new PermissionDeniedException(PROCESS_COMMENT_TEMPLATE_MODIFY.class);
         }
         commentTemplateMapper.deleteTemplate(id);
         commentTemplateMapper.deleteTemplateAuthority(id);
+        commentTemplateMapper.deleteTemplateUsecount(id);
         return null;
     }
 }
