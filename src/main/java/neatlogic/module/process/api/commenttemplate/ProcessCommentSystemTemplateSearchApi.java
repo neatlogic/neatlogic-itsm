@@ -1,16 +1,17 @@
 package neatlogic.module.process.api.commenttemplate;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.UserType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.auth.PROCESS_COMMENT_TEMPLATE_MODIFY;
 import neatlogic.framework.process.dao.mapper.ProcessCommentTemplateMapper;
 import neatlogic.framework.process.dto.ProcessCommentTemplateAuthVo;
+import neatlogic.framework.process.dto.ProcessCommentTemplateSearchVo;
 import neatlogic.framework.process.dto.ProcessCommentTemplateVo;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -51,6 +52,7 @@ public class ProcessCommentSystemTemplateSearchApi extends PrivateApiComponentBa
     }
 
     @Input({@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
+            @Param(name = "type", type = ApiParamType.ENUM, rule = "system,custom", desc = "类型"),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
@@ -61,46 +63,19 @@ public class ProcessCommentSystemTemplateSearchApi extends PrivateApiComponentBa
     })
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-//        ProcessCommentTemplateVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessCommentTemplateVo>() {
-//        });
-////        vo.setType(ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue());
-//
-//        //根据当前用户所在组、角色筛选其能看到的模版
-//        List<String> uuidList = UserContext.get().getUuidList();
-//        uuidList.add(UserType.ALL.getValue());
-//        vo.setAuthList(uuidList);
-//
-//        JSONObject returnObj = new JSONObject();
-//        if (vo.getNeedPage()) {
-//            int rowNum = commentTemplateMapper.searchTemplateCount(vo);
-//            returnObj.put("pageSize", vo.getPageSize());
-//            returnObj.put("currentPage", vo.getCurrentPage());
-//            returnObj.put("rowNum", rowNum);
-//            returnObj.put("pageCount", PageUtil.getPageCount(rowNum, vo.getPageSize()));
-//        }
-//        List<ProcessCommentTemplateVo> tbodyList = commentTemplateMapper.searchTemplate(vo);
-//        if(CollectionUtils.isNotEmpty(tbodyList)){
-//            //有系统模版管理权限才能编辑系统模版
-//            tbodyList.forEach(o -> {
-//                if((ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(o.getType())
-//                        && AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName()))
-//                        || ProcessCommentTemplateVo.TempalteType.CUSTOM.getValue().equals(o.getType())){
-//                    o.setIsEditable(1);
-//                }else{
-//                    o.setIsEditable(0);
-//                }
-//            });
-//        }
-//        returnObj.put("tbodyList", tbodyList);
-//        return returnObj;
-        BasePageVo searchVo = jsonObj.toJavaObject(BasePageVo.class);
-        List<Long> customTemplateIdList = commentTemplateMapper.getCustomTemplateIdListByUserUuid(UserContext.get().getUserUuid());
-        if (CollectionUtils.isNotEmpty(customTemplateIdList)) {
-            JSONArray defaultValue = new JSONArray();
-            for (Long id : customTemplateIdList) {
-                defaultValue.add(id);
-            }
-            searchVo.setDefaultValue(defaultValue);
+        /*
+        回复模板管理页、工单处理页回复模板、流程编辑页回复模板下拉框的取数逻辑：
+        1.当前用户拥有PROCESS_COMMENT_TEMPLATE_MODIFY（系统回复模版管理权限）时，可以看到本人创建的模板和所有的系统模板；
+        2.当前用户没有PROCESS_COMMENT_TEMPLATE_MODIFY（系统回复模版管理权限）时，可以看到本人创建的模板和有授权的系统模板；
+         */
+        ProcessCommentTemplateSearchVo searchVo = jsonObj.toJavaObject(ProcessCommentTemplateSearchVo.class);
+        searchVo.setUserUuid(UserContext.get().getUserUuid());
+        if (AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class)) {
+            searchVo.setIsHasModifyAuthority(1);
+        } else {
+            List<String> uuidList = UserContext.get().getUuidList();
+            uuidList.add(UserType.ALL.getValue());
+            searchVo.setUuidList(uuidList);
         }
         int rowNum = commentTemplateMapper.searchCommentTemplateCount(searchVo);
         if (rowNum == 0) {
