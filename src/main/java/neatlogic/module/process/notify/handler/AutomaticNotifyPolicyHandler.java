@@ -78,10 +78,10 @@ public class AutomaticNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     protected List<NotifyTriggerVo> myNotifyTriggerList() {
         List<NotifyTriggerVo> returnList = new ArrayList<>();
         for (ProcessTaskStepNotifyTriggerType notifyTriggerType : ProcessTaskStepNotifyTriggerType.values()) {
-            returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), I18nUtils.getMessage(notifyTriggerType.getText()), I18nUtils.getMessage(notifyTriggerType.getDescription())));
+            returnList.add(new NotifyTriggerVo(notifyTriggerType));
         }
         for (ProcessTaskStepAutomaticNotifyTriggerType notifyTriggerType : ProcessTaskStepAutomaticNotifyTriggerType.values()) {
-            returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(), notifyTriggerType.getDescription()));
+            returnList.add(new NotifyTriggerVo(notifyTriggerType));
         }
         return returnList;
     }
