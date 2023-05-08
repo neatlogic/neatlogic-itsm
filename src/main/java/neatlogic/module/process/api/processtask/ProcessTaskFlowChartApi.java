@@ -140,7 +140,7 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
             processTaskStepVo.setStartTime(startTime);
             processTaskStepVo.setIsActive(1);
             processTaskStepVo.setStatus(ProcessTaskStepStatus.DRAFT.getValue());
-            processTaskStepVo.setStatusVo(new ProcessTaskStatusVo(ProcessTaskStepStatus.DRAFT.getValue()));
+            processTaskStepVo.setStatusVo(new ProcessTaskStepStatusVo(ProcessTaskStepStatus.DRAFT.getValue()));
             processTaskStepVo.setAssignableWorkerStepList(null);
             processTaskStepVo.setBackwardNextStepList(null);
             processTaskStepVo.setCommentList(null);
