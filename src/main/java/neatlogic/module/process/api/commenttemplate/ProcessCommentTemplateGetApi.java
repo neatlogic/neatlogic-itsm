@@ -4,6 +4,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.dao.mapper.ProcessCommentTemplateMapper;
+import neatlogic.framework.process.dto.ProcessCommentTemplateAuthVo;
 import neatlogic.framework.process.dto.ProcessCommentTemplateVo;
 import neatlogic.framework.process.exception.commenttemplate.ProcessCommentTemplateNotFoundException;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -15,6 +16,10 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -45,10 +50,18 @@ public class ProcessCommentTemplateGetApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         Long id = jsonObj.getLong("id");
-        if(commentTemplateMapper.checkTemplateExistsById(id) == 0){
+        ProcessCommentTemplateVo vo = commentTemplateMapper.getTemplateById(id);
+        if(vo == null){
             throw new ProcessCommentTemplateNotFoundException(id);
         }
-        ProcessCommentTemplateVo vo = commentTemplateMapper.getTemplateById(id);
+        if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(vo.getType())) {
+            List<String> authList = new ArrayList<>();
+            List<ProcessCommentTemplateAuthVo> authVoList = commentTemplateMapper.getProcessCommentTemplateAuthListByCommentTemplateId(id);
+            for (ProcessCommentTemplateAuthVo authVo : authVoList) {
+                authList.add(authVo.getType() + "#" + authVo.getUuid());
+            }
+            vo.setAuthList(authList);
+        }
         returnObj.put("template", vo);
         return returnObj;
     }

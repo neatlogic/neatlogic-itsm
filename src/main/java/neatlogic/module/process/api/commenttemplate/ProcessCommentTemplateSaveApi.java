@@ -77,11 +77,12 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
         }
 
         if (id != null) {
-            if (commentTemplateMapper.checkTemplateExistsById(id) == 0) {
+
+            ProcessCommentTemplateVo _vo = commentTemplateMapper.getTemplateById(id);
+            if (_vo == null) {
                 throw new ProcessCommentTemplateNotFoundException(id);
             }
             /** 没有权限则不允许编辑系统模版 */
-            ProcessCommentTemplateVo _vo = commentTemplateMapper.getTemplateById(id);
             if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(_vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())) {
                 throw new PermissionDeniedException(PROCESS_COMMENT_TEMPLATE_MODIFY.class);
             }
