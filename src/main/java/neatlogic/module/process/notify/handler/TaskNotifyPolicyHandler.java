@@ -45,7 +45,7 @@ public class TaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	public List<NotifyTriggerVo> myNotifyTriggerList() {
 		List<NotifyTriggerVo> returnList = new ArrayList<>();
 		for (ProcessTaskNotifyTriggerType notifyTriggerType : ProcessTaskNotifyTriggerType.values()) {
-            returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), I18nUtils.getMessage(notifyTriggerType.getText()), I18nUtils.getMessage(notifyTriggerType.getDescription())));
+            returnList.add(new NotifyTriggerVo(notifyTriggerType));
 		}
 		return returnList;
 	}
