@@ -2085,20 +2085,23 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     }
                 }
             } else {
-                // 如果没有步骤处理权限，还需要判断是否有当前步骤的子任务或变更步骤处理权限
-                if (processTaskMapper.checkIsWorker(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), ProcessUserType.MINOR.getValue(), authenticationInfoVo) > 0) {
-                    resultList.add(processTaskStepVo);
-                    continue;
-                }
-                // 子任务用户A授权给B，B处理后，A也能处理
-                List<ProcessTaskStepTaskVo> processTaskStepTaskList = processTaskStepTaskMapper.getStepTaskListByProcessTaskStepId(processTaskStepVo.getId());
-                if (CollectionUtils.isNotEmpty(processTaskStepTaskList)) {
-                    List<Long> stepTaskIdList = processTaskStepTaskList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList());
-                    List<ProcessTaskStepTaskUserAgentVo> processTaskStepTaskUserAgentList = processTaskStepTaskMapper.getProcessTaskStepTaskUserAgentListByStepTaskIdList(stepTaskIdList);
-                    for (ProcessTaskStepTaskUserAgentVo processTaskStepTaskUserAgentVo : processTaskStepTaskUserAgentList) {
-                        if (Objects.equals(processTaskStepTaskUserAgentVo.getUserUuid(), userUuid)) {
-                            resultList.add(processTaskStepVo);
-                            break;
+                // 对于状态为“处理中”的步骤，要检测子任务和变更步骤处理权限
+                if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())) {
+                    // 如果没有步骤处理权限，还需要判断是否有当前步骤的子任务或变更步骤处理权限
+                    if (processTaskMapper.checkIsWorker(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), ProcessUserType.MINOR.getValue(), authenticationInfoVo) > 0) {
+                        resultList.add(processTaskStepVo);
+                        continue;
+                    }
+                    // 子任务用户A授权给B，B处理后，A也能处理
+                    List<ProcessTaskStepTaskVo> processTaskStepTaskList = processTaskStepTaskMapper.getStepTaskListByProcessTaskStepId(processTaskStepVo.getId());
+                    if (CollectionUtils.isNotEmpty(processTaskStepTaskList)) {
+                        List<Long> stepTaskIdList = processTaskStepTaskList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList());
+                        List<ProcessTaskStepTaskUserAgentVo> processTaskStepTaskUserAgentList = processTaskStepTaskMapper.getProcessTaskStepTaskUserAgentListByStepTaskIdList(stepTaskIdList);
+                        for (ProcessTaskStepTaskUserAgentVo processTaskStepTaskUserAgentVo : processTaskStepTaskUserAgentList) {
+                            if (Objects.equals(processTaskStepTaskUserAgentVo.getUserUuid(), userUuid)) {
+                                resultList.add(processTaskStepVo);
+                                break;
+                            }
                         }
                     }
                 }
