@@ -25,6 +25,7 @@ import neatlogic.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.framework.process.workcenter.dto.WorkcenterAuthorityVo;
 import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
 import neatlogic.framework.startup.StartupBase;
+import neatlogic.framework.tenantinit.ITenantInit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -42,7 +43,8 @@ import java.util.stream.Stream;
  * @Date: 2021/1/5 17:55
  **/
 @Component
-public class WorkcenterInit extends StartupBase {
+public class WorkcenterInit extends StartupBase implements ITenantInit {
+
     public List<WorkcenterVo> workcenterList = new ArrayList<>();
 
     @Resource
@@ -196,6 +198,25 @@ public class WorkcenterInit extends StartupBase {
 
     @Override
     public void executeForCurrentTenant() {
+        executeService();
+    }
+
+    @Override
+    public void executeForAllTenant() {
+
+    }
+
+    @Override
+    public int sort() {
+        return 0;
+    }
+
+    @Override
+    public void execute() {
+        executeService();
+    }
+
+    private void executeService() {
         if (CollectionUtils.isNotEmpty(workcenterList)) {
             //获取工单中心需要初始化的分类的uuidList
             List<String> initWorkcenterUUidList = Stream.of(ProcessWorkcenterInitType.values()).map(ProcessWorkcenterInitType::getValue).collect(Collectors.toList());
@@ -224,15 +245,5 @@ public class WorkcenterInit extends StartupBase {
                 }
             }
         }
-    }
-
-    @Override
-    public void executeForAllTenant() {
-
-    }
-
-    @Override
-    public int sort() {
-        return 0;
     }
 }
