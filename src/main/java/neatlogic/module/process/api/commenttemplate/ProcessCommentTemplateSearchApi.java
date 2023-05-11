@@ -28,7 +28,7 @@ import java.util.*;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessCommentSystemTemplateSearchApi extends PrivateApiComponentBase {
+public class ProcessCommentTemplateSearchApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessCommentTemplateMapper commentTemplateMapper;
@@ -36,12 +36,12 @@ public class ProcessCommentSystemTemplateSearchApi extends PrivateApiComponentBa
 
     @Override
     public String getToken() {
-        return "process/comment/system/template/search";
+        return "process/comment/template/search";
     }
 
     @Override
     public String getName() {
-        return "查询系统回复模版";
+        return "查询回复模版列表";
     }
 
     @Override
