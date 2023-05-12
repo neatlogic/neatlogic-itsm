@@ -18,9 +18,11 @@ package neatlogic.module.process.notify.handler.param;
 
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeDataConversionHandler;
+import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
+import neatlogic.framework.notify.widget.FormTable;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
@@ -55,7 +57,7 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Override
     public String getValue() {
-        return ProcessTaskNotifyParam.FORM.getValue();
+        return ProcessTaskNotifyParam.FORM_TABLE.getValue();
     }
 
     @Override
@@ -75,17 +77,17 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
         if (StringUtils.isBlank(formContent)) {
             return null;
         }
-        Map<String, ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataMap = new HashMap<>();
+        Map<String, AttributeDataVo> attributeDataMap = new HashMap<>();
                 List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskVo.getId());
         if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
-            processTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
+            attributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
         }
-        List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataVoList = new ArrayList<>();
+        List<AttributeDataVo> attributeDataVoList = new ArrayList<>();
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
         List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
         for (FormAttributeVo formAttribute : formAttributeList) {
-            ProcessTaskFormAttributeDataVo attributeDataVo = processTaskFormAttributeDataMap.get(formAttribute.getUuid());
+            AttributeDataVo attributeDataVo = attributeDataMap.get(formAttribute.getUuid());
             if (attributeDataVo == null) {
                 attributeDataVo = new ProcessTaskFormAttributeDataVo();
                 attributeDataVo.setAttributeUuid(formAttribute.getUuid());
@@ -96,9 +98,9 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
             if (handler != null) {
                 Object value = handler.dataTransformationForEmail(attributeDataVo, formAttribute.getConfigObj());
                 attributeDataVo.setDataObj(value);
-                processTaskFormAttributeDataVoList.add(attributeDataVo);
+                attributeDataVoList.add(attributeDataVo);
             }
         }
-        return processTaskFormAttributeDataVoList;
+        return new FormTable(attributeDataVoList);
     }
 }
