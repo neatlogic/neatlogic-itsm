@@ -45,6 +45,8 @@ import neatlogic.module.process.thread.ProcessTaskAutomaticThread;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -55,7 +57,7 @@ import java.util.Set;
 
 @Service
 public class AutomaticProcessComponent extends ProcessStepHandlerBase {
-
+    private Logger logger = LoggerFactory.getLogger(AutomaticProcessComponent.class);
     // 激活自动处理步骤时，如果在时间窗口内，在`processtask_step_in_operation`表中插入一条数据，标识该步骤正在后台处理中，有效时长3秒
     private final long EXPIRETIME = 3000;
 
@@ -105,83 +107,87 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-        AutomaticConfigVo automaticConfigVo = processTaskAutomaticService.getAutomaticConfigVoByProcessTaskStepId(currentProcessTaskStepVo.getId());
-        JSONObject requestAudit = new JSONObject();
-        requestAudit.put("integrationUuid", automaticConfigVo.getBaseIntegrationUuid());
-        requestAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
-        requestAudit.put("failPolicyName", FailPolicy.getText(automaticConfigVo.getBaseFailPolicy()));
-        requestAudit.put("status", ProcessTaskStepStatus.getJson(ProcessTaskStepStatus.PENDING.getValue()));
-        JSONObject baseSuccessConfig = automaticConfigVo.getBaseSuccessConfig();
-        if (MapUtils.isNotEmpty(baseSuccessConfig)) {
-            requestAudit.put("successConfig", baseSuccessConfig);
-        } else {
-            JSONObject successConfig = new JSONObject();
-            successConfig.put("default", "默认按状态码判断，2xx和3xx表示成功");
-            requestAudit.put("successConfig", successConfig);
-        }
+        try {
+            AutomaticConfigVo automaticConfigVo = processTaskAutomaticService.getAutomaticConfigVoByProcessTaskStepId(currentProcessTaskStepVo.getId());
+            JSONObject requestAudit = new JSONObject();
+            requestAudit.put("integrationUuid", automaticConfigVo.getBaseIntegrationUuid());
+            requestAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
+            requestAudit.put("failPolicyName", FailPolicy.getText(automaticConfigVo.getBaseFailPolicy()));
+            requestAudit.put("status", ProcessTaskStepStatus.getJson(ProcessTaskStepStatus.PENDING.getValue()));
+            JSONObject baseSuccessConfig = automaticConfigVo.getBaseSuccessConfig();
+            if (MapUtils.isNotEmpty(baseSuccessConfig)) {
+                requestAudit.put("successConfig", baseSuccessConfig);
+            } else {
+                JSONObject successConfig = new JSONObject();
+                successConfig.put("default", "默认按状态码判断，2xx和3xx表示成功");
+                requestAudit.put("successConfig", successConfig);
+            }
 
-        JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
-        int isTimeToRun = 0;
-        //检验执行时间窗口
-        if (MapUtils.isNotEmpty(timeWindowConfig)) {
-            String startTime = timeWindowConfig.getString("startTime");
-            String endTime = timeWindowConfig.getString("endTime");
-            if (StringUtils.isNotBlank(startTime) && StringUtils.isNotBlank(endTime)) {
-                isTimeToRun = TimeUtil.isInTimeWindow(startTime, endTime);
+            JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
+            int isTimeToRun = 0;
+            //检验执行时间窗口
+            if (MapUtils.isNotEmpty(timeWindowConfig)) {
+                String startTime = timeWindowConfig.getString("startTime");
+                String endTime = timeWindowConfig.getString("endTime");
+                if (StringUtils.isNotBlank(startTime) && StringUtils.isNotBlank(endTime)) {
+                    isTimeToRun = TimeUtil.isInTimeWindow(startTime, endTime);
+                }
             }
-        }
-        if (isTimeToRun == 0) {
-            requestAudit.put("startTime", System.currentTimeMillis());
-        } else {
-            requestAudit.put("startTime", TimeUtil.getDateByHourMinute(timeWindowConfig.getString("startTime"),isTimeToRun>0?1:0));
-        }
-        JSONObject data = new JSONObject();
-        data.put("requestAudit", requestAudit);
-        ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(
-                currentProcessTaskStepVo.getProcessTaskId(),
-                currentProcessTaskStepVo.getId(),
-                ProcessTaskStepDataType.AUTOMATIC.getValue(),
-                SystemUser.SYSTEM.getUserUuid()
-        );
-        auditDataVo.setData(data.toJSONString());
-        processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
-        UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
-        if (Objects.equals(isTimeToRun, 0)) {
-//            System.out.println("在时间窗口内，直接发送请求");
-            IProcessStepInternalHandler processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-            if (processStepInternalHandler == null) {
-                throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+            if (isTimeToRun == 0) {
+                requestAudit.put("startTime", System.currentTimeMillis());
+            } else {
+                requestAudit.put("startTime", TimeUtil.getDateByHourMinute(timeWindowConfig.getString("startTime"), isTimeToRun > 0 ? 1 : 0));
             }
-            ProcessTaskStepInOperationVo processTaskStepInOperationVo = new ProcessTaskStepInOperationVo(
+            JSONObject data = new JSONObject();
+            data.put("requestAudit", requestAudit);
+            ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(
                     currentProcessTaskStepVo.getProcessTaskId(),
                     currentProcessTaskStepVo.getId(),
-                    "request",
-                    new Date(System.currentTimeMillis() + EXPIRETIME)
+                    ProcessTaskStepDataType.AUTOMATIC.getValue(),
+                    SystemUser.SYSTEM.getUserUuid()
             );
-            // 后台异步操作步骤前，在`processtask_step_in_operation`表中插入一条数据，标识该步骤正在后台处理中，异步处理完删除
-            processStepInternalHandler.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
-            TransactionSynchronizationPool.execute(new ProcessTaskAutomaticThread(currentProcessTaskStepVo, processTaskStepInOperationVo.getId()));
-        } else {
+            auditDataVo.setData(data.toJSONString());
+            processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
+            UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
+            if (Objects.equals(isTimeToRun, 0)) {
+//            System.out.println("在时间窗口内，直接发送请求");
+                IProcessStepInternalHandler processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+                if (processStepInternalHandler == null) {
+                    throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+                }
+                ProcessTaskStepInOperationVo processTaskStepInOperationVo = new ProcessTaskStepInOperationVo(
+                        currentProcessTaskStepVo.getProcessTaskId(),
+                        currentProcessTaskStepVo.getId(),
+                        "request",
+                        new Date(System.currentTimeMillis() + EXPIRETIME)
+                );
+                // 后台异步操作步骤前，在`processtask_step_in_operation`表中插入一条数据，标识该步骤正在后台处理中，异步处理完删除
+                processStepInternalHandler.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
+                TransactionSynchronizationPool.execute(new ProcessTaskAutomaticThread(currentProcessTaskStepVo, processTaskStepInOperationVo.getId()));
+            } else {
 //            System.out.println("不在时间窗口内，加载定时作业，定时发送请求");
-            IJob jobHandler = SchedulerManager.getHandler(ProcessTaskAutomaticJob.class.getName());
-            if (jobHandler == null) {
-                throw new ScheduleHandlerNotFoundException(ProcessTaskAutomaticJob.class.getName());
+                IJob jobHandler = SchedulerManager.getHandler(ProcessTaskAutomaticJob.class.getName());
+                if (jobHandler == null) {
+                    throw new ScheduleHandlerNotFoundException(ProcessTaskAutomaticJob.class.getName());
+                }
+                ProcessTaskStepAutomaticRequestVo processTaskStepAutomaticRequestVo = new ProcessTaskStepAutomaticRequestVo();
+                processTaskStepAutomaticRequestVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+                processTaskStepAutomaticRequestVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+                processTaskStepAutomaticRequestVo.setType("request");
+                processTaskMapper.insertProcessTaskStepAutomaticRequest(processTaskStepAutomaticRequestVo);
+                JobObject.Builder jobObjectBuilder = new JobObject.Builder(
+                        processTaskStepAutomaticRequestVo.getId().toString(),
+                        jobHandler.getGroupName(),
+                        jobHandler.getClassName(),
+                        TenantContext.get().getTenantUuid()
+                );
+                JobObject jobObject = jobObjectBuilder.build();
+                jobHandler.reloadJob(jobObject);
             }
-            ProcessTaskStepAutomaticRequestVo processTaskStepAutomaticRequestVo = new ProcessTaskStepAutomaticRequestVo();
-            processTaskStepAutomaticRequestVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-            processTaskStepAutomaticRequestVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-            processTaskStepAutomaticRequestVo.setType("request");
-            processTaskMapper.insertProcessTaskStepAutomaticRequest(processTaskStepAutomaticRequestVo);
-            JobObject.Builder jobObjectBuilder = new JobObject.Builder(
-                    processTaskStepAutomaticRequestVo.getId().toString(),
-                    jobHandler.getGroupName(),
-                    jobHandler.getClassName(),
-                    TenantContext.get().getTenantUuid()
-            );
-            JobObject jobObject = jobObjectBuilder.build();
-            jobHandler.reloadJob(jobObject);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new ProcessTaskException(e.getMessage());
         }
-
         return 1;
     }
 

@@ -65,23 +65,28 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		String configHash = currentProcessTaskStepVo.getConfigHash();
-		String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(configHash);
-		if (StringUtils.isNotBlank(stepConfig)) {
-			int size = AutoCompleteRuleHandlerFactory.getHandlerSize();
-			for (int i = 0; i < size; i++) {
-				IAutoCompleteRuleHandler autoCompleteRuleHandler = AutoCompleteRuleHandlerFactory.getHandler(i);
-				if (autoCompleteRuleHandler != null) {
-					Integer autoCompleteRule = (Integer) JSONPath.read(stepConfig, autoCompleteRuleHandler.getHandler());
-					if (Objects.equals(autoCompleteRule, 1)) {
-						if (autoCompleteRuleHandler.execute(currentProcessTaskStepVo)) {
-							break;
+		try {
+			String configHash = currentProcessTaskStepVo.getConfigHash();
+			String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(configHash);
+			if (StringUtils.isNotBlank(stepConfig)) {
+				int size = AutoCompleteRuleHandlerFactory.getHandlerSize();
+				for (int i = 0; i < size; i++) {
+					IAutoCompleteRuleHandler autoCompleteRuleHandler = AutoCompleteRuleHandlerFactory.getHandler(i);
+					if (autoCompleteRuleHandler != null) {
+						Integer autoCompleteRule = (Integer) JSONPath.read(stepConfig, autoCompleteRuleHandler.getHandler());
+						if (Objects.equals(autoCompleteRule, 1)) {
+							if (autoCompleteRuleHandler.execute(currentProcessTaskStepVo)) {
+								break;
+							}
 						}
 					}
 				}
 			}
+			return 0;
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			throw new ProcessTaskException(e.getMessage());
 		}
-		return 0;
 	}
 	
 	@Override
