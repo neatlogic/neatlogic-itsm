@@ -45,10 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author linbq
@@ -92,6 +89,22 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
             List<String> hidecomponentList = new ArrayList<>();
             JSONArray formAttributeDataList = new JSONArray();
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(invokeId);
+            if (processTaskStepVo == null) {
+                return;
+            }
+            // 获取工单锁
+            processTaskMapper.getProcessTaskLockById(processTaskStepVo.getProcessTaskId());
+            // 获取与工单步骤关联的作业列表，如果其中存在作业状态为“待处理”和“处理中”的情况下，直接返回
+            List<Long> jobIdList = autoexecJobMapper.getJobIdListByInvokeId(invokeId);
+            if (CollectionUtils.isNotEmpty(jobIdList)) {
+                List<AutoexecJobVo> autoexecJobList = autoexecJobMapper.getJobListByIdList(jobIdList);
+                for (AutoexecJobVo jobVo : autoexecJobList) {
+                    if (Objects.equals(jobVo.getStatus(), JobStatus.PENDING.getValue())
+                            || Objects.equals(jobVo.getStatus(), JobStatus.RUNNING.getValue())) {
+                        return;
+                    }
+                }
+            }
             String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
             if (StringUtils.isNotBlank(config)) {
                 JSONArray formAttributeList = (JSONArray) JSONPath.read(config, "autoexecConfig.formAttributeList");
