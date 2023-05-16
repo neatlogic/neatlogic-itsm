@@ -111,6 +111,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        try {
         String configHash = currentProcessTaskStepVo.getConfigHash();
         String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(configHash);
 //        {
@@ -232,6 +233,10 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
             }
         }
         return 1;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new ProcessTaskException(e.getMessage());
+        }
     }
 
     @Override
