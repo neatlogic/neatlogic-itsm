@@ -271,7 +271,15 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
             processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
             return;
         }
-        Long policyId = invokeNotifyPolicyConfigVo.getPolicyId();
+        Long policyId;
+        if (invokeNotifyPolicyConfigVo.getIsCustom() == 1) {
+            policyId = invokeNotifyPolicyConfigVo.getPolicyId();
+        } else {
+            policyId = invokeNotifyPolicyConfigVo.getDefaultPolicyId();
+        }
+        if (policyId == null) {
+            return;
+        }
         NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
         if (notifyPolicyVo == null || notifyPolicyVo.getConfig() == null) {
             schedulerManager.unloadJob(jobObject);
