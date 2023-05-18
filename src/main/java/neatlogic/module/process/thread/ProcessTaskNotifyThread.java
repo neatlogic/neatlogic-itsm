@@ -94,13 +94,12 @@ public class ProcessTaskNotifyThread extends NeatLogicThread {
 
             INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
             StringBuilder notifyAuditMessageStringBuilder = new StringBuilder();
-            InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = null;
+            JSONObject notifyPolicyConfig;
             if (notifyTriggerType instanceof ProcessTaskNotifyTriggerType) {
                 /** 获取工单配置信息 **/
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoByIdIncludeIsDeleted(currentProcessTaskStepVo.getProcessTaskId());
                 String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
-                JSONObject notifyPolicyConfig = (JSONObject) JSONPath.read(config, "process.processConfig.notifyPolicyConfig");
-                invokeNotifyPolicyConfigVo = notifyServiceCrossoverService.regulateNotifyPolicyConfig(notifyPolicyConfig);
+                notifyPolicyConfig = (JSONObject) JSONPath.read(config, "process.processConfig.notifyPolicyConfig");
                 notifyAuditMessageStringBuilder.append(currentProcessTaskStepVo.getProcessTaskId());
             } else {
                 /* 获取步骤配置信息 **/
@@ -110,8 +109,7 @@ public class ProcessTaskNotifyThread extends NeatLogicThread {
                     throw new ProcessStepUtilHandlerNotFoundException(stepVo.getHandler());
                 }
                 String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
-                JSONObject notifyPolicyConfig = (JSONObject) JSONPath.read(stepConfig, "notifyPolicyConfig");
-                invokeNotifyPolicyConfigVo = notifyServiceCrossoverService.regulateNotifyPolicyConfig(notifyPolicyConfig);
+                notifyPolicyConfig = (JSONObject) JSONPath.read(stepConfig, "notifyPolicyConfig");
 
                 notifyAuditMessageStringBuilder.append(stepVo.getProcessTaskId());
                 notifyAuditMessageStringBuilder.append("-");
@@ -121,20 +119,17 @@ public class ProcessTaskNotifyThread extends NeatLogicThread {
                 notifyAuditMessageStringBuilder.append(")");
             }
 
+            InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = notifyServiceCrossoverService.regulateNotifyPolicyConfig(notifyPolicyConfig);
             if (invokeNotifyPolicyConfigVo == null) {
                 return;
             }
+            // 触发点被排除，不用发送邮件
             List<String> excludeTriggerList = invokeNotifyPolicyConfigVo.getExcludeTriggerList();
             if (CollectionUtils.isNotEmpty(excludeTriggerList) && excludeTriggerList.contains(notifyTriggerType.getTrigger())) {
                 return;
             }
 
-            Long policyId;
-            if (invokeNotifyPolicyConfigVo.getIsCustom() == 1) {
-                policyId = invokeNotifyPolicyConfigVo.getPolicyId();
-            } else {
-                policyId = invokeNotifyPolicyConfigVo.getDefaultPolicyId();
-            }
+            Long policyId = invokeNotifyPolicyConfigVo.getPolicyId();
             if (policyId == null) {
                 return;
             }
