@@ -21,24 +21,7 @@ public class ProcessTaskStatusMatrixPrivateDataSourceHandler implements IMatrixP
 
     private final List<MatrixAttributeVo> matrixAttributeList = new ArrayList<>();
     private final Map<String , String> columnsMap = new HashMap<>();
-
-    @Override
-    public String getUuid() {
-        return UuidUtil.getCustomUUID(getLabel());
-    }
-
-    @Override
-    public String getName() {
-        return "流程状态";
-    }
-
-    @Override
-    public String getLabel() {
-        return "ProcessTaskStatus";
-    }
-
-    @Override
-    public List<MatrixAttributeVo> getAttributeList() {
+    {
         JSONArray attributeDefinedList = new JSONArray();
         {
             JSONObject jsonObj = new JSONObject();
@@ -56,13 +39,28 @@ public class ProcessTaskStatusMatrixPrivateDataSourceHandler implements IMatrixP
             jsonObj.put("isSearchable", 1);
             attributeDefinedList.add(jsonObj);
         }
-        if (matrixAttributeList.size() == 0) {
-            this.setAttribute(matrixAttributeList , attributeDefinedList);
-
-            for(MatrixAttributeVo matrixAttributeVo : matrixAttributeList){
-                columnsMap.put(matrixAttributeVo.getLabel() , matrixAttributeVo.getUuid());
-            }
+        this.setAttribute(matrixAttributeList , attributeDefinedList);
+        for(MatrixAttributeVo matrixAttributeVo : matrixAttributeList){
+            columnsMap.put(matrixAttributeVo.getLabel() , matrixAttributeVo.getUuid());
         }
+    }
+    @Override
+    public String getUuid() {
+        return UuidUtil.getCustomUUID(getLabel());
+    }
+
+    @Override
+    public String getName() {
+        return "流程状态";
+    }
+
+    @Override
+    public String getLabel() {
+        return "ProcessTaskStatus";
+    }
+
+    @Override
+    public List<MatrixAttributeVo> getAttributeList() {
         return matrixAttributeList;
     }
 

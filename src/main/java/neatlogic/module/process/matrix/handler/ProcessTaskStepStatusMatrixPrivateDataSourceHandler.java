@@ -6,7 +6,7 @@ import neatlogic.framework.matrix.core.IMatrixPrivateDataSourceHandler;
 import neatlogic.framework.matrix.dto.MatrixAttributeVo;
 import neatlogic.framework.matrix.dto.MatrixDataVo;
 import neatlogic.framework.matrix.dto.MatrixFilterVo;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -21,24 +21,7 @@ public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMat
 
     private final List<MatrixAttributeVo> matrixAttributeList = new ArrayList<>();
     private final Map<String , String> columnsMap = new HashMap<>();
-
-    @Override
-    public String getUuid() {
-        return UuidUtil.getCustomUUID(getLabel());
-    }
-
-    @Override
-    public String getName() {
-        return "流程步骤状态";
-    }
-
-    @Override
-    public String getLabel() {
-        return "ProcessTaskStepStatus";
-    }
-
-    @Override
-    public List<MatrixAttributeVo> getAttributeList() {
+    {
         JSONArray attributeDefinedList = new JSONArray();
         {
             JSONObject jsonObj = new JSONObject();
@@ -56,13 +39,28 @@ public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMat
             jsonObj.put("isSearchable", 1);
             attributeDefinedList.add(jsonObj);
         }
-        if (matrixAttributeList.size() == 0) {
-            this.setAttribute(matrixAttributeList , attributeDefinedList);
-
-            for(MatrixAttributeVo matrixAttributeVo : matrixAttributeList){
-                columnsMap.put(matrixAttributeVo.getLabel() , matrixAttributeVo.getUuid());
-            }
+        this.setAttribute(matrixAttributeList , attributeDefinedList);
+        for(MatrixAttributeVo matrixAttributeVo : matrixAttributeList){
+            columnsMap.put(matrixAttributeVo.getLabel() , matrixAttributeVo.getUuid());
         }
+    }
+    @Override
+    public String getUuid() {
+        return UuidUtil.getCustomUUID(getLabel());
+    }
+
+    @Override
+    public String getName() {
+        return "流程步骤状态";
+    }
+
+    @Override
+    public String getLabel() {
+        return "ProcessTaskStepStatus";
+    }
+
+    @Override
+    public List<MatrixAttributeVo> getAttributeList() {
         return matrixAttributeList;
     }
 
@@ -72,7 +70,7 @@ public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMat
         List<Map<String, String>> dataList = new ArrayList<>();
 
         if (CollectionUtils.isEmpty(filterList)) {
-            for (ProcessTaskStatus type : ProcessTaskStatus.values()) {
+            for (ProcessTaskStepStatus type : ProcessTaskStepStatus.values()) {
                 Map<String, String> data = new HashMap<>();
                 data.put("uuid", UuidUtil.getCustomUUID(getLabel() + type.getValue()));
                 data.put(columnsMap.get("status"), type.getValue());
@@ -80,7 +78,7 @@ public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMat
                 dataList.add(data);
             }
         }else{
-            for (ProcessTaskStatus type : ProcessTaskStatus.values()) {
+            for (ProcessTaskStepStatus type : ProcessTaskStepStatus.values()) {
                 if(checkFilter(type , filterList)){
                     Map<String, String> data = new HashMap<>();
                     data.put("uuid", UuidUtil.getCustomUUID(getLabel() + type.getValue()));
@@ -93,7 +91,7 @@ public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMat
         return dataList;
     }
 
-    private Boolean checkFilter(ProcessTaskStatus type , List<MatrixFilterVo> filterList){
+    private Boolean checkFilter(ProcessTaskStepStatus type , List<MatrixFilterVo> filterList){
         boolean isContain = false ;
         flag:for (MatrixFilterVo filter : filterList) {
             for(String value:filter.getValueList()){

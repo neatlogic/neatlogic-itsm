@@ -43,6 +43,29 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
 
     private final Map<String , String> columnsMap = new HashMap<>();
 
+    {
+        JSONArray attributeDefinedList = new JSONArray();
+        {
+            JSONObject jsonObj = new JSONObject();
+            jsonObj.put("name", "uuid");
+            jsonObj.put("label", "uuid");
+            jsonObj.put("isPrimaryKey", 1);
+            jsonObj.put("isSearchable", 0);
+            attributeDefinedList.add(jsonObj);
+        }
+        {
+            JSONObject jsonObj = new JSONObject();
+            jsonObj.put("name", "名称");
+            jsonObj.put("label", "name");
+            jsonObj.put("isPrimaryKey", 0);
+            jsonObj.put("isSearchable", 1);
+            attributeDefinedList.add(jsonObj);
+        }
+        this.setAttribute(matrixAttributeList , attributeDefinedList);
+        for(MatrixAttributeVo matrixAttributeVo : matrixAttributeList){
+            columnsMap.put(matrixAttributeVo.getLabel() , matrixAttributeVo.getUuid());
+        }
+    }
     @Resource
     private PriorityMapper priorityMapper;
 
@@ -63,30 +86,6 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
 
     @Override
     public List<MatrixAttributeVo> getAttributeList() {
-        JSONArray attributeDefinedList = new JSONArray();
-        {
-            JSONObject jsonObj = new JSONObject();
-            jsonObj.put("name", "uuid");
-            jsonObj.put("label", "uuid");
-            jsonObj.put("isPrimaryKey", 1);
-            jsonObj.put("isSearchable", 0);
-            attributeDefinedList.add(jsonObj);
-        }
-        {
-            JSONObject jsonObj = new JSONObject();
-            jsonObj.put("name", "名称");
-            jsonObj.put("label", "name");
-            jsonObj.put("isPrimaryKey", 0);
-            jsonObj.put("isSearchable", 1);
-            attributeDefinedList.add(jsonObj);
-        }
-        if (matrixAttributeList.size() == 0) {
-            this.setAttribute(matrixAttributeList , attributeDefinedList);
-
-            for(MatrixAttributeVo matrixAttributeVo : matrixAttributeList){
-                columnsMap.put(matrixAttributeVo.getLabel() , matrixAttributeVo.getUuid());
-            }
-        }
         return matrixAttributeList;
     }
 
