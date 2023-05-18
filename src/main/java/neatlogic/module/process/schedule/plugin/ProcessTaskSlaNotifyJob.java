@@ -271,12 +271,14 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
             processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
             return;
         }
-        Long policyId;
-        if (invokeNotifyPolicyConfigVo.getIsCustom() == 1) {
-            policyId = invokeNotifyPolicyConfigVo.getPolicyId();
-        } else {
-            policyId = invokeNotifyPolicyConfigVo.getDefaultPolicyId();
+        // 触发点被排除，不用发送邮件
+        List<String> excludeTriggerList = invokeNotifyPolicyConfigVo.getExcludeTriggerList();
+        if (CollectionUtils.isNotEmpty(excludeTriggerList) && excludeTriggerList.contains(SlaNotifyTriggerType.TIMEOUT.getTrigger())) {
+            schedulerManager.unloadJob(jobObject);
+            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
+            return;
         }
+        Long policyId = invokeNotifyPolicyConfigVo.getPolicyId();
         if (policyId == null) {
             return;
         }
