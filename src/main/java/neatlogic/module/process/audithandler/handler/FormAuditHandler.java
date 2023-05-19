@@ -91,6 +91,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
         if (CollectionUtils.isEmpty(defaultSceneFormAttributeList)) {
             return 0;
         }
+        int isModified = 0;
         List<ProcessTaskAuditFormAttributeDataVo> auditFormAttributeDataList = new ArrayList<>();
         Map<String, ProcessTaskFormAttributeDataVo> newProcessTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
         Map<String, ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataMap = oldProcessTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
@@ -118,6 +119,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
                     auditFormAttributeDataVo.setModified(0);
                 } else {
                     // 现在要保存该属性的值不为null，则将该属性值保存到数据库中，但标记为已修改
+                    isModified = 1;
                     auditFormAttributeDataVo.setModified(1);
                     auditFormAttributeDataVo.setDataObj(newProcessTaskFormAttributeDataVo.getDataObj());
                     auditFormAttributeDataVo.setSort(newProcessTaskFormAttributeDataVo.getSort());
@@ -139,6 +141,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
                     auditFormAttributeDataVo.setModified(0);
                 } else {
                     auditFormAttributeDataVo.setModified(1);
+                    isModified = 1;
                 }
             }
             // 删除不能audit的表单组件
@@ -147,6 +150,9 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
                 oldProcessTaskFormAttributeDataMap.remove(attributeUuid);
                 newProcessTaskFormAttributeDataMap.remove(attributeUuid);
             }
+        }
+        if (isModified == 0) {
+            return 0;
         }
         processTaskStepAuditDetailVo.setOldContent(JSON.toJSONString(auditFormAttributeDataList));
         Map<String, String> oldContentMap = new HashMap<>();
