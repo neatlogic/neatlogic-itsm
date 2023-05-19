@@ -152,6 +152,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
             }
         }
         if (isModified == 0) {
+            // 表单未修改，返回值为0，表示不用显示表单内容
             return 0;
         }
         processTaskStepAuditDetailVo.setOldContent(JSON.toJSONString(auditFormAttributeDataList));
