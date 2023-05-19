@@ -972,7 +972,6 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
 
         /** 获取旧表单数据 **/
         List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
-        paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldProcessTaskFormAttributeDataList));
         Map<String, ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataMap = oldProcessTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
 
         List<ProcessTaskFormAttributeDataVo> newProcessTaskFormAttributeDataList = new ArrayList<>();
@@ -993,7 +992,12 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             }
             i++;
         }
-        paramObj.put(ProcessTaskAuditDetailType.FORM.getParamName(), JSON.toJSONString(newProcessTaskFormAttributeDataList));
+        // 判断是否修改了表单数据，如果是，则记录活动
+        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+        if (formCrossoverService.isModifiedFormData(defaultSceneFormAttributeList, newProcessTaskFormAttributeDataList, oldProcessTaskFormAttributeDataList)) {
+            paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldProcessTaskFormAttributeDataList));
+            paramObj.put(ProcessTaskAuditDetailType.FORM.getParamName(), JSON.toJSONString(newProcessTaskFormAttributeDataList));
+        }
 
         // 写入当前工单的表单属性值
         for (ProcessTaskFormAttributeDataVo dataVo : newProcessTaskFormAttributeDataList) {

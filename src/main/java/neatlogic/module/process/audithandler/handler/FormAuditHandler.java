@@ -1,11 +1,13 @@
 package neatlogic.module.process.audithandler.handler;
 
+import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
 import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeDataConversionHandler;
 import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
+import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
@@ -89,6 +91,12 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
         formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
         List<FormAttributeVo> defaultSceneFormAttributeList = formVersionVo.getFormAttributeList();
         if (CollectionUtils.isEmpty(defaultSceneFormAttributeList)) {
+            return 0;
+        }
+        // 判断是否修改了表单数据
+        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+        if (!formCrossoverService.isModifiedFormData(defaultSceneFormAttributeList, processTaskFormAttributeDataList, oldProcessTaskFormAttributeDataList)) {
+            // 表单未修改，返回值为0，表示不用显示表单内容
             return 0;
         }
         List<ProcessTaskAuditFormAttributeDataVo> auditFormAttributeDataList = new ArrayList<>();
