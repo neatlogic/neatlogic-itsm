@@ -83,6 +83,8 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
                     pause++;
                     continue;
                 }
+            } else if (Objects.equals(processTaskStepVo.getIsActive(),-1)) {
+                pause++;
             } else if (ProcessTaskStepStatus.SUCCEED.getValue().equals(status)) {
                 done++;
             }
