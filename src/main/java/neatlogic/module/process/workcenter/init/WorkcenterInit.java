@@ -197,14 +197,11 @@ public class WorkcenterInit extends StartupBase implements ITenantInit {
     }
 
     @Override
-    public void executeForCurrentTenant() {
+    public int executeForCurrentTenant() {
         executeService();
+        return 0;
     }
 
-    @Override
-    public void executeForAllTenant() {
-
-    }
 
     @Override
     public int sort() {
