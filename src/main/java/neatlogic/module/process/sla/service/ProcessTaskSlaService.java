@@ -22,7 +22,7 @@ import neatlogic.framework.process.dto.ProcessTaskSlaTimeVo;
 import org.springframework.stereotype.Service;
 
 @Service
-public interface SlaService {
+public interface ProcessTaskSlaService {
     /**
      * 创建ProcessTaskSlaTimeVo
      * @param slaId 时效ID

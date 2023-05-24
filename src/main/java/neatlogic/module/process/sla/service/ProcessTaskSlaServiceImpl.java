@@ -40,7 +40,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class SlaServiceImpl implements SlaService {
+public class ProcessTaskSlaServiceImpl implements ProcessTaskSlaService {
 
     @Resource
     private ProcessTaskSlaMapper processTaskSlaMapper;

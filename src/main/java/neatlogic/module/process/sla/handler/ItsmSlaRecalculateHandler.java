@@ -25,12 +25,13 @@ import neatlogic.framework.process.exception.sla.SlaCalculateHandlerNotFoundExce
 import neatlogic.framework.process.sla.core.ISlaCalculateHandler;
 import neatlogic.framework.process.sla.core.SlaCalculateHandlerFactory;
 import neatlogic.framework.sla.core.ISlaRecalculateHandler;
-import neatlogic.module.process.sla.service.SlaService;
+import neatlogic.module.process.sla.service.ProcessTaskSlaService;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -44,9 +45,10 @@ public class ItsmSlaRecalculateHandler implements ISlaRecalculateHandler {
     private ProcessTaskSlaMapper processTaskSlaMapper;
 
     @Resource
-    private SlaService slaService;
+    private ProcessTaskSlaService processTaskSlaService;
 
     @Override
+    @Transactional
     public void execute(String worktimeUuid) {
         int rowNum = processTaskSlaMapper.getDoingOrPauseSlaIdCountByWorktimeUuid(worktimeUuid);
         if (rowNum == 0) {
@@ -96,16 +98,15 @@ public class ItsmSlaRecalculateHandler implements ISlaRecalculateHandler {
             }
             long currentTimeMillis = System.currentTimeMillis();
             ProcessTaskSlaTimeCostVo timeCostVo = handler.calculateTimeCost(slaId, currentTimeMillis, worktimeUuid);
-            ProcessTaskSlaTimeVo slaTimeVo = slaService.createSlaTime(slaId, timeSum, currentTimeMillis, timeCostVo);
-            slaService.recalculateExpireTime(slaTimeVo, currentTimeMillis, worktimeUuid);
+            ProcessTaskSlaTimeVo slaTimeVo = processTaskSlaService.createSlaTime(slaId, timeSum, currentTimeMillis, timeCostVo);
+            processTaskSlaService.recalculateExpireTime(slaTimeVo, currentTimeMillis, worktimeUuid);
             slaTimeVo.setStatus(oldSlaTimeVo.getStatus());
 
             System.out.println("newSlaTimeVo=" + slaTimeVo);
             processTaskSlaMapper.updateProcessTaskSlaTime(slaTimeVo);
-//        processTaskSlaMapper.deleteProcessTaskStepSlaTimeBySlaId(slaId);
             if (!Objects.equals(oldSlaTimeVo.getExpireTimeLong(), slaTimeVo.getExpireTimeLong())
                     && SlaStatus.DOING.toString().toLowerCase().equals(slaTimeVo.getStatus())) {
-                slaService.loadJobNotifyAndTransfer(slaId, slaConfigObj);
+                processTaskSlaService.loadJobNotifyAndTransfer(slaId, slaConfigObj);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
