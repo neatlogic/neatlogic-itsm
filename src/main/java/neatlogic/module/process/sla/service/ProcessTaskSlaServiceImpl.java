@@ -89,7 +89,6 @@ public class ProcessTaskSlaServiceImpl implements ProcessTaskSlaService {
         if (CollectionUtils.isNotEmpty(notifyPolicyList)) {
             List<ProcessTaskSlaNotifyVo> processTaskSlaNotifyList = processTaskSlaMapper.getProcessTaskSlaNotifyBySlaId(slaId);
             if (CollectionUtils.isNotEmpty(processTaskSlaNotifyList)) {
-//                    System.out.println("删除时效id=" + slaId + "的job，因为超时时间点变了");
                 processTaskSlaMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
             }
             for (int i = 0; i < notifyPolicyList.size(); i++) {
@@ -109,7 +108,6 @@ public class ProcessTaskSlaServiceImpl implements ProcessTaskSlaService {
                                     TenantContext.get().getTenantUuid()
                             );
                     JobObject jobObject = jobObjectBuilder.build();
-//                    System.out.println("loadJobNotifyAndtransfer....");
                     jobHandler.reloadJob(jobObject);
                 } else {
                     throw new ScheduleHandlerNotFoundException(ProcessTaskSlaNotifyJob.class.getName());
