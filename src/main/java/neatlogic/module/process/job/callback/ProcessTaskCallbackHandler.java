@@ -92,6 +92,23 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
             if (processTaskStepVo == null) {
                 return;
             }
+            List<String> runningStatusList = new ArrayList<>();
+            runningStatusList.add(JobStatus.PAUSED.getValue());
+            runningStatusList.add(JobStatus.PAUSING.getValue());
+            runningStatusList.add(JobStatus.PENDING.getValue());
+            runningStatusList.add(JobStatus.READY.getValue());
+            runningStatusList.add(JobStatus.RUNNING.getValue());
+            runningStatusList.add(JobStatus.SAVED.getValue());
+            runningStatusList.add(JobStatus.WAIT_INPUT.getValue());
+            List<String> completedStatusList = new ArrayList<>();
+            completedStatusList.add(JobStatus.COMPLETED.getValue());
+            completedStatusList.add(JobStatus.CHECKED.getValue());
+            List<String> failedStatusList = new ArrayList<>();
+            failedStatusList.add(JobStatus.ABORTED.getValue());
+            failedStatusList.add(JobStatus.ABORTING.getValue());
+            failedStatusList.add(JobStatus.FAILED.getValue());
+            failedStatusList.add(JobStatus.REVOKED.getValue());
+            int completed = 0, failed = 0;
             // 获取工单锁
             processTaskMapper.getProcessTaskLockById(processTaskStepVo.getProcessTaskId());
             // 获取与工单步骤关联的作业列表，如果其中存在作业状态为“待处理”和“处理中”的情况下，直接返回
@@ -99,10 +116,17 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
             if (CollectionUtils.isNotEmpty(jobIdList)) {
                 List<AutoexecJobVo> autoexecJobList = autoexecJobMapper.getJobListByIdList(jobIdList);
                 for (AutoexecJobVo jobVo : autoexecJobList) {
-                    if (Objects.equals(jobVo.getStatus(), JobStatus.PENDING.getValue())
-                            || Objects.equals(jobVo.getStatus(), JobStatus.RUNNING.getValue())) {
+                    if (runningStatusList.contains(jobVo.getStatus())) {
                         return;
+                    } else if (completedStatusList.contains(jobVo.getStatus())) {
+                        completed++;
+                    } else if (failedStatusList.contains(jobVo.getStatus())) {
+                        failed++;
                     }
+//                    if (Objects.equals(jobVo.getStatus(), JobStatus.PENDING.getValue())
+//                            || Objects.equals(jobVo.getStatus(), JobStatus.RUNNING.getValue())) {
+//                        return;
+//                    }
                 }
             }
             String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
@@ -139,14 +163,21 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
                 }
                 failPolicy = (String) JSONPath.read(config, "autoexecConfig.failPolicy");
             }
-            if (JobStatus.COMPLETED.getValue().equals(autoexecJobVo.getStatus())) {
-                processTaskStepComplete(processTaskStepVo, formAttributeDataList, hidecomponentList);
-            } else {
-                //暂停中、已暂停、中止中、已中止、已完成、已失败都属于异常，根据失败策略处理
+            if (failed > 0) {
                 if (FailPolicy.KEEP_ON.getValue().equals(failPolicy)) {
                     processTaskStepComplete(processTaskStepVo, formAttributeDataList, hidecomponentList);
                 }
+            } else {
+                processTaskStepComplete(processTaskStepVo, formAttributeDataList, hidecomponentList);
             }
+//            if (JobStatus.COMPLETED.getValue().equals(autoexecJobVo.getStatus())) {
+//                processTaskStepComplete(processTaskStepVo, formAttributeDataList, hidecomponentList);
+//            } else {
+//                //暂停中、已暂停、中止中、已中止、已失败都属于异常，根据失败策略处理
+//                if (FailPolicy.KEEP_ON.getValue().equals(failPolicy)) {
+//                    processTaskStepComplete(processTaskStepVo, formAttributeDataList, hidecomponentList);
+//                }
+//            }
         }
     }
 
