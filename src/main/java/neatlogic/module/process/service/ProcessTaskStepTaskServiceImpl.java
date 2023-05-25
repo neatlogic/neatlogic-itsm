@@ -255,33 +255,34 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         if (stepTaskVo == null) {
             throw new ProcessTaskStepTaskNotFoundException(id.toString());
         }
-        if (StringUtils.isBlank(content)) {
-            if (StringUtils.isNotBlank(button)) {
-                TaskConfigVo taskConfigVo = taskMapper.getTaskConfigById(stepTaskVo.getTaskConfigId());
-                if (taskConfigVo != null) {
-                    JSONObject config = taskConfigVo.getConfig();
-                    if (MapUtils.isNotEmpty(config)) {
-                        JSONArray customButtonList = config.getJSONArray("customButtonList");
-                        if (CollectionUtils.isNotEmpty(customButtonList)) {
-                            for (int i = 0; i < customButtonList.size(); i++) {
-                                JSONObject customButton = customButtonList.getJSONObject(i);
-                                if (MapUtils.isNotEmpty(customButton)) {
-                                    String name = customButton.getString("name");
-                                    if (Objects.equals(name, button)) {
-                                        Integer isRequired = customButton.getInteger("isRequired");
-                                        if (Objects.equals(isRequired, 1)) {
-                                            throw new ProcessTaskStepTaskContentIsEmptyException();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                throw new ProcessTaskStepTaskContentIsEmptyException();
-            }
-        }
+//        回复内容改成必填，这里不需要判断是否设置必填
+//        if (StringUtils.isBlank(content)) {
+//            if (StringUtils.isNotBlank(button)) {
+//                TaskConfigVo taskConfigVo = taskMapper.getTaskConfigById(stepTaskVo.getTaskConfigId());
+//                if (taskConfigVo != null) {
+//                    JSONObject config = taskConfigVo.getConfig();
+//                    if (MapUtils.isNotEmpty(config)) {
+//                        JSONArray customButtonList = config.getJSONArray("customButtonList");
+//                        if (CollectionUtils.isNotEmpty(customButtonList)) {
+//                            for (int i = 0; i < customButtonList.size(); i++) {
+//                                JSONObject customButton = customButtonList.getJSONObject(i);
+//                                if (MapUtils.isNotEmpty(customButton)) {
+//                                    String name = customButton.getString("name");
+//                                    if (Objects.equals(name, button)) {
+//                                        Integer isRequired = customButton.getInteger("isRequired");
+//                                        if (Objects.equals(isRequired, 1)) {
+//                                            throw new ProcessTaskStepTaskContentIsEmptyException();
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            } else {
+//                throw new ProcessTaskStepTaskContentIsEmptyException();
+//            }
+//        }
         Long processTaskId = stepTaskVo.getProcessTaskId();
         Long processTaskStepId = stepTaskVo.getProcessTaskStepId();
         // 锁定当前流程

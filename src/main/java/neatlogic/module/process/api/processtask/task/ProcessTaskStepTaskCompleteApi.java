@@ -60,7 +60,7 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase impl
     @Input({
             @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "任务id"),
             @Param(name = "button", type = ApiParamType.STRING, desc = "按钮"),
-            @Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述"),
             @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
     })
     @Output({})
