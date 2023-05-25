@@ -50,6 +50,7 @@ public class ItsmSlaRecalculateHandler implements ISlaRecalculateHandler {
     @Override
     @Transactional
     public void execute(String worktimeUuid) {
+        // 查询出所有与worktimeUuid服务窗口关联的未完成的slaId，且相关工单的状态为进行中，且未删除
         int rowNum = processTaskSlaMapper.getDoingOrPauseSlaIdCountByWorktimeUuid(worktimeUuid);
         if (rowNum == 0) {
             return;
@@ -81,7 +82,6 @@ public class ItsmSlaRecalculateHandler implements ISlaRecalculateHandler {
                 return;
             }
             ProcessTaskSlaTimeVo oldSlaTimeVo = processTaskSlaMapper.getProcessTaskSlaTimeBySlaId(slaId);
-            System.out.println("oldSlaTimeVo=" + oldSlaTimeVo);
             if (oldSlaTimeVo == null) {
                 return;
             }
@@ -102,7 +102,6 @@ public class ItsmSlaRecalculateHandler implements ISlaRecalculateHandler {
             processTaskSlaService.recalculateExpireTime(slaTimeVo, currentTimeMillis, worktimeUuid);
             slaTimeVo.setStatus(oldSlaTimeVo.getStatus());
 
-            System.out.println("newSlaTimeVo=" + slaTimeVo);
             processTaskSlaMapper.updateProcessTaskSlaTime(slaTimeVo);
             if (!Objects.equals(oldSlaTimeVo.getExpireTimeLong(), slaTimeVo.getExpireTimeLong())
                     && SlaStatus.DOING.toString().toLowerCase().equals(slaTimeVo.getStatus())) {
