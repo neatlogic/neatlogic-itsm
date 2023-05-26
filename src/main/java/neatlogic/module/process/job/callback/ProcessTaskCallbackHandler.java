@@ -92,22 +92,6 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
             if (processTaskStepVo == null) {
                 return;
             }
-            List<String> runningStatusList = new ArrayList<>();
-            runningStatusList.add(JobStatus.PAUSED.getValue());
-            runningStatusList.add(JobStatus.PAUSING.getValue());
-            runningStatusList.add(JobStatus.PENDING.getValue());
-            runningStatusList.add(JobStatus.READY.getValue());
-            runningStatusList.add(JobStatus.RUNNING.getValue());
-            runningStatusList.add(JobStatus.SAVED.getValue());
-            runningStatusList.add(JobStatus.WAIT_INPUT.getValue());
-            List<String> completedStatusList = new ArrayList<>();
-            completedStatusList.add(JobStatus.COMPLETED.getValue());
-            completedStatusList.add(JobStatus.CHECKED.getValue());
-            List<String> failedStatusList = new ArrayList<>();
-            failedStatusList.add(JobStatus.ABORTED.getValue());
-            failedStatusList.add(JobStatus.ABORTING.getValue());
-            failedStatusList.add(JobStatus.FAILED.getValue());
-            failedStatusList.add(JobStatus.REVOKED.getValue());
             int completed = 0, failed = 0;
             // 获取工单锁
             processTaskMapper.getProcessTaskLockById(processTaskStepVo.getProcessTaskId());
@@ -116,11 +100,11 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
             if (CollectionUtils.isNotEmpty(jobIdList)) {
                 List<AutoexecJobVo> autoexecJobList = autoexecJobMapper.getJobListByIdList(jobIdList);
                 for (AutoexecJobVo jobVo : autoexecJobList) {
-                    if (runningStatusList.contains(jobVo.getStatus())) {
+                    if (JobStatus.isRunningStatus(jobVo.getStatus())) {
                         return;
-                    } else if (completedStatusList.contains(jobVo.getStatus())) {
+                    } else if (JobStatus.isCompletedStatus(jobVo.getStatus())) {
                         completed++;
-                    } else if (failedStatusList.contains(jobVo.getStatus())) {
+                    } else if (JobStatus.isFailedStatus(jobVo.getStatus())) {
                         failed++;
                     }
 //                    if (Objects.equals(jobVo.getStatus(), JobStatus.PENDING.getValue())
