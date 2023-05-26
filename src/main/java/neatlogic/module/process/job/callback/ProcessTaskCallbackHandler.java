@@ -92,6 +92,7 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
             if (processTaskStepVo == null) {
                 return;
             }
+            int completed = 0, failed = 0;
             // 获取工单锁
             processTaskMapper.getProcessTaskLockById(processTaskStepVo.getProcessTaskId());
             // 获取与工单步骤关联的作业列表，如果其中存在作业状态为“待处理”和“处理中”的情况下，直接返回
@@ -99,10 +100,17 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
             if (CollectionUtils.isNotEmpty(jobIdList)) {
                 List<AutoexecJobVo> autoexecJobList = autoexecJobMapper.getJobListByIdList(jobIdList);
                 for (AutoexecJobVo jobVo : autoexecJobList) {
-                    if (Objects.equals(jobVo.getStatus(), JobStatus.PENDING.getValue())
-                            || Objects.equals(jobVo.getStatus(), JobStatus.RUNNING.getValue())) {
+                    if (JobStatus.isRunningStatus(jobVo.getStatus())) {
                         return;
+                    } else if (JobStatus.isCompletedStatus(jobVo.getStatus())) {
+                        completed++;
+                    } else if (JobStatus.isFailedStatus(jobVo.getStatus())) {
+                        failed++;
                     }
+//                    if (Objects.equals(jobVo.getStatus(), JobStatus.PENDING.getValue())
+//                            || Objects.equals(jobVo.getStatus(), JobStatus.RUNNING.getValue())) {
+//                        return;
+//                    }
                 }
             }
             String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
@@ -139,14 +147,21 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
                 }
                 failPolicy = (String) JSONPath.read(config, "autoexecConfig.failPolicy");
             }
-            if (JobStatus.COMPLETED.getValue().equals(autoexecJobVo.getStatus())) {
-                processTaskStepComplete(processTaskStepVo, formAttributeDataList, hidecomponentList);
-            } else {
-                //暂停中、已暂停、中止中、已中止、已完成、已失败都属于异常，根据失败策略处理
+            if (failed > 0) {
                 if (FailPolicy.KEEP_ON.getValue().equals(failPolicy)) {
                     processTaskStepComplete(processTaskStepVo, formAttributeDataList, hidecomponentList);
                 }
+            } else {
+                processTaskStepComplete(processTaskStepVo, formAttributeDataList, hidecomponentList);
             }
+//            if (JobStatus.COMPLETED.getValue().equals(autoexecJobVo.getStatus())) {
+//                processTaskStepComplete(processTaskStepVo, formAttributeDataList, hidecomponentList);
+//            } else {
+//                //暂停中、已暂停、中止中、已中止、已失败都属于异常，根据失败策略处理
+//                if (FailPolicy.KEEP_ON.getValue().equals(failPolicy)) {
+//                    processTaskStepComplete(processTaskStepVo, formAttributeDataList, hidecomponentList);
+//                }
+//            }
         }
     }
 
