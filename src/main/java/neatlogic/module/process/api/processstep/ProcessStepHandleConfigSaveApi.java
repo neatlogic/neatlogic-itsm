@@ -2,9 +2,10 @@ package neatlogic.module.process.api.processstep;
 
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dependency.core.DependencyManager;
+import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.notify.dao.mapper.NotifyMapper;
-import neatlogic.framework.notify.exception.NotifyPolicyNotFoundException;
 import neatlogic.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import neatlogic.framework.process.dto.ProcessStepHandlerVo;
 import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
@@ -67,6 +68,7 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
     @Description(desc = "流程节点组件配置保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
     	List<ProcessStepHandlerVo> processStepHandlerList = jsonObj.getJSONArray("processStepHandlerList").toJavaList(ProcessStepHandlerVo.class);
     	for(ProcessStepHandlerVo stepHandlerVo :processStepHandlerList) {
     	    String handler = stepHandlerVo.getHandler();
@@ -79,14 +81,8 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
                     DependencyManager.delete(NotifyPolicyProcessStepHandlerDependencyHandler.class, handler);
                     JSONObject notifyPolicyConfig = config.getJSONObject("notifyPolicyConfig");
                     InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
-                    if (invokeNotifyPolicyConfigVo != null) {
-                        Long policyId = invokeNotifyPolicyConfigVo.getPolicyId();
-                        if (policyId != null) {
-                            if(notifyMapper.checkNotifyPolicyIsExists(policyId) == 0){
-                                throw new NotifyPolicyNotFoundException(policyId.toString());
-                            }
-                            DependencyManager.insert(NotifyPolicyProcessStepHandlerDependencyHandler.class, policyId, handler);
-                        }
+                    if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(invokeNotifyPolicyConfigVo)) {
+                        DependencyManager.insert(NotifyPolicyProcessStepHandlerDependencyHandler.class, invokeNotifyPolicyConfigVo.getPolicyId(), handler);
                     }
     			} 			
     		}
