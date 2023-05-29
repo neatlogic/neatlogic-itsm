@@ -492,6 +492,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     JSONObject jsonParam = currentProcessTaskStepVo.getParamObj();
                     jsonParam.put("action", ProcessTaskOperationType.STEP_COMPLETE.getValue());
                     jsonParam.put("nextStepId", nextStepIdList.get(0));
+                    jsonParam.put(ProcessTaskAuditDetailType.AUTOMATICINFO.getParamName(), data);
                     IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
                     processHandler.autoComplete(currentProcessTaskStepVo);
                 }
@@ -512,7 +513,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     }
                 }
                 requestAudit.put("failedReason", failedReason);
-                failPolicy(automaticConfigVo, currentProcessTaskStepVo, failedReason);
+                failPolicy(automaticConfigVo, currentProcessTaskStepVo, failedReason, data);
                 auditDataVo.setData(data.toJSONString());
                 auditDataVo.setFcu(SystemUser.SYSTEM.getUserUuid());
                 processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
@@ -606,6 +607,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 JSONObject jsonParam = currentProcessTaskStepVo.getParamObj();
                 jsonParam.put("action", ProcessTaskOperationType.STEP_COMPLETE.getValue());
                 jsonParam.put("nextStepId", nextStepIdList.get(0));
+                jsonParam.put(ProcessTaskAuditDetailType.AUTOMATICINFO.getParamName(), data);
                 IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
                 processHandler.autoComplete(currentProcessTaskStepVo);
                 isUnloadJob = true;
@@ -626,7 +628,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     }
                 }
                 callbackAudit.put("failedReason", failedReason);
-                failPolicy(automaticConfigVo, currentProcessTaskStepVo, failedReason);
+                failPolicy(automaticConfigVo, currentProcessTaskStepVo, failedReason, data);
                 isUnloadJob = true;
             } else {
 //                System.out.println("callbackRequest 继续轮询回调");
@@ -739,7 +741,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
      * @param currentProcessTaskStepVo
      * @param failedReason
      */
-    private void failPolicy(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo, String failedReason) {
+    private void failPolicy(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo, String failedReason, JSONObject automaticInfo) {
         IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
         if (FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
             List<ProcessTaskStepVo> backStepList =
@@ -751,6 +753,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     jsonParam.put("action", ProcessTaskOperationType.STEP_BACK.getValue());
                     jsonParam.put("nextStepId", nextProcessTaskStepVo.getId());
                     jsonParam.put("content", failedReason);
+                    jsonParam.put(ProcessTaskAuditDetailType.AUTOMATICINFO.getParamName(), automaticInfo);
                     processHandler.autoComplete(currentProcessTaskStepVo);
                 }
             }
@@ -761,9 +764,12 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
             JSONObject jsonParam = currentProcessTaskStepVo.getParamObj();
             jsonParam.put("action", ProcessTaskOperationType.STEP_COMPLETE.getValue());
             jsonParam.put("nextStepId", nextStepIdList.get(0));
+            jsonParam.put(ProcessTaskAuditDetailType.AUTOMATICINFO.getParamName(), automaticInfo);
             processHandler.autoComplete(currentProcessTaskStepVo);
         } else if (FailPolicy.CANCEL.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
-            processHandler.abortProcessTask(new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId()));
+            ProcessTaskVo processTaskVo = new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId());
+            processTaskVo.getParamObj().put(ProcessTaskAuditDetailType.AUTOMATICINFO.getParamName(), automaticInfo);
+            processHandler.abortProcessTask(processTaskVo);
         }
     }
 }

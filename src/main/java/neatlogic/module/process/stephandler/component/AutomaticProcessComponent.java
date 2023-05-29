@@ -309,6 +309,12 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
+        ProcessTaskStepDataVo stepDataVo = processTaskStepDataMapper
+                .getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),
+                        currentProcessTaskStepVo.getId(), currentProcessTaskStepVo.getHandler(), SystemUser.SYSTEM.getUserUuid()));
+        if (stepDataVo != null) {
+            currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.AUTOMATICINFO.getParamName(), stepDataVo.getData());
+        }
         processTaskMapper.deleteProcessTaskStepAutomaticRequestByProcessTaskStepId(currentProcessTaskStepVo.getId());
         return 0;
     }
