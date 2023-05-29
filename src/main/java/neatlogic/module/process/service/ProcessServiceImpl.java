@@ -18,13 +18,14 @@ package neatlogic.module.process.service;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dependency.core.DependencyManager;
 import neatlogic.framework.exception.integration.IntegrationNotFoundException;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.exception.FormNotFoundException;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
+import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.notify.dao.mapper.NotifyMapper;
-import neatlogic.framework.notify.exception.NotifyPolicyNotFoundException;
 import neatlogic.framework.process.dao.mapper.ProcessTagMapper;
 import neatlogic.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import neatlogic.framework.process.dto.*;
@@ -67,6 +68,7 @@ public class ProcessServiceImpl implements ProcessService {
 
     @Override
     public int saveProcess(ProcessVo processVo) throws ProcessNameRepeatException {
+        INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
         if (processMapper.checkProcessNameIsRepeat(processVo) > 0) {
             throw new ProcessNameRepeatException(processVo.getName());
         }
@@ -109,17 +111,9 @@ public class ProcessServiceImpl implements ProcessService {
                         processMapper.insertProcessStepSla(stepUuid, slaVo.getUuid());
                     }
                     for (InvokeNotifyPolicyConfigVo notifyPolicyConfig : slaVo.getNotifyPolicyConfigList()) {
-                        if (notifyPolicyConfig.getPolicyId() == null) {
-                            continue;
+                        if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(notifyPolicyConfig)) {
+                            DependencyManager.insert(NotifyPolicyProcessSlaDependencyHandler.class, notifyPolicyConfig.getPolicyId(), slaVo.getUuid());
                         }
-                        if (notifyMapper.checkNotifyPolicyIsExists(notifyPolicyConfig.getPolicyId()) == 0) {
-                            if (StringUtils.isNotBlank(notifyPolicyConfig.getPolicyPath())) {
-                                throw new NotifyPolicyNotFoundException(notifyPolicyConfig.getPolicyPath());
-                            } else {
-                                throw new NotifyPolicyNotFoundException(notifyPolicyConfig.getPolicyId());
-                            }
-                        }
-                        DependencyManager.insert(NotifyPolicyProcessSlaDependencyHandler.class, notifyPolicyConfig.getPolicyId(), slaVo.getUuid());
                     }
                 } else {
                     //关联的多个步骤各用一个时效
@@ -128,17 +122,9 @@ public class ProcessServiceImpl implements ProcessService {
                         processMapper.insertProcessSla(slaVo);
                         processMapper.insertProcessStepSla(stepUuid, slaVo.getUuid());
                         for (InvokeNotifyPolicyConfigVo notifyPolicyConfig : slaVo.getNotifyPolicyConfigList()) {
-                            if (notifyPolicyConfig.getPolicyId() == null) {
-                                continue;
+                            if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(notifyPolicyConfig)) {
+                                DependencyManager.insert(NotifyPolicyProcessSlaDependencyHandler.class, notifyPolicyConfig.getPolicyId(), slaVo.getUuid());
                             }
-                            if (notifyMapper.checkNotifyPolicyIsExists(notifyPolicyConfig.getPolicyId()) == 0) {
-                                if (StringUtils.isNotBlank(notifyPolicyConfig.getPolicyPath())) {
-                                    throw new NotifyPolicyNotFoundException(notifyPolicyConfig.getPolicyPath());
-                                } else {
-                                    throw new NotifyPolicyNotFoundException(notifyPolicyConfig.getPolicyId());
-                                }
-                            }
-                            DependencyManager.insert(NotifyPolicyProcessSlaDependencyHandler.class, notifyPolicyConfig.getPolicyId(), slaVo.getUuid());
                         }
                     }
                 }
@@ -176,14 +162,7 @@ public class ProcessServiceImpl implements ProcessService {
                     }
                 }
                 InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = stepVo.getNotifyPolicyConfig();
-                if (invokeNotifyPolicyConfigVo != null && invokeNotifyPolicyConfigVo.getPolicyId() != null) {
-                    if (notifyMapper.checkNotifyPolicyIsExists(invokeNotifyPolicyConfigVo.getPolicyId()) == 0) {
-                        if (StringUtils.isNotBlank(invokeNotifyPolicyConfigVo.getPolicyPath())) {
-                            throw new NotifyPolicyNotFoundException(invokeNotifyPolicyConfigVo.getPolicyPath());
-                        } else {
-                            throw new NotifyPolicyNotFoundException(invokeNotifyPolicyConfigVo.getPolicyId());
-                        }
-                    }
+                if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(invokeNotifyPolicyConfigVo)) {
                     DependencyManager.insert(NotifyPolicyProcessStepDependencyHandler.class, invokeNotifyPolicyConfigVo.getPolicyId(), stepVo.getUuid());
                 }
                 processMapper.deleteProcessStepCommentTemplate(stepVo.getUuid());
@@ -236,14 +215,7 @@ public class ProcessServiceImpl implements ProcessService {
         }
 
         InvokeNotifyPolicyConfigVo notifyPolicyConfig = processVo.getNotifyPolicyConfig();
-        if (notifyPolicyConfig != null && notifyPolicyConfig.getPolicyId() != null) {
-            if (notifyMapper.checkNotifyPolicyIsExists(notifyPolicyConfig.getPolicyId()) == 0) {
-                if (StringUtils.isNotBlank(notifyPolicyConfig.getPolicyPath())) {
-                    throw new NotifyPolicyNotFoundException(notifyPolicyConfig.getPolicyPath());
-                } else {
-                    throw new NotifyPolicyNotFoundException(notifyPolicyConfig.getPolicyId());
-                }
-            }
+        if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(notifyPolicyConfig)) {
             DependencyManager.insert(NotifyPolicyProcessDependencyHandler.class, notifyPolicyConfig.getPolicyId(), uuid);
         }
         if (CollectionUtils.isNotEmpty(processVo.getIntegrationUuidList())) {
