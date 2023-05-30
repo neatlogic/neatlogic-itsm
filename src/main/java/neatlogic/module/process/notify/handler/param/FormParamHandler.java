@@ -19,6 +19,7 @@ package neatlogic.module.process.notify.handler.param;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeDataConversionHandler;
 import neatlogic.framework.form.dto.AttributeDataVo;
+import neatlogic.framework.form.dto.AttributeExtendedDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
@@ -82,7 +83,7 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
         if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
             attributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
         }
-        List<AttributeDataVo> attributeDataVoList = new ArrayList<>();
+        List<AttributeExtendedDataVo> attributeExtendedDataList = new ArrayList<>();
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
         List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
@@ -97,10 +98,9 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
             IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttribute.getHandler());
             if (handler != null) {
                 Object value = handler.dataTransformationForEmail(attributeDataVo, formAttribute.getConfigObj());
-                attributeDataVo.setDataObj(value);
-                attributeDataVoList.add(attributeDataVo);
+                attributeExtendedDataList.add(new AttributeExtendedDataVo(attributeDataVo, value));
             }
         }
-        return new FormTable(attributeDataVoList);
+        return new FormTable(attributeExtendedDataList);
     }
 }
