@@ -23,7 +23,7 @@ public class ProcessTaskMessageHandler extends MessageHandlerBase {
 
     @Override
     public String getName() {
-        return "modulegroup.itsm";
+        return "modulegroup.itsm.a";
     }
 
     @Override
@@ -56,7 +56,7 @@ public class ProcessTaskMessageHandler extends MessageHandlerBase {
         }
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("<p>");
-        stringBuilder.append(I18nUtils.getMessage("modulegroup.itsm"));
+        stringBuilder.append(I18nUtils.getMessage("modulegroup.itsm.a"));
         stringBuilder.append("-");
         stringBuilder.append(I18nUtils.getMessage(policyHandlerName));
         stringBuilder.append("-");
