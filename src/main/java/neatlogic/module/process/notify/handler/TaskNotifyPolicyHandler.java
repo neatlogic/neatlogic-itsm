@@ -38,7 +38,7 @@ public class TaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 
 	@Override
 	public String getName() {
-		return "handler.notify.processtask";
+		return "common.itsm.processtask";
 	}
 	
 	@Override

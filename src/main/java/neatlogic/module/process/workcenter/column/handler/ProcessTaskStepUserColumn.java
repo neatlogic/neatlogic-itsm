@@ -41,7 +41,7 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 
     @Override
     public String getDisplayName() {
-        return "handler.processtask.column.stepuser";
+        return "common.stepuser";
     }
 
     @Override

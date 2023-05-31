@@ -36,7 +36,7 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 
 	@Override
 	public String getDisplayName() {
-		return "handler.processtask.column.channeltype";
+		return "common.channeltype";
 	}
 
 	@Override

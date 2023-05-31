@@ -23,7 +23,7 @@ public class ProcessTaskSerialNumberColumn extends ProcessTaskColumnBase impleme
 
 	@Override
 	public String getDisplayName() {
-		return "handler.processtask.column.serialnumber";
+		return "common.tasknumber";
 	}
 
 	/*@Override

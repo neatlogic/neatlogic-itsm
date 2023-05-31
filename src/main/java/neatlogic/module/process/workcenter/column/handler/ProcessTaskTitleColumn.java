@@ -24,7 +24,7 @@ public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IPr
 
 	@Override
 	public String getDisplayName() {
-		return "handler.processtask.column.title";
+		return "common.title";
 	}
 
 	/*@Override

@@ -37,7 +37,7 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
 
     @Override
     public String getDisplayName() {
-        return "handler.processtask.column.priority";
+        return "common.priority";
     }
 
     @Override

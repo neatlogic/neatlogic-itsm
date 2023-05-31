@@ -55,11 +55,11 @@ public class StepSlaParamHandler extends ProcessTaskNotifyParamHandlerBase {
 //            stringBuilder.append(" ");
 //            if (Objects.equals(slaTimeVo.getStatus(), SlaStatus.DONE.name().toLowerCase())) {
 ////                stringBuilder.append("耗时 ");
-//                stringBuilder.append(I18nUtils.getMessage("const.timeconsuming"));
+//                stringBuilder.append(I18nUtils.getMessage("common.costtime"));
 //                stringBuilder.append(" ");
 //                stringBuilder.append(TimeUtil.millisecondsFormat((slaTimeVo.getTimeSum() - slaTimeVo.getTimeLeft()), 3, TimeUnit.MINUTES, " "));
 //                stringBuilder.append(" ");
-//                stringBuilder.append(I18nUtils.getMessage("const.completed"));
+//                stringBuilder.append(I18nUtils.getMessage("common.completed"));
 ////                stringBuilder.append("完成");
 //            } else {
 //                if (slaTimeVo.getTimeLeft() > 0) {
@@ -68,7 +68,7 @@ public class StepSlaParamHandler extends ProcessTaskNotifyParamHandlerBase {
 //                    stringBuilder.append(" ");
 //                } else {
 ////                    stringBuilder.append("超时 ");
-//                    stringBuilder.append(I18nUtils.getMessage("const.overtime"));
+//                    stringBuilder.append(I18nUtils.getMessage("common.timeout"));
 //                    stringBuilder.append(" ");
 //                }
 //                if (slaTimeVo.getTimeLeft() > 0 || Objects.equals(slaTimeVo.getDisplayModeAfterTimeout(), "workTime")) {
@@ -85,7 +85,7 @@ public class StepSlaParamHandler extends ProcessTaskNotifyParamHandlerBase {
 //                } else if (Objects.equals(slaTimeVo.getStatus(), SlaStatus.PAUSE.name().toLowerCase())) {
 //                    stringBuilder.append(" ");
 ////                    stringBuilder.append("已暂停");
-//                    stringBuilder.append(I18nUtils.getMessage("const.paused"));
+//                    stringBuilder.append(I18nUtils.getMessage("common.paused"));
 //                }
 //            }
 //            slaTimeList.add(stringBuilder.toString());
