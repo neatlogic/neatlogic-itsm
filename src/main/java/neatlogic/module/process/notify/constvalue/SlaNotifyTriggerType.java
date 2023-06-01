@@ -4,7 +4,7 @@ import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.util.I18n;
 
 public enum SlaNotifyTriggerType implements INotifyTriggerType {
-    TIMEOUT("timeout", new I18n("enum.process.slanotifytriggertype.timeout"), new I18n("enum.process.slanotifytriggertype.timeout"));
+    TIMEOUT("timeout", new I18n("SLA"), new I18n("SLA"));
 
     private String trigger;
     private I18n text;

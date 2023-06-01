@@ -29,7 +29,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 
 	@Override
 	public String getDisplayName() {
-		return "common.currentstep";
+		return "当前步骤";
 	}
 
 	@Override

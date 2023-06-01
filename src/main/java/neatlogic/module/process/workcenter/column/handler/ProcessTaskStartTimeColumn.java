@@ -27,7 +27,7 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
 
     @Override
     public String getDisplayName() {
-        return "handler.processtask.column.starttime";
+        return "上报时间";
     }
 
    /* @Override

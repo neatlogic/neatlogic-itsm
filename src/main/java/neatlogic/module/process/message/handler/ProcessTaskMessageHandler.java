@@ -23,12 +23,12 @@ public class ProcessTaskMessageHandler extends MessageHandlerBase {
 
     @Override
     public String getName() {
-        return "common.itservice";
+        return "IT服务";
     }
 
     @Override
     public String getDescription() {
-        return "handler.message.itsm.description";
+        return "实时显示待处理工单信息，支持快速审批";
     }
 
     @Override
@@ -56,7 +56,7 @@ public class ProcessTaskMessageHandler extends MessageHandlerBase {
         }
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("<p>");
-        stringBuilder.append(I18nUtils.getMessage("common.itservice"));
+        stringBuilder.append(I18nUtils.getMessage("IT服务"));
         stringBuilder.append("-");
         stringBuilder.append(I18nUtils.getMessage(policyHandlerName));
         stringBuilder.append("-");
@@ -80,7 +80,7 @@ public class ProcessTaskMessageHandler extends MessageHandlerBase {
                 stepName = taskStepVo.getName();
             }
         }
-        stringBuilder.append(I18nUtils.getMessage("handler.message.itsm.callermessage", processTaskIdStr, stepName, stepIdStr));
+        stringBuilder.append(I18nUtils.getMessage("工单号：{0}、步骤名：{1}({2})", processTaskIdStr, stepName, stepIdStr));
         return stringBuilder.toString();
     }
 }

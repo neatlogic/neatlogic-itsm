@@ -39,7 +39,7 @@ import java.util.List;
 public class TimedTaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     @Override
     public String getName() {
-        return "common.scheduledtask";
+        return "定时任务";
     }
 
 //    @Override

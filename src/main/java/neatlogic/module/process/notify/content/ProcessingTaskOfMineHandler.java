@@ -67,7 +67,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
     protected ProcessTaskService processTaskService;
 
 	public enum ConditionOptions{
-		STEPTEAM("stepteam","enum.process.conditionoptions.stepteam",Expression.INCLUDE.getExpression());
+		STEPTEAM("stepteam","处理组",Expression.INCLUDE.getExpression());
 
 		private String value;
 		private String text;

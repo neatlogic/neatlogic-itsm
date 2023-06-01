@@ -32,7 +32,7 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 
     @Override
     public String getDisplayName() {
-        return "common.owner";
+        return "上报人";
     }
 
     @Override

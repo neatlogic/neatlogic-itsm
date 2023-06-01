@@ -20,9 +20,9 @@ import neatlogic.framework.dashboard.constvalue.IDashboardGroupField;
 import neatlogic.framework.util.I18n;
 
 public enum ProcessTaskStepDashboardGroupField implements IDashboardGroupField {
-    EVERY_DAY("stepEveryday", new I18n("common.everyday")),
-    EVERY_MONTH("stepEveryMonth", new I18n("common.everymonth")),
-    EVERY_QUARTER("stepEveryQuarter", new I18n("common.everyquarter"));
+    EVERY_DAY("stepEveryday", new I18n("每天")),
+    EVERY_MONTH("stepEveryMonth", new I18n("每月")),
+    EVERY_QUARTER("stepEveryQuarter", new I18n("每季度"));
     private final String value;
     private final I18n text;
 

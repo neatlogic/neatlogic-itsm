@@ -20,10 +20,10 @@ import neatlogic.framework.dashboard.constvalue.IDashboardGroupField;
 import neatlogic.framework.util.I18nUtils;
 
 public enum ProcessTaskDashboardStatistics implements IDashboardGroupField {
-    AVG_HANDLE_COST_TIME("avgCostTime","enum.process.processtaskdashboardstatistics.avg_handle_cost_time"),
-    AVG_RESPONSE_COST_TIME("avgResponseCostTime","common.averageresponsetime"),
-    RESPONSE_PUNCTUALITY("responsePunctuality","common.responsepunctualityrate"),
-    HANDLE_PUNCTUALITY("handlePunctuality","common.processingpunctualityrate"),
+    AVG_HANDLE_COST_TIME("avgCostTime","平均耗时"),
+    AVG_RESPONSE_COST_TIME("avgResponseCostTime","平均响应耗时"),
+    RESPONSE_PUNCTUALITY("responsePunctuality","响应准时率"),
+    HANDLE_PUNCTUALITY("handlePunctuality","处理准时率"),
     ;
 
     private final String value;

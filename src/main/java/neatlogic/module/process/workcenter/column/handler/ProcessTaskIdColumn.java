@@ -23,7 +23,7 @@ public class ProcessTaskIdColumn extends ProcessTaskColumnBase implements IProce
 
 	@Override
 	public String getDisplayName() {
-		return "handler.processtask.column.id";
+		return "工单id";
 	}
 
 	/*@Override

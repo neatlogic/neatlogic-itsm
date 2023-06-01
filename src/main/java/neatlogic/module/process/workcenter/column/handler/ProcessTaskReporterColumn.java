@@ -29,7 +29,7 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
 
     @Override
     public String getDisplayName() {
-        return "common.reporter";
+        return "代报人";
     }
 
 	/*@Override
