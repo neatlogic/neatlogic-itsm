@@ -39,6 +39,7 @@ import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.form.dao.mapper.FormMapper;
+import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormActiveVersionNotFoundExcepiton;
 import neatlogic.framework.form.service.IFormCrossoverService;
@@ -2012,6 +2013,22 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
         return resultMap;
+    }
+
+    @Override
+    public List<FormAttributeVo> getFormAttributeListByProcessTaskId(Long processTaskId) {
+        ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
+        if (processTaskFormVo == null) {
+            // 工单没有表单直接返回
+            return new ArrayList<>();
+        }
+        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+        // 默认场景的表单
+        FormVersionVo formVersionVo = new FormVersionVo();
+        formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
+        formVersionVo.setFormName(processTaskFormVo.getFormName());
+        formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
+        return formVersionVo.getFormAttributeList();
     }
 
     /**

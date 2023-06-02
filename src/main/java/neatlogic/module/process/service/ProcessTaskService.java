@@ -17,6 +17,7 @@ limitations under the License.
 package neatlogic.module.process.service;
 
 import neatlogic.framework.dto.AuthenticationInfoVo;
+import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.notify.dto.NotifyReceiverVo;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
@@ -448,4 +449,11 @@ public interface ProcessTaskService {
      * @return
      */
     Map<ProcessUserType, List<String>> getProcessTaskStepProcessUserTypeData(ProcessTaskStepVo processTaskStepVo, List<ProcessUserType> processUserTypeList);
+
+    /**
+     * 根据工单id获取工单绑定的表单信息
+     * @param processTaskId 工单ID
+     * @return
+     */
+    List<FormAttributeVo> getFormAttributeListByProcessTaskId(Long processTaskId);
 }
