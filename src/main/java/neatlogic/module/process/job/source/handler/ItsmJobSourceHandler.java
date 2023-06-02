@@ -63,6 +63,9 @@ public class ItsmJobSourceHandler implements IAutoexecJobSource {
             }
             idList.add(Long.valueOf(str));
         }
+        if (CollectionUtils.isEmpty(idList)) {
+            return null;
+        }
         List<AutoexecJobRouteVo> resultList = new ArrayList<>();
 //        List<ProcessStepVo> processStepList = processMapper.getProcessStepListByUuidList(uniqueKeyList);
 //        if (CollectionUtils.isEmpty(processStepList)) {
