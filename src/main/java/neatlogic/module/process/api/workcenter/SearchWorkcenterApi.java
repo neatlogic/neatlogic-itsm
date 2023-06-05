@@ -49,7 +49,7 @@ public class SearchWorkcenterApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单中心搜索接口";
+        return "nmpaw.searchworkcenterapi.getname";
     }
 
     @Override
@@ -57,19 +57,19 @@ public class SearchWorkcenterApi extends PrivateApiComponentBase {
         return null;
     }
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = true),
-            @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "条件设置，为空则使用数据库中保存的条件"),
-            @Param(name = "sortList", type = ApiParamType.JSONARRAY, desc = "排序"),
-            @Param(name = "headerList", type = ApiParamType.JSONARRAY, desc = "显示的字段"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.typeuuid", isRequired = true),
+            @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "nmpaw.searchworkcenterapi.input.param.desc.conditionconfig"),
+            @Param(name = "sortList", type = ApiParamType.JSONARRAY, desc = "common.sort"),
+            @Param(name = "headerList", type = ApiParamType.JSONARRAY, desc = "nmpaw.searchworkcenterapi.input.param.desc.headerlist"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize")
     })
     @Output({
-            @Param(name = "theadList", type = ApiParamType.JSONARRAY, desc = "展示的字段"),
-            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "展示的值"),
+            @Param(name = "theadList", type = ApiParamType.JSONARRAY, desc = "common.theadlist"),
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "common.tbodylist"),
             @Param(explode = BasePageVo.class)
     })
-    @Description(desc = "工单中心搜索接口")
+    @Description(desc = "nmpaw.searchworkcenterapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
