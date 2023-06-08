@@ -71,7 +71,7 @@ import neatlogic.framework.process.task.TaskConfigManager;
 import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import neatlogic.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import neatlogic.framework.service.AuthenticationInfoService;
-import neatlogic.framework.util.I18nUtils;
+import neatlogic.framework.util.$;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
@@ -1605,7 +1605,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                         Map<String, Object> map = new HashMap<>();
                         for (IProcessTaskColumn column : ProcessTaskColumnFactory.columnComponentMap.values()) {
                             if (!column.getDisabled() && column.getIsShow() && column.getIsExport()) {
-                                map.put(I18nUtils.getMessage(column.getDisplayName()), column.getSimpleValue(processTaskVo));
+                                map.put($.t(column.getDisplayName()), column.getSimpleValue(processTaskVo));
                             }
                         }
                         taskList.add(map);

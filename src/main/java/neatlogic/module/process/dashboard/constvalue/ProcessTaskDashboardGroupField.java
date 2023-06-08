@@ -17,7 +17,7 @@ limitations under the License.
 package neatlogic.module.process.dashboard.constvalue;
 
 import neatlogic.framework.dashboard.constvalue.IDashboardGroupField;
-import neatlogic.framework.util.I18nUtils;
+import neatlogic.framework.util.$;
 
 public enum ProcessTaskDashboardGroupField implements IDashboardGroupField {
     EVERY_DAY("everyday","每天"),
@@ -38,7 +38,7 @@ public enum ProcessTaskDashboardGroupField implements IDashboardGroupField {
 
     @Override
     public String getText() {
-        return I18nUtils.getMessage(text);
+        return $.t(text);
     }
 
     public static String getValue(String _value) {

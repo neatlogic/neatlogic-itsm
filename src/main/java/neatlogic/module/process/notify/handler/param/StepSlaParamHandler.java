@@ -55,20 +55,20 @@ public class StepSlaParamHandler extends ProcessTaskNotifyParamHandlerBase {
 //            stringBuilder.append(" ");
 //            if (Objects.equals(slaTimeVo.getStatus(), SlaStatus.DONE.name().toLowerCase())) {
 ////                stringBuilder.append("耗时 ");
-//                stringBuilder.append(I18nUtils.getMessage("耗时"));
+//                stringBuilder.append($.t("耗时"));
 //                stringBuilder.append(" ");
 //                stringBuilder.append(TimeUtil.millisecondsFormat((slaTimeVo.getTimeSum() - slaTimeVo.getTimeLeft()), 3, TimeUnit.MINUTES, " "));
 //                stringBuilder.append(" ");
-//                stringBuilder.append(I18nUtils.getMessage("已完成"));
+//                stringBuilder.append($.t("已完成"));
 ////                stringBuilder.append("完成");
 //            } else {
 //                if (slaTimeVo.getTimeLeft() > 0) {
 ////                    stringBuilder.append("剩余 ");
-//                    stringBuilder.append(I18nUtils.getMessage("剩余"));
+//                    stringBuilder.append($.t("剩余"));
 //                    stringBuilder.append(" ");
 //                } else {
 ////                    stringBuilder.append("超时 ");
-//                    stringBuilder.append(I18nUtils.getMessage("超时"));
+//                    stringBuilder.append($.t("超时"));
 //                    stringBuilder.append(" ");
 //                }
 //                if (slaTimeVo.getTimeLeft() > 0 || Objects.equals(slaTimeVo.getDisplayModeAfterTimeout(), "workTime")) {
@@ -81,11 +81,11 @@ public class StepSlaParamHandler extends ProcessTaskNotifyParamHandlerBase {
 //                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //                    stringBuilder.append(sdf.format(slaTimeVo.getExpireTime()));
 ////                    stringBuilder.append("截止");
-//                    stringBuilder.append(I18nUtils.getMessage("截止"));
+//                    stringBuilder.append($.t("截止"));
 //                } else if (Objects.equals(slaTimeVo.getStatus(), SlaStatus.PAUSE.name().toLowerCase())) {
 //                    stringBuilder.append(" ");
 ////                    stringBuilder.append("已暂停");
-//                    stringBuilder.append(I18nUtils.getMessage("已暂停"));
+//                    stringBuilder.append($.t("已暂停"));
 //                }
 //            }
 //            slaTimeList.add(stringBuilder.toString());

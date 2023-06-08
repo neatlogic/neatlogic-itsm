@@ -1,5 +1,7 @@
 package neatlogic.module.process.notify.content;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.Expression;
@@ -22,14 +24,12 @@ import neatlogic.framework.notify.dto.job.NotifyJobVo;
 import neatlogic.framework.notify.exception.NotifyHandlerNotFoundException;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
-import neatlogic.framework.util.I18nUtils;
-import neatlogic.module.process.service.ProcessTaskService;
+import neatlogic.framework.util.$;
 import neatlogic.module.framework.message.handler.TimedTaskMessgeHandler;
 import neatlogic.module.framework.notify.handler.MessageNotifyHandler;
 import neatlogic.module.process.notify.constvalue.TimedTaskTriggerType;
 import neatlogic.module.process.notify.handler.TimedTaskNotifyPolicyHandler;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -81,7 +81,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			return value;
 		}
 		public String getText() {
-			return I18nUtils.getMessage(text);
+			return $.t(text);
 		}
 		public String getExpression() {
 			return expression;
@@ -193,7 +193,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				JSONArray dataColumnList = config.getJSONArray("dataColumnList");
 				List<String> columnNameList = new ArrayList<>();
 				Map<String, String> collect = ProcessTaskColumnFactory.columnComponentMap.values()
-						.stream().collect(Collectors.toMap(IProcessTaskColumn::getName, e -> I18nUtils.getMessage(e.getDisplayName())));
+						.stream().collect(Collectors.toMap(IProcessTaskColumn::getName, e -> $.t(e.getDisplayName())));
 				for(Object column : dataColumnList){
 					columnNameList.add(collect.get(column.toString()));
 				}
@@ -259,10 +259,10 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 					JSONArray dataColumns = config.getJSONArray("dataColumnList");
 					List<String> columnList = new ArrayList<>();
 					if(CollectionUtils.isNotEmpty(dataColumns)){
-						dataColumns.forEach(o -> columnList.add(I18nUtils.getMessage(ProcessTaskColumnFactory.columnComponentMap.get(o.toString()).getDisplayName())));
+						dataColumns.forEach(o -> columnList.add($.t(ProcessTaskColumnFactory.columnComponentMap.get(o.toString()).getDisplayName())));
 					}else{
 						for(Map.Entry<String, IProcessTaskColumn> entry : ProcessTaskColumnFactory.columnComponentMap.entrySet()){
-							columnList.add(I18nUtils.getMessage(entry.getValue().getDisplayName()));
+							columnList.add($.t(entry.getValue().getDisplayName()));
 						}
 					}
 					/** 获取按用户分好类的工单列表 **/
@@ -551,7 +551,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			Collection<IProcessTaskColumn> values = ProcessTaskColumnFactory.columnComponentMap.values();
 			values.stream().sorted(Comparator.comparing(IProcessTaskColumn::getSort)).forEach(o -> {
 				if(!o.getDisabled() && o.getIsShow() && o.getIsExport()){
-					result.add(new ValueTextVo(o.getName(),I18nUtils.getMessage(o.getDisplayName())));
+					result.add(new ValueTextVo(o.getName(),$.t(o.getDisplayName())));
 				}
 			});
 		}

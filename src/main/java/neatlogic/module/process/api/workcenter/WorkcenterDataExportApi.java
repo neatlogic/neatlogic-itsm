@@ -16,6 +16,8 @@
 
 package neatlogic.module.process.api.workcenter;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
@@ -39,16 +41,14 @@ import neatlogic.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnu
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import neatlogic.framework.util.$;
 import neatlogic.framework.util.FileUtil;
-import neatlogic.framework.util.I18nUtils;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
 import neatlogic.module.process.service.NewWorkcenterService;
 import neatlogic.module.process.sql.decorator.SqlBuilder;
 import neatlogic.module.process.workcenter.column.handler.ProcessTaskCurrentStepColumn;
 import neatlogic.module.process.workcenter.column.handler.ProcessTaskCurrentStepNameColumn;
 import neatlogic.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -283,7 +283,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                             IProcessTaskColumn column = entry.getValue();
                             if (column.getIsShow() && column.getIsExport() && !column.getDisabled()) {
-                                map.put(I18nUtils.getMessage(column.getDisplayName()), column.getSimpleValue(taskVo));
+                                map.put($.t(column.getDisplayName()), column.getSimpleValue(taskVo));
                             }
                         }
                         // 填充工单属性&记录每个工单属性的单元格合并

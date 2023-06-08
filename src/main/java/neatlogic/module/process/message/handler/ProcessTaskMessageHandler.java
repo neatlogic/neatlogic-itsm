@@ -5,7 +5,7 @@ import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerFactory;
 import neatlogic.framework.notify.dto.NotifyVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.util.I18nUtils;
+import neatlogic.framework.util.$;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -56,9 +56,9 @@ public class ProcessTaskMessageHandler extends MessageHandlerBase {
         }
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("<p>");
-        stringBuilder.append(I18nUtils.getMessage("IT服务"));
+        stringBuilder.append($.t("IT服务"));
         stringBuilder.append("-");
-        stringBuilder.append(I18nUtils.getMessage(policyHandlerName));
+        stringBuilder.append($.t(policyHandlerName));
         stringBuilder.append("-");
         stringBuilder.append(notifyVo.getCallerNotifyPolicyVo().getName());
         stringBuilder.append("-");
@@ -80,7 +80,7 @@ public class ProcessTaskMessageHandler extends MessageHandlerBase {
                 stepName = taskStepVo.getName();
             }
         }
-        stringBuilder.append(I18nUtils.getMessage("工单号：{0}、步骤名：{1}({2})", processTaskIdStr, stepName, stepIdStr));
+        stringBuilder.append($.t("工单号：{0}、步骤名：{1}({2})", processTaskIdStr, stepName, stepIdStr));
         return stringBuilder.toString();
     }
 }

@@ -16,6 +16,7 @@
 
 package neatlogic.module.process.api.workcenter;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
@@ -31,14 +32,13 @@ import neatlogic.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnu
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import neatlogic.framework.util.$;
 import neatlogic.framework.util.FileUtil;
-import neatlogic.framework.util.I18nUtils;
 import neatlogic.module.process.service.NewWorkcenterService;
 import neatlogic.module.process.sql.decorator.SqlBuilder;
 import neatlogic.module.process.workcenter.column.handler.ProcessTaskCurrentStepColumn;
 import neatlogic.module.process.workcenter.column.handler.ProcessTaskCurrentStepNameColumn;
 import neatlogic.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -148,7 +148,7 @@ public class WorkcenterDataExportToCSVApi extends PrivateBinaryStreamApiComponen
                         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                             IProcessTaskColumn column = entry.getValue();
                             if (column.getIsShow() && column.getIsExport() && !column.getDisabled()) {
-                                map.put(I18nUtils.getMessage(column.getDisplayName()), column.getSimpleValue(taskVo));
+                                map.put($.t(column.getDisplayName()), column.getSimpleValue(taskVo));
                             }
                         }
                         for (String head : headList) {

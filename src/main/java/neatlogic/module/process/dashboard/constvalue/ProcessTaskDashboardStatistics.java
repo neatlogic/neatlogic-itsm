@@ -17,7 +17,7 @@ limitations under the License.
 package neatlogic.module.process.dashboard.constvalue;
 
 import neatlogic.framework.dashboard.constvalue.IDashboardGroupField;
-import neatlogic.framework.util.I18nUtils;
+import neatlogic.framework.util.$;
 
 public enum ProcessTaskDashboardStatistics implements IDashboardGroupField {
     AVG_HANDLE_COST_TIME("avgCostTime","平均耗时"),
@@ -41,7 +41,7 @@ public enum ProcessTaskDashboardStatistics implements IDashboardGroupField {
 
     @Override
     public String getText() {
-        return I18nUtils.getMessage(text);
+        return $.t(text);
     }
 
     public static String getValue(String _value) {

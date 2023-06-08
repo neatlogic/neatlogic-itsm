@@ -16,6 +16,9 @@
 
 package neatlogic.module.process.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.batch.BatchRunner;
@@ -44,13 +47,10 @@ import neatlogic.framework.process.workcenter.dto.WorkcenterTheadVo;
 import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import neatlogic.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
-import neatlogic.framework.util.I18nUtils;
+import neatlogic.framework.util.$;
 import neatlogic.framework.util.TableResultUtil;
 import neatlogic.module.process.sql.decorator.SqlBuilder;
 import neatlogic.module.process.workcenter.operate.WorkcenterOperateBuilder;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -265,7 +265,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                     it.remove();
                 } else {
                     thead.setDisabled(columnComponentMap.get(thead.getName()).getDisabled() ? 1 : 0);
-                    thead.setDisplayName(I18nUtils.getMessage(columnComponentMap.get(thead.getName()).getDisplayName()));
+                    thead.setDisplayName($.t(columnComponentMap.get(thead.getName()).getDisplayName()));
                     thead.setClassName(columnComponentMap.get(thead.getName()).getClassName());
                     thead.setIsExport(columnComponentMap.get(thead.getName()).getIsExport() ? 1 : 0);
                 }
