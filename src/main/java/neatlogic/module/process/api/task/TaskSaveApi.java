@@ -65,7 +65,7 @@ public class TaskSaveApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "id", type = ApiParamType.LONG, desc = "任务id,存在则修改，否则新增"),
             @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "关键字，匹配名称"),
-            @Param(name = "num", type = ApiParamType.INTEGER, isRequired = true, desc = "参与人数。-1：不做限制", rule = "single,many"),
+            @Param(name = "num", type = ApiParamType.INTEGER, isRequired = true, desc = "参与人数。-1：不做限制"),
             @Param(name = "policy", type = ApiParamType.ENUM, isRequired = true, desc = "其中一个人完成即可：any,所有人完成：all", rule = "any,all"),
             @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "是否激活,激活：1，禁用：0", rule = "0,1"),
             @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "配置信息")
