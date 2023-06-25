@@ -2,9 +2,8 @@ package neatlogic.module.process.operationauth.handler;
 
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.common.constvalue.SystemUser;
-import neatlogic.framework.dao.mapper.ConfigMapper;
+import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.ConfigVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.constvalue.*;
@@ -33,8 +32,6 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
 
     @Resource
     private UserMapper userMapper;
-    @Resource
-    private ConfigMapper configMapper;
     @Resource
     private ProcessTaskService processTaskService;
 
@@ -517,11 +514,8 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMMENT, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
-            ConfigVo configVo = configMapper.getConfigByKey("processTaskStepEnableComment");
-            if (configVo == null) {
-                return false;
-            }
-            if (!Objects.equals(configVo.getValue(), "1")) {
+            String processTaskStepEnableComment = ConfigManager.getConfig(ItsmTenantConfig.PROCESS_TASK_STEP_ENABLE_COMMENT);
+            if (!Objects.equals(processTaskStepEnableComment, "1")) {
                 return false;
             }
             Long id = processTaskStepVo.getId();

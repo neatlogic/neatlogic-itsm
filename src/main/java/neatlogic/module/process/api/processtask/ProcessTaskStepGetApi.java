@@ -4,10 +4,10 @@ import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.asynchronization.threadpool.CachedThreadPool;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.ConfigMapper;
-import neatlogic.framework.dto.ConfigVo;
+import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.ItsmTenantConfig;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.score.ScoreTemplateMapper;
@@ -44,9 +44,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
     @Resource
     private ScoreTemplateMapper scoreTemplateMapper;
-
-    @Resource
-    private ConfigMapper configMapper;
 
     @Override
     public String getToken() {
@@ -185,9 +182,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 processTaskService.setTemporaryData(processTaskVo, currentProcessTaskStepVo);
             }
         }
-        ConfigVo config = configMapper.getConfigByKey("processtaskBaseInfoIsShow");
-        if (config != null && StringUtils.isNotBlank(config.getValue())) {
-            processTaskVo.setIsShowBaseInfo(Integer.valueOf(config.getValue()));
+        String processTaskBaseInfoIsShow = ConfigManager.getConfig(ItsmTenantConfig.PROCESS_TASK_BASE_INFO_IS_SHOW);
+        if (StringUtils.isNotBlank(processTaskBaseInfoIsShow)) {
+            processTaskVo.setIsShowBaseInfo(Integer.valueOf(processTaskBaseInfoIsShow));
         }
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTask", processTaskVo);

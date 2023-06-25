@@ -1,13 +1,9 @@
 package neatlogic.module.process.workcenter.column.handler;
 
-import neatlogic.framework.dao.mapper.ConfigMapper;
-import neatlogic.framework.dto.ConfigVo;
+import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnBase;
-import neatlogic.framework.process.constvalue.ProcessFieldType;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
-import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
-import neatlogic.framework.process.constvalue.SlaStatus;
+import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dto.ProcessTaskSlaTimeVo;
 import neatlogic.framework.process.dto.ProcessTaskSlaVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
@@ -24,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.*;
 
 @Component
@@ -32,10 +27,6 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 
     @Autowired
     WorktimeMapper worktimeMapper;
-    @Resource
-    ConfigMapper configMapper;
-
-    private final String DISPLAY_MODE_AFTER_TIMEOUT_KEY = "displayModeAfterTimeout";
     @Override
     public String getName() {
         return "expiretime";
@@ -105,14 +96,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
         List<ProcessTaskSlaVo> processTaskSlaList = processTaskVo.getProcessTaskSlaVoList();
         JSONArray resultArray = new JSONArray();
         if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus()) && CollectionUtils.isNotEmpty(processTaskSlaList)) {
-            String displayModeAfterTimeout = "";
-            ConfigVo configVo = configMapper.getConfigByKey(DISPLAY_MODE_AFTER_TIMEOUT_KEY);
-            if (configVo != null) {
-                displayModeAfterTimeout = configVo.getValue();
-            }
-            if (StringUtils.isBlank(displayModeAfterTimeout)) {
-                displayModeAfterTimeout = "naturalTime";
-            }
+            String displayModeAfterTimeout = ConfigManager.getConfig(ItsmTenantConfig.DISPLAY_MODE_AFTER_TIMEOUT);
             long currentTimeMillis = System.currentTimeMillis();
             for (ProcessTaskSlaVo slaVo : processTaskSlaList) {
                 //判断需要 同时满足 该步骤是进行中状态，以及包含sla策略
@@ -122,7 +106,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
                     continue;
                 }
                 JSONObject tmpJson = new JSONObject();
-                tmpJson.put(DISPLAY_MODE_AFTER_TIMEOUT_KEY, displayModeAfterTimeout);
+                tmpJson.put(ItsmTenantConfig.DISPLAY_MODE_AFTER_TIMEOUT.getKey(), displayModeAfterTimeout);
                 ProcessTaskSlaTimeVo slaTimeVo = slaVo.getSlaTimeVo();
                 if (slaTimeVo == null) {
                     continue;
