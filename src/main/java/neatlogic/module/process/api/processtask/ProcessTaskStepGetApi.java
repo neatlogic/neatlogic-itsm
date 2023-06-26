@@ -19,6 +19,7 @@ import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.$;
 import neatlogic.module.process.common.config.ProcessConfig;
 import neatlogic.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
@@ -57,7 +58,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单步骤基本信息获取接口";
+        return "nmpap.processtaskstepgetapi.getname";
     }
 
     @Override
@@ -65,10 +66,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")})
-    @Output({@Param(name = "processTask", explode = ProcessTaskVo.class, desc = "工单信息")})
-    @Description(desc = "工单步骤基本信息获取接口，当前步骤名称、激活时间、状态、处理人、协助处理人、处理时效、表单属性显示控制等")
+    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "term.itsm.processtaskstepid")})
+    @Output({@Param(name = "processTask", explode = ProcessTaskVo.class, desc = "term.itsm.processtaskinfo")})
+    @Description(desc = "nmpap.processtaskstepgetapi.description.desc")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
