@@ -4,10 +4,10 @@ import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.asynchronization.threadpool.CachedThreadPool;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.ConfigMapper;
-import neatlogic.framework.dto.ConfigVo;
+import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.ItsmTenantConfig;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.score.ScoreTemplateMapper;
@@ -19,6 +19,7 @@ import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.$;
 import neatlogic.module.process.common.config.ProcessConfig;
 import neatlogic.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
@@ -45,9 +46,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     @Resource
     private ScoreTemplateMapper scoreTemplateMapper;
 
-    @Resource
-    private ConfigMapper configMapper;
-
     @Override
     public String getToken() {
         return "processtask/step/get";
@@ -60,7 +58,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单步骤基本信息获取接口";
+        return "nmpap.processtaskstepgetapi.getname";
     }
 
     @Override
@@ -68,10 +66,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")})
-    @Output({@Param(name = "processTask", explode = ProcessTaskVo.class, desc = "工单信息")})
-    @Description(desc = "工单步骤基本信息获取接口，当前步骤名称、激活时间、状态、处理人、协助处理人、处理时效、表单属性显示控制等")
+    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "term.itsm.processtaskstepid")})
+    @Output({@Param(name = "processTask", explode = ProcessTaskVo.class, desc = "term.itsm.processtaskinfo")})
+    @Description(desc = "nmpap.processtaskstepgetapi.description.desc")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
@@ -185,9 +183,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 processTaskService.setTemporaryData(processTaskVo, currentProcessTaskStepVo);
             }
         }
-        ConfigVo config = configMapper.getConfigByKey("processtaskBaseInfoIsShow");
-        if (config != null && StringUtils.isNotBlank(config.getValue())) {
-            processTaskVo.setIsShowBaseInfo(Integer.valueOf(config.getValue()));
+        String processTaskBaseInfoIsShow = ConfigManager.getConfig(ItsmTenantConfig.PROCESS_TASK_BASE_INFO_IS_SHOW);
+        if (StringUtils.isNotBlank(processTaskBaseInfoIsShow)) {
+            processTaskVo.setIsShowBaseInfo(Integer.valueOf(processTaskBaseInfoIsShow));
         }
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTask", processTaskVo);

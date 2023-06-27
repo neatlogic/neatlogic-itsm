@@ -25,8 +25,8 @@ import neatlogic.framework.change.constvalue.ChangeProcessStepHandlerType;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.common.constvalue.UserType;
+import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.dao.mapper.ConfigMapper;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
@@ -164,8 +164,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     private TaskConfigManager taskConfigManager;
     @Resource
     private IProcessStepHandlerUtil processStepHandlerUtil;
-    @Resource
-    private ConfigMapper configMapper;
 //    @Override
 //    public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo,
 //                                                  Map<String, String> formAttributeActionMap, int mode) {
@@ -717,14 +715,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
         Map<Long, String> worktimeUuidMap = processTaskList.stream().collect(Collectors.toMap(ProcessTaskVo::getId, ProcessTaskVo::getWorktimeUuid));
         Long currentTimeMillis = System.currentTimeMillis();
-        String displayModeAfterTimeout = "";
-        ConfigVo configVo = configMapper.getConfigByKey("displayModeAfterTimeout");
-        if (configVo != null) {
-            displayModeAfterTimeout = configVo.getValue();
-        }
-        if (StringUtils.isBlank(displayModeAfterTimeout)) {
-            displayModeAfterTimeout = "naturalTime";
-        }
+        String displayModeAfterTimeout = ConfigManager.getConfig(ItsmTenantConfig.DISPLAY_MODE_AFTER_TIMEOUT);
         for (ProcessTaskSlaTimeVo processTaskSlaTimeVo : processTaskSlaTimeList) {
             processTaskSlaTimeVo.setDisplayModeAfterTimeout(displayModeAfterTimeout);
             if (!Objects.equals(SlaStatus.DOING.name().toLowerCase(), processTaskSlaTimeVo.getStatus())) {
