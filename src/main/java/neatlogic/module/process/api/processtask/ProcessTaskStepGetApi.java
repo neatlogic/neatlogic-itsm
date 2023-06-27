@@ -19,7 +19,6 @@ import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.util.$;
 import neatlogic.module.process.common.config.ProcessConfig;
 import neatlogic.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
@@ -186,6 +185,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         String processTaskBaseInfoIsShow = ConfigManager.getConfig(ItsmTenantConfig.PROCESS_TASK_BASE_INFO_IS_SHOW);
         if (StringUtils.isNotBlank(processTaskBaseInfoIsShow)) {
             processTaskVo.setIsShowBaseInfo(Integer.valueOf(processTaskBaseInfoIsShow));
+        }
+        String processTaskStepCommentEditorToolbarIsShow = ConfigManager.getConfig(ItsmTenantConfig.PROCESS_TASK_STEP_COMMENT_EDITOR_TOOLBAR_IS_SHOW);
+        if (StringUtils.isNotBlank(processTaskStepCommentEditorToolbarIsShow)) {
+            processTaskVo.setIsShowProcessTaskStepCommentEditorToolbar(Integer.valueOf(processTaskStepCommentEditorToolbarIsShow));
         }
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTask", processTaskVo);
