@@ -78,7 +78,9 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
                         new SelectColumnVo(UserTable.FieldEnum.USER_NAME.getValue(), "ownerName"),
                         new SelectColumnVo(UserTable.FieldEnum.USER_INFO.getValue(), "ownerInfo"),
                         new SelectColumnVo(UserTable.FieldEnum.VIP_LEVEL.getValue(), "ownerVipLevel"),
-                        new SelectColumnVo(UserTable.FieldEnum.PINYIN.getValue(), "ownerPinYin")
+                        new SelectColumnVo(UserTable.FieldEnum.PINYIN.getValue(), "ownerPinYin"),
+                        new SelectColumnVo(UserTable.FieldEnum.IS_ACTIVE.getValue(), "ownerIsActive"),
+                        new SelectColumnVo(UserTable.FieldEnum.IS_DELETE.getValue(), "ownerIsDelete")
                 )));
             }
         };
