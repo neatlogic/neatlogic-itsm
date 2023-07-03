@@ -104,7 +104,9 @@ public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implement
 						new SelectColumnVo(UserTable.FieldEnum.USER_NAME.getValue(),"focusName"),
 						new SelectColumnVo(UserTable.FieldEnum.USER_INFO.getValue(),"focusInfo"),
 						new SelectColumnVo(UserTable.FieldEnum.VIP_LEVEL.getValue(),"focusVipLevel"),
-						new SelectColumnVo(UserTable.FieldEnum.PINYIN.getValue(),"focusPinYin")
+						new SelectColumnVo(UserTable.FieldEnum.PINYIN.getValue(),"focusPinYin"),
+						new SelectColumnVo(UserTable.FieldEnum.IS_ACTIVE.getValue(), "focusIsActive"),
+						new SelectColumnVo(UserTable.FieldEnum.IS_DELETE.getValue(), "focusIsDelete")
 				)));
 			}
 		};

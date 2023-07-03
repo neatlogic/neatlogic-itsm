@@ -110,7 +110,9 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
                         new SelectColumnVo(UserTable.FieldEnum.USER_NAME.getValue(), "reporterName"),
                         new SelectColumnVo(UserTable.FieldEnum.USER_INFO.getValue(), "reporterInfo"),
                         new SelectColumnVo(UserTable.FieldEnum.VIP_LEVEL.getValue(), "reporterVipLevel"),
-                        new SelectColumnVo(UserTable.FieldEnum.PINYIN.getValue(), "reporterPinYin")
+                        new SelectColumnVo(UserTable.FieldEnum.PINYIN.getValue(), "reporterPinYin"),
+                        new SelectColumnVo(UserTable.FieldEnum.IS_ACTIVE.getValue(), "reporterIsActive"),
+                        new SelectColumnVo(UserTable.FieldEnum.IS_DELETE.getValue(), "reporterIsDelete")
                 )));
             }
         };
