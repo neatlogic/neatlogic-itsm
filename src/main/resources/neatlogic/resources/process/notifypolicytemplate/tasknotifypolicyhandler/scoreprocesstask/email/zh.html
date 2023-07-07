@@ -1,0 +1,32 @@
+<!--
+  ~ Copyright(c) 2023 NeatLogic Co., Ltd. All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>【${DATA.channelTypeName}工单已评分通知】[${DATA.serialNumber}]${DATA.title}</title>
+</head>
+<body>
+<p style="font-size: 14px">${DATA.channelTypeName}类型工单：[${DATA.serialNumber}]${DATA.title},用户：${DATA.ownerName}已完成工单确认和评分，响应内容：${DATA.processTaskScoreContent}，评分结果：
+  <#if DATA.processTaskScore?? && (DATA.processTaskScore?size > 0)>
+  <#list DATA.processTaskScore as item>${item.dimensionName}：${item.score}<#if item_has_next>,</#if></#list></#if>
+</p>
+<p style="font-size: 14px">
+  详情点击查看：<a href=${DATA.homeUrl}process.html#/task-detail?processTaskId=${DATA.id}>${DATA.title}</a>
+</p>
+</body>
+</html>
