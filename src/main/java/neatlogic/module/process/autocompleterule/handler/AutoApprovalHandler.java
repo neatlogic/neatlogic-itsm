@@ -123,7 +123,7 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
                 ProcessStepThread thread = new ProcessStepThread(currentProcessTaskStepVo, currentUserVo) {
                     @Override
                     public void myExecute() {
-                        UserContext.init(currentUserVo, SystemUser.SYSTEM.getTimezone());
+                        UserContext.init(currentUserVo, authenticationInfoVo, SystemUser.SYSTEM.getTimezone());
                         currentProcessTaskStepVo.getParamObj().put("action", "complete");
                         handler.autoComplete(currentProcessTaskStepVo);
                     }

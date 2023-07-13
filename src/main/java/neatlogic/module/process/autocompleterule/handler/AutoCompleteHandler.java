@@ -20,6 +20,7 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.process.autocompleterule.core.IAutoCompleteRuleHandler;
 import neatlogic.framework.process.constvalue.*;
@@ -29,6 +30,7 @@ import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import neatlogic.framework.process.stephandler.core.*;
+import neatlogic.framework.service.AuthenticationInfoService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -48,6 +50,9 @@ public class AutoCompleteHandler implements IAutoCompleteRuleHandler {
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private AuthenticationInfoService authenticationInfoService;
 
     @Override
     public String getHandler() {
@@ -80,7 +85,8 @@ public class AutoCompleteHandler implements IAutoCompleteRuleHandler {
                     ProcessStepThread thread = new ProcessStepThread(currentProcessTaskStepVo, currentUserVo) {
                         @Override
                         public void myExecute() {
-                            UserContext.init(currentUserVo, SystemUser.SYSTEM.getTimezone());
+                            AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(currentUserVo.getUuid());
+                            UserContext.init(currentUserVo, authenticationInfoVo, SystemUser.SYSTEM.getTimezone());
                             currentProcessTaskStepVo.getParamObj().put("action", "complete");
                             handler.complete(currentProcessTaskStepVo);
                         }

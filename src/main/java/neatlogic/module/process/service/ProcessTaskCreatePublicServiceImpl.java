@@ -4,6 +4,7 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.exception.user.UserNotFoundException;
@@ -33,6 +34,7 @@ import neatlogic.framework.process.exception.priority.PriorityNotFoundException;
 import neatlogic.framework.process.exception.process.ProcessNotFoundException;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNextStepIllegalException;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNextStepOverOneException;
+import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.module.framework.form.attribute.handler.SelectHandler;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
 import com.alibaba.fastjson.JSON;
@@ -73,6 +75,9 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
 
     @Resource
     private ProcessTaskService processTaskService;
+
+    @Resource
+    private AuthenticationInfoService authenticationInfoService;
 
     /**
      * 创建工单
@@ -181,7 +186,8 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                 }
                 reporterUserVo = userMapper.getUserByUuid(reporterUserVo.getUuid());
             }
-            UserContext.init(reporterUserVo, SystemUser.SYSTEM.getTimezone());
+            AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userVo.getUuid());
+            UserContext.init(reporterUserVo, authenticationInfoVo, SystemUser.SYSTEM.getTimezone());
         }
         //暂存
         //TODO isNeedValid 参数是否需要？？？
