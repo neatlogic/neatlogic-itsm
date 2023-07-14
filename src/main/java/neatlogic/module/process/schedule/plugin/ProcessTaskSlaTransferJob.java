@@ -205,7 +205,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
                             workerVo.setUuid(split[1]);
                             workerVo.setUserType(ProcessUserType.MAJOR.getValue());
                             /** 执行转交前，设置当前用户为system,用于权限校验 **/
-                            UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
+                            UserContext.init(SystemUser.SYSTEM);
                             List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
                             if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
                                 List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);

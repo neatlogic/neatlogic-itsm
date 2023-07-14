@@ -105,7 +105,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
     protected Set<Long> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo,
                                   List<Long> nextStepIdList, Long nextStepId) throws ProcessTaskException {
         try {
-            UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
+            UserContext.init(SystemUser.SYSTEM);
             Set<Long> nextStepIdSet = new HashSet<>();
             if (CollectionUtils.isNotEmpty(nextStepIdList)) {
                 List<ProcessTaskStepVo> nextStepList = processTaskMapper.getProcessTaskStepListByIdList(nextStepIdList);
