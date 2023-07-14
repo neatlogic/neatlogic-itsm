@@ -75,7 +75,7 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "标记重复工单接口";
+        return "nmpap.processtaskrepeatsaveapi.getname";
     }
 
     @Override
@@ -84,14 +84,14 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-            @Param(name = "repeatProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "重复工单id列表")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source"),
+            @Param(name = "repeatProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "term.itsm.repeatprocesstaskidlist")
     })
     @Output({
-            @Param(explode = ProcessTaskVo[].class, desc = "工单列表")
+            @Param(explode = ProcessTaskVo[].class, desc = "common.tbodylist")
     })
-    @Description(desc = "标记重复工单接口")
+    @Description(desc = "nmpap.processtaskrepeatsaveapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long processTaskId = paramObj.getLong("processTaskId");
@@ -170,7 +170,7 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
 
         for (ProcessTaskVo processTaskVo : runningProcessTaskList) {
             //当前用户可能没有工单的取消权限，所以用系统用户操作
-            UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
+            UserContext.init(SystemUser.SYSTEM);
             ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
             ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
             processTaskStep.setProcessTaskId(processTaskVo.getId());

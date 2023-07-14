@@ -15,7 +15,6 @@ import neatlogic.framework.process.exception.catalog.CatalogNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.module.process.service.CatalogService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -40,9 +39,6 @@ public class CalalogBreadcrumbSearchApi extends PrivateApiComponentBase {
     @Resource
     private ChannelMapper channelMapper;
 
-    @Resource
-    private AuthenticationInfoService authenticationInfoService;
-
     @Override
     public String getToken() {
         return "process/catalog/breadcrumb/search";
@@ -50,7 +46,7 @@ public class CalalogBreadcrumbSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取某个服务目录下的所有服务目录路径接口";
+        return "nmpacr.calalogbreadcrumbapi.getname";
     }
 
     @Override
@@ -59,17 +55,17 @@ public class CalalogBreadcrumbSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "catalogUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务目录uuid"),
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称", xss = true),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+            @Param(name = "catalogUuid", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.cataloguuid"),
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword", xss = true),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "common.isneedpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage")
     })
     @Output({
             @Param(explode = BasePageVo.class),
-            @Param(name = "breadcrumbList", type = ApiParamType.JSONARRAY, desc = "服务目录路径列表")
+            @Param(name = "breadcrumbList", type = ApiParamType.JSONARRAY, desc = "common.tbodylist")
     })
-    @Description(desc = "获取某个服务目录下的所有服务目录路径接口")
+    @Description(desc = "nmpacr.calalogbreadcrumbapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String catalogUuid = jsonObj.getString("catalogUuid");
@@ -84,7 +80,7 @@ public class CalalogBreadcrumbSearchApi extends PrivateApiComponentBase {
             }
         }
 
-        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+        AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
         JSONObject resultObj = new JSONObject();
         resultObj.put("breadcrumbList", new ArrayList<>());
         //已授权的服务uuid

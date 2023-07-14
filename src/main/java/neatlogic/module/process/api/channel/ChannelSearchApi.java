@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.dao.mapper.ChannelTypeMapper;
@@ -11,7 +12,6 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 
-import neatlogic.framework.service.AuthenticationInfoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,8 +32,6 @@ import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
 import neatlogic.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 import neatlogic.module.process.service.CatalogService;
 
-import javax.annotation.Resource;
-
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -48,9 +46,6 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 	@Autowired
 	private CatalogService catalogService;
 
-	@Resource
-	private AuthenticationInfoService authenticationInfoService;
-
 	@Override
 	public String getToken() {
 		return "process/channel/search";
@@ -58,7 +53,7 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "服务通道搜索接口";
+		return "nmpac.channelsearchapi.getname";
 	}
 
 	@Override
@@ -67,25 +62,22 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
-		@Param(name = "parentUuid", type = ApiParamType.STRING, desc = "服务目录uuid"),
-		@Param(name = "isFavorite", type = ApiParamType.ENUM, desc = "是否只查询已收藏的数据，1：已收藏，0：全部", rule = "0,1"),
-		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
-		@Param(name = "isAuthenticate", type = ApiParamType.ENUM, desc = "是否需要鉴权", rule = "0,1"),
-		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-        @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "服务类型关系id"),
-        @Param(name = "channelUuid", type = ApiParamType.STRING, desc = "服务uuid")
+		@Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
+		@Param(name = "parentUuid", type = ApiParamType.STRING, desc = "term.itsm.cataloguuid"),
+		@Param(name = "isFavorite", type = ApiParamType.ENUM, desc = "nmpac.channelsearchapi.input.param.desc.isfavorite", rule = "0,1", help = "1：已收藏，0：全部"),
+		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "common.isactive", rule = "0,1"),
+		@Param(name = "isAuthenticate", type = ApiParamType.ENUM, desc = "common.isauthenticate", rule = "0,1"),
+		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "common.isneedpage"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+        @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "term.itsm.channeltyperelationid"),
+        @Param(name = "channelUuid", type = ApiParamType.STRING, desc = "term.itsm.channeluuid")
 		})
 	@Output({
-		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=true,desc="当前页码"),
-		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
-		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
-		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="channelList",explode=ChannelVo[].class,desc="服务通道列表")
+		@Param(explode = BasePageVo.class),
+		@Param(name="channelList",explode=ChannelVo[].class,desc="common.tbodylist")
 	})
-	@Description(desc = "服务通道搜索接口")
+	@Description(desc = "nmpac.channelsearchapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
@@ -99,7 +91,7 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 		boolean hasData = true;
 		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");
 		if(Objects.equal(isAuthenticate, 1)) {
-			AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+			AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
 		    List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 		    if(CollectionUtils.isNotEmpty(authorizedChannelUuidList)) {
 		        String channelUuid = jsonObj.getString("channelUuid");
