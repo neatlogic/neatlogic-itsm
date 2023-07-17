@@ -148,7 +148,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
             );
             auditDataVo.setData(data.toJSONString());
             processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
-            UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
+            UserContext.init(SystemUser.SYSTEM);
             if (Objects.equals(isTimeToRun, 0)) {
 //            System.out.println("在时间窗口内，直接发送请求");
                 IProcessStepInternalHandler processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());

@@ -221,7 +221,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                         ProcessStepThread thread = new ProcessStepThread(currentProcessTaskStepVo) {
                             @Override
                             public void myExecute() {
-                                UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
+                                UserContext.init(SystemUser.SYSTEM);
                                 IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
                                 handler.autoComplete(currentProcessTaskStepVo);
                             }

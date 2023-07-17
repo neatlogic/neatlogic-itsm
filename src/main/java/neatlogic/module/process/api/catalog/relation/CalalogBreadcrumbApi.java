@@ -7,7 +7,6 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.dao.mapper.ChannelTypeMapper;
-import neatlogic.framework.service.AuthenticationInfoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
@@ -50,9 +49,6 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 	@Resource
 	private ChannelTypeMapper channelTypeMapper;
 
-	@Resource
-	private AuthenticationInfoService authenticationInfoService;
-
 	@Override
 	public String getToken() {
 		return "process/catalog/breadcrumb";
@@ -60,7 +56,7 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "获取某个服务目录下的所有服务目录路径接口";
+		return "nmpacr.calalogbreadcrumbapi.getname";
 	}
 
 	@Override
@@ -69,19 +65,19 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "catalogUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务目录uuid"),
-        @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "服务类型关系id"),
-        @Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务uuid"),
-		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称", xss = true),
-		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+		@Param(name = "catalogUuid", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.cataloguuid"),
+        @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "term.itsm.channeltyperelationid"),
+        @Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.channeluuid"),
+		@Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword", xss = true),
+		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "common.isneedpage"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage")
 		})
 	@Output({
 		@Param(explode = BasePageVo.class),
-		@Param(name="breadcrumbList", type=ApiParamType.JSONARRAY, desc="服务目录路径列表")
+		@Param(name="breadcrumbList", type=ApiParamType.JSONARRAY, desc="common.tbodylist")
 	})
-	@Description(desc = "获取某个服务目录下的所有服务目录路径接口")
+	@Description(desc = "nmpacr.calalogbreadcrumbapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
@@ -109,7 +105,7 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
         if(CollectionUtils.isEmpty(channelRelationTargetChannelUuidList)) {
             return resultObj;
         }
-		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+		AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
 		//已授权的服务uuid
 		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 		/** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/

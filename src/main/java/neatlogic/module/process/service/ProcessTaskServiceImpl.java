@@ -1911,7 +1911,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
         /** 如果当前用户有处理权限，则获取其有权看到的配置的回复模版 */
         if (hasComplete) {
-            processTaskStepVo.setCommentTemplate(getProcessStepCommentTemplate(processTaskStepVo.getProcessStepUuid(), authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true))));
+            processTaskStepVo.setCommentTemplate(getProcessStepCommentTemplate(processTaskStepVo.getProcessStepUuid(), UserContext.get().getAuthenticationInfoVo()));
         }
         processTaskStepVo.setReplaceableTextList(getReplaceableTextList(processTaskStepVo));
         processTaskStepVo.setCustomStatusList(getCustomStatusList(processTaskStepVo));
@@ -2072,7 +2072,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             builder.addOperationType(ProcessTaskOperationType.STEP_RECOVER);
         }
         String userUuid = UserContext.get().getUserUuid(true);
-        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
+        AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();;
         Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap = builder.build().getOperateMap();
         for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
             Set<ProcessTaskOperationType> set = operationTypeSetMap.get(processTaskStepVo.getId());

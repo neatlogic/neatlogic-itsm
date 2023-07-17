@@ -61,7 +61,7 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
 	@Override
 	public List<String> getCurrentUserAuthorizedChannelUuidList() {
 		List<String> resultList = new ArrayList<>();
-		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+		AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
 		/** 查出当前用户所有已授权的目录uuid集合  **/
 		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 		if(CollectionUtils.isNotEmpty(currentUserAuthorizedCatalogUuidList)) {
@@ -149,7 +149,7 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
 	@Override
     public List<CatalogVo> getCatalogByCatalogParentUuid(String catalogUuid) {
 	    List<CatalogVo> cataLogVoList = new ArrayList<>();
-		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+		AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
         //已授权的服务uuid
         List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
         if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
@@ -187,7 +187,7 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
 	public JSONObject getCatalogChannelByCatalogUuid(CatalogVo catalog,Boolean isNeedChannel) {
 	    JSONArray sonListArray = new JSONArray();
         JSONObject catalogParentJson = new JSONObject();
-		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+		AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
 	    //已授权的服务uuid
         List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
         if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {

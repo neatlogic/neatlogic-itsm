@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,9 +48,6 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
     @Resource
     private ProcessTaskMapper processTaskMapper;
 
-    @Resource
-    private AuthenticationInfoService authenticationInfoService;
-
     @Override
     public String getToken() {
         return "process/channeltype/relation/list/forselect";
@@ -59,7 +55,7 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
 
     @Override
     public String getName() {
-        return "查询服务类型关系列表（下拉框专用）";
+        return "nmpacr.channeltyperelationlistforselectapi.getname";
     }
 
     @Override
@@ -68,20 +64,20 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关系名称，关键字搜索"),
-            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id"),
-            @Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
-            @Param(name = "sourceChannelTypeUuid", type = ApiParamType.STRING, xss = true, desc = "来源服务类型uuid"),
-            @Param(name = "sourceChannelUuid", type = ApiParamType.STRING, xss = true, desc = "来源服务uuid"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+            @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "common.keyword"),
+            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, desc = "common.isactive", rule = "0,1"),
+            @Param(name = "sourceChannelTypeUuid", type = ApiParamType.STRING, xss = true, desc = "term.itsm.sourcechanneltypeuuid"),
+            @Param(name = "sourceChannelUuid", type = ApiParamType.STRING, xss = true, desc = "term.itsm.sourcechanneluuid"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "common.isneedpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage")
     })
     @Output({
-            @Param(name = "list", explode = ValueTextVo[].class, desc = "服务类型关系列表"),
+            @Param(name = "list", explode = ValueTextVo[].class, desc = "common.tbodylist"),
             @Param(explode = BasePageVo.class)
     })
-    @Description(desc = "查询服务类型关系列表")
+    @Description(desc = "nmpacr.channeltyperelationlistforselectapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
@@ -97,8 +93,7 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
         if (StringUtils.isNotBlank(sourceChannelUuid)) {
             Set<Long> channelTypeRelationIdSet = new HashSet<>();
             channelTypeRelationVo.setUseIdList(true);
-            String userUuid = UserContext.get().getUserUuid(true);
-            AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
+            AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
             Long processTaskId = jsonObj.getLong("processTaskId");
             channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, authenticationInfoVo));
             /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/

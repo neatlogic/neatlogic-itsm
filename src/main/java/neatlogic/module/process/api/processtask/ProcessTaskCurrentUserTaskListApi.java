@@ -68,7 +68,7 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "当前用户任务列表接口";
+        return "nmpap.processtaskcurrentusertasklistapi.getname";
     }
 
     @Override
@@ -77,17 +77,17 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字搜索"),
-            @Param(name = "currentProcessTaskId", type = ApiParamType.LONG, isRequired = true, desc = "当前工单id"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页")
+            @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "common.keyword"),
+            @Param(name = "currentProcessTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.currentprocesstaskid"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "common.isneedpage")
     })
     @Output({
-            @Param(name = "taskList", type = ApiParamType.JSONARRAY, desc = "任务列表"),
+            @Param(name = "taskList", type = ApiParamType.JSONARRAY, desc = "common.tbodylist"),
             @Param(explode = BasePageVo.class)
     })
-    @Description(desc = "当前用户任务列表接口")
+    @Description(desc = "nmpap.processtaskcurrentusertasklistapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long currentProcessTaskId = jsonObj.getLong("currentProcessTaskId");
@@ -113,7 +113,7 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
         Set<Long> allProcessTaskStepIdSet = new HashSet<>();
         String keyword = jsonObj.getString("keyword");
         String currentUserUuid = UserContext.get().getUserUuid(true);
-        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(currentUserUuid);
+        AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
         Set<Long> processTaskStepIdSet = processTaskMapper.getProcessTaskStepIdSetByChannelUuidListAndAuthenticationInfo(keyword, null, authenticationInfoVo);
         allProcessTaskStepIdSet.addAll(processTaskStepIdSet);
         List<ProcessTaskAgentVo> processTaskAgentList = processTaskAgentMapper.getProcessTaskAgentListByToUserUuid(currentUserUuid);

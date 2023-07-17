@@ -136,7 +136,7 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
                     JSONObject paramObj = processTaskStepVo.getParamObj();
                     paramObj.put("nextStepId", nextStepId);
                     paramObj.put("action", ProcessTaskOperationType.STEP_COMPLETE.getValue());
-                    UserContext.init(SystemUser.SYSTEM.getUserVo(),SystemUser.SYSTEM.getTimezone());
+                    UserContext.init(SystemUser.SYSTEM);
                     handler.autoComplete(processTaskStepVo);
                 } catch (ProcessTaskNoPermissionException e) {
                     logger.error(e.getMessage(), e);

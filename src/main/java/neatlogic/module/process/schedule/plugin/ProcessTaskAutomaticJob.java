@@ -185,7 +185,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		}
 		if(isTimeToRun == 0) {
 			//避免后续获取用户异常
-			UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
+			UserContext.init(SystemUser.SYSTEM);
 			ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue(),SystemUser.SYSTEM.getUserUuid());
 			String type = requestVo.getType();
 			if ("request".equals(type)) {

@@ -8,7 +8,6 @@ import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.module.process.service.CatalogService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +38,6 @@ public class CatalogTreeSearchApi extends PrivateApiComponentBase {
 	@Autowired
 	private ChannelMapper channelMapper;
 
-	@Resource
-	private AuthenticationInfoService authenticationInfoService;
-
 	@Override
 	public String getToken() {
 		return "process/catalog/tree/search";
@@ -49,7 +45,7 @@ public class CatalogTreeSearchApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "获取所有服务目录（包含层级关系）接口";
+		return "nmpacr.catalogtreeapi.getname";
 	}
 
 	@Override
@@ -58,12 +54,12 @@ public class CatalogTreeSearchApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "catalogUuid", type = ApiParamType.STRING, isRequired= true, desc = "已选中的服务目录uuid")
+		@Param(name = "catalogUuid", type = ApiParamType.STRING, isRequired= true, desc = "term.itsm.cataloguuid")
 		})
 	@Output({
-		@Param(name="Return",explode=CatalogVo[].class,desc="服务目录列表")
+		@Param(name="Return",explode=CatalogVo[].class,desc="common.tbodylist")
 	})
-	@Description(desc = "获取所有服务目录（包含层级关系）接口")
+	@Description(desc = "nmpacr.catalogtreeapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String catalogUuid = jsonObj.getString("catalogUuid");
@@ -72,7 +68,7 @@ public class CatalogTreeSearchApi extends PrivateApiComponentBase {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
 
-		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+		AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
 		//已授权的目录uuid
 		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 		if(CollectionUtils.isEmpty(currentUserAuthorizedCatalogUuidList)) {
