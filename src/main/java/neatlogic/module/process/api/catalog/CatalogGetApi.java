@@ -17,7 +17,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.AuthorityVo;
 import neatlogic.framework.process.dao.mapper.CatalogMapper;
 import neatlogic.framework.process.dto.CatalogVo;
-import neatlogic.framework.process.exception.catalog.CatalogNotFoundException;
+import neatlogic.framework.process.exception.catalog.CatalogNotFoundEditTargetException;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -34,7 +34,7 @@ public class CatalogGetApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "服务目录获取信息接口";
+		return "nmpac.cataloggetapi.getname";
 	}
 
 	@Override
@@ -43,18 +43,18 @@ public class CatalogGetApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "服务目录uuid")
+		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "term.itsm.cataloguuid")
 		})
 	@Output({
-		@Param(explode=CatalogVo.class,desc="服务目录信息")
+		@Param(explode=CatalogVo.class,desc="term.itsm.cataloginfo")
 	})
-	@Description(desc = "服务目录获取信息接口")
+	@Description(desc = "nmpac.cataloggetapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
 		CatalogVo catalog = catalogMapper.getCatalogByUuid(uuid);
 		if(catalog == null) {
-			throw new CatalogNotFoundException(uuid);
+			throw new CatalogNotFoundEditTargetException(uuid);
 		}
 //		CatalogVo catalogVo = new CatalogVo();
 //		catalogVo.setParentUuid(uuid);
