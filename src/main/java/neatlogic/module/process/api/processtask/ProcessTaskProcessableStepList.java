@@ -6,6 +6,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.dto.ProcessTaskStepInOperationVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
+import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundEditTargetException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -59,7 +60,10 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
+		if (processTaskVo == null) {
+			throw new ProcessTaskNotFoundEditTargetException(processTaskId);
+		}
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("status", "ok");
 		List<ProcessTaskStepInOperationVo> processTaskStepInOperationList = processTaskMapper.getProcessTaskStepInOperationListByProcessTaskId(processTaskId);
