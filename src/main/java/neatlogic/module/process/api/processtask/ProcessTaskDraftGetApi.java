@@ -28,11 +28,13 @@ import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.dao.mapper.*;
 import neatlogic.framework.process.dto.*;
+import neatlogic.framework.process.exception.channel.ChannelNotFoundEditTargetException;
 import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
 import neatlogic.framework.process.exception.channeltype.ChannelTypeNotFoundException;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import neatlogic.framework.process.exception.process.ProcessNotFoundException;
 import neatlogic.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundEditTargetException;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
@@ -92,7 +94,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单草稿数据获取接口";
+        return "nmpap.processtaskdraftgetapi.getname";
     }
 
     @Override
@@ -101,16 +103,16 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id，从工单中心进入上报页时，传processTaskId"),
-            @Param(name = "copyProcessTaskId", type = ApiParamType.LONG, desc = "复制工单id，从复制上报进入上报页时，传copyProcessTaskId"),
-            @Param(name = "channelUuid", type = ApiParamType.STRING, desc = "服务uuid，从服务目录进入上报页时，传channelUuid"),
-            @Param(name = "fromProcessTaskId", type = ApiParamType.LONG, desc = "来源工单id，从转报进入上报页时，传fromProcessTaskId"),
-            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "关系类型id，从转报进入上报页时，传channelTypeRelationId")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid", help = "从工单中心进入上报页时，传processTaskId"),
+            @Param(name = "copyProcessTaskId", type = ApiParamType.LONG, desc = "term.itsm.copyprocesstaskid", help = "从复制上报进入上报页时，传copyProcessTaskId"),
+            @Param(name = "channelUuid", type = ApiParamType.STRING, desc = "term.itsm.channeluuid", help = "从服务目录进入上报页时，传channelUuid"),
+            @Param(name = "fromProcessTaskId", type = ApiParamType.LONG, desc = "term.itsm.fromprocesstaskid", help = "从转报进入上报页时，传fromProcessTaskId"),
+            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "term.itsm.channeltyperelationid", help = "从转报进入上报页时，传channelTypeRelationId")
     })
     @Output({
-            @Param(explode = ProcessTaskVo.class, desc = "工单信息")
+            @Param(explode = ProcessTaskVo.class, desc = "term.itsm.processtaskinfo")
     })
-    @Description(desc = "工单详情数据获取接口")
+    @Description(desc = "nmpap.processtaskdraftgetapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
@@ -119,6 +121,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         ProcessTaskVo processTaskVo = null;
         if (processTaskId != null) {
             //已经暂存，从工单中心进入上报页
+            if (processTaskMapper.getProcessTaskStepBaseInfoById(processTaskId) == null) {
+                throw new ProcessTaskNotFoundEditTargetException(processTaskId);
+            }
             try {
                 new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_START)
                         .build()
@@ -129,6 +134,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             processTaskVo=  getProcessTaskVoByProcessTaskId(processTaskId);
         } else if (copyProcessTaskId != null) {
             //复制上报
+            if (processTaskMapper.getProcessTaskStepBaseInfoById(processTaskId) == null) {
+                 throw new ProcessTaskNotFoundEditTargetException(processTaskId);
+            }
             try {
                 new ProcessAuthManager.TaskOperationChecker(copyProcessTaskId, ProcessTaskOperationType.PROCESSTASK_COPYPROCESSTASK)
                         .build()
@@ -138,6 +146,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             }
             processTaskVo =  getProcessTaskVoByCopyProcessTaskId(copyProcessTaskId);
         } else if (channelUuid != null) {
+            if (channelMapper.checkChannelIsExists(channelUuid) == 0) {
+                throw new ChannelNotFoundEditTargetException(channelUuid);
+            }
             Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
             Long fromProcessTaskId = jsonObj.getLong("fromProcessTaskId");
             if (fromProcessTaskId != null) {

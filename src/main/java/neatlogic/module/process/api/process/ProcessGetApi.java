@@ -14,7 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.dto.ProcessVo;
-import neatlogic.framework.process.exception.process.ProcessNotFoundException;
+import neatlogic.framework.process.exception.process.ProcessNotFoundEditTargetException;
 
 import javax.annotation.Resource;
 
@@ -33,7 +33,7 @@ public class ProcessGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取单个流程图数据接口";
+        return "nmpap.processgetapi.getname";
     }
 
     @Override
@@ -42,18 +42,18 @@ public class ProcessGetApi extends PrivateApiComponentBase {
     }
 
     @Input({
-			@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "流程uuid")
+			@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.processuuid")
     })
     @Output({
 			@Param(explode = ProcessVo.class)
     })
-    @Description(desc = "获取单个流程图数据接口")
+    @Description(desc = "nmpap.processgetapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
         ProcessVo processVo = processMapper.getProcessByUuid(uuid);
         if (processVo == null) {
-            throw new ProcessNotFoundException(uuid);
+            throw new ProcessNotFoundEditTargetException(uuid);
         }
         processVo.setConfig(ProcessConfigUtil.regulateProcessConfig(processVo.getConfig()));
         int count = processMapper.getProcessReferenceCount(uuid);

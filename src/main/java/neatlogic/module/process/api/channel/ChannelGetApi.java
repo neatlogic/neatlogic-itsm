@@ -8,7 +8,7 @@ import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.dao.mapper.ChannelMapper;
 import neatlogic.framework.process.dto.ChannelPriorityVo;
 import neatlogic.framework.process.dto.ChannelVo;
-import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
+import neatlogic.framework.process.exception.channel.ChannelNotFoundEditTargetException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -34,7 +34,7 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "服务通道获取信息接口";
+		return "nmpac.channelgetapi.getname";
 	}
 
 	@Override
@@ -43,18 +43,18 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "服务通道uuid")
+		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "term.itsm.channeluuid")
 		})
 	@Output({
-		@Param(explode=ChannelVo.class,desc="服务通道信息")
+		@Param(explode=ChannelVo.class,desc="term.itsm.channelinfo")
 	})
-	@Description(desc = "服务通道获取信息接口")
+	@Description(desc = "nmpac.channelgetapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
 		ChannelVo channelVo = channelMapper.getChannelByUuid(uuid);
 		if(channelVo == null) {
-			throw new ChannelNotFoundException(uuid);
+			throw new ChannelNotFoundEditTargetException(uuid);
 		}
 		ChannelVo channel = new ChannelVo(channelVo);
 		String processUuid = channelMapper.getProcessUuidByChannelUuid(uuid);
