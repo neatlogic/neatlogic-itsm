@@ -1,8 +1,11 @@
 package neatlogic.module.process.api.process;
 
 import java.util.List;
+import java.util.Objects;
 
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
@@ -34,7 +37,7 @@ public class ProcessSearchApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "流程列表搜索接口";
+		return "nmpap.processsearchapi.getname";
 	}
 
 	@Override
@@ -43,22 +46,19 @@ public class ProcessSearchApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
-		@Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "默认值"),
-		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
-		@Param(name = "isICreated", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否只查询我创建的"),
-		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+		@Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword", help = "匹配名称"),
+		@Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "common.defaultvalue"),
+		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "common.isactive", rule = "0,1"),
+		@Param(name = "isICreated", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "nmpap.processsearchapi.input.param.desc.isicreated"),
+		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "common.isneedpage"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage")
 		})
 	@Output({
-		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=true,desc="当前页码"),
-		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
-		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
-		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="processList",explode=ProcessVo[].class,desc="流程列表")
+		@Param(explode = BasePageVo.class),
+		@Param(name="processList",explode=ProcessVo[].class,desc="common.tbodylist")
 	})
-	@Description(desc = "流程列表搜索接口")
+	@Description(desc = "nmpap.processsearchapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
@@ -68,6 +68,10 @@ public class ProcessSearchApi extends PrivateApiComponentBase {
 			List<ProcessVo> processList = processMapper.getProcessListByUuidList(defaultValue.toJavaList(String.class));
 			resultObj.put("processList", processList);
 			return resultObj;
+		}
+		Integer isICreated = jsonObj.getInteger("isICreated");
+		if (Objects.equals(isICreated, 1)) {
+			processVo.setFcu(UserContext.get().getUserUuid());
 		}
 		if(processVo.getNeedPage()) {
 			int rowNum = processMapper.searchProcessCount(processVo);

@@ -242,20 +242,24 @@ limitations under the License.
 		SELECT count(1) FROM `process` WHERE name=#{name} AND uuid != #{uuid}
 	</select>
 
+	<sql id="searchProcessWhere">
+		<where>
+			<if test="keyword != null and keyword != ''">
+				AND `name` LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="isActive != null">
+				AND `is_Active` = #{isActive}
+			</if>
+			<if test="fcu != null and fcu != ''">
+				AND `fcu` = #{fcu}
+			</if>
+		</where>
+	</sql>
 	<select id="searchProcessCount" resultType="int">
 		SELECT
-		COUNT(`uuid`)
+		COUNT(1)
 		FROM `process`
-		WHERE 1=1
-		<if test="keyword != null and keyword != ''">
-			AND `name` LIKE CONCAT('%', #{keyword}, '%')
-		</if>
-		<if test="isActive != null">
-			AND `is_Active` = #{isActive}
-		</if>
-		<if test="isICreated != null and isICreated == 1">
-			AND `fcu` = #{fcu}
-		</if>
+		<include refid="searchProcessWhere"/>
 	</select>
 
 	<select id="searchProcessList" resultType="neatlogic.framework.process.dto.ProcessVo">
@@ -268,16 +272,7 @@ limitations under the License.
 		`lcu`,
 		`lcd`
 		FROM `process`
-		WHERE 1=1
-		<if test="keyword != null and keyword != ''">
-			AND `name` LIKE CONCAT('%', #{keyword}, '%')
-		</if>
-		<if test="isActive != null">
-			AND `is_Active` = #{isActive}
-		</if>
-		<if test="isICreated != null and isICreated == 1">
-			AND `fcu` = #{fcu}
-		</if>
+		<include refid="searchProcessWhere"/>
 		ORDER BY `fcd` DESC
 		<if test="needPage">
 			limit #{startNum}, #{pageSize}
@@ -289,16 +284,7 @@ limitations under the License.
 		`uuid` as `value`,
 		`name` as `text`
 		FROM `process`
-		WHERE 1=1
-		<if test="keyword != null and keyword != ''">
-			AND `name` LIKE CONCAT('%', #{keyword}, '%')
-		</if>
-		<if test="isActive != null">
-			AND `is_Active` = #{isActive}
-		</if>
-		<if test="isICreated != null and isICreated == 1">
-			AND `fcu` = #{fcu}
-		</if>
+		<include refid="searchProcessWhere"/>
 		ORDER BY `fcd` DESC
 		<if test="needPage">
 			limit #{startNum}, #{pageSize}
