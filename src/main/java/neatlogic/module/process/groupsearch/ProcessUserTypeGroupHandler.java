@@ -18,11 +18,15 @@ package neatlogic.module.process.groupsearch;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.common.constvalue.UserType;
 import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.process.constvalue.ProcessTaskGroupSearch;
 import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.dao.mapper.task.TaskMapper;
 import neatlogic.framework.process.dto.TaskConfigVo;
+import neatlogic.framework.restful.groupsearch.core.GroupSearchGroupVo;
+import neatlogic.framework.restful.groupsearch.core.GroupSearchOptionVo;
+import neatlogic.framework.restful.groupsearch.core.GroupSearchVo;
 import neatlogic.framework.restful.groupsearch.core.IGroupSearchHandler;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -50,17 +54,22 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler<ValueTex
     TaskMapper taskMapper;
 
     @Override
-    public List<ValueTextVo> search(JSONObject jsonObj) {
-        List<Object> includeList = jsonObj.getJSONArray("includeList");
-        List<Object> excludeList = jsonObj.getJSONArray("excludeList");
-        if (CollectionUtils.isEmpty(includeList)) {
-            includeList = new ArrayList<Object>();
+    public List<ValueTextVo> search(GroupSearchVo groupSearchVo) {
+//        List<Object> includeList = jsonObj.getJSONArray("includeList");
+//        List<Object> excludeList = jsonObj.getJSONArray("excludeList");
+//        if (CollectionUtils.isEmpty(includeList)) {
+//            includeList = new ArrayList<Object>();
+//        }
+//        List<String> includeStrList = includeList.stream().map(Object::toString).collect(Collectors.toList());
+        List<String> includeStrList = groupSearchVo.getIncludeList();
+        if (CollectionUtils.isEmpty(includeStrList)) {
+            includeStrList = new ArrayList<>();
         }
-        List<String> includeStrList = includeList.stream().map(Object::toString).collect(Collectors.toList());
+        List<String> excludeList = groupSearchVo.getExcludeList();
         List<String> valuelist = new ArrayList<>();
         List<ValueTextVo> userTypeList = new ArrayList<>();
         for (ProcessUserType s : ProcessUserType.values()) {
-            if (s.getIsShow() && s.getText().contains(jsonObj.getString("keyword"))) {
+            if (s.getIsShow() && s.getText().contains(groupSearchVo.getKeyword())) {
                 String value = getHeader() + s.getValue();
                 if (!valuelist.contains(value)) {
                     valuelist.add(value);
@@ -80,7 +89,7 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler<ValueTex
         //任务
         if (CollectionUtils.isNotEmpty(excludeList) && !excludeList.contains("processUserType#" + ProcessUserType.MINOR.getValue())) {
             TaskConfigVo configParam = new TaskConfigVo();
-            configParam.setKeyword(jsonObj.getString("keyword"));
+            configParam.setKeyword(groupSearchVo.getKeyword());
             List<TaskConfigVo> taskConfigVoList = taskMapper.searchTaskConfig(configParam);
             if (CollectionUtils.isNotEmpty(taskConfigVoList)) {
                 for (TaskConfigVo configVo : taskConfigVoList) {
@@ -96,9 +105,10 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler<ValueTex
     }
 
     @Override
-    public List<ValueTextVo> reload(JSONObject jsonObj) {
+    public List<ValueTextVo> reload(GroupSearchVo groupSearchVo) {
         List<ValueTextVo> userTypeList = new ArrayList<>();
-        List<String> valueList = jsonObj.getJSONArray("valueList").toJavaList(String.class);
+//        List<String> valueList = jsonObj.getJSONArray("valueList").toJavaList(String.class);
+        List<String> valueList = groupSearchVo.getValueList();
         if (CollectionUtils.isNotEmpty(valueList)) {
             for (String value : valueList) {
                 if (value.startsWith(getHeader())) {
@@ -120,13 +130,26 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler<ValueTex
     }
 
     @Override
-    public JSONObject repack(List<ValueTextVo> userTypeList) {
-        JSONObject userTypeObj = new JSONObject();
-        userTypeObj.put("value", "processUserType");
-        userTypeObj.put("text", "工单干系人");
-        userTypeObj.put("sort", getSort());
-        userTypeObj.put("dataList", userTypeList);
-        return userTypeObj;
+    public GroupSearchGroupVo repack(List<ValueTextVo> userTypeList) {
+        GroupSearchGroupVo groupSearchGroupVo = new GroupSearchGroupVo();
+        groupSearchGroupVo.setValue("processUserType");
+        groupSearchGroupVo.setText("工单干系人");
+        groupSearchGroupVo.setSort(getSort());
+        List<GroupSearchOptionVo> dataList = new ArrayList<>();
+        for (ValueTextVo userType : userTypeList) {
+            GroupSearchOptionVo groupSearchOptionVo = new GroupSearchOptionVo();
+            groupSearchOptionVo.setValue(userType.getValue().toString());
+            groupSearchOptionVo.setText(userType.getText());
+            dataList.add(groupSearchOptionVo);
+        }
+        groupSearchGroupVo.setDataList(dataList);
+        return groupSearchGroupVo;
+//        JSONObject userTypeObj = new JSONObject();
+//        userTypeObj.put("value", "processUserType");
+//        userTypeObj.put("text", "工单干系人");
+//        userTypeObj.put("sort", getSort());
+//        userTypeObj.put("dataList", userTypeList);
+//        return userTypeObj;
     }
 
     @Override
