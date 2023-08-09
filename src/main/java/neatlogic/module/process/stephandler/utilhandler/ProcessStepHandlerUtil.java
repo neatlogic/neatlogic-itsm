@@ -1,3 +1,19 @@
+/*
+ * Copyright(c) 2023 NeatLogic Co., Ltd. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package neatlogic.module.process.stephandler.utilhandler;
 
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
@@ -34,26 +50,6 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @Title: ProcessStepHandlerUtilServiceImpl
- * @Package neatlogic.module.process.stephandler.service
- * @Description: TODO
- * @Author: linbq
- * @Date: 2021/1/20 16:26
-Copyright(c) 2023 NeatLogic Co., Ltd. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- **/
 @RootComponent
 public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     @Resource
@@ -70,12 +66,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     private ProcessTagMapper processTagMapper;
 
     /**
-     * @param currentProcessTaskStepVo
-     * @param trigger
      * @Description: 触发动作
      * @Author: linbq
      * @Date: 2021/1/20 16:15
-     * @Params:[currentProcessTaskStepVo, trigger]
      * @Returns:void
      */
     @Override
@@ -84,12 +77,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskStepVo
-     * @param trigger
      * @Description: 触发通知
      * @Author: linbq
      * @Date: 2021/1/20 16:17
-     * @Params:[currentProcessTaskStepVo, trigger]
      * @Returns:void
      */
     @Override
@@ -98,12 +88,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskVo
-     * @param isAsync
      * @Description: 计算时效
      * @Author: linbq
      * @Date: 2021/1/20 16:17
-     * @Params:[currentProcessTaskVo, isAsync]
      * @Returns:void
      */
     @Override
@@ -112,11 +99,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskVo
      * @Description: 计算时效
      * @Author: linbq
      * @Date: 2021/1/20 16:17
-     * @Params:[currentProcessTaskVo, isAsync]
      * @Returns:void
      */
     @Override
@@ -125,11 +110,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskStepVo
      * @Description: 计算时效
      * @Author: linbq
      * @Date: 2021/1/20 16:17
-     * @Params:[currentProcessTaskVo, isAsync]
      * @Returns:void
      */
     @Override
@@ -138,13 +121,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskVo
-     * @param currentProcessTaskStepVo
-     * @param isAsync
      * @Description: 计算时效
      * @Author: linbq
      * @Date: 2021/1/20 16:17
-     * @Params:[currentProcessTaskVo, isAsync]
      * @Returns:void
      */
     @Override
@@ -157,12 +136,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskStepVo
-     * @param action
      * @Description: 记录操作时间
      * @Author: linbq
      * @Date: 2021/1/20 16:19
-     * @Params:[currentProcessTaskStepVo, action]
      * @Returns:void
      */
     @Override
@@ -186,7 +162,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 }
                 break;
             case STEP_COMPLETE:
-                /** 如果找不到审计记录并且completetime不为空，则新建审计记录 **/
+                /* 如果找不到审计记录并且completetime不为空，则新建审计记录 **/
                 newAuditVo.setCompleteTime("now");
                 if (lastTimeAuditVo == null || StringUtils.isNotBlank(lastTimeAuditVo.getCompleteTime())) {
                     processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
@@ -196,7 +172,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 }
                 break;
             case PROCESSTASK_ABORT:
-                /** 如果找不到审计记录并且aborttime不为空，则新建审计记录 **/
+                /* 如果找不到审计记录并且aborttime不为空，则新建审计记录 **/
                 newAuditVo.setAbortTime("now");
                 if (lastTimeAuditVo == null || StringUtils.isNotBlank(lastTimeAuditVo.getAbortTime())) {
                     processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
@@ -206,7 +182,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 }
                 break;
             case STEP_BACK:
-                /** 如果找不到审计记录并且backtime不为空，则新建审计记录 **/
+                /* 如果找不到审计记录并且backtime不为空，则新建审计记录 **/
                 newAuditVo.setBackTime("now");
                 if (lastTimeAuditVo == null || StringUtils.isNotBlank(lastTimeAuditVo.getBackTime())) {
                     processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
@@ -232,7 +208,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 }
                 break;
             case STEP_PAUSE:
-                /** 如果找不到审计记录并且pausetime不为空，则新建审计记录 **/
+                /* 如果找不到审计记录并且pausetime不为空，则新建审计记录 **/
                 newAuditVo.setPauseTime("now");
                 if (lastTimeAuditVo == null || StringUtils.isNotBlank(lastTimeAuditVo.getPauseTime())) {
                     processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
@@ -245,12 +221,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskStepVo
-     * @param action
      * @Description: 记录操作活动
      * @Author: linbq
      * @Date: 2021/1/20 16:19
-     * @Params:[currentProcessTaskStepVo, action]
      * @Returns:void
      */
     @Override
@@ -259,11 +232,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskVo
      * @Description: 自动评分
      * @Author: linbq
      * @Date: 2021/1/20 16:22
-     * @Params:[currentProcessTaskVo]
      * @Returns:void
      */
     @Override
@@ -272,12 +243,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskStepVo
      * @Description: 获取验证基本信息数据是否合法，并验证
      * @Author: linbq
      * @Date: 2021/1/20 16:21
-     * @Params:[currentProcessTaskStepVo]
-     * @Returns:boolean
      */
     @Override
     public boolean baseInfoValidFromDb(ProcessTaskStepVo currentProcessTaskStepVo) {
@@ -288,13 +256,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskStepVo
-     * @param processTaskVo
      * @Description: 验证基本信息数据是否合法
      * @Author: linbq
      * @Date: 2021/1/20 16:21
-     * @Params:[currentProcessTaskStepVo, processTaskVo]
-     * @Returns:boolean
      */
     @Override
     public boolean baseInfoValid(ProcessTaskStepVo currentProcessTaskStepVo, ProcessTaskVo processTaskVo) {
@@ -353,12 +317,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskStepVo
      * @Description: 验证前置步骤指派处理人是否合法
      * @Author: linbq
      * @Date: 2021/1/20 16:21
-     * @Params:[currentProcessTaskStepVo]
-     * @Returns:boolean
      */
     @Override
     public boolean assignWorkerValid(ProcessTaskStepVo currentProcessTaskStepVo) {
@@ -465,9 +426,10 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
 
     /**
      * 找出流转到哪些步骤时，需要指定targetStepId步骤的处理人
+     *
      * @param processTaskId 工单id
      * @param currentStepId 当前流转步骤id
-     * @param targetStepId 配置了由当前步骤处理人指定处理人的步骤id
+     * @param targetStepId  配置了由当前步骤处理人指定处理人的步骤id
      * @return
      */
     @Override
@@ -514,15 +476,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskStepVo
-     * @param targerProcessTaskStepId
-     * @param reason
-     * @param ation
      * @Description: 保存步骤提醒
      * @Author: linbq
      * @Date: 2021/1/21 11:30
-     * @Params:[currentProcessTaskStepVo, targerProcessTaskStepId, reason, ation]
-     * @Returns:int
      */
     @Override
     public int saveStepRemind(ProcessTaskStepVo currentProcessTaskStepVo, Long targerProcessTaskStepId, String reason, IProcessTaskStepRemindType ation) {
@@ -550,12 +506,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskStepVo
-     * @param action
      * @Description: 保存描述内容和附件
      * @Author: linbq
      * @Date: 2021/1/27 11:41
-     * @Params:[currentProcessTaskStepVo, action]
      * @Returns:void
      */
     @Override
@@ -584,7 +537,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         }
         processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
 
-        /** 保存附件uuid **/
+        /* 保存附件uuid **/
         if (CollectionUtils.isNotEmpty(fileIdList)) {
             ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();
             processTaskStepFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
@@ -623,11 +576,11 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     @Override
-    public void chechContentIsRequired(ProcessTaskStepVo currentProcessTaskStepVo) {
+    public void checkContentIsRequired(ProcessTaskStepVo currentProcessTaskStepVo) {
         if (Objects.equals(currentProcessTaskStepVo.getIsNeedContent(), 0)) {
             return;
         }
-        if(Objects.equals(currentProcessTaskStepVo.getIsRequired(), 1)) {
+        if (Objects.equals(currentProcessTaskStepVo.getIsRequired(), 1)) {
             JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
             String content = paramObj.getString("content");
             if (StringUtils.isBlank(content)) {
@@ -649,11 +602,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     }
 
     /**
-     * @param currentProcessTaskStepVo
      * @Description: 保存标签列表
      * @Author: linbq
      * @Date: 2021/1/27 11:42
-     * @Params:[currentProcessTaskStepVo]
      * @Returns:void
      */
     @Override
@@ -864,11 +815,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
 //    }
 
     /**
-     * @param currentProcessTaskStepVo
      * @Description: 保存表单属性值
      * @Author: linbq
      * @Date: 2021/1/27 11:42
-     * @Params:[currentProcessTaskStepVo]
      * @Returns:void
      */
     @Override
@@ -883,17 +832,17 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
         JSONArray formAttributeDataList = paramObj.getJSONArray("formAttributeDataList");
         if (formAttributeDataList == null) {
-            /** 如果参数中没有formAttributeDataList字段，则不改变表单属性值，这样可以兼容自动节点自动完成场景 **/
+            /* 如果参数中没有formAttributeDataList字段，则不改变表单属性值，这样可以兼容自动节点自动完成场景 **/
             return;
         }
 
-        /** 隐藏的属性uuid列表 **/
+        /* 隐藏的属性uuid列表 **/
         List<String> hidecomponentList = new ArrayList<>();
         JSONArray hidecomponentArray = paramObj.getJSONArray("hidecomponentList");
         if (CollectionUtils.isNotEmpty(hidecomponentArray)) {
             hidecomponentList = hidecomponentArray.toJavaList(String.class);
         }
-        /** 只读的属性uuid列表 **/
+        /* 只读的属性uuid列表 **/
         List<String> readcomponentList = new ArrayList<>();
         JSONArray readcomponentArray = paramObj.getJSONArray("readcomponentList");
         if (CollectionUtils.isNotEmpty(readcomponentArray)) {
@@ -909,7 +858,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             formVersionVo.setFormName(processTaskFormVo.getFormName());
             formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
             IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-            /** 校验表单属性是否合法 **/
+            /* 校验表单属性是否合法 **/
             formCrossoverService.formAttributeValueValid(formVersionVo, formAttributeDataList);
             defaultSceneFormAttributeList = formVersionVo.getFormAttributeList();
         }
@@ -970,7 +919,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             }
         }
 
-        /** 获取旧表单数据 **/
+        /* 获取旧表单数据 **/
         List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
         Map<String, ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataMap = oldProcessTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
 
