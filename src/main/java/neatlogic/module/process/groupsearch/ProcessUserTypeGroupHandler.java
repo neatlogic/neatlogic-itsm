@@ -17,14 +17,10 @@
 package neatlogic.module.process.groupsearch;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.common.constvalue.UserType;
-import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.process.constvalue.ProcessTaskGroupSearch;
 import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.dao.mapper.task.TaskMapper;
 import neatlogic.framework.process.dto.TaskConfigVo;
-import neatlogic.framework.restful.groupsearch.core.GroupSearchGroupVo;
 import neatlogic.framework.restful.groupsearch.core.GroupSearchOptionVo;
 import neatlogic.framework.restful.groupsearch.core.GroupSearchVo;
 import neatlogic.framework.restful.groupsearch.core.IGroupSearchHandler;
@@ -60,12 +56,6 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
 
     @Override
     public List<GroupSearchOptionVo> search(GroupSearchVo groupSearchVo) {
-//        List<Object> includeList = jsonObj.getJSONArray("includeList");
-//        List<Object> excludeList = jsonObj.getJSONArray("excludeList");
-//        if (CollectionUtils.isEmpty(includeList)) {
-//            includeList = new ArrayList<Object>();
-//        }
-//        List<String> includeStrList = includeList.stream().map(Object::toString).collect(Collectors.toList());
         List<String> includeStrList = groupSearchVo.getIncludeList();
         if (CollectionUtils.isEmpty(includeStrList)) {
             includeStrList = new ArrayList<>();
@@ -82,7 +72,6 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
                     groupSearchOptionVo.setValue(value);
                     groupSearchOptionVo.setText(s.getText());
                     userTypeList.add(groupSearchOptionVo);
-//                    userTypeList.add(new ValueTextVo(value, s.getText()));
                 }
             }
             if (includeStrList.contains(getHeader() + s.getValue())) {
@@ -94,7 +83,6 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
                         groupSearchOptionVo.setValue(value);
                         groupSearchOptionVo.setText(s.getText());
                         userTypeList.add(groupSearchOptionVo);
-//                        userTypeList.add(new ValueTextVo(value, s.getText()));
                     }
                 }
             }
@@ -113,7 +101,6 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
                         groupSearchOptionVo.setValue(value);
                         groupSearchOptionVo.setText(configVo.getName() + "处理人");
                         userTypeList.add(groupSearchOptionVo);
-//                        userTypeList.add(new ValueTextVo(value, configVo.getName() + "处理人"));
                     }
                 }
             }
@@ -124,7 +111,6 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
     @Override
     public List<GroupSearchOptionVo> reload(GroupSearchVo groupSearchVo) {
         List<GroupSearchOptionVo> userTypeList = new ArrayList<>();
-//        List<String> valueList = jsonObj.getJSONArray("valueList").toJavaList(String.class);
         List<String> valueList = groupSearchVo.getValueList();
         if (CollectionUtils.isNotEmpty(valueList)) {
             for (String value : valueList) {
@@ -146,34 +132,10 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
                     groupSearchOptionVo.setValue(getHeader() + o.getId().toString());
                     groupSearchOptionVo.setText(o.getName() + "处理人");
                     userTypeList.add(groupSearchOptionVo);
-//                    userTypeList.add(new ValueTextVo(getHeader() + o.getId().toString(), o.getName() + "处理人"));
                 });
             }
         }
         return userTypeList;
-    }
-
-//    @Override
-    public GroupSearchGroupVo repack(List<ValueTextVo> userTypeList) {
-        GroupSearchGroupVo groupSearchGroupVo = new GroupSearchGroupVo();
-        groupSearchGroupVo.setValue("processUserType");
-        groupSearchGroupVo.setText("工单干系人");
-        groupSearchGroupVo.setSort(getSort());
-        List<GroupSearchOptionVo> dataList = new ArrayList<>();
-        for (ValueTextVo userType : userTypeList) {
-            GroupSearchOptionVo groupSearchOptionVo = new GroupSearchOptionVo();
-            groupSearchOptionVo.setValue(userType.getValue().toString());
-            groupSearchOptionVo.setText(userType.getText());
-            dataList.add(groupSearchOptionVo);
-        }
-        groupSearchGroupVo.setDataList(dataList);
-        return groupSearchGroupVo;
-//        JSONObject userTypeObj = new JSONObject();
-//        userTypeObj.put("value", "processUserType");
-//        userTypeObj.put("text", "工单干系人");
-//        userTypeObj.put("sort", getSort());
-//        userTypeObj.put("dataList", userTypeList);
-//        return userTypeObj;
     }
 
     @Override
