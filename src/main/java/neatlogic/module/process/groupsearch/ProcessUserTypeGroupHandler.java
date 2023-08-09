@@ -24,6 +24,7 @@ import neatlogic.framework.process.dto.TaskConfigVo;
 import neatlogic.framework.restful.groupsearch.core.GroupSearchOptionVo;
 import neatlogic.framework.restful.groupsearch.core.GroupSearchVo;
 import neatlogic.framework.restful.groupsearch.core.IGroupSearchHandler;
+import neatlogic.framework.util.$;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -99,7 +100,7 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
                         valuelist.add(value);
                         GroupSearchOptionVo groupSearchOptionVo = new GroupSearchOptionVo();
                         groupSearchOptionVo.setValue(value);
-                        groupSearchOptionVo.setText(configVo.getName() + "处理人");
+                        groupSearchOptionVo.setText(configVo.getName() + $.t("common.worker"));
                         userTypeList.add(groupSearchOptionVo);
                     }
                 }
@@ -130,7 +131,7 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
                 configVoList.forEach(o -> {
                     GroupSearchOptionVo groupSearchOptionVo = new GroupSearchOptionVo();
                     groupSearchOptionVo.setValue(getHeader() + o.getId().toString());
-                    groupSearchOptionVo.setText(o.getName() + "处理人");
+                    groupSearchOptionVo.setText(o.getName() + $.t("common.worker"));
                     userTypeList.add(groupSearchOptionVo);
                 });
             }
