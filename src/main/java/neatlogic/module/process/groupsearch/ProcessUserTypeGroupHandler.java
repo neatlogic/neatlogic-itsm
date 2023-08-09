@@ -39,10 +39,15 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class ProcessUserTypeGroupHandler implements IGroupSearchHandler<ValueTextVo> {
+public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
     @Override
     public String getName() {
         return ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue();
+    }
+
+    @Override
+    public String getLabel() {
+        return ProcessTaskGroupSearch.PROCESSUSERTYPE.getText();
     }
 
     @Override
@@ -54,7 +59,7 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler<ValueTex
     TaskMapper taskMapper;
 
     @Override
-    public List<ValueTextVo> search(GroupSearchVo groupSearchVo) {
+    public List<GroupSearchOptionVo> search(GroupSearchVo groupSearchVo) {
 //        List<Object> includeList = jsonObj.getJSONArray("includeList");
 //        List<Object> excludeList = jsonObj.getJSONArray("excludeList");
 //        if (CollectionUtils.isEmpty(includeList)) {
@@ -67,13 +72,17 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler<ValueTex
         }
         List<String> excludeList = groupSearchVo.getExcludeList();
         List<String> valuelist = new ArrayList<>();
-        List<ValueTextVo> userTypeList = new ArrayList<>();
+        List<GroupSearchOptionVo> userTypeList = new ArrayList<>();
         for (ProcessUserType s : ProcessUserType.values()) {
             if (s.getIsShow() && s.getText().contains(groupSearchVo.getKeyword())) {
                 String value = getHeader() + s.getValue();
                 if (!valuelist.contains(value)) {
                     valuelist.add(value);
-                    userTypeList.add(new ValueTextVo(value, s.getText()));
+                    GroupSearchOptionVo groupSearchOptionVo = new GroupSearchOptionVo();
+                    groupSearchOptionVo.setValue(value);
+                    groupSearchOptionVo.setText(s.getText());
+                    userTypeList.add(groupSearchOptionVo);
+//                    userTypeList.add(new ValueTextVo(value, s.getText()));
                 }
             }
             if (includeStrList.contains(getHeader() + s.getValue())) {
@@ -81,7 +90,11 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler<ValueTex
                     String value = getHeader() + s.getValue();
                     if (!valuelist.contains(value)) {
                         valuelist.add(value);
-                        userTypeList.add(new ValueTextVo(value, s.getText()));
+                        GroupSearchOptionVo groupSearchOptionVo = new GroupSearchOptionVo();
+                        groupSearchOptionVo.setValue(value);
+                        groupSearchOptionVo.setText(s.getText());
+                        userTypeList.add(groupSearchOptionVo);
+//                        userTypeList.add(new ValueTextVo(value, s.getText()));
                     }
                 }
             }
@@ -96,7 +109,11 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler<ValueTex
                     String value = getHeader() + configVo.getId().toString();
                     if (!valuelist.contains(value)) {
                         valuelist.add(value);
-                        userTypeList.add(new ValueTextVo(value, configVo.getName() + "处理人"));
+                        GroupSearchOptionVo groupSearchOptionVo = new GroupSearchOptionVo();
+                        groupSearchOptionVo.setValue(value);
+                        groupSearchOptionVo.setText(configVo.getName() + "处理人");
+                        userTypeList.add(groupSearchOptionVo);
+//                        userTypeList.add(new ValueTextVo(value, configVo.getName() + "处理人"));
                     }
                 }
             }
@@ -105,8 +122,8 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler<ValueTex
     }
 
     @Override
-    public List<ValueTextVo> reload(GroupSearchVo groupSearchVo) {
-        List<ValueTextVo> userTypeList = new ArrayList<>();
+    public List<GroupSearchOptionVo> reload(GroupSearchVo groupSearchVo) {
+        List<GroupSearchOptionVo> userTypeList = new ArrayList<>();
 //        List<String> valueList = jsonObj.getJSONArray("valueList").toJavaList(String.class);
         List<String> valueList = groupSearchVo.getValueList();
         if (CollectionUtils.isNotEmpty(valueList)) {
@@ -115,21 +132,28 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler<ValueTex
                     String realValue = value.replace(getHeader(), "");
                     String text = ProcessUserType.getText(realValue);
                     if (StringUtils.isNotBlank(text)) {
-                        userTypeList.add(new ValueTextVo(value, text));
+                        GroupSearchOptionVo groupSearchOptionVo = new GroupSearchOptionVo();
+                        groupSearchOptionVo.setValue(value);
+                        groupSearchOptionVo.setText(text);
+                        userTypeList.add(groupSearchOptionVo);
                     }
                 }
             }
             List<TaskConfigVo> configVoList = taskMapper.getTaskConfigByIdList(JSONArray.parseArray(JSONArray.toJSONString(valueList.stream().map(v -> v.replace(getHeader(), "")).collect(Collectors.toList()))));
             if (CollectionUtils.isNotEmpty(configVoList)) {
                 configVoList.forEach(o -> {
-                    userTypeList.add(new ValueTextVo(getHeader() + o.getId().toString(), o.getName() + "处理人"));
+                    GroupSearchOptionVo groupSearchOptionVo = new GroupSearchOptionVo();
+                    groupSearchOptionVo.setValue(getHeader() + o.getId().toString());
+                    groupSearchOptionVo.setText(o.getName() + "处理人");
+                    userTypeList.add(groupSearchOptionVo);
+//                    userTypeList.add(new ValueTextVo(getHeader() + o.getId().toString(), o.getName() + "处理人"));
                 });
             }
         }
         return userTypeList;
     }
 
-    @Override
+//    @Override
     public GroupSearchGroupVo repack(List<ValueTextVo> userTypeList) {
         GroupSearchGroupVo groupSearchGroupVo = new GroupSearchGroupVo();
         groupSearchGroupVo.setValue("processUserType");
