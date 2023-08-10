@@ -96,7 +96,7 @@ public class ProcessTaskNotifyThread extends NeatLogicThread {
             StringBuilder notifyAuditMessageStringBuilder = new StringBuilder();
             JSONObject notifyPolicyConfig;
             if (notifyTriggerType instanceof ProcessTaskNotifyTriggerType) {
-                /** 获取工单配置信息 **/
+                /* 获取工单配置信息 **/
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoByIdIncludeIsDeleted(currentProcessTaskStepVo.getProcessTaskId());
                 String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
                 notifyPolicyConfig = (JSONObject) JSONPath.read(config, "process.processConfig.notifyPolicyConfig");
