@@ -26,6 +26,6 @@
 申请事项：${DATA.channelName}
 最新进展：${DATA.ownerName}已完成工单确认和评分，响应内容：${DATA.processTaskScoreContent}，评分结果：<#if DATA.processTaskScore?? && (DATA.processTaskScore?size > 0)><#list DATA.processTaskScore as item>${item.dimensionName}:${item.score}<#if item_has_next>,</#if></#list></#if>
 提醒时间：${DATA.currentTime}
-@link:https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx8a4c400b4c54eead&redirect_uri=http://demo.techsure.cn:8011/demo/workDetail?processTaskId=${DATA.id}&isHandle=true&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect
+@link:https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx8a4c400b4c54eead&redirect_uri=http://demo.neatlogic.cn:8011/demo/workDetail?processTaskId=${DATA.id}&isHandle=true&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect
 </body>
 </html>

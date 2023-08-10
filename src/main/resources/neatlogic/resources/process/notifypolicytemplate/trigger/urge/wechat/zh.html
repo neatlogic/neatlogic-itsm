@@ -26,6 +26,6 @@
 申请事项：${DATA.channelName}
 最新进展：用户累积催办：${DATA.processTaskUrgeCount}次，<#if DATA.processTaskStepSla?? && (DATA.processTaskStepSla?size > 0)><#list DATA.processTaskStepSla as item> <#if (item.timeLeft > 0)>即将超时，还剩：${item.timeLeftFormat}<#else>已超时：${item.timeLeftFormat}</#if><#if item_has_next>,</#if></#list>，</#if>请及时响应和处理
 提醒时间：${DATA.currentTime}
-@link:https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx8a4c400b4c54eead&redirect_uri=http://demo.techsure.cn:8011/demo/workDetail?processTaskId=${DATA.id}&isHandle=true&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect
+@link:https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx8a4c400b4c54eead&redirect_uri=http://demo.neatlogic.cn:8011/demo/workDetail?processTaskId=${DATA.id}&isHandle=true&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect
 </body>
 </html>
