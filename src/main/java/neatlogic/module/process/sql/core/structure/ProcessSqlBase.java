@@ -25,7 +25,6 @@ import neatlogic.framework.process.dto.SqlDecoratorVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
 import neatlogic.framework.process.workcenter.dto.SelectColumnVo;
 import neatlogic.framework.process.workcenter.dto.TableSelectColumnVo;
-import neatlogic.module.process.dashboard.handler.ProcessTaskDashboardHandler;
 import neatlogic.module.process.sql.IProcessSqlStructure;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -40,11 +39,6 @@ import java.util.stream.Collectors;
 import static neatlogic.framework.common.util.CommonUtil.distinctByKey;
 
 public abstract class ProcessSqlBase<T extends SqlDecoratorVo> implements IProcessSqlStructure<T> {
-    @Override
-    public String getDataSourceHandlerName() {
-        return ProcessTaskDashboardHandler.class.getName();
-    }
-
     /**
      * @Description: 如果是distinct id 则 只需要 根据条件获取需要的表
      * @Author: 89770

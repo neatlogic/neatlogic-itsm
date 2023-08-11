@@ -32,12 +32,6 @@ public interface IProcessSqlStructure<T extends SqlDecoratorVo> {
     String getSqlStructureName();
 
     /**
-     * 获取 数据源
-     * @return 数据源
-     */
-    String getDataSourceHandlerName();
-
-    /**
      * 补充主体sql
      *
      * @param sqlSb               sql

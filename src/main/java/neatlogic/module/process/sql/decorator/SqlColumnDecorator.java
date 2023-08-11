@@ -17,7 +17,6 @@ limitations under the License.
 package neatlogic.module.process.sql.decorator;
 
 import neatlogic.framework.process.dto.SqlDecoratorVo;
-import neatlogic.module.process.dashboard.handler.ProcessTaskDashboardHandler;
 import neatlogic.module.process.sql.IProcessSqlStructure;
 import neatlogic.module.process.sql.ProcessSqlStructureFactory;
 import org.springframework.stereotype.Component;
@@ -33,7 +32,7 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
      * @Returns: java.lang.String
      **/
     public <T extends SqlDecoratorVo> void myBuild(StringBuilder sqlSb, T sqlDecoratorVo) {
-        IProcessSqlStructure processSqlStructure = ProcessSqlStructureFactory.getProcessSqlStructure(ProcessTaskDashboardHandler.class.getName(),"column", sqlDecoratorVo.getSqlFieldType());
+        IProcessSqlStructure processSqlStructure = ProcessSqlStructureFactory.getProcessSqlStructure("column", sqlDecoratorVo.getSqlFieldType());
         if(processSqlStructure != null) {
             processSqlStructure.doService(sqlSb, sqlDecoratorVo);
         }

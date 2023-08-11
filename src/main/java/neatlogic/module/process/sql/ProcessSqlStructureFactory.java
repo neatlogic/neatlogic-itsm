@@ -27,8 +27,8 @@ import java.util.Map;
 public class ProcessSqlStructureFactory extends ModuleInitializedListenerBase {
     private static final Map<String, IProcessSqlStructure> processSqlStructureMap = new HashMap<>();
 
-    public static IProcessSqlStructure getProcessSqlStructure(String dataSourceHandlerName, String sqlStructureName, String name) {
-        return processSqlStructureMap.get(String.format("%s_%s_%s", dataSourceHandlerName, sqlStructureName, name));
+    public static IProcessSqlStructure getProcessSqlStructure(String sqlStructureName, String name) {
+        return processSqlStructureMap.get(String.format("%s_%s", sqlStructureName, name));
     }
 
     @Override
@@ -36,7 +36,7 @@ public class ProcessSqlStructureFactory extends ModuleInitializedListenerBase {
         Map<String, IProcessSqlStructure> myMap = context.getBeansOfType(IProcessSqlStructure.class);
         for (Map.Entry<String, IProcessSqlStructure> entry : myMap.entrySet()) {
             IProcessSqlStructure processSqlStructure = entry.getValue();
-            processSqlStructureMap.put(String.format("%s_%s_%s", processSqlStructure.getDataSourceHandlerName(), processSqlStructure.getSqlStructureName(), processSqlStructure.getName()), processSqlStructure);
+            processSqlStructureMap.put(String.format("%s_%s", processSqlStructure.getSqlStructureName(), processSqlStructure.getName()), processSqlStructure);
         }
     }
 
