@@ -121,7 +121,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         ProcessTaskVo processTaskVo = null;
         if (processTaskId != null) {
             //已经暂存，从工单中心进入上报页
-            if (processTaskMapper.getProcessTaskStepBaseInfoById(processTaskId) == null) {
+            if (processTaskMapper.getProcessTaskBaseInfoById(processTaskId) == null) {
                 throw new ProcessTaskNotFoundEditTargetException(processTaskId);
             }
             try {
@@ -134,8 +134,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             processTaskVo=  getProcessTaskVoByProcessTaskId(processTaskId);
         } else if (copyProcessTaskId != null) {
             //复制上报
-            if (processTaskMapper.getProcessTaskStepBaseInfoById(processTaskId) == null) {
-                 throw new ProcessTaskNotFoundEditTargetException(processTaskId);
+            if (processTaskMapper.getProcessTaskBaseInfoById(copyProcessTaskId) == null) {
+                 throw new ProcessTaskNotFoundEditTargetException(copyProcessTaskId);
             }
             try {
                 new ProcessAuthManager.TaskOperationChecker(copyProcessTaskId, ProcessTaskOperationType.PROCESSTASK_COPYPROCESSTASK)
