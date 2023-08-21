@@ -134,8 +134,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             processTaskVo=  getProcessTaskVoByProcessTaskId(processTaskId);
         } else if (copyProcessTaskId != null) {
             //复制上报
-            if (processTaskMapper.getProcessTaskStepBaseInfoById(processTaskId) == null) {
-                 throw new ProcessTaskNotFoundEditTargetException(processTaskId);
+            if (processTaskMapper.getProcessTaskStepBaseInfoById(copyProcessTaskId) == null) {
+                 throw new ProcessTaskNotFoundEditTargetException(copyProcessTaskId);
             }
             try {
                 new ProcessAuthManager.TaskOperationChecker(copyProcessTaskId, ProcessTaskOperationType.PROCESSTASK_COPYPROCESSTASK)
