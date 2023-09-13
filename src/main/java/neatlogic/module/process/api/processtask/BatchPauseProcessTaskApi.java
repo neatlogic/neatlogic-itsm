@@ -39,7 +39,6 @@ import java.util.Objects;
 @Transactional
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class BatchPauseProcessTaskApi extends PrivateApiComponentBase {
-
     @Resource
     private ProcessTaskMapper processTaskMapper;
 
@@ -73,7 +72,11 @@ public class BatchPauseProcessTaskApi extends PrivateApiComponentBase {
                     }
                     processTaskStepVo.getParamObj().put("source", source);
                     processTaskStepVo.getParamObj().put("content", content);
-                    handler.pause(processTaskStepVo);
+                    try {
+                        handler.pause(processTaskStepVo);
+                    } catch (Exception e) {
+                        // 忽略
+                    }
                 }
             }
         }

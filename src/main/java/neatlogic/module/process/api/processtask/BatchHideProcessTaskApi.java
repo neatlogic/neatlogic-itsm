@@ -57,12 +57,13 @@ public class BatchHideProcessTaskApi extends PrivateApiComponentBase {
             if (processTaskVo == null) {
                 return null;
             }
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_HIDE)
+            boolean flag = new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_HIDE)
                     .build()
-                    .checkAndNoPermissionThrowException();
-            processTaskVo.setId(processTaskId);
-            processTaskVo.setIsShow(0);
-            processTaskMapper.updateProcessTaskIsShow(processTaskVo);
+                    .check();
+            if (flag) {
+                processTaskVo.setIsShow(0);
+                processTaskMapper.updateProcessTaskIsShow(processTaskVo);
+            }
         }
         return null;
     }

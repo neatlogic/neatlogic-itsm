@@ -24,8 +24,6 @@ import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.process.service.ProcessTaskService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,9 +37,6 @@ public class BatchAbortProcessTaskApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
-
-    @Autowired
-    private ProcessTaskService processTaskService;
 
     @Override
     public String getName() {
@@ -66,7 +61,11 @@ public class BatchAbortProcessTaskApi extends PrivateApiComponentBase {
             }
             processTaskVo.getParamObj().put("source", source);
             processTaskVo.getParamObj().put("content", content);
-            ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
+            try {
+                ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
+            } catch (Exception e) {
+                // 忽略
+            }
         }
         return null;
     }

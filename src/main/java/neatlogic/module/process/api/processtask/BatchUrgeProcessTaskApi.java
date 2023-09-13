@@ -72,9 +72,12 @@ public class BatchUrgeProcessTaskApi extends PrivateApiComponentBase {
             if (processTaskVo == null) {
                 return null;
             }
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_URGE)
+            boolean flag = new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_URGE)
                     .build()
-                    .checkAndNoPermissionThrowException();
+                    .check();
+            if (!flag) {
+                continue;
+            }
             List<ProcessTaskStepVo> processTaskStepList = processTaskService.getUrgeableStepList(processTaskVo, UserContext.get().getUserUuid(true));
             /** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
             List<String> fromUserUUidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), processTaskVo.getChannelUuid());

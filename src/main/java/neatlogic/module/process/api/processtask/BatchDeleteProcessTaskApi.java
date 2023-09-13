@@ -63,14 +63,16 @@ public class BatchDeleteProcessTaskApi extends PrivateApiComponentBase {
             if (processTaskMapper.getProcessTaskLockById(processTaskId) == null) {
                 return null;
             }
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_DELETE)
+            boolean flag = new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_DELETE)
                     .build()
-                    .checkAndNoPermissionThrowException();
-            // is_deleted置为1
-            processTaskMapper.updateProcessTaskIsDeletedById(processTaskId, 1);
-            ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskId, null);
-            processStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
-            processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
+                    .check();
+            if (flag) {
+                // is_deleted置为1
+                processTaskMapper.updateProcessTaskIsDeletedById(processTaskId, 1);
+                ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskId, null);
+                processStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
+                processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
+            }
         }
         return null;
     }
