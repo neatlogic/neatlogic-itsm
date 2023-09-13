@@ -33,13 +33,11 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 @Service
-@Transactional
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class BatchUrgeProcessTaskApi extends PrivateApiComponentBase {
 

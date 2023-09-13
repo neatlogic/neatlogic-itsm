@@ -29,14 +29,13 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 
 @Service
-@Transactional
+//@Transactional
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class BatchPauseProcessTaskApi extends PrivateApiComponentBase {
     @Resource
