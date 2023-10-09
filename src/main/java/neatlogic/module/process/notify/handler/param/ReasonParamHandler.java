@@ -16,20 +16,19 @@ limitations under the License.
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.dto.MailServerVo;
 import neatlogic.framework.dto.UrlInfoVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import neatlogic.framework.util.HtmlUtil;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -38,9 +37,6 @@ import java.util.List;
  **/
 @Component
 public class ReasonParamHandler extends ProcessTaskNotifyParamHandlerBase {
-
-    @Resource
-    private ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getValue() {
@@ -57,7 +53,18 @@ public class ReasonParamHandler extends ProcessTaskNotifyParamHandlerBase {
                 content = content.replace("</p>", "");
                 content = content.replace("<br>", "");
                 List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
-                content = HtmlUtil.urlReplace(content, urlInfoVoList);
+                String homeUrl = "";
+                String config = notifyConfigMapper.getConfigByType(NotifyHandlerType.EMAIL.getValue());
+                if (StringUtils.isNotBlank(config)) {
+                    MailServerVo mailServerVo = JSONObject.parseObject(config, MailServerVo.class);
+                    if (mailServerVo != null) {
+                        homeUrl = mailServerVo.getHomeUrl();
+                        if (StringUtils.isBlank(homeUrl)) {
+                            homeUrl = "";
+                        }
+                    }
+                }
+                content = HtmlUtil.urlReplace(content, urlInfoVoList, homeUrl);
             }
             return content;
         }

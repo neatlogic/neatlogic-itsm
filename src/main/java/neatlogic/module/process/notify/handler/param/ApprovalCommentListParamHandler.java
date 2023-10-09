@@ -16,11 +16,13 @@ limitations under the License.
 
 package neatlogic.module.process.notify.handler.param;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.TeamLevel;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.*;
 import neatlogic.framework.notify.core.INotifyTriggerType;
+import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepContentVo;
@@ -68,6 +70,17 @@ public class ApprovalCommentListParamHandler extends ProcessTaskNotifyParamHandl
     public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskId(processTaskStepVo.getProcessTaskId());
         if (CollectionUtils.isNotEmpty(processTaskStepContentList)) {
+            String homeUrl = "";
+            String config = notifyConfigMapper.getConfigByType(NotifyHandlerType.EMAIL.getValue());
+            if (StringUtils.isNotBlank(config)) {
+                MailServerVo mailServerVo = JSONObject.parseObject(config, MailServerVo.class);
+                if (mailServerVo != null) {
+                    homeUrl = mailServerVo.getHomeUrl();
+                    if (StringUtils.isBlank(homeUrl)) {
+                        homeUrl = "";
+                    }
+                }
+            }
             List<String> commentList = new ArrayList<>();
             for (ProcessTaskStepContentVo contentVo : processTaskStepContentList) {
                 String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentVo.getContentHash());
@@ -80,7 +93,7 @@ public class ApprovalCommentListParamHandler extends ProcessTaskNotifyParamHandl
                     }
                     if (StringUtils.isNotBlank(content)) {
                         List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
-                        content = HtmlUtil.urlReplace(content, urlInfoVoList);
+                        content = HtmlUtil.urlReplace(content, urlInfoVoList, homeUrl);
                         StringBuilder commentStringBuilder = new StringBuilder();
                         commentStringBuilder.append("<p>");
                         commentStringBuilder.append(content);
