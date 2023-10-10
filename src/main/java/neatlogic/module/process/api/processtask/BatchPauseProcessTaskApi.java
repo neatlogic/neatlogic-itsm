@@ -17,7 +17,9 @@
 package neatlogic.module.process.api.processtask;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
@@ -35,7 +37,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-//@Transactional
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class BatchPauseProcessTaskApi extends PrivateApiComponentBase {
     @Resource
@@ -43,15 +45,15 @@ public class BatchPauseProcessTaskApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "批量暂停工单";
+        return "nmpap.batchpauseprocesstaskapi.getname";
     }
     @Input({
-            @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1, desc = "工单Id列表"),
-            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1, desc = "term.itsm.processtaskidlist"),
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source")
     })
     @Output({})
-    @Description(desc = "批量暂停工单")
+    @Description(desc = "nmpap.batchpauseprocesstaskapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String source = paramObj.getString("source");
