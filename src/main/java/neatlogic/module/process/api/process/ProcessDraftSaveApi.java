@@ -1,22 +1,18 @@
 package neatlogic.module.process.api.process;
 
-import neatlogic.framework.process.util.ProcessConfigUtil;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.*;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_MODIFY;
-
+import neatlogic.framework.process.dto.ProcessDraftVo;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.process.dto.ProcessDraftVo;
 
 @Service
 @Transactional
@@ -34,7 +30,7 @@ public class ProcessDraftSaveApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "流程草稿保存接口";
+		return "nmpap.processdraftsaveapi.getname";
 	}
 
 	@Override
@@ -42,11 +38,15 @@ public class ProcessDraftSaveApi extends PrivateApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "processUuid", type = ApiParamType.STRING, desc = "流程uuid", isRequired = true),
-			@Param(name = "name", type = ApiParamType.STRING, xss = true, isRequired = false, maxLength = 50, desc = "流程名称"),
-			@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "流程配置内容", isRequired = true) })
-	@Output({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "草稿uuid") })
-	@Description(desc = "流程草稿保存接口")
+	@Input({
+			@Param(name = "processUuid", type = ApiParamType.STRING, desc = "term.itsm.processuuid", isRequired = true),
+			@Param(name = "name", type = ApiParamType.STRING, xss = true, isRequired = false, maxLength = 50, desc = "common.name"),
+			@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "common.config", isRequired = true)
+	})
+	@Output({
+			@Param(name = "uuid", type = ApiParamType.STRING, desc = "草稿uuid")
+	})
+	@Description(desc = "nmpap.processdraftsaveapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessDraftVo processDraftVo = JSONObject.toJavaObject(jsonObj, ProcessDraftVo.class);
@@ -66,7 +66,7 @@ public class ProcessDraftSaveApi extends PrivateApiComponentBase {
 		if (earliestUuid != null) {
 			processMapper.deleteProcessDraftByUuid(earliestUuid);
 		}
-		processDraftVo.setConfig(ProcessConfigUtil.regulateProcessConfig(processDraftVo.getConfig()));
+//		processDraftVo.setConfig(ProcessConfigUtil.regulateProcessConfig(processDraftVo.getConfig()));
 		processMapper.insertProcessDraft(processDraftVo);
 		return processDraftVo.getUuid();
 	}
