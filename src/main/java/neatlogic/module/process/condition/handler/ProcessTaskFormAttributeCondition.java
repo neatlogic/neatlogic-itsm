@@ -200,8 +200,25 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     private void defaultSqlBuild(JSONArray valueArray, ConditionVo conditionVo, IFormAttributeHandler formAttributeHandler, StringBuilder sqlSb) {
         List<String> valueList = new ArrayList<>();
         for (Object valueObj : valueArray) {
-            String[] valueTmpList = valueObj.toString().split("&=&");
-            for (String valueTmp : valueTmpList) {
+            if (valueObj instanceof JSONObject) {
+                JSONObject jsonObj = (JSONObject) valueObj;
+                String value = jsonObj.getString("value");
+                String text = jsonObj.getString("text");
+                String[] valueTmpList = {value, text};
+                for (String valueTmp : valueTmpList) {
+                    //如果需要分词，则搜索的时候关键字也需分词搜索
+                    if (formAttributeHandler.isNeedSliceWord()) {
+                        Set<String> sliceKeySet = null;
+                        sliceKeySet = FullTextIndexUtil.sliceKeyword(valueTmp);
+                        if (CollectionUtils.isNotEmpty(sliceKeySet)) {
+                            valueList.addAll(new ArrayList<>(sliceKeySet));
+                        }
+                    } else {//否则直接md5作为整体搜索
+                        valueList.add(Md5Util.encryptMD5(valueTmp).toLowerCase(Locale.ROOT));
+                    }
+                }
+            } else {
+                String valueTmp = valueObj.toString();
                 //如果需要分词，则搜索的时候关键字也需分词搜索
                 if (formAttributeHandler.isNeedSliceWord()) {
                     Set<String> sliceKeySet = null;
