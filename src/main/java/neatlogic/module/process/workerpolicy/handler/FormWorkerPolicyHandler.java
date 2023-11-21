@@ -96,12 +96,9 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                         if (handler != null) {
                             JSONObject detailedData = handler.getDetailedData(processTaskFormAttributeData, formAttributeVo.getConfigObj());
                             JSONArray valueList = detailedData.getJSONArray("valueList");
-                            System.out.println("valueList = " + valueList.toJSONString());
                             if (CollectionUtils.isNotEmpty(valueList)) {
-                                System.out.println("18");
                                 List<String> dataList = valueList.toJavaList(String.class);
                                 for (String value : dataList) {
-                                    System.out.println("value1 = " + value);
                                     /** 校验属性值是否合法，只有是当前存在的用户、组、角色才合法 **/
                                     if (value.contains("#")) {
                                         String[] split = value.split("#");
@@ -120,7 +117,6 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                                         } else {
                                             continue;
                                         }
-                                        System.out.println("value2 = " + value);
                                         processTaskStepWorkerList.add(
                                                 new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
                                                         currentProcessTaskStepVo.getId(), split[0], split[1],
@@ -134,15 +130,11 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                         if (handler != null) {
                             JSONObject detailedData = handler.getDetailedData(processTaskFormAttributeData, formAttributeVo.getConfigObj());
                             JSONArray valueList = detailedData.getJSONArray("valueList");
-                            System.out.println("valueList = " + valueList.toJSONString());
                             if (CollectionUtils.isNotEmpty(valueList)) {
-                                System.out.println("18");
                                 List<String> dataList = valueList.toJavaList(String.class);
                                 for (String value : dataList) {
-                                    System.out.println("value1 = " + value);
                                     if (StringUtils.isNotBlank(value)) {
                                         if (userMapper.checkUserIsExists(value) > 0) {
-                                            System.out.println("value2 = " + value);
                                             processTaskStepWorkerList.add(
                                                     new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
                                                             currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(),
