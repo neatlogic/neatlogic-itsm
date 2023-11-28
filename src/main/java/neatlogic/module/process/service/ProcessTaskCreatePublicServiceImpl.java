@@ -1,27 +1,19 @@
 package neatlogic.module.process.service;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.SystemUser;
-import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.UserVo;
-import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
 import neatlogic.framework.form.attribute.core.FormHandlerBase;
-import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormAttributeNotFoundException;
-import neatlogic.framework.matrix.core.IMatrixDataSourceHandler;
-import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
-import neatlogic.framework.matrix.dao.mapper.MatrixMapper;
-import neatlogic.framework.matrix.dto.MatrixDataVo;
-import neatlogic.framework.matrix.dto.MatrixVo;
-import neatlogic.framework.matrix.exception.MatrixDataSourceHandlerNotFoundException;
-import neatlogic.framework.matrix.exception.MatrixNotFoundException;
 import neatlogic.framework.process.constvalue.ProcessFlowDirection;
 import neatlogic.framework.process.dao.mapper.ChannelMapper;
 import neatlogic.framework.process.dao.mapper.PriorityMapper;
@@ -35,19 +27,16 @@ import neatlogic.framework.process.exception.process.ProcessNotFoundException;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNextStepIllegalException;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNextStepOverOneException;
 import neatlogic.framework.service.AuthenticationInfoService;
-import neatlogic.module.framework.form.attribute.handler.SelectHandler;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePublicService {
@@ -66,9 +55,6 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
 
     @Resource
     private UserMapper userMapper;
-
-    @Resource
-    private MatrixMapper matrixMapper;
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
@@ -210,104 +196,5 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
 
         result.put("processTaskId", saveResultObj.getString("processTaskId"));
         return result;
-    }
-
-    /**
-     * 通过text 转换为实际的value
-     *
-     * @param values text
-     * @param config form config
-     * @return 转换后的值
-     */
-    private Object textConversionValue(List<String> values, JSONObject config) {
-        Object result = null;
-        if (CollectionUtils.isNotEmpty(values)) {
-            boolean isMultiple = config.getBooleanValue("isMultiple");
-            String dataSource = config.getString("dataSource");
-            if ("static".equals(dataSource)) {
-                List<ValueTextVo> dataList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("dataList")), ValueTextVo.class);
-                if (CollectionUtils.isNotEmpty(dataList)) {
-                    Map<String, Object> valueTextMap = new HashMap<>();
-                    for (ValueTextVo data : dataList) {
-                        valueTextMap.put(data.getText(), data.getValue());
-                    }
-                    if (isMultiple) {
-                        JSONArray jsonArray = new JSONArray();
-                        for (String value : values) {
-                            jsonArray.add(valueTextMap.get(value));
-                        }
-                        result = jsonArray;
-                    } else {
-                        result = valueTextMap.get(values.get(0));
-                    }
-                }
-            } else if ("matrix".equals(dataSource)) {
-                ValueTextVo mapping = JSON.toJavaObject(config.getJSONObject("mapping"), ValueTextVo.class);
-                if (Objects.equals(mapping.getText(), mapping.getValue())) {
-                    if (isMultiple) {
-                        List<String> dataList = new ArrayList<>();
-                        for (String value : values) {
-                            dataList.add(value + "&=&" + value);
-                        }
-                        return dataList;
-                    } else {
-                        String value = values.get(0);
-                        return value + "&=&" + value;
-                    }
-                }
-                String matrixUuid = config.getString("matrixUuid");
-                if (StringUtils.isNotBlank(matrixUuid)) {
-                    MatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
-                    if (matrixVo == null) {
-                        throw new MatrixNotFoundException(matrixUuid);
-                    }
-                    if (isMultiple) {
-                        List<String> dataLsit = new ArrayList<>();
-                        for (String value : values) {
-                            String compose = getValue(matrixUuid, mapping, value);
-                            if (StringUtils.isNotBlank(compose)) {
-                                dataLsit.add(compose);
-                            }
-                        }
-                        return dataLsit;
-                    } else {
-                        return getValue(matrixUuid, mapping, values.get(0));
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    private String getValue(String matrixUuid, ValueTextVo mapping, String value) {
-        if (StringUtils.isBlank(value)) {
-            return value;
-        }
-        try {
-            MatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
-            if (matrixVo == null) {
-                throw new MatrixNotFoundException(matrixUuid);
-            }
-            IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
-            if (matrixDataSourceHandler == null) {
-                throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
-            }
-            MatrixDataVo dataVo = new MatrixDataVo();
-            dataVo.setMatrixUuid(matrixUuid);
-            List<String> columnList = new ArrayList<>();
-            columnList.add((String) mapping.getValue());
-            columnList.add(mapping.getText());
-            dataVo.setColumnList(columnList);
-            dataVo.setKeyword(value);
-            dataVo.setKeywordColumn(mapping.getText());
-            List<Map<String, JSONObject>> tbodyList = matrixDataSourceHandler.searchTableColumnData(dataVo);
-            for (Map<String, JSONObject> firstObj : tbodyList) {
-                JSONObject valueObj = firstObj.get(mapping.getValue());
-                return valueObj.getString("compose");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }
