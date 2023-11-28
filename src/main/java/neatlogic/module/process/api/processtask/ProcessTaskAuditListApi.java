@@ -1,37 +1,34 @@
 package neatlogic.module.process.api.processtask;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.dto.WorkAssignmentUnitVo;
-import neatlogic.framework.process.audithandler.core.ProcessTaskAuditDetailTypeFactory;
-import neatlogic.framework.process.auth.PROCESS_BASE;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import neatlogic.framework.process.audithandler.core.ProcessTaskAuditDetailTypeFactory;
 import neatlogic.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
+import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import neatlogic.framework.process.dto.ProcessTaskStepAuditVo;
-import neatlogic.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.module.process.service.ProcessTaskService;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.service.ProcessTaskService;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -89,17 +86,24 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
         processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
         List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
         Map<Long, Set<ProcessTaskOperationType>> operateMap = new HashMap<>();
+        Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
         List<Long> processtaskStepIdList = processTaskStepAuditList.stream().filter(e -> e.getProcessTaskStepId() != null).map(ProcessTaskStepAuditVo::getProcessTaskStepId).collect(Collectors.toList());
         if(CollectionUtils.isNotEmpty(processtaskStepIdList)){
             Long[] processTaskStepIds = new Long[processtaskStepIdList.size()];
             processtaskStepIdList.toArray(processTaskStepIds);
             operateMap = new ProcessAuthManager.Builder().addProcessTaskStepId(processTaskStepIds).addOperationType(ProcessTaskOperationType.STEP_VIEW).build().getOperateMap();
+            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processtaskStepIdList);
+            processTaskStepMap = processTaskStepList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
         }
         for (ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
             if (processTaskStepAudit.getProcessTaskStepId() != null) {
                 // 判断当前用户是否有权限查看该节点信息
                 if (!operateMap.computeIfAbsent(processTaskStepAudit.getProcessTaskStepId(), k -> new HashSet<>()).contains(ProcessTaskOperationType.STEP_VIEW)) {
                     continue;
+                }
+                ProcessTaskStepVo processTaskStepVo = processTaskStepMap.get(processTaskStepAudit.getProcessTaskStepId());
+                if (processTaskStepVo != null) {
+                    processTaskStepAudit.setFormSceneUuid(processTaskStepVo.getFormSceneUuid());
                 }
             }
 
