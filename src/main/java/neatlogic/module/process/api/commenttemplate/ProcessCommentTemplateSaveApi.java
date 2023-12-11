@@ -1,21 +1,17 @@
 package neatlogic.module.process.api.commenttemplate;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.auth.PROCESS_COMMENT_TEMPLATE_MODIFY;
 import neatlogic.framework.process.dao.mapper.ProcessCommentTemplateMapper;
-import neatlogic.framework.process.dto.ProcessCommentTemplateAuthVo;
 import neatlogic.framework.process.dto.ProcessCommentTemplateVo;
-import neatlogic.framework.process.exception.commenttemplate.ProcessCommentTemplateNotFoundException;
 import neatlogic.framework.process.exception.commenttemplate.ProcessCommentTemplateNameRepeatException;
+import neatlogic.framework.process.exception.commenttemplate.ProcessCommentTemplateNotFoundException;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Output;
@@ -23,13 +19,11 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import org.apache.commons.collections4.CollectionUtils;
+import neatlogic.module.process.service.ProcessCommentTemplateService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @Transactional
@@ -39,6 +33,9 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessCommentTemplateMapper commentTemplateMapper;
+
+    @Resource
+    private ProcessCommentTemplateService processCommentTemplateService;
 
     @Override
     public String getToken() {
@@ -68,16 +65,7 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         Long id = jsonObj.getLong("id");
-        String type = jsonObj.getString("type");
-        JSONArray authList = jsonObj.getJSONArray("authList");
-
-        ProcessCommentTemplateVo vo = jsonObj.toJavaObject(ProcessCommentTemplateVo.class);
-        if (commentTemplateMapper.checkTemplateNameIsRepeat(vo) > 0) {
-            throw new ProcessCommentTemplateNameRepeatException(vo.getName());
-        }
-
         if (id != null) {
-
             ProcessCommentTemplateVo _vo = commentTemplateMapper.getTemplateById(id);
             if (_vo == null) {
                 throw new ProcessCommentTemplateNotFoundException(id);
@@ -86,42 +74,16 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
             if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(_vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())) {
                 throw new PermissionDeniedException(PROCESS_COMMENT_TEMPLATE_MODIFY.class);
             }
-//            vo.setType(_vo.getType());
-            commentTemplateMapper.updateTemplate(vo);
-            commentTemplateMapper.deleteTemplateAuthority(id);
         } else {
-            vo.setType(type);
+            String type = jsonObj.getString("type");
             /** 没有权限则不允许创建系统模版 */
-            if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())) {
+            if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(type) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())) {
                 throw new PermissionDeniedException(PROCESS_COMMENT_TEMPLATE_MODIFY.class);
             }
-            vo.setFcu(UserContext.get().getUserUuid(true));
-            commentTemplateMapper.insertTemplate(vo);
         }
-        List<ProcessCommentTemplateAuthVo> list = new ArrayList<>();
-        if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(vo.getType()) && CollectionUtils.isNotEmpty(authList)) {
-            for (Object obj : authList) {
-                String[] split = obj.toString().split("#");
-                if (GroupSearch.getGroupSearch(split[0]) != null) {
-                    ProcessCommentTemplateAuthVo auth = new ProcessCommentTemplateAuthVo();
-                    auth.setCommentTemplateId(vo.getId());
-                    auth.setType(split[0]);
-                    auth.setUuid(split[1]);
-                    list.add(auth);
-                }
-            }
-        } else if (ProcessCommentTemplateVo.TempalteType.CUSTOM.getValue().equals(vo.getType())) {
-            ProcessCommentTemplateAuthVo auth = new ProcessCommentTemplateAuthVo();
-            auth.setCommentTemplateId(vo.getId());
-            auth.setType(GroupSearch.USER.getValue());
-            auth.setUuid(UserContext.get().getUserUuid());
-            list.add(auth);
-        }
-        if (CollectionUtils.isNotEmpty(list)) {
-            commentTemplateMapper.batchInsertAuthority(list);
-        }
-
-        returnObj.put("id", vo.getId());
+        ProcessCommentTemplateVo template = jsonObj.toJavaObject(ProcessCommentTemplateVo.class);
+        processCommentTemplateService.saveTemplate(template);
+        returnObj.put("id", template.getId());
         return returnObj;
     }
 
