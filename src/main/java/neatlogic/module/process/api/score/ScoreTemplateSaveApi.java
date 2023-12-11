@@ -1,6 +1,8 @@
 package neatlogic.module.process.api.score;
 
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.FieldValidResultVo;
@@ -18,13 +20,11 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.RegexUtils;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import neatlogic.module.process.service.ScoreTemplateService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @AuthAction(action = SCORE_TEMPLATE_MODIFY.class)
@@ -33,8 +33,11 @@ import java.util.List;
 @OperationType(type = OperationTypeEnum.CREATE)
 public class ScoreTemplateSaveApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ScoreTemplateMapper scoreTemplateMapper;
+
+    @Resource
+    private ScoreTemplateService scoreTemplateService;
 
     @Override
     public String getToken() {
@@ -75,28 +78,16 @@ public class ScoreTemplateSaveApi extends PrivateApiComponentBase {
         scoreTemplateVo.setName(name);
         scoreTemplateVo.setDescription(description);
         scoreTemplateVo.setIsActive(isActive);
-        scoreTemplateVo.setLcu(UserContext.get().getUserUuid(true));
-
+        scoreTemplateVo.setDimensionList(dimensionList);
         if (id != null){
             if(scoreTemplateMapper.checkScoreTemplateExistsById(id) == null){
                 throw new ScoreTemplateNotFoundException(id);
             }
-        	if(scoreTemplateMapper.checkScoreTemplateNameIsRepeat(scoreTemplateVo) > 0) {
-        		throw new ScoreTemplateNameRepeatException(scoreTemplateVo.getName());
-        	}
-            scoreTemplateMapper.updateScoreTemplate(scoreTemplateVo);
-            scoreTemplateMapper.deleteScoreTemplateDimension(scoreTemplateVo.getId());
-        }else {
-            scoreTemplateVo.setFcu(UserContext.get().getUserUuid(true));
-            if(scoreTemplateMapper.checkScoreTemplateNameIsRepeat(scoreTemplateVo) > 0) {
-            	throw new ScoreTemplateNameRepeatException(scoreTemplateVo.getName());
-        	}
-            scoreTemplateMapper.insertScoreTemplate(scoreTemplateVo);
         }
-        for(ScoreTemplateDimensionVo vo : dimensionList){
-            vo.setScoreTemplateId(scoreTemplateVo.getId());
-            scoreTemplateMapper.insertScoreTemplateDimension(vo);
+        if(scoreTemplateMapper.checkScoreTemplateNameIsRepeat(scoreTemplateVo) > 0) {
+            throw new ScoreTemplateNameRepeatException(scoreTemplateVo.getName());
         }
+        scoreTemplateService.saveScoreTemplate(scoreTemplateVo);
         returnObj.put("scoreTemplate", scoreTemplateVo);
         return returnObj;
     }
