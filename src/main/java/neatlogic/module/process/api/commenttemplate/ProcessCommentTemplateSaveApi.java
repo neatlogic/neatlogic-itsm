@@ -12,10 +12,7 @@ import neatlogic.framework.process.dao.mapper.ProcessCommentTemplateMapper;
 import neatlogic.framework.process.dto.ProcessCommentTemplateVo;
 import neatlogic.framework.process.exception.commenttemplate.ProcessCommentTemplateNameRepeatException;
 import neatlogic.framework.process.exception.commenttemplate.ProcessCommentTemplateNotFoundException;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -44,7 +41,7 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "保存回复模版";
+        return "nmpac.processcommenttemplatesaveapi.getname";
     }
 
     @Override
@@ -52,15 +49,16 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "回复模版ID"),
-            @Param(name = "name", type = ApiParamType.STRING, desc = "名称", isRequired = true),
-            @Param(name = "content", type = ApiParamType.STRING, desc = "内容", isRequired = true),
-            @Param(name = "type", type = ApiParamType.ENUM, rule = "system,custom", desc = "类型，新增时必填(system:系统模版;custom:自定义模版)"),
-            @Param(name = "authList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，type为system时必填，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]")
+    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "common.id"),
+            @Param(name = "name", type = ApiParamType.STRING, desc = "common.name", isRequired = true),
+            @Param(name = "content", type = ApiParamType.STRING, desc = "common.content", isRequired = true),
+            @Param(name = "type", type = ApiParamType.ENUM, rule = "system,custom", desc = "common.type", help = "新增时必填(system:系统模版;custom:自定义模版)"),
+            @Param(name = "authList", type = ApiParamType.JSONARRAY, desc = "common.authlist", help = "可多选，type为system时必填，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]")
     })
     @Output({
-            @Param(name = "id", type = ApiParamType.LONG, desc = "回复模版id")
+            @Param(name = "id", type = ApiParamType.LONG, desc = "common.id")
     })
+    @Description(desc = "nmpac.processcommenttemplatesaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
