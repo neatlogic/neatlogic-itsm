@@ -1,6 +1,8 @@
 package neatlogic.module.process.api.score;
 
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.FieldValidResultVo;
@@ -10,21 +12,16 @@ import neatlogic.framework.process.dto.score.ScoreTemplateDimensionVo;
 import neatlogic.framework.process.dto.score.ScoreTemplateVo;
 import neatlogic.framework.process.exception.score.ScoreTemplateNameRepeatException;
 import neatlogic.framework.process.exception.score.ScoreTemplateNotFoundException;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.RegexUtils;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import neatlogic.module.process.service.ScoreTemplateService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @AuthAction(action = SCORE_TEMPLATE_MODIFY.class)
@@ -33,8 +30,11 @@ import java.util.List;
 @OperationType(type = OperationTypeEnum.CREATE)
 public class ScoreTemplateSaveApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ScoreTemplateMapper scoreTemplateMapper;
+
+    @Resource
+    private ScoreTemplateService scoreTemplateService;
 
     @Override
     public String getToken() {
@@ -43,7 +43,7 @@ public class ScoreTemplateSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "保存评分模版";
+        return "nmpas.scoretemplatesaveapi.getname";
     }
 
     @Override
@@ -51,15 +51,17 @@ public class ScoreTemplateSaveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({ @Param( name = "id", type = ApiParamType.LONG, desc = "评分模版ID"),
-             @Param( name = "name", type = ApiParamType.REGEX, maxLength = 50,rule = RegexUtils.NAME, desc = "评分模版名称", isRequired = true, xss = true),
-             @Param( name = "description", type = ApiParamType.STRING, maxLength = 50, desc = "评分模版说明"),
-             @Param( name = "isActive", type = ApiParamType.INTEGER,desc = "是否激活"),
-             @Param( name = "dimensionArray", type = ApiParamType.JSONARRAY, isRequired = true,desc = "评分维度列表，格式:[{\"name\":\"t1\",\"description\":\"d1\"},{\"name\":\"t2\",\"description\":\"d2\"}]")
+    @Input({
+            @Param(name = "id", type = ApiParamType.LONG, desc = "common.id"),
+            @Param(name = "name", type = ApiParamType.REGEX, maxLength = 50, rule = RegexUtils.NAME, desc = "common.name", isRequired = true, xss = true),
+            @Param(name = "description", type = ApiParamType.STRING, maxLength = 50, desc = "common.description"),
+            @Param(name = "isActive", type = ApiParamType.INTEGER, desc = "common.isactive"),
+            @Param(name = "dimensionArray", type = ApiParamType.JSONARRAY, isRequired = true, desc = "term.itsm.scoretemplatedimensionlist", help = "格式:[{\"name\":\"t1\",\"description\":\"d1\"},{\"name\":\"t2\",\"description\":\"d2\"}]")
     })
     @Output({
-            @Param( name = "scoreTemplate", explode = ScoreTemplateVo.class, desc = "评分模版")
+            @Param(name = "scoreTemplate", explode = ScoreTemplateVo.class, desc = "common.tbodylist")
     })
+    @Description(desc = "nmpas.scoretemplatesaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
@@ -75,36 +77,24 @@ public class ScoreTemplateSaveApi extends PrivateApiComponentBase {
         scoreTemplateVo.setName(name);
         scoreTemplateVo.setDescription(description);
         scoreTemplateVo.setIsActive(isActive);
-        scoreTemplateVo.setLcu(UserContext.get().getUserUuid(true));
-
-        if (id != null){
-            if(scoreTemplateMapper.checkScoreTemplateExistsById(id) == null){
+        scoreTemplateVo.setDimensionList(dimensionList);
+        if (id != null) {
+            if (scoreTemplateMapper.checkScoreTemplateExistsById(id) == null) {
                 throw new ScoreTemplateNotFoundException(id);
             }
-        	if(scoreTemplateMapper.checkScoreTemplateNameIsRepeat(scoreTemplateVo) > 0) {
-        		throw new ScoreTemplateNameRepeatException(scoreTemplateVo.getName());
-        	}
-            scoreTemplateMapper.updateScoreTemplate(scoreTemplateVo);
-            scoreTemplateMapper.deleteScoreTemplateDimension(scoreTemplateVo.getId());
-        }else {
-            scoreTemplateVo.setFcu(UserContext.get().getUserUuid(true));
-            if(scoreTemplateMapper.checkScoreTemplateNameIsRepeat(scoreTemplateVo) > 0) {
-            	throw new ScoreTemplateNameRepeatException(scoreTemplateVo.getName());
-        	}
-            scoreTemplateMapper.insertScoreTemplate(scoreTemplateVo);
         }
-        for(ScoreTemplateDimensionVo vo : dimensionList){
-            vo.setScoreTemplateId(scoreTemplateVo.getId());
-            scoreTemplateMapper.insertScoreTemplateDimension(vo);
+        if (scoreTemplateMapper.checkScoreTemplateNameIsRepeat(scoreTemplateVo) > 0) {
+            throw new ScoreTemplateNameRepeatException(scoreTemplateVo.getName());
         }
+        scoreTemplateService.saveScoreTemplate(scoreTemplateVo);
         returnObj.put("scoreTemplate", scoreTemplateVo);
         return returnObj;
     }
 
-    public IValid name(){
+    public IValid name() {
         return value -> {
             ScoreTemplateVo scoreTemplateVo = JSON.toJavaObject(value, ScoreTemplateVo.class);
-            if(scoreTemplateMapper.checkScoreTemplateNameIsRepeat(scoreTemplateVo) > 0) {
+            if (scoreTemplateMapper.checkScoreTemplateNameIsRepeat(scoreTemplateVo) > 0) {
                 return new FieldValidResultVo(new ScoreTemplateNameRepeatException(scoreTemplateVo.getName()));
             }
             return new FieldValidResultVo();

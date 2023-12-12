@@ -1,33 +1,26 @@
 package neatlogic.module.process.api.commenttemplate;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.ProcessCommentTemplateMapper;
-import neatlogic.framework.process.dto.ProcessCommentTemplateAuthVo;
 import neatlogic.framework.process.dto.ProcessCommentTemplateVo;
 import neatlogic.framework.process.exception.commenttemplate.ProcessCommentTemplateNotFoundException;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import neatlogic.module.process.service.ProcessCommentTemplateService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import javax.annotation.Resource;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessCommentTemplateGetApi extends PrivateApiComponentBase {
 
-    @Autowired
-    private ProcessCommentTemplateMapper commentTemplateMapper;
+    @Resource
+    private ProcessCommentTemplateService processCommentTemplateService;
 
     @Override
     public String getToken() {
@@ -36,7 +29,7 @@ public class ProcessCommentTemplateGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取回复模版";
+        return "nmpac.processcommenttemplategetapi.getname";
     }
 
     @Override
@@ -44,23 +37,20 @@ public class ProcessCommentTemplateGetApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "回复模版ID")})
-    @Output({@Param(name = "template", explode = ProcessCommentTemplateVo.class, desc = "回复模版")})
+    @Input({
+            @Param(name = "id", type = ApiParamType.LONG, desc = "common.id")
+    })
+    @Output({
+            @Param(name = "template", explode = ProcessCommentTemplateVo.class, desc = "common.tbodylist")
+    })
+    @Description(desc = "nmpac.processcommenttemplategetapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         Long id = jsonObj.getLong("id");
-        ProcessCommentTemplateVo vo = commentTemplateMapper.getTemplateById(id);
+        ProcessCommentTemplateVo vo = processCommentTemplateService.getTemplateById(id);
         if(vo == null){
             throw new ProcessCommentTemplateNotFoundException(id);
-        }
-        if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(vo.getType())) {
-            List<String> authList = new ArrayList<>();
-            List<ProcessCommentTemplateAuthVo> authVoList = commentTemplateMapper.getProcessCommentTemplateAuthListByCommentTemplateId(id);
-            for (ProcessCommentTemplateAuthVo authVo : authVoList) {
-                authList.add(authVo.getType() + "#" + authVo.getUuid());
-            }
-            vo.setAuthList(authList);
         }
         returnObj.put("template", vo);
         return returnObj;
