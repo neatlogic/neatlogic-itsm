@@ -147,6 +147,10 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
                     if (policyId == null) {
                         continue;
                     }
+                    Integer isCustom = notifyPolicyConfig.getInteger("isCustom");
+                    if (!Objects.equals(isCustom, 1)) {
+                        continue;
+                    }
                     if (action == IMPORT) {
                         Object newPrimaryKey = getNewPrimaryKey(FrameworkImportExportHandlerType.NOTIFY_POLICY, policyId, primaryChangeList);
                         if (newPrimaryKey != null) {
@@ -179,8 +183,9 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
             // 集成
             JSONObject notifyPolicyConfig = processConfig.getJSONObject("notifyPolicyConfig");
             if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
+                Integer isCustom = notifyPolicyConfig.getInteger("isCustom");
                 Long policyId = notifyPolicyConfig.getLong("policyId");
-                if (policyId != null) {
+                if (Objects.equals(isCustom, 1) && policyId != null) {
                     if (action == IMPORT) {
                         Object newPrimaryKey = getNewPrimaryKey(FrameworkImportExportHandlerType.NOTIFY_POLICY, policyId, primaryChangeList);
                         if (newPrimaryKey != null) {
@@ -248,8 +253,9 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
                 }
                 JSONObject notifyPolicyConfig = stepConfig.getJSONObject("notifyPolicyConfig");
                 if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
+                    Integer isCustom = notifyPolicyConfig.getInteger("isCustom");
                     Long policyId = notifyPolicyConfig.getLong("policyId");
-                    if (policyId != null) {
+                    if (Objects.equals(isCustom, 1) && policyId != null) {
                         if (action == IMPORT) {
                             Object newPrimaryKey = getNewPrimaryKey(FrameworkImportExportHandlerType.NOTIFY_POLICY, policyId, primaryChangeList);
                             if (newPrimaryKey != null) {
