@@ -112,29 +112,38 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                             IFormAttributeDataConversionHandler formAttributeHandler =
                                     FormAttributeDataConversionHandlerFactory.getHandler(formAttribute.getHandler());
                             if (formAttributeHandler != null) {
-                                AttributeDataVo attributeDataVo = new AttributeDataVo();
-                                attributeDataVo.setAttributeUuid(attributeUuid);
-                                if (value instanceof String) {
-                                    attributeDataVo.setData((String) value);
-                                } else if (value instanceof JSONArray) {
-                                    attributeDataVo.setData(JSON.toJSONString(value));
-                                }
-                                Object text = formAttributeHandler.valueConversionText(attributeDataVo,
-                                        JSON.parseObject(formAttribute.getConfig()));
-                                if (text instanceof String) {
-                                    return text;
-                                } else if (text instanceof List) {
-                                    List<String> textList = JSON.parseArray(JSON.toJSONString(text), String.class);
-                                    if ("formdate".equals(formAttribute.getHandler())
-                                            || "formtime".equals(formAttribute.getHandler())) {
+                                if (Objects.equal(formAttribute.getHandler(), FormHandler.FORMDATE.getHandler())
+                                        || Objects.equal(formAttribute.getHandler(), FormHandler.FORMTIME.getHandler())) {
+                                    if (value instanceof String) {
+                                        return value;
+                                    } else if (value instanceof JSONArray) {
+                                        List<String> textList = ((JSONArray) value).toJavaList(String.class);
                                         return String.join("-", textList);
-                                    } else if ("formcascadelist".equals(formAttribute.getHandler())) {
-                                        return String.join("/", textList);
-                                    } else {
-                                        return String.join("、", textList);
                                     }
+                                } else {
+                                    AttributeDataVo attributeDataVo = new AttributeDataVo();
+                                    attributeDataVo.setAttributeUuid(attributeUuid);
+                                    attributeDataVo.setType(formAttribute.getHandler());
+                                    if (value instanceof String) {
+                                        attributeDataVo.setData((String) value);
+                                    } else if (value instanceof JSONArray) {
+                                        attributeDataVo.setData(JSON.toJSONString(value));
+                                    }
+
+                                    Object text = formAttributeHandler.valueConversionText(attributeDataVo,
+                                            JSON.parseObject(formAttribute.getConfig()));
+                                    if (text instanceof String) {
+                                        return text;
+                                    } else if (text instanceof List) {
+                                        List<String> textList = JSON.parseArray(JSON.toJSONString(text), String.class);
+                                        if (FormHandler.FORMCASCADER.getHandler().equals(formAttribute.getHandler())) {
+                                            return String.join("/", textList);
+                                        } else {
+                                            return String.join("、", textList);
+                                        }
+                                    }
+                                    return text;
                                 }
-                                return text;
                             }
                         }
                     }
