@@ -16,6 +16,9 @@
 
 package neatlogic.module.process.stephandler.component;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import neatlogic.framework.asynchronization.threadlocal.ConditionParamContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.SystemUser;
@@ -30,10 +33,6 @@ import neatlogic.framework.process.exception.processtask.ProcessTaskException;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerBase;
 import neatlogic.framework.util.RunScriptUtil;
 import neatlogic.framework.util.javascript.JavascriptUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -133,24 +132,20 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                     JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
                                     if (CollectionUtils.isNotEmpty(conditionGroupList)) {
                                         JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(conditionProcessTaskOptions, currentProcessTaskStepVo);
-//                                    ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
-//                                    processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
-//                                    processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
-//                                    JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
+                                        ConditionConfigVo conditionConfigVo = null;
                                         try {
-//                                        ConditionParamContext.init(conditionParamData).setFormConfig(processTaskVo.getFormConfig()).setTranslate(true);
                                             ConditionParamContext.init(conditionParamData).setTranslate(true);
-                                            ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
+                                            conditionConfigVo = new ConditionConfigVo(moveonConfig);
                                             String script = conditionConfigVo.buildScript();
                                             // ((false || true) || (true && false) || (true || false))
-                                            // System.out.println(JSON.toJSONString(conditionConfigVo));
                                             canRun = RunScriptUtil.runScript(script);
-                                            ruleObj.putAll(JSON.parseObject(JSON.toJSONString(conditionConfigVo)));
                                             ruleObj.put("result", canRun);
                                         } catch (Exception e) {
                                             logger.error(e.getMessage(), e);
                                         } finally {
                                             ConditionParamContext.get().release();
+                                            ruleObj.put("conditionGroupList", conditionConfigVo.getConditionGroupList());
+                                            ruleObj.put("conditionGroupRelList", conditionConfigVo.getConditionGroupRelList());
                                         }
                                     }
                                 } else {
