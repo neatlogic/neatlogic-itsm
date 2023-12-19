@@ -10,7 +10,6 @@ import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.dto.ConditionParamVo;
 import neatlogic.framework.dto.ExpressionVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
-import neatlogic.framework.notify.core.INotifyPolicyHandlerGroup;
 import neatlogic.framework.notify.core.NotifyHandlerFactory;
 import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerBase;
@@ -25,7 +24,6 @@ import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyParam;
 import neatlogic.framework.process.notify.core.IDefaultTemplate;
 import neatlogic.framework.process.notify.core.NotifyDefaultTemplateFactory;
-import neatlogic.framework.util.I18nUtils;
 import neatlogic.module.process.notify.constvalue.SlaNotifyTriggerType;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -142,8 +140,8 @@ public class SlaNotifyPolicyHandler extends NotifyPolicyHandlerBase {
         return PROCESS_MODIFY.class.getSimpleName();
     }
 
-    @Override
-    public INotifyPolicyHandlerGroup getGroup() {
-        return null;
-    }
+//    @Override
+//    public INotifyPolicyHandlerGroup getGroup() {
+//        return null;
+//    }
 }
