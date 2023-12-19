@@ -11,6 +11,7 @@ import neatlogic.framework.importexport.dto.ImportExportVo;
 import neatlogic.framework.process.constvalue.ProcessImportExportHandlerType;
 import neatlogic.framework.process.dto.ProcessVo;
 import neatlogic.framework.process.exception.process.ProcessNotFoundException;
+import neatlogic.framework.util.UuidUtil;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
 import neatlogic.module.process.service.ProcessService;
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,7 +20,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.zip.ZipOutputStream;
 
@@ -65,14 +68,16 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
     public Object importData(ImportExportVo importExportVo, List<ImportExportPrimaryChangeVo> primaryChangeList) {
         ProcessVo process = importExportVo.getData().toJavaObject(ProcessVo.class);
         ProcessVo oldProcess = processMapper.getProcessByName(importExportVo.getName());
+        boolean isChangeUuid = false;
         if (oldProcess != null) {
             process.setUuid(oldProcess.getUuid());
         } else {
             if (processMapper.getProcessByUuid(process.getUuid()) != null) {
                 process.setUuid(null);
+                isChangeUuid = true;
             }
         }
-        importHandle(process, primaryChangeList);
+        importHandle(process, primaryChangeList, isChangeUuid);
         process.makeupConfigObj();
         processService.saveProcess(process);
         return process.getUuid();
@@ -82,9 +87,10 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
      * 导入处理，更新依赖组件的唯一标识
      * @param process
      * @param primaryChangeList
+     * @param isChangeUuid
      */
-    private void importHandle(ProcessVo process, List<ImportExportPrimaryChangeVo> primaryChangeList) {
-        dependencyHandle(IMPORT, process, null, null, primaryChangeList);
+    private void importHandle(ProcessVo process, List<ImportExportPrimaryChangeVo> primaryChangeList, boolean isChangeUuid) {
+        dependencyHandle(IMPORT, process, null, null, primaryChangeList, isChangeUuid);
     }
 
     @Override
@@ -107,7 +113,7 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
      * @param zipOutputStream
      */
     private void exportHandle(ProcessVo process, List<ImportExportBaseInfoVo> dependencyList, ZipOutputStream zipOutputStream) {
-        dependencyHandle(EXPORT, process, dependencyList, zipOutputStream, null);
+        dependencyHandle(EXPORT, process, dependencyList, zipOutputStream, null, false);
     }
 
     /**
@@ -118,8 +124,10 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
      * @param dependencyList
      * @param zipOutputStream
      * @param primaryChangeList
+     * @param isChangeUuid
      */
-    private void dependencyHandle(String action, ProcessVo process, List<ImportExportBaseInfoVo> dependencyList, ZipOutputStream zipOutputStream, List<ImportExportPrimaryChangeVo> primaryChangeList) {
+    private void dependencyHandle(String action, ProcessVo process, List<ImportExportBaseInfoVo> dependencyList, ZipOutputStream zipOutputStream, List<ImportExportPrimaryChangeVo> primaryChangeList, boolean isChangeUuid) {
+        Map<String, String> oldUuid2NewUuidMap = new HashMap<>();
         JSONObject config = process.getConfig();
         JSONObject processObj = config.getJSONObject("process");
         JSONArray slaList = processObj.getJSONArray("slaList");
@@ -129,6 +137,12 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
                 JSONObject slaObj = slaList.getJSONObject(i);
                 if (MapUtils.isEmpty(slaObj)) {
                     continue;
+                }
+                if (isChangeUuid) {
+                    String oldUuid = slaObj.getString("uuid");
+                    String newUuid = UuidUtil.randomUuid();
+                    slaObj.put("uuid", newUuid);
+                    oldUuid2NewUuidMap.put(oldUuid, newUuid);
                 }
                 JSONArray notifyPolicyList = slaObj.getJSONArray("notifyPolicyList");
                 if (CollectionUtils.isEmpty(notifyPolicyList)) {
@@ -246,6 +260,12 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
                 JSONObject stepObj = stepList.getJSONObject(i);
                 if (MapUtils.isEmpty(stepObj)) {
                     continue;
+                }
+                if (isChangeUuid) {
+                    String oldUuid = stepObj.getString("uuid");
+                    String newUuid = UuidUtil.randomUuid();
+                    stepObj.put("uuid", newUuid);
+                    oldUuid2NewUuidMap.put(oldUuid, newUuid);
                 }
                 JSONObject stepConfig = stepObj.getJSONObject("stepConfig");
                 if (MapUtils.isEmpty(stepConfig)) {
@@ -410,6 +430,29 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
                         }
                     }
                 }
+            }
+        }
+
+        if (isChangeUuid) {
+            JSONArray connectionList = processObj.getJSONArray("connectionList");
+            if (CollectionUtils.isNotEmpty(connectionList)) {
+                for (int i = 0; i < connectionList.size(); i++) {
+                    JSONObject connectionObj = connectionList.getJSONObject(i);
+                    if (MapUtils.isEmpty(connectionObj)) {
+                        continue;
+                    }
+                    String oldUuid = connectionObj.getString("uuid");
+                    String newUuid = UuidUtil.randomUuid();
+                    connectionObj.put("uuid", newUuid);
+                    oldUuid2NewUuidMap.put(oldUuid, newUuid);
+                }
+            }
+            if (MapUtils.isNotEmpty(oldUuid2NewUuidMap)) {
+                String configStr = config.toJSONString();
+                for (Map.Entry<String, String> entry : oldUuid2NewUuidMap.entrySet()) {
+                    configStr = configStr.replace(entry.getKey(), entry.getValue());
+                }
+                process.setConfig(configStr);
             }
         }
     }
