@@ -193,6 +193,12 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
         }
         JSONObject processConfig = processObj.getJSONObject("processConfig");
         if (MapUtils.isNotEmpty(processConfig)) {
+            if (isChangeUuid) {
+                String oldUuid = processConfig.getString("uuid");
+                String newUuid = process.getUuid();
+                processConfig.put("uuid", newUuid);
+                oldUuid2NewUuidMap.put(oldUuid, newUuid);
+            }
             // 通知策略
             // 集成
             JSONObject notifyPolicyConfig = processConfig.getJSONObject("notifyPolicyConfig");
