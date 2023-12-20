@@ -16,15 +16,13 @@ limitations under the License.
 
 package neatlogic.module.process.notify.handler;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.dto.ConditionParamVo;
-import neatlogic.framework.notify.core.INotifyPolicyHandlerGroup;
 import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerBase;
 import neatlogic.framework.notify.dto.NotifyTriggerTemplateVo;
 import neatlogic.framework.notify.dto.NotifyTriggerVo;
-import neatlogic.framework.util.I18nUtils;
 import neatlogic.module.process.notify.constvalue.TimedTaskTriggerType;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -41,15 +39,6 @@ public class TimedTaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     public String getName() {
         return "定时任务";
     }
-
-//    @Override
-//    public List<NotifyTriggerVo> getNotifyTriggerListForNotifyTree() {
-//        List<NotifyTriggerVo> returnList = new ArrayList<>();
-//        for (TimedTaskTriggerType type : TimedTaskTriggerType.values()) {
-//            returnList.add(new NotifyTriggerVo(type.getTrigger(), type.getText(), type.getDescription()));
-//        }
-//        return returnList;
-//    }
 
     @Override
     protected List<NotifyTriggerVo> myNotifyTriggerList() {
@@ -88,10 +77,10 @@ public class TimedTaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
         return null;
     }
 
-    @Override
-    public INotifyPolicyHandlerGroup getGroup() {
-        return null;
-    }
+//    @Override
+//    public INotifyPolicyHandlerGroup getGroup() {
+//        return null;
+//    }
 
     @Override
     public boolean isPublic(){
