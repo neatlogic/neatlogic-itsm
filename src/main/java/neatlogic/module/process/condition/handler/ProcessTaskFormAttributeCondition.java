@@ -17,6 +17,7 @@
 package neatlogic.module.process.condition.handler;
 
 import neatlogic.framework.common.constvalue.ParamType;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
@@ -28,6 +29,7 @@ import neatlogic.framework.form.constvalue.FormHandler;
 import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
+import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.fulltextindex.utils.FullTextIndexUtil;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
@@ -252,9 +254,17 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
             String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
             if (StringUtils.isNotBlank(formContent)) {
                 resultObj.put("formConfig", formContent);
+                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
                 List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskStepVo.getProcessTaskId());
                 for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-                    resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+                    if (java.util.Objects.equals(processTaskFormAttributeDataVo.getType(), FormHandler.FORMRADIO.getHandler())
+                            || java.util.Objects.equals(processTaskFormAttributeDataVo.getType(), FormHandler.FORMCHECKBOX.getHandler())
+                            || java.util.Objects.equals(processTaskFormAttributeDataVo.getType(), FormHandler.FORMSELECT.getHandler())) {
+                        Object value =  formCrossoverService.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
+                        resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), value);
+                    } else {
+                        resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+                    }
                 }
             }
         }
