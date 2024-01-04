@@ -417,10 +417,10 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
                             if (MapUtils.isEmpty(configObj)) {
                                 continue;
                             }
-                            Integer isStart = configObj.getInteger("isStart");
-                            if (!Objects.equals(isStart, 1)) {
-                                continue;
-                            }
+//                            Integer isStart = configObj.getInteger("isStart");
+//                            if (!Objects.equals(isStart, 1)) {
+//                                continue;
+//                            }
                             Long ciId = configObj.getLong("ciId");
                             if (ciId == null) {
                                 continue;
