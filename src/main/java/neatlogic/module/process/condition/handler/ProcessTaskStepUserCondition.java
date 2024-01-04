@@ -156,15 +156,18 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
         List<String> roleList = new ArrayList<String>();
         for (String user : stepUserValueList) {
             user = user.replace(GroupSearch.USER.getValuePlugin(), "");
+            AuthenticationInfoVo authenticationInfoVo;
             if (user.equals(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue())) {
                 user = UserContext.get().getUserUuid();
+                authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
+            } else {
+                authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(user);
             }
             //如果是待处理状态，则需额外匹配角色和组
-            AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(user);
             if (authenticationInfoVo != null) {
                 userList.add(user);
-                teamList = authenticationInfoVo.getTeamUuidList();
-                roleList = authenticationInfoVo.getRoleUuidList();
+                teamList.addAll(authenticationInfoVo.getTeamUuidList());
+                roleList.addAll(authenticationInfoVo.getRoleUuidList());
             }
         }
         sqlSb.append(" (");
