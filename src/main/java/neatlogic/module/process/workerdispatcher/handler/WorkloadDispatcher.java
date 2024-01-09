@@ -1,27 +1,23 @@
 package neatlogic.module.process.workerdispatcher.handler;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.stream.Collectors;
-
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.common.constvalue.GroupSearch;
+import neatlogic.framework.dao.mapper.TeamMapper;
+import neatlogic.framework.dto.TeamUserVo;
+import neatlogic.framework.process.constvalue.ProcessUserType;
+import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
+import neatlogic.framework.process.workerdispatcher.core.WorkerDispatcherBase;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.common.constvalue.GroupSearch;
-import neatlogic.framework.dao.mapper.TeamMapper;
-import neatlogic.framework.dto.TeamUserVo;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.workerdispatcher.core.WorkerDispatcherBase;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class WorkloadDispatcher extends WorkerDispatcherBase {
@@ -34,12 +30,12 @@ public class WorkloadDispatcher extends WorkerDispatcherBase {
 
 	@Override
 	public String getName() {
-		return "根据工作量分配处理人";
+		return "nmpwh.workloaddispatcher.getname";
 	}	
 
 	@Override
-	protected List<String> myGetWorker(ProcessTaskStepVo processTaskStepVo, JSONObject configObj) {
-		List<String> resultList = new ArrayList<>();
+	protected List<ProcessTaskStepWorkerVo> myGetWorker(ProcessTaskStepVo processTaskStepVo, JSONObject configObj) {
+		List<ProcessTaskStepWorkerVo> resultList = new ArrayList<>();
 		if(MapUtils.isEmpty(configObj)) {
 			return resultList;
 		}
@@ -90,7 +86,8 @@ public class WorkloadDispatcher extends WorkerDispatcherBase {
 		if(CollectionUtils.isNotEmpty(minWorkloadUserUuidList)) {
 			Random random = new Random();
 			int index = random.nextInt(minWorkloadUserUuidList.size());
-			resultList.add(minWorkloadUserUuidList.get(index));
+			ProcessTaskStepWorkerVo worker = new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), GroupSearch.USER.getValue(), minWorkloadUserUuidList.get(index), ProcessUserType.MAJOR.getValue());
+			resultList.add(worker);
 		}
 		return resultList;
 	}

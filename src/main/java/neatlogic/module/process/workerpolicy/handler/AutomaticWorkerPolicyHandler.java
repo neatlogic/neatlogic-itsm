@@ -1,8 +1,14 @@
 package neatlogic.module.process.workerpolicy.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.process.constvalue.WorkerPolicy;
+import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
+import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
+import neatlogic.framework.process.exception.processtask.ProcessTaskException;
+import neatlogic.framework.process.workerdispatcher.core.IWorkerDispatcher;
+import neatlogic.framework.process.workerdispatcher.core.WorkerDispatcherFactory;
+import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -10,17 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.common.constvalue.GroupSearch;
-import neatlogic.framework.process.constvalue.ProcessUserType;
-import neatlogic.framework.process.constvalue.WorkerPolicy;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
-import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
-import neatlogic.framework.process.workerdispatcher.core.IWorkerDispatcher;
-import neatlogic.framework.process.workerdispatcher.core.WorkerDispatcherFactory;
-import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class AutomaticWorkerPolicyHandler implements IWorkerPolicyHandler {
@@ -42,7 +39,7 @@ public class AutomaticWorkerPolicyHandler implements IWorkerPolicyHandler {
 	}
 
 	@Override
-	public List<ProcessTaskStepWorkerVo> execute(ProcessTaskStepWorkerPolicyVo workerPolicyVo, ProcessTaskStepVo currentProcessTaskStepVo) {
+	public List<ProcessTaskStepWorkerVo> execute(ProcessTaskStepWorkerPolicyVo workerPolicyVo, ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = new ArrayList<>();
 		if (MapUtils.isEmpty(workerPolicyVo.getConfigObj())) {
 			return processTaskStepWorkerList;
@@ -59,15 +56,11 @@ public class AutomaticWorkerPolicyHandler implements IWorkerPolicyHandler {
 		if(MapUtils.isEmpty(handlerConfig)) {
 			return processTaskStepWorkerList;
 		}
-		List<String> workerList = dispatcher.getWorker(currentProcessTaskStepVo, handlerConfig);
+		List<ProcessTaskStepWorkerVo> workerList = dispatcher.getWorker(currentProcessTaskStepVo, handlerConfig);
 		if(CollectionUtils.isEmpty(workerList)) {
 			return processTaskStepWorkerList;
 		}
-		for(String userUuid : workerList) {
-			if (StringUtils.isBlank(userUuid)) {
-				continue;
-			}
-			ProcessTaskStepWorkerVo workerVo = new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), userUuid, ProcessUserType.MAJOR.getValue());
+		for(ProcessTaskStepWorkerVo workerVo : workerList) {
 			if (!processTaskStepWorkerList.contains(workerVo)) {
 				processTaskStepWorkerList.add(workerVo);
 			}

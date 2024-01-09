@@ -1,5 +1,6 @@
 package neatlogic.module.process.workerdispatcher.handler;
 
+import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.TeamUserTitleVo;
@@ -12,6 +13,7 @@ import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
 import neatlogic.framework.process.workerdispatcher.core.WorkerDispatcherBase;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -41,7 +43,7 @@ public class HandlerLeaderDispatcher extends WorkerDispatcherBase {
 
     @Override
     public String getName() {
-        return "处理人领导分派器";
+        return "nmpwh.handlerleaderdispatcher.getname";
     }
 
     @Override
@@ -80,8 +82,8 @@ public class HandlerLeaderDispatcher extends WorkerDispatcherBase {
     }
 
     @Override
-    protected List<String> myGetWorker(ProcessTaskStepVo processTaskStepVo, JSONObject configObj) {
-        List<String> resultList = new ArrayList<>();
+    protected List<ProcessTaskStepWorkerVo> myGetWorker(ProcessTaskStepVo processTaskStepVo, JSONObject configObj) {
+        List<ProcessTaskStepWorkerVo> resultList = new ArrayList<>();
         if (MapUtils.isNotEmpty(configObj)) {
             JSONArray preStepArray = configObj.getJSONArray("preStepList");
             String teamUserTitle = configObj.getString("teamUserTitle");
@@ -102,7 +104,11 @@ public class HandlerLeaderDispatcher extends WorkerDispatcherBase {
                         for (TeamVo teamVo : teamList) {
                             List<TeamUserTitleVo> teamUserTitleVoList = teamMapper.getTeamUserTitleListByTeamlrAndTitleId(teamVo.getLft(), teamVo.getRht(), userTitleVo.getId());
                             if (CollectionUtils.isNotEmpty(teamUserTitleVoList)) {
-                                resultList.addAll(teamUserTitleVoList.get(0).getUserList());
+                                List<String> userUuidList = teamUserTitleVoList.get(0).getUserList();
+                                for (String userUuid : userUuidList) {
+                                    ProcessTaskStepWorkerVo worker = new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), GroupSearch.USER.getValue(), userUuid, ProcessUserType.MAJOR.getValue());
+                                    resultList.add(worker);
+                                }
                                 break;
                             }
                         }

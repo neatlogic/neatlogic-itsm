@@ -1,13 +1,16 @@
 package neatlogic.module.process.workerdispatcher.handler;
 
+import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.TeamUserTitleVo;
 import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserTitleVo;
 import neatlogic.framework.exception.team.TeamUserTitleNotFoundException;
+import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workerdispatcher.core.WorkerDispatcherBase;
 import com.alibaba.fastjson.JSONArray;
@@ -35,7 +38,7 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
 
     @Override
     public String getName() {
-        return "上报人领导分派器";
+        return "nmpwh.ownerleaderdispatcher.getname";
     }
 
     @Override
@@ -65,8 +68,8 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
     }
 
     @Override
-    protected List<String> myGetWorker(ProcessTaskStepVo processTaskStepVo, JSONObject configObj) {
-        List<String> resultList = new ArrayList<>();
+    protected List<ProcessTaskStepWorkerVo> myGetWorker(ProcessTaskStepVo processTaskStepVo, JSONObject configObj) {
+        List<ProcessTaskStepWorkerVo> resultList = new ArrayList<>();
         String teamUserTitle = configObj.getString("teamUserTitle");
         if (StringUtils.isNotBlank(teamUserTitle)) {
             UserTitleVo userTitleVo = userMapper.getUserTitleByName(teamUserTitle);
@@ -80,7 +83,11 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
                 for (TeamVo teamVo : teamList) {
                     List<TeamUserTitleVo> teamUserTitleVoList = teamMapper.getTeamUserTitleListByTeamlrAndTitleId(teamVo.getLft(), teamVo.getRht(), userTitleVo.getId());
                     if (CollectionUtils.isNotEmpty(teamUserTitleVoList)) {
-                        resultList.addAll(teamUserTitleVoList.get(0).getUserList());
+                        List<String> userUuidList = teamUserTitleVoList.get(0).getUserList();
+                        for (String userUuid : userUuidList) {
+                            ProcessTaskStepWorkerVo worker = new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), GroupSearch.USER.getValue(), userUuid, ProcessUserType.MAJOR.getValue());
+                            resultList.add(worker);
+                        }
                         break;
                     }
                 }
