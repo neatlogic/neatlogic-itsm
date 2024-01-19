@@ -342,7 +342,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
      * @return
      */
     @Override
-    public int getForwardOutnputQuantity() {
+    public int getForwardOutputQuantity() {
         return 1;
     }
 
