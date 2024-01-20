@@ -156,6 +156,16 @@ public class ProcessServiceImpl implements ProcessService {
                     config.put("stepName", stepVo.getName());
                     DependencyManager.insert(FormScene2ProcessStepDependencyHandler.class, stepVo.getFormSceneUuid(), stepVo.getUuid(), config);
                 }
+                if (CollectionUtils.isNotEmpty(stepVo.getEoaTemplateIdList())) {
+                    for (Long eoaTemplateId : stepVo.getEoaTemplateIdList()) {
+                        JSONObject config = new JSONObject();
+                        config.put("processUuid", uuid);
+                        config.put("processName", processVo.getName());
+                        config.put("stepUuid", stepVo.getUuid());
+                        config.put("stepName", stepVo.getName());
+                        DependencyManager.insert(EoaTemplate2ProcessStepDependencyHandler.class, eoaTemplateId, stepVo.getUuid(), config);
+                    }
+                }
                 if (CollectionUtils.isNotEmpty(stepVo.getWorkerPolicyList())) {
                     for (ProcessStepWorkerPolicyVo processStepWorkerPolicyVo : stepVo.getWorkerPolicyList()) {
                         processMapper.insertProcessStepWorkerPolicy(processStepWorkerPolicyVo);
@@ -247,6 +257,7 @@ public class ProcessServiceImpl implements ProcessService {
         processMapper.deleteProcessStepTagByProcessUuid(uuid);
         for (String stepUuid : processStepUuidList) {
             DependencyManager.delete(FormScene2ProcessStepDependencyHandler.class, stepUuid);
+            DependencyManager.delete(EoaTemplate2ProcessStepDependencyHandler.class, stepUuid);
         }
     }
 
