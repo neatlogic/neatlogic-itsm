@@ -58,17 +58,6 @@ public class EoaTemplate2ProcessStepDependencyHandler extends FixedTableDependen
             if (!Objects.equals(uuid, stepUuid)) {
                 continue;
             }
-//            JSONObject stepConfig = stepObj.getJSONObject("stepConfig");
-//            if (MapUtils.isEmpty(stepConfig)) {
-//                return null;
-//            }
-//            String formSceneUuid = stepConfig.getString("formSceneUuid");
-//            if (StringUtils.isBlank(formSceneUuid)) {
-//                return null;
-//            }
-//            if (!Objects.equals(formSceneUuid, dependencyVo.getFrom())) {
-//                return null;
-//            }
             JSONObject dependencyInfoConfig = new JSONObject();
             dependencyInfoConfig.put("processUuid", processUuid);
             dependencyInfoConfig.put("stepUuid", stepUuid);
