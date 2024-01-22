@@ -7,7 +7,7 @@ import neatlogic.framework.dependency.core.FixedTableDependencyHandlerBase;
 import neatlogic.framework.dependency.core.IFromType;
 import neatlogic.framework.dependency.dto.DependencyInfoVo;
 import neatlogic.framework.dependency.dto.DependencyVo;
-import neatlogic.framework.eoa.enums.EoaFromType;
+import neatlogic.framework.process.constvalue.ProcessFromType;
 import neatlogic.framework.process.dto.ProcessVo;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -72,6 +72,6 @@ public class EoaTemplate2ProcessStepDependencyHandler extends FixedTableDependen
 
     @Override
     public IFromType getFromType() {
-        return EoaFromType.EOATEMPLATE;
+        return ProcessFromType.EOATEMPLATE;
     }
 }

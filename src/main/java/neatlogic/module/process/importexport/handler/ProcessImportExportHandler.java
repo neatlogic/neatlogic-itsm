@@ -2,7 +2,6 @@ package neatlogic.module.process.importexport.handler;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.eoa.enums.EoaImportExportHandlerType;
 import neatlogic.framework.importexport.constvalue.FrameworkImportExportHandlerType;
 import neatlogic.framework.importexport.core.ImportExportHandlerBase;
 import neatlogic.framework.importexport.core.ImportExportHandlerType;
@@ -450,12 +449,12 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
                                 continue;
                             }
                             if (action == IMPORT) {
-                                Object newPrimaryKey = getNewPrimaryKey(EoaImportExportHandlerType.EOA_TEMPLATE, id, primaryChangeList);
+                                Object newPrimaryKey = getNewPrimaryKey(ProcessImportExportHandlerType.EOA_TEMPLATE, id, primaryChangeList);
                                 if (newPrimaryKey != null) {
                                     eoaTemplateObj.put("id", newPrimaryKey);
                                 }
                             } else if (action == EXPORT) {
-                                doExportData(EoaImportExportHandlerType.EOA_TEMPLATE, id, dependencyList, zipOutputStream);
+                                doExportData(ProcessImportExportHandlerType.EOA_TEMPLATE, id, dependencyList, zipOutputStream);
                             }
                         }
                     }
