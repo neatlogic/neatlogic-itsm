@@ -485,13 +485,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     workerVo.setName(userVo.getUserName());
                 }
             } else if (workerVo.getType().equals(GroupSearch.TEAM.getValue())) {
-                TeamVo teamVo = teamMapper.getTeamByUuid(workerVo.getUuid());
+                TeamVo search = new TeamVo();
+                search.setUuid(workerVo.getUuid());
+                TeamVo teamVo = teamMapper.getTeamSimpleInfoByUuid(search);
                 if (teamVo != null) {
                     workerVo.setWorker(new WorkAssignmentUnitVo(teamVo));
                     workerVo.setName(teamVo.getName());
                 }
             } else if (workerVo.getType().equals(GroupSearch.ROLE.getValue())) {
-                RoleVo roleVo = roleMapper.getRoleByUuid(workerVo.getUuid());
+                RoleVo roleVo = roleMapper.getRoleSimpleInfoByUuid(workerVo.getUuid());
                 if (roleVo != null) {
                     workerVo.setWorker(new WorkAssignmentUnitVo(roleVo));
                     workerVo.setName(roleVo.getName());
@@ -828,13 +830,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                         workerVo.setName(userVo.getUserName());
                     }
                 } else if (workerVo.getType().equals(GroupSearch.TEAM.getValue())) {
-                    TeamVo teamVo = teamMapper.getTeamByUuid(workerVo.getUuid());
+                    TeamVo search = new TeamVo();
+                    search.setUuid(workerVo.getUuid());
+                    TeamVo teamVo = teamMapper.getTeamSimpleInfoByUuid(search);
                     if (teamVo != null) {
                         workerVo.setWorker(new WorkAssignmentUnitVo(teamVo));
                         workerVo.setName(teamVo.getName());
                     }
                 } else if (workerVo.getType().equals(GroupSearch.ROLE.getValue())) {
-                    RoleVo roleVo = roleMapper.getRoleByUuid(workerVo.getUuid());
+                    RoleVo roleVo = roleMapper.getRoleSimpleInfoByUuid(workerVo.getUuid());
                     if (roleVo != null) {
                         workerVo.setWorker(new WorkAssignmentUnitVo(roleVo));
                         workerVo.setName(roleVo.getName());

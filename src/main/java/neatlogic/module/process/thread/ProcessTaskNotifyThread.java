@@ -83,7 +83,7 @@ public class ProcessTaskNotifyThread extends NeatLogicThread {
     }
 
     public ProcessTaskNotifyThread(ProcessTaskStepVo _currentProcessTaskStepVo, INotifyTriggerType _trigger) {
-        super("PROCESSTASK-NOTIFY" + (_currentProcessTaskStepVo != null ? "-" + _currentProcessTaskStepVo.getId() : ""));
+        super("PROCESSTASK-NOTIFY" + (_trigger != null ? "-" + _trigger.getTrigger() : "") + (_currentProcessTaskStepVo != null ? "-" + _currentProcessTaskStepVo.getId() : ""));
         currentProcessTaskStepVo = _currentProcessTaskStepVo;
         notifyTriggerType = _trigger;
     }
