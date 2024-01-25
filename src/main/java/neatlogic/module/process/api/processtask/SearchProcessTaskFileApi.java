@@ -25,13 +25,17 @@ import neatlogic.framework.form.constvalue.FormHandler;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
+import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
+import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
+import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,6 +126,17 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
         List<FileVo> taskFileList = processTaskMapper.getProcessTaskStepTaskFileListByProcessTaskId(processTaskId);
         if (taskFileList.size() > 0) {
             fileList.addAll(taskFileList);
+        }
+        List<Long> stepFileIdList = new ArrayList<>();
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
+        for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+            IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
+            if (handler != null) {
+                stepFileIdList.addAll(handler.getFileIdList(processTaskStepVo));
+            }
+        }
+        if (CollectionUtils.isNotEmpty(stepFileIdList)) {
+            fileList.addAll(fileMapper.getFileDetailListByIdList(stepFileIdList));
         }
         if (fileList.size() > 0) {
             fileList = fileList.stream().sorted(Comparator.comparing(FileVo::getUploadTime, Comparator.nullsLast(Date::compareTo).reversed())).collect(Collectors.toList());
