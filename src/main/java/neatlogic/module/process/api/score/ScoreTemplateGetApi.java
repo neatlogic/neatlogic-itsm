@@ -51,6 +51,8 @@ public class ScoreTemplateGetApi extends PrivateApiComponentBase{
 		if(scoreTemplate == null) {
             throw new ScoreTemplateNotFoundException(scoreTemplateId);
 		}
+		int count = scoreTemplateMapper.getRefProcessCount(scoreTemplateId);
+		scoreTemplate.setProcessCount(count);
 		return scoreTemplate;
 	}
 }
