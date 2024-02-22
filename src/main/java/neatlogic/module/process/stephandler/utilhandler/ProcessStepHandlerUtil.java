@@ -950,6 +950,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 formAttributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                 formAttributeDataVo.setHandler(formAttributeVo.getHandler());
                 formAttributeDataVo.setDataObj(data);
+                formAttributeDataVo.setFormUuid(formAttributeVo.getFormUuid());
 //                formAttributeDataVo.setSort(i);
                 newProcessTaskFormAttributeDataList.add(formAttributeDataVo);
             }
