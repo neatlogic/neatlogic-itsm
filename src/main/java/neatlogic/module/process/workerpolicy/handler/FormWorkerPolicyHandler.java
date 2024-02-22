@@ -70,6 +70,8 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
             /** 选择的表单属性uuid **/
             JSONArray attributeUuidArray = workerPolicyVo.getConfigObj().getJSONArray("attributeUuidList");
             if (CollectionUtils.isNotEmpty(attributeUuidArray)) {
+                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+                Map<String, ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
                 List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
                 Map<String, FormAttributeVo> formAttributeMap = formAttributeList.stream().collect(Collectors.toMap(e -> e.getUuid(), e -> e));
                 List<String> attributeUuidList = attributeUuidArray.toJavaList(String.class);
@@ -78,11 +80,7 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                     if (formAttributeVo == null) {
                         continue;
                     }
-                    ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo = new ProcessTaskFormAttributeDataVo();
-                    processTaskFormAttributeDataVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-                    processTaskFormAttributeDataVo.setAttributeUuid(attributeUuid);
-                    ProcessTaskFormAttributeDataVo processTaskFormAttributeData = processTaskMapper
-                            .getProcessTaskFormAttributeDataByProcessTaskIdAndAttributeUuid(processTaskFormAttributeDataVo);
+                    ProcessTaskFormAttributeDataVo processTaskFormAttributeData = processTaskFormAttributeDataMap.get(attributeUuid);
                     if (processTaskFormAttributeData == null) {
                         continue;
                     }

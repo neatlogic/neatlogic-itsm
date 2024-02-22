@@ -16,6 +16,9 @@
 
 package neatlogic.module.process.stephandler.utilhandler;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import neatlogic.framework.common.RootComponent;
@@ -23,6 +26,8 @@ import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.exception.user.UserNotFoundException;
+import neatlogic.framework.form.dao.mapper.FormMapper;
+import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormAttributeRequiredException;
@@ -38,9 +43,6 @@ import neatlogic.framework.process.stepremind.core.IProcessTaskStepRemindType;
 import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import neatlogic.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import neatlogic.module.process.thread.*;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -64,6 +66,8 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     private ChannelMapper channelMapper;
     @Resource
     private ProcessTagMapper processTagMapper;
+    @Resource
+    private FormMapper formMapper;
 
     /**
      * @Description: 触发动作
@@ -920,7 +924,17 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         }
 
         /* 获取旧表单数据 **/
-        List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
+        List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = new ArrayList<>();
+        List<Long> formAttributeDataIdList = processTaskMapper.getProcessTaskFormAttributeDataIdListByProcessTaskId(processTaskId);
+        if (CollectionUtils.isNotEmpty(formAttributeDataIdList)) {
+            List<AttributeDataVo> attributeDataList = formMapper.getFormAttributeDataListByIdList(formAttributeDataIdList);
+            if (CollectionUtils.isNotEmpty(attributeDataList)) {
+                for (AttributeDataVo attributeDataVo : attributeDataList) {
+                    oldProcessTaskFormAttributeDataList.add(new ProcessTaskFormAttributeDataVo(processTaskId, attributeDataVo));
+                }
+            }
+        }
+
         Map<String, ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataMap = oldProcessTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
 
         List<ProcessTaskFormAttributeDataVo> newProcessTaskFormAttributeDataList = new ArrayList<>();
@@ -936,7 +950,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 formAttributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                 formAttributeDataVo.setType(formAttributeVo.getHandler());
                 formAttributeDataVo.setDataObj(data);
-                formAttributeDataVo.setSort(i);
+//                formAttributeDataVo.setSort(i);
                 newProcessTaskFormAttributeDataList.add(formAttributeDataVo);
             }
             i++;
@@ -967,7 +981,8 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                     dataVo.setData(dataObj.toString());
                 }
             }
-            processTaskMapper.insertProcessTaskFormAttributeData(dataVo);
+            formMapper.insertFormAttributeData(dataVo);
+            processTaskMapper.insertProcessTaskFormAttribute(dataVo);
         }
     }
 }

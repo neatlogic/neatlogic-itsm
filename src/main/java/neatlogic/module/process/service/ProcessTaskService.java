@@ -456,4 +456,21 @@ public interface ProcessTaskService {
      * @return
      */
     List<FormAttributeVo> getFormAttributeListByProcessTaskId(Long processTaskId);
+
+    /**
+     * 根据工单id获取表单属性数据列表
+     * @param processTaskId 工单id
+     * @return
+     */
+    List<ProcessTaskFormAttributeDataVo> getProcessTaskFormAttributeDataListByProcessTaskId(Long processTaskId);
+
+    /**
+     * 根据工单id和表单属性uuid获取表单属性数据
+     * @param processTaskId 工单id
+     * @param attributeUuid 表单属性uuid
+     * @return
+     */
+    ProcessTaskFormAttributeDataVo getProcessTaskFormAttributeDataByProcessTaskIdAndAttributeUuid(Long processTaskId, String attributeUuid);
+
+    void deleteProcessTaskFormAttributeDataByProcessTaskId(Long processTaskId);
 }

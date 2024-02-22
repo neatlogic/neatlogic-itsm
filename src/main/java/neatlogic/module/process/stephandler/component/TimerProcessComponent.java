@@ -35,12 +35,14 @@ import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.module.process.schedule.plugin.ProcessTaskStepTimerCompleteJob;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -59,6 +61,9 @@ import java.util.Set;
  **/
 @Component
 public class TimerProcessComponent extends ProcessStepHandlerBase {
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     private final Logger logger = LoggerFactory.getLogger(TimerProcessComponent.class);
 
@@ -135,10 +140,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                 } else if ("form".equals(type)) {
                     String attributeUuid = config.getString("attributeUuid");
                     if (StringUtils.isNotBlank(attributeUuid)) {
-                        ProcessTaskFormAttributeDataVo searchVo = new ProcessTaskFormAttributeDataVo();
-                        searchVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-                        searchVo.setAttributeUuid(attributeUuid);
-                        ProcessTaskFormAttributeDataVo dataVo = processTaskMapper.getProcessTaskFormAttributeDataByProcessTaskIdAndAttributeUuid(searchVo);
+                        ProcessTaskFormAttributeDataVo dataVo = processTaskService.getProcessTaskFormAttributeDataByProcessTaskIdAndAttributeUuid(currentProcessTaskStepVo.getProcessTaskId(), attributeUuid);
                         if (dataVo != null) {
                             String value = dataVo.getData();
                             if (StringUtils.isNotBlank(value)) {

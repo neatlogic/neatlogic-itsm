@@ -208,7 +208,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                     labelHandlerMap.put(formAttributeVo.getLabel(), formAttributeVo.getHandler());
                 }
                 Map<String, Object> formAttributeDataMap = new HashMap<>();
-                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(fromProcessTaskId);
+                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(fromProcessTaskId);
                 for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
                     formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
                 }

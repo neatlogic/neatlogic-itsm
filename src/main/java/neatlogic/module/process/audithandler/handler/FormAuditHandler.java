@@ -128,18 +128,18 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
                     // 现在要保存该属性的值不为null，则将该属性值保存到数据库中，但标记为已修改
                     auditFormAttributeDataVo.setModified(1);
                     auditFormAttributeDataVo.setDataObj(newProcessTaskFormAttributeDataVo.getDataObj());
-                    auditFormAttributeDataVo.setSort(newProcessTaskFormAttributeDataVo.getSort());
+//                    auditFormAttributeDataVo.setSort(newProcessTaskFormAttributeDataVo.getSort());
                 }
             }
             // 如果现在接口参数中没有该属性值，则表示不修改该属性值
             else if (newProcessTaskFormAttributeDataVo == null) {
                 // 将该属性旧值添加到stepFormAttributeDataMap，记录该步骤流转时该属性值
                 auditFormAttributeDataVo.setDataObj(oldProcessTaskFormAttributeDataVo.getDataObj());
-                auditFormAttributeDataVo.setSort(oldProcessTaskFormAttributeDataVo.getSort());
+//                auditFormAttributeDataVo.setSort(oldProcessTaskFormAttributeDataVo.getSort());
                 auditFormAttributeDataVo.setModified(0);
             } else {
                 auditFormAttributeDataVo.setDataObj(newProcessTaskFormAttributeDataVo.getDataObj());
-                auditFormAttributeDataVo.setSort(newProcessTaskFormAttributeDataVo.getSort());
+//                auditFormAttributeDataVo.setSort(newProcessTaskFormAttributeDataVo.getSort());
                 if (Objects.equals(oldProcessTaskFormAttributeDataVo.getDataObj(), newProcessTaskFormAttributeDataVo.getDataObj())) {
                     // 如果新表单属性值与旧表单属性值相同，就不用replace更新数据了
                     oldProcessTaskFormAttributeDataMap.remove(attributeUuid);

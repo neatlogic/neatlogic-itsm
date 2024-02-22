@@ -39,6 +39,7 @@ import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.form.dao.mapper.FormMapper;
+import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormActiveVersionNotFoundExcepiton;
@@ -264,7 +265,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             String formContent = selectContentByHashMapper.getProcessTaskFromContentByProcessTaskId(processTaskId);
             if (StringUtils.isNotBlank(formContent)) {
                 processTaskVo.setFormConfig(JSONObject.parseObject(formContent));
-                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskVo.getId());
+                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = getProcessTaskFormAttributeDataListByProcessTaskId(processTaskVo.getId());
                 for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
                     processTaskVo.getFormAttributeDataMap().put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
                 }
@@ -2024,6 +2025,50 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         formVersionVo.setFormName(processTaskFormVo.getFormName());
         formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
         return formVersionVo.getFormAttributeList();
+    }
+
+    @Override
+    public List<ProcessTaskFormAttributeDataVo> getProcessTaskFormAttributeDataListByProcessTaskId(Long processTaskId) {
+        List<Long> formAttributeDataIdList = processTaskMapper.getProcessTaskFormAttributeDataIdListByProcessTaskId(processTaskId);
+        if (CollectionUtils.isEmpty(formAttributeDataIdList)) {
+            return new ArrayList<>();
+        }
+        List<AttributeDataVo> attributeDataList = formMapper.getFormAttributeDataListByIdList(formAttributeDataIdList);
+        if (CollectionUtils.isEmpty(attributeDataList)) {
+            return new ArrayList<>();
+        }
+        List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = new ArrayList<>();
+        for (AttributeDataVo attributeDataVo : attributeDataList) {
+            processTaskFormAttributeDataList.add(new ProcessTaskFormAttributeDataVo(processTaskId, attributeDataVo));
+        }
+        return processTaskFormAttributeDataList;
+    }
+
+    @Override
+    public ProcessTaskFormAttributeDataVo getProcessTaskFormAttributeDataByProcessTaskIdAndAttributeUuid(Long processTaskId, String attributeUuid) {
+        List<Long> formAttributeDataIdList = processTaskMapper.getProcessTaskFormAttributeDataIdListByProcessTaskId(processTaskId);
+        if (CollectionUtils.isEmpty(formAttributeDataIdList)) {
+            return null;
+        }
+        List<AttributeDataVo> attributeDataList = formMapper.getFormAttributeDataListByIdList(formAttributeDataIdList);
+        if (CollectionUtils.isEmpty(attributeDataList)) {
+            return null;
+        }
+        for (AttributeDataVo attributeDataVo : attributeDataList) {
+            if (Objects.equals(attributeDataVo.getAttributeUuid(), attributeUuid)) {
+                return new ProcessTaskFormAttributeDataVo(processTaskId, attributeDataVo);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteProcessTaskFormAttributeDataByProcessTaskId(Long processTaskId) {
+        List<Long> formAttributeDataIdList = processTaskMapper.getProcessTaskFormAttributeDataIdListByProcessTaskId(processTaskId);
+        if (CollectionUtils.isNotEmpty(formAttributeDataIdList)) {
+            formMapper.deleteFormAttributeDataByIdList(formAttributeDataIdList);
+            processTaskMapper.deleteProcessTaskFormAttributeByProcessTaskId(processTaskId);
+        }
     }
 
     /**
