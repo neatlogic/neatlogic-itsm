@@ -541,18 +541,13 @@ CREATE TABLE IF NOT EXISTS `processtask_form_content` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='工单表单内容表';
 
 -- ----------------------------
--- Table structure for processtask_formattribute_data
+-- Table structure for processtask_formattribute
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS `processtask_formattribute_data` (
+CREATE TABLE IF NOT EXISTS `processtask_formattribute` (
   `processtask_id` bigint NOT NULL COMMENT '工单id',
-  `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '插件类型',
-  `attribute_label` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '属性名',
-  `attribute_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '属性uuid',
-  `data` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '工单属性值,json格式',
-  `sort` int DEFAULT NULL COMMENT '排序',
-  PRIMARY KEY (`processtask_id`,`attribute_uuid`) USING BTREE,
-  KEY `idx_attribute_uuid` (`attribute_uuid`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='工单关联的属性当前值';
+  `form_attribute_data_id` bigint NOT NULL COMMENT '表单属性值id',
+  PRIMARY KEY (`processtask_id`,`form_attribute_data_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='工单与表单属性值关系表';
 
 -- ----------------------------
 -- Table structure for processtask_import_audit
