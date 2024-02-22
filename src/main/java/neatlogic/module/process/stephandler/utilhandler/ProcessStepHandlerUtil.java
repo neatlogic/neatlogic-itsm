@@ -945,6 +945,10 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 Object data = formAttributeDataMap.get(attributeUuid);
 
                 ProcessTaskFormAttributeDataVo formAttributeDataVo = new ProcessTaskFormAttributeDataVo();
+                ProcessTaskFormAttributeDataVo oldProcessTaskFormAttributeData = oldProcessTaskFormAttributeDataMap.get(attributeUuid);
+                if (oldProcessTaskFormAttributeData != null) {
+                    formAttributeDataVo.setId(oldProcessTaskFormAttributeData.getId());
+                }
                 formAttributeDataVo.setProcessTaskId(processTaskId);
                 formAttributeDataVo.setAttributeUuid(attributeUuid);
                 formAttributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
