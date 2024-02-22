@@ -103,7 +103,7 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
         List<ProcessTaskFormAttributeDataVo> formDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(processTaskId);
         if (formDataList.size() > 0) {
             for (ProcessTaskFormAttributeDataVo dataVo : formDataList) {
-                if (!Objects.equals(dataVo.getType(), FormHandler.FORMUPLOAD.getHandler())) {
+                if (!Objects.equals(dataVo.getHandler(), FormHandler.FORMUPLOAD.getHandler())) {
                     continue;
                 }
                 String data = dataVo.getData();

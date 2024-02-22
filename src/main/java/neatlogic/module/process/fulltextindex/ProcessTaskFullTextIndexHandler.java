@@ -86,7 +86,7 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
         if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataVoList)) {
             for (ProcessTaskFormAttributeDataVo attributeDataVo : processTaskFormAttributeDataVoList) {
                 if (StringUtils.isNotBlank(attributeDataVo.getData())) {
-                    IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
+                    IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getHandler());
                     if(handler != null) {
                         List<String> dataList = handler.indexFieldContentList(attributeDataVo.getData());
                         if (CollectionUtils.isNotEmpty(dataList)) {

@@ -129,7 +129,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                                 } else {
                                     AttributeDataVo attributeDataVo = new AttributeDataVo();
                                     attributeDataVo.setAttributeUuid(attributeUuid);
-                                    attributeDataVo.setType(formAttribute.getHandler());
+                                    attributeDataVo.setHandler(formAttribute.getHandler());
                                     if (value instanceof String) {
                                         attributeDataVo.setData((String) value);
                                     } else if (value instanceof JSONArray) {
@@ -261,9 +261,9 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                 IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
                 List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(processTaskStepVo.getProcessTaskId());
                 for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-                    if (java.util.Objects.equals(processTaskFormAttributeDataVo.getType(), FormHandler.FORMRADIO.getHandler())
-                            || java.util.Objects.equals(processTaskFormAttributeDataVo.getType(), FormHandler.FORMCHECKBOX.getHandler())
-                            || java.util.Objects.equals(processTaskFormAttributeDataVo.getType(), FormHandler.FORMSELECT.getHandler())) {
+                    if (java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMRADIO.getHandler())
+                            || java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMCHECKBOX.getHandler())
+                            || java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMSELECT.getHandler())) {
                         Object value =  formCrossoverService.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
                         resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), value);
                     } else {

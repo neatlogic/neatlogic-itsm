@@ -89,7 +89,7 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                         continue;
                     }
                     /** 只有表单属性类型为用户选择器才生效 **/
-                    if (FormHandler.FORMUSERSELECT.getHandler().equals(processTaskFormAttributeData.getType())) {
+                    if (FormHandler.FORMUSERSELECT.getHandler().equals(processTaskFormAttributeData.getHandler())) {
                         IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(FormHandler.FORMUSERSELECT.getHandler());
                         if (handler != null) {
                             JSONObject detailedData = handler.getDetailedData(processTaskFormAttributeData, formAttributeVo.getConfigObj());
@@ -123,7 +123,7 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                                 }
                             }
                         }
-                    } else if (FormHandler.FORMSELECT.getHandler().equals(processTaskFormAttributeData.getType())) {
+                    } else if (FormHandler.FORMSELECT.getHandler().equals(processTaskFormAttributeData.getHandler())) {
                         IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(FormHandler.FORMSELECT.getHandler());
                         if (handler != null) {
                             JSONObject detailedData = handler.getDetailedData(processTaskFormAttributeData, formAttributeVo.getConfigObj());

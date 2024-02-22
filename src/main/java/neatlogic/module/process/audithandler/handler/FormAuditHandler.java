@@ -117,7 +117,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
             ProcessTaskAuditFormAttributeDataVo auditFormAttributeDataVo = new ProcessTaskAuditFormAttributeDataVo();
             auditFormAttributeDataVo.setAttributeUuid(attributeUuid);
             auditFormAttributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
-            auditFormAttributeDataVo.setType(formAttributeVo.getHandler());
+            auditFormAttributeDataVo.setHandler(formAttributeVo.getHandler());
             auditFormAttributeDataList.add(auditFormAttributeDataVo);
             // 在此之前如果该属性的值，在数据库中没有对应的旧数据
             if (oldProcessTaskFormAttributeDataVo == null) {
@@ -160,7 +160,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
         Map<String, String> oldContentMap = new HashMap<>();
         for (Map.Entry<String, ProcessTaskFormAttributeDataVo> entry : oldProcessTaskFormAttributeDataMap.entrySet()) {
             ProcessTaskFormAttributeDataVo attributeDataVo = entry.getValue();
-            IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(attributeDataVo.getType());
+            IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(attributeDataVo.getHandler());
             if (handler != null) {
                 String result = null;
                 Object value = handler.valueConversionText(attributeDataVo,
@@ -190,7 +190,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
                 content.put("oldContent", oldContent);
             }
             String newContent = null;
-            IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(attributeDataVo.getType());
+            IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(attributeDataVo.getHandler());
             if (handler != null) {
                 String result = null;
                 Object value = handler.valueConversionText(attributeDataVo,
