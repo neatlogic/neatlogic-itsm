@@ -46,6 +46,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Objects;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -60,6 +61,9 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 
     @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @Override
     public String getName() {
@@ -125,7 +129,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                                 } else {
                                     AttributeDataVo attributeDataVo = new AttributeDataVo();
                                     attributeDataVo.setAttributeUuid(attributeUuid);
-                                    attributeDataVo.setType(formAttribute.getHandler());
+                                    attributeDataVo.setHandler(formAttribute.getHandler());
                                     if (value instanceof String) {
                                         attributeDataVo.setData((String) value);
                                     } else if (value instanceof JSONArray) {
@@ -255,11 +259,11 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
             if (StringUtils.isNotBlank(formContent)) {
                 resultObj.put("formConfig", formContent);
                 IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskStepVo.getProcessTaskId());
+                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(processTaskStepVo.getProcessTaskId());
                 for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-                    if (java.util.Objects.equals(processTaskFormAttributeDataVo.getType(), FormHandler.FORMRADIO.getHandler())
-                            || java.util.Objects.equals(processTaskFormAttributeDataVo.getType(), FormHandler.FORMCHECKBOX.getHandler())
-                            || java.util.Objects.equals(processTaskFormAttributeDataVo.getType(), FormHandler.FORMSELECT.getHandler())) {
+                    if (java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMRADIO.getHandler())
+                            || java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMCHECKBOX.getHandler())
+                            || java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMSELECT.getHandler())) {
                         Object value =  formCrossoverService.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
                         resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), value);
                     } else {

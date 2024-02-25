@@ -28,6 +28,7 @@ import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,9 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
 
     @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @Override
     protected String getModuleId() {
@@ -78,11 +82,11 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
         //fullTextIndexVo.addFieldContent("serial_number", new FullTextIndexVo.WordVo(processTaskVo.getSerialNumber()));
         //fullTextIndexVo.addFieldContent("id", new FullTextIndexVo.WordVo(processTaskVo.getId().toString()));
         //表单
-        List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataVoList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(fullTextIndexVo.getTargetId());
+        List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataVoList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(fullTextIndexVo.getTargetId());
         if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataVoList)) {
             for (ProcessTaskFormAttributeDataVo attributeDataVo : processTaskFormAttributeDataVoList) {
                 if (StringUtils.isNotBlank(attributeDataVo.getData())) {
-                    IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
+                    IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getHandler());
                     if(handler != null) {
                         List<String> dataList = handler.indexFieldContentList(attributeDataVo.getData());
                         if (CollectionUtils.isNotEmpty(dataList)) {

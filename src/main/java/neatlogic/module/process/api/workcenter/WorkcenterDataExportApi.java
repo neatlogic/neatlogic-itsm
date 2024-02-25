@@ -45,6 +45,7 @@ import neatlogic.framework.util.$;
 import neatlogic.framework.util.FileUtil;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
 import neatlogic.module.process.service.NewWorkcenterService;
+import neatlogic.module.process.service.ProcessTaskService;
 import neatlogic.module.process.sql.decorator.SqlBuilder;
 import neatlogic.module.process.workcenter.column.handler.ProcessTaskCurrentStepColumn;
 import neatlogic.module.process.workcenter.column.handler.ProcessTaskCurrentStepNameColumn;
@@ -96,6 +97,9 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 
     @Resource
     ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @Override
     public String getToken() {
@@ -259,7 +263,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                         // 以channel当前关联的流程为准，如果流程没有关联表单或关联的表单没有属性，则无论当前工单是否有表单，都不查询
                         if (CollectionUtils.isNotEmpty(formAttributeList)) {
                             // 遍历当前工单的所有表单属性，找出数据行数最多的属性，该属性的数据行数作为当前工单需要合并的行数
-                            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskVo.getId());
+                            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(taskVo.getId());
                             if (processTaskFormAttributeDataList.size() > 0) {
                                 processTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(AttributeDataVo::getAttributeLabel, e -> e));
                                 for (FormAttributeVo formAttributeVo : formAttributeList) {

@@ -33,6 +33,7 @@ import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -55,6 +56,9 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
     private ProcessTaskMapper processTaskMapper;
     @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @Override
     public String getValue() {
@@ -79,7 +83,7 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
             return null;
         }
         Map<String, AttributeDataVo> attributeDataMap = new HashMap<>();
-                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskVo.getId());
+        List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(processTaskVo.getId());
         if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
             attributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
         }
@@ -92,7 +96,7 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
             if (attributeDataVo == null) {
                 attributeDataVo = new ProcessTaskFormAttributeDataVo();
                 attributeDataVo.setAttributeUuid(formAttribute.getUuid());
-                attributeDataVo.setType(formAttribute.getHandler());
+                attributeDataVo.setHandler(formAttribute.getHandler());
             }
             attributeDataVo.setAttributeLabel(formAttribute.getLabel());
             IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttribute.getHandler());

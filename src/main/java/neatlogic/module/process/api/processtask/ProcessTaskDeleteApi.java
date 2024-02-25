@@ -40,6 +40,7 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,6 +68,9 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
 
     @Resource
     private IProcessStepHandlerUtil IProcessStepHandlerUtil;
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @Override
     public String getToken() {
@@ -122,7 +126,7 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         }
         // 表单 processtask_form processtask_formattribute_data
         taskMapper.deleteProcessTaskFormByProcessTaskId(processTaskId);
-        taskMapper.deleteProcessTaskFormAttributeDataByProcessTaskId(processTaskId);
+        processTaskService.deleteProcessTaskFormAttributeDataByProcessTaskId(processTaskId);
         // 关注人 processtask_focus
         taskMapper.deleteProcessTaskFocusByProcessTaskId(processTaskId);
         // 流程汇聚 processtask_converge

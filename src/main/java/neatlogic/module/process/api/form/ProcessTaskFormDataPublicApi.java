@@ -1,13 +1,12 @@
 package neatlogic.module.process.api.form;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.publicapi.PublicApiComponentBase;
 import neatlogic.module.process.service.ProcessTaskService;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -18,8 +17,6 @@ public class ProcessTaskFormDataPublicApi extends PublicApiComponentBase {
 
     @Resource
     private ProcessTaskService processTaskService;
-    @Resource
-    private ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getToken() {
@@ -47,7 +44,7 @@ public class ProcessTaskFormDataPublicApi extends PublicApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        return processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
+        return processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(processTaskId);
     }
 
 }
