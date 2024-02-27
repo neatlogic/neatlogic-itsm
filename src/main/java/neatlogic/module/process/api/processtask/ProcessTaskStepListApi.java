@@ -79,6 +79,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
 
         ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(processTaskId);
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
+        resultList.add(startProcessTaskStepVo);
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.PROCESS.getValue());
         for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
             if (Objects.equals(processTaskStepVo.getId(), startProcessTaskStepVo.getId())) {
@@ -106,13 +107,14 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
                 Set<ProcessTaskOperationType> processTaskStepOperateSet = operateMap.get(processTaskStepVo.getId());
                 if (CollectionUtils.isNotEmpty(processTaskStepOperateSet) && processTaskStepOperateSet.contains(ProcessTaskOperationType.STEP_VIEW)) {
                     processTaskStepVo.setIsView(1);
-                    getProcessTaskStepDetail(processTaskStepVo);
+                    if (!Objects.equals(processTaskStepVo.getId(), startProcessTaskStepVo.getId())) {
+                        getProcessTaskStepDetail(processTaskStepVo);
+                    }
                 } else {
                     processTaskStepVo.setIsView(0);
                 }
             }
         }
-        resultList.add(0, startProcessTaskStepVo);
         resultList.sort(Comparator.comparing(ProcessTaskStepVo::getActiveTime));
         return resultList;
     }
