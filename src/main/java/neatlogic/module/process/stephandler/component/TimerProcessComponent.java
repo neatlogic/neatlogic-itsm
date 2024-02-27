@@ -65,6 +65,9 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
     @Resource
     private ProcessTaskService processTaskService;
 
+    @Resource
+    private SchedulerManager schedulerManager;
+
     private final Logger logger = LoggerFactory.getLogger(TimerProcessComponent.class);
 
     @Override
@@ -248,7 +251,23 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) {
-        return 0;
+        ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerByProcessTaskStepId(currentProcessTaskStepVo.getId());
+        if (processTaskStepTimerVo != null) {
+            IJob jobHandler = SchedulerManager.getHandler(ProcessTaskStepTimerCompleteJob.class.getName());
+            if (jobHandler == null) {
+                throw new ScheduleHandlerNotFoundException(ProcessTaskStepTimerCompleteJob.class.getName());
+            }
+            JobObject.Builder jobObjectBuilder = new JobObject.Builder(
+                    currentProcessTaskStepVo.getId().toString(),
+                    jobHandler.getGroupName(),
+                    jobHandler.getClassName(),
+                    TenantContext.get().getTenantUuid()
+            );
+            JobObject jobObject = jobObjectBuilder.build();
+            schedulerManager.unloadJob(jobObject);
+            processTaskMapper.deleteProcessTaskStepTimerByProcessTaskStepId(currentProcessTaskStepVo.getId());
+        }
+        return 1;
     }
 
     @Override
