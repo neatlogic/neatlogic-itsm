@@ -62,7 +62,7 @@ public class TimerProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
     @Override
     public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-/** 组装分配策略 **/
+    /** 组装分配策略 **/
         JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
         if (MapUtils.isNotEmpty(workerPolicyConfig)) {
             JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
@@ -83,6 +83,11 @@ public class TimerProcessUtilHandler extends ProcessStepInternalHandlerBase {
                 }
                 processStepVo.setWorkerPolicyList(workerPolicyList);
             }
+        }
+        // 保存表单场景
+        String formSceneUuid = stepConfigObj.getString("formSceneUuid");
+        if (StringUtils.isNotBlank(formSceneUuid)) {
+            processStepVo.setFormSceneUuid(formSceneUuid);
         }
     }
 
@@ -133,6 +138,11 @@ public class TimerProcessUtilHandler extends ProcessStepInternalHandlerBase {
             attributeUuid = "";
         }
         resultObj.put("attributeUuid", attributeUuid);
+        /** 表单场景 **/
+        String formSceneUuid = configObj.getString("formSceneUuid");
+        String formSceneName = configObj.getString("formSceneName");
+        resultObj.put("formSceneUuid", formSceneUuid == null ? "" : formSceneUuid);
+        resultObj.put("formSceneName", formSceneName == null ? "" : formSceneName);
         return resultObj;
     }
 }
