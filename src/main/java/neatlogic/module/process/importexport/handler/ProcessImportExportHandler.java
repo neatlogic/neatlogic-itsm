@@ -2,12 +2,17 @@ package neatlogic.module.process.importexport.handler;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.importexport.constvalue.FrameworkImportExportHandlerType;
+import neatlogic.framework.importexport.core.ImportExportHandler;
 import neatlogic.framework.importexport.core.ImportExportHandlerBase;
+import neatlogic.framework.importexport.core.ImportExportHandlerFactory;
 import neatlogic.framework.importexport.core.ImportExportHandlerType;
 import neatlogic.framework.importexport.dto.ImportExportBaseInfoVo;
 import neatlogic.framework.importexport.dto.ImportExportPrimaryChangeVo;
 import neatlogic.framework.importexport.dto.ImportExportVo;
+import neatlogic.framework.importexport.exception.DependencyNotFoundException;
+import neatlogic.framework.importexport.exception.ImportExportHandlerNotFoundException;
 import neatlogic.framework.process.constvalue.ProcessImportExportHandlerType;
 import neatlogic.framework.process.dto.ProcessVo;
 import neatlogic.framework.process.exception.process.ProcessNotFoundException;
@@ -20,10 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.zip.ZipOutputStream;
 
 @Component
@@ -412,6 +414,7 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
                     JSONObject ciEntityConfig = stepConfig.getJSONObject("ciEntityConfig");
                     JSONArray configList = ciEntityConfig.getJSONArray("configList");
                     if (CollectionUtils.isNotEmpty(configList)) {
+                        List<String> messageList = new ArrayList<>();
                         for (int j = 0; j < configList.size(); j++) {
                             JSONObject configObj = configList.getJSONObject(j);
                             if (MapUtils.isEmpty(configObj)) {
@@ -425,14 +428,70 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
                             if (ciId == null) {
                                 continue;
                             }
-                            if (action == IMPORT) {
-                                Object newPrimaryKey = getNewPrimaryKey(FrameworkImportExportHandlerType.CMDB_CI, ciId, primaryChangeList);
-                                if (newPrimaryKey != null) {
-                                    configObj.put("ciId", newPrimaryKey);
-                                }
-                            } else if (action == EXPORT) {
-                                doExportData(FrameworkImportExportHandlerType.CMDB_CI, ciId, dependencyList, zipOutputStream);
+//                            if (action == IMPORT) {
+//                                Object newPrimaryKey = getNewPrimaryKey(FrameworkImportExportHandlerType.CMDB_CI, ciId, primaryChangeList);
+//                                if (newPrimaryKey != null) {
+//                                    configObj.put("ciId", newPrimaryKey);
+//                                }
+//                            } else if (action == EXPORT) {
+//                                doExportData(FrameworkImportExportHandlerType.CMDB_CI, ciId, dependencyList, zipOutputStream);
+//                            }
+                            String ciName = configObj.getString("ciName");
+                            String ciLabel = configObj.getString("ciLabel");
+                            // 配置项模型不做一起导入导出，只检查其是否存在
+                            ImportExportHandler importExportHandler = ImportExportHandlerFactory.getHandler(FrameworkImportExportHandlerType.CMDB_CI.getValue());
+                            if (importExportHandler == null) {
+                                throw new ImportExportHandlerNotFoundException(FrameworkImportExportHandlerType.CMDB_CI.getText());
                             }
+                            ImportExportBaseInfoVo importExportBaseInfoVo = new ImportExportBaseInfoVo();
+                            importExportBaseInfoVo.setPrimaryKey(ciId);
+                            importExportBaseInfoVo.setName(ciLabel + "(" + ciName + ")");
+                            importExportBaseInfoVo.setType(FrameworkImportExportHandlerType.CMDB_CI.getValue());
+
+                            try {
+                                importExportHandler.checkIsExists(importExportBaseInfoVo);
+                            } catch (ApiRuntimeException e) {
+                                messageList.add(e.getMessage());
+                            }
+                        }
+                        if (CollectionUtils.isNotEmpty(messageList)) {
+                            throw new DependencyNotFoundException(messageList);
+                        }
+                    }
+                } else if (Objects.equals(handler, "dataconversion")) {
+                    JSONObject ciEntityConfig = stepConfig.getJSONObject("dataConversionConfig");
+                    JSONArray configList = ciEntityConfig.getJSONArray("configList");
+                    if (CollectionUtils.isNotEmpty(configList)) {
+                        List<String> messageList = new ArrayList<>();
+                        for (int j = 0; j < configList.size(); j++) {
+                            JSONObject configObj = configList.getJSONObject(j);
+                            if (MapUtils.isEmpty(configObj)) {
+                                continue;
+                            }
+                            Long ciId = configObj.getLong("ciId");
+                            if (ciId == null) {
+                                continue;
+                            }
+                            String ciName = configObj.getString("ciName");
+                            String ciLabel = configObj.getString("ciLabel");
+                            // 配置项模型不做一起导入导出，只检查其是否存在
+                            ImportExportHandler importExportHandler = ImportExportHandlerFactory.getHandler(FrameworkImportExportHandlerType.CMDB_CI.getValue());
+                            if (importExportHandler == null) {
+                                throw new ImportExportHandlerNotFoundException(FrameworkImportExportHandlerType.CMDB_CI.getText());
+                            }
+                            ImportExportBaseInfoVo importExportBaseInfoVo = new ImportExportBaseInfoVo();
+                            importExportBaseInfoVo.setPrimaryKey(ciId);
+                            importExportBaseInfoVo.setName(ciLabel + "(" + ciName + ")");
+                            importExportBaseInfoVo.setType(FrameworkImportExportHandlerType.CMDB_CI.getValue());
+
+                            try {
+                                importExportHandler.checkIsExists(importExportBaseInfoVo);
+                            } catch (ApiRuntimeException e) {
+                                messageList.add(e.getMessage());
+                            }
+                        }
+                        if (CollectionUtils.isNotEmpty(messageList)) {
+                            throw new DependencyNotFoundException(messageList);
                         }
                     }
                 } else if (Objects.equals(handler, "eoa")) {
