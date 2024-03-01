@@ -10,6 +10,7 @@ import neatlogic.framework.util.FileUtil;
 import neatlogic.module.process.dao.mapper.ProcessTaskDataMapper;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -164,6 +165,22 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
             String sql = "SELECT * FROM `processtask_formattribute_data` WHERE `processtask_id` = " + processTaskId;
             List<Map<String, Object>> processtask_formattribute_data = processTaskDataMapper.getList(sql);
             put(resultObj, "processtask_formattribute_data", processtask_formattribute_data);
+        }
+        {
+            // 工单表单数据
+            String sql = "SELECT * FROM `processtask_formattribute` WHERE `processtask_id` = " + processTaskId;
+            List<Map<String, Object>> processtask_formattribute = processTaskDataMapper.getList(sql);
+            put(resultObj, "processtask_formattribute_data", processtask_formattribute);
+            if (CollectionUtils.isNotEmpty(processtask_formattribute)) {
+                List<String> formAttributeDataIdList = new ArrayList<>();
+                for (Map<String, Object> map : processtask_formattribute) {
+                    Long formAttributeDataId = (Long) map.get("form_attribute_data_id");
+                    formAttributeDataIdList.add(formAttributeDataId.toString());
+                }
+                sql = "SELECT * FROM `form_attribute_data` WHERE `id` IN (" + String.join(",", formAttributeDataIdList) + ")";
+                List<Map<String, Object>> form_attribute_data = processTaskDataMapper.getList(sql);
+                put(resultObj, "form_attribute_data", form_attribute_data);
+            }
         }
         {
             // 工单关联
@@ -627,6 +644,22 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
             sql = "SELECT * FROM `processtask_agent_target`";
             List<Map<String, Object>> processtask_agent_target = processTaskDataMapper.getList(sql);
             put(resultObj, "processtask_agent_target", processtask_agent_target);
+        }
+
+        {
+            // 工单审批数据
+            String sql = "SELECT * FROM `processtask_approve_entity` WHERE `processtask_id` = " + processTaskId;
+            Map<String, Object> processtask_approve_entity = processTaskDataMapper.getOne(sql);
+            if (MapUtils.isNotEmpty(processtask_approve_entity)) {
+                put(resultObj, "processtask_approve_entity", processtask_approve_entity);
+
+                sql = "SELECT * FROM `processtask_approve_entity_config` WHERE `hash` = " + processtask_approve_entity.get("config_hash");
+                Map<String, Object> processtask_approve_entity_config = processTaskDataMapper.getOne(sql);
+                put(resultObj, "processtask_approve_entity_config", processtask_approve_entity_config);
+            }
+            sql = "SELECT * FROM `processtask_approve_status` WHERE `processtask_id` = " + processTaskId;
+            Map<String, Object> processtask_approve_status = processTaskDataMapper.getOne(sql);
+            put(resultObj, "processtask_approve_status", processtask_approve_status);
         }
         return resultObj;
     }
