@@ -48,6 +48,7 @@ import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
 import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.notify.dto.NotifyReceiverVo;
+import neatlogic.framework.process.approve.dto.ApproveEntityVo;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
 import neatlogic.framework.process.constvalue.*;
@@ -76,6 +77,7 @@ import neatlogic.framework.util.$;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
+import neatlogic.module.process.dao.mapper.ProcessTaskApproveMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -101,6 +103,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private ProcessTaskApproveMapper processTaskApproveMapper;
 
     @Resource
     private ProcessTaskSlaMapper processTaskSlaMapper;
@@ -1352,6 +1357,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 ownerVo.setTeamList(teamList);
             }
             processTaskVo.setOwnerVo(ownerVo);
+        }
+        // 审批实体信息
+        String processTaskApproveEntityConfig = processTaskApproveMapper.getProcessTaskApproveEntityConfigByProcessTaskId(processTaskId);
+        if (StringUtils.isNotBlank(processTaskApproveEntityConfig)) {
+            ApproveEntityVo approveEntity = JSONObject.parseObject(processTaskApproveEntityConfig, ApproveEntityVo.class);
+            if (approveEntity != null) {
+                processTaskVo.setApproveEntity(approveEntity);
+            }
         }
     }
 

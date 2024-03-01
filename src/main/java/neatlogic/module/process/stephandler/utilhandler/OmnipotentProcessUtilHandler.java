@@ -254,6 +254,10 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         String formSceneName = configObj.getString("formSceneName");
         resultObj.put("formSceneUuid", formSceneUuid == null ? "" : formSceneUuid);
         resultObj.put("formSceneName", formSceneName == null ? "" : formSceneName);
+
+        /** 审批状态 **/
+        JSONObject approveStatusConfig = configObj.getJSONObject("approveStatusConfig");
+        resultObj.put("approveStatusConfig",approveStatusConfig);
         return resultObj;
     }
 

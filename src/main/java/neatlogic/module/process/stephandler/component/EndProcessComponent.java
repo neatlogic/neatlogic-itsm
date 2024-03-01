@@ -1,5 +1,11 @@
 package neatlogic.module.process.stephandler.component;
 
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.process.approve.ApproveHandlerNotFoundException;
+import neatlogic.framework.process.approve.constvalue.ApproveReply;
+import neatlogic.framework.process.approve.core.ApproveHandlerFactory;
+import neatlogic.framework.process.approve.core.IApproveHandler;
+import neatlogic.framework.process.approve.dto.ApproveEntityVo;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.constvalue.ProcessStepMode;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
@@ -8,14 +14,20 @@ import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskException;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerBase;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.dao.mapper.ProcessTaskApproveMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
 public class EndProcessComponent extends ProcessStepHandlerBase {
+
+	@Resource
+	private ProcessTaskApproveMapper processTaskApproveMapper;
 
 	@Override
 	public String getHandler() {
@@ -107,6 +119,25 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 //		processTaskMapper.updateProcessTaskStatus(processTaskVo);
 		//自动评分
 		IProcessStepHandlerUtil.autoScore(processTaskVo);
+
+		String configStr = processTaskApproveMapper.getProcessTaskApproveEntityConfigByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+		if (StringUtils.isNotBlank(configStr)) {
+			ApproveEntityVo approveEntity = JSONObject.parseObject(configStr, ApproveEntityVo.class);
+			IApproveHandler handler = ApproveHandlerFactory.getHandler(approveEntity.getType());
+			if (handler == null) {
+				throw new ApproveHandlerNotFoundException(approveEntity.getType());
+			}
+			ApproveReply approveReply = null;
+			String approveStatus = processTaskApproveMapper.getApproveStatusByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+			if (Objects.equals(approveStatus, ApproveReply.ACCEPT.getValue())) {
+				approveReply = ApproveReply.ACCEPT;
+			} else if (Objects.equals(approveStatus, ApproveReply.DENY.getValue())) {
+				approveReply = ApproveReply.DENY;
+			} else {
+				approveReply = ApproveReply.NEUTRAL;
+			}
+			handler.callback(currentProcessTaskStepVo.getProcessTaskId(), approveReply, approveEntity.getId(), null);
+		}
 		return 0;
 	}
 	
