@@ -17,12 +17,6 @@ limitations under the License.
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="neatlogic.module.process.dao.mapper.ProcessTaskApproveMapper">
-    <select id="getApproveStatusByProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.String">
-        SELECT
-            `approve_status`
-        FROM `processtask_approve_status`
-        WHERE `processtask_id` = #{value}
-    </select>
 
     <select id="getProcessTaskApproveEntityConfigByProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.String">
         SELECT
@@ -31,18 +25,6 @@ limitations under the License.
         JOIN `processtask_approve_entity_config` b ON b.`hash` = a.`config_hash`
         WHERE a.`processtask_id` = #{value}
     </select>
-
-    <insert id="insertProcessTaskApproveStatus" parameterType="java.util.HashMap">
-        INSERT INTO `processtask_approve_status` (
-            `processtask_id`,
-            `approve_status`
-        )
-        VALUES
-            (
-                #{processTaskId},
-                #{approveStatus}
-            )
-    </insert>
 
     <insert id="insertProcessTaskApproveEntity" parameterType="neatlogic.framework.process.dto.approve.ProcessTaskApproveEntityVo">
         INSERT INTO `processtask_approve_entity` (
