@@ -77,7 +77,9 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
             @Param(name = "handlerStepInfo", type = ApiParamType.JSONOBJECT, desc = "处理器特有的步骤信息"),
             @Param(name = "fromProcessTaskId", type = ApiParamType.LONG, desc = "来源工单id，从转报进入上报页时，传fromProcessTaskId"),
             @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "关系类型id，从转报进入上报页时，传channelTypeRelationId"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
+            @Param(name = "parentProcessTaskStepId", type = ApiParamType.LONG, desc = "nmpap.processtaskdraftgetapi.input.param.desc.parentprocesstaskstepid", help = "创建子流程时，传parentProcessTaskStepId"),
+            @Param(name = "invoke", type = ApiParamType.STRING, desc = "nmpap.processtaskdraftsaveapi.input.param.desc.invoke", help = "subprocess :子流程")
     })
     @Output({
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id"),
