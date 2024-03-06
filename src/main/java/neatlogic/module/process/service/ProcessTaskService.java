@@ -123,22 +123,22 @@ public interface ProcessTaskService {
     void setNextStepList(ProcessTaskStepVo processTaskStepVo);
 
     /**
-     * @param processTaskStepId 步骤id
+     * @param processTaskStepVo 步骤id
      * @return List<ProcessTaskStepVo>
      * @Author: linbq
      * @Time:2020年9月23日
      * @Description: 获取前进步骤列表
      */
-    public List<ProcessTaskStepVo> getForwardNextStepListByProcessTaskStepId(Long processTaskStepId);
+    public List<ProcessTaskStepVo> getForwardNextStepListByProcessTaskStepId(ProcessTaskStepVo processTaskStepVo);
 
     /**
-     * @param processTaskStepId 步骤id
+     * @param processTaskStepVo 步骤id
      * @return List<ProcessTaskStepVo>
      * @Author: linbq
      * @Time:2020年9月23日
      * @Description: 获取回退步骤列表
      */
-    public List<ProcessTaskStepVo> getBackwardNextStepListByProcessTaskStepId(Long processTaskStepId);
+    public List<ProcessTaskStepVo> getBackwardNextStepListByProcessTaskStepId(ProcessTaskStepVo processTaskStepVo);
 
     /**
      * @param processTaskStepVo
