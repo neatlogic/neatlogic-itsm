@@ -746,7 +746,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         Map<Long, List<AssignableWorkerStepVo>> assignableWorkerStepMap = getAssignableWorkerStepMap(processTaskStepVo);
         List<ProcessTaskStepVo> forwardNextStepList = new ArrayList<>();
         List<ProcessTaskStepVo> backwardNextStepList = new ArrayList<>();
-        List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepVo.getId(), null);
+        IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
+        if (handler == null) {
+            throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
+        }
+        List<ProcessTaskStepVo> nextStepList = handler.getNextStepList(processTaskStepVo, null);
         for (ProcessTaskStepVo processTaskStep : nextStepList) {
             List<AssignableWorkerStepVo> assignableWorkerStepList = assignableWorkerStepMap.get(processTaskStep.getId());
             if (CollectionUtils.isNotEmpty(assignableWorkerStepList)) {
@@ -767,10 +771,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     }
 
     @Override
-    public List<ProcessTaskStepVo> getForwardNextStepListByProcessTaskStepId(Long processTaskStepId) {
+    public List<ProcessTaskStepVo> getForwardNextStepListByProcessTaskStepId(ProcessTaskStepVo processTaskStepVo) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
-        List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,
-                ProcessFlowDirection.FORWARD.getValue());
+        IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
+        if (handler == null) {
+            throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
+        }
+        List<ProcessTaskStepVo> nextStepList = handler.getNextStepList(processTaskStepVo, ProcessFlowDirection.FORWARD);
         for (ProcessTaskStepVo processTaskStep : nextStepList) {
             if (StringUtils.isNotBlank(processTaskStep.getAliasName())) {
                 processTaskStep.setName(processTaskStep.getAliasName());
@@ -784,10 +791,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     }
 
     @Override
-    public List<ProcessTaskStepVo> getBackwardNextStepListByProcessTaskStepId(Long processTaskStepId) {
+    public List<ProcessTaskStepVo> getBackwardNextStepListByProcessTaskStepId(ProcessTaskStepVo processTaskStepVo) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
-        List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,
-                ProcessFlowDirection.BACKWARD.getValue());
+        IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
+        if (handler == null) {
+            throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
+        }
+        List<ProcessTaskStepVo> nextStepList = handler.getNextStepList(processTaskStepVo, ProcessFlowDirection.BACKWARD);
         for (ProcessTaskStepVo processTaskStep : nextStepList) {
             if (!Objects.equals(processTaskStep.getIsActive(), 0)) {
                 if (StringUtils.isNotBlank(processTaskStep.getAliasName())) {

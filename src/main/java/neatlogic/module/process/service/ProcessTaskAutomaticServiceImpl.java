@@ -16,7 +16,9 @@ limitations under the License.
 
 package neatlogic.module.process.service;
 
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
@@ -49,10 +51,6 @@ import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.util.ConditionUtil;
 import neatlogic.framework.util.FreemarkerUtil;
 import neatlogic.module.process.schedule.plugin.ProcessTaskAutomaticJob;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -745,7 +743,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
         IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
         if (FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
             List<ProcessTaskStepVo> backStepList =
-                    processTaskService.getBackwardNextStepListByProcessTaskStepId(currentProcessTaskStepVo.getId());
+                    processTaskService.getBackwardNextStepListByProcessTaskStepId(currentProcessTaskStepVo);
             if (backStepList.size() == 1) {
                 ProcessTaskStepVo nextProcessTaskStepVo = backStepList.get(0);
                 if (processHandler != null) {

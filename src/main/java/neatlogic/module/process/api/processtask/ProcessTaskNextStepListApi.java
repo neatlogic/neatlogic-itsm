@@ -71,9 +71,9 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase {
         Map<Long, List<AssignableWorkerStepVo>> assignableWorkerStepMap = processTaskService.getAssignableWorkerStepMap(processTaskVo.getCurrentProcessTaskStep());
         List<ProcessTaskStepVo> nextStepList = null;
         if (operationType == ProcessTaskOperationType.STEP_COMPLETE) {
-            nextStepList =  processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepId);
+            nextStepList =  processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskVo.getCurrentProcessTaskStep());
         } else {
-            nextStepList =  processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepId);
+            nextStepList =  processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskVo.getCurrentProcessTaskStep());
         }
         if (CollectionUtils.isEmpty(nextStepList)) {
             return nextStepList;

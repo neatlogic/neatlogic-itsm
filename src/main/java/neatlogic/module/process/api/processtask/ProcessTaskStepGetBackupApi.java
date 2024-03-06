@@ -116,7 +116,7 @@ public class ProcessTaskStepGetBackupApi extends PrivateApiComponentBase {
             if (processTaskScoreTemplateVo != null) {
                 processTaskVo.setScoreTemplateVo(scoreTemplateMapper.getScoreTemplateById(processTaskScoreTemplateVo.getScoreTemplateId()));
                 ProcessTaskStepVo endProcessTaskStepVo = processTaskMapper.getEndProcessTaskStepByProcessTaskId(processTaskId);
-                List<ProcessTaskStepVo> processTaskStepVoList = processTaskService.getBackwardNextStepListByProcessTaskStepId(endProcessTaskStepVo.getId());
+                List<ProcessTaskStepVo> processTaskStepVoList = processTaskService.getBackwardNextStepListByProcessTaskStepId(endProcessTaskStepVo);
                 processTaskVo.setRedoStepList(processTaskStepVoList);
             }
         }
