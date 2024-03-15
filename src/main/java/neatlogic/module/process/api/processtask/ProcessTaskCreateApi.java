@@ -44,6 +44,8 @@ public class ProcessTaskCreateApi extends PrivateApiComponentBase {
             @Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, desc = "term.itsm.hidecomponentlist"),
             @Param(name = "readcomponentList", type = ApiParamType.JSONARRAY, desc = "term.itsm.readcomponentlist"),
             @Param(name = "content", type = ApiParamType.STRING, desc = "common.content"),
+            @Param(name = "filePathPrefix", type = ApiParamType.STRING, defaultValue = "file:", desc = "common.filepathprefix"),
+            @Param(name = "filePathList", type = ApiParamType.JSONARRAY, desc = "common.filepathlist"),
             @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "common.fileidlist"),
             @Param(name = "handlerStepInfo", type = ApiParamType.JSONOBJECT, desc = "term.itsm.handlerstepinfo"),
             @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")
