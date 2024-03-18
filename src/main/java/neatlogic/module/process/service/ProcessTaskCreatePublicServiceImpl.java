@@ -8,6 +8,8 @@ import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.user.UserNotFoundException;
+import neatlogic.framework.file.dao.mapper.FileMapper;
+import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
 import neatlogic.framework.form.attribute.core.FormHandlerBase;
 import neatlogic.framework.form.dao.mapper.FormMapper;
@@ -33,7 +35,9 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +68,9 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
 
     @Resource
     private AuthenticationInfoService authenticationInfoService;
+
+    @Resource
+    private FileMapper fileMapper;
 
     /**
      * 创建工单
@@ -106,6 +113,28 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                 }
             }
             paramObj.put("priorityUuid", priorityVo.getUuid());
+        }
+        // 附件传递文件路径
+        JSONArray filePathList = paramObj.getJSONArray("filePathList");
+        if( filePathList != null && filePathList.size() > 0  ){
+            String filePathPrefix = paramObj.getString("filePathPrefix");
+            JSONArray fileIdList  = new JSONArray();
+            MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
+            for (Object filePath: filePathList ) {
+                File file = new File(filePath.toString());
+                if(file.exists()){
+                    FileVo fileVo = new FileVo();
+                    fileVo.setName(file.getName());
+                    fileVo.setSize(file.length());
+                    fileVo.setUserUuid(userVo.getUuid());
+                    fileVo.setType("itsm"); //itsm
+                    fileVo.setContentType(mimeTypesMap.getContentType(filePath.toString()));
+                    fileVo.setPath(filePathPrefix + filePath);
+                    fileMapper.insertFile(fileVo);
+                    fileIdList.add(fileVo.getId());
+                }
+            }
+            paramObj.put("fileIdList" , fileIdList);
         }
         //流程
         String processUuid = channelMapper.getProcessUuidByChannelUuid(channelVo.getUuid());
