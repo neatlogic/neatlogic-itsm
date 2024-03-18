@@ -76,9 +76,11 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "channelUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "服务uuidList"),
-            @Param(name = "conditionModel", type = ApiParamType.ENUM, rule = "simple,custom", isRequired = true,
-                    desc = "条件模型 simple|custom,  simple:目前用于用于工单中心条件过滤简单模式, custom:目前用于用于工单中心条件过自定义模式、条件分流和sla条件;默认custom"),})
+    @Input({
+            @Param(name = "channelUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "服务uuidList"),
+            @Param(name = "conditionModel", type = ApiParamType.ENUM, rule = "simple,custom,all", isRequired = true,
+                    desc = "条件模型 simple|custom|all  ,  simple:目前用于用于工单中心条件过滤简单模式, custom:目前用于用于工单中心条件过自定义模式、条件分流和sla条件;默认custom")
+    })
     @Output({@Param(name = "Return", explode = FormAttributeVo[].class, desc = "表单属性列表")})
     @Description(desc = "服务绑定的表单属性信息获取接口")
     @Override
@@ -121,7 +123,7 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
                     formAttributeVo.setHandler(new CheckboxHandler().getHandler());
                 }
                 IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                if (handler == null || !handler.isConditionable()) {
+                if (handler == null || (!Objects.equals("all", conditionModel) && !handler.isConditionable())) {
                     formIterator.remove();
                     continue;
                 }
