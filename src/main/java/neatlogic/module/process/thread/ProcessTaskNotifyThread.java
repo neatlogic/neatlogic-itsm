@@ -108,10 +108,6 @@ public class ProcessTaskNotifyThread extends NeatLogicThread {
                 notifyAuditMessageStringBuilder.append(currentProcessTaskStepVo.getProcessTaskId());
             } else {
                 /* 获取步骤配置信息 **/
-                //如果有父工单步骤，则使用父工单步骤的配置策略，兼容子流程场景
-                if(currentProcessTaskStepVo.getParentProcessTaskStepId() != null){
-
-                }
                 ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
                 IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(stepVo.getHandler());
                 if (processStepUtilHandler == null) {
