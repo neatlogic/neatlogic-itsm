@@ -118,7 +118,7 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
             while (formIterator.hasNext()) {
                 FormAttributeVo formAttributeVo = formIterator.next();
                 //如果是radio 则改为 checkbox，前端解决多选，取消选择问题
-                if (Objects.equals(formAttributeVo.getHandler(), new RadioHandler().getHandler())) {
+                if (!Objects.equals("all", conditionModel) && Objects.equals(formAttributeVo.getHandler(), new RadioHandler().getHandler())) {
                     formAttributeVo.setHandler(new CheckboxHandler().getHandler());
                 }
                 IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());

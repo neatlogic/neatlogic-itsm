@@ -176,8 +176,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 //                if (!flag) {
 //                    new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT);
 //                }
-            } else if ( parentProcessTaskStepId != null) {
-                return getParentProcessTask( parentProcessTaskStepId, channelUuid);
+            } else if (parentProcessTaskStepId != null) {
+                return getParentProcessTask(parentProcessTaskStepId, channelUuid);
             }
             processTaskVo = getProcessTaskVoByChannelUuid(channelUuid, fromProcessTaskId, channelTypeRelationId);
         } else {
@@ -284,38 +284,40 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         JSONObject labelUuidMap = fromProcessTaskFormAttrDataMap.getJSONObject("labelUuidMap");
         JSONObject labelHandlerMap = fromProcessTaskFormAttrDataMap.getJSONObject("labelHandlerMap");
         JSONObject formAttributeDataMap = fromProcessTaskFormAttrDataMap.getJSONObject("formAttributeDataMap");
-        //获取父流程步骤配置信息
-        IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(parentProcessTaskStepVo.getHandler());
-        if (processStepUtilHandler == null) {
-            throw new ProcessStepUtilHandlerNotFoundException(parentProcessTaskStepVo.getHandler());
-        }
-        Object parenStepInfoObj = processStepUtilHandler.getHandlerStepInitInfo(parentProcessTaskStepVo);
-        if (parenStepInfoObj != null) {
-            JSONObject parenStepInfo = (JSONObject) parenStepInfoObj;
-            JSONObject parentStepChannelFormMapping = parenStepInfo.getJSONObject("formMapping");
-            if (MapUtils.isNotEmpty(parentStepChannelFormMapping)) {
-                JSONObject parentSubProcessTaskStepConfigFormMapping = parentStepChannelFormMapping.getJSONObject(channelUuid);
-                if (MapUtils.isNotEmpty(parentSubProcessTaskStepConfigFormMapping)) {
-                    //获取目标表单值
-                    Map<String, Object> resultObj = new HashMap<>();
-                    FormVersionVo toFormVersion = new FormVersionVo();
-                    toFormVersion.setFormConfig(processTaskVo.getFormConfig());
-                    for (FormAttributeVo formAttributeVo : toFormVersion.getFormAttributeList()) {
-                        String parentFormLabel = parentSubProcessTaskStepConfigFormMapping.getString(formAttributeVo.getLabel());
-                        if (StringUtils.isNotBlank(parentFormLabel)) {
-                            String fromFormAttributeHandler = labelHandlerMap.getString(parentFormLabel);
-                            if (Objects.equals(fromFormAttributeHandler, formAttributeVo.getHandler())) {
-                                String fromFormAttributeUuid = labelUuidMap.getString(parentFormLabel);
-                                if (StringUtils.isNotBlank(fromFormAttributeUuid)) {
-                                    Object data = formAttributeDataMap.get(fromFormAttributeUuid);
-                                    if (data != null) {
-                                        resultObj.put(formAttributeVo.getUuid(), data);
+        if (MapUtils.isNotEmpty(labelUuidMap) && MapUtils.isNotEmpty(labelHandlerMap) && MapUtils.isNotEmpty(formAttributeDataMap)) {
+            //获取父流程步骤配置信息
+            IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(parentProcessTaskStepVo.getHandler());
+            if (processStepUtilHandler == null) {
+                throw new ProcessStepUtilHandlerNotFoundException(parentProcessTaskStepVo.getHandler());
+            }
+            Object parenStepInfoObj = processStepUtilHandler.getHandlerStepInitInfo(parentProcessTaskStepVo);
+            if (parenStepInfoObj != null) {
+                JSONObject parenStepInfo = (JSONObject) parenStepInfoObj;
+                JSONObject parentStepChannelFormMapping = parenStepInfo.getJSONObject("formMapping");
+                if (MapUtils.isNotEmpty(parentStepChannelFormMapping)) {
+                    JSONObject parentSubProcessTaskStepConfigFormMapping = parentStepChannelFormMapping.getJSONObject(channelUuid);
+                    if (MapUtils.isNotEmpty(parentSubProcessTaskStepConfigFormMapping)) {
+                        //获取目标表单值
+                        Map<String, Object> resultObj = new HashMap<>();
+                        FormVersionVo toFormVersion = new FormVersionVo();
+                        toFormVersion.setFormConfig(processTaskVo.getFormConfig());
+                        for (FormAttributeVo formAttributeVo : toFormVersion.getFormAttributeList()) {
+                            String parentFormLabel = parentSubProcessTaskStepConfigFormMapping.getString(formAttributeVo.getLabel());
+                            if (StringUtils.isNotBlank(parentFormLabel)) {
+                                String fromFormAttributeHandler = labelHandlerMap.getString(parentFormLabel);
+                                if (Objects.equals(fromFormAttributeHandler, formAttributeVo.getHandler())) {
+                                    String fromFormAttributeUuid = labelUuidMap.getString(parentFormLabel);
+                                    if (StringUtils.isNotBlank(fromFormAttributeUuid)) {
+                                        Object data = formAttributeDataMap.get(fromFormAttributeUuid);
+                                        if (data != null) {
+                                            resultObj.put(formAttributeVo.getUuid(), data);
+                                        }
                                     }
                                 }
                             }
                         }
+                        processTaskVo.setFormAttributeDataMap(resultObj);
                     }
-                    processTaskVo.setFormAttributeDataMap(resultObj);
                 }
             }
         }
