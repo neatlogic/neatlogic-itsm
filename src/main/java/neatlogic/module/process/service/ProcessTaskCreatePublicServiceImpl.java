@@ -210,7 +210,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                                                     attributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                                                     attributeDataVo.setDataObj(data);
                                                     JSONArray textList = (JSONArray) formAttributeHandler.valueConversionText(attributeDataVo, config);
-                                                    if (!Objects.equals(textList.get(0), data)) {
+                                                    if (CollectionUtils.isNotEmpty(textList) && !Objects.equals(textList.get(0), data)) {
                                                         JSONObject jsonObj = new JSONObject();
                                                         jsonObj.put("value", data);
                                                         jsonObj.put("text", textList.get(0));
@@ -235,7 +235,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                                                 attributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                                                 attributeDataVo.setDataObj(data);
                                                 JSONArray textList = (JSONArray) formAttributeHandler.valueConversionText(attributeDataVo, config);
-                                                if (!Objects.equals(textList.get(0), data)) {
+                                                if (CollectionUtils.isNotEmpty(textList) && !Objects.equals(textList.get(0), data)) {
                                                     JSONObject jsonObj = new JSONObject();
                                                     jsonObj.put("value", data);
                                                     jsonObj.put("text", textList.get(0));
@@ -257,7 +257,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                                             attributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                                             attributeDataVo.setDataObj(data);
                                             JSONArray textList = (JSONArray) formAttributeHandler.valueConversionText(attributeDataVo, config);
-                                            if (!Objects.equals(textList.get(0), data)) {
+                                            if (CollectionUtils.isNotEmpty(textList) && !Objects.equals(textList.get(0), data)) {
                                                 JSONObject jsonObj = new JSONObject();
                                                 jsonObj.put("value", data);
                                                 jsonObj.put("text", textList.get(0));
@@ -276,7 +276,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                                                 attributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                                                 attributeDataVo.setDataObj(data);
                                                 JSONArray textList = (JSONArray) formAttributeHandler.valueConversionText(attributeDataVo, config);
-                                                if (!Objects.equals(textList.get(0), data)) {
+                                                if (CollectionUtils.isNotEmpty(textList) && !Objects.equals(textList.get(0), data)) {
                                                     JSONObject jsonObj = new JSONObject();
                                                     jsonObj.put("value", data);
                                                     jsonObj.put("text", textList.get(0));
