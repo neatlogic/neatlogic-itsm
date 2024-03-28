@@ -39,9 +39,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import javax.activation.MimetypesFileTypeMap;
 import javax.annotation.Resource;
-import java.io.File;
 import java.util.*;
 
 @Service
@@ -121,20 +119,17 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
         if( filePathList != null && filePathList.size() > 0  ){
             String filePathPrefix = paramObj.getString("filePathPrefix");
             JSONArray fileIdList  = new JSONArray();
-            MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
+//            MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
             for (Object filePath: filePathList ) {
-                File file = new File(filePath.toString());
-                if(file.exists()){
-                    FileVo fileVo = new FileVo();
-                    fileVo.setName(file.getName());
-                    fileVo.setSize(file.length());
-                    fileVo.setUserUuid(userVo.getUuid());
-                    fileVo.setType("itsm"); //itsm
-                    fileVo.setContentType(mimeTypesMap.getContentType(filePath.toString()));
-                    fileVo.setPath(filePathPrefix + filePath);
-                    fileMapper.insertFile(fileVo);
-                    fileIdList.add(fileVo.getId());
-                }
+                FileVo fileVo = new FileVo();
+                fileVo.setName(filePath.toString().substring(filePath.toString().lastIndexOf("/")+1 , filePath.toString().length()));
+                fileVo.setSize(100*1024*1024L);
+                fileVo.setUserUuid(userVo.getUuid());
+                fileVo.setType("itsm"); //itsm
+//                fileVo.setContentType(mimeTypesMap.getContentType(filePath.toString()));
+                fileVo.setPath(filePathPrefix + filePath);
+                fileMapper.insertFile(fileVo);
+                fileIdList.add(fileVo.getId());
             }
             paramObj.put("fileIdList" , fileIdList);
         }
