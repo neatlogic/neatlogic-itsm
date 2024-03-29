@@ -52,13 +52,13 @@ public class ProcessTaskMobileisFitApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject result = new JSONObject();
         result.put("isfit", true);
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(jsonObj.getLong("processTaskId"));
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskCurrentStepByProcessTaskId(jsonObj.getLong("processTaskId"));
         for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
             String handler = processTaskStepVo.getHandler().toLowerCase();
             List<ProcessStepHandlerVo> processStepHandlerVos = ProcessStepHandlerFactory.getActiveProcessStepHandler();
             if (processStepHandlerVos.stream().noneMatch(o -> Objects.equals(o.getHandler(), handler) && o.getFitMobile())) {
                 result.put("isfit", false);
-                result.put("msg", String.format("抱歉！移动端暂时不支持查看/处理含有‘%s’步骤节点的工单", ProcessStepHandlerTypeFactory.getName(handler)));
+                result.put("msg", String.format("抱歉！移动端暂时不支持处理含有‘%s’步骤节点的工单", ProcessStepHandlerTypeFactory.getName(handler)));
                 break;
             }
         }
