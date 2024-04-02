@@ -4,16 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.ParamType;
-import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.condition.core.ConditionHandlerFactory;
 import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.dto.ConditionParamVo;
 import neatlogic.framework.dto.ExpressionVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
-import neatlogic.framework.notify.core.NotifyHandlerFactory;
-import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerBase;
-import neatlogic.framework.notify.dto.NotifyTriggerTemplateVo;
 import neatlogic.framework.notify.dto.NotifyTriggerVo;
 import neatlogic.framework.process.auth.PROCESS_MODIFY;
 import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
@@ -22,17 +18,11 @@ import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyParam;
-import neatlogic.framework.process.notify.core.IDefaultTemplate;
-import neatlogic.framework.process.notify.core.NotifyDefaultTemplateFactory;
 import neatlogic.module.process.notify.constvalue.SlaNotifyTriggerType;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class SlaNotifyPolicyHandler extends NotifyPolicyHandlerBase {
@@ -50,33 +40,6 @@ public class SlaNotifyPolicyHandler extends NotifyPolicyHandlerBase {
         }
 		return returnList;
 	}
-
-    @Override
-    protected List<NotifyTriggerTemplateVo> myNotifyTriggerTemplateList(NotifyHandlerType type) {
-        List<NotifyTriggerTemplateVo> list = new ArrayList<>();
-        /** 根据type获取通知handler全类名 */
-        String handler = null;
-        List<ValueTextVo> notifyHandlerTypeList = NotifyHandlerFactory.getNotifyHandlerNameList();
-        Optional<ValueTextVo> first = notifyHandlerTypeList.stream().filter(o -> o.getText().equals(type.getValue())).findFirst();
-        if(first != null){
-            ValueTextVo notifyHandlerClass = first.get();
-            handler = notifyHandlerClass.getValue().toString();
-        }
-        List<IDefaultTemplate> templateList = NotifyDefaultTemplateFactory.getTemplate(type.getValue());
-        if(CollectionUtils.isNotEmpty(templateList)){
-            Map<String, List<IDefaultTemplate>> map = templateList.stream().collect(Collectors.groupingBy(IDefaultTemplate::getTrigger));
-            for (SlaNotifyTriggerType notifyTriggerType : SlaNotifyTriggerType.values()) {
-                List<IDefaultTemplate> templates = map.get(notifyTriggerType.getTrigger().toLowerCase());
-                if (CollectionUtils.isEmpty(templates)) {
-                    continue;
-                }
-                for(IDefaultTemplate vo : templates){
-                    list.add(new NotifyTriggerTemplateVo(notifyTriggerType.getText(),notifyTriggerType.getDescription(),vo.getTitle(),vo.getContent(),handler));
-                }
-            }
-        }
-        return list;
-    }
 
     @Override
 	protected List<ConditionParamVo> mySystemParamList() {

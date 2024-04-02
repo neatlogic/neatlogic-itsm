@@ -17,9 +17,7 @@ package neatlogic.module.process.notify.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.dto.ConditionParamVo;
-import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerBase;
-import neatlogic.framework.notify.dto.NotifyTriggerTemplateVo;
 import neatlogic.framework.notify.dto.NotifyTriggerVo;
 import neatlogic.module.process.notify.constvalue.TimedTaskTriggerType;
 import org.springframework.stereotype.Service;
@@ -49,11 +47,6 @@ public class TimedTaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     }
 
     @Override
-    protected List<NotifyTriggerTemplateVo> myNotifyTriggerTemplateList(NotifyHandlerType type) {
-        return null;
-    }
-
-    @Override
     protected List<ConditionParamVo> mySystemParamList() {
         return null;
     }
@@ -75,11 +68,6 @@ public class TimedTaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     public String getAuthName() {
         return null;
     }
-
-//    @Override
-//    public INotifyPolicyHandlerGroup getGroup() {
-//        return null;
-//    }
 
     @Override
     public boolean isPublic(){
