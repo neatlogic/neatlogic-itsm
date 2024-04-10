@@ -70,19 +70,16 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
         int size = processTaskStepList.size();
         for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
             String status = processTaskStepVo.getStatus();
-            if (Objects.equals(processTaskStepVo.getIsActive(),1)) {
+            if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
                 // 未处理、处理中和挂起的步骤才需要计算SLA
                 if (ProcessTaskStepStatus.PENDING.getValue().equals(status)) {
                     doing++;
-                    continue;
                 } else if (ProcessTaskStepStatus.RUNNING.getValue().equals(status)) {
                     doing++;
-                    continue;
                 } else if (ProcessTaskStepStatus.HANG.getValue().equals(status)) {
                     pause++;
-                    continue;
                 }
-            } else if (Objects.equals(processTaskStepVo.getIsActive(),-1)) {
+            } else if (Objects.equals(processTaskStepVo.getIsActive(), -1)) {
                 pause++;
             } else if (ProcessTaskStepStatus.SUCCEED.getValue().equals(status)) {
                 done++;
@@ -92,7 +89,7 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
             return SlaStatus.DOING;
         } else if (pause > 0) {
             return SlaStatus.PAUSE;
-        } else if (done == size){
+        } else if (done == size) {
             return SlaStatus.DONE;
         }
         return null;
@@ -119,15 +116,12 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
 
     /**
      * 将时效关联的步骤操作时间记录转换成时间段列表
-     *
-     * @param timeAuditList
-     * @param currentTimeMillis
-     * @return
      */
     private static List<Map<String, Long>> timeAuditListToTimePeriodList(List<ProcessTaskStepTimeAuditVo> timeAuditList, long currentTimeMillis) {
         List<Map<String, Long>> timeList = new ArrayList<>();
         for (ProcessTaskStepTimeAuditVo auditVo : timeAuditList) {
-            Long startTime = null, endTime = null;
+            Long startTime = null;
+            Long endTime = null;
             if (auditVo.getActiveTimeLong() != null) {
                 startTime = auditVo.getActiveTimeLong();
             } else if (auditVo.getStartTimeLong() != null) {
