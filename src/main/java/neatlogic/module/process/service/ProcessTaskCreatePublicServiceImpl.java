@@ -21,6 +21,7 @@ import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormAttributeHandlerNotFoundException;
 import neatlogic.framework.form.exception.FormAttributeNotFoundException;
 import neatlogic.framework.process.constvalue.ProcessFlowDirection;
+import neatlogic.framework.process.crossover.IProcessTaskCreatePublicCrossoverService;
 import neatlogic.framework.process.dao.mapper.ChannelMapper;
 import neatlogic.framework.process.dao.mapper.PriorityMapper;
 import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
@@ -43,7 +44,7 @@ import javax.annotation.Resource;
 import java.util.*;
 
 @Service
-public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePublicService {
+public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePublicService, IProcessTaskCreatePublicCrossoverService {
 
     @Resource
     private ChannelMapper channelMapper;
