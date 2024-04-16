@@ -169,7 +169,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
             throw new ParamIrregularException("ConditionGroup", " handler illegal");
         }
         JSONArray valueArray = JSONArray.parseArray(conditionVo.getValueList().toString());
-        if(CollectionUtils.isEmpty(valueArray)){
+        if (CollectionUtils.isEmpty(valueArray)) {
             return;
         }
         if (FormHandler.FORMDATE.getHandler().equals(conditionVo.getHandler())) {
@@ -183,7 +183,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     /**
      * date的sql拼凑
      *
-     * @param value  条件的值
+     * @param value       条件的值
      * @param conditionVo 条件
      * @param sqlSb       拼凑的sql
      */
@@ -250,7 +250,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     }
 
     @Override
-    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo){
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
         JSONObject resultObj = new JSONObject();
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskStepVo.getProcessTaskId());
         if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
@@ -263,10 +263,14 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                     if (java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMRADIO.getHandler())
                             || java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMCHECKBOX.getHandler())
                             || java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMSELECT.getHandler())) {
-                        Object value =  formCrossoverService.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
+                        Object value = formCrossoverService.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
                         resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), value);
+                        //另存一份label为key的数据，给条件路由的自定义脚本消费
+                        resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), value);
                     } else {
                         resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+                        //另存一份label为key的数据，给条件路由的自定义脚本消费
+                        resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), processTaskFormAttributeDataVo.getDataObj());
                     }
                 }
             }
