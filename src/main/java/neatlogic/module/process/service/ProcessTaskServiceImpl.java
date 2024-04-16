@@ -94,7 +94,7 @@ import static java.util.stream.Collectors.toCollection;
 @Service
 public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskCrossoverService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
 
     private final Pattern pattern_html = Pattern.compile("<[^>]+>", Pattern.CASE_INSENSITIVE);
 
@@ -1433,12 +1433,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         ProcessTaskVo processTaskVo =
                 processTaskMapper.getProcessTaskBaseInfoByIdIncludeIsDeleted(currentProcessTaskStepVo.getProcessTaskId());
         if (processTaskVo != null) {
-            /** 上报人 **/
+            /* 上报人 **/
             if (StringUtils.isNotBlank(processTaskVo.getOwner())) {
                 receiverMap.computeIfAbsent(ProcessUserType.OWNER.getValue(), k -> new ArrayList<>())
                         .add(new NotifyReceiverVo(GroupSearch.USER.getValue(), processTaskVo.getOwner()));
             }
-            /** 代报人 **/
+            /* 代报人 **/
             if (StringUtils.isNotBlank(processTaskVo.getReporter())) {
                 receiverMap.computeIfAbsent(ProcessUserType.REPORTER.getValue(), k -> new ArrayList<>())
                         .add(new NotifyReceiverVo(GroupSearch.USER.getValue(), processTaskVo.getReporter()));
@@ -1447,7 +1447,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         ProcessTaskStepUserVo processTaskStepUser = new ProcessTaskStepUserVo();
         processTaskStepUser.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
         processTaskStepUser.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-        /** 主处理人 **/
+        /* 主处理人 **/
         processTaskStepUser.setUserType(ProcessUserType.MAJOR.getValue());
         List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserList(processTaskStepUser);
         for (ProcessTaskStepUserVo processTaskStepUserVo : majorUserList) {
@@ -1830,8 +1830,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     /**
      * @param processTaskStepVo 步骤信息
      * @return ProcessTaskStepVo
-     * @Author: linbq
-     * @Time:2020年8月21日
      * @Description: 获取当前步骤信息
      */
     @Override
@@ -1992,14 +1990,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
         if (processUserTypeList.contains(ProcessUserType.WORKER)) {
-            /** 待处理人 **/
+            /* 待处理人 **/
             List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId());
             for (ProcessTaskStepWorkerVo processTaskStepWorkerVo : workerList) {
                 resultMap.computeIfAbsent(ProcessUserType.WORKER, k -> new ArrayList<>()).add(processTaskStepWorkerVo.getType() + "#" + processTaskStepWorkerVo.getUuid());
             }
         }
         if (processUserTypeList.contains(ProcessUserType.FOCUS_USER)) {
-            /** 工单关注人 */
+            /* 工单关注人 */
             List<String> focusUserList = processTaskMapper.getFocusUserListByTaskId(processTaskStepVo.getProcessTaskId());
             for (String focusUser : focusUserList) {
                 resultMap.computeIfAbsent(ProcessUserType.FOCUS_USER, k -> new ArrayList<>())
@@ -2007,7 +2005,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
         if (processUserTypeList.contains(ProcessUserType.DEFAULT_WORKER)) {
-            /** 异常处理人 **/
+            /* 异常处理人 **/
             String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
             if (StringUtils.isNotBlank(stepConfig)) {
                 String defaultWorker = (String) JSONPath.read(stepConfig, "workerPolicyConfig.defaultWorker");
@@ -2038,11 +2036,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public List<ProcessTaskFormAttributeDataVo> getProcessTaskFormAttributeDataListByProcessTaskId(Long processTaskId) {
-        List<Long> formAttributeDataIdList = processTaskMapper.getProcessTaskFormAttributeDataIdListByProcessTaskId(processTaskId);
-        if (CollectionUtils.isEmpty(formAttributeDataIdList)) {
-            return new ArrayList<>();
-        }
-        List<AttributeDataVo> attributeDataList = formMapper.getFormAttributeDataListByIdList(formAttributeDataIdList);
+//        List<Long> formAttributeDataIdList = processTaskMapper.getProcessTaskFormAttributeDataIdListByProcessTaskId(processTaskId);
+//        if (CollectionUtils.isEmpty(formAttributeDataIdList)) {
+//            return new ArrayList<>();
+//        }
+        List<AttributeDataVo> attributeDataList = formMapper.getFormAttributeDataListByProcessTaskId(processTaskId);
         if (CollectionUtils.isEmpty(attributeDataList)) {
             return new ArrayList<>();
         }

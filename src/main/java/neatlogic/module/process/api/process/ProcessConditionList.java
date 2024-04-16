@@ -1,18 +1,8 @@
 package neatlogic.module.process.api.process;
 
-import java.util.List;
-
-import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.process.auth.PROCESS_BASE;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-
+import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.ParamType;
@@ -20,26 +10,30 @@ import neatlogic.framework.condition.core.ConditionHandlerFactory;
 import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.dto.ConditionParamVo;
 import neatlogic.framework.dto.ExpressionVo;
-import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
+import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
+import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.FormAttributeVo;
-import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
-import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
+import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessConditionList extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private FormMapper formMapper;
 
     @Override
@@ -49,7 +43,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "流程条件列表接口";
+        return "nmpap.processconditionlist.getname";
     }
 
     @Override
@@ -57,9 +51,10 @@ public class ProcessConditionList extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "formUuid", type = ApiParamType.STRING, desc = "流程绑定表单的uuid")})
-    @Output({@Param(explode = ConditionParamVo[].class, desc = "流程条件列表")})
-    @Description(desc = "流程条件列表接口")
+    @Input({@Param(name = "formUuid", type = ApiParamType.STRING, desc = "nmpap.processconditionlist.input.param.desc"),
+            @Param(name = "isAll", type = ApiParamType.BOOLEAN, desc = "是否返回所有属性")})
+    @Output({@Param(explode = ConditionParamVo[].class, desc = "nmpap.processconditionlist.getname")})
+    @Description(desc = "nmpap.processconditionlist.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray resultArray = new JSONArray();
@@ -101,7 +96,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
             for (FormAttributeVo formAttributeVo : formAttrList) {
 
                 IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                if(formHandler == null){
+                if (formHandler == null) {
                     continue;
                 }
                 if (formHandler.isConditionable()) {
