@@ -8,29 +8,23 @@ import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.condition.core.ConditionHandlerFactory;
 import neatlogic.framework.condition.core.IConditionHandler;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dto.ConditionParamVo;
 import neatlogic.framework.dto.ExpressionVo;
 import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.form.dao.mapper.FormMapper;
-import neatlogic.framework.form.dto.FormAttributeParentVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
-import neatlogic.framework.form.dto.FormVersionVo;
-import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -57,12 +51,13 @@ public class ProcessConditionList extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "formUuid", type = ApiParamType.STRING, desc = "nmpap.processconditionlist.input.param.desc"),
-            @Param(name = "isAll", type = ApiParamType.BOOLEAN, desc = "是否返回所有属性")})
+            @Param(name = "isAll", type = ApiParamType.INTEGER, rule = "0,1", desc = "term.process.isreturnallattr")})
     @Output({@Param(explode = ConditionParamVo[].class, desc = "nmpap.processconditionlist.getname")})
     @Description(desc = "nmpap.processconditionlist.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray resultArray = new JSONArray();
+        Integer isAll = jsonObj.getInteger("isAll");
         // 固定字段条件
         for (ConditionProcessTaskOptions option : ConditionProcessTaskOptions.values()) {
             IConditionHandler condition = ConditionHandlerFactory.getHandler(option.getValue());
@@ -71,6 +66,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
                 conditionParamVo.setName(condition.getName());
                 conditionParamVo.setLabel(condition.getDisplayName());
                 conditionParamVo.setController(condition.getHandler(FormConditionModel.CUSTOM));
+                conditionParamVo.setHandler("form" + conditionParamVo.getController());
                 if (condition.getConfig() != null) {
                     conditionParamVo.setConfig(condition.getConfig().toJSONString());
                 }
@@ -98,17 +94,17 @@ public class ProcessConditionList extends PrivateApiComponentBase {
         // 表单条件
         String formUuid = jsonObj.getString("formUuid");
         if (StringUtils.isNotBlank(formUuid)) {
-            List<String> conditionableAttrUuidList = new ArrayList<>();
+            //List<String> conditionableAttrUuidList = new ArrayList<>();
             List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
             for (FormAttributeVo formAttributeVo : formAttrList) {
-
                 IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                 if (formHandler == null) {
                     continue;
                 }
-                if (formHandler.isConditionable()) {
+                if ((isAll != null && isAll.equals(1)) || formHandler.isConditionable()) {
                     formAttributeVo.setType("form");
                     formAttributeVo.setConditionModel(FormConditionModel.CUSTOM);
+
                     ConditionParamVo conditionParamVo = new ConditionParamVo();
                     conditionParamVo.setName(formAttributeVo.getUuid());
                     conditionParamVo.setLabel(formAttributeVo.getLabel());
@@ -116,19 +112,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
                     conditionParamVo.setType(formAttributeVo.getType());
                     conditionParamVo.setHandler(formAttributeVo.getHandler());
                     conditionParamVo.setConfig(formAttributeVo.getConfig());
-                    if ("formdate".equals(formAttributeVo.getHandler())) {
-                        JSONObject config = conditionParamVo.getConfig();
-                        if (MapUtils.isNotEmpty(config)) {
-                            config.put("type", "datetimerange");
-                            conditionParamVo.setConfig(config.toJSONString());
-                        }
-                    } else if ("formtime".equals(formAttributeVo.getHandler())) {
-                        JSONObject config = conditionParamVo.getConfig();
-                        if (MapUtils.isNotEmpty(config)) {
-                            config.put("type", "timerange");
-                            conditionParamVo.setConfig(config.toJSONString());
-                        }
-                    }
+
                     ParamType paramType = formHandler.getParamType();
                     if (paramType != null) {
                         conditionParamVo.setParamType(paramType.getName());
@@ -143,41 +127,8 @@ public class ProcessConditionList extends PrivateApiComponentBase {
                             }
                         }
                     }
-                    conditionParamVo.setConditionable(true);
-                    conditionableAttrUuidList.add(formAttributeVo.getUuid());
+                    conditionParamVo.setConditionable(formHandler.isConditionable());
                     resultArray.add(conditionParamVo);
-                }
-            }
-            Boolean isAll = jsonObj.getBoolean("isAll");
-            if (Boolean.TRUE.equals(isAll)) {
-                FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(formUuid);
-                if (formVersion != null) {
-                    IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-                    List<FormAttributeVo> allFormAttributeList = formCrossoverService.getAllFormAttributeList(formVersion.getFormConfig());
-                    for (FormAttributeVo formAttributeVo : allFormAttributeList) {
-                        if (conditionableAttrUuidList.contains(formAttributeVo.getUuid())) {
-                            continue;
-                        }
-                        List<String> parentNameList = new ArrayList<>();
-                        FormAttributeParentVo parent = formAttributeVo.getParent();
-                        while (parent != null) {
-                            parentNameList.add(0, parent.getName());
-                            parent = parent.getParent();
-                        }
-                        parentNameList.add(formAttributeVo.getLabel());
-                        String label = String.join("/", parentNameList);
-                        formAttributeVo.setType("form");
-                        formAttributeVo.setConditionModel(FormConditionModel.CUSTOM);
-                        ConditionParamVo conditionParamVo = new ConditionParamVo();
-                        conditionParamVo.setName(formAttributeVo.getUuid());
-                        conditionParamVo.setLabel(label);
-//                        conditionParamVo.setController(formAttributeVo.getHandlerType());
-                        conditionParamVo.setType(formAttributeVo.getType());
-                        conditionParamVo.setHandler(formAttributeVo.getHandler());
-                        conditionParamVo.setConfig(formAttributeVo.getConfig());
-                        conditionParamVo.setConditionable(false);
-                        resultArray.add(conditionParamVo);
-                    }
                 }
             }
         }

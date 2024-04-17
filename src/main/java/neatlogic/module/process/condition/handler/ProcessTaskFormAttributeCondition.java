@@ -266,11 +266,11 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                         Object value = formCrossoverService.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
                         resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), value);
                         //另存一份label为key的数据，给条件路由的自定义脚本消费
-                        resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), value);
+                        //resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), value);
                     } else {
                         resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
                         //另存一份label为key的数据，给条件路由的自定义脚本消费
-                        resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), processTaskFormAttributeDataVo.getDataObj());
+                        //resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), processTaskFormAttributeDataVo.getDataObj());
                     }
                 }
             }
