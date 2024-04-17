@@ -355,7 +355,7 @@ public interface ProcessTaskService {
      * @param jsonObj
      * @return
      */
-    JSONObject saveProcessTaskDraft(JSONObject jsonObj) throws Exception;
+    JSONObject saveProcessTaskDraft(JSONObject jsonObj, Long newProcessTaskId) throws Exception;
 
     /**
      * 提交上报工单

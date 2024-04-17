@@ -2277,7 +2277,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
      * @return
      */
     @Override
-    public JSONObject saveProcessTaskDraft(JSONObject jsonObj) throws Exception {
+    public JSONObject saveProcessTaskDraft(JSONObject jsonObj, Long newProcessTaskId) throws Exception {
         String channelUuid = jsonObj.getString("channelUuid");
         if (channelMapper.checkChannelIsExists(channelUuid) == 0) {
             throw new ChannelNotFoundException(channelUuid);
@@ -2384,7 +2384,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
 
         startProcessTaskStepVo.getParamObj().putAll(jsonObj);
-        handler.saveDraft(startProcessTaskStepVo);
+        handler.saveDraft(startProcessTaskStepVo, newProcessTaskId);
 
         processTaskStepDataVo.setData(jsonObj.toJSONString());
         processTaskStepDataVo.setProcessTaskId(startProcessTaskStepVo.getProcessTaskId());
