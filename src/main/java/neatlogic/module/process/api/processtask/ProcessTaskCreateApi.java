@@ -48,7 +48,8 @@ public class ProcessTaskCreateApi extends PrivateApiComponentBase {
             @Param(name = "filePathList", type = ApiParamType.JSONARRAY, desc = "common.filepathlist"),
             @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "common.fileidlist"),
             @Param(name = "handlerStepInfo", type = ApiParamType.JSONOBJECT, desc = "term.itsm.handlerstepinfo"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
+            @Param(name = "isAsync", type = ApiParamType.INTEGER, rule="0,1", desc = "是否异步模式")
     })
     @Output({
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid")

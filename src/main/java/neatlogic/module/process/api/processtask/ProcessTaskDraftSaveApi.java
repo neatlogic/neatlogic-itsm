@@ -165,7 +165,7 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
 //        if (indexHandler != null) {
 //            indexHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
 //        }
-        return processTaskService.saveProcessTaskDraft(jsonObj);
+        return processTaskService.saveProcessTaskDraft(jsonObj, null);
     }
 
 }
