@@ -397,7 +397,11 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     List<String> targetValueList = new ArrayList<>();
                     targetValueList.add(value);
                     String expression = config.getString("expression");
-                    result = ConditionUtil.predicate(currentValueList, expression, targetValueList);
+                    try {
+                        result = ConditionUtil.predicate(currentValueList, expression, targetValueList);
+                    } catch (Exception e) {
+                        logger.warn(e.getMessage(), e);
+                    }
                 }
             }
         }
@@ -406,8 +410,6 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
     /**
      * 第一次请求
-     *
-     * @param currentProcessTaskStepVo
      */
     @Override
     @Transactional
