@@ -395,7 +395,8 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
             //暂存
             //TODO isNeedValid 参数是否需要？？？
             paramObj.put("isNeedValid", 1);
-            JSONObject saveResultObj = processTaskService.saveProcessTaskDraft(paramObj, null);
+            processTaskId = paramObj.getLong("processTaskId");
+            JSONObject saveResultObj = processTaskService.saveProcessTaskDraft(paramObj, processTaskId);
 
             //查询可执行下一 步骤
             processTaskId = saveResultObj.getLong("processTaskId");
