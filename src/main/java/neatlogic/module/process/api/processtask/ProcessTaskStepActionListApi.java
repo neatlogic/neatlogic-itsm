@@ -1,31 +1,25 @@
 package neatlogic.module.process.api.processtask;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.process.auth.PROCESS_BASE;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSONObject;
-
+import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.ValueTextVo;
+import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
-import neatlogic.module.process.service.ProcessTaskService;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.service.ProcessTaskService;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -43,7 +37,7 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单步骤当前用户操作权限列表获取接口";
+        return "获取工单步骤当前用户操作权限列表";
     }
 
     @Override
@@ -54,7 +48,7 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
     @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
         @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")})
     @Output({@Param(name = "Return", explode = ValueTextVo[].class, desc = "当前用户操作权限列表")})
-    @Description(desc = "工单步骤当前用户操作权限列表获取接口")
+    @Description(desc = "获取工单步骤当前用户操作权限列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
