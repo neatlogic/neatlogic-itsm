@@ -52,7 +52,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "formUuid", type = ApiParamType.STRING, desc = "nmpap.processconditionlist.input.param.desc"),
+    @Input({@Param(name = "formUuid", type = ApiParamType.STRING, desc = "term.framework.formuuid"),
             @Param(name = "isAll", type = ApiParamType.INTEGER, rule = "0,1", desc = "term.process.isreturnallattr")})
     @Output({@Param(explode = ConditionParamVo[].class, desc = "nmpap.processconditionlist.getname")})
     @Description(desc = "nmpap.processconditionlist.getname")
