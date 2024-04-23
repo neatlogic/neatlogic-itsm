@@ -42,7 +42,7 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单上报暂存接口";
+        return "nmpap.processtaskdraftsaveapi.getname";
     }
 
     @Override
@@ -61,31 +61,31 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
 //  		}
 //  	]                			
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id"),
-            @Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务uuid"),
-            @Param(name = "title", type = ApiParamType.STRING, isRequired = true, maxLength = 80, desc = "标题"),
-            @Param(name = "owner", type = ApiParamType.STRING, desc = "请求人"),
-            @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "优先级uuid"),
-            @Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "表单属性数据列表"),
-            @Param(name = "formExtendAttributeDataList", type = ApiParamType.JSONARRAY, desc = "表单扩展属性数据列表"),
-            @Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, desc = "隐藏表单属性列表"),
-            @Param(name = "readcomponentList", type = ApiParamType.JSONARRAY, desc = "只读表单属性列表"),
-            @Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
-            @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "附件id列表"),
-            @Param(name = "tagList", type = ApiParamType.JSONARRAY, desc = "标签列表"),
-            @Param(name = "focusUserUuidList", type = ApiParamType.JSONARRAY, desc = "工单关注人列表"),
-            @Param(name = "handlerStepInfo", type = ApiParamType.JSONOBJECT, desc = "处理器特有的步骤信息"),
-            @Param(name = "fromProcessTaskId", type = ApiParamType.LONG, desc = "来源工单id，从转报进入上报页时，传fromProcessTaskId"),
-            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "关系类型id，从转报进入上报页时，传channelTypeRelationId"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
+            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid"),
+            @Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.channeluuid"),
+            @Param(name = "title", type = ApiParamType.STRING, isRequired = true, maxLength = 80, desc = "common.title"),
+            @Param(name = "owner", type = ApiParamType.STRING, desc = "term.itsm.owner"),
+            @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "common.priorityuuid"),
+            @Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "term.itsm.formattributedatalist"),
+            @Param(name = "formExtendAttributeDataList", type = ApiParamType.JSONARRAY, desc = "term.itsm.formextendattributedatalist"),
+            @Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, desc = "term.itsm.hidecomponentlist"),
+            @Param(name = "readcomponentList", type = ApiParamType.JSONARRAY, desc = "term.itsm.readcomponentlist"),
+            @Param(name = "content", type = ApiParamType.STRING, desc = "common.content"),
+            @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "common.fileidlist"),
+            @Param(name = "tagList", type = ApiParamType.JSONARRAY, desc = "common.taglist"),
+            @Param(name = "focusUserUuidList", type = ApiParamType.JSONARRAY, desc = "term.itsm.focususeruuidlist"),
+            @Param(name = "handlerStepInfo", type = ApiParamType.JSONOBJECT, desc = "term.itsm.handlerstepinfo"),
+            @Param(name = "fromProcessTaskId", type = ApiParamType.LONG, desc = "term.itsm.fromprocesstaskid", help = "从转报进入上报页时，传fromProcessTaskId"),
+            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "term.itsm.channeltyperelationid", help = "从转报进入上报页时，传channelTypeRelationId"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source"),
             @Param(name = "parentProcessTaskStepId", type = ApiParamType.LONG, desc = "nmpap.processtaskdraftgetapi.input.param.desc.parentprocesstaskstepid", help = "创建子流程时，传parentProcessTaskStepId"),
             @Param(name = "invoke", type = ApiParamType.STRING, desc = "nmpap.processtaskdraftsaveapi.input.param.desc.invoke", help = "subprocess :子流程")
     })
     @Output({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id"),
+            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid"),
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id")
     })
-    @Description(desc = "工单上报暂存接口")
+    @Description(desc = "nmpap.processtaskdraftsaveapi.getname")
     @Override
     @ResubmitInterval(5)
     public Object myDoService(JSONObject jsonObj) throws Exception {
