@@ -15,6 +15,8 @@ import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.FormAttributeVo;
+import neatlogic.framework.form.dto.FormVo;
+import neatlogic.framework.form.exception.FormNotFoundException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
 import neatlogic.framework.restful.annotation.*;
@@ -50,7 +52,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "formUuid", type = ApiParamType.STRING, desc = "nmpap.processconditionlist.input.param.desc"),
+    @Input({@Param(name = "formUuid", type = ApiParamType.STRING, desc = "term.framework.formuuid"),
             @Param(name = "isAll", type = ApiParamType.INTEGER, rule = "0,1", desc = "term.process.isreturnallattr")})
     @Output({@Param(explode = ConditionParamVo[].class, desc = "nmpap.processconditionlist.getname")})
     @Description(desc = "nmpap.processconditionlist.getname")
@@ -95,6 +97,13 @@ public class ProcessConditionList extends PrivateApiComponentBase {
         String formUuid = jsonObj.getString("formUuid");
         if (StringUtils.isNotBlank(formUuid)) {
             //List<String> conditionableAttrUuidList = new ArrayList<>();
+            FormVo form = formMapper.getFormByUuid(formUuid);
+            if (form == null) {
+                throw new FormNotFoundException(formUuid);
+            }
+            // TODO 需要确定条件节点表单扩展属性标签
+//            IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+//            List<FormAttributeVo> formAttributeList = formCrossoverService.getFormAttributeList(formUuid, form.getName(), "condition");
             List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
             for (FormAttributeVo formAttributeVo : formAttrList) {
                 IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
@@ -111,7 +120,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
                     conditionParamVo.setController(formAttributeVo.getHandlerType());
                     conditionParamVo.setType(formAttributeVo.getType());
                     conditionParamVo.setHandler(formAttributeVo.getHandler());
-                    conditionParamVo.setConfig(formAttributeVo.getConfig());
+                    conditionParamVo.setConfig(formAttributeVo.getConfig().toJSONString());
 
                     ParamType paramType = formHandler.getParamType();
                     if (paramType != null) {

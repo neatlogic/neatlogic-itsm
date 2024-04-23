@@ -46,7 +46,7 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单步骤暂存接口";
+        return "nmpap.processtaskstepdraftsaveapi.getname";
     }
 
     @Override
@@ -54,17 +54,18 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-        @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "优先级uuid"),
-        @Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "表单属性数据列表"),
-        @Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, desc = "隐藏表单属性列表"),
-        @Param(name = "readcomponentList", type = ApiParamType.JSONARRAY, desc = "只读表单属性列表"),
-        @Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
-        @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "附件id列表"),
-        @Param(name = "handlerStepInfo", type = ApiParamType.JSONOBJECT, desc = "处理器特有的步骤信息")})
-    @Output({@Param(name = "auditId", type = ApiParamType.LONG, desc = "活动id")})
-    @Description(desc = "工单步骤暂存接口")
+    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+        @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
+        @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "common.priorityuuid"),
+        @Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "term.itsm.formattributedatalist"),
+        @Param(name = "formExtendAttributeDataList", type = ApiParamType.JSONARRAY, desc = "term.itsm.formextendattributedatalist"),
+        @Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, desc = "term.itsm.hidecomponentlist"),
+        @Param(name = "readcomponentList", type = ApiParamType.JSONARRAY, desc = "term.itsm.readcomponentlist"),
+        @Param(name = "content", type = ApiParamType.STRING, desc = "common.content"),
+        @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "common.fileidlist"),
+        @Param(name = "handlerStepInfo", type = ApiParamType.JSONOBJECT, desc = "term.itsm.handlerstepinfo")})
+    @Output({})
+    @Description(desc = "nmpap.processtaskstepdraftsaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");

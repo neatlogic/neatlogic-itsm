@@ -92,7 +92,7 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                     if (FormHandler.FORMUSERSELECT.getHandler().equals(processTaskFormAttributeData.getHandler())) {
                         IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(FormHandler.FORMUSERSELECT.getHandler());
                         if (handler != null) {
-                            JSONObject detailedData = handler.getDetailedData(processTaskFormAttributeData, formAttributeVo.getConfigObj());
+                            JSONObject detailedData = handler.getDetailedData(processTaskFormAttributeData, formAttributeVo.getConfig());
                             JSONArray valueList = detailedData.getJSONArray("valueList");
                             if (CollectionUtils.isNotEmpty(valueList)) {
                                 List<String> dataList = valueList.toJavaList(String.class);
@@ -126,7 +126,7 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                     } else if (FormHandler.FORMSELECT.getHandler().equals(processTaskFormAttributeData.getHandler())) {
                         IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(FormHandler.FORMSELECT.getHandler());
                         if (handler != null) {
-                            JSONObject detailedData = handler.getDetailedData(processTaskFormAttributeData, formAttributeVo.getConfigObj());
+                            JSONObject detailedData = handler.getDetailedData(processTaskFormAttributeData, formAttributeVo.getConfig());
                             JSONArray valueList = detailedData.getJSONArray("valueList");
                             if (CollectionUtils.isNotEmpty(valueList)) {
                                 List<String> dataList = valueList.toJavaList(String.class);

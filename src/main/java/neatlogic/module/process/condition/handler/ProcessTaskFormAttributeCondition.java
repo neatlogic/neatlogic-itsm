@@ -135,8 +135,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                                         attributeDataVo.setData(JSON.toJSONString(value));
                                     }
 
-                                    Object text = formAttributeHandler.valueConversionText(attributeDataVo,
-                                            JSON.parseObject(formAttribute.getConfig()));
+                                    Object text = formAttributeHandler.valueConversionText(attributeDataVo, formAttribute.getConfig());
                                     if (text instanceof String) {
                                         return text;
                                     } else if (text instanceof List) {

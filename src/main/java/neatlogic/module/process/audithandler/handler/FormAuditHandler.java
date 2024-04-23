@@ -107,7 +107,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
         for (FormAttributeVo formAttributeVo : defaultSceneFormAttributeList) {
             String attributeUuid = formAttributeVo.getUuid();
             attributeLabelMap.put(attributeUuid, formAttributeVo.getLabel());
-            attributeConfigMap.put(attributeUuid, formAttributeVo.getConfigObj());
+            attributeConfigMap.put(attributeUuid, formAttributeVo.getConfig());
             ProcessTaskFormAttributeDataVo newProcessTaskFormAttributeDataVo = newProcessTaskFormAttributeDataMap.get(attributeUuid);
             ProcessTaskFormAttributeDataVo oldProcessTaskFormAttributeDataVo = oldProcessTaskFormAttributeDataMap.get(attributeUuid);
             if (oldProcessTaskFormAttributeDataVo == null && newProcessTaskFormAttributeDataVo == null) {

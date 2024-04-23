@@ -156,7 +156,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                                         List<FormAttributeVo> fromFormAttributeList = fromFormVersion.getFormAttributeList();
                                         for (FormAttributeVo formAttributeVo : fromFormAttributeList) {
                                             if (Objects.equals(formAttributeVo.getUuid(), attributeUuid)) {
-                                                JSONObject configObj = formAttributeVo.getConfigObj();
+                                                JSONObject configObj = formAttributeVo.getConfig();
                                                 if (MapUtils.isNotEmpty(configObj)) {
                                                     IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo.getHandler());
                                                     if (handler != null) {
