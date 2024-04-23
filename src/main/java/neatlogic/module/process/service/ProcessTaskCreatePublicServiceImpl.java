@@ -195,7 +195,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                                     if (formAttributeHandler == null) {
                                         throw new FormAttributeHandlerNotFoundException(formAttributeVo.getHandler());
                                     }
-                                    JSONObject config = JSONObject.parseObject(formAttributeVo.getConfig());
+                                    JSONObject config = formAttributeVo.getConfig();
                                     formAttributeData.put("attributeUuid", formAttributeVo.getUuid());
                                     formAttributeData.put("handler", formAttributeVo.getHandler());
                                     Object dataObj = formAttributeData.get("dataList");

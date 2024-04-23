@@ -2076,6 +2076,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             formMapper.deleteFormAttributeDataByIdList(formAttributeDataIdList);
             processTaskMapper.deleteProcessTaskFormAttributeByProcessTaskId(processTaskId);
         }
+        List<Long> extendFormAttributeDataIdList = processTaskMapper.getProcessTaskExtendFormAttributeDataIdListByProcessTaskId(processTaskId);
+        if (CollectionUtils.isNotEmpty(extendFormAttributeDataIdList)) {
+            formMapper.deleteFormExtendAttributeDataByIdList(formAttributeDataIdList);
+            processTaskMapper.deleteProcessTaskExtendFormAttributeByProcessTaskId(processTaskId);
+        }
     }
 
     /**

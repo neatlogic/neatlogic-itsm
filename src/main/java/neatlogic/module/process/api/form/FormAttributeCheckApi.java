@@ -132,7 +132,7 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 					AttributeDataVo attributeDataVo = new AttributeDataVo();
 					attributeDataVo.setAttributeUuid(attributeUuid);
 					attributeDataVo.setData(jsonObj.getString("data"));
-					JSONObject configObj = formAttribute.getConfigObj();
+					JSONObject configObj = formAttribute.getConfig();
 					configObj.put("worktimeUuid", worktimeUuid);
 					return handler.valid(attributeDataVo, configObj);
 				}else {
