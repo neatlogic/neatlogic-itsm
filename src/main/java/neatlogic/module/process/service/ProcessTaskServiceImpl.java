@@ -25,7 +25,6 @@ import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.common.constvalue.UserType;
 import neatlogic.framework.config.ConfigManager;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
@@ -42,7 +41,6 @@ import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormActiveVersionNotFoundExcepiton;
-import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
 import neatlogic.framework.notify.core.INotifyTriggerType;
@@ -72,6 +70,7 @@ import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import neatlogic.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.framework.util.$;
+import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
@@ -2381,8 +2380,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
 
         JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");
-        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-        formCrossoverService.formAttributeValueValid(formVersionVo, formAttributeDataList);
+        FormUtil.formAttributeValueValid(formVersionVo, formAttributeDataList);
 
         IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
         if (handler == null) {
