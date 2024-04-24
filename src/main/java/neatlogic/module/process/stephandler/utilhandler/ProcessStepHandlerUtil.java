@@ -993,7 +993,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         Map<String, AttributeDataVo> oldExtendAttributeDataMap = oldExtendAttributeDataList.stream().collect(Collectors.toMap(AttributeDataVo::getAttributeUuid, e -> e));
         JSONArray formExtendAttributeDataList = paramObj.getJSONArray("formExtendAttributeDataList");
         if (CollectionUtils.isNotEmpty(formExtendAttributeDataList)) {
-            List<ProcessTaskFormAttributeVo> processTaskFormExtendAttributeList = processTaskMapper.getProcessTaskFormExtendAttributeListByProcessTaskId(processTaskId);
+            List<ProcessTaskFormAttributeVo> processTaskFormExtendAttributeList = processTaskMapper.getProcessTaskFormExtendAttributeListByProcessTaskIdAndTag(processTaskId, null);
             Map<String, ProcessTaskFormAttributeVo> processTaskFormExtendAttributeMap = processTaskFormExtendAttributeList.stream().collect(Collectors.toMap(e -> e.getParentUuid() + "#" + e.getKey(), e -> e));
             for (int j = 0; j < formExtendAttributeDataList.size(); j++) {
                 JSONObject formExtendAttributeDataObj = formExtendAttributeDataList.getJSONObject(j);

@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.service;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
@@ -25,8 +27,6 @@ import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 import java.util.Map;
@@ -457,11 +457,27 @@ public interface ProcessTaskService {
     List<FormAttributeVo> getFormAttributeListByProcessTaskId(Long processTaskId);
 
     /**
+     * 根据工单id获取工单绑定的表单信息
+     * @param processTaskId 工单ID
+     * @param tag 标签
+     * @return
+     */
+    List<FormAttributeVo> getFormAttributeListByProcessTaskIdAngTag(Long processTaskId, String tag);
+
+    /**
      * 根据工单id获取表单属性数据列表
      * @param processTaskId 工单id
      * @return
      */
     List<ProcessTaskFormAttributeDataVo> getProcessTaskFormAttributeDataListByProcessTaskId(Long processTaskId);
+
+    /**
+     * 根据工单id获取表单属性数据列表
+     * @param processTaskId 工单id
+     * @param tag 标签
+     * @return
+     */
+    List<ProcessTaskFormAttributeDataVo> getProcessTaskFormAttributeDataListByProcessTaskIdAndTag(Long processTaskId, String tag);
 
     /**
      * 根据工单id和表单属性uuid获取表单属性数据
