@@ -20,7 +20,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Objects;
 import neatlogic.framework.common.constvalue.ParamType;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
@@ -32,7 +31,6 @@ import neatlogic.framework.form.constvalue.FormHandler;
 import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
-import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.fulltextindex.utils.FullTextIndexUtil;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
@@ -43,6 +41,7 @@ import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import neatlogic.framework.process.dto.ProcessTaskFormVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.Md5Util;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.module.process.service.ProcessTaskService;
@@ -256,13 +255,12 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
             String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
             if (StringUtils.isNotBlank(formContent)) {
                 resultObj.put("formConfig", formContent);
-                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
                 List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(processTaskStepVo.getProcessTaskId());
                 for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
                     if (java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMRADIO.getHandler())
                             || java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMCHECKBOX.getHandler())
                             || java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMSELECT.getHandler())) {
-                        Object value = formCrossoverService.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
+                        Object value = FormUtil.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
                         resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), value);
                         //另存一份label为key的数据，给条件路由的自定义脚本消费
                         //resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), value);

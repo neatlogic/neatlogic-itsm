@@ -25,7 +25,6 @@ import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.common.constvalue.UserType;
 import neatlogic.framework.config.ConfigManager;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
@@ -42,7 +41,6 @@ import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormActiveVersionNotFoundExcepiton;
-import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
 import neatlogic.framework.notify.core.INotifyTriggerType;
@@ -72,6 +70,7 @@ import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import neatlogic.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.framework.util.$;
+import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.module.process.dao.mapper.ProcessMapper;
@@ -2020,33 +2019,66 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public List<FormAttributeVo> getFormAttributeListByProcessTaskId(Long processTaskId) {
+        return getFormAttributeListByProcessTaskIdAngTag(processTaskId, null);
+    }
+
+    @Override
+    public List<FormAttributeVo> getFormAttributeListByProcessTaskIdAngTag(Long processTaskId, String tag) {
+        List<FormAttributeVo> resultList = new ArrayList<>();
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
         if (processTaskFormVo == null) {
             // 工单没有表单直接返回
-            return new ArrayList<>();
+            return resultList;
         }
         String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+        JSONObject config = JSONObject.parseObject(formContent);
         // 默认场景的表单
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
         formVersionVo.setFormName(processTaskFormVo.getFormName());
-        formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
-        return formVersionVo.getFormAttributeList();
+        formVersionVo.setFormConfig(config);
+        String mainSceneUuid = config.getString("uuid");
+        formVersionVo.setSceneUuid(mainSceneUuid);
+        List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+        if (StringUtils.isBlank(tag)) {
+            return formAttributeList;
+        }
+        List<String> parentUuidList = new ArrayList<>();
+        List<FormAttributeVo> formExtendAttributeList = new ArrayList<>();
+        List<ProcessTaskFormAttributeVo> processTaskFormExtendAttributeList = processTaskMapper.getProcessTaskFormExtendAttributeListByProcessTaskIdAndTag(processTaskId, tag);
+        for (ProcessTaskFormAttributeVo processTaskFormAttributeVo : processTaskFormExtendAttributeList) {
+            parentUuidList.add(processTaskFormAttributeVo.getParentUuid());
+            String configStr = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormAttributeVo.getConfigHash());
+            processTaskFormAttributeVo.setConfig(JSONObject.parseObject(configStr));
+            formExtendAttributeList.add(processTaskFormAttributeVo);
+        }
+        for (FormAttributeVo formAttributeVo : formAttributeList) {
+            if (parentUuidList.contains(formAttributeVo.getUuid())) {
+                continue;
+            }
+            resultList.add(formAttributeVo);
+        }
+        resultList.addAll(formExtendAttributeList);
+        return resultList;
     }
 
     @Override
     public List<ProcessTaskFormAttributeDataVo> getProcessTaskFormAttributeDataListByProcessTaskId(Long processTaskId) {
-//        List<Long> formAttributeDataIdList = processTaskMapper.getProcessTaskFormAttributeDataIdListByProcessTaskId(processTaskId);
-//        if (CollectionUtils.isEmpty(formAttributeDataIdList)) {
-//            return new ArrayList<>();
-//        }
-        List<AttributeDataVo> attributeDataList = formMapper.getFormAttributeDataListByProcessTaskId(processTaskId);
-        if (CollectionUtils.isEmpty(attributeDataList)) {
-            return new ArrayList<>();
-        }
+        return getProcessTaskFormAttributeDataListByProcessTaskIdAndTag(processTaskId, null);
+    }
+
+    @Override
+    public List<ProcessTaskFormAttributeDataVo> getProcessTaskFormAttributeDataListByProcessTaskIdAndTag(Long processTaskId, String tag) {
         List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = new ArrayList<>();
+        List<AttributeDataVo> attributeDataList = processTaskMapper.getProcessTaskFormAttributeDataListByProcessTaskId(processTaskId);
         for (AttributeDataVo attributeDataVo : attributeDataList) {
             processTaskFormAttributeDataList.add(new ProcessTaskFormAttributeDataVo(processTaskId, attributeDataVo));
+        }
+        if (StringUtils.isNotBlank(tag)) {
+            List<AttributeDataVo> extendAttributeDataList = processTaskMapper.getProcessTaskExtendFormAttributeDataListByProcessTaskId(processTaskId, tag);
+            for (AttributeDataVo attributeDataVo : extendAttributeDataList) {
+                processTaskFormAttributeDataList.add(new ProcessTaskFormAttributeDataVo(processTaskId, attributeDataVo));
+            }
         }
         return processTaskFormAttributeDataList;
     }
@@ -2348,8 +2380,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
 
         JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");
-        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-        formCrossoverService.formAttributeValueValid(formVersionVo, formAttributeDataList);
+        FormUtil.formAttributeValueValid(formVersionVo, formAttributeDataList);
 
         IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
         if (handler == null) {

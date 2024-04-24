@@ -204,6 +204,13 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                         actionVo.setTrigger(triggerType.getTrigger());
                         actionVo.setTriggerText(triggerType.getText());
                         actionVo.setSucceed(isSucceed);
+                        if (StringUtils.isNotBlank(integrationResultVo.getError())) {
+                            String error = integrationResultVo.getError();
+                            if (error.startsWith("failed\n")) {
+                                error = error.substring("failed\n".length());
+                            }
+                            actionVo.setError(error);
+                        }
                         currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.RESTFULACTION.getParamName(), JSON.toJSONString(actionVo));
                         ProcessTaskAuditThread.audit(currentProcessTaskStepVo, ProcessTaskAuditType.RESTFULACTION);
                     }

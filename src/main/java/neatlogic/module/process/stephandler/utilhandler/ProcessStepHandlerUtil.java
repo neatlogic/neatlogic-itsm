@@ -22,7 +22,6 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import neatlogic.framework.common.RootComponent;
 import neatlogic.framework.common.constvalue.GroupSearch;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.form.dao.mapper.FormMapper;
@@ -30,7 +29,6 @@ import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormAttributeRequiredException;
-import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.audithandler.core.IProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.*;
@@ -41,6 +39,7 @@ import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import neatlogic.framework.process.stepremind.core.IProcessTaskStepRemindType;
 import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import neatlogic.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
+import neatlogic.framework.util.FormUtil;
 import neatlogic.module.process.thread.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -860,9 +859,8 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
             formVersionVo.setFormName(processTaskFormVo.getFormName());
             formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
-            IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
             /* 校验表单属性是否合法 **/
-            formCrossoverService.formAttributeValueValid(formVersionVo, formAttributeDataList);
+            FormUtil.formAttributeValueValid(formVersionVo, formAttributeDataList);
             defaultSceneFormAttributeList = formVersionVo.getFormAttributeList();
         }
         if (CollectionUtils.isEmpty(defaultSceneFormAttributeList)) {
@@ -960,8 +958,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             i++;
         }
         // 判断是否修改了表单数据，如果是，则记录活动
-        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-        if (formCrossoverService.isModifiedFormData(defaultSceneFormAttributeList, newProcessTaskFormAttributeDataList, oldProcessTaskFormAttributeDataList)) {
+        if (FormUtil.isModifiedFormData(defaultSceneFormAttributeList, newProcessTaskFormAttributeDataList, oldProcessTaskFormAttributeDataList)) {
             paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldProcessTaskFormAttributeDataList));
             paramObj.put(ProcessTaskAuditDetailType.FORM.getParamName(), JSON.toJSONString(newProcessTaskFormAttributeDataList));
         }
@@ -993,7 +990,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         Map<String, AttributeDataVo> oldExtendAttributeDataMap = oldExtendAttributeDataList.stream().collect(Collectors.toMap(AttributeDataVo::getAttributeUuid, e -> e));
         JSONArray formExtendAttributeDataList = paramObj.getJSONArray("formExtendAttributeDataList");
         if (CollectionUtils.isNotEmpty(formExtendAttributeDataList)) {
-            List<ProcessTaskFormAttributeVo> processTaskFormExtendAttributeList = processTaskMapper.getProcessTaskFormExtendAttributeListByProcessTaskId(processTaskId);
+            List<ProcessTaskFormAttributeVo> processTaskFormExtendAttributeList = processTaskMapper.getProcessTaskFormExtendAttributeListByProcessTaskIdAndTag(processTaskId, null);
             Map<String, ProcessTaskFormAttributeVo> processTaskFormExtendAttributeMap = processTaskFormExtendAttributeList.stream().collect(Collectors.toMap(e -> e.getParentUuid() + "#" + e.getKey(), e -> e));
             for (int j = 0; j < formExtendAttributeDataList.size(); j++) {
                 JSONObject formExtendAttributeDataObj = formExtendAttributeDataList.getJSONObject(j);
