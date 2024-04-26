@@ -62,6 +62,8 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
     private static ProcessTaskMapper processTaskMapper;
     private static ProcessTaskSlaMapper processTaskSlaMapper;
     private static TransactionUtil transactionUtil;
+
+    private static SchedulerManager schedulerManager;
 //    private static ProcessTaskService processTaskService;
 
 //    @Resource
@@ -82,6 +84,11 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
     @Resource
     public void setTransactionUtil(TransactionUtil _transactionUtil) {
         transactionUtil = _transactionUtil;
+    }
+
+    @Resource
+    public void setSchedulerManager(SchedulerManager _schedulerManager) {
+        schedulerManager = _schedulerManager;
     }
 
     private ProcessTaskStepVo currentProcessTaskStepVo;
@@ -219,29 +226,56 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
     private void adjustJob(ProcessTaskSlaTimeVo slaTimeVo, JSONObject slaConfigObj, boolean expireTimeHasChanged) {
         Long slaId = slaTimeVo.getSlaId();
         /* 作业是否已启动 **/
-        boolean jobStarted = false;
         List<ProcessTaskSlaNotifyVo> processTaskSlaNotifyList = processTaskSlaMapper.getProcessTaskSlaNotifyBySlaId(slaId);
         List<ProcessTaskSlaTransferVo> processTaskSlaTransferList = processTaskSlaMapper.getProcessTaskSlaTransferBySlaId(slaId);
-        if (CollectionUtils.isNotEmpty(processTaskSlaNotifyList) || CollectionUtils.isNotEmpty(processTaskSlaTransferList)) {
-            jobStarted = true;
-        }
         String status = slaTimeVo.getStatus();
         if (SlaStatus.DOING.toString().toLowerCase().equals(status)) {
-            if (jobStarted) {
-                if (expireTimeHasChanged) {
+            if (expireTimeHasChanged) {
 //                    System.out.println("删除时效id=" + slaId + "的job，因为超时时间点变了");
+                if (CollectionUtils.isNotEmpty(processTaskSlaTransferList)) {
                     processTaskSlaMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
-                    processTaskSlaMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
-                    loadJobNotifyAndtransfer(slaId, slaConfigObj);
                 }
-            } else {
-                loadJobNotifyAndtransfer(slaId, slaConfigObj);
+                if (CollectionUtils.isNotEmpty(processTaskSlaNotifyList)) {
+                    processTaskSlaMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
+                }
             }
+            loadJobNotifyAndtransfer(slaId, slaConfigObj);
         } else {
-            if (jobStarted) {
 //                System.out.println("删除时效id=" + slaId + "的job，因为status=" + status);
-                processTaskSlaMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
+            if (CollectionUtils.isNotEmpty(processTaskSlaNotifyList)) {
+                IJob jobHandler = SchedulerManager.getHandler(ProcessTaskSlaNotifyJob.class.getName());
+                if (jobHandler != null) {
+                    for (ProcessTaskSlaNotifyVo processTaskSlaNotifyVo : processTaskSlaNotifyList) {
+                        JobObject.Builder jobObjectBuilder =
+                                new JobObject.Builder(
+                                        processTaskSlaNotifyVo.getId().toString(),
+                                        jobHandler.getGroupName(),
+                                        jobHandler.getClassName(),
+                                        TenantContext.get().getTenantUuid()
+                                );
+                        JobObject jobObject = jobObjectBuilder.build();
+                        schedulerManager.unloadJob(jobObject);
+                    }
+                }
+
                 processTaskSlaMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
+            }
+            if (CollectionUtils.isNotEmpty(processTaskSlaTransferList)) {
+                IJob jobHandler = SchedulerManager.getHandler(ProcessTaskSlaTransferJob.class.getName());
+                if (jobHandler != null) {
+                    for (ProcessTaskSlaTransferVo processTaskSlaTransferVo : processTaskSlaTransferList) {
+                        JobObject.Builder jobObjectBuilder =
+                                new JobObject.Builder(
+                                        processTaskSlaTransferVo.getId().toString(),
+                                        jobHandler.getGroupName(),
+                                        jobHandler.getClassName(),
+                                        TenantContext.get().getTenantUuid()
+                                );
+                        JobObject jobObject = jobObjectBuilder.build();
+                        schedulerManager.unloadJob(jobObject);
+                    }
+                }
+                processTaskSlaMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
             }
         }
     }
@@ -352,9 +386,46 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
     }
 
     private void deleteSlaById(Long slaId) {
+        List<ProcessTaskSlaNotifyVo> processTaskSlaNotifyList = processTaskSlaMapper.getProcessTaskSlaNotifyBySlaId(slaId);
+        List<ProcessTaskSlaTransferVo> processTaskSlaTransferList = processTaskSlaMapper.getProcessTaskSlaTransferBySlaId(slaId);
+        if (CollectionUtils.isNotEmpty(processTaskSlaNotifyList)) {
+            IJob jobHandler = SchedulerManager.getHandler(ProcessTaskSlaNotifyJob.class.getName());
+            if (jobHandler != null) {
+                for (ProcessTaskSlaNotifyVo processTaskSlaNotifyVo : processTaskSlaNotifyList) {
+                    JobObject.Builder jobObjectBuilder =
+                            new JobObject.Builder(
+                                    processTaskSlaNotifyVo.getId().toString(),
+                                    jobHandler.getGroupName(),
+                                    jobHandler.getClassName(),
+                                    TenantContext.get().getTenantUuid()
+                            );
+                    JobObject jobObject = jobObjectBuilder.build();
+                    schedulerManager.unloadJob(jobObject);
+                }
+            }
+
+            processTaskSlaMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
+        }
+        if (CollectionUtils.isNotEmpty(processTaskSlaTransferList)) {
+            IJob jobHandler = SchedulerManager.getHandler(ProcessTaskSlaTransferJob.class.getName());
+            if (jobHandler != null) {
+                for (ProcessTaskSlaTransferVo processTaskSlaTransferVo : processTaskSlaTransferList) {
+                    JobObject.Builder jobObjectBuilder =
+                            new JobObject.Builder(
+                                    processTaskSlaTransferVo.getId().toString(),
+                                    jobHandler.getGroupName(),
+                                    jobHandler.getClassName(),
+                                    TenantContext.get().getTenantUuid()
+                            );
+                    JobObject jobObject = jobObjectBuilder.build();
+                    schedulerManager.unloadJob(jobObject);
+                }
+            }
+            processTaskSlaMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
+        }
+//        processTaskSlaMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
+//        processTaskSlaMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
         processTaskSlaMapper.deleteProcessTaskSlaTimeBySlaId(slaId);
-        processTaskSlaMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
-        processTaskSlaMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
     }
 
     /**
