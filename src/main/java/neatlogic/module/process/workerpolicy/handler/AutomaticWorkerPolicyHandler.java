@@ -53,9 +53,6 @@ public class AutomaticWorkerPolicyHandler implements IWorkerPolicyHandler {
 			return processTaskStepWorkerList;
 		}
 		JSONObject handlerConfig = workerPolicyVo.getConfigObj().getJSONObject("handlerConfig");
-		if(MapUtils.isEmpty(handlerConfig)) {
-			return processTaskStepWorkerList;
-		}
 		List<ProcessTaskStepWorkerVo> workerList = dispatcher.getWorker(currentProcessTaskStepVo, handlerConfig);
 		if(CollectionUtils.isEmpty(workerList)) {
 			return processTaskStepWorkerList;

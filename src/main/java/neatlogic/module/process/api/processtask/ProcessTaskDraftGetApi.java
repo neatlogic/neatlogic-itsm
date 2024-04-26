@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.process.api.processtask;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
@@ -53,10 +54,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -397,6 +395,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         }
 
         ProcessTaskVo processTaskVo = new ProcessTaskVo();
+        processTaskVo.setProcessDispatcherList(getProcessDispatcherList(processVo.getConfig()));
         processTaskVo.setIsAutoGenerateId(false);
         try {
             processTaskVo.setChannelType(channelTypeVo.clone());
@@ -457,5 +456,39 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             }
         }
         return processTaskVo;
+    }
+
+    /**
+     * 根据流程配置返回分派器列表
+     *
+     * @param processConfig 流程配置
+     */
+    private List<String> getProcessDispatcherList(JSONObject processConfig) {
+        List<String> processDispathcerList = new ArrayList<>();
+        if (processConfig.getJSONObject("process") != null) {
+            JSONArray stepListArray = processConfig.getJSONObject("process").getJSONArray("stepList");
+            if (CollectionUtils.isNotEmpty(stepListArray)) {
+                for (int i = 0; i < stepListArray.size(); i++) {
+                    JSONObject step = stepListArray.getJSONObject(i);
+                    if (Objects.equals(step.getString("type"), "process")) {
+                        if (step.getJSONObject("stepConfig") != null && step.getJSONObject("stepConfig").getJSONObject("workerPolicyConfig") != null) {
+                            JSONArray policyArray = step.getJSONObject("stepConfig").getJSONObject("workerPolicyConfig").getJSONArray("policyList");
+                            if (CollectionUtils.isNotEmpty(policyArray)) {
+                                for (int j = 0; j < stepListArray.size(); j++) {
+                                    JSONObject policy = policyArray.getJSONObject(j);
+                                    if (Objects.equals(policy.getString("type"), "automatic")) {
+                                        if (policy.getJSONObject("config") != null && StringUtils.isNotBlank(policy.getJSONObject("config").getString("handler"))) {
+                                            processDispathcerList.add(policy.getJSONObject("config").getString("handler"));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+        return processDispathcerList;
     }
 }

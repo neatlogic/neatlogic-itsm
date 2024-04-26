@@ -3,7 +3,8 @@
     {
       "type":"新增功能",
       "detail":[
-        {"msg":"1.如果当前登录人和owner不一样则需要额外传reporter。没有代报人，则数据库对应reporter直接null"}
+        {"msg":"1.如果当前登录人和owner不一样则需要额外传reporter。没有代报人，则数据库对应reporter直接null"},
+        {"msg":"2.地域管理和地域分派器"}
       ]
     }
   ]
