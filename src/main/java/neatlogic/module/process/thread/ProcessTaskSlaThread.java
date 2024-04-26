@@ -423,8 +423,6 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
             }
             processTaskSlaMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
         }
-//        processTaskSlaMapper.deleteProcessTaskSlaTransferBySlaId(slaId);
-//        processTaskSlaMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
         processTaskSlaMapper.deleteProcessTaskSlaTimeBySlaId(slaId);
     }
 
