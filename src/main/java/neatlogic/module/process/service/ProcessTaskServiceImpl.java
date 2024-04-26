@@ -2345,9 +2345,30 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
         String owner = jsonObj.getString("owner");
-        if (StringUtils.isNotBlank(owner) && owner.contains("#")) {
-            owner = owner.split("#")[1];
-            jsonObj.put("owner", owner);
+        if (StringUtils.isNotBlank(owner)) {
+            if (owner.contains("#")) {
+                owner = owner.split("#")[1];
+                jsonObj.put("owner", owner);
+            }
+            UserVo user = userMapper.getUserBaseInfoByUuid(owner);
+            if (user == null) {
+                throw new UserNotFoundException(owner);
+            }
+        } else {
+            jsonObj.put("owner", null);
+        }
+        String reporter = jsonObj.getString("reporter");
+        if (StringUtils.isNotBlank(reporter)) {
+            if (reporter.contains("#")) {
+                reporter = reporter.split("#")[1];
+                jsonObj.put("reporter", reporter);
+            }
+            UserVo user = userMapper.getUserBaseInfoByUuid(reporter);
+            if (user == null) {
+                throw new UserNotFoundException(reporter);
+            }
+        } else {
+            jsonObj.put("reporter", null);
         }
         ProcessTaskStepVo startProcessTaskStepVo = null;
 
