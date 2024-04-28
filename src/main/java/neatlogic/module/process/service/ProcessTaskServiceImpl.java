@@ -2552,6 +2552,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 if (CollectionUtils.isNotEmpty(formAttributeDataList)) {
                     paramObj.put("formAttributeDataList", formAttributeDataList);
                 }
+                JSONArray formExtendAttributeDataList = dataObj.getJSONArray("formExtendAttributeDataList");
+                if (CollectionUtils.isNotEmpty(formExtendAttributeDataList)) {
+                    paramObj.put("formExtendAttributeDataList", formExtendAttributeDataList);
+                }
                 JSONArray hidecomponentList = dataObj.getJSONArray("hidecomponentList");
                 if (CollectionUtils.isNotEmpty(hidecomponentList)) {
                     paramObj.put("hidecomponentList", hidecomponentList);
