@@ -474,7 +474,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                         if (step.getJSONObject("stepConfig") != null && step.getJSONObject("stepConfig").getJSONObject("workerPolicyConfig") != null) {
                             JSONArray policyArray = step.getJSONObject("stepConfig").getJSONObject("workerPolicyConfig").getJSONArray("policyList");
                             if (CollectionUtils.isNotEmpty(policyArray)) {
-                                for (int j = 0; j < stepListArray.size(); j++) {
+                                for (int j = 0; j < policyArray.size(); j++) {
                                     JSONObject policy = policyArray.getJSONObject(j);
                                     if (Objects.equals(policy.getString("type"), "automatic")) {
                                         if (policy.getJSONObject("config") != null && StringUtils.isNotBlank(policy.getJSONObject("config").getString("handler"))) {
