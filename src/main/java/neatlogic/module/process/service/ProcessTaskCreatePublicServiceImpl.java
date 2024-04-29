@@ -3,9 +3,13 @@ package neatlogic.module.process.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.asynchronization.threadpool.CachedThreadPool;
 import neatlogic.framework.common.constvalue.GroupSearch;
+import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.AuthenticationInfoVo;
+import neatlogic.framework.dto.JwtVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.file.dao.mapper.FileMapper;
@@ -350,12 +354,17 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                     throw new UserNotFoundException(reporter);
                 }
                 paramObj.put("reporter", reporterUserVo.getUuid());
-//                reporterUserVo = userMapper.getUserByUuid(reporterUserVo.getUuid());
+                reporterUserVo = userMapper.getUserByUuid(reporterUserVo.getUuid());
             }
-//            AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userVo.getUuid());
-//            JwtVo jwtVo = UserContext.get().getJwtVo();
-//            UserContext.get().init(reporterUserVo, authenticationInfoVo, SystemUser.SYSTEM.getTimezone()).setJwtVo(jwtVo);
+            AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userVo.getUuid());
+            JwtVo jwtVo = UserContext.get().getJwtVo();
+            UserContext.get().init(reporterUserVo, authenticationInfoVo, SystemUser.SYSTEM.getTimezone()).setJwtVo(jwtVo);
+        } else {
+            AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userVo.getUuid());
+            JwtVo jwtVo = UserContext.get().getJwtVo();
+            UserContext.get().init(userVo, authenticationInfoVo, SystemUser.SYSTEM.getTimezone()).setJwtVo(jwtVo);
         }
+
         Long processTaskId = null;
         Integer isAsync = paramObj.getInteger("isAsync");
         if (Objects.equals(isAsync, 1)) {
