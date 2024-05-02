@@ -34,10 +34,6 @@ import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
 import neatlogic.framework.process.constvalue.*;
-import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTaskMapper;
-import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
@@ -48,11 +44,13 @@ import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import neatlogic.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
 import neatlogic.framework.util.$;
 import neatlogic.framework.util.TableResultUtil;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTaskMapper;
+import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.module.process.sql.decorator.SqlBuilder;
 import neatlogic.module.process.workcenter.operate.WorkcenterOperateBuilder;
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -63,7 +61,7 @@ import java.util.stream.Collectors;
 @Service
 public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
-    Logger logger = LoggerFactory.getLogger(NewWorkcenterServiceImpl.class);
+    //Logger logger = LoggerFactory.getLogger(NewWorkcenterServiceImpl.class);
 
     @Resource
     WorkcenterMapper workcenterMapper;
@@ -135,7 +133,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 }
                 //重新渲染工单字段
                 for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
-                    long tmp = System.currentTimeMillis();
+                    //long tmp = System.currentTimeMillis();
                     IProcessTaskColumn column = entry.getValue();
                     taskJson.put(column.getName(), column.getValue(processTaskVo));
                     /*if (Objects.equals("currentstep", column.getName())) {
@@ -153,7 +151,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             }, "WORKCENTER-COLUMN-SEARCHER");
             //System.out.println((System.currentTimeMillis() - columnTime) + " ##end workcenter-column:-------------------------------------------------------------------------------");
         }
-        dataList = dataList.stream().sorted(Comparator.comparing(o -> JSONObject.parseObject(o.toString()).getInteger("index"))).collect(Collectors.toList());
+        dataList = dataList.stream().sorted(Comparator.comparing(o -> JSON.parseObject(o.toString()).getInteger("index"))).collect(Collectors.toList());
         // 字段排序
         /*JSONArray sortList = workcenterVo.getSortList();
         if (CollectionUtils.isEmpty(sortList)) {
@@ -221,7 +219,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                     taskJson.put(column.getName(), column.getValue(processTaskVo));
                 }
                 // route 供前端跳转路由信息
-                JSONObject routeJson = new JSONObject();
+                //JSONObject routeJson = new JSONObject();
                 // operate 获取对应工单的操作
                 operationJson.put(processTaskVo.getId().toString(), getTaskOperate(processTaskVo, operateTypeSetMap));
             }
@@ -350,10 +348,10 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             }
         }
         // 返回实际操作按钮
-        /**
-         * 实质性操作按钮：如“处理”、“取消”、“催办”，根据用户权限展示 ;次要的操作按钮：如“隐藏”、“删除”，只有管理员可见 移动端按钮展示规则：
-         * 1、工单显示时，优先展示实质性的按钮，次要的操作按钮收起到“更多”中；如果没有任何实质性的操作按钮，则将次要按钮放出来（管理员可见）；
-         * 2、工单隐藏时，仅“显示”、“删除”按钮放出来，其他实质性按钮需要等工单显示后才会展示；
+        /*
+          实质性操作按钮：如“处理”、“取消”、“催办”，根据用户权限展示 ;次要的操作按钮：如“隐藏”、“删除”，只有管理员可见 移动端按钮展示规则：
+          1、工单显示时，优先展示实质性的按钮，次要的操作按钮收起到“更多”中；如果没有任何实质性的操作按钮，则将次要按钮放出来（管理员可见）；
+          2、工单隐藏时，仅“显示”、“删除”按钮放出来，其他实质性按钮需要等工单显示后才会展示；
          */
 
         WorkcenterOperateBuilder workcenterFirstOperateBuilder = new WorkcenterOperateBuilder();
@@ -362,7 +360,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 .build();
         boolean isNeedFirstOperate = false;
         for (Object firstOperate : workcenterFirstOperateArray) {
-            JSONObject firstOperateJson = JSONObject.parseObject(firstOperate.toString());
+            JSONObject firstOperateJson = JSON.parseObject(firstOperate.toString());
             if (firstOperateJson.getInteger("isEnable") == 1) {
                 isNeedFirstOperate = true;
             }
@@ -371,7 +369,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         JSONArray workcenterSecondOperateJsonArray =
                 workcenterSecondOperateBuilder.setShowHideOperate(processTaskVo).setDeleteOperate(processTaskVo).build();
         for (Object workcenterSecondOperateObj : workcenterSecondOperateJsonArray) {
-            JSONObject workcenterSecondOperateJson = JSONObject.parseObject(workcenterSecondOperateObj.toString());
+            JSONObject workcenterSecondOperateJson = JSON.parseObject(workcenterSecondOperateObj.toString());
             if (ProcessTaskOperationType.PROCESSTASK_SHOW.getValue().equals(workcenterSecondOperateJson.getString("name"))) {
                 isNeedFirstOperate = false;
             }
@@ -448,7 +446,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             JSONObject titleObj = new JSONObject();
             JSONArray dataList = new JSONArray();
             for (ProcessTaskVo processTaskVo : processTaskVoList) {
-                dataList.add(JSONObject.parseObject(JSONObject.toJSONString(processTaskVo)).getString(workcenterVo.getKeywordPro()));
+                dataList.add(JSON.parseObject(JSON.toJSONString(processTaskVo)).getString(workcenterVo.getKeywordPro()));
             }
             titleObj.put("dataList", dataList);
             titleObj.put("value", workcenterVo.getKeywordColumn());
@@ -473,11 +471,11 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             for (ProcessTaskStepWorkerVo workerVo : stepVo.getWorkerList()) {
                 if (Objects.equals(workerVo.getUserType(), ProcessUserType.MINOR.getValue())) {
                     //子任务minor
-                    long stepStartTime = System.currentTimeMillis();
+                    //long stepStartTime = System.currentTimeMillis();
                     stepTaskWorker(workerVo, stepVo, workerArray, workerUuidTypeList);
                     //System.out.println((System.currentTimeMillis()-stepStartTime)+" ##end stepTaskWorker:-------------------------------------------------------------------------------");
                     //其他minor
-                    long otherStartTime = System.currentTimeMillis();
+                    //long otherStartTime = System.currentTimeMillis();
                     otherWorker(workerVo, stepVo, workerArray, workerUuidTypeList);
                     //System.out.println((System.currentTimeMillis()-otherStartTime)+" ##end otherWorker:-------------------------------------------------------------------------------");
                 }
@@ -544,7 +542,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         if (GroupSearch.USER.getValue().equals(workerVo.getType())) {
             UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
             if (userVo != null) {
-                workerJson.put("workerVo", JSON.parseObject(JSONObject.toJSONString(userVo)));
+                workerJson.put("workerVo", JSON.parseObject(JSON.toJSONString(userVo)));
                 workerArray.add(workerJson);
             }
         } else if (GroupSearch.TEAM.getValue().equals(workerVo.getType())) {

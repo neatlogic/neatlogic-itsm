@@ -61,7 +61,10 @@ import neatlogic.framework.process.exception.processtask.task.ProcessTaskStepTas
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.framework.process.stephandler.core.*;
+import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
+import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
+import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import neatlogic.framework.process.stepremind.core.ProcessTaskStepRemindTypeFactory;
 import neatlogic.framework.process.task.TaskConfigManager;
 import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
@@ -72,12 +75,12 @@ import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
-import neatlogic.module.process.dao.mapper.process.ProcessCommentTemplateMapper;
-import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessCommentTemplateMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessStepHandlerMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessTagMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
@@ -87,8 +90,6 @@ import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTaskMapper
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -103,7 +104,7 @@ import static java.util.stream.Collectors.toCollection;
 @Service
 public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskCrossoverService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
+    // private static final Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
 
     private final Pattern pattern_html = Pattern.compile("<[^>]+>", Pattern.CASE_INSENSITIVE);
 
@@ -272,7 +273,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         if (processTaskId != null) {
             String formContent = selectContentByHashMapper.getProcessTaskFromContentByProcessTaskId(processTaskId);
             if (StringUtils.isNotBlank(formContent)) {
-                processTaskVo.setFormConfig(JSONObject.parseObject(formContent));
+                processTaskVo.setFormConfig(JSON.parseObject(formContent));
                 List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = getProcessTaskFormAttributeDataListByProcessTaskId(processTaskVo.getId());
                 for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
                     processTaskVo.getFormAttributeDataMap().put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
@@ -618,11 +619,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             if (typeList.contains(processTaskStepContentVo.getType())) {
                 ProcessTaskStepReplyVo processTaskStepReplyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
                 parseProcessTaskStepReply(processTaskStepReplyVo);
-                if(Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())
+                if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())
                         && Objects.equals(UserContext.get().getUserUuid(), processTaskStepReplyVo.getFcu())) {
                     processTaskStepReplyVo.setIsEditable(1);
                     processTaskStepReplyVo.setIsDeletable(1);
-                }else {
+                } else {
                     processTaskStepReplyVo.setIsEditable(0);
                     processTaskStepReplyVo.setIsDeletable(0);
                 }
@@ -725,7 +726,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         Set<Long> processTaskIdSet = processTaskSlaTimeList.stream().map(ProcessTaskSlaTimeVo::getProcessTaskId).collect(Collectors.toSet());
         List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
         Map<Long, String> worktimeUuidMap = processTaskList.stream().collect(Collectors.toMap(ProcessTaskVo::getId, ProcessTaskVo::getWorktimeUuid));
-        Long currentTimeMillis = System.currentTimeMillis();
+        long currentTimeMillis = System.currentTimeMillis();
         String displayModeAfterTimeout = ConfigManager.getConfig(ItsmTenantConfig.DISPLAY_MODE_AFTER_TIMEOUT);
         for (ProcessTaskSlaTimeVo processTaskSlaTimeVo : processTaskSlaTimeList) {
             processTaskSlaTimeVo.setDisplayModeAfterTimeout(displayModeAfterTimeout);
@@ -1041,7 +1042,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(handler);
             JSONObject globalConfig = null;
             if (StringUtils.isNotBlank(processStepHandlerConfig)) {
-                globalConfig = JSONObject.parseObject(processStepHandlerConfig);
+                globalConfig = JSON.parseObject(processStepHandlerConfig);
             }
             globalConfig = processStepUtilHandler.makeupConfig(globalConfig);
             authorityList = globalConfig.getJSONArray("authorityList");
@@ -1154,7 +1155,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<ProcessTaskStepVo> stepVoList =
                 processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
         for (ProcessTaskStepVo stepVo : stepVoList) {
-            /** 找到所有已激活步骤 **/
+            /* 找到所有已激活步骤 **/
             if (stepVo.getIsActive().equals(1)) {
                 resultSet.addAll(getRetractableStepListByProcessTaskStepId(processTaskVo, stepVo.getId(), userUuid));
             }
@@ -1174,7 +1175,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(ProcessTaskVo processTaskVo,
                                                                              Long processTaskStepId, String userUuid) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
-        /** 所有前置步骤 **/
+        /* 所有前置步骤 **/
 //        List<Long> fromStepIdList = processTaskMapper.getFromProcessTaskStepIdListByToId(processTaskStepId);
         List<Long> fromStepIdList = new ArrayList<>();
         List<ProcessTaskStepRelVo> fromProcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByToId(processTaskStepId);
@@ -1185,7 +1186,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
         if (CollectionUtils.isNotEmpty(fromStepIdList)) {
             List<ProcessTaskStepVo> fromStepList = processTaskMapper.getProcessTaskStepListByIdList(fromStepIdList);
-            /** 找到所有已完成步骤 **/
+            /* 找到所有已完成步骤 **/
             for (ProcessTaskStepVo fromStep : fromStepList) {
                 IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromStep.getHandler());
                 if (handler != null) {
@@ -1238,7 +1239,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             if (StringUtils.isNotBlank(contentHash)) {
                 String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentHash);
                 if (StringUtils.isNotBlank(content)) {
-                    /** 有图片标签才显式点击详情 **/
+                    /* 有图片标签才显式点击详情 **/
                     if (content.contains("<figure class=\"image\">") && content.contains("</figure>")) {
                         processTaskStepRemindVo.setDetail(content);
                     }
@@ -1255,7 +1256,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<ProcessTaskStepVo> stepVoList =
                 processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
         for (ProcessTaskStepVo stepVo : stepVoList) {
-            /** 找到所有已激活步骤 **/
+            /* 找到所有已激活步骤 **/
             if (stepVo.getIsActive().equals(1)) {
                 if (checkOperationAuthIsConfigured(stepVo, processTaskVo.getOwner(), processTaskVo.getReporter(),
                         ProcessTaskOperationType.STEP_TRANSFER, userUuid)) {
@@ -1310,12 +1311,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         // 获取工单表单信息
         setProcessTaskFormInfo(processTaskVo);
         Long processTaskId = processTaskVo.getId();
-        /** 获取评分信息 */
+        /* 获取评分信息 */
         if (ProcessTaskStatus.SCORED.getValue().equals(processTaskVo.getStatus())) {
             String scoreInfo = processTaskMapper.getProcessTaskScoreInfoById(processTaskId);
             processTaskVo.setScoreInfo(scoreInfo);
         }
-        /** 转报数据 **/
+        /* 转报数据 **/
         ProcessTaskTransferReportVo processTaskTransferReportVo = processTaskMapper.getProcessTaskTransferReportByToProcessTaskId(processTaskId);
         if (processTaskTransferReportVo != null) {
             ProcessTaskVo fromProcessTaskVo = getFromProcessTaskById(processTaskTransferReportVo.getFromProcessTaskId());
@@ -1394,7 +1395,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 break;
             }
         }
-        /** 当前步骤特有步骤信息 **/
+        /* 当前步骤特有步骤信息 **/
         IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
         if (processStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
@@ -1480,7 +1481,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 }
             }
         } else {
-            /** 所有任务处理人 **/
+            /* 所有任务处理人 **/
             processTaskStepUser.setUserType(ProcessUserType.MINOR.getValue());
             List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserList(processTaskStepUser);
             for (ProcessTaskStepUserVo processTaskStepUserVo : minorUserList) {
@@ -1489,7 +1490,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
 
-        /** 待处理人 **/
+        /* 待处理人 **/
         List<ProcessTaskStepWorkerVo> workerList =
                 processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(
                         currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId());
@@ -1498,7 +1499,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     .add(new NotifyReceiverVo(processTaskStepWorkerVo.getType(), processTaskStepWorkerVo.getUuid()));
         }
 
-        /** 工单关注人 */
+        /* 工单关注人 */
         List<String> focusUserList =
                 processTaskMapper.getFocusUserListByTaskId(currentProcessTaskStepVo.getProcessTaskId());
         for (String user : focusUserList) {
@@ -1507,7 +1508,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     .add(new NotifyReceiverVo(split[0], split[1]));
         }
 
-        /** 异常处理人 **/
+        /* 异常处理人 **/
         String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(currentProcessTaskStepVo.getConfigHash());
         if (StringUtils.isNotBlank(stepConfig)) {
             String defaultWorker = (String) JSONPath.read(stepConfig, "workerPolicyConfig.defaultWorker");
@@ -1536,7 +1537,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         if (stepDraftSaveData != null) {
             JSONObject dataObj = stepDraftSaveData.getData();
             if (MapUtils.isNotEmpty(dataObj)) {
-                /** 表单属性 **/
+                /* 表单属性 **/
                 JSONArray formAttributeDataList = dataObj.getJSONArray("formAttributeDataList");
                 if (CollectionUtils.isNotEmpty(formAttributeDataList)) {
                     Map<String, Object> formAttributeDataMap = new HashMap<>();
@@ -1551,7 +1552,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 //                    processTaskStepVo.setFormAttributeDataMap(formAttributeDataMap);
                     processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
                 }
-                /** 描述及附件 **/
+                /* 描述及附件 **/
                 ProcessTaskStepReplyVo commentVo = new ProcessTaskStepReplyVo();
                 String content = dataObj.getString("content");
                 commentVo.setContent(content);
@@ -1564,12 +1565,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     }
                 }
                 processTaskStepVo.setComment(commentVo);
-                /** 当前步骤特有步骤信息 **/
+                /* 当前步骤特有步骤信息 **/
                 JSONObject handlerStepInfo = dataObj.getJSONObject("handlerStepInfo");
                 if (handlerStepInfo != null) {
                     processTaskStepVo.setHandlerStepInfo(handlerStepInfo);
                 }
-                /** 优先级 **/
+                /* 优先级 **/
                 String priorityUuid = dataObj.getString("priorityUuid");
                 if (StringUtils.isNotBlank(priorityUuid)) {
                     processTaskVo.setPriorityUuid(priorityUuid);
@@ -1580,12 +1581,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     }
                     processTaskVo.setPriority(priorityVo);
                 }
-                /** 标签列表 **/
+                /* 标签列表 **/
                 List<String> tagList = JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("tagList")), String.class);
                 if (tagList != null) {
                     processTaskVo.setTagList(tagList);
                 }
-                /** 工单关注人列表 **/
+                /* 工单关注人列表 **/
                 List<String> focusUserUuidList = JSON.parseArray(dataObj.getString("focusUserUuidList"), String.class);
                 if (CollectionUtils.isNotEmpty(focusUserUuidList)) {
                     processTaskVo.setFocusUserUuidList(focusUserUuidList);
@@ -1606,12 +1607,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
         Map<String, List<Map<String, Object>>> userTaskMap = new HashMap<>();
         List<UserVo> userList = (List<UserVo>) conditionMap.get("userList");
-        /** 以处理组中的用户为单位，查询每个用户的待办工单 **/
+        /* 以处理组中的用户为单位，查询每个用户的待办工单 **/
         if (CollectionUtils.isNotEmpty(userList)) {
             for (UserVo user : userList) {
                 getConditionMap(conditionMap, user);
                 List<Map<String, Object>> taskList = new ArrayList<>();
-                /** 查询工单 **/
+                /* 查询工单 **/
                 List<Long> taskIdList = processTaskMapper.getProcessingTaskIdListByCondition(conditionMap);
                 if (CollectionUtils.isNotEmpty(taskIdList)) {
                     List<ProcessTaskVo> processTaskList = processTaskMapper.getTaskListByIdList(taskIdList);
@@ -1696,7 +1697,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             if (StringUtils.isNotBlank(handler)) {
                 String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(handler);
                 if (StringUtils.isNotBlank(processStepHandlerConfig)) {
-                    JSONObject configObj = JSONObject.parseObject(processStepHandlerConfig);
+                    JSONObject configObj = JSON.parseObject(processStepHandlerConfig);
                     if (MapUtils.isNotEmpty(configObj)) {
                         replaceableTextList = configObj.getJSONArray("replaceableTextList");
                     }
@@ -1735,7 +1736,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             if (StringUtils.isNotBlank(handler)) {
                 String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(handler);
                 if (StringUtils.isNotBlank(processStepHandlerConfig)) {
-                    JSONObject configObj = JSONObject.parseObject(processStepHandlerConfig);
+                    JSONObject configObj = JSON.parseObject(processStepHandlerConfig);
                     if (MapUtils.isNotEmpty(configObj)) {
                         customButtonList = configObj.getJSONArray("customButtonList");
                     }
@@ -1764,7 +1765,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             if (StringUtils.isNotBlank(handler)) {
                 String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(handler);
                 if (StringUtils.isNotBlank(processStepHandlerConfig)) {
-                    JSONObject configObj = JSONObject.parseObject(processStepHandlerConfig);
+                    JSONObject configObj = JSON.parseObject(processStepHandlerConfig);
                     if (MapUtils.isNotEmpty(configObj)) {
                         customStatusList = configObj.getJSONArray("customStatusList");
                     }
@@ -1847,7 +1848,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         // 处理人列表
         setProcessTaskStepUser(processTaskStepVo);
 
-        /** 当前步骤特有步骤信息 **/
+        /* 当前步骤特有步骤信息 **/
         IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
         if (processStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
@@ -1910,12 +1911,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
 
-        /** 下一步骤列表 **/
+        /* 下一步骤列表 **/
         setNextStepList(processTaskStepVo);
 //        processTaskStepVo.setForwardNextStepList(getForwardNextStepListByProcessTaskStepId(processTaskStepVo.getId()));
 //        processTaskStepVo.setBackwardNextStepList(getBackwardNextStepListByProcessTaskStepId(processTaskStepVo.getId()));
 
-        /** 提醒列表 **/
+        /* 提醒列表 **/
         List<ProcessTaskStepRemindVo> processTaskStepRemindList = getProcessTaskStepRemindListByProcessTaskStepId(processTaskStepId);
         processTaskStepVo.setProcessTaskStepRemindList(processTaskStepRemindList);
 
@@ -1930,7 +1931,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 //                    processTaskStepVo.setOriginalUserName(userVo.getUserName());
             }
         }
-        /** 如果当前用户有处理权限，则获取其有权看到的配置的回复模版 */
+        /* 如果当前用户有处理权限，则获取其有权看到的配置的回复模版 */
         if (hasComplete) {
             processTaskStepVo.setCommentTemplate(getProcessStepCommentTemplate(processTaskStepVo.getProcessStepUuid(), UserContext.get().getAuthenticationInfoVo()));
         }
@@ -1966,12 +1967,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         Map<ProcessUserType, List<String>> resultMap = new HashMap<>();
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoByIdIncludeIsDeleted(processTaskStepVo.getProcessTaskId());
         if (processTaskVo != null) {
-            /** 上报人 **/
+            /* 上报人 **/
             if (StringUtils.isNotBlank(processTaskVo.getOwner()) && processUserTypeList.contains(ProcessUserType.OWNER)) {
                 resultMap.computeIfAbsent(ProcessUserType.OWNER, k -> new ArrayList<>())
                         .add(GroupSearch.USER.addPrefix(processTaskVo.getOwner()));
             }
-            /** 代报人 **/
+            /* 代报人 **/
             if (StringUtils.isNotBlank(processTaskVo.getReporter()) && processUserTypeList.contains(ProcessUserType.REPORTER)) {
                 resultMap.computeIfAbsent(ProcessUserType.REPORTER, k -> new ArrayList<>())
                         .add(GroupSearch.USER.addPrefix(processTaskVo.getReporter()));
@@ -1981,7 +1982,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         processTaskStepUser.setProcessTaskId(processTaskStepVo.getProcessTaskId());
         processTaskStepUser.setProcessTaskStepId(processTaskStepVo.getId());
         if (processUserTypeList.contains(ProcessUserType.MAJOR)) {
-            /** 主处理人 **/
+            /* 主处理人 **/
             processTaskStepUser.setUserType(ProcessUserType.MAJOR.getValue());
             List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserList(processTaskStepUser);
             for (ProcessTaskStepUserVo processTaskStepUserVo : majorUserList) {
@@ -1990,7 +1991,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
         if (processUserTypeList.contains(ProcessUserType.MINOR)) {
-            /** 所有任务处理人 **/
+            /* 所有任务处理人 **/
             processTaskStepUser.setUserType(ProcessUserType.MINOR.getValue());
             List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserList(processTaskStepUser);
             for (ProcessTaskStepUserVo processTaskStepUserVo : minorUserList) {
@@ -2041,7 +2042,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             return resultList;
         }
         String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-        JSONObject config = JSONObject.parseObject(formContent);
+        JSONObject config = JSON.parseObject(formContent);
         // 默认场景的表单
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
@@ -2059,7 +2060,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         for (ProcessTaskFormAttributeVo processTaskFormAttributeVo : processTaskFormExtendAttributeList) {
             parentUuidList.add(processTaskFormAttributeVo.getParentUuid());
             String configStr = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormAttributeVo.getConfigHash());
-            processTaskFormAttributeVo.setConfig(JSONObject.parseObject(configStr));
+            processTaskFormAttributeVo.setConfig(JSON.parseObject(configStr));
             formExtendAttributeList.add(processTaskFormAttributeVo);
         }
         for (FormAttributeVo formAttributeVo : formAttributeList) {
@@ -2128,8 +2129,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     /**
      * 根据fileId 和 processTaskIdList 获取对应用户是否有该工单附件的下载权限
      *
-     * @param fileId
-     * @param processTaskIdList
      * @return true：有权限   false：没有权限
      */
     @Override
@@ -2175,7 +2174,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             builder.addOperationType(ProcessTaskOperationType.STEP_RECOVER);
         }
         String userUuid = UserContext.get().getUserUuid(true);
-        AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();;
+        AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
         Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap = builder.build().getOperateMap();
         for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
             Set<ProcessTaskOperationType> set = operationTypeSetMap.get(processTaskStepVo.getId());
@@ -2317,11 +2316,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 //        }
 //        return false;
 //    }
+
     /**
      * 暂存工单草稿
-     *
-     * @param jsonObj
-     * @return
      */
     @Override
     public JSONObject saveProcessTaskDraft(JSONObject jsonObj, Long newProcessTaskId) throws Exception {
@@ -2333,10 +2330,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         if (processMapper.checkProcessIsExists(processUuid) == 0) {
             throw new ProcessNotFoundException(processUuid);
         }
-        /**
-         * 由于批量上报是暂存与提交一并完成，
-         * 如果不校验优先级，那么会出现批量上报记录显示上报失败，
-         * 而实际上已经生成工单，只是状态是草稿
+        /*
+          由于批量上报是暂存与提交一并完成，
+          如果不校验优先级，那么会出现批量上报记录显示上报失败，
+          而实际上已经生成工单，只是状态是草稿
          */
         List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
         if (CollectionUtils.isNotEmpty(channelPriorityList)) {
@@ -2393,10 +2390,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 formVersionVo = new FormVersionVo();
                 formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
                 formVersionVo.setFormName(processTaskFormVo.getFormName());
-                formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
+                formVersionVo.setFormConfig(JSON.parseObject(formContent));
             }
         } else {
-            /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
+            /* 判断当前用户是否拥有channelUuid服务的上报权限 **/
             if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
                 throw new PermissionDeniedException();
             }
@@ -2474,7 +2471,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
      * void
      * 提交上报工单
      *
-     * @param jsonObj
      * @return
      */
     @Override
@@ -2656,7 +2652,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             idList.removeAll(processTaskIdList);
             notFoundProcessTaskIdList.addAll(idList);
         }
-        if (processTaskIdList.size() > 0) {
+        if (!processTaskIdList.isEmpty()) {
             AuthenticationInfoVo authenticationInfo = authenticationInfoService.getAuthenticationInfo(user.getUuid());
             List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getCurrentProcessTaskStepListByProcessTaskIdListAndTag(processTaskIdList, tag);
             Map<Long, List<ProcessTaskStepVo>> map = processTaskStepList.stream().collect(Collectors.groupingBy(ProcessTaskStepVo::getProcessTaskId));
@@ -2679,7 +2675,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                             throw new ProcessTaskStepMustBeManualException(currentStep.getProcessTaskId(), currentStep.getName());
                         }
                         Map<Long, Set<ProcessTaskOperationType>> auth = checkProcessTaskStepCompleteAuth(user, authenticationInfo, currentStep);
-                        if (MapUtils.isEmpty(auth) || auth.values().stream().findFirst().get().size() == 0) {
+                        if (MapUtils.isEmpty(auth) || auth.values().stream().findFirst().get().isEmpty()) {
                             noAuthProcessTaskIdList.add(currentStep.getProcessTaskId());
                             continue;
                         }
@@ -2706,13 +2702,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
 
-        if (notFoundProcessTaskIdList.size() > 0) {
+        if (!notFoundProcessTaskIdList.isEmpty()) {
             result.put("工单不存在的ID", notFoundProcessTaskIdList);
         }
-        if (currentStepOverOneProcessTaskIdList.size() > 0) {
+        if (!currentStepOverOneProcessTaskIdList.isEmpty()) {
             result.put("当前步骤超过一个的工单", currentStepOverOneProcessTaskIdList);
         }
-        if (noAuthProcessTaskIdList.size() > 0) {
+        if (!noAuthProcessTaskIdList.isEmpty()) {
             result.put("无权限处理的工单", noAuthProcessTaskIdList.stream().map(Objects::toString).collect(Collectors.joining(",")));
         }
         if (!exceptionMap.isEmpty()) {
@@ -2727,7 +2723,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
      * @param user               处理人
      * @param authenticationInfo 处理人权限
      * @param processTaskStepVo  工单步骤
-     * @return
      */
     private Map<Long, Set<ProcessTaskOperationType>> checkProcessTaskStepCompleteAuth(UserVo user, AuthenticationInfoVo authenticationInfo, ProcessTaskStepVo processTaskStepVo) {
         UserContext.init(user, authenticationInfo, SystemUser.SYSTEM.getTimezone());
@@ -2745,7 +2740,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
      *
      * @param processTaskStepVo 工单步骤
      * @param content           处理意见
-     * @throws Exception
      */
     private void completeProcessTaskStep(ProcessTaskStepVo processTaskStepVo, String content) throws Exception {
         // 查询后续节点，不包括回退节点
@@ -2773,7 +2767,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
      *
      * @param processTaskStatus 工单状态
      * @param statuss           状态列表
-     * @return
      */
     @Override
     public ProcessTaskPermissionDeniedException checkProcessTaskStatus(String processTaskStatus, ProcessTaskStatus... statuss) {
@@ -2826,7 +2819,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
      *
      * @param stepStatus 步骤状态
      * @param statuss    状态列表
-     * @return
      */
     @Override
     public ProcessTaskPermissionDeniedException checkProcessTaskStepStatus(String stepStatus, ProcessTaskStepStatus... statuss) {

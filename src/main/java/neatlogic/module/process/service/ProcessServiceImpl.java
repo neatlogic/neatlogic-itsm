@@ -24,10 +24,7 @@ import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.exception.FormNotFoundException;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
 import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
-import neatlogic.framework.notify.dao.mapper.NotifyMapper;
 import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
-import neatlogic.module.process.dao.mapper.process.ProcessTagMapper;
-import neatlogic.module.process.dao.mapper.score.ScoreTemplateMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.process.ProcessNameRepeatException;
 import neatlogic.framework.process.exception.sla.SlaCalculateHandlerNotFoundException;
@@ -35,6 +32,8 @@ import neatlogic.framework.process.sla.core.ISlaCalculateHandler;
 import neatlogic.framework.process.sla.core.SlaCalculateHandlerFactory;
 import neatlogic.framework.util.UuidUtil;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessTagMapper;
+import neatlogic.module.process.dao.mapper.score.ScoreTemplateMapper;
 import neatlogic.module.process.dependency.handler.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,8 +55,8 @@ public class ProcessServiceImpl implements ProcessService {
     @Resource
     private FormMapper formMapper;
 
-    @Resource
-    private NotifyMapper notifyMapper;
+    //@Resource
+    //private NotifyMapper notifyMapper;
 
     @Resource
     private IntegrationMapper integrationMapper;

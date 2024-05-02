@@ -39,8 +39,6 @@ import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -50,7 +48,7 @@ import java.util.Objects;
 @Service
 public class ChannelServiceImpl implements ChannelService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ChannelServiceImpl.class);
+    //private static final Logger logger = LoggerFactory.getLogger(ChannelServiceImpl.class);
 
     @Resource
     private ChannelMapper channelMapper;
@@ -101,7 +99,7 @@ public class ChannelServiceImpl implements ChannelService {
         }
         channelMapper.replaceChannelWorktime(uuid, channelVo.getWorktimeUuid());
         //优先级
-        if(channelVo.getIsNeedPriority() == 1) {
+        if (channelVo.getIsNeedPriority() == 1) {
             String defaultPriorityUuid = channelVo.getDefaultPriorityUuid();
             List<String> priorityUuidList = channelVo.getPriorityUuidList();
             for (String priorityUuid : priorityUuidList) {
@@ -125,7 +123,7 @@ public class ChannelServiceImpl implements ChannelService {
                 channelMapper.insertChannelAuthority(authorityVo, channelVo.getUuid());
             }
         }
-        /** 转报设置逻辑，允许转报后，转报设置必填 **/
+        /* 转报设置逻辑，允许转报后，转报设置必填 **/
         channelMapper.deleteChannelRelationBySource(channelVo.getUuid());
         channelMapper.deleteChannelRelationAuthorityBySource(channelVo.getUuid());
         channelMapper.deleteChannelRelationIsUsePreOwnerBySource(channelVo.getUuid());

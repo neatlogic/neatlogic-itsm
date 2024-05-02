@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
@@ -30,9 +31,6 @@ import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.constvalue.automatic.CallbackType;
 import neatlogic.framework.process.constvalue.automatic.FailPolicy;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
-import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepDataVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
@@ -48,6 +46,9 @@ import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.util.ConditionUtil;
 import neatlogic.framework.util.FreemarkerUtil;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
 import neatlogic.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -72,7 +73,7 @@ import java.util.stream.Collectors;
  **/
 @Service
 public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticService {
-    private static Logger logger = LoggerFactory.getLogger(ProcessTaskAutomaticServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProcessTaskAutomaticServiceImpl.class);
     @Resource
     private IntegrationMapper integrationMapper;
     @Resource
@@ -345,9 +346,9 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
     private Boolean predicate(JSONObject config, IntegrationResultVo resultVo, Boolean isSuccess) {
         boolean result = false;
         if (config == null || config.isEmpty() || !config.containsKey("expression")) {
-            String patternStr = "(2|3).*";
+            String patternStr = "([23]).*";
             if (!isSuccess) {
-                patternStr = "(4|5).*";
+                patternStr = "([45]).*";
             }
             Pattern pattern = Pattern.compile(patternStr);
             if (pattern.matcher(String.valueOf(resultVo.getStatusCode())).matches()) {
@@ -446,7 +447,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
             requestAudit.put("endTime", System.currentTimeMillis());
             JSONObject auditResult = new JSONObject();
             auditResult.put("json", resultJson);
-            auditResult.put("template", FreemarkerUtil.transform(JSONObject.parse(resultJson), template));
+            auditResult.put("template", FreemarkerUtil.transform(JSON.parse(resultJson), template));
             requestAudit.put("result", auditResult);
 
             if (predicate(successConfig, resultVo, true)) {// 如果执行成功
@@ -543,9 +544,6 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
     /**
      * 回调请求
-     *
-     * @param currentProcessTaskStepVo
-     * @return
      */
     @Override
     @Transactional
@@ -583,7 +581,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     json = result.getString("json");
                 }
             }
-            integrationVo.getParamObj().putAll(getIntegrationParam(currentProcessTaskStepVo, automaticConfigVo.getCallbackParamList(), JSONObject.parseObject(json)));
+            integrationVo.getParamObj().putAll(getIntegrationParam(currentProcessTaskStepVo, automaticConfigVo.getCallbackParamList(), JSON.parseObject(json)));
             resultVo = handler.sendRequest(integrationVo, ProcessRequestFrom.PROCESS);
 //            System.out.println("resultVo=" + JSONObject.toJSONString(resultVo));
             String resultJson = resultVo.getTransformedResult();
@@ -593,7 +591,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
             callbackAudit.put("endTime", System.currentTimeMillis());
             JSONObject auditResult = new JSONObject();
             auditResult.put("json", resultJson);
-            auditResult.put("template", FreemarkerUtil.transform(JSONObject.parse(resultJson), template));
+            auditResult.put("template", FreemarkerUtil.transform(JSON.parse(resultJson), template));
             callbackAudit.put("result", auditResult);
 
             if (predicate(successConfig, resultVo, true)) {// 如果执行成功
@@ -656,9 +654,6 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
     /**
      * 获取流程步骤自动处理配置信息
-     *
-     * @param processTaskStepId
-     * @return
      */
     @Override
     public AutomaticConfigVo getAutomaticConfigVoByProcessTaskStepId(Long processTaskStepId) {
@@ -671,11 +666,6 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
     /**
      * 组装请求参数
-     *
-     * @param currentProcessTaskStepVo
-     * @param paramList
-     * @param resultJson
-     * @return
      */
     private JSONObject getIntegrationParam(ProcessTaskStepVo currentProcessTaskStepVo, JSONArray paramList, JSONObject resultJson) {
         JSONObject processTaskJson = ProcessTaskConditionFactory.getConditionParamData(Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList()), currentProcessTaskStepVo);
@@ -692,9 +682,9 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 String value = param.getString("value");
                 String name = param.getString("name");
                 if (type.equals("common") || type.equals("form")) {
-                    integrationParam.put(name, processTaskJson.get(value.replaceAll("common#", StringUtils.EMPTY).replaceAll("form#", StringUtils.EMPTY)));
+                    integrationParam.put(name, processTaskJson.get(value.replace("common#", StringUtils.EMPTY).replace("form#", StringUtils.EMPTY)));
                 } else if (type.equals("integration") && MapUtils.isNotEmpty(resultJson)) {
-                    integrationParam.put(name, resultJson.get(value.replaceAll("integration#", StringUtils.EMPTY)));
+                    integrationParam.put(name, resultJson.get(value.replace("integration#", StringUtils.EMPTY)));
                 } else {// 常量
                     integrationParam.put(name, value);
                 }
@@ -705,9 +695,6 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
     /**
      * 获取回调信息
-     *
-     * @param automaticConfigVo
-     * @return
      */
     private JSONObject getCallbackAudit(AutomaticConfigVo automaticConfigVo) {
         JSONObject failConfig = new JSONObject();
@@ -734,10 +721,6 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 
     /**
      * 失败策略
-     *
-     * @param automaticConfigVo
-     * @param currentProcessTaskStepVo
-     * @param failedReason
      */
     private void failPolicy(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo, String failedReason, JSONObject automaticInfo) {
         IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
