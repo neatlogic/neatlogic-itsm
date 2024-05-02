@@ -3,7 +3,7 @@ package neatlogic.module.process.api.score;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.score.ScoreTemplateMapper;
+import neatlogic.module.process.dao.mapper.score.ScoreTemplateMapper;
 import neatlogic.framework.process.dto.score.ScoreTemplateVo;
 import neatlogic.framework.process.exception.score.ScoreTemplateNotFoundException;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;

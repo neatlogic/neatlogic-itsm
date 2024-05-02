@@ -20,8 +20,8 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
-import neatlogic.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepTaskUserVo;
 import neatlogic.framework.process.dto.ProcessTaskStepTaskVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
@@ -33,7 +33,7 @@ import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import neatlogic.module.process.service.ProcessTaskService;
-import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -58,7 +58,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
     @Resource
     ProcessTaskMapper processTaskMapper;
     @Resource
-    IProcessStepHandlerUtil IProcessStepHandlerUtil;
+    IProcessStepHandlerUtil processStepHandlerUtil;
     @Resource
     ProcessTaskService processTaskService;
 
@@ -119,11 +119,11 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
         paramObj.put("source", jsonObj.getString("source"));
         processTaskStepVo.getParamObj().putAll(paramObj);
-        IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETETASK);
+        processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETETASK);
         stepTaskVo.setStepTaskUserVoList(processTaskStepTaskUserList);
         processTaskStepVo.setProcessTaskStepTaskVo(stepTaskVo);
-        IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.DELETETASK);
-        IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.DELETETASK);
+        processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.DELETETASK);
+        processStepHandlerUtil.action(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.DELETETASK);
         return null;
     }
 }

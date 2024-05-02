@@ -3,7 +3,7 @@ package neatlogic.module.process.api.process;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.ProcessTagMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessTagMapper;
 import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;

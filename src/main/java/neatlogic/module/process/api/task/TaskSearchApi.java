@@ -18,7 +18,7 @@ package neatlogic.module.process.api.task;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.task.TaskMapper;
+import neatlogic.module.process.dao.mapper.task.TaskMapper;
 import neatlogic.framework.process.dto.TaskConfigVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;

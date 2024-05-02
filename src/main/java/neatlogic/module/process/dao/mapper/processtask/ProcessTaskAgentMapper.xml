@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.processtask.ProcessTaskAgentMapper">
+
+    <select id="getProcessTaskAgentIdListByFromUserUuid" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT `id` FROM `processtask_agent` WHERE `from_user_uuid` = #{value}
+    </select>
+
+    <select id="getProcessTaskAgentListByFromUserUuid" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.agent.ProcessTaskAgentVo">
+        SELECT
+            `id`,
+            `from_user_uuid` AS fromUserUuid,
+            `to_user_uuid` AS toUserUuid,
+            `begin_time` AS beginTime,
+            `end_time` AS endTime,
+            `is_active` as isActive
+        FROM `processtask_agent`
+        WHERE `from_user_uuid` = #{value}
+    </select>
+
+    <resultMap id="agentMap" type="neatlogic.framework.process.dto.agent.ProcessTaskAgentVo">
+        <id property="id" column="id"/>
+        <result property="fromUserUuid" column="fromUserUuid"/>
+        <result property="toUserUuid" column="toUserUuid"/>
+        <result property="beginTime" column="beginTime"/>
+        <result property="endTime" column="endTime"/>
+        <result property="isActive" column="isActive"/>
+        <collection property="processTaskAgentTargetVos" ofType="neatlogic.framework.process.dto.agent.ProcessTaskAgentTargetVo">
+            <result property="target" column="target"/>
+            <result property="type" column="type"/>
+            <result property="pathListStr" column="pathListStr"/>
+        </collection>
+    </resultMap>
+
+    <select id="getProcessTaskAgentDetailListByToUserUuid" parameterType="java.lang.String" resultMap="agentMap">
+        SELECT
+            psa.`id`,
+            psa.`from_user_uuid` AS fromUserUuid,
+            psa.`to_user_uuid` AS toUserUuid,
+            psa.`begin_time` AS beginTime,
+            psa.`end_time` AS endTime,
+            psa.`is_active` AS isActive,
+            psat.`target`,
+            psat.`type`,
+            psat.`path_list` AS pathListStr,
+            psat.`processtask_agent_id` AS processtaskAgentId
+        FROM `processtask_agent` psa
+                 JOIN `processtask_agent_target` psat ON psa.`id` = psat.`processtask_agent_id`
+        WHERE psa.`to_user_uuid` = #{value}
+          AND psa.`is_active` = 1
+          AND psa.`begin_time` &lt;= NOW()
+          AND psa.`end_time` &gt;= NOW()
+    </select>
+
+    <select id="getProcessTaskAgentListByToUserUuid" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.agent.ProcessTaskAgentVo">
+        SELECT
+            `id`,
+            `from_user_uuid` AS fromUserUuid,
+            `to_user_uuid` AS toUserUuid,
+            `begin_time` AS beginTime,
+            `end_time` AS endTime,
+            `is_active` AS isActive
+        FROM `processtask_agent`
+        WHERE `to_user_uuid` = #{value}
+        AND `is_active` = 1
+        AND `begin_time` &lt;= NOW()
+        AND `end_time` &gt;= NOW()
+    </select>
+
+    <select id="getProcessTaskAgentTargetListByProcessTaskAgentId" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.agent.ProcessTaskAgentTargetVo">
+        SELECT
+            `processtask_agent_id` AS processTaskAgentId,
+            `target`,
+            `type`,
+            `path_list` AS pathListStr
+        FROM `processtask_agent_target`
+        WHERE `processtask_agent_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskAgentDetailListByFromUserUuidList" parameterType="java.util.List" resultMap="agentMap">
+        SELECT
+            psa.`id`,
+            psa.`from_user_uuid` AS fromUserUuid,
+            psa.`to_user_uuid` AS toUserUuid,
+            psa.`begin_time` AS beginTime,
+            psa.`end_time` AS endTime,
+            psa.`is_active` AS isActive,
+            psat.`target`,
+            psat.`type`,
+            psat.`path_list` AS pathListStr,
+            psat.`processtask_agent_id` AS processtaskAgentId
+        FROM `processtask_agent` psa
+                 JOIN `processtask_agent_target` psat ON psa.`id` = psat.`processtask_agent_id`
+        WHERE psa.`from_user_uuid` IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+          AND psa.`is_active` = 1
+          AND psa.`begin_time` &lt;= NOW()
+          AND psa.`end_time` &gt;= NOW()
+    </select>
+
+    <insert id="insertProcessTaskAgent" parameterType="neatlogic.framework.process.dto.agent.ProcessTaskAgentVo">
+        INSERT INTO `processtask_agent` (
+            `id`,
+            `from_user_uuid`,
+            `to_user_uuid`,
+            `begin_time`,
+            `end_time`,
+            `is_active`
+        )
+        VALUES
+        (
+            #{id},
+            #{fromUserUuid},
+            #{toUserUuid},
+            #{beginTime},
+            #{endTime},
+            #{isActive}
+        )
+    </insert>
+
+    <insert id="insertIgnoreProcessTaskAgentTarget" parameterType="neatlogic.framework.process.dto.agent.ProcessTaskAgentTargetVo">
+        INSERT IGNORE INTO `processtask_agent_target` (
+            `processtask_agent_id`,
+            `target`,
+            `type`,
+            `path_list`
+        )
+        VALUES
+        (
+            #{processTaskAgentId},
+            #{target},
+            #{type},
+            #{pathListStr}
+        )
+    </insert>
+
+    <update id="updateProcessTaskAgentIsActiveByFromUserUuid" parameterType="java.lang.String">
+        UPDATE `processtask_agent` SET `is_active` = 1-`is_active` WHERE `from_user_uuid` = #{value}
+    </update>
+
+    <delete id="deleteProcessTaskAgentByFromUserUuid" parameterType="java.lang.String">
+        DELETE FROM `processtask_agent` WHERE `from_user_uuid` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskAgentTargetByProcessTaskAgentIdList" parameterType="java.lang.Long">
+        DELETE FROM `processtask_agent_target`
+        WHERE `processtask_agent_id` IN
+        <foreach collection="list" item="processTaskAgentId" open="(" separator="," close=")">
+            #{processTaskAgentId}
+        </foreach>
+    </delete>
+</mapper>

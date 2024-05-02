@@ -12,12 +12,17 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @Component
 public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getName() {

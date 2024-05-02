@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper">
+    <cache type="neatlogic.framework.dao.cache.NeatLogicCache" flushInterval="30000" size="100"></cache>
+
+    <select id="searchChannelTypeCount" parameterType="neatlogic.framework.process.dto.ChannelTypeVo" resultType="int" useCache="false">
+        SELECT
+        count(1)
+        FROM `channel_type`
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND `name` LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="isActive != null">
+                AND `is_active` = #{isActive}
+            </if>
+        </where>
+    </select>
+
+    <select id="searchChannelTypeList" parameterType="neatlogic.framework.process.dto.ChannelTypeVo" resultType="neatlogic.framework.process.dto.ChannelTypeVo" useCache="false">
+        SELECT
+        a.`uuid`,
+        a.`name`,
+        a.`is_active` AS isActive,
+        a.`icon`,
+        a.`color`,
+        a.`description`,
+        a.`sort`,
+        a.`prefix`,
+        b.`handler`
+        FROM `channel_type` a
+        LEFT JOIN `processtask_serial_number_policy` b ON b.`channel_type_uuid` = a.`uuid`
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND a.`name` LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="isActive != null">
+                AND a.`is_active` = #{isActive}
+            </if>
+        </where>
+        ORDER BY a.`sort` DESC
+        <if test="needPage">
+            LIMIT #{startNum}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="searchChannelTypeListForSelect" parameterType="neatlogic.framework.process.dto.ChannelTypeVo" resultType="neatlogic.framework.common.dto.ValueTextVo" useCache="false">
+        SELECT
+        `uuid` as `value`,
+        `name` as `text`
+        FROM `channel_type`
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND `name` LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="isActive != null">
+                AND `is_active` = #{isActive}
+            </if>
+        </where>
+        ORDER BY `sort` desc
+        <if test="needPage">
+            limit #{startNum}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getChannelTypeByUuid" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.ChannelTypeVo" useCache="true">
+        SELECT
+            `uuid`,
+            `name`,
+            `is_active` AS isActive,
+            `icon`,
+            `color`,
+            `description`,
+            `sort`,
+            `prefix`
+        FROM `channel_type`
+        WHERE `uuid` = #{uuid}
+    </select>
+
+    <select id="getChannelTypeByUuidList" resultType="neatlogic.framework.process.dto.ChannelTypeVo" useCache="true">
+        SELECT
+            `uuid`,
+            `name`,
+            `is_active` AS isActive,
+            `icon`,
+            `color`,
+            `description`,
+            `sort`,
+            `prefix`
+        FROM `channel_type`
+        WHERE `uuid` in
+        <foreach collection="list" item="uuid" close=")" open="(" separator=",">
+            #{uuid}
+        </foreach>
+    </select>
+
+    <select id="checkChannelTypeIsExists" parameterType="java.lang.String" resultType="int" useCache="false">
+        SELECT COUNT(`uuid`) FROM `channel_type` WHERE `uuid` = #{uuid}
+    </select>
+
+    <select id="checkChannelTypeNameIsRepeat" parameterType="neatlogic.framework.process.dto.ChannelTypeVo" resultType="int" useCache="false">
+        SELECT COUNT(1) FROM `channel_type` WHERE `name` = #{name}
+                                              AND `uuid` != #{uuid}
+    </select>
+
+    <select id="getChannelTypeMaxSort" resultType="int" useCache="false">
+        SELECT MAX(`sort`) FROM `channel_type` FOR UPDATE
+    </select>
+
+    <select id="checkChannelTypeRelationIsExists" parameterType="java.lang.Long" resultType="int" useCache="false">
+        SELECT COUNT(`id`) FROM `channel_type_relation` WHERE `id` = #{id}
+    </select>
+
+    <select id="checkChannelTypeRelationNameIsRepeat" parameterType="neatlogic.framework.process.dto.ChannelTypeRelationVo" resultType="int" useCache="false">
+        SELECT COUNT(1) FROM `channel_type_relation`
+        WHERE `name` = #{name} AND `id` != #{id} AND `is_delete` = 0
+    </select>
+
+    <select id="getChannelTypeRelationById" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ChannelTypeRelationVo" useCache="false">
+        SELECT
+            `id`,
+            `name`,
+            `is_active` AS isActive
+        FROM `channel_type_relation`
+        WHERE `id` = #{value}
+    </select>
+
+    <select id="getChannelTypeRelationLockById" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ChannelTypeRelationVo" useCache="false">
+        SELECT
+            `id`,
+            `name`,
+            `is_active` AS isActive
+        FROM `channel_type_relation`
+        WHERE `id` = #{value}
+        FOR UPDATE
+    </select>
+
+    <select id="getChannelTypeRelationList" parameterType="neatlogic.framework.process.dto.ChannelTypeRelationVo" resultType="neatlogic.framework.process.dto.ChannelTypeRelationVo" useCache="false">
+        SELECT
+        `id`,
+        `name`,
+        `is_active` AS isActive
+        FROM `channel_type_relation`
+        WHERE `is_delete` = 0
+        <if test="keyword != null and keyword != ''">
+            AND `name` LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="isActive != null">
+            AND `is_active` = #{isActive}
+        </if>
+        ORDER BY `id` DESC
+        <if test="needPage">
+            limit #{startNum}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getChannelTypeRelationCount" parameterType="neatlogic.framework.process.dto.ChannelTypeRelationVo" resultType="int" useCache="false">
+        SELECT
+        COUNT(1)
+        FROM `channel_type_relation`
+        WHERE `is_delete` = 0
+        <if test="keyword != null and keyword != ''">
+            AND `name` LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="isActive != null">
+            AND `is_active` = #{isActive}
+        </if>
+    </select>
+
+    <select id="getChannelTypeRelationListForSelect" parameterType="neatlogic.framework.process.dto.ChannelTypeRelationVo" resultType="neatlogic.framework.common.dto.ValueTextVo" useCache="false">
+        SELECT
+        `id` AS value,
+        `name` AS text
+        FROM `channel_type_relation`
+        WHERE `is_delete` = 0
+        <if test="keyword != null and keyword != ''">
+            AND `name` LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="isActive != null">
+            AND `is_active` = #{isActive}
+        </if>
+        <if test="useIdList">
+            AND `id` IN
+            <foreach collection="idList" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        ORDER BY `id` DESC
+        <if test="needPage">
+            limit #{startNum}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getChannelTypeRelationCountForSelect" parameterType="neatlogic.framework.process.dto.ChannelTypeRelationVo" resultType="int" useCache="false">
+        SELECT
+        COUNT(1)
+        FROM `channel_type_relation`
+        WHERE `is_delete` = 0
+        <if test="keyword != null and keyword != ''">
+            AND `name` LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="isActive != null">
+            AND `is_active` = #{isActive}
+        </if>
+        <if test="useIdList">
+            AND `id` IN
+            <foreach collection="idList" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getChannelTypeRelationSourceListByChannelTypeRelationId" parameterType="java.lang.Long" resultType="java.lang.String" useCache="false">
+        SELECT `channel_type_uuid` FROM
+            `channel_type_relation_source` WHERE `channel_type_relation_id` = #{value}
+    </select>
+
+    <select id="getChannelTypeRelationTargetListByChannelTypeRelationId" parameterType="java.lang.Long" resultType="java.lang.String" useCache="false">
+        SELECT `channel_type_uuid` FROM
+            `channel_type_relation_target` WHERE `channel_type_relation_id` = #{value}
+    </select>
+
+    <select id="getChannelTypeRelationSourceListByChannelTypeRelationIdList" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ChannelTypeRelationChannelVo" useCache="false">
+        SELECT
+        `channel_type_relation_id` AS channelTypeRelationId,
+        `channel_type_uuid` AS channelTypeUuid
+        FROM `channel_type_relation_source`
+        WHERE `channel_type_relation_id` IN
+        <foreach collection="list" item="channelTypeRelationId" open="(" separator="," close=")">
+            #{channelTypeRelationId}
+        </foreach>
+    </select>
+
+    <select id="getChannelTypeRelationTargetListByChannelTypeRelationIdList" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ChannelTypeRelationChannelVo" useCache="false">
+        SELECT
+        `channel_type_relation_id` AS channelTypeRelationId,
+        `channel_type_uuid` AS channelTypeUuid
+        FROM `channel_type_relation_target`
+        WHERE `channel_type_relation_id` IN
+        <foreach collection="list" item="channelTypeRelationId" open="(" separator="," close=")">
+            #{channelTypeRelationId}
+        </foreach>
+    </select>
+
+    <select id="getChannelTypeRelationIdListBySourceChannelTypeUuid" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT DISTINCT `channel_type_relation_id` FROM `channel_type_relation_source`
+        WHERE `channel_type_uuid` IN (#{value}, 'all')
+    </select>
+
+    <select id="getAuthorizedChannelTypeRelationIdListBySourceChannelUuid" resultType="java.lang.Long" useCache="false">
+        SELECT
+        DISTINCT `channel_type_relation_id`
+        FROM `channel_relation_authority`
+        WHERE `source` = #{source}
+        AND ((`type` = 'common' AND `uuid` = 'alluser')
+        <if test="userUuid != null and userUuid != ''">
+            OR (`type` = 'user' AND `uuid` = #{userUuid})
+        </if>
+        <if test="teamUuidList != null and teamUuidList.size() > 0">
+            OR (`type` = 'team' AND `uuid` IN
+            <foreach collection="teamUuidList" item="teamUuid" open="(" separator="," close=")">
+                #{teamUuid}
+            </foreach>
+            )
+        </if>
+        <if test="roleUuidList != null and roleUuidList.size() > 0">
+            OR (`type` = 'role' AND `uuid` IN
+            <foreach collection="roleUuidList" item="roleUuid" open="(" separator="," close=")">
+                #{roleUuid}
+            </foreach>
+            )
+        </if>
+        <if test="processUserTypeList != null and processUserTypeList.size() > 0">
+            OR (`type` = 'processUserType' AND `uuid` IN
+            <foreach collection="processUserTypeList" item="processUserType" open="(" separator="," close=")">
+                #{processUserType}
+            </foreach>
+            )
+        </if>
+        )
+    </select>
+
+    <select id="getChannelUuidListByParentUuidListAndChannelTypeUuidList" resultType="java.lang.String">
+        SELECT `uuid` FROM `channel`
+        WHERE `parent_uuid` IN
+        <foreach collection="parentUuidList" item="parentUuid" open="(" separator="," close=")">
+            #{parentUuid}
+        </foreach>
+        <if test="channelTypeUuidList != null and channelTypeUuidList.size() > 0">
+            AND `channel_type_uuid` IN
+            <foreach collection="channelTypeUuidList" item="channelTypeUuid" open="(" separator="," close=")">
+                #{channelTypeUuid}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getActiveChannelCountByParentUuidAndChannelTypeUuidList" resultType="int">
+        SELECT COUNT(1) FROM (
+        SELECT `uuid` FROM `channel`
+        WHERE `is_active` = 1
+        AND `parent_uuid` = #{parentUuid}
+        <if test="channelTypeUuidList != null and channelTypeUuidList.size() > 0">
+            AND `channel_type_uuid` IN
+            <foreach collection="channelTypeUuidList" item="channelTypeUuid" open="(" separator="," close=")">
+                #{channelTypeUuid}
+            </foreach>
+        </if>
+        LIMIT 1
+        ) a
+    </select>
+
+    <select id="checkChannelTypeRelationIsUsedByChannelTypeRelationId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `channel_type_relation_id` FROM `processtask_relation`
+        WHERE `channel_type_relation_id` = #{value}
+        UNION ALL
+        SELECT `channel_type_relation_id` FROM `processtask_tranfer_report`
+        WHERE `channel_type_relation_id` = #{value}
+        LIMIT 1
+    </select>
+
+    <select id="getChannelTypeRelationReferenceUuidListByChannelTypeRelationId" parameterType="java.lang.Long" resultType="java.lang.String">
+        SELECT `source` FROM `channel_relation` WHERE `channel_type_relation_id` = #{value}
+    </select>
+
+    <select id="checkChannelTypeRelationHasReference" parameterType="java.lang.Long" resultType="int">
+        SELECT count(`channel_type_relation_id`) FROM `channel_relation` WHERE `channel_type_relation_id` = #{value}
+    </select>
+
+    <select id="checkChannelTypeHasReference" parameterType="java.lang.String" resultType="int" useCache="false">
+        select count(1) from (SELECT `uuid` FROM `channel` WHERE `channel_type_uuid` = #{value}
+            limit 1) a
+    </select>
+    <select id="getChannelTypeByName" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.ChannelTypeVo">
+        SELECT
+            `uuid`,
+            `name`,
+            `is_active` AS isActive,
+            `icon`,
+            `color`,
+            `description`,
+            `sort`,
+            `prefix`
+        FROM `channel_type`
+        WHERE `name` = #{value}
+    </select>
+
+    <insert id="insertChannelType" parameterType="neatlogic.framework.process.dto.ChannelTypeVo">
+        INSERT INTO `channel_type` (
+            `uuid`,
+            `name`,
+            `is_active`,
+            `icon`,
+            `color`,
+            `description`,
+            `sort`,
+            `prefix`
+        )
+        VALUES
+        (
+            #{uuid},
+            #{name},
+            #{isActive},
+            #{icon},
+            #{color},
+            #{description},
+            #{sort},
+            #{prefix}
+        )
+    </insert>
+
+    <insert id="insertChannelTypeRelation" parameterType="neatlogic.framework.process.dto.ChannelTypeRelationVo">
+        INSERT INTO `channel_type_relation` (
+            `id`,
+            `name`,
+            `is_active`
+        )
+        VALUES
+        (
+            #{id},
+            #{name},
+            #{isActive}
+        )
+    </insert>
+
+    <insert id="insertChannelTypeRelationSource">
+        INSERT INTO `channel_type_relation_source` (
+            `channel_type_relation_id`,
+            `channel_type_uuid`
+        )
+        VALUES
+        (
+            #{channelTypeRelationId},
+            #{channelTypeUuid}
+        )
+    </insert>
+
+    <insert id="insertChannelTypeRelationTarget">
+        INSERT INTO `channel_type_relation_target` (
+            `channel_type_relation_id`,
+            `channel_type_uuid`
+        )
+        VALUES
+        (
+            #{channelTypeRelationId},
+            #{channelTypeUuid}
+        )
+    </insert>
+
+    <update id="updateChannelTypeByUuid" parameterType="neatlogic.framework.process.dto.ChannelTypeVo">
+        UPDATE `channel_type`
+        SET
+            `name` = #{name},
+            `is_active` = #{isActive},
+            `icon` = #{icon},
+            `color` = #{color},
+            `description` = #{description},
+            `sort`
+                = #{sort},
+            `prefix` = #{prefix}
+        WHERE `uuid` = #{uuid}
+    </update>
+
+    <update id="updateChannelTypeRelationById" parameterType="neatlogic.framework.process.dto.ChannelTypeRelationVo">
+        UPDATE `channel_type_relation`
+        SET
+            `name` = #{name},
+            `is_active` = #{isActive}
+        WHERE `id` = #{id}
+    </update>
+
+    <update id="updateChannelTypeRelationIsActiveById" parameterType="java.lang.Long">
+        UPDATE `channel_type_relation`
+        SET
+            `is_active` = !`is_active`
+        WHERE `id` = #{value}
+    </update>
+
+    <update id="updateChannelTypeRelationToDeleteById" parameterType="java.lang.Long">
+        UPDATE `channel_type_relation`
+        SET
+            `is_active` = 0,
+            `is_delete` = 1
+        WHERE `id` = #{value}
+    </update>
+
+    <delete id="deleteChannelTypeByUuid" parameterType="java.lang.String">
+        DELETE FROM `channel_type` WHERE `uuid` = #{uuid}
+    </delete>
+
+    <delete id="deleteChannelTypeRelationById" parameterType="java.lang.Long">
+        DELETE FROM `channel_type_relation` WHERE `id` = #{value}
+    </delete>
+
+    <delete id="deleteChannelTypeRelationSourceByChannelTypeRelationId" parameterType="java.lang.Long">
+        DELETE FROM `channel_type_relation_source` WHERE `channel_type_relation_id` = #{value}
+    </delete>
+
+    <delete id="deleteChannelTypeRelationTargetByChannelTypeRelationId" parameterType="java.lang.Long">
+        DELETE FROM `channel_type_relation_target` WHERE `channel_type_relation_id` = #{value}
+    </delete>
+
+
+</mapper>

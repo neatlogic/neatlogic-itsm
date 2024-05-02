@@ -18,7 +18,7 @@ package neatlogic.module.process.notify.handler.param;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;

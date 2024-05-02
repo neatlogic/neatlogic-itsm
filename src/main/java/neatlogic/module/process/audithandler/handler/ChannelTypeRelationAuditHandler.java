@@ -1,7 +1,7 @@
 package neatlogic.module.process.audithandler.handler;
 
 import neatlogic.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
-import neatlogic.framework.process.dao.mapper.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;

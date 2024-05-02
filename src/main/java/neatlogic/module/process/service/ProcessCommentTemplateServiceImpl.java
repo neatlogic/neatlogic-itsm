@@ -2,7 +2,7 @@ package neatlogic.module.process.service;
 
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.GroupSearch;
-import neatlogic.framework.process.dao.mapper.ProcessCommentTemplateMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessCommentTemplateMapper;
 import neatlogic.framework.process.dto.ProcessCommentTemplateAuthVo;
 import neatlogic.framework.process.dto.ProcessCommentTemplateVo;
 import neatlogic.framework.process.exception.commenttemplate.ProcessCommentTemplateNameRepeatException;

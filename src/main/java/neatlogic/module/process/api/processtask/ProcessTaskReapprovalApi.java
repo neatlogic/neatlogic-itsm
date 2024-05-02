@@ -24,7 +24,7 @@ import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskStepDataType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepDataVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;

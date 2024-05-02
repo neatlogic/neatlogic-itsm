@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskSlaTimeVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskStepNotFoundException;

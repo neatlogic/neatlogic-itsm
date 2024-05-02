@@ -3,7 +3,7 @@ package neatlogic.module.process.api.processtask;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import neatlogic.framework.process.stephandler.core.IProcessStepHandler;

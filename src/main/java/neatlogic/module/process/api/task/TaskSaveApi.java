@@ -19,7 +19,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.task.TaskMapper;
+import neatlogic.module.process.dao.mapper.task.TaskMapper;
 import neatlogic.framework.process.dto.TaskConfigVo;
 import neatlogic.framework.process.exception.processtask.task.TaskConfigButtonNameRepeatException;
 import neatlogic.framework.process.exception.processtask.task.TaskConfigNameRepeatException;

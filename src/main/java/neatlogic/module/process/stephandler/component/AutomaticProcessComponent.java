@@ -22,7 +22,6 @@ import neatlogic.framework.asynchronization.threadpool.TransactionSynchronizatio
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.constvalue.automatic.FailPolicy;
-import neatlogic.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepDataVo;
 import neatlogic.framework.process.dto.ProcessTaskStepInOperationVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
@@ -39,7 +38,10 @@ import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.util.TimeUtil;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
 import neatlogic.module.process.schedule.plugin.ProcessTaskAutomaticJob;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.module.process.service.ProcessTaskAutomaticService;
 import neatlogic.module.process.thread.ProcessTaskAutomaticThread;
 import org.apache.commons.collections4.MapUtils;
@@ -65,6 +67,11 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
     @Resource
     ProcessTaskAutomaticService processTaskAutomaticService;
 
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 
     @Override
     public String getHandler() {
@@ -325,7 +332,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
         }
         /** 处理历史记录 **/
         String action = currentProcessTaskStepVo.getParamObj().getString("action");
-        IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
+        processStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
         return 0;
     }
 

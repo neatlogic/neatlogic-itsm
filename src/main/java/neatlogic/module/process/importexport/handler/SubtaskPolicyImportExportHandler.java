@@ -7,7 +7,7 @@ import neatlogic.framework.importexport.dto.ImportExportBaseInfoVo;
 import neatlogic.framework.importexport.dto.ImportExportPrimaryChangeVo;
 import neatlogic.framework.importexport.dto.ImportExportVo;
 import neatlogic.framework.process.constvalue.ProcessImportExportHandlerType;
-import neatlogic.framework.process.dao.mapper.task.TaskMapper;
+import neatlogic.module.process.dao.mapper.task.TaskMapper;
 import neatlogic.framework.process.dto.TaskConfigVo;
 import neatlogic.framework.process.exception.processtask.task.TaskConfigNotFoundException;
 import org.springframework.stereotype.Component;

@@ -9,7 +9,7 @@ import neatlogic.framework.common.constvalue.UserType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.auth.PROCESS_COMMENT_TEMPLATE_MODIFY;
-import neatlogic.framework.process.dao.mapper.ProcessCommentTemplateMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessCommentTemplateMapper;
 import neatlogic.framework.process.dto.ProcessCommentTemplateSearchVo;
 import neatlogic.framework.process.dto.ProcessCommentTemplateVo;
 import neatlogic.framework.restful.annotation.Input;

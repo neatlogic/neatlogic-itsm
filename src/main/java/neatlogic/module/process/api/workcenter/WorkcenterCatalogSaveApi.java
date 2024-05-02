@@ -3,7 +3,7 @@ package neatlogic.module.process.api.workcenter;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.framework.process.exception.workcenter.WorkcenterCatalogIdNotFoundException;
 import neatlogic.framework.process.exception.workcenter.WorkcenterCatalogNameRepeatsException;
 import neatlogic.framework.process.workcenter.dto.WorkcenterCatalogVo;

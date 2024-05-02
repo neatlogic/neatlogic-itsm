@@ -6,7 +6,7 @@ import neatlogic.framework.dashboard.dto.DashboardWidgetGroupDefineVo;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnBase;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
-import neatlogic.framework.process.dao.mapper.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import neatlogic.framework.process.dto.ChannelTypeVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;

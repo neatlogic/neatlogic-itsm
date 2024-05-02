@@ -8,7 +8,7 @@ import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
-import neatlogic.framework.process.dao.mapper.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;

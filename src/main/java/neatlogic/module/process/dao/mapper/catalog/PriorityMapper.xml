@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.catalog.PriorityMapper">
+	<cache type="neatlogic.framework.dao.cache.NeatLogicCache" flushInterval="30000" size="100"></cache>
+	<select id="searchPriorityCount" parameterType="neatlogic.framework.process.dto.PriorityVo" resultType="int" useCache="false">
+		SELECT
+		COUNT(p.`uuid`)
+		FROM `priority` p
+		<if test="channelUuid != null and channelUuid != ''">
+			JOIN `channel_priority` cp ON cp.`priority_uuid` = p.`uuid` AND cp.`channel_uuid` = #{channelUuid}
+		</if>
+		WHERE 1=1
+		<if test="keyword != null">
+			AND p.`name` LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="isActive != null">
+			AND p.`is_active` = #{isActive}
+		</if>
+	</select>
+
+	<select id="searchPriorityList" parameterType="neatlogic.framework.process.dto.PriorityVo" resultType="neatlogic.framework.process.dto.PriorityVo" useCache="false">
+		SELECT
+		p.`uuid`,
+		p.`name`,
+		p.`is_active` as isActive,
+		p.`desc`,
+		p.`icon`,
+		p.`color`,
+		p.`sort`
+		FROM `priority` p
+		<if test="channelUuid != null and channelUuid != ''">
+			JOIN `channel_priority` cp ON cp.`priority_uuid` = p.`uuid` AND cp.`channel_uuid` = #{channelUuid}
+		</if>
+		WHERE 1=1
+		<if test="keyword != null">
+			AND p.`name` LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="isActive != null">
+			AND p.`is_active` = #{isActive}
+		</if>
+		ORDER BY p.`sort` DESC
+		<if test="needPage">
+			limit #{startNum}, #{pageSize}
+		</if>
+	</select>
+
+	<sql id="searchPriorityListForMatrixSql">
+		<if test="keyword != null">
+			AND `name` LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="filterList != null and filterList.size() > 0">
+			AND
+			<foreach collection="filterList" item="filter" separator="AND">
+				<choose>
+					<when test="filter.expression == 'equal'">
+						<choose>
+							<when test="filter.valueList.size() > 1">
+								`${filter.uuid}` IN
+								<foreach collection="filter.valueList" item="item" open="(" close=")" separator=",">
+									#{item}
+								</foreach>
+							</when>
+							<otherwise>
+								`${filter.uuid}` = #{filter.valueList[0]}
+							</otherwise>
+						</choose>
+					</when>
+					<when test="filter.expression == 'notequal'">
+						<choose>
+							<when test="filter.valueList.size() > 1">
+								(`${filter.uuid}` NOT IN
+								<foreach collection="filter.valueList" item="item" open="(" close=")" separator=",">
+									#{item}
+								</foreach>
+								OR `${filter.uuid}` IS NULL)
+							</when>
+							<otherwise>
+								`${filter.uuid}` != #{filter.valueList[0]}
+							</otherwise>
+						</choose>
+					</when>
+					<when test="filter.expression == 'like'">
+						<choose>
+							<when test="filter.valueList.size() > 1">
+								`${filter.uuid}` IN
+								<foreach collection="filter.valueList" item="item" open="(" close=")" separator=",">
+									#{item}
+								</foreach>
+							</when>
+							<otherwise>
+								`${filter.uuid}` LIKE CONCAT('%', #{filter.valueList[0]}, '%')
+							</otherwise>
+						</choose>
+					</when>
+					<when test="filter.expression == 'notlike'">
+						<choose>
+							<when test="filter.valueList.size() > 1">
+								(`${filter.uuid}` NOT IN
+								<foreach collection="filter.valueList" item="item" open="(" close=")" separator=",">
+									#{item}
+								</foreach>
+								OR `${filter.uuid}` IS NULL)
+							</when>
+							<otherwise>
+								(`${filter.uuid}` NOT LIKE CONCAT('%', #{filter.valueList[0]}, '%') OR `${filter.uuid}` IS NULL)
+							</otherwise>
+						</choose>
+					</when>
+					<when test="filter.expression == 'is-null'">
+						(`${filter.uuid}` IS NULL OR `${filter.uuid}` = '')
+					</when>
+					<when test="filter.expression == 'is-not-null'">
+						(`${filter.uuid}` IS NOT NULL AND `${filter.uuid}` != '')
+					</when>
+					<otherwise>
+						<choose>
+							<when test="filter.valueList.size() > 1">
+								`${filter.uuid}` IN
+								<foreach collection="filter.valueList" item="item" open="(" close=")" separator=",">
+									#{item}
+								</foreach>
+							</when>
+							<otherwise>
+								`${filter.uuid}` = #{filter.valueList[0]}
+							</otherwise>
+						</choose>
+					</otherwise>
+				</choose>
+			</foreach>
+		</if>
+	</sql>
+	<select id="searchPriorityCountForMatrix" parameterType="neatlogic.framework.process.dto.PrioritySearchVo" resultType="int" useCache="false">
+		SELECT
+		COUNT(1)
+		FROM `priority`
+		WHERE `is_active` = 1
+		<include refid="searchPriorityListForMatrixSql"/>
+	</select>
+
+	<select id="searchPriorityListForMatrix" parameterType="neatlogic.framework.process.dto.PrioritySearchVo" resultType="neatlogic.framework.process.dto.PriorityVo" useCache="false">
+		SELECT
+		`uuid`,
+		`name`
+		FROM `priority`
+		WHERE `is_active` = 1
+		<include refid="searchPriorityListForMatrixSql"/>
+		ORDER BY `sort` DESC
+		LIMIT #{startNum}, #{pageSize}
+	</select>
+
+	<select id="searchPriorityListForSelect" parameterType="neatlogic.framework.process.dto.PriorityVo" resultType="neatlogic.framework.common.dto.ValueTextVo" useCache="false">
+		SELECT
+		p.`uuid` as `value`,
+		p.`name` as `text`
+		FROM `priority` p
+		<if test="channelUuid != null and channelUuid != ''">
+			JOIN `channel_priority` cp ON cp.`priority_uuid` = p.`uuid` AND cp.`channel_uuid` = #{channelUuid}
+		</if>
+		WHERE 1=1
+		<if test="keyword != null">
+			AND p.`name` LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="isActive != null">
+			AND p.`is_active` = #{isActive}
+		</if>
+		ORDER BY p.`sort` DESC
+		<if test="needPage">
+			limit #{startNum}, #{pageSize}
+		</if>
+	</select>
+
+	<select id="checkPriorityIsExists" parameterType="java.lang.String" resultType="int" useCache="false">
+		SELECT COUNT(`uuid`) FROM `priority` WHERE `uuid`=#{uuid}
+	</select>
+
+	<select id="getPriorityByUuid" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.PriorityVo" useCache="true">
+		SELECT
+		`uuid`,
+		`name`,
+		`is_active` AS isActive,
+		`desc`,
+		`icon`,
+		`color`,
+		`sort`
+		FROM `priority`
+		WHERE `uuid` = #{uuid}
+	</select>
+
+	<select id="getPriorityByUuidList" resultType="neatlogic.framework.process.dto.PriorityVo" useCache="true">
+		SELECT
+			`uuid`,
+			`name`,
+			`is_active` AS isActive,
+			`desc`,
+			`icon`,
+			`color`,
+			`sort`
+		FROM `priority`
+		WHERE `uuid` in
+		<foreach collection="list" item="uuid" close=")" open="(" separator=",">
+			#{uuid}
+		</foreach>
+	</select>
+	
+	<select id="getPriorityByName" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.PriorityVo" useCache="false">
+		SELECT
+		`uuid`,
+		`name`,
+		`is_active` AS isActive,
+		`desc`,
+		`icon`,
+		`color`,
+		`sort`
+		FROM `priority`
+		WHERE `name` = #{value}
+	</select>
+
+	<select id="checkPriorityNameIsRepeat" parameterType="neatlogic.framework.process.dto.PriorityVo" resultType="int" useCache="false">
+		SELECT COUNT(1) FROM `priority` WHERE `name` = #{name} AND `uuid` != #{uuid}
+	</select>
+
+	<select id="getMaxSort" resultType="java.lang.Integer" useCache="false">
+		SELECT MAX(`sort`) FROM `priority` FOR UPDATE
+	</select>
+
+	<select id="checkPriorityIsInvoked" parameterType="java.lang.String" resultType="int">
+		SELECT COUNT(1) FROM `channel_priority` WHERE `priority_uuid` = #{value}
+	</select>
+
+	<insert id="insertPriority" parameterType="neatlogic.framework.process.dto.PriorityVo">
+		INSERT INTO `priority` (`uuid`, `name`, `is_active`, `desc`, `icon`, `color`, `sort`)
+		VALUES(#{uuid}, #{name}, #{isActive}, #{desc}, #{icon}, #{color}, #{sort})
+	</insert>
+
+	<update id="updatePriority" parameterType="neatlogic.framework.process.dto.PriorityVo">
+		UPDATE `priority`
+		SET
+		`name` = #{name},
+		`is_active` = #{isActive},
+		`desc` = #{desc},
+		`icon` = #{icon},
+		`color` = #{color},
+		`sort` = #{sort}
+		WHERE `uuid` = #{uuid}
+	</update>
+	
+	<update id="updateSortIncrement">
+	update `priority` SET `sort` = `sort` + 1
+	WHERE `sort` &gt;= #{fromSort} 
+	<if test="toSort != null">	
+	AND `sort` &lt;= #{toSort}
+	</if>
+	</update>
+	
+	<update id="updateSortDecrement">
+	update `priority` SET `sort` = `sort` - 1
+	WHERE `sort` &gt;= #{fromSort} 
+	<if test="toSort != null">
+	AND `sort` &lt;= #{toSort}
+	</if>
+	</update>
+	
+	<delete id="deletePriorityByUuid" parameterType="java.lang.String">
+		DELETE FROM `priority` WHERE `uuid` = #{uuid}
+	</delete>
+</mapper>

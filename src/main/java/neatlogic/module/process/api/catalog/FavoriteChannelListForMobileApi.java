@@ -19,7 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;

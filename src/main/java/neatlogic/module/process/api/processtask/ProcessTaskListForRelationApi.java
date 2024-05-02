@@ -8,7 +8,7 @@ import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
-import neatlogic.framework.process.dao.mapper.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import neatlogic.framework.process.dto.ProcessTaskSearchVo;
 import neatlogic.module.process.service.ProcessTaskService;
 import neatlogic.framework.util.TableResultUtil;
@@ -20,7 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;

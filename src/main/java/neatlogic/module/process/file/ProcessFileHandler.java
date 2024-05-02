@@ -22,7 +22,7 @@ import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.file.core.FileTypeHandlerBase;
 import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.process.crossover.ICatalogCrossoverService;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import neatlogic.module.process.service.ProcessTaskService;

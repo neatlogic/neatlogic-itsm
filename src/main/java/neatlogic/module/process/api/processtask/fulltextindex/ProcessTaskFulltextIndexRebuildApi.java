@@ -22,7 +22,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
 import neatlogic.framework.restful.annotation.Input;

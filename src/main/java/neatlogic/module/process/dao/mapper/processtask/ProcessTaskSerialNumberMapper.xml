@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.processtask.ProcessTaskSerialNumberMapper">
+
+	<select id="getProcessTaskSerialNumberPolicyLockByChannelTypeUuid" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.ProcessTaskSerialNumberPolicyVo">
+		SELECT
+		`channel_type_uuid` AS channelTypeUuid,
+		`handler`,
+		`config`,
+		`serial_number_seed` AS serialNumberSeed,
+		`start_time` AS startTime,
+		`end_time` AS endTime
+		FROM `processtask_serial_number_policy`
+		WHERE `channel_type_uuid` = #{value}
+		FOR UPDATE
+	</select>
+
+	<select id="getProcessTaskSerialNumberPolicyByChannelTypeUuid" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.ProcessTaskSerialNumberPolicyVo">
+		SELECT
+		`channel_type_uuid` AS channelTypeUuid,
+		`handler`,
+		`config`,
+		`serial_number_seed` AS serialNumberSeed,
+		`start_time` AS startTime,
+		`end_time` AS endTime
+		FROM `processtask_serial_number_policy`
+		WHERE `channel_type_uuid` = #{value}
+	</select>
+
+	<select id="getProcessTaskSerialNumberPolicyListByHandler" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.ProcessTaskSerialNumberPolicyVo">
+		SELECT
+		`channel_type_uuid` AS channelTypeUuid,
+		`handler`,
+		`config`,
+		`serial_number_seed` AS serialNumberSeed,
+		`start_time` AS startTime,
+		`end_time` AS endTime
+		FROM
+		`processtask_serial_number_policy`
+		WHERE `handler` = #{value}
+	</select>
+
+	<insert id="insertProcessTaskSerialNumberPolicy" parameterType="neatlogic.framework.process.dto.ProcessTaskSerialNumberPolicyVo">
+		INSERT INTO `processtask_serial_number_policy` (
+		`channel_type_uuid`,
+		`handler`,
+		`config`,
+		`serial_number_seed`
+		)
+		VALUES
+		(
+		#{channelTypeUuid},
+		#{handler},
+		#{configStr},
+		#{serialNumberSeed}
+		)
+	</insert>
+
+	<insert id="insertProcessTaskSerialNumber">
+		INSERT IGNORE INTO `processtask_serial_number` (`processtask_id`, `serial_number`) VALUES (#{processTaskId}, #{serialNumber})
+	</insert>
+
+	<update id="updateProcessTaskSerialNumberPolicyByChannelTypeUuid" parameterType="neatlogic.framework.process.dto.ProcessTaskSerialNumberPolicyVo">
+		UPDATE `processtask_serial_number_policy`
+		SET
+		`handler` = #{handler},
+		`config` = #{configStr}
+		WHERE `channel_type_uuid` = #{channelTypeUuid}
+	</update>
+
+	<update id="updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid">
+		UPDATE `processtask_serial_number_policy` SET `serial_number_seed` = #{serialNumberSeed}
+		WHERE
+		`channel_type_uuid` = #{channelTypeUuid}
+	</update>
+	
+	<update id="updateProcessTaskSerialNumberPolicyStartTimeByChannelTypeUuid">
+		UPDATE `processtask_serial_number_policy` SET `start_time` = NOW(3), `end_time` = NULL
+		WHERE
+		`channel_type_uuid` = #{channelTypeUuid}
+	</update>
+	
+	<update id="updateProcessTaskSerialNumberPolicyEndTimeByChannelTypeUuid">
+		UPDATE `processtask_serial_number_policy` SET `end_time` = NOW(3)
+		WHERE
+		`channel_type_uuid` = #{channelTypeUuid}
+	</update>
+
+	<delete id="deleteProcessTaskSerialNumberPolicyByChannelTypeUuid" parameterType="java.lang.String">
+		DELETE FROM `processtask_serial_number_policy` WHERE `channel_type_uuid` = #{value}
+	</delete>
+
+	<delete id="deleteProcessTaskSerialNumberByProcessTaskId" parameterType="java.lang.Long">
+		DELETE FROM `processtask_serial_number` WHERE `processtask_id` = #{value}
+	</delete>
+</mapper>

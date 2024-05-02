@@ -20,7 +20,7 @@ import neatlogic.framework.dependency.constvalue.FrameworkFromType;
 import neatlogic.framework.dependency.core.CustomTableDependencyHandlerBase;
 import neatlogic.framework.dependency.core.IFromType;
 import neatlogic.framework.dependency.dto.DependencyInfoVo;
-import neatlogic.framework.process.dao.mapper.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.framework.process.dto.ChannelVo;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;

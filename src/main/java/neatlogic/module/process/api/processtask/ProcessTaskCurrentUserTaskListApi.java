@@ -8,12 +8,16 @@ import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.SlaStatus;
-import neatlogic.framework.process.dao.mapper.*;
 import neatlogic.framework.process.dto.agent.ProcessTaskAgentVo;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.framework.process.service.ProcessTaskAgentService;
+import neatlogic.module.process.service.ProcessTaskAgentService;
 import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.framework.util.TableResultUtil;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskAgentMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 

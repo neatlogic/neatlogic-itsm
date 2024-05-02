@@ -22,17 +22,17 @@ import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
-import neatlogic.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
-import neatlogic.framework.process.dao.mapper.ProcessTaskSlaMapper;
-import neatlogic.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSerialNumberMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
+import neatlogic.module.process.dao.mapper.score.ProcessTaskScoreMapper;
 import neatlogic.framework.process.dto.ProcessTaskRelationVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -66,7 +66,7 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
     private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
 
     @Resource
-    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 
     @Resource
     private ProcessTaskService processTaskService;
@@ -101,8 +101,8 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         // is_deleted置为1
         taskMapper.updateProcessTaskIsDeletedById(processTaskId, 1);
         ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskId, null);
-        IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
-        IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
+        processStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
+        processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
         return null;
     }
 

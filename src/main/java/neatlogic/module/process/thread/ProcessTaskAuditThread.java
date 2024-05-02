@@ -24,7 +24,7 @@ import neatlogic.framework.process.audithandler.core.IProcessTaskAuditDetailType
 import neatlogic.framework.process.audithandler.core.IProcessTaskAuditType;
 import neatlogic.framework.process.audithandler.core.ProcessTaskAuditDetailTypeFactory;
 import neatlogic.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.util.FreemarkerUtil;
 import neatlogic.module.process.service.ProcessTaskService;

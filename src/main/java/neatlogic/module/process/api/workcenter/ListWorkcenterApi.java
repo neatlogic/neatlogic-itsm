@@ -29,7 +29,7 @@ import neatlogic.framework.process.auth.WORKCENTER_MODIFY;
 import neatlogic.framework.process.auth.WORKCENTER_NEW_TYPE;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterInitType;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterType;
-import neatlogic.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.framework.process.workcenter.dto.WorkcenterUserProfileVo;
 import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
 import neatlogic.framework.restful.annotation.*;

@@ -5,7 +5,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import neatlogic.framework.process.dto.ChannelTypeVo;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;

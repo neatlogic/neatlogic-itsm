@@ -9,7 +9,7 @@ import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
-import neatlogic.framework.process.dao.mapper.PriorityMapper;
+import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
 import neatlogic.framework.process.dto.PriorityVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
@@ -17,14 +17,19 @@ import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
+
     @Autowired
     private PriorityMapper priorityMapper;
 

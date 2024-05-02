@@ -21,7 +21,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.lrcode.LRCodeManager;
 import neatlogic.framework.lrcode.constvalue.MoveType;
 import neatlogic.framework.process.auth.CATALOG_MODIFY;
-import neatlogic.framework.process.dao.mapper.CatalogMapper;
+import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.framework.process.dto.CatalogVo;
 import neatlogic.framework.process.exception.catalog.CatalogNameRepeatException;
 import neatlogic.framework.restful.annotation.Description;

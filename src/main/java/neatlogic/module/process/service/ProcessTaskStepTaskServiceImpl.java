@@ -22,10 +22,10 @@ import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.process.constvalue.*;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
-import neatlogic.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
-import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
-import neatlogic.framework.process.dao.mapper.task.TaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTaskMapper;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.dao.mapper.task.TaskMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskHiddenException;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
@@ -34,8 +34,6 @@ import neatlogic.framework.process.exception.operationauth.ProcessTaskStepNotMin
 import neatlogic.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import neatlogic.framework.process.exception.processtask.task.*;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
-import neatlogic.framework.process.service.ProcessTaskAgentServiceImpl;
-import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import neatlogic.framework.process.task.TaskConfigManager;
@@ -72,7 +70,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
     @Resource
     TaskMapper taskMapper;
     @Resource
-    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
+    private IProcessStepHandlerUtil processStepHandlerUtil;
     @Resource
     TaskConfigManager taskConfigManager;
     @Resource
@@ -146,9 +144,9 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         processTaskStepTaskVo.setTaskConfigName(taskConfigVo.getName());
         processTaskStepVo.setProcessTaskStepTaskVo(processTaskStepTaskVo);
         processTaskStepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(Collections.singletonList(processTaskStepTaskVo.getId())));
-        IProcessStepHandlerUtil.audit(processTaskStepVo, auditType);
-        IProcessStepHandlerUtil.notify(processTaskStepVo, triggerType);
-        IProcessStepHandlerUtil.action(processTaskStepVo, triggerType);
+        processStepHandlerUtil.audit(processTaskStepVo, auditType);
+        processStepHandlerUtil.notify(processTaskStepVo, triggerType);
+        processStepHandlerUtil.action(processTaskStepVo, triggerType);
     }
 
 //    /**
@@ -359,12 +357,12 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                     }
                 }
                 if (isCanStepComplete) {
-                    IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.COMPLETEALLTASK);
+                    processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.COMPLETEALLTASK);
                 }
             }
-            IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.COMPLETETASK);
-            IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.COMPLETETASK);
-            IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.COMPLETETASK);
+            processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.COMPLETETASK);
+            processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.COMPLETETASK);
+            processStepHandlerUtil.action(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.COMPLETETASK);
 
             IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
             if (handler == null) {

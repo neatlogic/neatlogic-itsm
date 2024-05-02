@@ -18,7 +18,7 @@ import com.alibaba.fastjson.TypeReference;
 
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.process.dao.mapper.PriorityMapper;
+import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
 import neatlogic.framework.process.dto.PriorityVo;
 import neatlogic.framework.process.exception.priority.PriorityNameRepeatException;
 import neatlogic.framework.process.exception.priority.PriorityNotFoundException;

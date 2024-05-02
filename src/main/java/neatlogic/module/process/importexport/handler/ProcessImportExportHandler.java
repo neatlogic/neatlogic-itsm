@@ -17,7 +17,7 @@ import neatlogic.framework.process.constvalue.ProcessImportExportHandlerType;
 import neatlogic.framework.process.dto.ProcessVo;
 import neatlogic.framework.process.exception.process.ProcessNotFoundException;
 import neatlogic.framework.util.UuidUtil;
-import neatlogic.module.process.dao.mapper.ProcessMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.service.ProcessService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;

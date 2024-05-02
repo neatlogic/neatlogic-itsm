@@ -6,7 +6,7 @@ import neatlogic.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnBase;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
-import neatlogic.framework.process.dao.mapper.CatalogMapper;
+import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.dto.*;
 import neatlogic.framework.process.workcenter.table.CatalogSqlTable;

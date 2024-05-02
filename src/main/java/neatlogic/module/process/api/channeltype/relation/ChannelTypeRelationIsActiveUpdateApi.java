@@ -1,6 +1,6 @@
 package neatlogic.module.process.api.channeltype.relation;
 
-import neatlogic.framework.process.dao.mapper.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import neatlogic.framework.process.exception.channeltype.ChannelTypeRelationHasReferenceException;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;

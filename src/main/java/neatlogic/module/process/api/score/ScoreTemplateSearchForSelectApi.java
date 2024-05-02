@@ -5,7 +5,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.score.ScoreTemplateMapper;
+import neatlogic.module.process.dao.mapper.score.ScoreTemplateMapper;
 import neatlogic.framework.process.dto.score.ScoreTemplateVo;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;

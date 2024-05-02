@@ -1,6 +1,6 @@
 package neatlogic.module.process.api.channeltype;
 
-import neatlogic.framework.process.dao.mapper.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import neatlogic.framework.process.dto.ChannelTypeVo;
 import neatlogic.framework.process.exception.channeltype.ChannelTypeHasReferenceException;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -16,7 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSerialNumberMapper;
 import neatlogic.framework.process.exception.channeltype.ChannelTypeNotFoundException;
 
 @Service

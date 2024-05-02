@@ -19,7 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.autoexec.dto.job.AutoexecJobRouteVo;
 import neatlogic.framework.autoexec.source.IAutoexecJobSource;
 import neatlogic.framework.process.constvalue.AutoExecJobProcessSource;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import org.apache.commons.collections4.CollectionUtils;

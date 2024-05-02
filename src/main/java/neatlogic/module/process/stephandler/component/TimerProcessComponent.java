@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.stephandler.component;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.asynchronization.threadpool.TransactionSynchronizationPool;
@@ -32,8 +33,10 @@ import neatlogic.framework.scheduler.core.IJob;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.schedule.plugin.ProcessTaskStepTimerCompleteJob;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,10 +65,19 @@ import java.util.Set;
 public class TimerProcessComponent extends ProcessStepHandlerBase {
 
     @Resource
+    private IProcessStepHandlerUtil processStepHandlerUtil;
+
+    @Resource
     private ProcessTaskService processTaskService;
 
     @Resource
     private SchedulerManager schedulerManager;
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private SelectContentByHashMapper selectContentByHashMapper;
 
     private final Logger logger = LoggerFactory.getLogger(TimerProcessComponent.class);
 
@@ -291,7 +303,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
             currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CAUSE.getParamName(), currentProcessTaskStepVo.getError());
         }
         /** 处理历史记录 **/
-        IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.COMPLETE);
+        processStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.COMPLETE);
         return 0;
     }
 

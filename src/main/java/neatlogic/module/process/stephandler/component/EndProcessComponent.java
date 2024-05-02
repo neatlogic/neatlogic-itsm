@@ -1,5 +1,6 @@
 package neatlogic.module.process.stephandler.component;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.constvalue.ProcessStepMode;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
@@ -8,14 +9,18 @@ import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskException;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerBase;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Set;
 
 @Service
 public class EndProcessComponent extends ProcessStepHandlerBase {
+
+	@Resource
+	private IProcessStepHandlerUtil processStepHandlerUtil;
 
 	@Override
 	public String getHandler() {
@@ -106,7 +111,7 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 		processTaskVo.setId(currentProcessTaskStepVo.getProcessTaskId());
 //		processTaskMapper.updateProcessTaskStatus(processTaskVo);
 		//自动评分
-		IProcessStepHandlerUtil.autoScore(processTaskVo);
+		processStepHandlerUtil.autoScore(processTaskVo);
 		return 0;
 	}
 	

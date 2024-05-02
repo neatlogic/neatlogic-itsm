@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.constvalue.WorkerPolicy;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepWorkerPolicyVo;

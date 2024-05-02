@@ -2,7 +2,7 @@ package neatlogic.module.process.api.channeltype.relation;
 
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
@@ -20,7 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.PageUtil;
-import neatlogic.framework.process.dao.mapper.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.framework.process.dto.ChannelTypeRelationChannelVo;
 import neatlogic.framework.process.dto.ChannelTypeRelationVo;
 import neatlogic.framework.process.dto.ChannelTypeVo;

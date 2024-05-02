@@ -6,7 +6,7 @@ import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dependency.core.DependencyManager;
 import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.notify.dao.mapper.NotifyMapper;
-import neatlogic.framework.process.dao.mapper.ProcessStepHandlerMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessStepHandlerMapper;
 import neatlogic.framework.process.dto.ProcessStepHandlerVo;
 import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;

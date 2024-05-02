@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.process.notify.handler.param;
 
 import neatlogic.framework.notify.core.INotifyTriggerType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;

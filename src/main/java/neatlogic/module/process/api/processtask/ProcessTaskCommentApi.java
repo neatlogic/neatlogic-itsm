@@ -4,21 +4,19 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.file.FileNotFoundException;
-import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.ProcessTaskStepDataType;
 import neatlogic.framework.process.crossover.IProcessTaskCommentApiCrossoverService;
-import neatlogic.framework.process.dao.mapper.ProcessCommentTemplateMapper;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
-import neatlogic.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessCommentTemplateMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
 import neatlogic.framework.process.dto.*;
-import neatlogic.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -57,7 +55,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
     private ProcessCommentTemplateMapper commentTemplateMapper;
 
     @Autowired
-    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 
     @Override
     public String getToken() {
@@ -163,9 +161,9 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
 
         // 生成活动
         processTaskStepVo.getParamObj().putAll(jsonObj);
-        IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
-        IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepNotifyTriggerType.COMMENT);
-        IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskStepNotifyTriggerType.COMMENT);
+        processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
+        processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepNotifyTriggerType.COMMENT);
+        processStepHandlerUtil.action(processTaskStepVo, ProcessTaskStepNotifyTriggerType.COMMENT);
         JSONObject resultObj = new JSONObject();
         List<String> typeList = new ArrayList<>();
         typeList.add(ProcessTaskOperationType.STEP_COMMENT.getValue());

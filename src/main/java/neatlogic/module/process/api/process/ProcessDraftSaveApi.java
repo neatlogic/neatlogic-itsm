@@ -9,7 +9,7 @@ import neatlogic.framework.process.dto.ProcessDraftVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.process.dao.mapper.ProcessMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
