@@ -11,7 +11,7 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import neatlogic.module.process.dao.mapper.ProcessMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;

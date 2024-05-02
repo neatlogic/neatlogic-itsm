@@ -7,7 +7,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.auth.WORKCENTER_MODIFY;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterType;
-import neatlogic.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.framework.process.exception.workcenter.WorkcenterCanNotEditFactoryException;
 import neatlogic.framework.process.exception.workcenter.WorkcenterNoCustomAuthException;
 import neatlogic.framework.process.exception.workcenter.WorkcenterNoModifyAuthException;

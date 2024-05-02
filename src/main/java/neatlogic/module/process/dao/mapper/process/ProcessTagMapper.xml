@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.process.ProcessTagMapper">
+    <select id="getProcessTagForSelect" parameterType="neatlogic.framework.process.dto.ProcessTagVo" resultType="neatlogic.framework.common.dto.ValueTextVo">
+        SELECT
+        `id` as value,
+        `name` as text
+        FROM  `process_tag`
+        <if test="keyword != null and keyword != ''">
+            WHERE `name` LIKE CONCAT('%', #{keyword}, '%')
+            ORDER BY LENGTH(`name`)
+        </if>
+        <if test="needPage">
+            limit #{startNum}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getProcessTagByNameList" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.ProcessTagVo">
+        SELECT
+        `name`,
+        `id`
+        FROM `process_tag`
+        WHERE `name` IN
+        <foreach collection="list" item="name" open="(" separator="," close=")">
+            #{name}
+        </foreach>
+    </select>
+
+    <select id="getProcessTagByIdList" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTagVo">
+        SELECT
+        `name`,
+        `id`
+        FROM `process_tag`
+        WHERE `id` IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getProcessTagIdByName" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT `id` FROM `process_tag` WHERE `name` = #{value}
+    </select>
+
+    <select id="getProcessTagCount" parameterType="neatlogic.framework.process.dto.ProcessTagVo" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+        FROM  `process_tag`
+        <if test="keyword != null and keyword != ''">
+            WHERE `name` LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+    </select>
+
+    <insert id="insertProcessTag" parameterType="neatlogic.framework.process.dto.ProcessTagVo">
+        INSERT INTO `process_tag` (`id`, `name`)
+        VALUES (#{id}, #{name})
+    </insert>
+</mapper>

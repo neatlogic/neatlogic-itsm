@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.task.TaskMapper">
+    <cache-ref namespace="neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTaskMapper"/>
+    <select id="searchTaskConfigCount" resultType="java.lang.Integer" useCache="false">
+        SELECT
+        count(1)
+        FROM
+        `task_config`
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND `name` LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="isActive != null">
+                AND `is_active` = #{isActive}
+            </if>
+        </where>
+    </select>
+
+    <select id="searchTaskConfig" resultType="neatlogic.framework.process.dto.TaskConfigVo" useCache="false">
+        SELECT
+        `id`,
+        `name`,
+        `num`,
+        `policy`,
+        `is_active` as isActive,
+        `config` as configStr,
+        `fcd`,
+        `fcu`,
+        `lcd`,
+        `lcu`
+        FROM
+        `task_config`
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND `name` LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="isActive != null">
+                AND `is_active` = #{isActive}
+            </if>
+        </where>
+        ORDER BY `fcd` DESC
+        <if test="needPage">
+            limit #{startNum}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="checkTaskConfigNameIsRepeat" parameterType="neatlogic.framework.process.dto.TaskConfigVo"
+            resultType="int" useCache="false">
+        SELECT COUNT(1)
+        FROM `task_config`
+        WHERE `name` = #{name}
+          AND `id` != #{id}
+    </select>
+
+    <select id="getTaskConfigById" resultType="neatlogic.framework.process.dto.TaskConfigVo" useCache="false">
+        SELECT `id`,
+               `name`,
+               `num`,
+               `policy`,
+               `is_active` as isActive,
+               `config` as configStr,
+               `fcd`,
+               `fcu`,
+               `lcd`,
+               `lcu`
+        FROM `task_config`
+        WHERE `id` = #{value}
+    </select>
+
+    <select id="getTaskConfigByName" resultType="neatlogic.framework.process.dto.TaskConfigVo" useCache="false">
+        SELECT `id`,
+               `name`,
+               `num`,
+               `policy`,
+               `is_active` as isActive
+        FROM `task_config`
+        WHERE `name` = #{value}
+    </select>
+    <select id="getTaskConfigByIdList" resultType="neatlogic.framework.process.dto.TaskConfigVo" useCache="false">
+        SELECT
+        `id`,
+        `name`,
+        `num`,
+        `policy`,
+        `is_active` as isActive,
+        `config` as configStr,
+        `fcd`,
+        `fcu`,
+        `lcd`,
+        `lcu`
+        FROM
+        `task_config`
+        WHERE
+        `id` in
+        <foreach collection="list" separator="," item="id" open="(" close=")">
+            #{id}
+        </foreach>
+    </select>
+    <select id="getTaskConfigReferenceCountMap" resultType="java.util.HashMap" useCache="false">
+        SELECT task_config_id as taskConfigId, COUNT(1) as `count`
+        FROM `process_step_task_config`
+        where task_config_id in
+        <foreach collection="list" item="configId" separator="," open="(" close=")">
+            #{configId}
+        </foreach>
+        GROUP BY task_config_id
+    </select>
+    <select id="getTaskConfigReferenceProcessList" resultType="neatlogic.framework.common.dto.ValueTextVo" useCache="false">
+        SELECT CONCAT(p.name,'-',GROUP_CONCAT(ps.name)) AS `text`,p.uuid AS `value` FROM `process_step_task_config` pst
+        JOIN process_step ps ON ps.uuid = pst.process_step_uuid
+        JOIN `process` p ON ps.process_uuid = p.uuid
+        WHERE pst.task_config_id = #{taskConfigId}
+        GROUP BY p.uuid
+        <if test="basePageVo.needPage">
+            limit #{basePageVo.startNum}, #{basePageVo.pageSize}
+        </if>
+    </select>
+
+    <select id="getTaskConfigReferenceProcessCount" resultType="java.lang.Integer" useCache="false">
+        SELECT COUNT(1)
+        FROM (
+                 SELECT p.uuid
+                 FROM `process_step_task_config` pst
+                          JOIN process_step ps ON ps.uuid = pst.process_step_uuid
+                          JOIN `process` p ON ps.process_uuid = p.uuid
+                 WHERE pst.task_config_id = #{value}
+                 GROUP BY p.uuid
+             ) a
+    </select>
+
+    <update id="updateTaskConfig">
+        UPDATE
+            `task_config`
+        SET `name`      = #{name},
+            `num`       = #{num},
+            `policy`    = #{policy},
+            `is_active` = #{isActive},
+            `config`    = #{configStr},
+            `lcd`       = now(3),
+            `lcu`       = #{lcu}
+        WHERE `id` = #{id};
+    </update>
+
+    <insert id="insertTaskConfig">
+        INSERT INTO `task_config` (`id`,
+                                   `name`,
+                                   `num`,
+                                   `policy`,
+                                   `is_active`,
+                                   `config`,
+                                   `fcd`,
+                                   `fcu`,
+                                   `lcd`,
+                                   `lcu`)
+        VALUES (#{id},
+                #{name},
+                #{num},
+                #{policy},
+                #{isActive},
+                #{configStr},
+                now(3),
+                #{fcu},
+                now(3),
+                #{fcu});
+    </insert>
+
+    <delete id="deleteTaskConfigById">
+        DELETE
+        FROM `task_config`
+        WHERE `id` = #{value}
+    </delete>
+</mapper>

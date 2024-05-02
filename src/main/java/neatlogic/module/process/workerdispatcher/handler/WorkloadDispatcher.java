@@ -6,7 +6,7 @@ import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dto.TeamUserVo;
 import neatlogic.framework.process.constvalue.ProcessUserType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
 import neatlogic.framework.process.workerdispatcher.core.WorkerDispatcherBase;

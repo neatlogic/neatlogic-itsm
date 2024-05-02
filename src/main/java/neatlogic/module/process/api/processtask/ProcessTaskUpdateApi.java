@@ -17,22 +17,20 @@ package neatlogic.module.process.api.processtask;
 
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.dao.mapper.PriorityMapper;
-import neatlogic.framework.process.dao.mapper.ProcessTagMapper;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessTagMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.priority.PriorityNotFoundException;
-import neatlogic.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -72,7 +70,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
     private ProcessTaskService processTaskService;
 
     @Resource
-    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 
     @Override
     public String getToken() {
@@ -213,8 +211,8 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
                 processTaskStepVo.setProcessTaskId(processTaskId);
             }
             processTaskStepVo.getParamObj().putAll(jsonObj);
-            IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
-            IProcessStepHandlerUtil.calculateSla(new ProcessTaskVo(processTaskId), false);
+            processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
+            processStepHandlerUtil.calculateSla(new ProcessTaskVo(processTaskId), false);
         }
 
         //创建全文检索索引

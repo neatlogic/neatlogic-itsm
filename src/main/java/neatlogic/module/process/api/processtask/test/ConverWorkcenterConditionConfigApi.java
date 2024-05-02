@@ -18,7 +18,7 @@ package neatlogic.module.process.api.processtask.test;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;

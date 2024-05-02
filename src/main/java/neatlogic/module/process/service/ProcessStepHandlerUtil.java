@@ -1,26 +1,27 @@
-/*Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+/*
+ * Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
-
-package neatlogic.module.process.stephandler.utilhandler;
+package neatlogic.module.process.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.asynchronization.threadpool.TransactionSynchronizationPool;
-import neatlogic.framework.common.RootComponent;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.exception.user.UserNotFoundException;
@@ -32,26 +33,31 @@ import neatlogic.framework.form.exception.FormAttributeRequiredException;
 import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.audithandler.core.IProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.*;
-import neatlogic.framework.process.dao.mapper.*;
+import neatlogic.framework.process.crossover.IProcessStepHandlerCrossoverUtil;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.processtask.*;
-import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import neatlogic.framework.process.stepremind.core.IProcessTaskStepRemindType;
 import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import neatlogic.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import neatlogic.framework.util.FormUtil;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessTagMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTimeAuditMapper;
 import neatlogic.module.process.thread.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@RootComponent
-public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
+@Service
+public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcessStepHandlerCrossoverUtil {
     @Resource
     private ProcessTaskStepTimeAuditMapper processTaskStepTimeAuditMapper;
     @Resource
@@ -128,8 +134,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
      * @Date: 2021/1/20 16:17
      * @Returns:void
      */
-    @Override
-    public void calculateSla(ProcessTaskVo currentProcessTaskVo, ProcessTaskStepVo currentProcessTaskStepVo, boolean isAsync) {
+    private void calculateSla(ProcessTaskVo currentProcessTaskVo, ProcessTaskStepVo currentProcessTaskStepVo, boolean isAsync) {
         if (!isAsync) {
             new ProcessTaskSlaThread(currentProcessTaskVo, currentProcessTaskStepVo).execute();
         } else {
@@ -262,8 +267,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
      * @Author: linbq
      * @Date: 2021/1/20 16:21
      */
-    @Override
-    public boolean baseInfoValid(ProcessTaskStepVo currentProcessTaskStepVo, ProcessTaskVo processTaskVo) {
+    private boolean baseInfoValid(ProcessTaskStepVo currentProcessTaskStepVo, ProcessTaskVo processTaskVo) {
         JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
         if (processTaskVo.getTitle() == null) {
             throw new ProcessTaskTitleIsEmptyException();

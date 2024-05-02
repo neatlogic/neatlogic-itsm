@@ -21,7 +21,7 @@ import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.dto.BaseEditorVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;

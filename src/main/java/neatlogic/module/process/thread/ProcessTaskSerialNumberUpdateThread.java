@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.process.thread;
 
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
-import neatlogic.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSerialNumberMapper;
 import neatlogic.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import neatlogic.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import org.slf4j.Logger;

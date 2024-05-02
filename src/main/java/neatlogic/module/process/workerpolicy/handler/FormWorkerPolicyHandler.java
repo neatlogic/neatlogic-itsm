@@ -12,7 +12,7 @@ import neatlogic.framework.form.constvalue.FormHandler;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.constvalue.WorkerPolicy;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepWorkerPolicyVo;

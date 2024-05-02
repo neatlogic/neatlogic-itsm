@@ -1,5 +1,8 @@
 package neatlogic.module.process.condition.handler;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.FormHandlerType;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.common.dto.ValueTextVo;
@@ -9,15 +12,13 @@ import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
-import neatlogic.framework.process.dao.mapper.ChannelMapper;
-import neatlogic.framework.process.dao.mapper.ChannelTypeMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
 import neatlogic.framework.process.workcenter.table.ChannelTypeSqlTable;
 import neatlogic.framework.process.workcenter.table.util.SqlTableUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -26,6 +27,9 @@ import java.util.List;
 
 @Component
 public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
     @Resource
     private ChannelTypeMapper channelTypeMapper;

@@ -13,8 +13,10 @@ import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,6 +26,9 @@ import java.util.List;
 public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
     private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getName() {

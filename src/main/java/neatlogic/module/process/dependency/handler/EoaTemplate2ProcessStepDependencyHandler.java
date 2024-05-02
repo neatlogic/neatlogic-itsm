@@ -9,7 +9,7 @@ import neatlogic.framework.dependency.dto.DependencyInfoVo;
 import neatlogic.framework.dependency.dto.DependencyVo;
 import neatlogic.framework.process.constvalue.ProcessFromType;
 import neatlogic.framework.process.dto.ProcessVo;
-import neatlogic.module.process.dao.mapper.ProcessMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;

@@ -26,7 +26,7 @@ import neatlogic.framework.process.constvalue.ProcessFlowDirection;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.constvalue.ProcessUserType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepInOperationVo;
 import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;

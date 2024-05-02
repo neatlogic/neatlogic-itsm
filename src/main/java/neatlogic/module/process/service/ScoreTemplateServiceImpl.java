@@ -1,7 +1,7 @@
 package neatlogic.module.process.service;
 
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.process.dao.mapper.score.ScoreTemplateMapper;
+import neatlogic.module.process.dao.mapper.score.ScoreTemplateMapper;
 import neatlogic.framework.process.dto.score.ScoreTemplateDimensionVo;
 import neatlogic.framework.process.dto.score.ScoreTemplateVo;
 import org.springframework.stereotype.Service;

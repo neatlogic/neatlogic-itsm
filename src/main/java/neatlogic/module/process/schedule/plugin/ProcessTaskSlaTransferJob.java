@@ -20,7 +20,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import neatlogic.framework.process.dao.mapper.ProcessTaskSlaMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +45,7 @@ import neatlogic.framework.exception.role.RoleNotFoundException;
 import neatlogic.framework.exception.team.TeamNotFoundException;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.process.constvalue.ProcessUserType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskSlaTimeVo;
 import neatlogic.framework.process.dto.ProcessTaskSlaTransferVo;
 import neatlogic.framework.process.dto.ProcessTaskSlaVo;

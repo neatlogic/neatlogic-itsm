@@ -18,7 +18,7 @@ package neatlogic.module.process.groupsearch;
 import com.alibaba.fastjson.JSONArray;
 import neatlogic.framework.process.constvalue.ProcessTaskGroupSearch;
 import neatlogic.framework.process.constvalue.ProcessUserType;
-import neatlogic.framework.process.dao.mapper.task.TaskMapper;
+import neatlogic.module.process.dao.mapper.task.TaskMapper;
 import neatlogic.framework.process.dto.TaskConfigVo;
 import neatlogic.framework.restful.groupsearch.core.GroupSearchOptionVo;
 import neatlogic.framework.restful.groupsearch.core.GroupSearchVo;

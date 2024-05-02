@@ -17,7 +17,7 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.common.util.PageUtil;
-import neatlogic.framework.process.dao.mapper.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.Description;

@@ -7,7 +7,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.process.auth.PROCESS_MODIFY;
 
-import neatlogic.module.process.dao.mapper.ProcessMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

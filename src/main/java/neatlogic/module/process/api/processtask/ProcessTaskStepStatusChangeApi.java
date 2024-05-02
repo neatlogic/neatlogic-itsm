@@ -40,7 +40,7 @@ import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepRelVo;
 import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;

@@ -1,0 +1,4094 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper">
+
+    <select id="getProcessTaskByStatusList" resultType="neatlogic.framework.process.dto.ProcessTaskVo">
+        SELECT
+        `id`,
+        `status`
+        from
+        `processtask`
+        where `status` in
+        <foreach collection="statusList" item="status" open="(" separator="," close=")">
+            #{status}
+        </foreach>
+        ORDER BY RAND() LIMIT #{count}
+    </select>
+
+    <resultMap id="processTaskStepRelMap" type="neatlogic.framework.process.dto.ProcessTaskStepRelVo">
+        <id column="uuid" property="processStepRelUuid"/>
+        <result column="processtask_id" property="processTaskId"/>
+        <result column="from_process_step_uuid" property="fromProcessStepUuid"/>
+        <result column="to_process_step_uuid" property="toProcessStepUuid"/>
+        <result column="from_processtask_step_id" property="fromProcessTaskStepId"/>
+        <result column="to_processtask_step_id" property="toProcessTaskStepId"/>
+        <result column="toProcessStepHandler" property="toProcessStepHandler"/>
+        <result column="condition" property="condition"/>
+        <result column="is_hit" property="isHit"/>
+        <result column="name" property="name"/>
+        <result column="type" property="type"/>
+    </resultMap>
+    <select id="getProcessTaskStepRelByProcessTaskId" parameterType="java.lang.Long" resultMap="processTaskStepRelMap">
+        SELECT `processtask_id`,
+               `from_process_step_uuid`,
+               `to_process_step_uuid`,
+               `from_processtask_step_id`,
+               `to_processtask_step_id`,
+               (SELECT xx.`handler`
+                FROM `processtask_step` xx
+                WHERE xx.id = `to_processtask_step_id`) AS toProcessStepHandler,
+               `condition`,
+               `uuid`,
+               `is_hit`,
+               `name`,
+               `type`
+        FROM `processtask_step_rel`
+        WHERE processtask_id = #{value}
+    </select>
+
+    <select id="getProcessTaskStepRelListByProcessTaskIdList" parameterType="java.lang.Long"
+            resultMap="processTaskStepRelMap">
+        SELECT
+        `processtask_id`,
+        `from_process_step_uuid`,
+        `to_process_step_uuid`,
+        `from_processtask_step_id`,
+        `to_processtask_step_id`,
+        `uuid`,
+        `is_hit`,
+        `type`
+        FROM `processtask_step_rel`
+        WHERE `processtask_id` IN
+        <foreach collection="list" item="processTaskId" open="(" separator="," close=")">
+            #{processTaskId}
+        </foreach>
+    </select>
+
+    <resultMap id="processTaskMap" type="neatlogic.framework.process.dto.ProcessTaskVo">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="process_uuid" property="processUuid"/>
+        <result column="channel_uuid" property="channelUuid"/>
+        <result column="config_hash" property="configHash"/>
+        <result column="priority_uuid" property="priorityUuid"/>
+        <result column="status" property="status"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="owner" property="owner"/>
+        <result column="reporter" property="reporter"/>
+        <!--<result column="reporterName" property="reporterName" />-->
+        <result column="expire_time" property="expireTime"/>
+        <result column="worktime_uuid" property="worktimeUuid"/>
+        <!--<result column="error" property="error"/>-->
+        <result column="is_show" property="isShow"/>
+        <result column="serial_number" property="serialNumber"/>
+        <result column="need_score" property="needScore"/>
+        <result column="source" property="source"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <!--<association property="ownerVo" javaType="neatlogic.framework.dto.UserVo">
+            <result property="uuid" column="owner"/>
+            <result property="userName" column="ownerName"/>
+            <result property="userInfo" column="ownerInfo"/>
+            <result property="vipLevel" column="ownerVipLevel"/>
+            <result property="pinyin" column="ownerPinyin"/>
+        </association>
+        <association property="reporterVo" javaType="neatlogic.framework.dto.UserVo">
+            <result property="uuid" column="reporter"/>
+            <result property="userName" column="reporterName"/>
+            <result property="userInfo" column="reporterInfo"/>
+            <result property="vipLevel" column="reporterVipLevel"/>
+            <result property="pinyin" column="reporterPinyin"/>
+        </association>-->
+    </resultMap>
+
+    <sql id="getProcessTaskBaseInfoColumnSql">
+        SELECT `id`,
+               `serial_number`,
+               `title`,
+               `process_uuid`,
+               `channel_uuid`,
+               `config_hash`,
+               `priority_uuid`,
+               `status`,
+               `start_time`,
+               `end_time`,
+               `owner`,
+               `reporter`,
+               `expire_time`,
+               `worktime_uuid`,
+               `is_show`,
+               `serial_number`,
+               `need_score`,
+               `source`,
+               `is_deleted`
+        FROM `processtask`
+    </sql>
+
+    <select id="getProcessTaskBaseInfoById" parameterType="java.lang.Long" resultMap="processTaskMap">
+        <include refid="getProcessTaskBaseInfoColumnSql"/>
+        WHERE `id` = #{value} AND (`is_deleted` IS NULL OR `is_deleted` != 1)
+    </select>
+
+    <select id="getProcessTaskBaseInfoByIdIncludeIsDeleted" parameterType="java.lang.Long" resultMap="processTaskMap">
+        <include refid="getProcessTaskBaseInfoColumnSql"/>
+        WHERE `id` = #{value}
+    </select>
+
+    <sql id="getProcessingTaskByConditionSql">
+        FROM
+        processtask pt
+        LEFT JOIN processtask_step pts ON pt.id = pts.processtask_id
+        LEFT JOIN processtask_step_user ptsu ON pts.processtask_id = ptsu.processtask_id
+        AND pts.id = ptsu.processtask_step_id
+        LEFT JOIN processtask_step_worker ptsw ON pts.processtask_id = ptsw.processtask_id
+        AND pts.id = ptsw.processtask_step_id
+        where
+        pt.`status` in ('running')
+        and
+        pts.`status` in ('pending','running' )
+        and (
+        ptsu.`user_uuid` in (#{conditionMap.userUuid})
+        <if test="conditionMap.containsKey('teamUuidList')">
+            or
+            ptsw.`uuid` in
+            <foreach collection="conditionMap.teamUuidList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+            and
+            ptsw.`type` in ('team')
+        </if>
+        <if test="conditionMap.containsKey('roleUuidList')">
+            or
+            ptsw.`uuid` in
+            <foreach collection="conditionMap.roleUuidList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+            and
+            ptsw.`type` in ('role')
+        </if>
+        or ptsw.`uuid` in (#{conditionMap.userUuid})
+        and ptsw.`type` in ('user')
+        )
+        and ( pts.type != 'start'
+        and ( ptsu.`user_uuid` in
+        <foreach collection="conditionMap.stepteam.userUuidList" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        or
+        ptsw.`uuid` in
+        <foreach collection="conditionMap.stepteam.uuidList" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        )
+        )
+    </sql>
+
+    <select id="getProcessingTaskIdListByCondition" parameterType="java.util.Map" resultType="java.lang.Long">
+        SELECT
+        pt.id
+        <include refid="getProcessingTaskByConditionSql"/>
+        group by pt.`id`
+        limit 0,50
+    </select>
+
+    <select id="getProcessingTaskCountByCondition" parameterType="java.util.Map" resultType="int">
+        SELECT
+        count(distinct pt.id)
+        <include refid="getProcessingTaskByConditionSql"/>
+    </select>
+
+    <select id="getTaskListByIdList" parameterType="java.util.List" resultMap="workcenterProcessTaskMap">
+        SELECT
+        pt.title AS title,
+        pt.serial_number AS serialNumber,
+        owner.uuid AS ownerUuid,
+        owner.user_name AS ownerName,
+        owner.user_info AS ownerInfo,
+        owner.vip_level AS ownerVipLevel,
+        owner.pinyin AS ownerPinYin,
+        pri.uuid AS priorityUuid,
+        pri.NAME AS priorityName,
+        pri.color AS priorityColor,
+        reporter.uuid AS reporterUuid,
+        reporter.user_name AS reporterName,
+        reporter.user_info AS reporterInfo,
+        reporter.vip_level AS reporterVipLevel,
+        reporter.pinyin AS reporterPinYin,
+        pts.id AS processTaskStepId,
+        pts.NAME AS processTaskStepName,
+        pts.processtask_id AS processTaskId,
+        pts.HANDLER AS processTaskStepHandler,
+        ptsw.uuid AS stepWorkerUuid,
+        ptsw.type AS stepWorkerType,
+        ptsw.user_type AS stepWorkerUserType,
+        ptsu.STATUS AS stepUserUserStatus,
+        ptsu.user_type AS stepUserUserType,
+        ptsuser.user_name AS stepUserUserName,
+        ptsuser.uuid AS stepUserUserUuid,
+        ptsuser.user_info AS stepUserUserInfo,
+        ptsuser.vip_level AS stepUserUserVipLevel,
+        ptsuser.pinyin AS stepUserUserPinyin,
+        pts.STATUS AS processTaskStepStatus,
+        pts.is_active AS processTaskStepIsActive,
+        pt.STATUS AS STATUS,
+        cata.uuid AS catalogUuid,
+        cata.NAME AS catalogName,
+        ct.uuid AS ChannelTypeUuid,
+        ct.NAME AS ChannelTypeName,
+        ct.color AS ChannelTypeColor,
+        c.uuid AS channelUuid,
+        c.NAME AS channelName,
+        pt.start_time AS start_time,
+        wt.NAME AS worktimeName,
+        pt.end_time AS end_time,
+        ptsl.id AS processTaskSlaId,
+        ptsl.NAME AS processTaskSlaName,
+        ptsl.config AS processTaskSlaConfig,
+        ptslt.expire_time AS expireTime,
+        ptslt.realexpire_time AS realExpireTime,
+        ptslt.time_left AS timeLeft,
+        ptslt.realtime_left AS realTimeLeft,
+        pt.is_show AS is_show,
+        pt.id AS id
+        FROM
+        processtask pt
+        LEFT JOIN `user` owner ON pt.owner = owner.uuid
+        LEFT JOIN priority pri ON pt.priority_uuid = pri.uuid
+        LEFT JOIN `user` reporter ON pt.reporter = reporter.uuid
+        LEFT JOIN processtask_step pts ON pt.id = pts.processtask_id
+        LEFT JOIN processtask_step_user ptsu ON pts.processtask_id = ptsu.processtask_id
+        AND pts.id = ptsu.processtask_step_id
+        LEFT JOIN processtask_step_worker ptsw ON pts.processtask_id = ptsw.processtask_id
+        AND pts.id = ptsw.processtask_step_id
+        LEFT JOIN `user` ptsuser ON ptsu.user_uuid = ptsuser.uuid
+        LEFT JOIN channel c ON pt.channel_uuid = c.uuid
+        LEFT JOIN catalog cata ON c.parent_uuid = cata.uuid
+        LEFT JOIN channel_type ct ON c.channel_type_uuid = ct.uuid
+        LEFT JOIN channel_worktime cwt ON c.uuid = cwt.channel_uuid
+        LEFT JOIN worktime wt ON cwt.worktime_uuid = wt.uuid
+        LEFT JOIN processtask_sla ptsl ON pts.processtask_id = ptsl.processtask_id
+        LEFT JOIN processtask_sla_time ptslt ON ptsl.id = ptslt.sla_id
+        where pt.id in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        order by pt.`id` desc
+    </select>
+
+    <select id="getProcessTaskFormByProcessTaskId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskFormVo">
+        SELECT a.`processtask_id`    as processTaskId,
+               a.`form_uuid`         as formUuid,
+               a.`form_name`         as formName,
+               a.`form_content_hash` as formContentHash
+        FROM `processtask_form` a
+        WHERE a.`processtask_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskFormExtendAttributeListByProcessTaskIdAndTag" parameterType="java.util.HashMap" resultType="neatlogic.framework.process.dto.ProcessTaskFormAttributeVo">
+        SELECT
+            `processtask_id` AS processTaskId,
+            `form_uuid` AS formUuid,
+            `parent_uuid` AS parentUuid,
+            `tag`,
+            `key`,
+            `uuid`,
+            `label`,
+            `type`,
+            `handler`,
+            `config_hash` AS configHash
+        FROM `processtask_form_extend_attribute`
+        WHERE `processtask_id` = #{processTaskId}
+          <if test="tag != null">
+              AND `tag` = #{tag}
+          </if>
+    </select>
+
+    <select id="getProcessTaskFormListByProcessTaskIdList" parameterType="java.util.List"
+            resultType="neatlogic.framework.process.dto.ProcessTaskFormVo">
+        SELECT a.`processtask_id` as processTaskId,
+        a.`form_uuid` as formUuid,
+        a.`form_name` as formName,
+        a.`form_content_hash` as formContentHash
+        FROM `processtask_form` a
+        WHERE a.`processtask_id` IN
+        <foreach collection="list" item="processTaskId" open="(" separator="," close=")">
+            #{processTaskId}
+        </foreach>
+    </select>
+
+    <select id="getProcessTaskFormAttributeDataIdListByProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `form_attribute_data_id` FROM `processtask_formattribute` WHERE `processtask_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskFormAttributeDataListByProcessTaskId" parameterType="java.lang.Long" resultType="neatlogic.framework.form.dto.AttributeDataVo">
+        SELECT a.`id`,
+               a.`form_uuid`       AS formUuid,
+               a.`handler`,
+               a.`attribute_label` AS attributeLabel,
+               a.`attribute_uuid`  AS attributeUuid,
+               a.`data`
+        FROM `form_attribute_data` a
+                 join processtask_formattribute b on a.id = b.form_attribute_data_id
+        where b.processtask_id = #{value}
+    </select>
+
+    <select id="getProcessTaskExtendFormAttributeDataIdListByProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `form_attribute_data_id` FROM `processtask_extend_formattribute` WHERE `processtask_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskExtendFormAttributeDataListByProcessTaskId" parameterType="java.util.HashMap" resultType="neatlogic.framework.form.dto.AttributeDataVo">
+        SELECT
+            b.`id`,
+            b.`form_uuid` AS formUuid,
+            b.`handler`,
+            b.`tag`,
+            b.`attribute_label` AS attributeLabel,
+            b.`attribute_uuid` AS attributeUuid,
+            b.`data`
+        FROM `processtask_extend_formattribute` a
+        JOIN `form_extend_attribute_data` b ON b.`id` = a.`form_attribute_data_id`
+        WHERE a.`processtask_id` = #{processTaskId}
+          <if test="tag != null and tag != ''">
+          AND b.`tag` = #{tag}
+          </if>
+    </select>
+
+    <select id="getProcessTaskStepContentByProcessTaskStepId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepContentVo">
+        SELECT `id`,
+               `processtask_id`      AS processTaskId,
+               `processtask_step_id` AS processTaskStepId,
+               `content_hash`        AS contentHash,
+               `type`,
+               `source`,
+               `fcd`,
+               `fcu`,
+               `lcd`,
+               `lcu`
+        FROM `processtask_step_content`
+        WHERE `processtask_step_id` = #{value}
+        ORDER BY id DESC
+    </select>
+
+    <select id="getProcessTaskStepContentByProcessTaskId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepContentVo">
+        SELECT `id`,
+               `processtask_id`      AS processTaskId,
+               `processtask_step_id` AS processTaskStepId,
+               `content_hash`        AS contentHash,
+               `type`,
+               `source`,
+               `fcd`,
+               `fcu`,
+               `lcd`,
+               `lcu`
+        FROM `processtask_step_content`
+        WHERE `processtask_id` = #{value}
+        ORDER BY `lcd` DESC
+    </select>
+
+    <select id="getProcessTaskStartContentByProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.String">
+        SELECT b.`content`
+        FROM `processtask_step_content` a
+                 JOIN `processtask_content` b ON b.`hash` = a.`content_hash`
+        WHERE a.`type` = 'startprocess'
+          AND a.`processtask_id` = #{value}
+        LIMIT 1
+    </select>
+
+    <resultMap id="processTaskStepUserMap" type="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+        <result column="processtask_id" property="processTaskId"/>
+        <result column="processtask_step_id" property="processTaskStepId"/>
+        <result column="user_type" property="userType"/>
+        <result column="status" property="status"/>
+        <result column="action" property="action"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="active_time" property="activeTime"/>
+        <result column="user_uuid" property="userUuid"/>
+        <result column="user_name" property="userName"/>
+    </resultMap>
+
+    <select id="getProcessTaskStepUserByStepId" resultMap="processTaskStepUserMap">
+        SELECT
+        `processtask_id`,
+        `processtask_step_id`,
+        `user_uuid`,
+        `user_name`,
+        `user_type`,
+        `status`,
+        `action`,
+        `start_time`,
+        `end_time`,
+        `active_time`
+        FROM `processtask_step_user`
+        WHERE processtask_step_id = #{processTaskStepId}
+        <if test="userType != null and userType != ''">
+            and user_type = #{userType}
+        </if>
+    </select>
+
+    <select id="getProcessTaskStepUserByStepIdList" resultMap="processTaskStepUserMap">
+        SELECT
+        `processtask_id`,
+        `processtask_step_id`,
+        `user_uuid`,
+        `user_name`,
+        `user_type`,
+        `status`,
+        `action`,
+        `start_time`,
+        `end_time`,
+        `active_time`
+        FROM `processtask_step_user`
+        WHERE processtask_step_id in
+        <foreach collection="processTaskStepIdList" separator="," open="(" close=")" item="processTaskStepId">
+            #{processTaskStepId}
+        </foreach>
+        <if test="userType != null and userType != ''">
+            and user_type = #{userType}
+        </if>
+    </select>
+
+    <select id="getProcessTaskStepWorkerPolicy"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepWorkerPolicyVo"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepWorkerPolicyVo">
+        SELECT
+        `processtask_id` as processTaskId,
+        `processtask_step_id` as processTaskStepId,
+        `process_step_uuid` as processStepUuid,
+        `policy`,
+        `sort`,
+        `config`
+        FROM `processtask_step_worker_policy`
+        <where>
+            <if test="processTaskId != null">
+                AND `processtask_id` = #{processTaskId}
+            </if>
+            <if test="processTaskStepId != null">
+                AND `processtask_step_id` = #{processTaskStepId}
+            </if>
+        </where>
+        ORDER BY `sort`
+    </select>
+
+    <resultMap id="processTaskStepWorkerMap" type="neatlogic.framework.process.dto.ProcessTaskStepWorkerVo">
+        <id column="uuid" property="uuid"/>
+        <id column="processtask_step_id" property="processTaskStepId"/>
+        <id column="processtask_id" property="processTaskId"/>
+        <result column="type" property="type"/>
+        <!-- <result column="name" property="name" /> -->
+        <result column="user_type" property="userType"/>
+    </resultMap>
+    <select id="getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId" resultMap="processTaskStepWorkerMap">
+        SELECT
+        ptsw.`processtask_id`,
+        ptsw.`processtask_step_id`,
+        ptsw.`type`,
+        ptsw.`uuid`,
+        <!-- CASE `type`
+		WHEN 'user' THEN (SELECT u.`user_name` FROM `user` u WHERE u.`uuid` =
+		ptsw.`uuid`)
+		WHEN 'team' THEN (SELECT t.`name` FROM `team` t WHERE t.`uuid` = ptsw.`uuid`)
+		WHEN 'role' THEN (SELECT r.`name` FROM `role` r WHERE r.`uuid` = ptsw.`uuid`)
+		ELSE NULL END AS `name`, -->
+        ptsw.`user_type`
+        FROM `processtask_step_worker` ptsw
+        WHERE ptsw.`processtask_id` = #{processTaskId}
+        <if test="processTaskStepId != null">
+            AND ptsw.`processtask_step_id` = #{processTaskStepId}
+        </if>
+    </select>
+
+    <select id="getProcessTaskStepWorkerListByProcessTaskIdList" parameterType="java.lang.Long"
+            resultMap="processTaskStepWorkerMap">
+        SELECT
+        `processtask_id`,
+        `processtask_step_id`,
+        `type`,
+        `uuid`,
+        `user_type`
+        FROM `processtask_step_worker`
+        WHERE `processtask_id` IN
+        <foreach collection="list" item="processTaskId" open="(" separator="," close=")">
+            #{processTaskId}
+        </foreach>
+    </select>
+
+    <select id="getProcessTaskStepWorkerListByProcessTaskStepIdListAndUserType" resultMap="processTaskStepWorkerMap">
+        SELECT
+        `processtask_id`,
+        `processtask_step_id`,
+        `type`,
+        `uuid`,
+        `user_type`
+        FROM `processtask_step_worker`
+        WHERE `user_type` = #{userType}
+        AND `processtask_step_id` IN
+        <foreach collection="processTaskStepIdList" item="processTaskStepId" open="(" separator="," close=")">
+            #{processTaskStepId}
+        </foreach>
+    </select>
+
+    <select id="checkProcessTaskStepWorkerIsExistsByPrimaryKey" parameterType="neatlogic.framework.process.dto.ProcessTaskStepWorkerVo" resultType="int">
+        SELECT
+        COUNT(1)
+        FROM `processtask_step_worker`
+        WHERE `processtask_id` = #{processTaskId}
+          AND `processtask_step_id` = #{processTaskStepId}
+          and `user_type` = #{userType}
+          and `uuid` = #{uuid}
+    </select>
+
+    <!--<select id="getFromProcessTaskStepByToId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        SELECT a.`id`,
+               a.`processtask_id`    AS processTaskId,
+               a.`name`,
+               a.`process_step_uuid` AS processStepUuid,
+               a.`status`,
+               a.`result`,
+               a.`type`,
+               a.`handler`,
+               a.`is_active`         AS isActive,
+               a.`config_hash`       AS configHash,
+               a.`active_time`       AS activeTime,
+               a.`start_time`        AS startTime,
+               a.`end_time`          AS endTime,
+               a.`error`
+        FROM `processtask_step` a
+                 JOIN `processtask_step_rel` b ON a.`id` = b.`from_processtask_step_id` AND b.`is_hit` = 1
+        WHERE b.`to_processtask_step_id` = #{value}
+    </select>-->
+
+    <select id="getFromProcessTaskStepIdListByToId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `from_processtask_step_id`
+        FROM `processtask_step_rel`
+        WHERE `to_processtask_step_id` = #{value}
+          AND `is_hit` = 1
+    </select>
+
+    <select id="getProcessTaskStepByConvergeId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        SELECT b.`id`,
+               b.`status`,
+               b.`name`,
+               b.`type`,
+               b.`handler`,
+               b.`is_active` AS isActive,
+               a.`is_check`  AS isCheck
+        FROM `processtask_converge` a
+                 JOIN
+             `processtask_step` b ON a.`processtask_step_id` = b.`id`
+        WHERE a.`converge_id` = #{value}
+    </select>
+
+    <!--<select id="getProcessTaskStepIdByConvergeId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT a.`processtask_step_id`
+        FROM `processtask_converge` a
+        WHERE a.`converge_id` = #{value}
+    </select>-->
+
+    <select id="getProcessTaskLockById" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT id
+        FROM processtask
+        WHERE id = #{value} FOR
+        UPDATE
+    </select>
+
+    <select id="getProcessTaskVoLockById" parameterType="java.lang.Long" resultMap="processTaskMap">
+        SELECT `id`,
+               `serial_number`,
+               `title`,
+               `process_uuid`,
+               `channel_uuid`,
+               `config_hash`,
+               `priority_uuid`,
+               `status`,
+               `start_time`,
+               `end_time`,
+               `owner`,
+               `reporter`,
+               `expire_time`,
+               `worktime_uuid`,
+               `is_show`,
+               `serial_number`,
+               `need_score`,
+               `source`
+        FROM `processtask`
+        WHERE id = #{value}
+            FOR
+        UPDATE
+    </select>
+
+    <select id="getToProcessTaskStepByFromIdAndType" resultType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        SELECT
+        a.`id`,
+        a.`processtask_id` AS processTaskId,
+        a.`name`,
+        a.`process_step_uuid` AS processStepUuid,
+        a.`status`,
+        a.`result`,
+        a.`type`,
+        a.`handler`,
+        a.`is_active` AS isActive,
+        a.`active_time` AS activeTime,
+        a.`start_time` AS startTime,
+        a.`end_time` AS endTime,
+        a.`error`,
+        b.`name` AS aliasName,
+        b.`type` AS flowDirection
+        FROM
+        `processtask_step` a JOIN `processtask_step_rel` b ON a.`id` =
+        b.`to_processtask_step_id`
+        WHERE
+        b.`from_processtask_step_id` = #{fromProcessTaskStepId}
+        <if test="type != null and type != ''">
+            and b.`type` = #{type}
+        </if>
+    </select>
+
+    <select id="getToProcessTaskStepIdListByFromIdAndType" resultType="java.lang.Long">
+        SELECT `to_processtask_step_id` FROM `processtask_step_rel`
+        WHERE `from_processtask_step_id` = #{fromProcessTaskStepId}
+        <if test="type != null and type != ''">
+            and `type` = #{type}
+        </if>
+    </select>
+
+    <select id="checkProcessTaskConvergeIsExists" parameterType="neatlogic.framework.process.dto.ProcessTaskConvergeVo"
+            resultType="int">
+        SELECT COUNT(1)
+        FROM `processtask_converge`
+        WHERE processtask_id =
+              #{processTaskId}
+          AND converge_id = #{convergeId}
+          AND processtask_step_id = #{processTaskStepId}
+    </select>
+
+    <select id="getProcessTaskConvergeListByStepId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskConvergeVo">
+        SELECT `converge_id`         AS convergeId,
+               `processtask_step_id` AS processTaskStepId,
+               `processtask_id`      AS processTaskId,
+               `is_check`            AS isCkeck
+        FROM `processtask_converge`
+        WHERE processtask_step_id = #{processTaskStepId}
+    </select>
+
+    <select id="getStartProcessTaskStepByProcessTaskId" resultType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        SELECT `id`,
+               `processtask_id`    AS processTaskId,
+               `name`,
+               `process_step_uuid` AS processStepUuid,
+               `status`,
+               `result`,
+               `type`,
+               `handler`,
+               `is_active`         AS isActive,
+               `active_time`       AS activeTime,
+               `start_time`        AS startTime,
+               `end_time`          AS endTime,
+               `error`,
+               `config_hash`       AS configHash
+        FROM `processtask_step`
+        WHERE `processtask_id` = #{value}
+          AND `type` = 'start'
+    </select>
+
+    <select id="getEndProcessTaskStepByProcessTaskId" resultType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        SELECT `id`,
+               `processtask_id`    AS processTaskId,
+               `name`,
+               `process_step_uuid` AS processStepUuid,
+               `status`,
+               `result`,
+               `type`,
+               `handler`,
+               `is_active`         AS isActive,
+               `active_time`       AS activeTime,
+               `start_time`        AS startTime,
+               `end_time`          AS endTime,
+               `error`,
+               `config_hash`       AS configHash
+        FROM `processtask_step`
+        WHERE `processtask_id` = #{value}
+          AND `type` = 'end'
+    </select>
+
+    <select id="getProcessTaskStepByProcessTaskIdAndType"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        SELECT `id`,
+               `processtask_id`    AS processTaskId,
+               `name`,
+               `process_step_uuid` AS processStepUuid,
+               `status`,
+               `result`,
+               `type`,
+               `handler`,
+               `is_active`         AS isActive,
+               `config_hash`       AS configHash,
+               `active_time`       AS activeTime,
+               `start_time`        AS startTime,
+               `end_time`          AS endTime,
+               `error`
+        FROM `processtask_step`
+        WHERE `processtask_id` = #{processTaskId}
+          AND `type` = #{type}
+    </select>
+
+    <resultMap id="processTaskStepDetailMap" type="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        <id column="id" property="id"/>
+        <result column="processTaskId" property="processTaskId"/>
+        <result column="name" property="name"/>
+        <result column="processStepUuid" property="processStepUuid"/>
+        <result column="status" property="status"/>
+        <result column="result" property="result"/>
+        <result column="type" property="type"/>
+        <result column="handler" property="handler"/>
+        <result column="isActive" property="isActive"/>
+        <result column="startTime" property="startTime"/>
+        <result column="configHash" property="configHash"/>
+        <result column="endTime" property="endTime"/>
+        <result column="error" property="error"/>
+        <collection property="workerList" ofType="neatlogic.framework.process.dto.ProcessTaskStepWorkerVo">
+            <result column="workerType" property="type"/>
+            <result column="uuid" property="uuid"/>
+        </collection>
+        <collection property="userList" ofType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+            <result column="userType" property="userType"/>
+            <result column="userStatus" property="status"/>
+            <result column="user_uuid" property="userUuid"/>
+        </collection>
+    </resultMap>
+
+    <select id="getProcessTaskActiveStepByProcessTaskIdAndProcessStepType" parameterType="java.lang.Long"
+            resultMap="processTaskStepDetailMap">
+        SELECT
+        ps.`id`,
+        ps.`processtask_id` AS processTaskId,
+        ps.`name`,
+        ps.`process_step_uuid` AS processStepUuid,
+        ps.`status`,
+        ps.`result`,
+        ps.`type`,
+        ps.`handler`,
+        ps.`active_time` AS activeTime,
+        ps.`start_time`
+        AS startTime,
+        ps.`end_time` AS endTime,
+        ps.`error`,
+        ps.`is_active` AS isActive,
+        ps.`config_hash` AS configHash,
+        psw.`type` as workerType,
+        psw.`uuid`,
+        psu.`user_uuid` as userUuid,
+        psu.`status` as userStatus,
+        psu.`user_type` AS userType
+        FROM `processtask_step` ps
+        LEFT JOIN `processtask_step_worker` psw ON ps.`processtask_id` = psw.`processtask_id` AND ps.`id` =
+        psw.`processtask_step_id`
+        LEFT JOIN
+        `processtask_step_user` psu ON ps.`processtask_id` = psu.`processtask_id` AND ps.`id` =
+        psu.`processtask_step_id`
+        WHERE ps.`processtask_id` = #{processTaskId}
+        <if test="processStepTypeList != null and processStepTypeList.size()>0">
+            AND ps.`type` in
+            <foreach collection="processStepTypeList" item="processStepType" open="(" separator="," close=")">
+                #{processStepType}
+            </foreach>
+        </if>
+        <if test="isActive != null">
+            AND ps.`is_active` = #{isActive}
+        </if>
+    </select>
+
+    <select id="getProcessTaskStepRelByToId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepRelVo">
+        SELECT `processtask_id`                         AS processTaskId,
+               `from_process_step_uuid`                 AS fromProcessStepUuid,
+               `to_process_step_uuid`                   AS toProcessStepUuid,
+               `from_processtask_step_id`               AS fromProcessTaskStepId,
+               `to_processtask_step_id`                 AS toProcessTaskStepId,
+               (SELECT xx.`handler`
+                FROM `processtask_step` xx
+                WHERE xx.id = `to_processtask_step_id`) AS toProcessStepHandler,
+               `condition`,
+               `is_hit`                                 AS isHit,
+               `name`,
+               `type`
+        FROM `processtask_step_rel`
+        WHERE to_processtask_step_id = #{value}
+    </select>
+
+    <select id="getProcessTaskStepRelListByToIdList" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepRelVo">
+        SELECT `processtask_id` AS processTaskId,
+        `from_process_step_uuid` AS fromProcessStepUuid,
+        `to_process_step_uuid` AS toProcessStepUuid,
+        `from_processtask_step_id` AS fromProcessTaskStepId,
+        `to_processtask_step_id` AS toProcessTaskStepId,
+        `condition`,
+        `is_hit` AS isHit,
+        `name`,
+        `type`
+        FROM `processtask_step_rel`
+        WHERE `to_processtask_step_id` IN
+        <foreach collection="list" item="toStepId" open="(" separator="," close=")">
+            #{toStepId}
+        </foreach>
+    </select>
+
+    <select id="getProcessTaskStepRelByFromId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepRelVo">
+        SELECT `processtask_id`                         AS processTaskId,
+               `from_process_step_uuid`                 AS fromProcessStepUuid,
+               `to_process_step_uuid`                   AS toProcessStepUuid,
+               `from_processtask_step_id`               AS fromProcessTaskStepId,
+               `to_processtask_step_id`                 AS toProcessTaskStepId,
+               (SELECT xx.`handler`
+                FROM `processtask_step` xx
+                WHERE xx.id = `to_processtask_step_id`) AS toProcessStepHandler,
+               `condition`,
+               `is_hit`                                 AS isHit,
+               `name`,
+               `type`
+        FROM `processtask_step_rel`
+        WHERE from_processtask_step_id = #{value}
+    </select>
+
+    <select id="getProcessTaskStepRelListByFromIdList" parameterType="java.util.List"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepRelVo">
+        SELECT `processtask_id` AS processTaskId,
+        `from_process_step_uuid` AS fromProcessStepUuid,
+        `to_process_step_uuid` AS toProcessStepUuid,
+        `from_processtask_step_id` AS fromProcessTaskStepId,
+        `to_processtask_step_id` AS toProcessTaskStepId,
+        (SELECT xx.`handler`
+        FROM `processtask_step` xx
+        WHERE xx.id = `to_processtask_step_id`) AS toProcessStepHandler,
+        `condition`,
+        `is_hit` AS isHit,
+        `name`,
+        `type`
+        FROM `processtask_step_rel`
+        WHERE from_processtask_step_id IN
+        <foreach collection="list" item="fromId" open="(" separator="," close=")">
+            #{fromId}
+        </foreach>
+    </select>
+
+    <select id="getProcessTaskStepBaseInfoById" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        SELECT `id`,
+               `processtask_id`    AS processTaskId,
+               `name`,
+               `process_step_uuid` AS processStepUuid,
+               `status`,
+               `result`,
+               `type`,
+               `handler`,
+               `is_active`         AS isActive,
+               `config_hash`       AS configHash,
+               `active_time`       AS activeTime,
+               `start_time`        AS startTime,
+               `end_time`          AS endTime,
+               `error`
+        FROM `processtask_step`
+        WHERE id =
+              #{value}
+    </select>
+
+    <select id="getProcessTaskStepBaseInfoByProcessTaskId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        SELECT `id`,
+               `processtask_id`    AS processTaskId,
+               `name`,
+               `process_step_uuid` AS processStepUuid,
+               `status`,
+               `result`,
+               `type`,
+               `handler`,
+               `is_active`         AS isActive,
+               `config_hash`       AS configHash,
+               `active_time`       AS activeTime,
+               `start_time`        AS startTime,
+               `end_time`          AS endTime,
+               `error`
+        FROM `processtask_step`
+        WHERE `processtask_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskById" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskVo">
+        SELECT `id`,
+               `title`,
+               `process_uuid`  AS processUuid,
+               `channel_uuid`  AS channelUuid,
+               `config_hash`   AS configHash,
+               `priority_uuid` AS priorityUuid,
+               `status`,
+               `start_time`    AS startTime,
+               `end_time`      AS endTime,
+               `owner`,
+               `reporter`,
+               `expire_time`   AS expireTime,
+               `worktime_uuid` AS worktimeUuid,
+               `error`,
+               `is_show`       as isShow,
+               `serial_number` AS serialNumber,
+               `need_score`    AS needScore,
+               `source`,
+               `region_id` AS regionId
+        FROM `processtask`
+        WHERE `id` = #{id}
+    </select>
+
+    <resultMap type="neatlogic.framework.process.dto.ProcessTaskStepAuditVo" id="processTaskStepAuditMap">
+        <id column="id" property="id"/>
+        <result column="processtask_id" property="processTaskId"/>
+        <result column="processtask_step_id" property="processTaskStepId"/>
+        <result column="user_uuid" property="userUuid"/>
+        <result column="action_time" property="actionTime"/>
+        <result column="action" property="action"/>
+        <result column="step_status" property="stepStatus"/>
+        <result column="description_hash" property="descriptionHash"/>
+        <result column="original_user" property="originalUser"/>
+        <result column="source" property="source"/>
+        <collection property="auditDetailList" ofType="neatlogic.framework.process.dto.ProcessTaskStepAuditDetailVo">
+            <result column="audit_id" property="auditId"/>
+            <result column="type" property="type"/>
+            <result column="old_content" property="oldContent"/>
+            <result column="new_content" property="newContent"/>
+        </collection>
+    </resultMap>
+    <select id="getProcessTaskStepAuditList" parameterType="neatlogic.framework.process.dto.ProcessTaskStepAuditVo"
+            resultMap="processTaskStepAuditMap">
+        SELECT
+        a.`id`,
+        a.`processtask_id`,
+        a.`processtask_step_id`,
+        a.`user_uuid`,
+        a.`action_time`,
+        a.`action`,
+        a.`step_status`,
+        a.`original_user`,
+        a.`description_hash`,
+        a.`source`,
+        b.`audit_id`,
+        b.`type`,
+        b.`old_content`,
+        b.`new_content`
+        FROM `processtask_step_audit` a
+        LEFT JOIN `processtask_step_audit_detail` b ON b.`audit_id` = a.`id`
+        WHERE a.`processtask_id` = #{processTaskId}
+        <if test="processTaskStepId != null">
+            AND a.`processtask_step_id` = #{processTaskStepId}
+        </if>
+    </select>
+
+    <resultMap type="neatlogic.framework.process.dto.ProcessTaskStepVo" id="processTaskStepMap">
+        <id column="id" property="id"/>
+        <result column="processtask_id" property="processTaskId"/>
+        <result column="name" property="name"/>
+        <result column="process_step_uuid" property="processStepUuid"/>
+        <result column="status" property="status"/>
+        <result column="result" property="result"/>
+        <result column="type" property="type"/>
+        <result column="handler" property="handler"/>
+        <result column="is_active" property="isActive"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="error" property="error"/>
+        <result column="expire_time" property="expireTime"/>
+        <result column="config_hash" property="configHash"/>
+    </resultMap>
+    <select id="getProcessTaskStepListByProcessTaskId" parameterType="java.lang.Long" resultMap="processTaskStepMap">
+        SELECT `id`,
+               `processtask_id`,
+               `name`,
+               `process_step_uuid`,
+               `status`,
+               `result`,
+               `type`,
+               `handler`,
+               `is_active`,
+               `active_time`,
+               `start_time`,
+               `end_time`,
+               `error`,
+               `expire_time`,
+               `config_hash`
+        FROM `processtask_step`
+        WHERE `processtask_id` = #{processTaskId}
+    </select>
+
+    <select id="getProcessTaskStepListByProcessTaskIdList" parameterType="java.lang.Long"
+            resultMap="processTaskStepMap">
+        SELECT
+        `id`,
+        `processtask_id`,
+        `name`,
+        `process_step_uuid`,
+        `status`,
+        `result`,
+        `type`,
+        `handler`,
+        `is_active`,
+        `active_time`,
+        `start_time`,
+        `end_time`,
+        `expire_time`,
+        `config_hash`
+        FROM `processtask_step`
+        WHERE `processtask_id` IN
+        <foreach collection="list" item="processTaskId" open="(" separator="," close=")">
+            #{processTaskId}
+        </foreach>
+    </select>
+
+    <select id="getProcessTaskStepIdSetByChannelUuidListAndAuthenticationInfo" resultType="java.lang.Long">
+        SELECT
+        a.`processtask_step_id`
+        FROM `processtask_step_worker` a
+        JOIN `processtask` b ON b.`id` = a.`processtask_id` and b.`status` = 'running' and b.`is_deleted` = 0
+        JOIN `processtask_serial_number` c ON c.`processtask_id` = a.`processtask_id`
+        JOIN `processtask_step` d ON d.`processtask_id` = a.`processtask_id` AND d.`id` = a.`processtask_step_id` AND (d.`status` = 'running' OR d.`status` = 'pending')
+        WHERE ((a.`type` = 'user' AND a.`uuid` = #{authenticationInfoVo.userUuid})
+        <if test="authenticationInfoVo.teamUuidList != null and authenticationInfoVo.teamUuidList.size() > 0">
+            OR (a.`type` = 'team' AND a.`uuid` in
+            <foreach collection="authenticationInfoVo.teamUuidList" item="teamUuid" open="(" separator="," close=")">
+                #{teamUuid}
+            </foreach>
+            )
+        </if>
+        <if test="authenticationInfoVo.roleUuidList != null and authenticationInfoVo.roleUuidList.size() > 0">
+            OR (a.`type` = 'role' AND a.`uuid` in
+            <foreach collection="authenticationInfoVo.roleUuidList" item="roleUuid" open="(" separator="," close=")">
+                #{roleUuid}
+            </foreach>
+            )
+        </if>
+        )
+        <if test="keyword != null and keyword != ''">
+            AND (b.`title` LIKE CONCAT('%', #{keyword}, '%') OR c.`serial_number` LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="channelUuidList != null and channelUuidList.size() > 0">
+            AND b.`channel_uuid` IN
+            <foreach collection="channelUuidList" item="channelUuid" open="(" separator="," close=")">
+                #{channelUuid}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getProcessTaskIdSetByChannelUuidListAndAuthenticationInfo" resultType="java.lang.Long">
+        SELECT
+        b.`id`
+        FROM `processtask_step_worker` a
+        JOIN `processtask` b ON b.`id` = a.`processtask_id` and b.`status` = 'running'
+        WHERE ((`type` = 'user' AND a.`uuid` = #{authenticationInfoVo.userUuid})
+        <if test="authenticationInfoVo.teamUuidList != null and authenticationInfoVo.teamUuidList.size() > 0">
+            OR (`type` = 'team' AND a.`uuid` in
+            <foreach collection="authenticationInfoVo.teamUuidList" item="teamUuid" open="(" separator="," close=")">
+                #{teamUuid}
+            </foreach>
+            )
+        </if>
+        <if test="authenticationInfoVo.roleUuidList != null and authenticationInfoVo.roleUuidList.size() > 0">
+            OR (`type` = 'role' AND a.`uuid` in
+            <foreach collection="authenticationInfoVo.roleUuidList" item="roleUuid" open="(" separator="," close=")">
+                #{roleUuid}
+            </foreach>
+            )
+        </if>
+        )
+        <if test="channelUuidList != null and channelUuidList.size() > 0">
+            AND b.`channel_uuid` IN
+            <foreach collection="channelUuidList" item="channelUuid" open="(" separator="," close=")">
+                #{channelUuid}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="checkIsWorker" resultType="int">
+        SELECT
+        COUNT(1)
+        FROM `processtask_step_worker`
+        WHERE `processtask_id` = #{processTaskId}
+        <if test="processTaskStepId != null">
+            AND `processtask_step_id` = #{processTaskStepId}
+        </if>
+        <if test="userType != null and userType != ''">
+            AND `user_type` = #{userType}
+        </if>
+        AND (
+        (`type` = 'user'
+        <choose>
+            <when test="authenticationInfoVo.userUuidList != null and authenticationInfoVo.userUuidList.size() > 0">
+                AND `uuid` IN
+                <foreach collection="authenticationInfoVo.userUuidList" item="userUuid" open="(" separator=","
+                         close=")">
+                    #{userUuid}
+                </foreach>
+            </when>
+            <otherwise>
+                AND `uuid` = #{authenticationInfoVo.userUuid}
+            </otherwise>
+        </choose>
+        )
+        <if test="authenticationInfoVo.teamUuidList != null and authenticationInfoVo.teamUuidList.size() > 0">
+            OR (`type` = 'team' AND `uuid` IN
+            <foreach collection="authenticationInfoVo.teamUuidList" item="teamUuid" open="(" separator="," close=")">
+                #{teamUuid}
+            </foreach>
+            )
+        </if>
+        <if test="authenticationInfoVo.roleUuidList != null and authenticationInfoVo.roleUuidList.size() > 0">
+            OR (`type` = 'role' AND `uuid` IN
+            <foreach collection="authenticationInfoVo.roleUuidList" item="roleUuid" open="(" separator="," close=")">
+                #{roleUuid}
+            </foreach>
+            )
+        </if>
+        )
+    </select>
+
+    <select id="checkIsProcessTaskStepUser" parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo"
+            resultType="int">
+        SELECT
+        COUNT(1)
+        FROM `processtask_step_user`
+        WHERE `processtask_id` = #{processTaskId}
+        <choose>
+            <when test="userUuidList != null and userUuidList.size() > 0">
+                AND `user_uuid` IN
+                <foreach collection="userUuidList" item="useruuid" open="(" separator="," close=")">
+                    #{useruuid}
+                </foreach>
+            </when>
+            <otherwise>
+                AND `user_uuid` = #{userUuid}
+            </otherwise>
+        </choose>
+        <if test="processTaskStepId != null">
+            AND `processtask_step_id` = #{processTaskStepId}
+        </if>
+        <if test="userType != null and userType != ''">
+            AND `user_type` = #{userType}
+        </if>
+    </select>
+
+    <select id="getProcessTaskAssignWorker" parameterType="neatlogic.framework.process.dto.ProcessTaskAssignWorkerVo"
+            resultType="neatlogic.framework.process.dto.ProcessTaskAssignWorkerVo">
+        SELECT `processtask_id`           AS processTaskId,
+               `processtask_step_id`      AS
+                                             processTaskStepId,
+               `from_processtask_step_id` AS fromProcessTaskStepId,
+               `from_process_step_uuid`   AS fromProcessStepUuid,
+               `type`,
+               `uuid`,
+               `fcu`,
+               `fcd`
+        FROM `processtask_assignworker`
+        WHERE `processtask_id` =
+              #{processTaskId}
+          AND `processtask_step_id` = #{processTaskStepId}
+          AND `from_process_step_uuid` = #{fromProcessStepUuid}
+    </select>
+
+    <select id="getProcessTaskStepBaseInfoByProcessTaskIdAndProcessStepUuid"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        SELECT `id`,
+               `processtask_id`    AS processTaskId,
+               `name`,
+               `process_step_uuid` AS processStepUuid,
+               `status`,
+               `result`,
+               `type`,
+               `handler`,
+               `is_active`         AS isActive,
+               `config_hash`       AS configHash,
+               `active_time`       AS activeTime,
+               `start_time`        AS startTime,
+               `end_time`          AS endTime,
+               `error`
+        FROM `processtask_step`
+        WHERE `processtask_id` = #{processTaskId}
+          AND `process_step_uuid` = #{processStepUuid}
+    </select>
+
+    <select id="getProcessTaskAuditList" resultType="neatlogic.framework.process.dto.ProcessTaskStepAuditVo">
+        SELECT
+        `processtask_id` as processTaskId,
+        `processtask_step_id` as processTaskStepId,
+        `user_uuid` as userUuid,
+        `action_time` as actionTime,
+        `action`,
+        `source`,
+        `step_status` as stepStatus,
+        `original_user` as
+        originalUser
+        FROM
+        `processtask_step_audit`
+        WHERE 1=1
+        <if test="processTaskId != null">
+            and `processtask_id` = #{processTaskId}
+        </if>
+        <if test="userUuid != null">
+            and `user_uuid` = #{userUuid}
+        </if>
+        <if test="action != null">
+            and `action` = #{action}
+        </if>
+    </select>
+
+    <select id="getProcessTaskListByIdList" parameterType="java.lang.Long" resultMap="processTaskMap">
+        SELECT
+        `id`,
+        `title`,
+        `process_uuid`,
+        `channel_uuid`,
+        `config_hash`,
+        `priority_uuid`,
+        `status`,
+        `start_time`,
+        `end_time`,
+        `owner`,
+        `reporter`,
+        `expire_time`,
+        `worktime_uuid`,
+        `is_show`,
+        `serial_number`,
+        `need_score`,
+        `source`
+        FROM `processtask`
+        WHERE `id` IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getProcessTaskStepListByIdList" parameterType="java.lang.Long" resultMap="processTaskStepMap">
+        SELECT
+        `id`,
+        `processtask_id`,
+        `name`,
+        `process_step_uuid`,
+        `status`,
+        `result`,
+        `type`,
+        `handler`,
+        `is_active`,
+        `active_time`,
+        `start_time`,
+        `end_time`,
+        `expire_time`,
+        `config_hash`
+        FROM `processtask_step`
+        WHERE
+        `id` IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <!--<select id="getProcessTaskStepNotifyPolicy"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepNotifyPolicyVo"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepNotifyPolicyVo">
+        SELECT a.`processtask_step_id` AS processTaskStepId,
+               a.`policy_id`           AS policyId,
+               a.`policy_name`         AS policyName,
+               a.`policy_handler`      AS policyHandler,
+               a.`policy_config_hash`  AS policyConfigHash,
+               b.`config`              AS policyConfig
+        FROM `processtask_step_notify_policy` a
+                 JOIN
+             `processtask_step_notify_policy_config` b ON b.`hash` = a.`policy_config_hash`
+        WHERE a.`processtask_step_id` = #{processTaskStepId}
+          AND a.`policy_id` = #{policyId}
+    </select>-->
+
+    <select id="getProcessTaskOldFormAndPropByTaskId" parameterType="java.lang.Long" resultType="java.util.HashMap">
+        select form, prop
+        from processtask_old_form_prop
+        where processtask_id = #{value}
+    </select>
+
+    <select id="getWorkloadByTeamUuid" parameterType="java.lang.String" resultType="java.util.HashMap">
+        SELECT c.`uuid`        AS userUuid,
+               COUNT(c.`uuid`) AS count
+        FROM `user_team` a
+                 JOIN `user` b ON b.`uuid` = a.`user_uuid`
+                 JOIN
+             `processtask_step_worker` c ON c.`uuid` = b.`uuid` AND c.`type` = 'user' AND c.`user_type` = 'major'
+        WHERE a.`team_uuid` = #{value}
+        GROUP BY c.`uuid`
+        ORDER BY COUNT(c.`uuid`) ASC
+    </select>
+
+    <select id="getFileIdListByContentId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `file_id`
+        FROM `processtask_file`
+        WHERE `content_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepContentById" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepContentVo">
+        SELECT `id`,
+               `processtask_id`      AS processTaskId,
+               `processtask_step_id` AS processTaskStepId,
+               `content_hash`        AS contentHash,
+               `type`,
+               `source`,
+               `fcd`,
+               `fcu`,
+               `lcd`,
+               `lcu`
+        FROM `processtask_step_content`
+        WHERE `id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepUserList" parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo"
+            resultMap="processTaskStepUserMap">
+        SELECT
+        `processtask_id`,
+        `processtask_step_id`,
+        `user_uuid`,
+        `user_name`,
+        `user_type`,
+        `status`,
+        `action`,
+        `start_time`,
+        `end_time`,
+        `active_time`
+        FROM `processtask_step_user`
+        WHERE `processtask_id`= #{processTaskId}
+        <if test="processTaskStepId != null">
+            AND `processtask_step_id` = #{processTaskStepId}
+        </if>
+        <if test="userType != null and userType != ''">
+            AND `user_type` = #{userType}
+        </if>
+        <if test="userUuid != null and userUuid != ''">
+            AND user_uuid = #{userUuid}
+        </if>
+    </select>
+
+    <select id="getProcessTaskStepUserListByProcessTaskIdList" parameterType="java.lang.Long"
+            resultMap="processTaskStepUserMap">
+        SELECT
+        `processtask_id`,
+        `processtask_step_id`,
+        `user_uuid`,
+        `user_name`,
+        `user_type`
+        FROM `processtask_step_user`
+        WHERE `processtask_id` IN
+        <foreach collection="list" item="processTaskId" open="(" separator="," close=")">
+            #{processTaskId}
+        </foreach>
+    </select>
+
+    <select id="getProcessTaskStepUserListByProcessTaskIdListAndStatusList" parameterType="java.lang.Long"
+            resultMap="processTaskStepUserMap">
+        SELECT
+        `processtask_id`,
+        `processtask_step_id`,
+        `user_uuid`,
+        `user_name`,
+        `user_type`
+        FROM `processtask_step_user`
+        WHERE `processtask_id` IN
+        <foreach collection="processTaskIdList" item="processTaskId" open="(" separator="," close=")">
+            #{processTaskId}
+        </foreach>
+        and `status` IN
+        <foreach collection="statusList" item="status" open="(" separator="," close=")">
+            #{status}
+        </foreach>
+    </select>
+
+    <select id="getProcessTaskScoreInfoById" parameterType="java.lang.Long" resultType="java.lang.String">
+        SELECT psaa.`new_content`
+        FROM `processtask` p
+                 left join `processtask_step_audit` psa on p.`id` = psa.`processtask_id`
+                 left join `processtask_step_audit_detail` psaa on psa.`id` = psaa.`audit_id`
+                 left join `processtask_content` pc on psaa.`new_content` = pc.`hash`
+        WHERE p.`id` = #{value}
+          and psa.`action` = 'score'
+    </select>
+
+    <resultMap id="processTaskAndStepMap" type="neatlogic.framework.process.dto.ProcessTaskVo">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="process_uuid" property="processUuid"/>
+        <result column="channel_uuid" property="channelUuid"/>
+        <result column="config_hash" property="configHash"/>
+        <result column="priority_uuid" property="priorityUuid"/>
+        <result column="status" property="status"/>
+        <result column="owner" property="owner"/>
+        <result column="reporter" property="reporter"/>
+        <result column="worktime_uuid" property="worktimeUuid"/>
+        <result column="start_time" property="startTime"/>
+        <result column="isShow" property="isShow"/>
+        <result column="endTime" property="endTime"/>
+        <association property="channelVo" javaType="neatlogic.framework.process.dto.ChannelVo">
+            <result property="uuid" column="channelUuid"/>
+            <result property="name" column="channelName"/>
+            <association property="channelTypeVo" javaType="neatlogic.framework.process.dto.ChannelTypeVo">
+                <result property="uuid" column="channelTypeUuid"/>
+                <result property="color" column="channelTypeColor"/>
+                <result property="name" column="channelTypeName"/>
+            </association>
+            <association property="parent" javaType="neatlogic.framework.process.dto.CatalogVo">
+                <result property="uuid" column="catalogUuid"/>
+                <result property="name" column="catalogName"/>
+            </association>
+        </association>
+        <association property="priority" javaType="neatlogic.framework.process.dto.PriorityVo">
+            <result property="uuid" column="priorityUuid"/>
+            <result property="name" column="priorityName"/>
+            <result property="color" column="priorityColor"/>
+        </association>
+        <collection property="stepList" ofType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+            <result column="stepId" property="id"/>
+            <result column="stepName" property="name"/>
+            <result column="stepStatus" property="status"/>
+            <result column="type" property="type"/>
+            <result column="handler" property="handler"/>
+            <result column="is_active" property="isActive"/>
+            <result column="stepConfigHash" property="configHash"/>
+            <result column="stepActiveTime" property="activeTime"/>
+            <result column="stepStartTime" property="startTime"/>
+            <result column="stepEndTime" property="endTime"/>
+            <result column="stepConfigHash" property="configHash"/>
+            <collection property="workerList" ofType="neatlogic.framework.process.dto.ProcessTaskStepWorkerVo">
+                <result column="stepWorkerType" property="type"/>
+                <result column="stepWorkerUserType" property="userType"/>
+                <result column="stepWorkerUuid" property="uuid"/>
+            </collection>
+            <collection property="userList" ofType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+                <result column="stepUserUserType" property="userType"/>
+                <result column="stepUserUserStatus" property="status"/>
+                <association property="userVo" javaType="neatlogic.framework.dto.UserVo">
+                    <result column="stepUserUserUuid" property="uuid"/>
+                    <result column="stepUserUserName" property="userName"/>
+                    <result column="stepUserUserInfo" property="userInfo"/>
+                    <result column="stepUserUserVipLevel" property="vipLevel"/>
+                    <result column="stepUserUserPinyin" property="pinyin"/>
+                </association>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="getProcessTaskAndStepById" parameterType="java.lang.Long" resultMap="processTaskAndStepMap"
+            useCache="false">
+        SELECT p.`id`,
+               p.`title`,
+               p.`process_uuid`,
+               p.`channel_uuid`,
+               p.`config_hash`,
+               p.`priority_uuid`,
+               p.`status`,
+               p.`owner`,
+               p.`reporter`,
+               p.`worktime_uuid`,
+               p.`start_time`,
+               p.`end_time`,
+               p.`is_show`       as isShow,
+               pri.`uuid`        as priorityUuid,
+               pri.`name`        as priorityName,
+               pri.`color`       as priorityColor,
+               cata.`uuid`       as catalogUuid,
+               cata.`name`       as catalogName,
+               ct.`uuid`         as channelTypeUuid,
+               ct.`name`         as channelTypeName,
+               ct.`color`        as channelTypeColor,
+               c.`uuid`          as channelUuid,
+               c.`name`          as channelName,
+               ps.`id`           as stepId,
+               ps.`name`         as stepName,
+               ps.`status`       as stepStatus,
+               ps.`type`,
+               ps.`handler`,
+               ps.`is_active`,
+               ps.`config_hash`  as stepConfigHash,
+               ps.`active_time`  as stepActiveTime,
+               ps.`start_time`   as stepStartTime,
+               ps.`end_time`     as stepEndTime,
+               ptsw.uuid         as stepWorkerUuid,
+               ptsw.type         as stepWorkerType,
+               ptsw.user_type    as stepWorkerUserType,
+               ptsu.status       as stepUserUserStatus,
+               ptsu.user_type    as stepUserUserType,
+               ptsuser.user_name as stepUserUserName,
+               ptsuser.uuid      as stepUserUserUuid,
+               ptsuser.user_info as stepUserUserInfo,
+               ptsuser.vip_level as stepUserUserVipLevel,
+               ptsuser.pinyin    as stepUserUserPinyin
+        from `processtask` p
+                 left join `processtask_step` ps on p.`id` = ps.`processtask_id`
+                 left join `priority` pri on p.`priority_uuid` = pri.`uuid`
+                 left join `channel` c on p.`channel_uuid` = c.`uuid`
+                 left join `catalog` cata on c.`parent_uuid` = cata.`uuid`
+                 left join `channel_type` ct on c.`channel_type_uuid` = ct.`uuid`
+                 left join `processtask_step_user` ptsu on ps.`processtask_id` = ptsu.`processtask_id`
+            and ps.`id` = ptsu.`processtask_step_id`
+                 left join `processtask_step_worker` ptsw on ps.`processtask_id` = ptsw.`processtask_id`
+            and ps.`id` = ptsw.`processtask_step_id`
+                 left join `user` ptsuser on ptsu.`user_uuid` = ptsuser.`uuid`
+        where p.`id` = #{value}
+    </select>
+
+    <select id="getFromProcessTaskIdByToProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `from_processtask_id`
+        FROM `processtask_tranfer_report`
+        WHERE `to_processtask_id` = #{value}
+    </select>
+
+    <select id="getToProcessTaskIdListByFromProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `to_processtask_id`
+        FROM `processtask_tranfer_report`
+        WHERE `from_processtask_id` =
+              #{value}
+        ORDER BY `id` DESC
+    </select>
+
+    <select id="getProcessTaskRelationCountByProcessTaskId" parameterType="java.lang.Long" resultType="int">
+        select count(1)
+        from (
+                 SELECT `id`
+                 FROM `processtask_relation`
+                 WHERE `source` = #{value}
+                    OR `target` = #{value}
+                 UNION
+                 SELECT `id`
+                 FROM `processtask_tranfer_report`
+                 WHERE `from_processtask_id` = #{value}
+                    OR `to_processtask_id` = #{value}
+             ) a
+    </select>
+
+    <select id="getProcessTaskRelationList" parameterType="neatlogic.framework.process.dto.ProcessTaskRelationVo"
+            resultType="neatlogic.framework.process.dto.ProcessTaskRelationVo">
+        SELECT
+        a.`id`,
+        a.`channelTypeRelationId`,
+        a.`source`,
+        a.`target`,
+        a.`processTaskId`,
+        a.`action`
+        FROM (
+        SELECT
+        `id`,
+        `channel_type_relation_id` AS channelTypeRelationId,
+        `source`,
+        `target`,
+        `target` AS
+        processTaskId,
+        'relation' AS action
+        FROM `processtask_relation`
+        WHERE `source` = #{processTaskId}
+        UNION
+        SELECT
+        `id`,
+        `channel_type_relation_id` AS channelTypeRelationId,
+        `source`,
+        `target`,
+        `source` AS
+        processTaskId,
+        'relation' AS action
+        FROM `processtask_relation`
+        WHERE `target` = #{processTaskId}
+        UNION
+        SELECT
+        `id`,
+        `channel_type_relation_id` AS channelTypeRelationId,
+        `from_processtask_id` AS source,
+        `to_processtask_id` AS target,
+        `to_processtask_id` AS processTaskId,
+        'tranferreport' AS action
+        FROM `processtask_tranfer_report`
+        WHERE `from_processtask_id` = #{processTaskId}
+        UNION
+        SELECT
+        `id`,
+        `channel_type_relation_id` AS channelTypeRelationId,
+        `from_processtask_id` AS source,
+        `to_processtask_id` AS target,
+        `from_processtask_id` AS processTaskId,
+        'tranferreport' AS action
+        FROM
+        `processtask_tranfer_report`
+        WHERE `to_processtask_id` = #{processTaskId}
+        ) a
+        ORDER BY a.id DESC
+        <if test="needPage == true">
+            LIMIT #{startNum}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getRelatedProcessTaskIdListByProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `target`
+        FROM `processtask_relation`
+        WHERE `source` = #{processTaskId}
+        UNION
+        SELECT `source`
+        FROM `processtask_relation`
+        WHERE `target` = #{processTaskId}
+    </select>
+
+    <select id="checkProcessTaskIdListIsExists" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `id` FROM `processtask` WHERE `id` IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getProcessTaskCountByKeywordAndChannelUuidList"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskSearchVo" resultType="int">
+        SELECT
+        COUNT(1)
+        FROM `processtask`
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (`id` LIKE CONCAT('%', #{keyword}, '%') OR `title` LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="excludeStatus != null and excludeStatus != ''">
+                AND `status` != #{excludeStatus}
+            </if>
+            <if test="includeChannelUuidList != null and includeChannelUuidList.size() > 0">
+                AND `channel_uuid` IN
+                <foreach collection="includeChannelUuidList" item="includeChannelUuid" open="(" separator="," close=")">
+                    #{includeChannelUuid}
+                </foreach>
+            </if>
+            <if test="excludeIdList != null and excludeIdList.size() > 0">
+                AND `id` NOT IN
+                <foreach collection="excludeIdList" item="excludeId" open="(" separator="," close=")">
+                    #{excludeId}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getProcessTaskListByKeywordAndChannelUuidList"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskSearchVo" resultMap="processTaskMap">
+        SELECT
+        `id`,
+        `title`,
+        `process_uuid`,
+        `channel_uuid`,
+        `config_hash`,
+        `priority_uuid`,
+        `status`,
+        `start_time`,
+        `end_time`,
+        `owner`,
+        `reporter`,
+        `expire_time`,
+        `worktime_uuid`,
+        `serial_number`,
+        `need_score`,
+        `source`
+        FROM `processtask`
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (`id` LIKE CONCAT('%', #{keyword}, '%') OR `title` LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="excludeStatus != null and excludeStatus != ''">
+                AND `status` != #{excludeStatus}
+            </if>
+            <if test="includeChannelUuidList != null and includeChannelUuidList.size() > 0">
+                AND `channel_uuid` IN
+                <foreach collection="includeChannelUuidList" item="includeChannelUuid" open="(" separator="," close=")">
+                    #{includeChannelUuid}
+                </foreach>
+            </if>
+            <if test="excludeIdList != null and excludeIdList.size() > 0">
+                AND `id` NOT IN
+                <foreach collection="excludeIdList" item="excludeId" open="(" separator="," close=")">
+                    #{excludeId}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY `id` DESC
+        <if test="needPage">
+            LIMIT #{startNum}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getProcessTaskTransferReportByToProcessTaskId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskTransferReportVo">
+        SELECT `id`,
+               `channel_type_relation_id` AS channelTypeRelationId,
+               `from_processtask_id`      AS
+                                             fromProcessTaskId,
+               `to_processtask_id`        AS toProcessTaskId
+        FROM `processtask_tranfer_report`
+        WHERE `to_processtask_id` = #{value}
+    </select>
+
+    <select id="searchProcessTaskImportAuditCount"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskImportAuditVo" resultType="int" useCache="false">
+        SELECT
+        COUNT(distinct a.`id`)
+        FROM `processtask_import_audit` a
+        left join `processtask` b
+        on a.`processtask_id` = b.`id`
+        <where>
+            <if test="status != null">
+                and a.`status` = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (a.`title` like CONCAT('%', #{keyword}, '%')
+                or b.`serial_number` like CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="searchProcessTaskImportAudit" parameterType="neatlogic.framework.process.dto.ProcessTaskImportAuditVo"
+            resultType="neatlogic.framework.process.dto.ProcessTaskImportAuditVo"
+            useCache="false">
+        SELECT
+        a.`id`,
+        a.`processtask_id` as processTaskId,
+        b.`serial_number` as serialNumber,
+        a.`title`,
+        (select `name` from `channel` where `uuid` = a.`channel_uuid`) as channelName,
+        a.`status`,
+        a.`error_reason` as errorReason,
+        a.`owner`,
+        (select u.`user_name` from `user` u where u.`uuid` = a.`owner`) as ownerName,
+        a.`import_time` as importTime
+        FROM
+        `processtask_import_audit` a
+        left join `processtask` b
+        on a.`processtask_id` = b.`id`
+        <where>
+            <if test="status != null">
+                and a.`status` = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (a.`title` like CONCAT('%', #{keyword}, '%')
+                or b.`serial_number` like CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        order by a.`import_time` desc
+        <if test="needPage">
+            limit #{startNum}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getProcessTaskRelationById" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskRelationVo">
+        SELECT `id`,
+               `channel_type_relation_id` AS channelTypeRelationId,
+               `source`,
+               `target`
+        FROM `processtask_relation`
+        WHERE `id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepRemindListByProcessTaskStepId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepRemindVo">
+        SELECT `processtask_id`                                      AS processTaskId,
+               `processtask_step_id`                                 AS processTaskStepId,
+               `action`,
+               `title`,
+               `fcu`,
+               (SELECT user_name FROM `user` x WHERE x.uuid = `fcu`) AS fcuName,
+               `fcd`,
+               `content_hash`                                        AS contentHash
+        FROM `processtask_step_remind`
+        WHERE `processtask_step_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskScoreTemplateByProcessTaskId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskScoreTemplateVo">
+        SELECT `processtask_id`    AS processTaskId,
+               `score_template_id` AS scoreTemplateId,
+               `is_auto`           AS
+                                      isAuto,
+               `config_hash`       AS configHash
+        FROM `processtask_score_template`
+        WHERE `processtask_id` = #{value}
+    </select>
+
+    <select id="checkProcessTaskFocusExists" resultType="int">
+        SELECT count(`processtask_id`)
+        FROM `processtask_focus`
+        WHERE `processtask_id` = #{processTaskId}
+          and `user_uuid` = #{userUuid}
+    </select>
+
+    <!--<select id="getFocusUsersOfProcessTask" parameterType="java.lang.Long" resultType="java.lang.String">
+        SELECT CONCAT("user#", `user_uuid`)
+        FROM `processtask_focus`
+        WHERE `processtask_id` = #{value}
+    </select>-->
+
+    <select id="getFocusUserListByTaskId" parameterType="java.lang.Long" resultType="java.lang.String">
+        SELECT CONCAT('user#', `user_uuid`)
+        FROM `processtask_focus`
+        WHERE `processtask_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepAgentByProcessTaskStepId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepAgentVo">
+        SELECT `processtask_id`      AS processTaskId,
+               `processtask_step_id` AS processTaskStepId,
+               `user_uuid`           AS userUuid,
+               `agent_uuid`          AS agentUuid
+        FROM `processtask_step_agent`
+        WHERE `processtask_step_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepAgentListByProcessTaskIdList" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepAgentVo">
+        SELECT `processtask_id` AS processTaskId,
+        `processtask_step_id` AS processTaskStepId,
+        `user_uuid` AS userUuid,
+        `agent_uuid` AS agentUuid
+        FROM `processtask_step_agent`
+        WHERE `processtask_id` IN
+        <foreach collection="list" item="processTaskId" open="(" separator="," close=")">
+            #{processTaskId}
+        </foreach>
+    </select>
+
+    <select id="getProcessTaskTagListByProcessTaskId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTagVo">
+        SELECT b.`id`,
+               b.`name`
+        FROM `processtask_tag` a
+                 LEFT JOIN `process_tag` b ON a.`tag_id` = b.`id`
+        WHERE a.`processtask_id` = #{processTaskId}
+    </select>
+
+    <select id="getProcessTaskStepInOperationCountByProcessTaskId" parameterType="java.lang.Long" resultType="int">
+        SELECT COUNT(1)
+        FROM `processtask_step_in_operation`
+        WHERE `processtask_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepInOperationListByProcessTaskId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepInOperationVo">
+        SELECT `processtask_id`      AS processTaskId,
+               `processtask_step_id` AS processTaskStepId,
+               `operation_type`      AS operationType,
+               `operation_time`      AS operationTime,
+               `expire_time`         AS expireTime
+        FROM `processtask_step_in_operation`
+        WHERE `processtask_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskCountByChannelTypeUuidAndStartTime"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskVo" resultType="int">
+        SELECT
+        COUNT(a.`id`)
+        FROM processtask a
+        JOIN channel b ON b.`uuid` = a.`channel_uuid`
+        JOIN channel_type c ON c.`uuid` = b.`channel_type_uuid`
+        WHERE c.`uuid` = #{channelTypeUuid}
+        <if test="startTime != null">
+            AND a.`start_time` &gt;= #{startTime}
+        </if>
+    </select>
+
+    <!--<resultMap type="neatlogic.framework.process.dto.ProcessTaskVo" id="processTaskMap">-->
+    <!--<id column="id" property="id" />-->
+    <!--<result column="title" property="title" />-->
+    <!--<result column="process_uuid" property="processUuid" />-->
+    <!--<result column="channel_uuid" property="channelUuid" />-->
+    <!--<result column="config_hash" property="configHash" />-->
+    <!--<result column="priority_uuid" property="priorityUuid" />-->
+    <!--<result column="status" property="status" />-->
+    <!--<result column="start_time" property="startTime" />-->
+    <!--<result column="end_time" property="endTime" />-->
+    <!--<result column="owner" property="owner" />-->
+    <!--<result column="reporter" property="reporter" />-->
+    <!--<result column="expire_time" property="expireTime" />-->
+    <!--<result column="worktime_uuid" property="worktimeUuid" />-->
+    <!--<result column="is_show" property="isShow" />-->
+    <!--<result column="serial_number" property="serialNumber" />-->
+    <!--</resultMap>-->
+
+    <select id="getProcessTaskListByChannelTypeUuidAndStartTime"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskVo" resultMap="processTaskMap">
+        SELECT
+        a.`id`,
+        a.`title`,
+        a.`process_uuid`,
+        a.`channel_uuid`,
+        a.`config_hash`,
+        a.`priority_uuid`,
+        a.`status`,
+        a.`start_time`,
+        a.`end_time`,
+        a.`owner`,
+        a.`reporter`,
+        a.`expire_time`,
+        a.`worktime_uuid`,
+        a.`is_show`,
+        a.`serial_number`,
+        a.`need_score`,
+        a.`source`
+        FROM `processtask` a
+        JOIN channel b ON b.`uuid` = a.`channel_uuid`
+        JOIN channel_type c ON c.`uuid` = b.`channel_type_uuid`
+        WHERE c.`uuid` = #{channelTypeUuid}
+        <if test="startTime != null">
+            AND a.`start_time` &gt;= #{startTime}
+        </if>
+        ORDER BY a.`id`
+        <if test="needPage">
+            limit #{startNum}, #{pageSize}
+        </if>
+    </select>
+
+    <resultMap type="neatlogic.framework.process.dto.ProcessTaskVo" id="processTaskDetailMap">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="process_uuid" property="processUuid"/>
+        <result column="channel_uuid" property="channelUuid"/>
+        <result column="config_hash" property="configHash"/>
+        <result column="priority_uuid" property="priorityUuid"/>
+        <result column="status" property="status"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="owner" property="owner"/>
+        <result column="reporter" property="reporter"/>
+        <result column="expire_time" property="expireTime"/>
+        <result column="worktime_uuid" property="worktimeUuid"/>
+        <result column="is_show" property="isShow"/>
+        <result column="serial_number" property="serialNumber"/>
+        <result column="need_score" property="needScore"/>
+
+        <collection property="stepList" ofType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+            <id column="bId" property="id"/>
+            <result column="bProcessTaskId" property="processTaskId"/>
+            <result column="bName" property="name"/>
+            <result column="bProcessStepUuid" property="processStepUuid"/>
+            <result column="bStatus" property="status"/>
+            <result column="bType" property="type"/>
+            <result column="bHandler" property="handler"/>
+            <result column="bIsActive" property="isActive"/>
+            <collection property="workerList" ofType="neatlogic.framework.process.dto.ProcessTaskStepWorkerVo">
+                <id column="cUuid" property="uuid"/>
+                <result column="cProcessTaskId" property="processTaskId"/>
+                <result column="cProcessTaskStepId" property="processTaskStepId"/>
+                <result column="cType" property="type"/>
+                <result column="cUserType" property="userType"/>
+            </collection>
+            <collection property="userList" ofType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+                <!--<id column="dUserUuid" property="userUuid" />-->
+                <result column="dProcessTaskId" property="processTaskId"/>
+                <result column="dProcessTaskStepId" property="processTaskStepId"/>
+                <result column="dUserType" property="userType"/>
+                <association property="userVo" javaType="neatlogic.framework.dto.UserVo">
+                    <result column="dUserUuid" property="uuid"/>
+                </association>
+            </collection>
+        </collection>
+
+        <collection property="stepRelList" ofType="neatlogic.framework.process.dto.ProcessTaskStepRelVo">
+            <id column="fUuid" property="processStepRelUuid"/>
+            <result column="bProcessTaskId" property="processTaskId"/>
+            <result column="fFromProcessStepUuid" property="fromProcessStepUuid"/>
+            <result column="fToProcessStepUuid" property="toProcessStepUuid"/>
+            <result column="fFromProcessTaskStepId" property="fromProcessTaskStepId"/>
+            <result column="fToProcessTaskStepId" property="toProcessTaskStepId"/>
+            <result column="fIsHit" property="isHit"/>
+            <result column="fName" property="name"/>
+            <result column="fType" property="type"/>
+        </collection>
+    </resultMap>
+
+    <select id="getProcessTaskStepNameById" parameterType="java.lang.Long" resultType="java.lang.String">
+        SELECT `name`
+        FROM `processtask_step`
+        WHERE `id` = #{value}
+    </select>
+
+    <select id="getProcessTaskCountBySql" parameterType="java.lang.String" resultType="java.lang.Integer">
+        ${value}
+    </select>
+
+    <select id="getWorkcenterProcessTaskMapBySql" parameterType="java.lang.String" resultType="java.util.Map">
+        ${value}
+    </select>
+
+    <resultMap id="workcenterProcessTaskMap" type="neatlogic.framework.process.dto.ProcessTaskVo">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="process_uuid" property="processUuid"/>
+        <result column="channel_uuid" property="channelUuid"/>
+        <result column="config_hash" property="configHash"/>
+        <result column="priority_uuid" property="priorityUuid"/>
+        <result column="processTaskStatus" property="status"/>
+        <result column="start_time" property="startTime"/>
+        <result column="status" property="status"/>
+        <result column="end_time" property="endTime"/>
+        <result column="ownerUuid" property="owner"/>
+        <result column="reporterUuid" property="reporter"/>
+        <!--<result column="reporterName" property="reporterName" />-->
+        <result column="expire_time" property="expireTime"/>
+        <result column="worktimeUuid" property="worktimeUuid"/>
+        <result column="worktimeName" property="worktimeName"/>
+        <result column="error" property="error"/>
+        <result column="is_show" property="isShow"/>
+        <result column="serialNumber" property="serialNumber"/>
+        <association property="channelVo" javaType="neatlogic.framework.process.dto.ChannelVo">
+            <result property="uuid" column="channelUuid"/>
+            <result property="name" column="channelName"/>
+            <association property="channelTypeVo" javaType="neatlogic.framework.process.dto.ChannelTypeVo">
+                <result property="uuid" column="channelTypeUuid"/>
+                <result property="color" column="channelTypeColor"/>
+                <result property="name" column="channelTypeName"/>
+            </association>
+            <association property="parent" javaType="neatlogic.framework.process.dto.CatalogVo">
+                <result property="uuid" column="catalogUuid"/>
+                <result property="name" column="catalogName"/>
+            </association>
+        </association>
+        <association property="ownerVo" javaType="neatlogic.framework.dto.UserVo">
+            <result property="uuid" column="ownerUuid"/>
+            <result property="userName" column="ownerName"/>
+            <result property="userInfo" column="ownerInfo"/>
+            <result property="vipLevel" column="ownerVipLevel"/>
+            <result property="pinyin" column="ownerPinyin"/>
+            <result property="isActive" column="ownerIsActive"/>
+            <result property="isDelete" column="ownerIsDelete"/>
+        </association>
+        <association property="reporterVo" javaType="neatlogic.framework.dto.UserVo">
+            <result property="uuid" column="reporterUuid"/>
+            <result property="userName" column="reporterName"/>
+            <result property="userInfo" column="reporterInfo"/>
+            <result property="vipLevel" column="reporterVipLevel"/>
+            <result property="pinyin" column="reporterPinyin"/>
+            <result property="isActive" column="reporterIsActive"/>
+            <result property="isDelete" column="reporterIsDelete"/>
+        </association>
+        <association property="priority" javaType="neatlogic.framework.process.dto.PriorityVo">
+            <result property="uuid" column="priorityUuid"/>
+            <result property="name" column="priorityName"/>
+            <result property="color" column="priorityColor"/>
+        </association>
+        <!--<collection property="stepList" ofType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+            <id column="processTaskStepId" property="id"/>
+            <result column="processTaskStepName" property="name"/>
+            <result column="processTaskStepStatus" property="status"/>
+            <result column="processTaskStepType" property="type"/>
+            <result column="processTaskStepHandler" property="handler"/>
+            <result column="processTaskStepIsActive" property="isActive"/>
+            <result column="processTaskStepStartTime" property="startTime"/>
+            <result column="processTaskStepConfigHash" property="configHash"/>
+            <result column="processTaskStepIsActive" property="isActive"/>
+            <result column="processTaskStepEndTime" property="endTime"/>
+            <result column="processTaskConfigHash" property="configHash"/>
+            <collection property="workerList" ofType="neatlogic.framework.process.dto.ProcessTaskStepWorkerVo">
+                <result column="stepWorkerType" property="type"/>
+                <result column="stepWorkerUserType" property="userType"/>
+                <result column="stepWorkerUuid" property="uuid"/>
+            </collection>
+            <collection property="userList" ofType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+                <result column="stepUserUserType" property="userType"/>
+                <result column="stepUserUserStatus" property="status"/>
+                <result column="stepUserUserUuid" property="userUuid"/>
+                <result column="stepUserUserName" property="userName"/>
+                <association property="userVo" javaType="neatlogic.framework.dto.UserVo">
+                    <result column="stepUserUserUuid" property="uuid"/>
+                    <result column="stepUserUserName" property="userName"/>
+                    <result column="stepUserUserInfo" property="userInfo"/>
+                    <result column="stepUserUserVipLevel" property="vipLevel"/>
+                    <result column="stepUserUserPinyin" property="pinyin"/>
+                </association>
+            </collection>
+            <collection property="slaTimeList" ofType="neatlogic.framework.process.dto.ProcessTaskSlaTimeVo">
+                <result column="slaStepId" property="processTaskStepId"/>
+                <result column="slaId" property="slaId"/>
+            </collection>
+        </collection>-->
+        <collection property="focusUserList" ofType="neatlogic.framework.dto.UserVo">
+            <result property="uuid" column="focusUuid"/>
+            <result property="userName" column="focusName"/>
+            <result property="userInfo" column="focusInfo"/>
+            <result property="vipLevel" column="focusVipLevel"/>
+            <result property="pinyin" column="focusPinyin"/>
+            <result property="isActive" column="focusIsActive"/>
+            <result property="isDelete" column="rfocusIsDelete"/>
+        </collection>
+        <collection property="processTaskSlaVoList" ofType="neatlogic.framework.process.dto.ProcessTaskSlaVo">
+            <result column="ProcessTaskSlaId" property="id"/>
+            <result column="ProcessTaskSlaName" property="name"/>
+            <result column="ProcessTaskSlaConfig" property="config"/>
+            <association property="slaTimeVo" javaType="neatlogic.framework.process.dto.ProcessTaskSlaTimeVo">
+                <result column="expireTime" property="expireTime"/>
+                <result column="realExpireTime" property="realExpireTime"/>
+                <result column="timeLeft" property="timeLeft"/>
+                <result column="realTimeLeft" property="realTimeLeft"/>
+                <result column="slaTimeStatus" property="status"/>
+                <result column="calculationTime" property="calculationTime"/>
+            </association>
+        </collection>
+
+    </resultMap>
+
+    <select id="getProcessTaskBySql" parameterType="java.lang.String" resultMap="workcenterProcessTaskMap">
+        ${value }
+    </select>
+
+    <resultMap id="workcenterProcessTaskCurrentStepMap" type="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        <id column="processTaskStepId" property="id"/>
+        <result column="processTaskStepName" property="name"/>
+        <result column="processTaskStepStatus" property="status"/>
+        <result column="processTaskStepType" property="type"/>
+        <result column="processTaskStepHandler" property="handler"/>
+        <result column="processTaskStepIsActive" property="isActive"/>
+        <result column="processTaskStepStartTime" property="startTime"/>
+        <result column="processTaskStepConfigHash" property="configHash"/>
+        <result column="processTaskStepIsActive" property="isActive"/>
+        <result column="processTaskStepEndTime" property="endTime"/>
+        <result column="processTaskConfigHash" property="configHash"/>
+        <collection property="workerList" ofType="neatlogic.framework.process.dto.ProcessTaskStepWorkerVo">
+            <result column="stepWorkerType" property="type"/>
+            <result column="stepWorkerUserType" property="userType"/>
+            <result column="stepWorkerUuid" property="uuid"/>
+        </collection>
+        <collection property="userList" ofType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+            <result column="stepUserUserType" property="userType"/>
+            <result column="stepUserUserStatus" property="status"/>
+            <result column="stepUserUserUuid" property="userUuid"/>
+            <result column="stepUserUserName" property="userName"/>
+            <association property="userVo" javaType="neatlogic.framework.dto.UserVo">
+                <result column="stepUserUserUuid" property="uuid"/>
+                <result column="stepUserUserName" property="userName"/>
+                <result column="stepUserUserInfo" property="userInfo"/>
+                <result column="stepUserUserVipLevel" property="vipLevel"/>
+                <result column="stepUserUserPinyin" property="pinyin"/>
+            </association>
+        </collection>
+        <collection property="slaTimeList" ofType="neatlogic.framework.process.dto.ProcessTaskSlaTimeVo">
+            <result column="slaStepId" property="processTaskStepId"/>
+            <result column="slaId" property="slaId"/>
+        </collection>
+    </resultMap>
+
+    <select id="getProcessTaskCurrentStepByProcessTaskId" parameterType="java.lang.Long"
+            resultMap="workcenterProcessTaskCurrentStepMap">
+        SELECT pts.id                    AS processTaskStepId,
+               pts.NAME                  AS processTaskStepName,
+               pts.processtask_id        AS processTaskId,
+               pts.is_active             AS processTaskStepIsActive,
+               pts.STATUS                AS processTaskStepStatus,
+               pts.config_hash           AS processTaskConfigHash,
+               pts.HANDLER               AS processTaskStepHandler,
+               ptsw.uuid                 AS stepWorkerUuid,
+               ptsw.type                 AS stepWorkerType,
+               ptsw.user_type            AS stepWorkerUserType,
+               ptsu.STATUS               AS stepUserUserStatus,
+               ptsu.user_type            AS stepUserUserType,
+               ptsuser.user_name         AS stepUserUserName,
+               ptsuser.uuid              AS stepUserUserUuid,
+               ptsuser.user_info         AS stepUserUserInfo,
+               ptsuser.vip_level         AS stepUserUserVipLevel,
+               ptsuser.pinyin            AS stepUserUserPinyin,
+               ptsl.id                   AS processTaskSlaId,
+               ptsl.NAME                 AS processTaskSlaName,
+               ptsl.config               AS processTaskSlaConfig,
+               ptslt.expire_time         AS expireTime,
+               ptslt.realexpire_time     AS realExpireTime,
+               ptslt.time_left           AS timeLeft,
+               ptslt.realtime_left       AS realTimeLeft,
+               ptssl.processtask_step_id AS slaStepId,
+               ptssl.sla_id              AS slaId
+        FROM processtask_step pts
+                 LEFT JOIN processtask_step_user ptsu
+                           ON pts.processtask_id = ptsu.processtask_id AND pts.id = ptsu.processtask_step_id
+                 LEFT JOIN processtask_step_worker ptsw
+                           ON pts.processtask_id = ptsw.processtask_id AND pts.id = ptsw.processtask_step_id
+                 LEFT JOIN `user` ptsuser ON ptsu.user_uuid = ptsuser.uuid
+                 LEFT JOIN processtask_sla ptsl ON pts.processtask_id = ptsl.processtask_id
+                 LEFT JOIN processtask_step_sla ptssl ON pts.id = ptssl.processtask_step_id
+                 LEFT JOIN processtask_sla_time ptslt ON ptssl.sla_id = ptslt.sla_id
+        WHERE pts.processtask_id = #{value}
+          and (pts.status = 'running' or (pts.status = 'pending' and pts.is_active = 1))
+    </select>
+
+    <select id="getProcessTaskIdByChannelUuidLimitOne" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT `id`
+        FROM `processtask`
+        WHERE `is_deleted` = 0
+          and `channel_uuid` = #{value}
+        LIMIT 1
+    </select>
+
+    <select id="getProcessTaskIdByPriorityUuidLimitOne" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT `id`
+        FROM `processtask`
+        WHERE `priority_uuid` = #{value}
+        LIMIT 1
+    </select>
+
+    <select id="getChannelReferencedCountList" resultType="neatlogic.framework.process.dto.ChannelVo">
+        SELECT `channel_uuid` AS `uuid`,
+               COUNT(`id`)    AS childrenCount
+        FROM `processtask`
+        where `is_deleted` = 0
+        GROUP BY `channel_uuid`
+    </select>
+
+    <select id="getProcessTaskStepFileListByTaskId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepFileVo">
+        select `processtask_id`      as processTaskId,
+               `processtask_step_id` as processTaskStepId,
+               `content_id`          as contentId,
+               `file_id`             as fileId
+        from `processtask_file`
+        where `processtask_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepFileListByTaskStepId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepFileVo">
+        select `processtask_id`      as processTaskId,
+               `processtask_step_id` as processTaskStepId,
+               `content_id`          as contentId,
+               `file_id`             as fileId
+        from `processtask_file`
+        where `processtask_step_id` = #{value}
+    </select>
+
+    <select id="getRepeatGroupIdByProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `repeat_group_id`
+        FROM `processtask_repeat`
+        WHERE `processtask_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskIdListByRepeatGroupId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `processtask_id`
+        FROM `processtask_repeat`
+        WHERE `repeat_group_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepReapprovalRestoreBackupMaxSortByBackupStepId" parameterType="java.lang.Long"
+            resultType="java.lang.Integer">
+        SELECT MAX(`sort`)
+        FROM `processtask_step_reapproval_restore_backup`
+        WHERE `backup_step_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepReapprovalRestoreBackupListByBackupStepId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepReapprovalRestoreBackupVo">
+        SELECT `processtask_id`      AS processTaskId,
+               `processtask_step_id` AS processTaskStepId,
+               `backup_step_id`      AS backupStepId,
+               `config`              AS configStr,
+               `sort`
+        FROM `processtask_step_reapproval_restore_backup`
+        WHERE `backup_step_id` = #{value}
+        ORDER BY `sort` DESC
+    </select>
+
+    <select id="getProcessTaskColumnByIndexKeyword"
+            resultType="neatlogic.framework.process.dto.ProcessTaskVo">
+        SELECT distinct pt.`${targetType}` as ${columnPro},count( ff.counter ) as counter
+        FROM processtask pt
+        JOIN fulltextindex_field_process ff ON ff.target_id = pt.id AND ff.`target_field` = #{targetType}
+        JOIN `fulltextindex_word` fw ON fw.id = ff.`word_id` AND fw.word IN
+        <foreach collection="keywordList" item="keyword" separator="," open="(" close=")">
+            #{keyword}
+        </foreach>
+        where pt.`is_deleted` = 0
+        GROUP BY pt.id,pt.`${targetType}`
+        ORDER BY count(ff.counter) DESC
+        limit 0,#{limit}
+    </select>
+
+    <select id="getProcessTaskIdAndTitleByIndexKeyword"
+            resultType="neatlogic.framework.process.dto.ProcessTaskVo">
+        SELECT pt.serial_number as serialNumber, pt.title , pt.status, pt.id
+        FROM processtask pt
+        JOIN fulltextindex_field_process ff ON ff.target_id = pt.id AND ff.`target_field` in
+        ('title','serial_number','content')
+        JOIN `fulltextindex_target_process` ft
+        ON ff.`target_id` = ft.`target_id` AND ft.`target_type` = 'processtask'
+        JOIN `fulltextindex_word` fw ON fw.id = ff.`word_id` AND fw.word IN
+        <foreach collection="keywordList" item="keyword" separator="," open="(" close=")">
+            #{keyword}
+        </foreach>
+        GROUP BY pt.`serial_number`, pt.title , pt.status, pt.id
+        ORDER BY MAX(ff.counter) DESC
+        limit 0,#{limit}
+    </select>
+
+    <select id="getProcessTaskStepIdListByProcessTaskIdAndTagId"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepTagVo" resultType="java.lang.Long">
+        SELECT `processtask_step_id`
+        FROM `processtask_step_tag`
+        WHERE `processtask_id` = #{processTaskId}
+          AND `tag_id` = #{tagId}
+    </select>
+
+    <select id="checkProcessTaskStepTagIsExists" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTagVo"
+            resultType="int">
+        SELECT COUNT(1)
+        FROM `processtask_step_tag`
+        WHERE `processtask_step_id` = #{processTaskStepId}
+          AND `tag_id` = #{tagId}
+    </select>
+
+    <select id="getSameTagIdListByProcessTaskStepIdList" parameterType="java.lang.Long" resultType="java.lang.Long">
+        <bind name="size" value="list.size()"/>
+        SELECT `tag_id` FROM `processtask_step_tag`
+        WHERE `processtask_step_id` IN
+        <foreach collection="list" item="processTaskStepId" open="(" separator="," close=")">
+            #{processTaskStepId}
+        </foreach>
+        GROUP BY `tag_id` HAVING COUNT(`tag_id`) = #{size}
+    </select>
+
+    <select id="getTagIdListByProcessTaskStepId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `tag_id`
+        FROM `processtask_step_tag`
+        WHERE `processtask_step_id` = #{value}
+    </select>
+
+    <sql id="getProcessTaskListByOwnerCondition">
+        WHERE `owner` = #{owner}
+        <if test="status != null and status !=''">
+            AND `status` = #{status}
+        </if>
+        <if test="channelName != null and channelName != ''">
+            AND EXISTS (
+            SELECT 1 FROM `channel` c WHERE c.`uuid` = pt.`channel_uuid` AND c.`name` = #{channelName}
+            )
+        </if>
+    </sql>
+
+    <select id="getProcessTaskCountByOwner" parameterType="neatlogic.framework.process.dto.ProcessTaskVo"
+            resultType="int">
+        SELECT count(1)
+        FROM `processtask` pt
+        <include refid="getProcessTaskListByOwnerCondition"/>
+    </select>
+
+    <select id="getProcessTaskListByOwner" parameterType="neatlogic.framework.process.dto.ProcessTaskVo"
+            resultMap="processTaskMap">
+        SELECT `id`,
+        `title`,
+        `process_uuid`,
+        `channel_uuid`,
+        `config_hash`,
+        `priority_uuid`,
+        `status`,
+        `start_time`,
+        `end_time`,
+        `owner`,
+        `reporter`,
+        `expire_time`,
+        `worktime_uuid`,
+        `is_show`,
+        `serial_number`,
+        `need_score`,
+        `source`
+        FROM `processtask` pt
+        <include refid="getProcessTaskListByOwnerCondition"/>
+        ORDER BY `id` DESC
+        LIMIT #{startNum}, #{pageSize}
+    </select>
+
+    <select id="getProcessTaskStepAutomaticRequestById" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.automatic.ProcessTaskStepAutomaticRequestVo">
+        SELECT `id`,
+               `processtask_id`      AS processTaskId,
+               `processtask_step_id` AS processTaskStepId,
+               `type`,
+               `trigger_time`        AS triggerTime
+        FROM `processtask_step_automatic_request`
+        WHERE `id` = #{value}
+    </select>
+
+    <select id="getAllProcessTaskStepAutomaticRequestList"
+            resultType="neatlogic.framework.process.dto.automatic.ProcessTaskStepAutomaticRequestVo">
+        SELECT `id`,
+               `processtask_id`      AS processTaskId,
+               `processtask_step_id` AS processTaskStepId,
+               `type`,
+               `trigger_time`        AS triggerTime
+        FROM `processtask_step_automatic_request`
+    </select>
+
+    <select id="getProcessTaskStepVoListByFileId" resultType="neatlogic.framework.process.dto.ProcessTaskVo">
+        select pf.`processtask_id` as id, p.channel_uuid as channelUuid
+        from processtask_file pf
+                 join processtask p on p.id = pf.processtask_id
+        where `file_id` = #{value}
+        UNION
+        SELECT c.`id`,
+               c.`channel_uuid` AS channelUuid
+        FROM `processtask_step_task_user_file` a
+                 JOIN `processtask_step_task` b ON b.`id` = a.`processtask_step_task_id`
+                 JOIN `processtask` c ON c.`id` = b.`processtask_id`
+        WHERE a.`file_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepTimerByProcessTaskStepId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepTimerVo">
+        SELECT `processtask_id`      AS processTaskId,
+               `processtask_step_id` AS processTaskStepId,
+               `trigger_time`        AS triggerTime
+        FROM `processtask_step_timer`
+        WHERE `processtask_step_id` = #{value}
+    </select>
+
+    <select id="getAllProcessTaskStepTimerList" resultType="neatlogic.framework.process.dto.ProcessTaskStepTimerVo">
+        SELECT `processtask_id`      AS processTaskId,
+               `processtask_step_id` AS processTaskStepId,
+               `trigger_time`        AS triggerTime
+        FROM `processtask_step_timer`
+    </select>
+    <select id="getProcessTaskStepListByProcessTaskIdAndProcessStepUuidList"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        SELECT
+        a.`id`,
+        a.`processtask_id` AS processTaskId,
+        a.`name`,
+        a.`process_step_uuid` AS processStepUuid,
+        a.`status`,
+        a.`result`,
+        a.`type`,
+        a.`handler`,
+        a.`is_active` AS isActive,
+        a.`active_time` AS activeTime,
+        a.`start_time` AS startTime,
+        a.`end_time` AS endTime,
+        a.`error`
+        FROM
+        `processtask_step` a
+        WHERE a.processtask_id = #{processTaskId}
+        and a.`process_step_uuid` in
+        <foreach collection="processStepUuidList" item="processStepUuid" close=")" open="(" separator=",">
+            #{processStepUuid}
+        </foreach>
+
+    </select>
+
+    <select id="getAllProcessTaskCount" resultType="java.lang.Integer">
+        select count(id)
+        from processtask
+    </select>
+
+    <select id="getProcessTaskIdList" resultType="java.lang.Long">
+        select id
+        from processtask
+        order by id
+        LIMIT #{startNum}, #{pageSize}
+    </select>
+
+    <select id="getProcessTaskStepByProcessTaskIdAndStepName"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepVo"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        SELECT `id`,
+               `processtask_id`    AS processTaskId,
+               `name`,
+               `process_step_uuid` AS processStepUuid,
+               `status`,
+               `result`,
+               `type`,
+               `handler`,
+               `is_active`         AS isActive,
+               `config_hash`       AS configHash,
+               `active_time`       AS activeTime,
+               `start_time`        AS startTime,
+               `end_time`          AS endTime,
+               `error`
+        FROM `processtask_step`
+        WHERE `processtask_id` = #{processTaskId}
+          AND `name` = #{name}
+    </select>
+
+    <select id="getProcessTaskListWhichIsProcessingByUserAndTag" resultType="java.util.Map">
+        SELECT
+        p.`id`,
+        p.`title`,
+        c.`name` AS channelName,
+        '处理中' AS status,
+        GROUP_CONCAT(pts.`name`) AS stepName,
+        GROUP_CONCAT(CASE WHEN pts.`status` = 'pending' THEN '待处理' WHEN pts.`status` = 'running' THEN '处理中' WHEN
+        pts.`status` = 'draft' THEN '草稿' END) AS stepStatus,
+        GROUP_CONCAT(u.`user_id`) AS userId,
+        GROUP_CONCAT(u.`user_name`) AS userName,
+        GROUP_CONCAT(t.`name`) AS teamName,
+        GROUP_CONCAT(r.`name`) AS roleName
+        FROM
+        `processtask` p
+        LEFT JOIN `processtask_step` pts ON p.id = pts.`processtask_id`
+        LEFT JOIN `processtask_step_worker` ptsw ON pts.`processtask_id` = ptsw.`processtask_id` AND pts.`id` =
+        ptsw.`processtask_step_id`
+        LEFT JOIN `processtask_step_tag` pst ON pts.`id` = pst.`processtask_step_id`
+        LEFT JOIN `process_tag` pt ON pt.`id` = pst.`tag_id`
+        LEFT JOIN `channel` c ON p.`channel_uuid` = c.`uuid`
+        LEFT JOIN `user` u ON u.`uuid` = ptsw.`uuid`
+        LEFT JOIN `team` t ON t.`uuid` = ptsw.`uuid`
+        LEFT JOIN `role` r ON r.`uuid` = ptsw.`uuid`
+        WHERE
+        p.`status` = 'running'
+        AND (pts.`status` = 'running' OR (pts.`status` = 'pending' AND pts.`is_active` = 1))
+        AND pt.`name` = #{tag}
+        AND (
+        ptsw.`uuid` = #{userUuid} AND ptsw.`type` = 'user'
+        <if test="teamUuidList != null and teamUuidList.size() > 0">
+            OR ptsw.`uuid` IN
+            <foreach collection="teamUuidList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            AND ptsw.`type` = 'team'
+        </if>
+        <if test="roleUuidList != null and roleUuidList.size() > 0">
+            OR ptsw.`uuid` IN
+            <foreach collection="roleUuidList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            AND ptsw.`type` = 'role'
+        </if>
+        )
+        GROUP BY p.`id`
+    </select>
+
+    <select id="getProcessTaskIdListWhichCurrentProcessTaskStepCountIsOverOneByProcessTaskIdList"
+            parameterType="java.util.List" resultType="java.lang.Long">
+        SELECT
+        pts.`processtask_id`
+        FROM
+        `processtask_step` pts
+        WHERE
+        (pts.`status` = 'running' OR ( pts.`status` = 'pending' AND pts.`is_active` = 1 ))
+        <if test="list != null and list.size() > 0">
+            AND pts.`processtask_id` IN
+            <foreach collection="list" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY
+        pts.`processtask_id`
+        HAVING
+        count( 1 ) > 1
+    </select>
+
+    <select id="getCurrentProcessTaskStepListByProcessTaskIdListAndTag"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        SELECT
+        pts.`processtask_id` AS processTaskId,
+        pts.`id`,
+        pts.`name`,
+        pts.`type`,
+        pts.`handler`
+        FROM
+        `processtask_step` pts
+        WHERE
+        (pts.`status` = 'running' OR ( pts.`status` = 'pending' AND pts.`is_active` = 1 ))
+        <if test="list != null and list.size() > 0">
+            AND pts.`processtask_id` IN
+            <foreach collection="list" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="tag != null and tag != ''">
+            AND EXISTS (
+            SELECT
+            1
+            FROM
+            `processtask_step_tag` ptst
+            JOIN `process_tag` pt ON ptst.`tag_id` = pt.`id`
+            WHERE
+            ptst.`processtask_step_id` = pts.`id`
+            AND pt.`name` = #{tag})
+        </if>
+    </select>
+
+    <select id="getProcessTaskFormContentListByContentLikeKeyword" parameterType="java.lang.String"
+            resultType="neatlogic.framework.process.dto.ProcessTaskFormVo">
+        SELECT `hash`    AS formContentHash,
+               `content` AS formContent
+        FROM `processtask_form_content`
+        WHERE `content` LIKE CONCAT('%', #{value}, '%')
+    </select>
+
+    <select id="getProcessTaskFormContentList" resultType="neatlogic.framework.process.dto.ProcessTaskFormVo">
+        SELECT `hash`    AS formContentHash,
+               `content` AS formContent
+        FROM `processtask_form_content`
+    </select>
+
+    <select id="getProcessTaskByIdStrList" resultType="neatlogic.framework.process.dto.ProcessTaskVo">
+        SELECT `id`,
+        `title`,
+        `process_uuid` AS processUuid,
+        `channel_uuid` AS channelUuid,
+        `config_hash` AS configHash,
+        `priority_uuid` AS priorityUuid,
+        `status`,
+        `start_time` AS startTime,
+        `end_time` AS endTime,
+        `owner`,
+        `reporter`,
+        `expire_time` AS expireTime,
+        `worktime_uuid` AS worktimeUuid,
+        `error`,
+        `is_show` as isShow,
+        `serial_number` AS serialNumber,
+        `need_score` AS needScore,
+        `source`
+        FROM `processtask`
+        WHERE `id` in
+        <foreach collection="list" item="id" close=")" open="(" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getProcessTaskBySerialNumberList" resultType="neatlogic.framework.process.dto.ProcessTaskVo">
+        SELECT `id`,
+        `title`,
+        `process_uuid` AS processUuid,
+        `channel_uuid` AS channelUuid,
+        `config_hash` AS configHash,
+        `priority_uuid` AS priorityUuid,
+        `status`,
+        `start_time` AS startTime,
+        `end_time` AS endTime,
+        `owner`,
+        `reporter`,
+        `expire_time` AS expireTime,
+        `worktime_uuid` AS worktimeUuid,
+        `error`,
+        `is_show` as isShow,
+        `serial_number` AS serialNumber,
+        `need_score` AS needScore,
+        `source`
+        FROM `processtask`
+        WHERE `serial_number` in
+        <foreach collection="list" item="serialNumber" close=")" open="(" separator=",">
+            #{serialNumber}
+        </foreach>
+    </select>
+
+    <select id="getFileListByProcessTaskId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.file.dto.FileVo">
+        SELECT a.`id`,
+               a.`name`,
+               a.`size`,
+               a.`user_uuid`    as userUuid,
+               a.`upload_time`  as uploadTime,
+               a.`type`,
+               a.`content_type` as contentType,
+               a.`path`
+        FROM `file` a
+                 JOIN `processtask_file` b ON a.`id` = b.`file_id`
+        WHERE `processtask_id` = #{value}
+    </select>
+
+    <resultMap id="fileVoMap" type="neatlogic.framework.file.dto.FileVo">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="type" property="type"/>
+        <result column="size" property="size"/>
+        <result column="uploadTime" property="uploadTime"/>
+        <result column="contentType" property="contentType"/>
+        <result column="path" property="path"/>
+        <association property="fcuVo" javaType="neatlogic.framework.dto.UserVo">
+            <result property="uuid" column="userUuid"/>
+            <result property="userName" column="userName"/>
+        </association>
+    </resultMap>
+
+    <select id="getFileDetailListByProcessTaskId" parameterType="java.lang.Long"
+            resultMap="fileVoMap">
+        SELECT a.`id`,
+               a.`name`,
+               a.`size`,
+               a.`type`,
+               a.`upload_time`  as uploadTime,
+               a.`content_type` as contentType,
+               a.`path`,
+               a.`user_uuid`    as userUuid,
+               c.`user_name`    as userName
+        FROM `file` a
+                 JOIN `processtask_file` b ON a.`id` = b.`file_id`
+                 LEFT JOIN `user` c ON a.`user_uuid` = c.`uuid`
+        WHERE `processtask_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepTaskFileListByProcessTaskId" parameterType="java.lang.Long"
+            resultMap="fileVoMap">
+        SELECT a.`id`,
+               a.`name`,
+               a.`size`,
+               a.`type`,
+               a.`upload_time`  as uploadTime,
+               a.`content_type` as contentType,
+               a.`path`,
+               a.`user_uuid`    as userUuid,
+               b.`user_name`    as userName
+        FROM `file` a
+                 LEFT JOIN `user` b on a.`user_uuid` = b.`uuid`
+        WHERE a.`id` in (
+            SELECT c.`file_id`
+            FROM `processtask_step_task_user_file` c
+                     JOIN `processtask_step_task` d ON d.`id` = c.`processtask_step_task_id`
+            WHERE d.`processtask_id` = #{value}
+        )
+    </select>
+
+    <select id="getProcessTaskLastUrgeUserUuidByProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.String">
+       SELECT
+           `lcu`
+       FROM `processtask_urge`
+       WHERE `processtask_id` = #{value}
+       ORDER BY `lcd` DESC
+       LIMIT 1
+    </select>
+
+    <select id="getProcessTaskUrgeCountByProcessTaskId" parameterType="java.lang.Long" resultType="int">
+       SELECT COUNT(1) FROM `processtask_urge` WHERE `processtask_id` = #{value}
+    </select>
+
+    <select id="searchProcessTaskCountByOwnerAndExcludeId" parameterType="neatlogic.framework.process.dto.ProcessTaskSearchVo"
+            resultType="int">
+        SELECT
+            COUNT(1)
+        FROM `processtask`
+        WHERE `owner` = #{owner}
+          AND `id` != #{excludeId}
+          AND `is_deleted` = 0
+    </select>
+
+    <select id="searchProcessTaskListByOwnerAndExcludeId" parameterType="neatlogic.framework.process.dto.ProcessTaskSearchVo"
+            resultType="neatlogic.framework.process.dto.ProcessTaskVo">
+        SELECT
+            `id`,
+            `title`,
+            `process_uuid` AS processUuid,
+            `channel_uuid` AS channelUuid,
+            `config_hash` AS configHash,
+            `priority_uuid` AS priorityUuid,
+            `status`,
+            `start_time` AS startTime,
+            `end_time` AS endTime,
+            `owner`,
+            `reporter`,
+            `expire_time` AS expireTime,
+            `worktime_uuid` AS worktimeUuid,
+            `error`,
+            `is_show` AS isShow,
+            `serial_number` AS serialNumber,
+            `source`,
+            `is_deleted` AS isDeleted,
+            `need_score` AS needScore
+        FROM `processtask`
+        WHERE `owner` = #{owner}
+          AND `id` != #{excludeId}
+          AND `is_deleted` = 0
+        ORDER BY `id` DESC
+            LIMIT #{startNum}, #{pageSize}
+    </select>
+    <select id="getSubProcessTaskCountByStepId" resultType="java.lang.Integer">
+        SELECT
+           count(1)
+        FROM `processtask` pt
+        join `processtask_invoke` as pi on pt.id = pi.processtask_id and pi.invoke_id = #{value}
+        WHERE  pt.`is_deleted` = 0
+    </select>
+
+    <select id="SearchSubProcessTaskListByStepId" resultMap="workcenterProcessTaskMap">
+        SELECT
+            pt.`id`,
+            pt.`title`,
+            pt.`process_uuid` AS processUuid,
+            pt.`channel_uuid` AS channelUuid,
+            pt.`config_hash` AS configHash,
+            pt.`priority_uuid` AS priorityUuid,
+            pt.`status`,
+            pt.`start_time`,
+            pt.`end_time`,
+            pt.`owner`,
+            pt.`reporter`,
+            pt.`expire_time` AS expireTime,
+            pt.`worktime_uuid` AS worktimeUuid,
+            pt.`error`,
+            pt.`is_show` AS isShow,
+            pt.`serial_number` AS serialNumber,
+            pt.`source`,
+            pt.`is_deleted` AS isDeleted,
+            pt.`need_score` AS needScore,
+            pri.`name` as priorityName,
+            pri.`color` as priorityColor,
+            c.`name` as channelName
+        FROM `processtask` pt
+                 join `processtask_invoke` as pi on pt.id = pi.processtask_id and pi.invoke_id = #{value}
+                 left join `priority` pri on pt.`priority_uuid` = pri.`uuid`
+                 left join `channel` c on pt.`channel_uuid` = c.`uuid`
+        WHERE  pt.`is_deleted` = 0
+        ORDER BY pt.`id` DESC
+    </select>
+
+    <select id="getSubProcessTaskCountByStepIdAndWithoutEndStatusList" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+        FROM `processtask` pt
+        join `processtask_invoke` as pi on pt.id = pi.processtask_id and pi.invoke_id = #{processTaskStepId}
+        WHERE  pt.`is_deleted` = 0
+        and pt.status not in
+        <foreach collection="statusList" item="status" close=")" open="(" separator="," >
+            #{status}
+        </foreach>
+    </select>
+    <select id="getInvokeByProcessTaskId" resultType="neatlogic.framework.process.dto.ProcessTaskInvokeVo">
+        select
+            `processtask_id` as processTaskId,
+            `source`,
+            `type`,
+            `invoke_id` as invokeId
+        from `processtask_invoke`
+        where `processtask_id` = #{value}
+
+    </select>
+
+    <!--<update id="updateProcessTaskStepConvergeIsCheck">
+        UPDATE `processtask_converge`
+        SET is_check = #{isCheck}
+        WHERE converge_id = #{convergeId}
+          AND processtask_step_id = #{processTaskStepId}
+    </update>-->
+
+    <update id="updateProcessTaskStepRelIsHit" parameterType="neatlogic.framework.process.dto.ProcessTaskStepRelVo">
+        UPDATE
+        `processtask_step_rel`
+        SET
+        `is_hit` = #{isHit}
+        WHERE `from_processtask_step_id` = #{fromProcessTaskStepId}
+        <if test="toProcessTaskStepId != null">
+            AND `to_processtask_step_id` = #{toProcessTaskStepId}
+        </if>
+        <if test="type != null and type != ''">
+            AND `type` = #{type}
+        </if>
+    </update>
+
+    <update id="updateProcessTaskStepStatus" parameterType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        UPDATE
+        `processtask_step`
+        SET
+        `status` = #{status},
+        `result` = #{result},
+        `is_active` = #{isActive},
+        <if test="updateActiveTime == 1">
+            `active_time` = NOW(3),
+        </if>
+        <choose>
+            <when test="updateStartTime == 1">
+                `start_time` = NOW(3),
+            </when>
+            <when test="updateStartTime == -1">
+                `start_time` = NULL,
+            </when>
+        </choose>
+        <choose>
+            <when test="updateEndTime == 1">
+                `end_time` = NOW(3),
+            </when>
+            <when test="updateEndTime == -1">
+                `end_time` = NULL,
+            </when>
+        </choose>
+        `error` = #{error}
+        WHERE `id` = #{id}
+    </update>
+
+    <insert id="insertProcessTaskStepAuditDetail"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepAuditDetailVo">
+        INSERT INTO `processtask_step_audit_detail` (`audit_id`,
+                                                     `type`,
+                                                     `old_content`,
+                                                     `new_content`)
+        VALUES (#{auditId},
+                #{type},
+                #{oldContent},
+                #{newContent})
+    </insert>
+
+    <insert id="batchInsertProcessTaskStepAuditDetail" parameterType="java.util.List">
+        INSERT INTO `processtask_step_audit_detail`
+            (
+              `audit_id`,
+              `type`,
+              `old_content`,
+              `new_content`
+            )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.auditId},
+            #{item.type},
+            #{item.oldContent},
+            #{item.newContent}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertProcessTaskStepAudit" parameterType="neatlogic.framework.process.dto.ProcessTaskStepAuditVo">
+        <!--		<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">-->
+        <!--			select LAST_INSERT_ID() as id-->
+        <!--		</selectKey>-->
+        INSERT INTO `processtask_step_audit` (
+        `id`,
+        `processtask_id`,
+        `processtask_step_id`,
+        `user_uuid`,
+        `action_time`,
+        `action`,
+        `step_status`,
+        `original_user`,
+        `description_hash`,
+        `source`
+        )
+        VALUES
+        (
+        #{id},
+        #{processTaskId},
+        #{processTaskStepId},
+        #{userUuid},
+        NOW(3),
+        #{action},
+        #{stepStatus},
+        #{originalUser},
+        #{descriptionHash},
+        #{source}
+        )
+    </insert>
+
+    <insert id="batchInsertProcessTaskStepAudit" parameterType="java.util.List">
+        INSERT INTO `processtask_step_audit` (
+        `id`,
+        `processtask_id`,
+        `processtask_step_id`,
+        `user_uuid`,
+        `action_time`,
+        `action`,
+        `step_status`,
+        `original_user`,
+        `description_hash`,
+        `source`
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id},
+            #{item.processTaskId},
+            #{item.processTaskStepId},
+            #{item.userUuid},
+            #{item.actionTime},
+            #{item.action},
+            #{item.stepStatus},
+            #{item.originalUser},
+            #{item.descriptionHash},
+            #{item.source}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertProcessTaskForm" parameterType="neatlogic.framework.process.dto.ProcessTaskFormVo">
+        INSERT INTO `processtask_form` (`processtask_id`,
+                                        `form_uuid`,
+                                        `form_name`,
+                                        `form_content_hash`)
+        VALUES (#{processTaskId},
+                #{formUuid},
+                #{formName},
+                #{formContentHash})
+    </insert>
+
+    <insert id="insertIgnoreProcessTaskFormContent" parameterType="neatlogic.framework.process.dto.ProcessTaskFormVo">
+        INSERT IGNORE INTO `processtask_form_content` (`hash`, `content`)
+        VALUES (#{formContentHash}, #{formContent});
+    </insert>
+
+    <insert id="insertProcessTaskStepWorkerPolicy"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepWorkerPolicyVo">
+        INSERT INTO `processtask_step_worker_policy` (`processtask_id`,
+                                                      `processtask_step_id`,
+                                                      `process_step_uuid`,
+                                                      `policy`,
+                                                      `sort`,
+                                                      `config`)
+        VALUES (#{processTaskId},
+                #{processTaskStepId},
+                #{processStepUuid},
+                #{policy},
+                #{sort},
+                #{config})
+    </insert>
+
+    <insert id="insertProcessTaskFormAttribute"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo">
+        INSERT ignore INTO `processtask_formattribute` (`processtask_id`, `form_attribute_data_id`)
+        VALUES (#{processTaskId}, #{id})
+    </insert>
+
+    <insert id="insertProcessTaskExtendFormAttribute"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo">
+        INSERT ignore INTO `processtask_extend_formattribute` (`processtask_id`, `form_attribute_data_id`, `tag`)
+        VALUES (#{processTaskId}, #{id}, #{tag})
+    </insert>
+
+    <insert id="insertIgnoreProcessTaskConverge" parameterType="neatlogic.framework.process.dto.ProcessTaskConvergeVo">
+        INSERT IGNORE INTO `processtask_converge` (`converge_id`,
+                                                   `processtask_step_id`,
+                                                   `processtask_id`)
+        VALUES (#{convergeId},
+                #{processTaskStepId},
+                #{processTaskId})
+    </insert>
+
+    <insert id="insertIgnoreProcessTaskStepWorker"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepWorkerVo">
+        INSERT ignore INTO `processtask_step_worker` (`processtask_id`,
+                                                      `processtask_step_id`,
+                                                      `type`,
+                                                      `uuid`,
+                                                      `user_type`)
+        VALUES (#{processTaskId},
+                #{processTaskStepId},
+                #{type},
+                #{uuid},
+                #{userType})
+    </insert>
+
+    <insert id="insertProcessTaskStepRel" parameterType="neatlogic.framework.process.dto.ProcessTaskStepRelVo">
+        INSERT INTO `processtask_step_rel` (`processtask_id`,
+                                            `from_process_step_uuid`,
+                                            `to_process_step_uuid`,
+                                            `from_processtask_step_id`,
+                                            `to_processtask_step_id`,
+                                            `condition`,
+                                            `is_hit`,
+                                            `uuid`,
+                                            `name`,
+                                            `type`)
+        VALUES (#{processTaskId},
+                #{fromProcessStepUuid},
+                #{toProcessStepUuid},
+                #{fromProcessTaskStepId},
+                #{toProcessTaskStepId},
+                #{condition},
+                #{isHit},
+                #{processStepRelUuid},
+                #{name},
+                #{type})
+    </insert>
+
+    <insert id="insertProcessTaskStep" parameterType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        <!-- <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER"> select LAST_INSERT_ID() as id </selectKey> -->
+        INSERT INTO `processtask_step` (
+        `id`,
+        `processtask_id`,
+        `name`,
+        `process_step_uuid`,
+        `status`,
+        `type`,
+        `handler`,
+        `is_active`,
+        `config_hash`
+        )
+        VALUES
+        (
+        #{id},
+        #{processTaskId},
+        #{name},
+        #{processStepUuid},
+        #{status},
+        #{type},
+        #{handler},
+        #{isActive},
+        #{configHash}
+        )
+    </insert>
+
+    <insert id="replaceProcessTaskStep" parameterType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        <!-- <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER"> select LAST_INSERT_ID() as id </selectKey> -->
+        REPLACE INTO `processtask_step` (
+        `id`,
+        `processtask_id`,
+        `name`,
+        `process_step_uuid`,
+        `status`,
+        `type`,
+        `handler`,
+        `is_active`,
+        `active_time`,
+        `start_time`,
+        `end_time`,
+        `config_hash`
+        )
+        VALUES
+        (
+        #{id},
+        #{processTaskId},
+        #{name},
+        #{processStepUuid},
+        #{status},
+        #{type},
+        #{handler},
+        #{isActive},
+        #{activeTime},
+        #{startTime},
+        #{endTime},
+        #{configHash}
+        )
+    </insert>
+
+    <insert id="insertProcessTask" parameterType="neatlogic.framework.process.dto.ProcessTaskVo">
+        <!-- <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER"> select LAST_INSERT_ID() as id </selectKey> -->
+        INSERT INTO `processtask` (
+        `id`,
+        `title`,
+        `process_uuid`,
+        `channel_uuid`,
+        `config_hash`,
+        `priority_uuid`,
+        `status`,
+        `start_time`,
+        `owner`,
+        `reporter`,
+        `expire_time`,
+        `worktime_uuid`,
+        `serial_number`,
+        `need_score`,
+        `source`,
+        `region_id`
+        )
+        VALUES
+        (
+        #{id},
+        #{title},
+        #{processUuid},
+        #{channelUuid},
+        #{configHash},
+        #{priorityUuid},
+        #{status},
+        NOW(3),
+        #{owner},
+        #{reporter},
+        #{expireTime},
+        #{worktimeUuid},
+        #{serialNumber},
+        #{needScore},
+        #{source},
+        #{regionId}
+        )
+    </insert>
+
+    <insert id="replaceProcessTask" parameterType="neatlogic.framework.process.dto.ProcessTaskVo">
+        <!-- <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER"> select LAST_INSERT_ID() as id </selectKey> -->
+        REPLACE INTO `processtask` (
+        `id`,
+        `title`,
+        `process_uuid`,
+        `channel_uuid`,
+        `config_hash`,
+        `priority_uuid`,
+        `status`,
+        `start_time`,
+        `owner`,
+        `reporter`,
+        `expire_time`,
+        `serial_number`,
+        `worktime_uuid`,
+        `region_id`
+        )
+        VALUES
+        (
+        #{id},
+        #{title},
+        #{processUuid},
+        #{channelUuid},
+        #{configHash},
+        #{priorityUuid},
+        #{status},
+        NOW(3),
+        #{owner},
+        #{reporter},
+        #{expireTime},
+        #{serialNumber},
+        #{worktimeUuid},
+        #{regionId}
+        )
+    </insert>
+
+    <insert id="insertIgnoreProcessTaskContent" parameterType="neatlogic.framework.process.dto.ProcessTaskContentVo">
+        INSERT IGNORE INTO `processtask_content` (`content`, `hash`)
+        VALUES (#{content}, #{hash})
+    </insert>
+
+    <insert id="batchInsertIgnoreProcessTaskContent" parameterType="neatlogic.framework.process.dto.ProcessTaskContentVo">
+        INSERT IGNORE INTO `processtask_content` (`content`, `hash`)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.content},
+            #{item.hash}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertProcessTaskStepContent" parameterType="neatlogic.framework.process.dto.ProcessTaskStepContentVo">
+        INSERT INTO `processtask_step_content` (`id`,
+                                                `processtask_id`,
+                                                `processtask_step_id`,
+                                                `content_hash`,
+                                                `type`,
+                                                `source`,
+                                                `fcd`,
+                                                `fcu`,
+                                                `lcd`,
+                                                `lcu`)
+        VALUES (#{id},
+                #{processTaskId},
+                #{processTaskStepId},
+                #{contentHash},
+                #{type},
+                #{source},
+                NOW(3),
+                #{fcu},
+                NOW(3),
+                #{fcu})
+    </insert>
+
+    <insert id="insertProcessTaskOperationContent" parameterType="neatlogic.framework.process.dto.ProcessTaskOperationContentVo">
+        INSERT INTO `processtask_operation_content` (`id`,
+                                                `processtask_id`,
+                                                `content_hash`,
+                                                `type`,
+                                                `source`,
+                                                `fcd`,
+                                                `fcu`,
+                                                `lcd`,
+                                                `lcu`)
+        VALUES (#{id},
+                #{processTaskId},
+                #{contentHash},
+                #{type},
+                #{source},
+                NOW(3),
+                #{fcu},
+                NOW(3),
+                #{fcu})
+    </insert>
+
+    <insert id="insertProcessTaskStepUser" parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+        INSERT INTO `processtask_step_user` (`processtask_id`,
+                                             `processtask_step_id`,
+                                             `user_uuid`,
+                                             `user_type`,
+                                             `user_name`,
+                                             `status`,
+                                             `active_time`,
+                                             `start_time`)
+        VALUES (#{processTaskId},
+                #{processTaskStepId},
+                #{userUuid},
+                #{userType},
+                #{userName},
+                #{status},
+                NOW(3),
+                NOW(3))
+    </insert>
+
+    <insert id="insertIgnoreProcessTaskStepUser" parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+        INSERT IGNORE INTO `processtask_step_user` (`processtask_id`,
+                                                    `processtask_step_id`,
+                                                    `user_uuid`,
+                                                    `user_type`,
+                                                    `user_name`,
+                                                    `status`,
+                                                    `active_time`,
+                                                    `end_time`,
+                                                    `start_time`)
+        VALUES (#{processTaskId},
+                #{processTaskStepId},
+                #{userUuid},
+                #{userType},
+                #{userName},
+                #{status},
+                #{activeTime},
+                #{endTime},
+                #{startTime})
+    </insert>
+
+    <insert id="insertProcessTaskStepMinorUser" parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+        INSERT INTO `processtask_step_user` (`processtask_id`,
+                                             `processtask_step_id`,
+                                             `user_uuid`,
+                                             `user_type`,
+                                             `user_name`,
+                                             `status`)
+        VALUES (#{processTaskId},
+                #{processTaskStepId},
+                #{userUuid},
+                'minor',
+                #{userName},
+                #{status})
+        ON DUPLICATE KEY UPDATE
+        `status` = #{status}
+    </insert>
+
+    <insert id="insertIgnoreProcessTaskStepConfig"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepConfigVo">
+        insert ignore INTO `processtask_step_config` (`hash`, `config`)
+        VALUES (#{hash}, #{config})
+    </insert>
+
+    <!--<insert id="insertProcessTaskStepFormAttribute"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepFormAttributeVo">
+        INSERT INTO `processtask_step_formattribute` (`processtask_id`,
+                                                      `processtask_step_id`,
+                                                      `attribute_uuid`,
+                                                      `action`,
+                                                      `type`)
+        VALUES (#{processTaskId},
+                #{processTaskStepId},
+                #{attributeUuid},
+                #{action},
+                #{type})
+    </insert>-->
+
+    <insert id="insertIgnoreProcessTaskConfig" parameterType="neatlogic.framework.process.dto.ProcessTaskConfigVo">
+        INSERT IGNORE INTO `processtask_config` (`hash`, `config`)
+        VALUES (#{hash}, #{config})
+    </insert>
+
+    <insert id="insertProcessTaskStepFile" parameterType="neatlogic.framework.process.dto.ProcessTaskStepFileVo">
+        INSERT INTO `processtask_file` (`processtask_id`,
+                                        `processtask_step_id`,
+                                        `content_id`,
+                                        `file_id`)
+        VALUES (#{processTaskId},
+                #{processTaskStepId},
+                #{contentId},
+                #{fileId})
+    </insert>
+
+    <insert id="insertProcessTaskAssignWorker"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskAssignWorkerVo">
+        INSERT INTO `processtask_assignworker` (`processtask_id`,
+                                                `processtask_step_id`,
+                                                `from_processtask_step_id`,
+                                                `from_process_step_uuid`,
+                                                `type`,
+                                                `uuid`,
+                                                `fcu`,
+                                                `fcd`)
+        VALUES (#{processTaskId},
+                #{processTaskStepId},
+                #{fromProcessTaskStepId},
+                #{fromProcessStepUuid},
+                #{type},
+                #{uuid},
+                #{fcu},
+                NOW(3))
+    </insert>
+
+    <!--<insert id="insertIgnoreProcessTaskStepNotifyPolicyConfig"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepNotifyPolicyVo">
+        INSERT IGNORE INTO `processtask_step_notify_policy_config` (`hash`, `config`)
+        VALUES (#{policyConfigHash}, #{policyConfig})
+    </insert>-->
+
+    <insert id="insertProcessTaskStepNotifyPolicy"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepNotifyPolicyVo">
+        INSERT INTO `processtask_step_notify_policy` (`processtask_step_id`,
+                                                      `policy_id`,
+                                                      `policy_name`,
+                                                      `policy_handler`,
+                                                      `policy_config_hash`)
+        VALUES (#{processTaskStepId},
+                #{policyId},
+                #{policyName},
+                #{policyHandler},
+                #{policyConfigHash})
+    </insert>
+
+    <insert id="replaceProcessTaskOldFormProp">
+        REPLACE INTO `processtask_old_form_prop` (`processtask_id`, `form`, `prop`)
+        VALUES (#{processTaskId}, #{form}, #{prop})
+    </insert>
+
+    <insert id="insertProcessTaskTransferReport"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskTransferReportVo">
+        INSERT INTO `processtask_tranfer_report` (`id`,
+                                                  `channel_type_relation_id`,
+                                                  `from_processtask_id`,
+                                                  `to_processtask_id`)
+        VALUES (#{id},
+                #{channelTypeRelationId},
+                #{fromProcessTaskId},
+                #{toProcessTaskId})
+    </insert>
+
+    <insert id="replaceProcessTaskRelation" parameterType="neatlogic.framework.process.dto.ProcessTaskRelationVo">
+        REPLACE INTO `processtask_relation` (`id`,
+                                             `channel_type_relation_id`,
+                                             `source`,
+                                             `target`)
+        VALUES (#{id},
+                #{channelTypeRelationId},
+                #{source},
+                #{target})
+    </insert>
+
+    <insert id="batchInsertProcessTaskImportAudit" parameterType="java.util.List">
+        INSERT INTO `processtask_import_audit`(
+        `id`,
+        `processtask_id`,
+        `title`,
+        `channel_uuid`,
+        `status`,
+        `error_reason`,
+        `owner`,
+        `import_time`
+        )
+        VALUES
+        <foreach collection="list" index="index" item="item" separator=",">
+            (
+            #{item.id},
+            #{item.processTaskId},
+            #{item.title},
+            #{item.channelUuid},
+            #{item.status},
+            #{item.errorReason},
+            #{item.owner},
+            NOW(3)
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertProcessTaskStepRemind" parameterType="neatlogic.framework.process.dto.ProcessTaskStepRemindVo">
+        INSERT INTO `processtask_step_remind` (`processtask_id`,
+                                               `processtask_step_id`,
+                                               `action`,
+                                               `title`,
+                                               `fcu`,
+                                               `fcd`,
+                                               `content_hash`)
+        VALUES (#{processTaskId},
+                #{processTaskStepId},
+                #{action},
+                #{title},
+                #{fcu},
+                NOW(3),
+                #{contentHash})
+    </insert>
+
+    <insert id="insertProcessTaskScoreTemplate"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskScoreTemplateVo">
+        INSERT INTO `processtask_score_template` (`processtask_id`,
+                                                  `score_template_id`,
+                                                  `is_auto`,
+                                                  `config_hash`)
+        VALUES (#{processTaskId},
+                #{scoreTemplateId},
+                #{isAuto},
+                #{configHash})
+    </insert>
+
+    <insert id="insertProcessTaskScoreTemplateConfig"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskScoreTemplateConfigVo">
+        INSERT INTO `processtask_score_template_config` (`hash`, `config`)
+        VALUES (#{hash}, #{config})
+    </insert>
+
+    <insert id="insertProcessTaskFocus">
+        INSERT IGNORE INTO `processtask_focus` (`processtask_id`, `user_uuid`)
+        VALUES (#{processTaskId}, #{userUuid})
+    </insert>
+
+    <insert id="replaceProcessTaskStepAgent" parameterType="neatlogic.framework.process.dto.ProcessTaskStepAgentVo">
+        REPLACE INTO `processtask_step_agent` (`processtask_id`,
+                                               `processtask_step_id`,
+                                               `user_uuid`,
+                                               `agent_uuid`)
+        VALUES (#{processTaskId},
+                #{processTaskStepId},
+                #{userUuid},
+                #{agentUuid})
+    </insert>
+
+    <insert id="insertProcessTaskTag" parameterType="neatlogic.framework.process.dto.ProcessTaskTagVo">
+        INSERT INTO `processtask_tag` (`processtask_id`, `tag_id`)
+        VALUES
+        <foreach collection="processTaskTagList" item="tag" open="(" separator="),(" close=")">
+            #{tag.processTaskId},
+            #{tag.tagId}
+        </foreach>
+    </insert>
+
+    <insert id="insertProcessTaskStepInOperation"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepInOperationVo">
+        <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+        INSERT IGNORE INTO `processtask_step_in_operation` (`processtask_id`,
+        `processtask_step_id`,
+        `operation_type`,
+        `operation_time`,
+        `expire_time`)
+        VALUES (#{processTaskId},
+        #{processTaskStepId},
+        #{operationType},
+        NOW(3),
+        #{expireTime})
+    </insert>
+
+    <insert id="insertProcessTaskStepTag" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTagVo">
+        INSERT INTO `processtask_step_tag` (`processtask_id`,
+                                            `processtask_step_id`,
+                                            `tag_id`)
+        VALUES (#{processTaskId},
+                #{processTaskStepId},
+                #{tagId})
+    </insert>
+
+    <insert id="replaceProcessTaskRepeatList" parameterType="neatlogic.framework.process.dto.ProcessTaskRepeatVo">
+        REPLACE INTO `processtask_repeat` (`processtask_id`, `repeat_group_id`) VALUES
+        <foreach collection="list" item="processTaskRepeat" separator=",">
+            (#{processTaskRepeat.processTaskId}, #{processTaskRepeat.repeatGroupId})
+        </foreach>
+    </insert>
+
+    <insert id="replaceProcessTaskRepeat" parameterType="neatlogic.framework.process.dto.ProcessTaskRepeatVo">
+        REPLACE INTO `processtask_repeat` (`processtask_id`, `repeat_group_id`)
+        VALUES (#{processTaskId}, #{repeatGroupId})
+    </insert>
+
+    <insert id="insertProcessTaskStepReapprovalRestoreBackup"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepReapprovalRestoreBackupVo">
+        INSERT INTO `processtask_step_reapproval_restore_backup` (`processtask_id`,
+                                                                  `processtask_step_id`,
+                                                                  `backup_step_id`,
+                                                                  `config`,
+                                                                  `sort`)
+        VALUES (#{processTaskId},
+                #{processTaskStepId},
+                #{backupStepId},
+                #{configStr},
+                #{sort})
+    </insert>
+
+    <insert id="insertProcessTaskStepAutomaticRequest"
+            parameterType="neatlogic.framework.process.dto.automatic.ProcessTaskStepAutomaticRequestVo">
+        <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+        INSERT INTO `processtask_step_automatic_request` (
+        `processtask_id`,
+        `processtask_step_id`,
+        `type`
+        )
+        VALUES
+        (
+        #{processTaskId},
+        #{processTaskStepId},
+        #{type}
+        )
+    </insert>
+
+    <insert id="insertProcessTaskStepTimer" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTimerVo">
+        INSERT INTO `processtask_step_timer` (`processtask_id`,
+                                              `processtask_step_id`,
+                                              `trigger_time`)
+        VALUES (#{processTaskId},
+                #{processTaskStepId},
+                #{triggerTime})
+    </insert>
+
+    <insert id="insertProcessTaskTimeCost" parameterType="neatlogic.framework.process.dto.ProcessTaskTimeCostVo">
+        INSERT INTO `processtask_time_cost` (`processtask_id`,
+                                             `time_cost`,
+                                             `realtime_cost`)
+        VALUES (#{processTaskId},
+                #{timeCost},
+                #{realTimeCost})
+        ON DUPLICATE KEY UPDATE
+        `time_cost` = #{timeCost},
+        `realtime_cost` = #{realTimeCost}
+    </insert>
+
+    <insert id="insertProcessTaskUrge" parameterType="java.util.Map">
+        INSERT INTO `processtask_urge` (`processtask_id`, `lcu`, `lcd`)
+        VALUES (#{processTaskId}, #{lcu}, NOW(3))
+    </insert>
+    <insert id="insertProcessTaskInvoke">
+        INSERT INTO `processtask_invoke` (`processtask_id`, `source`, `type`, `invoke_id`)
+        VALUES (#{processTaskId}, #{source}, #{sourceType}, #{invokeId});
+    </insert>
+
+    <insert id="insertProcessTaskFormExtendAttribute" parameterType="neatlogic.framework.process.dto.ProcessTaskFormAttributeVo">
+        INSERT INTO `processtask_form_extend_attribute` (
+            `processtask_id`,
+            `form_uuid`,
+            `parent_uuid`,
+            `tag`,
+            `key`,
+            `uuid`,
+            `label`,
+            `type`,
+            `handler`,
+            `config_hash`
+        )
+        VALUES
+            (
+                #{processTaskId},
+                #{formUuid},
+                #{parentUuid},
+                #{tag},
+                #{key},
+                #{uuid},
+                #{label},
+                #{type},
+                #{handler},
+                #{configHash}
+            )
+    </insert>
+
+    <update id="updateProcessTaskStepUserStatus" parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+        UPDATE
+        `processtask_step_user`
+        SET
+        <choose>
+            <when test="status == 'doing'">
+                `start_time` = NOW(3),
+                `end_time` = NULL,
+            </when>
+            <when test="status == 'done'">
+                `end_time` = NOW(3),
+            </when>
+        </choose>
+        `status` = #{status}
+        WHERE
+        `processtask_step_id` = #{processTaskStepId}
+        <if test="userUuid != null and userUuid != ''">
+            AND `user_uuid` = #{userUuid}
+        </if>
+        AND `user_type` = #{userType}
+    </update>
+
+    <update id="updateProcessTaskStatus" parameterType="neatlogic.framework.process.dto.ProcessTaskVo">
+        UPDATE
+        `processtask`
+        SET
+        <choose>
+            <when test="status == 'succeed' or status == 'failed' or status == 'aborted'">
+                `end_time` = NOW(3),
+            </when>
+            <when test="status == 'scored'"></when>    
+            <otherwise>
+                `end_time` = null,
+            </otherwise>
+        </choose>
+        `status` = #{status}
+        WHERE
+        `id` = #{id}
+    </update>
+
+    <update id="updateProcessTaskTitleOwnerPriorityUuid" parameterType="neatlogic.framework.process.dto.ProcessTaskVo">
+        UPDATE
+            `processtask`
+        SET `title`         = #{title},
+            `priority_uuid` = #{priorityUuid},
+            `owner`         = #{owner},
+            `reporter`      = #{reporter}
+        WHERE `id` = #{id}
+    </update>
+
+    <update id="updateProcessTaskStepContentById">
+        UPDATE `processtask_step_content`
+        SET `content_hash` = #{contentHash},
+            `source`       = #{source},
+            `lcd`          = NOW(3),
+            `lcu`          = #{lcu}
+        WHERE `id` = #{id}
+    </update>
+
+    <update id="updateProcessTaskStepWorkerUuid"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepWorkerVo">
+        UPDATE `processtask_step_worker`
+        SET `uuid` = #{newUuid}
+        WHERE `processtask_step_id` = #{processTaskStepId}
+          AND `type` = #{type}
+          AND `uuid` = #{uuid}
+          AND `user_type` = #{userType}
+    </update>
+
+    <update id="updateProcessTaskStepUserUserUuid"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+        UPDATE `processtask_step_user`
+        SET `user_uuid` = #{newUserUuid}, `user_name` = #{userName}
+        WHERE `processtask_step_id` = #{processTaskStepId}
+          AND `user_uuid` = #{userUuid}
+          AND `user_type` = #{userType}
+    </update>
+
+    <update id="updateProcessTaskIsShow" parameterType="neatlogic.framework.process.dto.ProcessTaskVo">
+        UPDATE `processtask`
+        SET `is_show` = #{isShow}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateProcessTaskNeedScoreByIdList">
+        UPDATE `processtask`
+        SET `need_score` = #{needScore}
+        WHERE `id` IN
+        <foreach collection="idList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="updateProcessTaskPriorityUuidById">
+        UPDATE `processtask`
+        SET `priority_uuid` = #{priorityUuid}
+        WHERE `id` = #{id}
+    </update>
+
+    <update id="updateProcessTaskSerialNumberById">
+        UPDATE `processtask`
+        SET `serial_number` = #{serialNumber}
+        WHERE `id` = #{id}
+    </update>
+
+    <update id="updateProcessTaskStepAutomaticRequestTriggerTimeById"
+            parameterType="neatlogic.framework.process.dto.automatic.ProcessTaskStepAutomaticRequestVo">
+        UPDATE `processtask_step_automatic_request`
+        SET `trigger_time` = #{triggerTime}
+        WHERE `id` = #{id}
+    </update>
+
+    <update id="updateProcessTaskStepTimerTriggerTimeById"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepTimerVo">
+        UPDATE `processtask_step_timer`
+        SET `trigger_time` = #{triggerTime}
+        where `processtask_step_id` = #{processTaskStepId}
+    </update>
+
+    <update id="updateProcessTaskStepStatusByStepId" parameterType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        UPDATE
+            `processtask_step`
+        SET `status`    = #{status},
+            `is_active` = #{isActive}
+        WHERE `id` = #{id}
+    </update>
+
+    <update id="updateProcessTaskStepMajorUserAndStatus"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+        UPDATE `processtask_step_user`
+        SET `user_uuid` = #{userUuid},
+        `user_name` = #{userName},
+        <choose>
+            <when test="status == 'doing'">
+                `start_time` = NOW(3),
+                `end_time` = NULL,
+            </when>
+            <when test="status == 'done'">
+                `end_time` = NOW(3),
+            </when>
+        </choose>
+        `status` = #{status}
+        WHERE `processtask_step_id` = #{processTaskStepId}
+        AND `user_type` = 'major'
+    </update>
+
+    <update id="updateProcessTaskFormFormContentHashByFormContentHash">
+        UPDATE `processtask_form`
+        SET `form_content_hash` = #{newFormConfigHash}
+        WHERE `form_content_hash` = #{oldFormConfigHash}
+    </update>
+
+    <update id="updateProcessTaskIsDeletedById">
+        UPDATE
+            `processtask`
+        SET `is_deleted` = #{isDeleted}
+        WHERE `id` = #{id}
+    </update>
+
+    <delete id="deleteProcessTaskConvergeByStepId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_converge`
+        WHERE `processtask_step_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskConvergeByProcessTaskId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_converge`
+        WHERE `processtask_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskFormAttributeByProcessTaskId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_formattribute`
+        WHERE `processtask_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskExtendFormAttributeByProcessTaskId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_Extend_formattribute`
+        WHERE `processtask_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepWorker" parameterType="neatlogic.framework.process.dto.ProcessTaskStepWorkerVo">
+        DELETE FROM `processtask_step_worker`
+        <where>
+            <if test="processTaskId != null and processTaskId != ''">
+                `processtask_id` = #{processTaskId}
+            </if>
+            <if test="processTaskStepId != null and processTaskStepId != ''">
+                AND `processtask_step_id` = #{processTaskStepId}
+            </if>
+            <if test="type != null and type != ''">
+                AND `type` = #{type}
+            </if>
+            <if test="uuid != null and uuid != ''">
+                AND `uuid` = #{uuid}
+            </if>
+            <if test="userType != null and userType != ''">
+                AND `user_type` = #{userType}
+            </if>
+        </where>
+    </delete>
+
+    <delete id="deleteProcessTaskStepUser">
+        DELETE
+        FROM
+        `processtask_step_user`
+        WHERE `processtask_step_id` = #{processTaskStepId}
+        <if test="userType != null and userType != ''">
+            AND `user_type` = #{userType}
+        </if>
+        <if test="userUuid != null and userUuid != ''">
+            AND `user_uuid` = #{userUuid}
+        </if>
+    </delete>
+
+    <delete id="deleteProcessTaskAssignWorker"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskAssignWorkerVo">
+        DELETE
+        FROM `processtask_assignworker`
+        WHERE `processtask_id` = #{processTaskId}
+          AND `processtask_step_id` = #{processTaskStepId}
+          AND `from_processtask_step_id` = #{fromProcessTaskStepId}
+    </delete>
+
+    <delete id="deleteProcessTaskAssignWorkerByProcessTaskId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_assignworker`
+        WHERE `processtask_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepFileByProcessTaskStepId">
+        DELETE
+        FROM `processtask_file`
+        WHERE `processtask_id` = #{processTaskId}
+          and `processtask_step_id` = #{processTaskStepId}
+    </delete>
+
+    <delete id="deleteProcessTaskStepFileByProcessTaskId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_file`
+        WHERE `processtask_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepContentByProcessTaskStepId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_step_content`
+        WHERE `processtask_step_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepFileByContentId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_file`
+        WHERE `content_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepContentById" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_step_content`
+        WHERE `id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskRelationById" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_relation`
+        WHERE `id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepRemind" parameterType="neatlogic.framework.process.dto.ProcessTaskStepRemindVo">
+        DELETE FROM `processtask_step_remind`
+        WHERE `processtask_step_id` = #{processTaskStepId}
+        <if test="action != null and action != ''">
+            AND `action` = #{action}
+        </if>
+    </delete>
+
+    <delete id="deleteProcessTaskFocus">
+        DELETE FROM `processtask_focus` WHERE `processtask_id` = #{processTaskId}
+        <if test="userUuid != null">
+            and `user_uuid` = #{userUuid}
+        </if>
+    </delete>
+
+    <delete id="deleteProcessTaskFocusByProcessTaskId">
+        DELETE
+        FROM `processtask_focus`
+        WHERE `processtask_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskFormByProcessTaskId" parameterType="java.lang.Long">
+        delete
+        from `processtask_form`
+        where `processtask_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepByProcessTaskId" parameterType="java.lang.Long">
+        DELETE ps,psa,psau,psaud,psc,psnp,psd,psf,psr,psrl,pss,pst,psu,psw,pswp
+        FROM `processtask_step` ps
+                 LEFT JOIN
+             `processtask_step_agent` psa
+             ON psa.`processtask_id` = ps.`processtask_id` AND psa.`processtask_step_id` = ps.id
+                 LEFT JOIN `processtask_step_audit` psau ON psau.`processtask_id` = ps.`processtask_id`
+            AND psau.`processtask_step_id` = ps.id
+                 LEFT JOIN `processtask_step_audit_detail` psaud ON psau.id = psaud.audit_id
+                 LEFT JOIN `processtask_step_content` psc ON psc.`processtask_id` =
+                                                             ps.`processtask_id` AND psc.`processtask_step_id` = ps.id
+                 LEFT JOIN `processtask_step_notify_policy` psnp ON psnp.`processtask_step_id` = ps.id
+                 LEFT JOIN `processtask_step_data` psd
+                           ON psd.`processtask_id` = ps.`processtask_id` AND psd.`processtask_step_id` =
+                                                                             ps.id
+                 LEFT JOIN `processtask_step_remind` psr ON psr.`processtask_id`
+                                                                = ps.`processtask_id` AND
+                                                            psr.`processtask_step_id` = ps.id
+                 LEFT JOIN `processtask_step_rel` psrl ON psrl.`processtask_id` = ps.`processtask_id`
+                 LEFT JOIN `processtask_step_sla` pss ON
+            pss.`processtask_step_id` = ps.id
+                 LEFT JOIN `processtask_step_timeaudit` pst ON pst.`processtask_step_id` = ps.id
+                 LEFT JOIN `processtask_step_user` psu ON psu.`processtask_id` =
+                                                          ps.`processtask_id` AND psu.`processtask_step_id` = ps.id
+                 LEFT JOIN `processtask_step_worker` psw
+                           ON psw.`processtask_id` = ps.`processtask_id` AND psw.`processtask_step_id` = ps.id
+                 LEFT JOIN
+             `processtask_step_worker_policy` pswp
+             ON pswp.`processtask_id` = ps.`processtask_id` AND pswp.`processtask_step_id` = ps.id
+        WHERE ps.`processtask_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskByProcessTaskId" parameterType="java.lang.Long">
+        delete
+        from `processtask`
+        where `id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepAgentByProcessTaskStepId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_step_agent`
+        WHERE `processtask_step_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskTagByProcessTaskId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_tag`
+        WHERE `processtask_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepInOperationById" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_step_in_operation`
+        WHERE `id` = #{id}
+    </delete>
+
+    <delete id="deleteProcessTaskStepInOperationByProcessTaskId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_step_in_operation`
+        WHERE `processtask_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepWorkerMinorByProcessTaskStepId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_step_worker`
+        where `processtask_step_id` = #{processTaskStepId}
+          and `user_type` = 'minor'
+    </delete>
+
+    <delete id="deleteProcessTaskStepUserMinorByProcessTaskStepId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_step_user`
+        where `processtask_step_id` = #{processTaskStepId}
+          and `user_type` = 'minor'
+    </delete>
+
+    <delete id="deleteProcessTaskRepeatByProcessTaskId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_repeat`
+        WHERE `processtask_id` = #{processTaskId}
+    </delete>
+
+    <delete id="deleteProcessTaskStepReapprovalRestoreBackupByBackupStepId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_step_reapproval_restore_backup`
+        WHERE `backup_step_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepAutomaticRequestById" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_step_automatic_request`
+        WHERE `id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepAutomaticRequestByProcessTaskStepId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_step_automatic_request`
+        WHERE `processtask_step_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepTimerByProcessTaskStepId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_step_timer`
+        WHERE `processtask_step_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskTimeCostByProcessTaskId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_time_cost`
+        WHERE `processtask_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskFormContentByHash" parameterType="java.lang.String">
+        DELETE
+        FROM `processtask_form_content`
+        WHERE `hash` = #{value}
+    </delete>
+</mapper>

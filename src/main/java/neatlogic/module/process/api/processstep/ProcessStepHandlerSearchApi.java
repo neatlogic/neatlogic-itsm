@@ -4,7 +4,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessStepType;
-import neatlogic.framework.process.dao.mapper.ProcessStepHandlerMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessStepHandlerMapper;
 import neatlogic.framework.process.dto.ProcessStepHandlerVo;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;

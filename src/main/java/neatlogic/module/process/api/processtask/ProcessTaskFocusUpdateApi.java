@@ -5,11 +5,11 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskFocusRepeatException;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -27,7 +27,7 @@ public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 	private ProcessTaskMapper processTaskMapper;
 
 	@Resource
-	private IProcessStepHandlerUtil IProcessStepHandlerUtil;
+	private IProcessStepHandlerUtil processStepHandlerUtil;
 
 	@Override
 	public String getToken() {
@@ -67,10 +67,10 @@ public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 				throw new ProcessTaskFocusRepeatException(processTaskId);
 			}
 			processTaskMapper.insertProcessTaskFocus(processTaskId,userUuid);
-			IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.FOCUSTASK);
+			processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.FOCUSTASK);
 		}else{
 			processTaskMapper.deleteProcessTaskFocus(processTaskId,userUuid);
-			IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UNDOFOCUSTASK);
+			processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UNDOFOCUSTASK);
 		}
 		JSONObject result = new JSONObject();
 		result.put("isFocus",isFocus);

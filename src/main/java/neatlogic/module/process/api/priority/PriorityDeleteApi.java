@@ -1,6 +1,6 @@
 package neatlogic.module.process.api.priority;
 
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.exception.priority.PriorityIsInvokedException;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -12,7 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.process.dao.mapper.PriorityMapper;
+import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
 import neatlogic.framework.process.dto.PriorityVo;
 import neatlogic.framework.process.exception.priority.PriorityNotFoundException;
 import neatlogic.framework.restful.annotation.Description;

@@ -7,7 +7,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.process.auth.SCORE_TEMPLATE_MODIFY;
-import neatlogic.framework.process.dao.mapper.score.ScoreTemplateMapper;
+import neatlogic.module.process.dao.mapper.score.ScoreTemplateMapper;
 import neatlogic.framework.process.dto.score.ScoreTemplateDimensionVo;
 import neatlogic.framework.process.dto.score.ScoreTemplateVo;
 import neatlogic.framework.process.exception.score.ScoreTemplateNameRepeatException;

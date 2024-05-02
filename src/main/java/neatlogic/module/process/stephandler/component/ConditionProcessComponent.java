@@ -32,12 +32,16 @@ import neatlogic.framework.process.exception.processtask.ProcessTaskException;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerBase;
 import neatlogic.framework.util.RunScriptUtil;
 import neatlogic.framework.util.javascript.JavascriptUtil;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import java.util.*;
@@ -48,6 +52,15 @@ import java.util.stream.Collectors;
 @Service
 public class ConditionProcessComponent extends ProcessStepHandlerBase {
     static Logger logger = LoggerFactory.getLogger(ConditionProcessComponent.class);
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private SelectContentByHashMapper selectContentByHashMapper;
+
+    @Resource
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 
     @Override
     public String getName() {
@@ -202,7 +215,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
         /* 处理历史记录 **/
         // String action = currentProcessTaskStepVo.getParamObj().getString("action");
         // AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
-        IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.CONDITION);
+        processStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.CONDITION);
         return 1;
     }
 

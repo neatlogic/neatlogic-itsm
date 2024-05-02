@@ -3,7 +3,7 @@ package neatlogic.module.process.audithandler.handler;
 import java.util.List;
 
 import neatlogic.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
-import neatlogic.framework.process.dao.mapper.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +12,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;
-import neatlogic.framework.process.dao.mapper.ChannelMapper;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ChannelTypeVo;
 import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.process.dto.ProcessTaskStepAuditDetailVo;

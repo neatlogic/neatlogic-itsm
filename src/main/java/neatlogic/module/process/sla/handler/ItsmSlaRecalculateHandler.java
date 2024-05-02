@@ -18,7 +18,7 @@ package neatlogic.module.process.sla.handler;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.process.constvalue.SlaStatus;
-import neatlogic.framework.process.dao.mapper.ProcessTaskSlaMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
 import neatlogic.framework.process.dto.ProcessTaskSlaTimeCostVo;
 import neatlogic.framework.process.dto.ProcessTaskSlaTimeVo;
 import neatlogic.framework.process.dto.ProcessTaskSlaVo;

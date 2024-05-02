@@ -9,7 +9,7 @@ import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
-import neatlogic.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepDataVo;
 import neatlogic.framework.process.dto.processconfig.*;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;

@@ -19,7 +19,7 @@ import neatlogic.framework.asynchronization.threadpool.CachedThreadPool;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.CHANNELTYPE_MODIFY;
-import neatlogic.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSerialNumberMapper;
 import neatlogic.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import neatlogic.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberPolicyHandlerNotFoundException;
 import neatlogic.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberPolicyNotFoundException;

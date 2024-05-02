@@ -17,12 +17,10 @@ import com.alibaba.fastjson.JSONObject;
 
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.process.dao.mapper.CatalogMapper;
-import neatlogic.framework.process.dao.mapper.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.framework.process.dto.CatalogVo;
 import neatlogic.framework.process.exception.catalog.CatalogNotFoundException;
-
-import javax.annotation.Resource;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)

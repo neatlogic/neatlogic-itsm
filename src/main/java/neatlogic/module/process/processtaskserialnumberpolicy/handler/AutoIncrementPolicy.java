@@ -1,9 +1,9 @@
 package neatlogic.module.process.processtaskserialnumberpolicy.handler;
 
 import neatlogic.framework.common.util.PageUtil;
-import neatlogic.framework.process.dao.mapper.ChannelTypeMapper;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
-import neatlogic.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSerialNumberMapper;
 import neatlogic.framework.process.dto.ChannelTypeVo;
 import neatlogic.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;

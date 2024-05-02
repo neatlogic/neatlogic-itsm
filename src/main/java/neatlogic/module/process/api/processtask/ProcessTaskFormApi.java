@@ -3,16 +3,10 @@ package neatlogic.module.process.api.processtask;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
-import neatlogic.framework.process.dao.mapper.ChannelMapper;
-import neatlogic.framework.process.dto.ChannelVo;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
-import neatlogic.framework.process.exception.processtask.ProcessTaskNoPermissionException;
-import neatlogic.framework.process.exception.processtask.ProcessTaskViewDeniedException;
 import org.apache.commons.collections4.MapUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;

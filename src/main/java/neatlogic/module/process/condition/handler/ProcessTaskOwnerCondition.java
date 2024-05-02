@@ -31,10 +31,12 @@ import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +44,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
     @Autowired
     private UserMapper userMapper;

@@ -6,7 +6,7 @@ import neatlogic.framework.importexport.dto.ImportExportBaseInfoVo;
 import neatlogic.framework.importexport.dto.ImportExportPrimaryChangeVo;
 import neatlogic.framework.importexport.dto.ImportExportVo;
 import neatlogic.framework.process.constvalue.ProcessImportExportHandlerType;
-import neatlogic.framework.process.dao.mapper.ProcessCommentTemplateMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessCommentTemplateMapper;
 import neatlogic.framework.process.dto.ProcessCommentTemplateVo;
 import neatlogic.framework.process.exception.commenttemplate.ProcessCommentTemplateNotFoundException;
 import neatlogic.module.process.service.ProcessCommentTemplateService;

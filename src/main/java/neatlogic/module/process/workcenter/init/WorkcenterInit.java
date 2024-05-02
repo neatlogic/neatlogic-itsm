@@ -20,7 +20,7 @@ import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.UserType;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterInitType;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterType;
-import neatlogic.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.framework.process.workcenter.dto.WorkcenterAuthorityVo;
 import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
 import neatlogic.framework.startup.StartupBase;

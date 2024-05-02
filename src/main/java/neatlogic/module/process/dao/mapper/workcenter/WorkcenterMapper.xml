@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper">
+    <!--临时用，版本稳定后删除-->
+    <select id="getAllWorkcenterConditionConfig" resultType="neatlogic.framework.process.workcenter.dto.WorkcenterVo">
+        select uuid, condition_config as conditionConfigStr
+        from process_workcenter
+    </select>
+
+    <resultMap id="workcenterMap" type="neatlogic.framework.process.workcenter.dto.WorkcenterVo">
+        <id column="uuid" property="uuid"/>
+        <result column="name" property="name"/>
+        <result column="owner" property="owner"/>
+        <result column="type" property="type"/>
+        <result column="catalogName" property="catalogName"/>
+        <result column="catalogId" property="catalogId"/>
+        <result column="support" property="support"/>
+        <result column="sort" property="sort"/>
+        <result column="condition_config" property="conditionConfigStr"/>
+        <result column="is_show_total" property="isShowTotal"/>
+        <collection property="authorityList" ofType="neatlogic.framework.dto.AuthorityVo">
+            <result column="authUuid" property="uuid"/>
+            <result column="authType" property="type"/>
+        </collection>
+    </resultMap>
+
+    <select id="getAuthorizedWorkcenterUuidList" resultType="java.lang.String">
+        SELECT
+        DISTINCT
+        pw.`uuid`
+        FROM
+        `process_workcenter` pw
+        LEFT JOIN `process_workcenter_authority` pwa ON pw.`uuid` = pwa.`workcenter_uuid`
+        LEFT JOIN `process_workcenter_owner` pwo ON pw.`uuid` = pwo.`workcenter_uuid`
+        <where>
+            pw.support in ('all',#{deviceType})
+            and
+            (
+            (pwa.type = 'common' AND pwa.`uuid` = 'alluser')
+            <if test="userUuid != null and userUuid != ''">
+                OR (pwa.type = 'user' AND pwa.`uuid` = #{userUuid})
+            </if>
+            <if test="teamUuidList != null and teamUuidList.size() > 0">
+                OR (pwa.type = 'team' AND pwa.`uuid` IN
+                <foreach collection="teamUuidList" item="teamUuid" open="(" separator="," close=")">
+                    #{teamUuid}
+                </foreach>
+                )
+            </if>
+            <if test="roleUuidList != null and roleUuidList.size() > 0">
+                OR (pwa.type = 'role' AND pwa.`uuid` IN
+                <foreach collection="roleUuidList" item="roleUuid" open="(" separator="," close=")">
+                    #{roleUuid}
+                </foreach>
+                )
+            </if>
+            <if test="userUuid != null and userUuid != ''">
+                or pwo.`user_uuid` = #{userUuid}
+            </if>
+            )
+            <if test="isHasNewTypeAuth == 0">
+                and pw.`type` != 'custom'
+            </if>
+            <if test="isHasModifiedAuth == 1">
+                or pw.`type` in ('system','factory')
+            </if>
+        </where>
+    </select>
+
+    <select id="getAuthorizedWorkcenterListByUuidList" parameterType="java.util.List" resultMap="workcenterMap">
+        SELECT
+        pw.`uuid`,
+        pw.`name`,
+        pw.`type`,
+        pw.`support`,
+        pw.`sort`,
+        pw.`condition_config`,
+        pw.`is_show_total`,
+        pwa.`type` as authType,
+        pwa.`uuid` as authUuid,
+        pwo.`user_uuid` as `owner`,
+        pwc.`name` as catalogName,
+        pw.`catalog_id` as catalogId
+        FROM
+        `process_workcenter` pw
+        LEFT JOIN `process_workcenter_authority` pwa ON pw.`uuid` = pwa.`workcenter_uuid`
+        LEFT JOIN `process_workcenter_owner` pwo ON pw.`uuid` = pwo.`workcenter_uuid`
+        LEFT JOIN `process_workcenter_catalog` pwc ON pw.`catalog_id` = pwc.`id`
+        <where>
+            <if test="uuidList != null and uuidList.size() > 0">
+                pw.`uuid` IN
+                <foreach collection="uuidList" item="uuid" open="(" separator="," close=")">
+                    #{uuid}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY pw.type asc,pw.`sort` ASC
+    </select>
+
+    <select id="checkWorkcenterNameIsRepeat" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+        FROM
+        `process_workcenter` pw
+        <where>
+            <if test="name != null and name != ''">
+                pw.`name` = #{name}
+            </if>
+            <if test="uuid != null and uuid != ''">
+                and uuid != #{uuid}
+            </if>
+        </where>
+    </select>
+
+    <select id="getWorkcenterByUuid" parameterType="java.lang.String" resultMap="workcenterMap">
+        SELECT pw.`uuid`,
+               pw.`name`,
+               pw.`type`,
+               pw.`support`,
+               pw.`sort`,
+               pw.`condition_config`,
+               pw.`is_show_total`,
+               pwo.`user_uuid` AS `owner`,
+               pw.`catalog_id` AS catalogId,
+               pwc.`name`      AS catalogName,
+               pwa.type        AS authType,
+               pwa.uuid        AS authUuid
+        FROM `process_workcenter` pw
+                 LEFT JOIN `process_workcenter_owner` pwo ON pw.`uuid` = pwo.`workcenter_uuid`
+                 LEFT JOIN `process_workcenter_catalog` pwc ON pw.catalog_id = pwc.id
+                 LEFT JOIN `process_workcenter_authority` pwa ON pw.uuid = pwa.workcenter_uuid
+        where pw.`uuid` = #{uuid}
+    </select>
+
+    <!--<select id="getWorkcenterConditionConfig" resultType="java.util.HashMap">
+        SELECT
+          pw.`uuid`,
+          pw.`condition_config`
+        FROM
+          `process_workcenter` pw
+    </select>-->
+
+    <select id="getWorkcenterThead" parameterType="neatlogic.framework.process.workcenter.dto.WorkcenterTheadVo"
+            resultType="neatlogic.framework.process.workcenter.dto.WorkcenterTheadVo">
+        SELECT `workcenter_uuid` as workcenterUuid,
+               `name`,
+               `sort`,
+               `is_show`         as isShow,
+               `type`,
+               `user_uuid`       as userUuid,
+               `disabled`        as disabled
+        FROM `process_workcenter_thead`
+        where workcenter_uuid = #{workcenterUuid}
+          and user_uuid = #{userUuid}
+        order by sort asc
+    </select>
+
+    <select id="getWorkcenterUserProfileByUserUuid" parameterType="java.lang.String"
+            resultType="neatlogic.framework.process.workcenter.dto.WorkcenterUserProfileVo">
+        select *
+        from `process_workcenter_user_profile`
+        where `user_uuid` = #{userUuid}
+    </select>
+
+    <select id="getWorkcenterVoListByUuidList"
+            parameterType="java.util.List" resultMap="workcenterMap">
+        select
+        `uuid` ,
+        `name`,
+        `sort`,
+        `type`,
+        `support`,
+        `is_show_total`
+        from `process_workcenter`
+        where `uuid` in
+        <foreach collection="uuidList" item="uuid" separator="," open="(" close=")">
+            #{uuid}
+        </foreach>
+    </select>
+
+    <select id="getWorkcenterAuthorityVoListByUuidList"
+            resultType="neatlogic.framework.process.workcenter.dto.WorkcenterAuthorityVo">
+        select
+        workcenter_uuid as workcenterUuid,
+        `uuid`,
+        `type`
+        from `process_workcenter_authority`
+        where `workcenter_uuid` in
+        <foreach collection="uuidList" item="uuid" open="(" separator="," close=")">
+            #{uuid}
+        </foreach>
+    </select>
+
+
+    <select id="checkWorkcenterCatalogNameIsRepeats" resultType="int"
+            parameterType="neatlogic.framework.process.workcenter.dto.WorkcenterCatalogVo">
+        SELECT count(1)
+        FROM `process_workcenter_catalog`
+        where `id` != #{id}
+          and `name` = #{name}
+    </select>
+
+    <select id="getWorkcenterCatalogByName" parameterType="java.lang.String"
+            resultType="neatlogic.framework.process.workcenter.dto.WorkcenterCatalogVo">
+        SELECT `id`, `name`
+        FROM `process_workcenter_catalog`
+        WHERE name = #{name}
+        limit 1
+    </select>
+
+    <select id="getWorkcenterCatalogListByName" parameterType="java.lang.String"
+            resultType="neatlogic.framework.process.workcenter.dto.WorkcenterCatalogVo">
+        SELECT `id`,`name`
+        FROM `process_workcenter_catalog`
+        <where>
+            <if test="name != null and name != ''">
+                and `name` like CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="checkWorkcenterCatalogIsExists" resultType="int">
+        SELECT COUNT(1)
+        FROM process_workcenter_catalog
+        WHERE id = #{id}
+    </select>
+
+    <select id="checkWorkcenterCatalogIsUsed" resultType="int">
+        SELECT COUNT(1)
+        FROM process_workcenter
+        WHERE catalog_id = #{value}
+    </select>
+
+    <delete id="deleteWorkcenterByUuid" parameterType="java.lang.String">
+        DELETE
+        FROM `process_workcenter`
+        WHERE `uuid` = #{workcenterUuid};
+    </delete>
+
+    <delete id="deleteWorkcenterAuthorityByUuid" parameterType="java.lang.String">
+        DELETE
+        FROM `process_workcenter_authority`
+        WHERE `workcenter_uuid` = #{workcenterUuid};
+    </delete>
+
+    <delete id="deleteWorkcenterOwnerByUuid" parameterType="java.lang.String">
+        DELETE
+        FROM `process_workcenter_owner`
+        WHERE `workcenter_uuid` = #{workcenterUuid};
+    </delete>
+
+    <delete id="deleteWorkcenterThead" parameterType="neatlogic.framework.process.workcenter.dto.WorkcenterTheadVo">
+        DELETE
+        FROM
+        `process_workcenter_thead`
+        <where>
+            `workcenter_uuid` = #{workcenterUuid}
+            <if test="userUuid != null and userUuid != ''">
+                and `user_uuid` = #{userUuid}
+            </if>
+        </where>
+    </delete>
+
+    <delete id="deleteWorkcenterUserProfileByUserUuid" parameterType="java.lang.String">
+        DELETE
+        FROM `process_workcenter_user_profile`
+        WHERE `user_uuid` = #{userUuid};
+    </delete>
+
+    <delete id="deleteWorkcenterCatalogById" parameterType="java.lang.Long">
+        DELETE
+        FROM `process_workcenter_catalog`
+        WHERE `id` = #{id}
+    </delete>
+
+
+    <insert id="insertWorkcenter" parameterType="neatlogic.framework.process.workcenter.dto.WorkcenterVo">
+        INSERT INTO `process_workcenter` (`uuid`,
+                                          `name`,
+                                          `type`,
+                                          `sort`,
+                                          `condition_config`,
+                                          `is_show_total`,
+                                          `support`,
+                                          `catalog_id`)
+        VALUES (#{uuid},
+                #{name},
+                #{type},
+                #{sort},
+                #{conditionConfigStr},
+                #{isShowTotal},
+                #{support},
+                #{catalogId})
+        ON DUPLICATE KEY UPDATE `name`            = #{name},
+                                `type`            = #{type},
+                                `sort`            = #{sort},
+                                `condition_config`=#{conditionConfigStr},
+                                `is_show_total`=#{isShowTotal},
+                                `support`= #{support},
+                                `catalog_id`= #{catalogId}
+    </insert>
+
+    <insert id="insertWorkcenterAuthority"
+            parameterType="neatlogic.framework.process.workcenter.dto.WorkcenterAuthorityVo">
+        INSERT INTO `process_workcenter_authority` (`workcenter_uuid`, `type`,
+                                                    `uuid`)
+        VALUES (#{workcenterUuid},
+                #{type},
+                #{uuid})
+    </insert>
+
+    <insert id="insertWorkcenterThead" parameterType="neatlogic.framework.process.workcenter.dto.WorkcenterTheadVo">
+        INSERT INTO `process_workcenter_thead` (`workcenter_uuid`,
+                                                `name`,
+                                                `sort`,
+                                                `type`,
+                                                `is_show`,
+                                                `width`,
+                                                `user_uuid`,
+                                                `disabled`)
+        VALUES (#{workcenterUuid},
+                #{name},
+                #{sort},
+                #{type},
+                #{isShow},
+                #{width},
+                #{userUuid},
+                0);
+    </insert>
+
+    <insert id="insertWorkcenterOwner" parameterType="java.lang.String">
+        INSERT IGNORE INTO `process_workcenter_owner` (`workcenter_uuid`, `user_uuid`)
+        VALUES (#{uuid}, #{userUuid});
+    </insert>
+
+    <insert id="insertWorkcenterUserProfile"
+            parameterType="neatlogic.framework.process.workcenter.dto.WorkcenterUserProfileVo">
+        INSERT INTO `process_workcenter_user_profile` (`user_uuid`, `config`)
+        VALUES (#{user_uuid}, #{config});
+    </insert>
+
+    <update id="updateWorkcenter" parameterType="neatlogic.framework.process.workcenter.dto.WorkcenterVo">
+        UPDATE
+        `process_workcenter`
+        SET
+        <if test="name != null and name != ''">
+            `name` = #{name},
+        </if>
+        `type` = #{type},
+        `support` = #{support},
+        `catalog_id` = #{catalogId},
+        `is_show_total` = #{isShowTotal}
+        WHERE `uuid` = #{uuid}
+    </update>
+
+    <update id="updateWorkcenterCondition" parameterType="neatlogic.framework.process.workcenter.dto.WorkcenterVo">
+        UPDATE
+            `process_workcenter`
+        SET `condition_config` = #{conditionConfigStr}
+        WHERE `uuid` = #{uuid}
+    </update>
+
+    <insert id="insertWorkcenterCatalog"
+            parameterType="neatlogic.framework.process.workcenter.dto.WorkcenterCatalogVo">
+        INSERT INTO `process_workcenter_catalog` (`id`, `name`)
+        VALUES (#{id}, #{name})
+        ON DUPLICATE KEY
+            UPDATE `name` = #{name}
+    </insert>
+
+</mapper>

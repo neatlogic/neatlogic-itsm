@@ -21,7 +21,7 @@ import neatlogic.framework.matrix.core.IMatrixPrivateDataSourceHandler;
 import neatlogic.framework.matrix.dto.MatrixAttributeVo;
 import neatlogic.framework.matrix.dto.MatrixDataVo;
 import neatlogic.framework.matrix.dto.MatrixFilterVo;
-import neatlogic.framework.process.dao.mapper.PriorityMapper;
+import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
 import neatlogic.framework.process.dto.PrioritySearchVo;
 import neatlogic.framework.process.dto.PriorityVo;
 import neatlogic.framework.util.UuidUtil;

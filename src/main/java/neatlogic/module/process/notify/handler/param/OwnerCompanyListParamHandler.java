@@ -19,7 +19,7 @@ import neatlogic.framework.common.constvalue.TeamLevel;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyParam;

@@ -15,7 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.AuthorityVo;
-import neatlogic.framework.process.dao.mapper.CatalogMapper;
+import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.framework.process.dto.CatalogVo;
 import neatlogic.framework.process.exception.catalog.CatalogNotFoundEditTargetException;
 

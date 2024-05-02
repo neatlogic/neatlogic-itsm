@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper">
+
+    <select id="getAllProcessTaskSlaTransfer" resultType="neatlogic.framework.process.dto.ProcessTaskSlaTransferVo">
+        SELECT `id`,
+               `sla_id` AS slaId,
+               `hash`,
+               `trigger_time` as triggerTime,
+               `config`
+        FROM `processtask_sla_transfer`
+    </select>
+
+    <select id="getProcessTaskSlaTransferById" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskSlaTransferVo">
+        SELECT `id`,
+               `sla_id` AS slaId,
+               `hash`,
+               `trigger_time` as triggerTime,
+               `config`
+        FROM `processtask_sla_transfer`
+        WHERE `id` = #{value}
+    </select>
+
+    <select id="getProcessTaskSlaTransferBySlaId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskSlaTransferVo">
+        SELECT `id`,
+               `sla_id` AS    slaId,
+               `hash`,
+               `trigger_time` triggerTime,
+               `config`
+        FROM `processtask_sla_transfer`
+        WHERE `sla_id` = #{value}
+    </select>
+
+    <select id="getAllProcessTaskSlaNotify" resultType="neatlogic.framework.process.dto.ProcessTaskSlaNotifyVo">
+        SELECT id,
+               `sla_id` AS slaId,
+               `hash`,
+               `trigger_time` as triggerTime,
+               `config`
+        FROM `processtask_sla_notify`
+    </select>
+
+    <select id="getProcessTaskSlaNotifyById" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskSlaNotifyVo">
+        SELECT id,
+               `sla_id` AS slaId,
+               `hash`,
+               `trigger_time` as triggerTime,
+               `config`
+        FROM `processtask_sla_notify`
+        WHERE `id` = #{value}
+    </select>
+
+    <select id="getProcessTaskSlaNotifyBySlaId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskSlaNotifyVo">
+        SELECT `id`,
+               `sla_id` AS    slaId,
+               `hash`,
+               `trigger_time` triggerTime,
+               `config`
+        FROM `processtask_sla_notify`
+        WHERE `sla_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskSlaById" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskSlaVo">
+        SELECT `processtask_id` AS processTaskId,
+               `id`,
+               `name`,
+               `config`
+        FROM `processtask_sla`
+        WHERE `id` = #{value}
+    </select>
+
+    <select id="getSlaIdListByProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `id` FROM `processtask_sla` WHERE `processtask_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskSlaConfigById" parameterType="java.lang.Long" resultType="java.lang.String">
+        SELECT `config` FROM `processtask_sla` WHERE `id` = #{value}
+    </select>
+
+    <select id="getProcessTaskSlaLockById" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskSlaVo">
+        SELECT `processtask_id` AS processTaskId,
+               `id`,
+               `name`,
+               `config`
+        FROM `processtask_sla`
+        WHERE `id` = #{value} FOR UPDATE
+    </select>
+
+    <resultMap type="neatlogic.framework.process.dto.ProcessTaskSlaTimeVo" id="processTaskSlaTimeMap">
+        <id column="sla_id" property="slaId"/>
+        <result column="processTaskId" property="processTaskId"/>
+        <result column="processTaskStepId" property="processTaskStepId"/>
+        <result column="name" property="name"/>
+        <result column="expireTime" property="expireTime"/>
+        <result column="realExpireTime" property="realExpireTime"/>
+        <result column="expireTimeLong" property="expireTimeLong"/>
+        <result column="realExpireTimeLong" property="realExpireTimeLong"/>
+        <result column="timeLeft" property="timeLeft"/>
+        <result column="realTimeLeft" property="realTimeLeft"/>
+        <result column="timeSum" property="timeSum"/>
+        <result column="status" property="status"/>
+        <result column="calculationTime" property="calculationTime"/>
+        <result column="calculationTimeLong" property="calculationTimeLong"/>
+    </resultMap>
+    <select id="getProcessTaskSlaTimeByProcessTaskStepIdList" parameterType="java.util.List" resultMap="processTaskSlaTimeMap">
+        SELECT
+        a.`processtask_id` as processTaskId,
+        a.`name`,
+        b.`processtask_step_id` as processTaskStepId,
+        c.`sla_id`,
+        c.`expire_time` as expireTime,
+        c.`realexpire_time` AS realExpireTime,
+        UNIX_TIMESTAMP(c.`expire_time`) * 1000     as expireTimeLong,
+        UNIX_TIMESTAMP(c.`realexpire_time`) * 1000 AS realExpireTimeLong,
+        c.`time_left` as timeLeft,
+        c.`realtime_left` as realTimeLeft,
+        c.`time_sum` as timeSum,
+        c.`status` as status,
+        c.`calculation_time` as calculationTime,
+        UNIX_TIMESTAMP(c.`calculation_time`) * 1000 AS calculationTimeLong
+        FROM `processtask_sla` a
+        JOIN `processtask_step_sla` b ON a.`id` = b.`sla_id`
+        JOIN `processtask_sla_time` c ON a.`id` = c.`sla_id`
+        WHERE b.`processtask_step_id` in
+        <foreach collection="list" item="stepId" open="(" separator="," close=")">
+            #{stepId}
+        </foreach>
+        ORDER BY b.`processtask_step_id`, c.`expire_time` ASC
+    </select>
+    <select id="getProcessTaskSlaTimeListBySlaIdList" parameterType="java.util.List" resultMap="processTaskSlaTimeMap">
+        SELECT
+        a.`processtask_id` as processTaskId,
+        a.`name`,
+        c.`sla_id`,
+        c.`expire_time` as expireTime,
+        c.`realexpire_time` AS realExpireTime,
+        UNIX_TIMESTAMP(c.`expire_time`) * 1000     as expireTimeLong,
+        UNIX_TIMESTAMP(c.`realexpire_time`) * 1000 AS realExpireTimeLong,
+        c.`time_left` as timeLeft,
+        c.`realtime_left` as realTimeLeft,
+        c.`time_sum` as timeSum,
+        c.`status` as status,
+        c.`calculation_time` as calculationTime,
+        UNIX_TIMESTAMP(c.`calculation_time`) * 1000 AS calculationTimeLong
+        FROM `processtask_sla` a
+        JOIN `processtask_sla_time` c ON a.`id` = c.`sla_id`
+        WHERE c.`sla_id` in
+        <foreach collection="list" item="slaId" open="(" separator="," close=")">
+            #{slaId}
+        </foreach>
+        ORDER BY c.`expire_time` ASC
+    </select>
+
+    <select id="getProcessTaskSlaTimeBySlaId" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskSlaTimeVo">
+        SELECT `sla_id`          as slaId,
+               `expire_time`     AS expireTime,
+               `realexpire_time` AS realExpireTime,
+               UNIX_TIMESTAMP(`expire_time`) * 1000     AS expireTimeLong,
+               UNIX_TIMESTAMP(`realexpire_time`) * 1000 AS realExpireTimeLong,
+               `time_left`       as timeLeft,
+               `realtime_left`   as realTimeLeft,
+               `time_sum`        as timeSum,
+               `status`        as status,
+               `calculation_time`        as calculationTime,
+               UNIX_TIMESTAMP(`calculation_time`) * 1000 AS calculationTimeLong
+        FROM `processtask_sla_time`
+        WHERE sla_id = #{value}
+    </select>
+
+    <select id="getSlaIdListByProcessTaskStepId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `sla_id` FROM `processtask_step_sla` WHERE `processtask_step_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepIdListBySlaId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT `processtask_step_id` FROM `processtask_step_sla` WHERE `sla_id` = #{value}
+    </select>
+
+    <select id="getDoingOrPauseSlaIdCountByWorktimeUuid" resultType="int">
+        SELECT
+            count(1)
+        FROM `processtask_sla` a
+        JOIN `processtask` b ON b.`id` = a.`processtask_id`
+        JOIN `processtask_sla_time` c on c.`sla_id` = a.`id`
+        WHERE b.`worktime_uuid` = #{worktimeUuid}
+          and b.`is_deleted` = 0
+          and b.`status` = 'running'
+          AND (c.`status` = 'doing' OR c.`status` = 'pause')
+    </select>
+
+    <select id="getDoingOrPauseSlaIdListByWorktimeUuid" resultType="java.lang.Long">
+        SELECT
+            a.`id`
+        FROM `processtask_sla` a
+        JOIN `processtask` b ON b.`id` = a.`processtask_id`
+        JOIN `processtask_sla_time` c on c.`sla_id` = a.`id`
+        WHERE b.`worktime_uuid` = #{worktimeUuid}
+          AND b.`is_deleted` = 0
+          AND b.`status` = 'running'
+          AND (c.`status` = 'doing' OR c.`status` = 'pause')
+        ORDER BY a.`id`
+        LIMIT #{startNum}, #{pageSize}
+    </select>
+
+    <insert id="insertProcessTaskSlaNotify" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaNotifyVo">
+        <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+        INSERT INTO `processtask_sla_notify` (
+        `sla_id`,
+        `hash`,
+        `trigger_time`,
+        `config`
+        )
+        VALUES
+        (
+        #{slaId},
+        #{hash},
+        #{triggerTime},
+        #{config}
+        )
+    </insert>
+
+    <insert id="insertProcessTaskSlaTransfer" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaTransferVo">
+        <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+        INSERT INTO `processtask_sla_transfer` (
+        `sla_id`,
+        `hash`,
+        `trigger_time`,
+        `config`
+        )
+        VALUES
+        (
+        #{slaId},
+        #{hash},
+        #{triggerTime},
+        #{config}
+        )
+    </insert>
+
+    <insert id="insertProcessTaskSla" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaVo">
+        <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+        INSERT INTO `processtask_sla` (
+        `processtask_id`,
+        `name`,
+        `is_active`,
+        `config`
+        )
+        VALUES
+        (
+        #{processTaskId},
+        #{name},
+        #{isActive},
+        #{config}
+        )
+    </insert>
+
+    <insert id="insertProcessTaskSlaTime" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaTimeVo">
+        INSERT INTO `processtask_sla_time` (
+            `sla_id`,
+            `time_sum`,
+            `expire_time`,
+            `realexpire_time`,
+            `time_left`,
+            `realtime_left`,
+            `status`,
+            `calculation_time`
+            )
+        VALUES (
+            #{slaId},
+            #{timeSum},
+            #{expireTime},
+            #{realExpireTime},
+            #{timeLeft},
+            #{realTimeLeft},
+            #{status},
+            #{calculationTime}
+            )
+    </insert>
+
+    <insert id="insertProcessTaskStepSla">
+        INSERT INTO `processtask_step_sla` (`processtask_step_id`, `sla_id`)
+        VALUES (#{processTaskStepId}, #{slaId});
+    </insert>
+
+    <insert id="insertProcessTaskStepSlaTime" parameterType="neatlogic.framework.process.dto.ProcessTaskStepSlaTimeVo">
+        INSERT INTO `processtask_step_sla_time` (
+            `processtask_id`,
+            `processtask_step_id`,
+            `type`,
+            `sla_id`,
+            `time_sum`,
+            `time_cost`,
+            `realtime_cost`,
+            `is_timeout`
+        )
+        VALUES
+        (
+            #{processTaskId},
+            #{processTaskStepId},
+            #{type},
+            #{slaId},
+            #{timeSum},
+            #{timeCost},
+            #{realTimeCost},
+            #{isTimeout}
+        )
+    </insert>
+
+    <update id="updateProcessTaskSlaTransfer" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaTransferVo">
+        UPDATE `processtask_sla_transfer`
+        SET `trigger_time` = #{triggerTime}
+        WHERE `id` = #{id}
+    </update>
+
+    <update id="updateProcessTaskSlaNotify" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaNotifyVo">
+        UPDATE `processtask_sla_notify`
+        SET `trigger_time` = #{triggerTime}
+        WHERE `id` = #{id}
+    </update>
+
+    <update id="updateProcessTaskSlaTime" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaTimeVo">
+        UPDATE
+            `processtask_sla_time`
+        SET `expire_time`     = #{expireTime},
+            `realexpire_time` = #{realExpireTime},
+            `time_left`       = #{timeLeft},
+            `realtime_left`   = #{realTimeLeft},
+            `time_sum`        = #{timeSum},
+            `status`        = #{status},
+            `calculation_time` = #{calculationTime}
+        WHERE `sla_id` = #{slaId}
+    </update>
+
+    <update id="updateProcessTaskSlaIsActiveBySlaId" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaVo">
+        UPDATE `processtask_sla` SET `is_active` = #{isActive} WHERE `id` = #{id}
+    </update>
+
+    <delete id="deleteProcessTaskSlaNotifyById" parameterType="java.lang.Long">
+        DELETE FROM `processtask_sla_notify` WHERE `id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskSlaTransferById" parameterType="java.lang.Long">
+        DELETE FROM `processtask_sla_transfer` WHERE `id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskSlaTransferBySlaId" parameterType="java.lang.Long">
+        DELETE FROM `processtask_sla_transfer` WHERE `sla_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskSlaNotifyBySlaId" parameterType="java.lang.Long">
+        DELETE FROM `processtask_sla_notify` WHERE `sla_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskSlaTimeBySlaId" parameterType="java.lang.Long">
+        DELETE FROM `processtask_sla_time` WHERE `sla_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepSlaTimeBySlaId" parameterType="java.lang.Long">
+        DELETE FROM `processtask_step_sla_time` WHERE `sla_id` = #{value}
+    </delete>
+</mapper>

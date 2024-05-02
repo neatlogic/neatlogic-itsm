@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.score.ScoreTemplateMapper">
+
+	<resultMap id="scoreTemplateMap" type="neatlogic.framework.process.dto.score.ScoreTemplateVo">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="isActive" column="isActive" />
+		<result property="description" column="description" />
+		<collection property="dimensionList" ofType="neatlogic.framework.process.dto.score.ScoreTemplateDimensionVo">
+			<id property="id" column="dimensionId" />
+			<result property="name" column="dimensionName" />
+			<result property="description" column="dimensionDescription" />
+		</collection>
+	</resultMap>
+
+	<resultMap id="scoreTemplateListMap" type="neatlogic.framework.process.dto.score.ScoreTemplateVo">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="isActive" column="isActive" />
+		<result property="description" column="description" />
+		<collection property="dimensionNameList" resultMap="dimensionNameMap" />
+	</resultMap>
+
+	<resultMap id="dimensionNameMap" type="java.lang.String">
+		<result property="dimensionName" column="dimensionName" />
+	</resultMap>
+
+	<select id="searchScoreTemplate" parameterType="neatlogic.framework.process.dto.score.ScoreTemplateVo" resultMap="scoreTemplateListMap">
+		select st.`id`,
+		st.`name`,
+		st.`description`,
+		st.`is_active` as isActive,
+		st.`fcd`,
+		std.`name` as dimensionName
+		from
+		(SELECT
+		`id`,
+		`name`,
+		`description`,
+		`is_active`,
+		`fcd`
+		FROM `score_template`
+		<where>
+		<if test="keyword != null and keyword != ''">
+			and `name` LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		</where>
+		order by `fcd` desc
+		<if test="needPage == true">
+			LIMIT #{startNum}, #{pageSize}
+		</if>
+		) st
+		left join `score_template_dimension` std on st.`id` = std.`score_template_id`
+		order by st.`fcd` desc
+	</select>
+
+	<select id="searchScoreTemplateCount" parameterType="neatlogic.framework.process.dto.score.ScoreTemplateVo" resultType="int">
+		SELECT
+		COUNT(1)
+		FROM
+		`score_template`
+		WHERE
+		1=1
+		<if test="keyword != null and keyword != ''">
+			and name LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="isActive != null">
+			and is_active = #{isActive}
+		</if>
+	</select>
+
+	<select id="searchScoreTemplateForSelect" parameterType="neatlogic.framework.process.dto.score.ScoreTemplateVo" resultType="neatlogic.framework.common.dto.ValueTextVo">
+		SELECT
+		st.`id` as `value`,
+		st.`name` as `text`
+		FROM `score_template` st
+		WHERE
+		1=1
+		and st.`is_active` = 1
+		<if test="keyword != null and keyword != ''">
+			and st.`name` LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="needPage == true">
+			LIMIT #{startNum}, #{pageSize}
+		</if>
+	</select>
+
+	<select id="getProcessCountByIdList" parameterType="java.util.List" resultType="neatlogic.framework.process.dto.score.ScoreTemplateVo">
+		SELECT
+		st.`id` as id,
+		COUNT(DISTINCT pst.`process_uuid`) AS processCount
+		FROM `score_template` st
+		LEFT JOIN `process_score_template` pst ON st.`id` = pst.`score_template_id`
+		WHERE st.`id` IN
+		<foreach collection="list" item="scoreTemplateId" open="(" close=")" separator=",">
+			#{scoreTemplateId}
+		</foreach>
+		GROUP BY st.`id`
+	</select>
+
+	<select id="getScoreTemplateById" parameterType="java.lang.Long" resultMap="scoreTemplateMap">
+		SELECT
+		st.`id`,
+		st.`name`,
+		st.`is_active` as isActive,
+		st.`description`,
+		std.`id` as dimensionId,
+		std.`name` as dimensionName,
+		std.`description` as dimensionDescription
+		FROM `score_template` st
+		left join `score_template_dimension` std on st.`id` = std.`score_template_id`
+		WHERE
+		st.`id` = #{id}
+	</select>
+
+	<select id="getScoreTemplateByName" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.score.ScoreTemplateVo">
+		SELECT
+			`id`,
+			`name`,
+			`is_active` as isActive
+		FROM `score_template`
+		WHERE `name` = #{value}
+	</select>
+
+	<select id="checkScoreTemplateNameIsRepeat" parameterType="neatlogic.framework.process.dto.score.ScoreTemplateVo" resultType="int">
+		SELECT COUNT(1) FROM `score_template` WHERE `name` = #{name} AND `id` != #{id}
+	</select>
+
+	<select id="checkScoreTemplateExistsById" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.score.ScoreTemplateVo">
+		SELECT `id`,`name` FROM `score_template` WHERE `id` = #{id}
+	</select>
+
+	<select id="getRefProcessList" parameterType="neatlogic.framework.process.dto.score.ScoreTemplateVo" resultType="neatlogic.framework.common.dto.ValueTextVo">
+		SELECT
+		p.`uuid` as `value`,
+		p.`name` as `text`
+		FROM `process` p
+		left JOIN `process_score_template` pst ON pst.`process_uuid` = p.`uuid`
+		where pst.`score_template_id` = #{id}
+		<if test="needPage">
+			LIMIT #{startNum}, #{pageSize}
+		</if>
+	</select>
+
+	<select id="getRefProcessCount" parameterType="java.lang.Long" resultType="int">
+		SELECT
+		count(p.`uuid`)
+		FROM `process` p
+		left JOIN `process_score_template` pst ON pst.`process_uuid` = p.`uuid`
+		where pst.`score_template_id` = #{scoreTemplateId}
+	</select>
+
+	<select id="getProcessScoreTemplateByProcessUuid" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.score.ProcessScoreTemplateVo">
+		SELECT
+		`score_template_id` as `scoreTemplateId`,
+		`process_uuid` as `processUuid`,
+		`is_auto` as `isAuto`,
+		`config` as `config`
+		FROM `process_score_template`
+		where `process_uuid` = #{value}
+	</select>
+
+	<select id="getScoreTemplateDimensionListByScoreTemplateId" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.score.ScoreTemplateDimensionVo">
+		SELECT
+			`id`,
+			`name`,
+			`description`
+		FROM `score_template_dimension`
+		WHERE `score_template_id` = #{value}
+	</select>
+
+	<update id="updateScoreTemplate" parameterType="neatlogic.framework.process.dto.score.ScoreTemplateVo">
+		UPDATE `score_template` SET
+		 `name` = #{name},
+		 `description` = #{description},
+		 `is_active` = #{isActive},
+		 `lcu` = #{lcu},
+		 `lcd` = NOW(3)
+		 WHERE `id` = #{id}
+	</update>
+
+	<update id="updateScoreTemplateStatus" parameterType="neatlogic.framework.process.dto.score.ScoreTemplateVo">
+		UPDATE `score_template` SET
+		 `is_active` = #{isActive},
+		 `lcu` = #{lcu},
+		 `lcd` = NOW(3)
+		 WHERE `id` = #{id}
+	</update>
+
+	<insert id="insertScoreTemplate" parameterType="neatlogic.framework.process.dto.score.ScoreTemplateVo" >
+		INSERT INTO `score_template` (
+		`id`,
+		`name`,
+		`description`,
+		`is_active`,
+		`fcu`,
+		`fcd`,
+		`lcu`,
+		`lcd`
+		) VALUES (
+		#{id},
+		#{name},
+		#{description},
+		#{isActive},
+		#{fcu},
+		NOW(3),
+		#{fcu},
+		NOW(3)
+		)
+	</insert>
+
+	<insert id="insertScoreTemplateDimension" parameterType="neatlogic.framework.process.dto.score.ScoreTemplateDimensionVo" >
+		INSERT INTO `score_template_dimension` (
+		`id`,
+		`score_template_id`,
+		`name`,
+		`description`
+		) VALUES (
+		#{id},
+		#{scoreTemplateId},
+		#{name},
+		#{description}
+		)
+	</insert>
+
+	<insert id="insertProcessScoreTemplate" parameterType="neatlogic.framework.process.dto.score.ProcessScoreTemplateVo" >
+		INSERT INTO `process_score_template` (
+		`score_template_id`,
+		`process_uuid`,
+		`is_auto`,
+		`config`
+		) VALUES (
+		#{scoreTemplateId},
+		#{processUuid},
+		#{isAuto},
+		#{config}
+		)
+	</insert>
+
+	<delete id="deleteScoreTemplate" parameterType="java.lang.Long">
+		DELETE st,std
+		FROM `score_template` st
+		left join `score_template_dimension` std
+		on st.`id` = std.`score_template_id`
+		WHERE st.`id` = #{scoreTemplateId}
+	</delete>
+
+	<delete id="deleteScoreTemplateDimension" parameterType="java.lang.Long">
+		DELETE FROM `score_template_dimension` WHERE `score_template_id` = #{scoreTemplateId}
+	</delete>
+
+	<delete id="deleteProcessScoreTemplateByProcessUuid" parameterType="java.lang.String">
+		DELETE FROM `process_score_template` WHERE `process_uuid` = #{value}
+	</delete>
+
+</mapper>

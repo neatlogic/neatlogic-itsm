@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTimeAuditMapper">
+	<select id="getProcessTaskStepTimeAuditBySlaId" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskStepTimeAuditVo">
+		SELECT
+		`id`,
+		UNIX_TIMESTAMP(a.`active_time`) * 1000 as activeTimeLong,
+		UNIX_TIMESTAMP(a.`start_time`) * 1000 as startTimeLong,
+		UNIX_TIMESTAMP(a.`complete_time`) * 1000 as completeTimeLong,
+		UNIX_TIMESTAMP(a.`abort_time`) * 1000 as abortTimeLong,
+		UNIX_TIMESTAMP(a.`back_time`) * 1000 as backTimeLong,
+		UNIX_TIMESTAMP(a.`pause_time`) * 1000 as pauseTimeLong
+		FROM
+		`processtask_step_timeaudit` a
+		JOIN `processtask_step_sla` b
+		ON a.`processtask_step_id` = b.`processtask_step_id`
+		WHERE b.`sla_id` = #{value}
+		ORDER BY a.`id`
+	</select>
+
+	<select id="getLastProcessTaskStepTimeAuditByStepId" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskStepTimeAuditVo">
+		SELECT
+		`id`,
+		`processtask_step_id` AS processTaskStepId,
+		DATE_FORMAT(`active_time`,'%Y-%m-%d %H:%i:%s') AS activeTime,
+		DATE_FORMAT(`start_time`,'%Y-%m-%d %H:%i:%s') AS startTime,
+		DATE_FORMAT(`abort_time`,'%Y-%m-%d %H:%i:%s') AS abortTime,
+		DATE_FORMAT(`complete_time`,'%Y-%m-%d %H:%i:%s') AS completeTime,
+		DATE_FORMAT(`back_time`,'%Y-%m-%d %H:%i:%s') AS backTime,
+		DATE_FORMAT(`pause_time`,'%Y-%m-%d %H:%i:%s') AS pauseTime
+		FROM
+		`processtask_step_timeaudit`
+		WHERE
+		processtask_step_id = #{value}
+		ORDER BY id DESC LIMIT 1
+	</select>
+
+	<insert id="insertProcessTaskStepTimeAudit" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTimeAuditVo">
+		<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+			select LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO `processtask_step_timeaudit` (
+		`processtask_step_id`
+		<choose>
+			<when test="activeTime != null and activeTime == 'now'">,`active_time`</when>
+			<when test="startTime != null and startTime == 'now'">,`start_time`</when>
+			<when test="abortTime != null and abortTime == 'now'">,`abort_time`</when>
+			<when test="completeTime != null and completeTime == 'now'">,`complete_time`</when>
+			<when test="backTime != null and backTime == 'now'">,`back_time`</when>
+			<when test="pauseTime != null and pauseTime == 'now'">,`pause_time`</when>
+		</choose>
+		)
+		VALUES
+		(
+		#{processTaskStepId}
+		<choose>
+			<when test="activeTime != null and activeTime == 'now'">,NOW(3)</when>
+			<when test="startTime != null and startTime == 'now'">,NOW(3)</when>
+			<when test="abortTime != null and abortTime == 'now'">,NOW(3)</when>
+			<when test="completeTime != null and completeTime == 'now'">,NOW(3)</when>
+			<when test="backTime != null and backTime == 'now'">,NOW(3)</when>
+			<when test="pauseTime != null and pauseTime == 'now'">,NOW(3)</when>
+		</choose>
+		)
+	</insert>
+
+	<update id="updateProcessTaskStepTimeAudit" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTimeAuditVo">
+		UPDATE
+		`processtask_step_timeaudit`
+		SET
+		`processtask_step_id` = #{processTaskStepId}
+		<choose>
+			<when test="activeTime != null and activeTime == 'now'">,`active_time` = NOW(3)</when>
+			<when test="startTime != null and startTime == 'now'">,`start_time` = NOW(3)</when>
+			<when test="abortTime != null and abortTime == 'now'">,`abort_time` = NOW(3)</when>
+			<when test="completeTime != null and completeTime == 'now'">,`complete_time` = NOW(3)</when>
+			<when test="backTime != null and backTime == 'now'">,`back_time` = NOW(3)</when>
+			<when test="pauseTime != null and pauseTime == 'now'">,`pause_time` = NOW(3)</when>
+		</choose>
+		WHERE `id` = #{id}
+	</update>
+</mapper>

@@ -6,12 +6,12 @@ import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskRelationVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -36,7 +36,7 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
     private ProcessTaskMapper processTaskMapper;
 
     @Autowired
-    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 
     @Override
     public String getToken() {
@@ -77,7 +77,7 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
             processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
                 JSON.toJSONString(Arrays.asList(processTaskRelationVo.getTarget())));
             processTaskStepVo.getParamObj().put("source", jsonObj.getString("source"));
-            IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETERELATION);
+            processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETERELATION);
 
             ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
             processTaskStep.setProcessTaskId(processTaskRelationVo.getTarget());
@@ -86,7 +86,7 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
             processTaskStep.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
                 JSON.toJSONString(Arrays.asList(processTaskRelationVo.getSource())));
             processTaskStep.getParamObj().put("source", jsonObj.getString("source"));
-            IProcessStepHandlerUtil.audit(processTaskStep, ProcessTaskAuditType.DELETERELATION);
+            processStepHandlerUtil.audit(processTaskStep, ProcessTaskAuditType.DELETERELATION);
         }
 
         return null;

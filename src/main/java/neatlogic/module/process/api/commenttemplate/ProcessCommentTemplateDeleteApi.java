@@ -2,12 +2,11 @@ package neatlogic.module.process.api.commenttemplate;
 
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
-import neatlogic.framework.auth.core.AuthFactory;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.auth.PROCESS_COMMENT_TEMPLATE_MODIFY;
-import neatlogic.framework.process.dao.mapper.ProcessCommentTemplateMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessCommentTemplateMapper;
 import neatlogic.framework.process.dto.ProcessCommentTemplateVo;
 import neatlogic.framework.process.exception.commenttemplate.ProcessCommentTemplateNotFoundException;
 import neatlogic.framework.restful.annotation.Input;

@@ -1,14 +1,11 @@
 package neatlogic.module.process.api.process;
 
-import neatlogic.framework.dependency.core.DependencyManager;
-import neatlogic.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.process.auth.PROCESS_MODIFY;
 
-import neatlogic.module.process.dao.mapper.ProcessMapper;
-import neatlogic.module.process.dependency.handler.*;
+import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.service.ProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,8 +18,6 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.dto.ProcessDraftVo;
 import neatlogic.framework.process.exception.process.ProcessNotFoundException;
 import neatlogic.framework.process.exception.process.ProcessReferencedCannotBeDeleteException;
-
-import java.util.List;
 
 @Service
 @Transactional

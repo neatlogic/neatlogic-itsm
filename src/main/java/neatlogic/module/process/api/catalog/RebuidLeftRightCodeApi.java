@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.process.dao.mapper.CatalogMapper;
+import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.framework.process.auth.CATALOG_MODIFY;
 import neatlogic.module.process.service.CatalogService;
 

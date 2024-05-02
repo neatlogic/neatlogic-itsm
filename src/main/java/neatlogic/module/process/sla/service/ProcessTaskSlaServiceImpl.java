@@ -18,7 +18,7 @@ package neatlogic.module.process.sla.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
-import neatlogic.framework.process.dao.mapper.ProcessTaskSlaMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
 import neatlogic.framework.process.dto.ProcessTaskSlaNotifyVo;
 import neatlogic.framework.process.dto.ProcessTaskSlaTimeCostVo;
 import neatlogic.framework.process.dto.ProcessTaskSlaTimeVo;

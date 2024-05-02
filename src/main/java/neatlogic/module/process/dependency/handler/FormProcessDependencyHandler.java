@@ -22,7 +22,7 @@ import neatlogic.framework.dependency.core.CustomTableDependencyHandlerBase;
 import neatlogic.framework.dependency.core.IFromType;
 import neatlogic.framework.dependency.dto.DependencyInfoVo;
 import neatlogic.framework.process.dto.ProcessVo;
-import neatlogic.module.process.dao.mapper.ProcessMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

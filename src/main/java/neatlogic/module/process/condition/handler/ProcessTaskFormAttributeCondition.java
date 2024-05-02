@@ -37,13 +37,14 @@ import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterField;
-import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import neatlogic.framework.process.dto.ProcessTaskFormVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.Md5Util;
 import neatlogic.framework.util.TimeUtil;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -56,6 +57,9 @@ import java.util.*;
 
 @Component
 public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
     @Resource
     private SelectContentByHashMapper selectContentByHashMapper;

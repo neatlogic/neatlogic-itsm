@@ -6,7 +6,7 @@ import neatlogic.framework.importexport.dto.ImportExportBaseInfoVo;
 import neatlogic.framework.importexport.dto.ImportExportPrimaryChangeVo;
 import neatlogic.framework.importexport.dto.ImportExportVo;
 import neatlogic.framework.process.constvalue.ProcessImportExportHandlerType;
-import neatlogic.framework.process.dao.mapper.score.ScoreTemplateMapper;
+import neatlogic.module.process.dao.mapper.score.ScoreTemplateMapper;
 import neatlogic.framework.process.dto.score.ScoreTemplateVo;
 import neatlogic.framework.process.exception.score.ScoreTemplateNotFoundException;
 import neatlogic.module.process.service.ScoreTemplateService;

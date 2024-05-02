@@ -4,9 +4,9 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -32,7 +32,7 @@ public class ProcessTaskTransferKnowledgeAuditApi extends PrivateApiComponentBas
     private ProcessTaskService processTaskService;
 
     @Autowired
-    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 
     @Override
     public String getToken() {
@@ -64,7 +64,7 @@ public class ProcessTaskTransferKnowledgeAuditApi extends PrivateApiComponentBas
         ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
         processTaskStepVo.setProcessTaskId(processTaskId);
         processTaskStepVo.getParamObj().putAll(jsonObj);
-        IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.TRANSFERKNOWLEDGE);
+        processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.TRANSFERKNOWLEDGE);
         return null;
     }
 

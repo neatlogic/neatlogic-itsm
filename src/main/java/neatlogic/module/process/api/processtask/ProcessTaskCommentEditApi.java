@@ -6,12 +6,12 @@ import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepContentVo;
 import neatlogic.framework.process.dto.ProcessTaskStepReplyVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskStepCommentNotFoundException;
-import neatlogic.framework.process.stephandler.core.IProcessStepHandlerUtil;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -38,7 +38,7 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
 	private ProcessTaskService processTaskService;
 
 	@Autowired
-	private IProcessStepHandlerUtil IProcessStepHandlerUtil;
+	private IProcessStepHandlerUtil processStepHandlerUtil;
 
 	@Override
 	public String getToken() {
@@ -90,7 +90,7 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
             //生成活动
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(oldReplyVo.getProcessTaskStepId());
             processTaskStepVo.getParamObj().putAll(jsonObj);
-			IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.EDITCOMMENT);
+			processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.EDITCOMMENT);
         }
         
         JSONObject resultObj = new JSONObject();

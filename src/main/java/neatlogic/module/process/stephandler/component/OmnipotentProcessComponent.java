@@ -1,5 +1,7 @@
 package neatlogic.module.process.stephandler.component;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import neatlogic.framework.process.autocompleterule.core.AutoCompleteRuleHandlerFactory;
 import neatlogic.framework.process.autocompleterule.core.IAutoCompleteRuleHandler;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
@@ -10,13 +12,14 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskException;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerBase;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPath;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -24,6 +27,12 @@ import java.util.Set;
 @Service
 public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	static Logger logger = LoggerFactory.getLogger(OmnipotentProcessComponent.class);
+
+	@Resource
+	private SelectContentByHashMapper selectContentByHashMapper;
+
+	@Resource
+	private IProcessStepHandlerUtil processStepHandlerUtil;
 
 	@Override
 	public String getHandler() {
@@ -141,7 +150,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		}
 		/** 处理历史记录 **/
 		String action = currentProcessTaskStepVo.getParamObj().getString("action");
-		IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
+		processStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
 		return 1;
 	}
 
@@ -151,7 +160,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CAUSE.getParamName(), currentProcessTaskStepVo.getError());
 		}
 		/** 处理历史记录 **/
-		IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.REAPPROVAL);
+		processStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.REAPPROVAL);
 		return 1;
 	}
 

@@ -12,8 +12,8 @@ import neatlogic.framework.process.audithandler.core.ProcessTaskAuditDetailTypeF
 import neatlogic.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.dao.mapper.ProcessTaskMapper;
-import neatlogic.framework.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import neatlogic.framework.process.dto.ProcessTaskStepAuditVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;

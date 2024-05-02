@@ -11,14 +11,18 @@ import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
 
 @Component
 public class ProcessTaskContentCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getName() {

@@ -20,7 +20,7 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dao.mapper.ProcessTaskAgentMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskAgentMapper;
 import neatlogic.framework.process.dto.agent.ProcessTaskAgentCompobVo;
 import neatlogic.framework.process.dto.agent.ProcessTaskAgentInfoVo;
 import neatlogic.framework.process.dto.agent.ProcessTaskAgentTargetVo;
