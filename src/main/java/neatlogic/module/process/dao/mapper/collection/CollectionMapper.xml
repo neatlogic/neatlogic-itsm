@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  ~ Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.collection.CollectionMapper">
+    <resultMap id="collectionMap" type="neatlogic.framework.process.dto.collection.CollectionVo">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="createTime" column="createTime"/>
+        <result property="createUser" column="createUser"/>
+        <result property="title" column="title"/>
+        <result property="title" column="title"/>
+        <collection property="phaseList" ofType="neatlogic.framework.process.dto.collection.CollectionPhaseVo">
+            <id property="id" column="phaseId"/>
+            <result property="name" column="phaseName"/>
+            <result property="sort" column="phaseSort"/>
+            <result property="status" column="phaseStatus"/>
+            <collection property="taskList" ofType="neatlogic.framework.process.dto.collection.CollectionPhaseTaskVo">
+                <id property="processTaskId" column="processTaskId"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="getCollectionById" parameterType="java.lang.Long" resultMap="collectionMap">
+        SELECT pc.id,
+               pc.content,
+               pc.create_time AS createTime,
+               pc.create_user AS createUser,
+               pc.`status`    AS STATUS,
+               pc.title       AS title,
+               pcp.id         AS phaseId,
+               pcp.NAME       AS phaseName,
+               pcp.sort       AS phaseSort,
+               pcp.`status`   AS phaseStatus,
+               p.id           as processTaskId,
+               p.title        as processTaskTitle
+        FROM processtask_collection pc
+                 LEFT JOIN processtask_collection_phase pcp ON pc.id = pcp.collection_id
+                 LEFT JOIN processtask_collection_phase_task pcpt ON pcp.id = pcpt.phase_id
+                 LEFT JOIN processtask p ON pcpt.processtask_id = p.id
+        where pc.id = #{value}
+    </select>
+
+    <insert id="insertCollection" parameterType="neatlogic.framework.process.dto.collection.CollectionVo">
+        insert into processtask_collection
+        (id,
+         content,
+         create_time,
+         create_user,
+         status,
+         title)
+        values (#{id},
+                #{content},
+                now(3),
+                #{createUser},
+                #{status},
+                #{title})
+    </insert>
+
+    <insert id="insertCollectionPhase" parameterType="neatlogic.framework.process.dto.collection.CollectionPhaseVo">
+        insert into processtask_collection_phase
+        (id,
+         collection_id,
+         sort,
+         name,
+         status,
+         is_active)
+        values (#{id},
+                #{collectionId},
+                #{sort},
+                #{name},
+                #{status},
+                #{isActive})
+    </insert>
+</mapper>
