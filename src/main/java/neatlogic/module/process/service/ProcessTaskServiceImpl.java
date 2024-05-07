@@ -640,9 +640,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                         }
                     }
                 }
-                if (operatorProcessUserTypeList.contains(ProcessUserType.OWNER) && operatorProcessUserTypeList.contains(ProcessUserType.REPORTER)) {
-                    operatorProcessUserTypeList.remove(ProcessUserType.REPORTER);
-                }
                 List<String> operatorProcessUserTypeTextList = new ArrayList<>(operatorProcessUserTypeList.size());
                 for (ProcessUserType processUserType : operatorProcessUserTypeList) {
                     operatorProcessUserTypeTextList.add(processUserType.getText());

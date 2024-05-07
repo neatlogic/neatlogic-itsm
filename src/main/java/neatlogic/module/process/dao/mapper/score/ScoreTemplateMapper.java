@@ -18,7 +18,7 @@
 package neatlogic.module.process.dao.mapper.score;
 
 import neatlogic.framework.common.dto.ValueTextVo;
-import neatlogic.framework.process.crossover.IChannelTypeCrossoverMapper;
+import neatlogic.framework.process.crossover.IScoreTemplateCrossoverMapper;
 import neatlogic.framework.process.dto.score.ProcessScoreTemplateVo;
 import neatlogic.framework.process.dto.score.ScoreTemplateDimensionVo;
 import neatlogic.framework.process.dto.score.ScoreTemplateVo;
@@ -26,7 +26,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-public interface ScoreTemplateMapper extends IChannelTypeCrossoverMapper {
+public interface ScoreTemplateMapper extends IScoreTemplateCrossoverMapper {
 
     List<ScoreTemplateVo> searchScoreTemplate(ScoreTemplateVo scoreTemplateVo);
 
