@@ -1,7 +1,9 @@
 package neatlogic.module.process.api.processtask;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
+@AuthAction(action = PROCESS_BASE.class)
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class ProcessTaskCreateApi extends PrivateApiComponentBase {

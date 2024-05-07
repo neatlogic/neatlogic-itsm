@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +67,9 @@ public class AssignWorkerPolicyHandler implements IWorkerPolicyHandler {
 					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, GroupSearch.USER.getValue(), processTaskVo.getOwner(), ProcessUserType.MAJOR.getValue()));
 				}else if(ProcessUserType.REPORTER.getValue().equals(split[1])) {
 					ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, GroupSearch.USER.getValue(), processTaskVo.getReporter(), ProcessUserType.MAJOR.getValue()));
+					if (StringUtils.isNotBlank(processTaskVo.getReporter())) {
+						processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, GroupSearch.USER.getValue(), processTaskVo.getReporter(), ProcessUserType.MAJOR.getValue()));
+					}
 				}
 			}else if(GroupSearch.getValue(split[0]) != null) {
 				processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, split[0], split[1], ProcessUserType.MAJOR.getValue()));
