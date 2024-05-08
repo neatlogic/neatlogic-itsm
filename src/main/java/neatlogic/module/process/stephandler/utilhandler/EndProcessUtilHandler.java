@@ -1,25 +1,29 @@
 package neatlogic.module.process.stephandler.utilhandler;
 
-import java.util.*;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
-import neatlogic.framework.process.dto.processconfig.*;
-import neatlogic.framework.process.util.ProcessConfigUtil;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.dto.ProcessStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.module.process.notify.handler.TaskNotifyPolicyHandler;
+import neatlogic.framework.process.dto.processconfig.ActionConfigVo;
+import neatlogic.framework.process.dto.processconfig.SlaCalculatePolicyVo;
+import neatlogic.framework.process.dto.processconfig.SlaNotifyPolicyVo;
+import neatlogic.framework.process.dto.processconfig.SlaTransferPolicyVo;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
+import neatlogic.framework.process.util.ProcessConfigUtil;
+import neatlogic.module.process.notify.handler.TaskNotifyPolicyHandler;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
@@ -31,29 +35,24 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
     @Override
     public Object getHandlerStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Object getHandlerStepInitInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
-        // TODO Auto-generated method stub
 
     }
 
-    @SuppressWarnings("serial")
     @Override
     public JSONObject makeupConfig(JSONObject configObj) {
         if (configObj == null) {
@@ -61,7 +60,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         }
         JSONObject resultObj = new JSONObject();
 
-        /** 授权 **/
+        /* 授权 **/
         ProcessTaskOperationType[] stepActions = {
                 ProcessTaskOperationType.PROCESSTASK_ABORT,
                 ProcessTaskOperationType.PROCESSTASK_UPDATE,
@@ -80,19 +79,19 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
             configObj = new JSONObject();
         }
         JSONObject resultObj = new JSONObject();
-        /** 流程设置 **/
+        /* 流程设置 **/
         JSONObject processConfig = configObj.getJSONObject("processConfig");
         JSONObject processObj = regulateProcessConfig(processConfig);
         resultObj.put("processConfig", processObj);
-        /** 表单设置 **/
+        /* 表单设置 **/
         JSONObject formConfig = configObj.getJSONObject("formConfig");
         JSONObject formObj = regulateFormConfig(formConfig);
         resultObj.put("formConfig", formObj);
-        /** 评分设置 **/
+        /* 评分设置 **/
         JSONObject scoreConfig = configObj.getJSONObject("scoreConfig");
         JSONObject scoreConfigObj = regulateScoreConfig(scoreConfig);
         resultObj.put("scoreConfig", scoreConfigObj);
-        /** 时效设置 **/
+        /* 时效设置 **/
         JSONArray slaList = configObj.getJSONArray("slaList");
         JSONArray slaArray = regulateSlaList(slaList);
         resultObj.put("slaList", slaArray);
@@ -108,7 +107,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         String name = processConfig.getString("name");
         processObj.put("uuid", uuid);
         processObj.put("name", name);
-        /** 授权 **/
+        /* 授权 **/
         ProcessTaskOperationType[] stepActions = {
                 ProcessTaskOperationType.PROCESSTASK_ABORT,
                 ProcessTaskOperationType.PROCESSTASK_UPDATE,
@@ -125,15 +124,15 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
         processObj.put("authorityList", authorityArray);
 
-        /** 通知 **/
+        /* 通知 **/
         JSONObject notifyPolicyConfig = processConfig.getJSONObject("notifyPolicyConfig");
         INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
         InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = notifyServiceCrossoverService.regulateNotifyPolicyConfig(notifyPolicyConfig, TaskNotifyPolicyHandler.class);
         processObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
 
-        /** 动作 **/
+        /* 动作 **/
         JSONObject actionConfig = processConfig.getJSONObject("actionConfig");
-        ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
+        ActionConfigVo actionConfigVo = JSON.toJavaObject(actionConfig, ActionConfigVo.class);
         if (actionConfigVo == null) {
             actionConfigVo = new ActionConfigVo();
         }
@@ -212,7 +211,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
                     List<SlaTransferPolicyVo> slaTransferPolicyList = new ArrayList<>();
                     JSONArray transferPolicyList = sla.getJSONArray("transferPolicyList");
                     if (CollectionUtils.isNotEmpty(transferPolicyList)) {
-                        transferPolicyList.removeIf(e -> e == null);
+                        transferPolicyList.removeIf(Objects::isNull);
                         for (int j = 0; j < transferPolicyList.size(); j++) {
                             SlaTransferPolicyVo slaTransferPolicyVo = transferPolicyList.getObject(j, SlaTransferPolicyVo.class);
                             if (slaTransferPolicyVo != null) {
@@ -224,16 +223,16 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
                     List<String> processStepUuidList = sla.getJSONArray("processStepUuidList").toJavaList(String.class);
                     if (processStepUuidList == null) {
-                        processStepUuidList = new ArrayList();
+                        processStepUuidList = new ArrayList<>();
                     } else {
-                        processStepUuidList.removeIf(e -> e == null);
+                        processStepUuidList.removeIf(Objects::isNull);
                     }
                     slaObj.put("processStepUuidList", processStepUuidList);
 
                     List<SlaCalculatePolicyVo> calculatePolicyArray = new ArrayList<>();
                     JSONArray calculatePolicyList = sla.getJSONArray("calculatePolicyList");
                     if (CollectionUtils.isNotEmpty(calculatePolicyList)) {
-                        calculatePolicyList.removeIf(e -> e == null);
+                        calculatePolicyList.removeIf(Objects::isNull);
                         for (int j = 0; j < calculatePolicyList.size(); j++) {
                             SlaCalculatePolicyVo slaCalculatePolicyVo = calculatePolicyList.getObject(j, SlaCalculatePolicyVo.class);
                             if (slaCalculatePolicyVo != null) {
@@ -246,7 +245,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
                     List<SlaNotifyPolicyVo> notifyPolicyArray = new ArrayList<>();
                     JSONArray notifyPolicyList = sla.getJSONArray("notifyPolicyList");
                     if (CollectionUtils.isNotEmpty(notifyPolicyList)) {
-                        notifyPolicyList.removeIf(e -> e == null);
+                        notifyPolicyList.removeIf(Objects::isNull);
                         for (int j = 0; j < notifyPolicyList.size(); j++) {
                             SlaNotifyPolicyVo slaNotifyPolicyVo = notifyPolicyList.getObject(j, SlaNotifyPolicyVo.class);
                             if (slaNotifyPolicyVo != null) {
