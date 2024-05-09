@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskOwnerCompanyCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -148,5 +149,15 @@ public class ProcessTaskOwnerCompanyCondition extends ProcessTaskConditionBase i
             }
         }
         return null;
+    }
+
+    @Override
+    public Object getConditionParamDataForHumanization(ProcessTaskStepVo processTaskStepVo) {
+        List<String> companyUuidList = (List<String>) getConditionParamData(processTaskStepVo);
+        if (CollectionUtils.isEmpty(companyUuidList)) {
+            return null;
+        }
+        List<TeamVo> teamList = teamMapper.getTeamByUuidList(companyUuidList);
+        return teamList.stream().map(TeamVo::getName).collect(Collectors.toList());
     }
 }

@@ -1000,7 +1000,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         JSONArray formExtendAttributeDataList = paramObj.getJSONArray("formExtendAttributeDataList");
         if (CollectionUtils.isNotEmpty(formExtendAttributeDataList)) {
             List<ProcessTaskFormAttributeVo> processTaskFormExtendAttributeList = processTaskMapper.getProcessTaskFormExtendAttributeListByProcessTaskIdAndTag(processTaskId, null);
-            Map<String, ProcessTaskFormAttributeVo> processTaskFormExtendAttributeMap = processTaskFormExtendAttributeList.stream().collect(Collectors.toMap(e -> e.getParentUuid() + "#" + e.getKey(), e -> e));
+            Map<String, ProcessTaskFormAttributeVo> processTaskFormExtendAttributeMap = processTaskFormExtendAttributeList.stream().collect(Collectors.toMap(e -> e.getParentUuid() + "#" + e.getTag() + "#" + e.getKey(), e -> e));
             for (int j = 0; j < formExtendAttributeDataList.size(); j++) {
                 JSONObject formExtendAttributeDataObj = formExtendAttributeDataList.getJSONObject(j);
                 if (MapUtils.isEmpty(formExtendAttributeDataObj)) {
@@ -1009,7 +1009,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 String parentUuid = formExtendAttributeDataObj.getString("parentUuid");
                 String tag = formExtendAttributeDataObj.getString("tag");
                 String key = formExtendAttributeDataObj.getString("key");
-                ProcessTaskFormAttributeVo processTaskFormAttributeVo = processTaskFormExtendAttributeMap.get(parentUuid + "#" + key);
+                ProcessTaskFormAttributeVo processTaskFormAttributeVo = processTaskFormExtendAttributeMap.get(parentUuid + "#" + tag + "#" + key);
                 if (processTaskFormAttributeVo == null) {
                     continue;
                 }

@@ -8,6 +8,7 @@ import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.condition.core.ConditionHandlerFactory;
 import neatlogic.framework.condition.core.IConditionHandler;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dto.ConditionParamVo;
 import neatlogic.framework.dto.ExpressionVo;
 import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
@@ -17,6 +18,7 @@ import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVo;
 import neatlogic.framework.form.exception.FormNotFoundException;
+import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
 import neatlogic.framework.restful.annotation.*;
@@ -96,15 +98,13 @@ public class ProcessConditionList extends PrivateApiComponentBase {
         // 表单条件
         String formUuid = jsonObj.getString("formUuid");
         if (StringUtils.isNotBlank(formUuid)) {
-            //List<String> conditionableAttrUuidList = new ArrayList<>();
             FormVo form = formMapper.getFormByUuid(formUuid);
             if (form == null) {
                 throw new FormNotFoundException(formUuid);
             }
             // TODO 需要确定条件节点表单扩展属性标签
-//            IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-//            List<FormAttributeVo> formAttributeList = formCrossoverService.getFormAttributeList(formUuid, form.getName(), "condition");
-            List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
+            IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+            List<FormAttributeVo> formAttrList = formCrossoverService.getFormAttributeList(formUuid, form.getName(), "processConditionComponent");
             for (FormAttributeVo formAttributeVo : formAttrList) {
                 IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                 if (formHandler == null) {

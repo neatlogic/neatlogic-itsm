@@ -18,7 +18,6 @@ package neatlogic.module.process.condition.handler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Objects;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.exception.type.ParamIrregularException;
@@ -37,14 +36,11 @@ import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterField;
-import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
-import neatlogic.framework.process.dto.ProcessTaskFormVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.Md5Util;
 import neatlogic.framework.util.TimeUtil;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -54,15 +50,10 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
-
-    @Resource
-    private ProcessTaskMapper processTaskMapper;
-
-    @Resource
-    private SelectContentByHashMapper selectContentByHashMapper;
 
     @Resource
     private ProcessTaskService processTaskService;
@@ -114,14 +105,14 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
             List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
             if (CollectionUtils.isNotEmpty(formAttributeList)) {
                 for (FormAttributeVo formAttribute : formAttributeList) {
-                    if (Objects.equal(attributeUuid, formAttribute.getUuid())) {
+                    if (Objects.equals(attributeUuid, formAttribute.getUuid())) {
                         config.put("name", formAttribute.getLabel());
                         if (value != null) {
                             IFormAttributeDataConversionHandler formAttributeHandler =
                                     FormAttributeDataConversionHandlerFactory.getHandler(formAttribute.getHandler());
                             if (formAttributeHandler != null) {
-                                if (Objects.equal(formAttribute.getHandler(), FormHandler.FORMDATE.getHandler())
-                                        || Objects.equal(formAttribute.getHandler(), FormHandler.FORMTIME.getHandler())) {
+                                if (Objects.equals(formAttribute.getHandler(), FormHandler.FORMDATE.getHandler())
+                                        || Objects.equals(formAttribute.getHandler(), FormHandler.FORMTIME.getHandler())) {
                                     if (value instanceof String) {
                                         return value;
                                     } else if (value instanceof JSONArray) {
@@ -254,25 +245,63 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     @Override
     public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
         JSONObject resultObj = new JSONObject();
-        ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskStepVo.getProcessTaskId());
-        if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
-            String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-            if (StringUtils.isNotBlank(formContent)) {
-                resultObj.put("formConfig", formContent);
-                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(processTaskStepVo.getProcessTaskId());
-                for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-                    if (java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMRADIO.getHandler())
-                            || java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMCHECKBOX.getHandler())
-                            || java.util.Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMSELECT.getHandler())) {
-                        Object value = FormUtil.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
-                        resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), value);
-                        //另存一份label为key的数据，给条件路由的自定义脚本消费
-                        //resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), value);
-                    } else {
-                        resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
-                        //另存一份label为key的数据，给条件路由的自定义脚本消费
-                        //resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), processTaskFormAttributeDataVo.getDataObj());
+        List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTag(processTaskStepVo.getProcessTaskId(), "processConditionComponent");
+        if (CollectionUtils.isNotEmpty(formAttributeList)) {
+            Map<String, FormAttributeVo> formAttributeMap = formAttributeList.stream().collect(Collectors.toMap(FormAttributeVo::getUuid, e -> e));
+            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskIdAndTag(processTaskStepVo.getProcessTaskId(), "processConditionComponent");
+            for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+                FormAttributeVo formAttributeVo = formAttributeMap.get(processTaskFormAttributeDataVo.getAttributeUuid());
+                if (formAttributeVo == null) {
+                    continue;
+                }
+                if (Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMRADIO.getHandler())
+                        || Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMCHECKBOX.getHandler())
+                        || Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMSELECT.getHandler())) {
+                    Object value = FormUtil.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
+                    resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), value);
+                } else {
+                    resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+                }
+            }
+        }
+        return resultObj;
+    }
+
+    @Override
+    public Object getConditionParamDataForHumanization(ProcessTaskStepVo processTaskStepVo) {
+        JSONObject resultObj = new JSONObject();
+        List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTag(processTaskStepVo.getProcessTaskId(), "processConditionComponent");
+        if (CollectionUtils.isNotEmpty(formAttributeList)) {
+            Map<String, FormAttributeVo> formAttributeMap = formAttributeList.stream().collect(Collectors.toMap(FormAttributeVo::getUuid, e -> e));
+            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskIdAndTag(processTaskStepVo.getProcessTaskId(), "processConditionComponent");
+            for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+                FormAttributeVo formAttributeVo = formAttributeMap.get(processTaskFormAttributeDataVo.getAttributeUuid());
+                if (formAttributeVo == null) {
+                    continue;
+                }
+                if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMRADIO.getHandler())
+                        || Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMCHECKBOX.getHandler())
+                        || Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMSELECT.getHandler())) {
+                    Object value = FormUtil.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
+                    //另存一份label为key的数据，给条件路由的自定义脚本消费
+                    resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), value);
+                } else {
+                    String data = processTaskFormAttributeDataVo.getData();
+                    JSONObject componentObj = new JSONObject();
+                    componentObj.put("handler", formAttributeVo.getHandler());
+                    componentObj.put("uuid", formAttributeVo.getUuid());
+                    componentObj.put("label", formAttributeVo.getLabel());
+                    componentObj.put("config", formAttributeVo.getConfig());
+                    componentObj.put("type", formAttributeVo.getType());
+                    List<FormAttributeVo> downwardFormAttributeList = FormUtil.getFormAttributeList(componentObj, null);
+                    for (FormAttributeVo downwardFormAttribute : downwardFormAttributeList) {
+                        if (data.contains(downwardFormAttribute.getUuid())) {
+                            data = data.replace(downwardFormAttribute.getUuid(), downwardFormAttribute.getLabel());
+                        }
                     }
+                    processTaskFormAttributeDataVo.setData(data);
+                    //另存一份label为key的数据，给条件路由的自定义脚本消费
+                    resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), processTaskFormAttributeDataVo.getDataObj());
                 }
             }
         }

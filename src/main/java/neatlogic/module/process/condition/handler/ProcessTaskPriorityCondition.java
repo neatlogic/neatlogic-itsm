@@ -129,4 +129,20 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
         }
         return processTaskVo.getPriorityUuid();
     }
+
+    @Override
+    public Object getConditionParamDataForHumanization(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo == null) {
+            return null;
+        }
+        if (processTaskVo.getPriorityUuid() == null) {
+            return null;
+        }
+        PriorityVo priority = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
+        if (priority == null) {
+            return null;
+        }
+        return priority.getName();
+    }
 }
