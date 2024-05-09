@@ -187,4 +187,17 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
         return processTaskVo.getOwner();
     }
 
+    @Override
+    public Object getConditionParamDataForHumanization(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo == null) {
+            return null;
+        }
+        UserVo user = userMapper.getUserBaseInfoByUuid(processTaskVo.getOwner());
+        if (user != null) {
+            return user.getUserName();
+        }
+        return null;
+    }
+
 }

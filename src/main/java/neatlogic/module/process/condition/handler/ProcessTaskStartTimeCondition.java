@@ -13,6 +13,7 @@ import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.util.TimeUtil;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.springframework.stereotype.Component;
 
@@ -100,5 +101,18 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
             return null;
         }
         return processTaskVo.getStartTime();
+    }
+
+    @Override
+    public Object getConditionParamDataForHumanization(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo == null) {
+            return null;
+        }
+        if (processTaskVo.getStartTime() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat(TimeUtil.YYYY_MM_DD_HH_MM_SS);
+            return sdf.format(processTaskVo.getStartTime());
+        }
+        return null;
     }
 }
