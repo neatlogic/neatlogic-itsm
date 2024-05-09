@@ -632,6 +632,7 @@
                `is_show`,
                `serial_number`,
                `need_score`,
+               `is_deleted`,
                `source`
         FROM `processtask`
         WHERE id = #{value}
