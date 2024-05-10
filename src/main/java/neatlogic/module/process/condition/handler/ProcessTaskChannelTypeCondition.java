@@ -142,4 +142,21 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
         }
         return null;
     }
+
+    @Override
+    public Object getConditionParamDataForHumanization(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo == null) {
+            return null;
+        }
+        ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+        if (channelVo == null) {
+            return null;
+        }
+        ChannelTypeVo channelType = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+        if (channelType == null) {
+            return null;
+        }
+        return channelType.getName();
+    }
 }

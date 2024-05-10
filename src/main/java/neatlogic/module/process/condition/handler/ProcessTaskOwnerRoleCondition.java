@@ -18,6 +18,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -128,6 +129,23 @@ public class ProcessTaskOwnerRoleCondition extends ProcessTaskConditionBase impl
             return authenticationInfoVo.getRoleUuidList().stream().map(o -> GroupSearch.ROLE.getValuePlugin() + o).collect(Collectors.toList());
         }
         return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object getConditionParamDataForHumanization(ProcessTaskStepVo processTaskStepVo) {
+        List<String> roleUuidList = (List<String>) getConditionParamData(processTaskStepVo);
+        if (CollectionUtils.isEmpty(roleUuidList)) {
+            return null;
+        }
+        List<String> roleNameList = new ArrayList<>();
+        for (String roleUuid : roleUuidList) {
+            RoleVo roleVo = roleMapper.getRoleByUuid(roleUuid.substring(5));
+            if (roleVo != null) {
+                roleNameList.add(roleVo.getName());
+            }
+        }
+        return roleNameList;
     }
 
 }

@@ -20,6 +20,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
+import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -60,10 +62,12 @@ public class BatchDeleteProcessTaskApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         List<Long> processTaskIdList = paramObj.getJSONArray("processTaskIdList").toJavaList(Long.class);
+        List<ProcessTaskVo> withoutAuthTaskIdList = new ArrayList<>();
         for (Long processTaskId : processTaskIdList) {
             // 锁住当前工单
-            if (processTaskMapper.getProcessTaskLockById(processTaskId) == null) {
-                return null;
+            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskVoLockById(processTaskId);
+            if (processTaskVo == null || processTaskVo.getIsDeleted() == 1) {
+                continue;
             }
             boolean flag = new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_DELETE)
                     .build()
@@ -74,9 +78,11 @@ public class BatchDeleteProcessTaskApi extends PrivateApiComponentBase {
                 ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskId, null);
                 processStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
                 processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
+            }else{
+                withoutAuthTaskIdList.add(processTaskVo);
             }
         }
-        return null;
+        return withoutAuthTaskIdList;
     }
 
     @Override

@@ -22,23 +22,23 @@ import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSerialNumberMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
-import neatlogic.module.process.dao.mapper.score.ProcessTaskScoreMapper;
 import neatlogic.framework.process.dto.ProcessTaskRelationVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
+import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSerialNumberMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
+import neatlogic.module.process.dao.mapper.score.ProcessTaskScoreMapper;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -92,17 +92,17 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         // 锁住当前工单
-        if (taskMapper.getProcessTaskLockById(processTaskId) == null) {
-            throw new ProcessTaskNotFoundException(processTaskId.toString());
+        ProcessTaskVo processTaskVo = taskMapper.getProcessTaskVoLockById(processTaskId);
+        if (processTaskVo != null && processTaskVo.getIsDeleted() == 0) {
+            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_DELETE)
+                    .build()
+                    .checkAndNoPermissionThrowException();
+            // is_deleted置为1
+            taskMapper.updateProcessTaskIsDeletedById(processTaskId, 1);
+            ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskId, null);
+            processStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
+            processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
         }
-        new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_DELETE)
-                .build()
-                .checkAndNoPermissionThrowException();
-        // is_deleted置为1
-        taskMapper.updateProcessTaskIsDeletedById(processTaskId, 1);
-        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskId, null);
-        processStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
-        processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
         return null;
     }
 
