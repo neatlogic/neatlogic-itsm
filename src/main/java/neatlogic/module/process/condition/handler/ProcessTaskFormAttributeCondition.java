@@ -246,10 +246,10 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     @Override
     public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
         JSONObject resultObj = new JSONObject();
-        List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTag(processTaskStepVo.getProcessTaskId(), "conditionProcessComponent");
+        List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTag(processTaskStepVo.getProcessTaskId(), ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
         if (CollectionUtils.isNotEmpty(formAttributeList)) {
             Map<String, FormAttributeVo> formAttributeMap = formAttributeList.stream().collect(Collectors.toMap(FormAttributeVo::getUuid, e -> e));
-            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskIdAndTag(processTaskStepVo.getProcessTaskId(), "conditionProcessComponent");
+            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskIdAndTag(processTaskStepVo.getProcessTaskId(), ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
             for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
                 FormAttributeVo formAttributeVo = formAttributeMap.get(processTaskFormAttributeDataVo.getAttributeUuid());
                 if (formAttributeVo == null) {
