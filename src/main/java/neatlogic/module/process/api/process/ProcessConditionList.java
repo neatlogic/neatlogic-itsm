@@ -24,6 +24,7 @@ import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.stephandler.component.ConditionProcessComponent;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -104,7 +105,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
             }
             // TODO 需要确定条件节点表单扩展属性标签
             IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-            List<FormAttributeVo> formAttrList = formCrossoverService.getFormAttributeList(formUuid, form.getName(), "processConditionComponent");
+            List<FormAttributeVo> formAttrList = formCrossoverService.getFormAttributeList(formUuid, form.getName(), ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
             for (FormAttributeVo formAttributeVo : formAttrList) {
                 IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                 if (formHandler == null) {
