@@ -53,6 +53,8 @@ import java.util.stream.Collectors;
 public class ConditionProcessComponent extends ProcessStepHandlerBase {
     static Logger logger = LoggerFactory.getLogger(ConditionProcessComponent.class);
 
+    public final static String FORM_EXTEND_ATTRIBUTE_TAG = "conditionProcessComponent";
+
     @Resource
     private ProcessTaskMapper processTaskMapper;
 
@@ -143,6 +145,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                     JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
                                     if (CollectionUtils.isNotEmpty(conditionGroupList)) {
                                         JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), currentProcessTaskStepVo);
+                                        System.out.println("conditionParamData = " + conditionParamData);
                                         ConditionConfigVo conditionConfigVo = null;
                                         try {
                                             ConditionParamContext.init(conditionParamData).setTranslate(true);
