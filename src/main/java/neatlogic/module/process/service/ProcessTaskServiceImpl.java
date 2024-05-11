@@ -772,7 +772,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 }
             }
         }
+        // 回退步骤有多个时，如果回退步骤列表中包含“上一步骤”时，将“上一步骤”排在第一位，点击回退按钮时默认选择“上一步骤”
         if (backwardNextStepList.size() > 1) {
+            // 获取“上一步骤”列表
             List<Long> fromStepIdList = new ArrayList<>();
             List<ProcessTaskStepRelVo> fromProcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByToId(processTaskStepVo.getId());
             for (ProcessTaskStepRelVo relVo : fromProcessTaskStepRelList) {
@@ -780,6 +782,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     fromStepIdList.add(relVo.getFromProcessTaskStepId());
                 }
             }
+            // 遍历回退步骤列表，区分“上一步骤”和非“上一步骤”
             List<ProcessTaskStepVo> previousStepList = new ArrayList<>();
             List<ProcessTaskStepVo> nonPreviousStepList = new ArrayList<>();
             for (ProcessTaskStepVo processTaskStep : backwardNextStepList) {
@@ -796,6 +799,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
             backwardNextStepList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(previousStepList)) {
+                // 存在多个时，按步骤结束时间排序，结束时间大的排在前面
                 if (previousStepList.size() > 1) {
                     previousStepList.sort((o1, o2) -> {
                         if (o1.getEndTime() == null && o2.getEndTime() == null) {
@@ -812,6 +816,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 backwardNextStepList.addAll(previousStepList);
             }
             if (CollectionUtils.isNotEmpty(nonPreviousStepList)) {
+                // 存在多个时，按步骤结束时间排序，结束时间大的排在前面
                 if (nonPreviousStepList.size() > 1) {
                     nonPreviousStepList.sort((o1, o2) -> {
                         if (o1.getEndTime() == null && o2.getEndTime() == null) {
