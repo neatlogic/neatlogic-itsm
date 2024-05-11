@@ -772,6 +772,67 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 }
             }
         }
+        // 回退步骤有多个时，如果回退步骤列表中包含“上一步骤”时，将“上一步骤”排在第一位，点击回退按钮时默认选择“上一步骤”
+        if (backwardNextStepList.size() > 1) {
+            // 获取“上一步骤”列表
+            List<Long> fromStepIdList = new ArrayList<>();
+            List<ProcessTaskStepRelVo> fromProcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByToId(processTaskStepVo.getId());
+            for (ProcessTaskStepRelVo relVo : fromProcessTaskStepRelList) {
+                if (Objects.equals(relVo.getIsHit(), 1) && Objects.equals(relVo.getType(), ProcessFlowDirection.FORWARD.getValue())) {
+                    fromStepIdList.add(relVo.getFromProcessTaskStepId());
+                }
+            }
+            // 遍历回退步骤列表，区分“上一步骤”和非“上一步骤”
+            List<ProcessTaskStepVo> previousStepList = new ArrayList<>();
+            List<ProcessTaskStepVo> nonPreviousStepList = new ArrayList<>();
+            for (ProcessTaskStepVo processTaskStep : backwardNextStepList) {
+                if (fromStepIdList.contains(processTaskStep.getId())) {
+                    if (StringUtils.isNotBlank(processTaskStep.getAliasName())) {
+                        processTaskStep.setAliasName(processTaskStep.getAliasName() + "(" + $.t("term.itsm.previousstep") + ")");
+                    } else {
+                        processTaskStep.setName(processTaskStep.getName() + "(" + $.t("term.itsm.previousstep") + ")");
+                    }
+                    previousStepList.add(processTaskStep);
+                } else {
+                    nonPreviousStepList.add(processTaskStep);
+                }
+            }
+            backwardNextStepList = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(previousStepList)) {
+                // 存在多个时，按步骤结束时间排序，结束时间大的排在前面
+                if (previousStepList.size() > 1) {
+                    previousStepList.sort((o1, o2) -> {
+                        if (o1.getEndTime() == null && o2.getEndTime() == null) {
+                            return 0;
+                        } else if (o2.getEndTime() == null) {
+                            return -1;
+                        } else if (o1.getEndTime() == null) {
+                            return 1;
+                        } else {
+                            return o2.getEndTime().compareTo(o1.getEndTime());
+                        }
+                    });
+                }
+                backwardNextStepList.addAll(previousStepList);
+            }
+            if (CollectionUtils.isNotEmpty(nonPreviousStepList)) {
+                // 存在多个时，按步骤结束时间排序，结束时间大的排在前面
+                if (nonPreviousStepList.size() > 1) {
+                    nonPreviousStepList.sort((o1, o2) -> {
+                        if (o1.getEndTime() == null && o2.getEndTime() == null) {
+                            return 0;
+                        } else if (o2.getEndTime() == null) {
+                            return -1;
+                        } else if (o1.getEndTime() == null) {
+                            return 1;
+                        } else {
+                            return o2.getEndTime().compareTo(o1.getEndTime());
+                        }
+                    });
+                }
+                backwardNextStepList.addAll(nonPreviousStepList);
+            }
+        }
         processTaskStepVo.setForwardNextStepList(forwardNextStepList);
         processTaskStepVo.setBackwardNextStepList(backwardNextStepList);
     }
