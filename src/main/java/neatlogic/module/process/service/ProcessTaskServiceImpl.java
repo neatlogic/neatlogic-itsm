@@ -772,6 +772,62 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 }
             }
         }
+        if (backwardNextStepList.size() > 1) {
+            List<Long> fromStepIdList = new ArrayList<>();
+            List<ProcessTaskStepRelVo> fromProcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByToId(processTaskStepVo.getId());
+            for (ProcessTaskStepRelVo relVo : fromProcessTaskStepRelList) {
+                if (Objects.equals(relVo.getIsHit(), 1) && Objects.equals(relVo.getType(), ProcessFlowDirection.FORWARD.getValue())) {
+                    fromStepIdList.add(relVo.getFromProcessTaskStepId());
+                }
+            }
+            List<ProcessTaskStepVo> previousStepList = new ArrayList<>();
+            List<ProcessTaskStepVo> nonPreviousStepList = new ArrayList<>();
+            for (ProcessTaskStepVo processTaskStep : backwardNextStepList) {
+                if (fromStepIdList.contains(processTaskStep.getId())) {
+                    if (StringUtils.isNotBlank(processTaskStep.getAliasName())) {
+                        processTaskStep.setAliasName(processTaskStep.getAliasName() + "(" + $.t("term.itsm.previousstep") + ")");
+                    } else {
+                        processTaskStep.setName(processTaskStep.getName() + "(" + $.t("term.itsm.previousstep") + ")");
+                    }
+                    previousStepList.add(processTaskStep);
+                } else {
+                    nonPreviousStepList.add(processTaskStep);
+                }
+            }
+            backwardNextStepList = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(previousStepList)) {
+                if (previousStepList.size() > 1) {
+                    previousStepList.sort((o1, o2) -> {
+                        if (o1.getEndTime() == null && o2.getEndTime() == null) {
+                            return 0;
+                        } else if (o2.getEndTime() == null) {
+                            return -1;
+                        } else if (o1.getEndTime() == null) {
+                            return 1;
+                        } else {
+                            return o2.getEndTime().compareTo(o1.getEndTime());
+                        }
+                    });
+                }
+                backwardNextStepList.addAll(previousStepList);
+            }
+            if (CollectionUtils.isNotEmpty(nonPreviousStepList)) {
+                if (nonPreviousStepList.size() > 1) {
+                    nonPreviousStepList.sort((o1, o2) -> {
+                        if (o1.getEndTime() == null && o2.getEndTime() == null) {
+                            return 0;
+                        } else if (o2.getEndTime() == null) {
+                            return -1;
+                        } else if (o1.getEndTime() == null) {
+                            return 1;
+                        } else {
+                            return o2.getEndTime().compareTo(o1.getEndTime());
+                        }
+                    });
+                }
+                backwardNextStepList.addAll(nonPreviousStepList);
+            }
+        }
         processTaskStepVo.setForwardNextStepList(forwardNextStepList);
         processTaskStepVo.setBackwardNextStepList(backwardNextStepList);
     }
