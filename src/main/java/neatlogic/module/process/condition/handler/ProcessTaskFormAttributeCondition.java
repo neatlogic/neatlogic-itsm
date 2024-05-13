@@ -42,6 +42,7 @@ import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.Md5Util;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.module.process.service.ProcessTaskService;
+import neatlogic.module.process.stephandler.component.ConditionProcessComponent;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -245,10 +246,10 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     @Override
     public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
         JSONObject resultObj = new JSONObject();
-        List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTag(processTaskStepVo.getProcessTaskId(), "processConditionComponent");
+        List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTag(processTaskStepVo.getProcessTaskId(), ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
         if (CollectionUtils.isNotEmpty(formAttributeList)) {
             Map<String, FormAttributeVo> formAttributeMap = formAttributeList.stream().collect(Collectors.toMap(FormAttributeVo::getUuid, e -> e));
-            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskIdAndTag(processTaskStepVo.getProcessTaskId(), "processConditionComponent");
+            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskIdAndTag(processTaskStepVo.getProcessTaskId(), ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
             for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
                 FormAttributeVo formAttributeVo = formAttributeMap.get(processTaskFormAttributeDataVo.getAttributeUuid());
                 if (formAttributeVo == null) {
@@ -270,10 +271,10 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     @Override
     public Object getConditionParamDataForHumanization(ProcessTaskStepVo processTaskStepVo) {
         JSONObject resultObj = new JSONObject();
-        List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTag(processTaskStepVo.getProcessTaskId(), "processConditionComponent");
+        List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTag(processTaskStepVo.getProcessTaskId(), ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
         if (CollectionUtils.isNotEmpty(formAttributeList)) {
             Map<String, FormAttributeVo> formAttributeMap = formAttributeList.stream().collect(Collectors.toMap(FormAttributeVo::getUuid, e -> e));
-            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskIdAndTag(processTaskStepVo.getProcessTaskId(), "processConditionComponent");
+            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskIdAndTag(processTaskStepVo.getProcessTaskId(), ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
             for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
                 FormAttributeVo formAttributeVo = formAttributeMap.get(processTaskFormAttributeDataVo.getAttributeUuid());
                 if (formAttributeVo == null) {

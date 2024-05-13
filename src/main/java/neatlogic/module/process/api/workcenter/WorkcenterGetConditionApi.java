@@ -1,16 +1,18 @@
 package neatlogic.module.process.api.workcenter;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.ParamType;
-import neatlogic.framework.condition.core.ConditionHandlerFactory;
 import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
+import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterField;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterInitType;
@@ -18,8 +20,6 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.condition.handler.ProcessTaskIsShowCondition;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,7 +68,7 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
         FormConditionModel formConditionModel = FormConditionModel.getFormConditionModel(conditionModel);
         formConditionModel = formConditionModel == null ? FormConditionModel.CUSTOM : formConditionModel;
         //固定字段条件
-        for (IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
+        for (IConditionHandler condition : ProcessTaskConditionFactory.getConditionHandlerList()) {
             //不支持endTime过滤，如果是简单模式 title、id、content 不返回
             //没有工单管理权限则不显示“是否隐藏工单”选项
             if ((condition.getName().equals(ProcessWorkcenterField.TITLE.getValue())

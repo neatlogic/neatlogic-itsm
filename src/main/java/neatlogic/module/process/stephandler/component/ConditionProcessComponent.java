@@ -53,6 +53,8 @@ import java.util.stream.Collectors;
 public class ConditionProcessComponent extends ProcessStepHandlerBase {
     static Logger logger = LoggerFactory.getLogger(ConditionProcessComponent.class);
 
+    public final static String FORM_EXTEND_ATTRIBUTE_TAG = "common";
+
     @Resource
     private ProcessTaskMapper processTaskMapper;
 
