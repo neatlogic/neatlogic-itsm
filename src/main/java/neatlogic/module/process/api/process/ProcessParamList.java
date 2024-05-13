@@ -1,41 +1,35 @@
 package neatlogic.module.process.api.process;
 
-import java.util.List;
-
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.condition.core.ConditionHandlerFactory;
 import neatlogic.framework.condition.core.IConditionHandler;
-import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.constvalue.ProcessFieldType;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.ConditionParamVo;
-import neatlogic.framework.process.constvalue.ProcessTaskParams;
-import neatlogic.framework.form.dao.mapper.FormMapper;
-import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
+import neatlogic.framework.form.dao.mapper.FormMapper;
+import neatlogic.framework.form.dto.FormAttributeVo;
+import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.ProcessFieldType;
+import neatlogic.framework.process.constvalue.ProcessTaskParams;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessParamList extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private FormMapper formMapper;
 
     @Override
@@ -45,7 +39,7 @@ public class ProcessParamList extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "流程参数列表接口";
+        return "nmpap.processparamlist.getname";
     }
 
     @Override
@@ -55,7 +49,7 @@ public class ProcessParamList extends PrivateApiComponentBase {
 
     @Input({@Param(name = "formUuid", type = ApiParamType.STRING, desc = "流程绑定表单的uuid")})
     @Output({@Param(explode = ConditionParamVo[].class, desc = "流程参数列表")})
-    @Description(desc = "流程参数列表接口")
+    @Description(desc = "nmpap.processparamlist.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray resultArray = new JSONArray();
@@ -100,7 +94,7 @@ public class ProcessParamList extends PrivateApiComponentBase {
                     ConditionParamVo conditionParamVo = new ConditionParamVo();
                     conditionParamVo.setName(formAttributeVo.getUuid());
                     conditionParamVo.setLabel(formAttributeVo.getLabel());
-                    if (formHandler != null && formHandler.getParamType() != null) {
+                    if (formHandler.getParamType() != null) {
                         conditionParamVo.setParamType(formHandler.getParamType().getName());
                         conditionParamVo.setParamTypeName(formHandler.getParamType().getText());
                     }
