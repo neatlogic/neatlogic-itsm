@@ -73,8 +73,6 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     ProcessTaskFormVo getProcessTaskFormByProcessTaskId(Long processTaskId);
 
-    List<ProcessTaskFormAttributeVo> getProcessTaskFormExtendAttributeListByProcessTaskIdAndTag(@Param("processTaskId") Long processTaskId, @Param("tag") String tag);
-
     List<ProcessTaskFormVo> getProcessTaskFormListByProcessTaskIdList(List<Long> existsProcessTaskIdList);
 
     List<Long> getProcessTaskFormAttributeDataIdListByProcessTaskId(Long processTaskId);
@@ -468,8 +466,6 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
     void insertProcessTaskUrge(@Param("processTaskId") Long processTaskId, @Param("lcu") String lcu);
 
     int insertProcessTaskInvoke(@Param("processTaskId") Long processTaskId, @Param("source") String invoke, @Param("sourceType") String invokeType, @Param("invokeId") Long invokeId);
-
-    int insertProcessTaskFormExtendAttribute(ProcessTaskFormAttributeVo processTaskFormAttributeVo);
 
     int updateProcessTaskStepStatus(ProcessTaskStepVo processTaskStepVo);
 
