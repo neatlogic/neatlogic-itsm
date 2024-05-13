@@ -2113,12 +2113,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             return formAttributeList;
         }
         List<String> parentUuidList = new ArrayList<>();
-        List<FormAttributeVo> formExtendAttributeList = formVersionVo.getFormExtendAttributeList();
+        List<FormAttributeVo> formExtendAttributeList = new ArrayList<>();
         List<FormAttributeVo> allFormExtendAttributeList = formVersionVo.getFormExtendAttributeList();
-        for (FormAttributeVo formAttributeVo : allFormExtendAttributeList) {
-            if (Objects.equals(formAttributeVo.getTag(), tag)) {
-                parentUuidList.add(formAttributeVo.getParentUuid());
-                formExtendAttributeList.add(formAttributeVo);
+        if (CollectionUtils.isNotEmpty(allFormExtendAttributeList)) {
+            for (FormAttributeVo formAttributeVo : allFormExtendAttributeList) {
+                if (Objects.equals(formAttributeVo.getTag(), tag)) {
+                    parentUuidList.add(formAttributeVo.getParentUuid());
+                    formExtendAttributeList.add(formAttributeVo);
+                }
             }
         }
         for (FormAttributeVo formAttributeVo : formAttributeList) {
