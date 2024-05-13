@@ -15,14 +15,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.sql.core.structure;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthActionChecker;
-import neatlogic.framework.condition.core.ConditionHandlerFactory;
 import neatlogic.framework.fulltextindex.dto.fulltextindex.FullTextIndexWordOffsetVo;
 import neatlogic.framework.fulltextindex.utils.FullTextIndexUtil;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
+import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterInitType;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
 import neatlogic.framework.process.workcenter.dto.WorkcenterTheadVo;
@@ -31,7 +32,6 @@ import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import neatlogic.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
 import neatlogic.framework.process.workcenter.table.util.SqlTableUtil;
 import neatlogic.module.process.condition.handler.ProcessTaskStartTimeCondition;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -137,7 +137,7 @@ public abstract class WorkcenterProcessSqlBase extends ProcessSqlBase<Workcenter
      */
     protected void buildCommonConditionWhereSql(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         //上报时间
-        ProcessTaskStartTimeCondition startTimeSqlCondition = (ProcessTaskStartTimeCondition) ConditionHandlerFactory.getHandler("starttime");
+        ProcessTaskStartTimeCondition startTimeSqlCondition = (ProcessTaskStartTimeCondition) ProcessTaskConditionFactory.getHandler("starttime");
         JSONObject startTimeCondition = workcenterVo.getConditionConfig().getJSONObject("startTimeCondition");
         if (startTimeCondition == null) {
             startTimeCondition = JSONObject.parseObject("{\"timeRange\":\"1\",\"timeUnit\":\"year\"}");//默认展示一年
@@ -146,7 +146,7 @@ public abstract class WorkcenterProcessSqlBase extends ProcessSqlBase<Workcenter
         //我的待办
         if (workcenterVo.getConditionConfig().getIntValue("isProcessingOfMine") == 1) {
             sqlSb.append(" and ");
-            IProcessTaskCondition sqlCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler("processingofmine");
+            IProcessTaskCondition sqlCondition = ProcessTaskConditionFactory.getHandler("processingofmine");
             sqlCondition.getSqlConditionWhere(null, 0, sqlSb);
         }
         //keyword搜索框搜索 idList 过滤

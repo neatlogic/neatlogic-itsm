@@ -8,7 +8,6 @@ import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.FormHandlerType;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.dto.ValueTextVo;
-import neatlogic.framework.condition.core.ConditionHandlerFactory;
 import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
@@ -24,6 +23,7 @@ import neatlogic.framework.notify.dto.job.NotifyJobVo;
 import neatlogic.framework.notify.exception.NotifyHandlerNotFoundException;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
+import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.util.$;
 import neatlogic.module.framework.message.handler.TimedTaskMessgeHandler;
 import neatlogic.module.framework.notify.handler.MessageNotifyHandler;
@@ -499,7 +499,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 	protected JSONArray getMyConditionOptionList() {
 		JSONArray params = new JSONArray();
 		for(ConditionOptions option : ConditionOptions.values()) {
-			IConditionHandler condition = ConditionHandlerFactory.getHandler(option.getValue());
+			IConditionHandler condition = ProcessTaskConditionFactory.getHandler(option.getValue());
 			if(condition != null) {
 				JSONObject obj = condition.getConfig();
 				obj.put("type",condition.getHandler(FormConditionModel.SIMPLE));

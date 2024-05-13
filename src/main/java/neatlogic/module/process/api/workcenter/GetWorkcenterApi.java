@@ -19,19 +19,19 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.condition.core.ConditionHandlerFactory;
 import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
-import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
+import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -132,7 +132,7 @@ public class GetWorkcenterApi extends PrivateApiComponentBase {
                     for (int j = 0; j < conditionList.size(); j++) {
                         JSONObject conditionObj = conditionList.getJSONObject(j);
                         if (conditionObj.getString("type").equalsIgnoreCase("common")) {
-                            IConditionHandler conditionHandler = ConditionHandlerFactory.getHandler(conditionObj.getString("name"));
+                            IConditionHandler conditionHandler = ProcessTaskConditionFactory.getHandler(conditionObj.getString("name"));
                             if (conditionHandler != null) {
                                 Object textList = conditionHandler.valueConversionText(conditionObj.get("valueList"), null);
                                 conditionObj.put("text", textList);
@@ -142,7 +142,7 @@ public class GetWorkcenterApi extends PrivateApiComponentBase {
                         } else if (conditionObj.getString("type").equalsIgnoreCase("form") && CollectionUtils.isNotEmpty(channelUuidList) && channelUuidList.size() == 1) {
                             //表单条件仅支持只有一个通道的情况
                             String channelUuid = channelUuidList.getString(0);
-                            IConditionHandler conditionHandler = ConditionHandlerFactory.getHandler("form");
+                            IConditionHandler conditionHandler = ProcessTaskConditionFactory.getHandler("form");
                             if (conditionHandler != null) {
                                 //获取表单属性的uuid
                                 JSONObject formConfig = formUtils.getFormConfig(channelUuid);

@@ -15,10 +15,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.sql.core.structure;
 
-import neatlogic.framework.condition.core.ConditionHandlerFactory;
 import neatlogic.framework.dto.condition.*;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
+import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.dto.SqlDecoratorVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
@@ -52,7 +52,7 @@ public abstract class ProcessSqlBase<T extends SqlDecoratorVo> implements IProce
         for (ConditionGroupVo groupVo : groupList) {
             List<ConditionVo> conditionVoList = groupVo.getConditionList();
             for (ConditionVo conditionVo : conditionVoList) {
-                IProcessTaskCondition conditionHandler = (IProcessTaskCondition) ConditionHandlerFactory.getHandler(conditionVo.getName());
+                IProcessTaskCondition conditionHandler = ProcessTaskConditionFactory.getHandler(conditionVo.getName());
                 if (conditionHandler != null) {
                     List<JoinTableColumnVo> handlerJoinTableColumnList = conditionHandler.getJoinTableColumnList(sqlDecoratorVo);
                     joinTableColumnList.addAll(handlerJoinTableColumnList);
@@ -129,7 +129,7 @@ public abstract class ProcessSqlBase<T extends SqlDecoratorVo> implements IProce
                     if (conditionVo.getType().equals(ProcessFieldType.FORM.getValue())) {
                         handler = ProcessFieldType.FORM.getValue();
                     }
-                    IProcessTaskCondition sqlCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler(handler);
+                    IProcessTaskCondition sqlCondition = ProcessTaskConditionFactory.getHandler(handler);
                     sqlCondition.getSqlConditionWhere(conditionVoList, i, sqlSb);
                     fromConditionUuid = toConditionUuid;
                 }

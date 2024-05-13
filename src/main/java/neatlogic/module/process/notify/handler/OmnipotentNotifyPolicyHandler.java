@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.ParamType;
-import neatlogic.framework.condition.core.ConditionHandlerFactory;
 import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.dto.ConditionParamVo;
 import neatlogic.framework.dto.ExpressionVo;
@@ -12,6 +11,7 @@ import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerBase;
 import neatlogic.framework.notify.dto.NotifyTriggerVo;
 import neatlogic.framework.process.auth.PROCESS_MODIFY;
+import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.constvalue.ProcessTaskGroupSearch;
@@ -62,7 +62,7 @@ public class OmnipotentNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     protected List<ConditionParamVo> mySystemConditionOptionList() {
         List<ConditionParamVo> notifyPolicyParamList = new ArrayList<>();
         for(ConditionProcessTaskOptions option : ConditionProcessTaskOptions.values()) {
-            IConditionHandler condition = ConditionHandlerFactory.getHandler(option.getValue());
+            IConditionHandler condition = ProcessTaskConditionFactory.getHandler(option.getValue());
             if(condition != null) {
                 ConditionParamVo param = new ConditionParamVo();
                 param.setName(condition.getName());

@@ -6,7 +6,6 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.ParamType;
-import neatlogic.framework.condition.core.ConditionHandlerFactory;
 import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dto.ConditionParamVo;
@@ -20,6 +19,7 @@ import neatlogic.framework.form.dto.FormVo;
 import neatlogic.framework.form.exception.FormNotFoundException;
 import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -65,7 +65,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
         Integer isAll = jsonObj.getInteger("isAll");
         // 固定字段条件
         for (ConditionProcessTaskOptions option : ConditionProcessTaskOptions.values()) {
-            IConditionHandler condition = ConditionHandlerFactory.getHandler(option.getValue());
+            IConditionHandler condition = ProcessTaskConditionFactory.getHandler(option.getValue());
             if (condition != null) {
                 ConditionParamVo conditionParamVo = new ConditionParamVo();
                 conditionParamVo.setName(condition.getName());

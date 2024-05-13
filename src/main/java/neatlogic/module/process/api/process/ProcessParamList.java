@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.ParamType;
-import neatlogic.framework.condition.core.ConditionHandlerFactory;
+import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.dto.ConditionParamVo;
 import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
@@ -55,7 +55,7 @@ public class ProcessParamList extends PrivateApiComponentBase {
         JSONArray resultArray = new JSONArray();
         // 固定字段条件
         for (ProcessTaskParams processTaskParams : ProcessTaskParams.values()) {
-            IConditionHandler condition = ConditionHandlerFactory.getHandler(processTaskParams.getValue());
+            IConditionHandler condition = ProcessTaskConditionFactory.getHandler(processTaskParams.getValue());
             if (condition != null) {
                 ConditionParamVo param = new ConditionParamVo();
                 param.setName(processTaskParams.getValue());
