@@ -860,7 +860,8 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
             readcomponentList = readcomponentArray.toJavaList(String.class);
         }
 
-        List<FormAttributeVo> defaultSceneFormAttributeList;
+        Map<String, FormAttributeVo> formExtendAttributeMap = new HashMap<>();
+                List<FormAttributeVo> defaultSceneFormAttributeList;
         String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
         {
             // 默认场景的表单
@@ -871,6 +872,10 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
             /* 校验表单属性是否合法 **/
             FormUtil.formAttributeValueValid(formVersionVo, formAttributeDataList);
             defaultSceneFormAttributeList = formVersionVo.getFormAttributeList();
+            List<FormAttributeVo> formExtendAttributeList = formVersionVo.getFormExtendAttributeList();
+            if (CollectionUtils.isNotEmpty(formExtendAttributeList)) {
+                formExtendAttributeMap = formExtendAttributeList.stream().collect(Collectors.toMap(e -> e.getParentUuid() + "#" + e.getTag() + "#" + e.getKey(), e -> e));
+            }
         }
         if (CollectionUtils.isEmpty(defaultSceneFormAttributeList)) {
             return;
@@ -999,8 +1004,6 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         Map<String, AttributeDataVo> oldExtendAttributeDataMap = oldExtendAttributeDataList.stream().collect(Collectors.toMap(AttributeDataVo::getAttributeUuid, e -> e));
         JSONArray formExtendAttributeDataList = paramObj.getJSONArray("formExtendAttributeDataList");
         if (CollectionUtils.isNotEmpty(formExtendAttributeDataList)) {
-            List<ProcessTaskFormAttributeVo> processTaskFormExtendAttributeList = processTaskMapper.getProcessTaskFormExtendAttributeListByProcessTaskIdAndTag(processTaskId, null);
-            Map<String, ProcessTaskFormAttributeVo> processTaskFormExtendAttributeMap = processTaskFormExtendAttributeList.stream().collect(Collectors.toMap(e -> e.getParentUuid() + "#" + e.getTag() + "#" + e.getKey(), e -> e));
             for (int j = 0; j < formExtendAttributeDataList.size(); j++) {
                 JSONObject formExtendAttributeDataObj = formExtendAttributeDataList.getJSONObject(j);
                 if (MapUtils.isEmpty(formExtendAttributeDataObj)) {
@@ -1009,21 +1012,21 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 String parentUuid = formExtendAttributeDataObj.getString("parentUuid");
                 String tag = formExtendAttributeDataObj.getString("tag");
                 String key = formExtendAttributeDataObj.getString("key");
-                ProcessTaskFormAttributeVo processTaskFormAttributeVo = processTaskFormExtendAttributeMap.get(parentUuid + "#" + tag + "#" + key);
-                if (processTaskFormAttributeVo == null) {
+                FormAttributeVo formAttributeVo = formExtendAttributeMap.get(parentUuid + "#" + tag + "#" + key);
+                if (formAttributeVo == null) {
                     continue;
                 }
                 String dataList = formExtendAttributeDataObj.getString("dataList");
                 ProcessTaskFormAttributeDataVo processTaskExtendFormAttributeDataVo = new ProcessTaskFormAttributeDataVo();
-                AttributeDataVo oldAttributeDataVo = oldExtendAttributeDataMap.get(processTaskFormAttributeVo.getUuid());
+                AttributeDataVo oldAttributeDataVo = oldExtendAttributeDataMap.get(formAttributeVo.getUuid());
                 if (oldAttributeDataVo != null) {
                     processTaskExtendFormAttributeDataVo.setId(oldAttributeDataVo.getId());
                 }
-                processTaskExtendFormAttributeDataVo.setFormUuid(processTaskFormAttributeVo.getFormUuid());
-                processTaskExtendFormAttributeDataVo.setHandler(processTaskFormAttributeVo.getHandler());
+                processTaskExtendFormAttributeDataVo.setFormUuid(formAttributeVo.getFormUuid());
+                processTaskExtendFormAttributeDataVo.setHandler(formAttributeVo.getHandler());
                 processTaskExtendFormAttributeDataVo.setTag(tag);
-                processTaskExtendFormAttributeDataVo.setAttributeUuid(processTaskFormAttributeVo.getUuid());
-                processTaskExtendFormAttributeDataVo.setAttributeLabel(processTaskFormAttributeVo.getLabel());
+                processTaskExtendFormAttributeDataVo.setAttributeUuid(formAttributeVo.getUuid());
+                processTaskExtendFormAttributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                 processTaskExtendFormAttributeDataVo.setData(dataList);
                 formMapper.insertFormExtendAttributeData(processTaskExtendFormAttributeDataVo);
                 processTaskExtendFormAttributeDataVo.setProcessTaskId(processTaskId);
