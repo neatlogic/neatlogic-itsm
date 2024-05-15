@@ -185,6 +185,8 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                                 if (processForm != null) {
                                     FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processForm.getFormUuid());
                                     if (formVersionVo != null) {
+                                        String mainSceneUuid = formVersionVo.getFormConfig().getString("uuid");
+                                        formVersionVo.setSceneUuid(mainSceneUuid);
                                         List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
                                         if (CollectionUtils.isNotEmpty(formAttributeList)) {
                                             List<FormAttributeVo> formAttributeVoList = new ArrayList<>();

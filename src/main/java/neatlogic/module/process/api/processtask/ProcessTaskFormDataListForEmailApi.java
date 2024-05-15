@@ -88,6 +88,8 @@ public class ProcessTaskFormDataListForEmailApi extends PrivateApiComponentBase 
             if (MapUtils.isNotEmpty(processTaskVo.getFormConfig())) {
                 FormVersionVo formVersionVo = new FormVersionVo();
                 formVersionVo.setFormConfig(processTaskVo.getFormConfig());
+                String mainSceneUuid = processTaskVo.getFormConfig().getString("uuid");
+                formVersionVo.setSceneUuid(mainSceneUuid);
                 List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
                 for (FormAttributeVo formAttribute : formAttributeList) {
                     ProcessTaskFormAttributeDataVo attributeDataVo = processTaskFormAttributeDataMap.get(formAttribute.getUuid());
