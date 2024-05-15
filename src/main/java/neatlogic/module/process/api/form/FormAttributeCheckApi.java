@@ -123,6 +123,8 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 			throw new ParamIrregularException("config","config参数中必须包含'processTaskId'或'channelUuid'");
 		}
 		String attributeUuid = jsonObj.getString("attributeUuid");
+		String mainSceneUuid = formVersionVo.getFormConfig().getString("uuid");
+		formVersionVo.setSceneUuid(mainSceneUuid);
 		List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
 		for(FormAttributeVo formAttribute : formAttributeList) {
 			if(attributeUuid.equals(formAttribute.getUuid())) {

@@ -89,6 +89,8 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
         List<AttributeExtendedDataVo> attributeExtendedDataList = new ArrayList<>();
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
+        String mainSceneUuid = formVersionVo.getFormConfig().getString("uuid");
+        formVersionVo.setSceneUuid(mainSceneUuid);
         List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
         for (FormAttributeVo formAttribute : formAttributeList) {
             AttributeDataVo attributeDataVo = attributeDataMap.get(formAttribute.getUuid());
