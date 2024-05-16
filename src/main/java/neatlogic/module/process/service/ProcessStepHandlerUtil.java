@@ -989,16 +989,16 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                     continue;
                 }
             }
-            Object dataObj = dataVo.getDataObj();
+            /*Object dataObj = dataVo.getDataObj();
             if (dataObj != null) {
                 if (dataObj instanceof JSONObject || dataObj instanceof JSONArray) {
-                    dataVo.setData(JSONObject.toJSONString(dataObj));
+                    dataVo.setData(JSON.toJSONString(dataObj));
                 } else if (dataObj instanceof String) {
                     dataVo.setData((String) dataObj);
                 } else {
                     dataVo.setData(dataObj.toString());
                 }
-            }
+            }*/
             formMapper.insertFormAttributeData(dataVo);
             processTaskMapper.insertProcessTaskFormAttribute(dataVo);
         }
