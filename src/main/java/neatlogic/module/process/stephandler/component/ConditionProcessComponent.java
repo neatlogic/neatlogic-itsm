@@ -20,8 +20,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import neatlogic.framework.asynchronization.threadlocal.ConditionParamContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.SystemUser;
+import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.dto.condition.ConditionConfigVo;
+import neatlogic.framework.dto.condition.ConditionGroupVo;
+import neatlogic.framework.dto.condition.ConditionVo;
+import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dto.ProcessTaskStepRelVo;
@@ -35,6 +40,7 @@ import neatlogic.framework.util.javascript.JavascriptUtil;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.IProcessStepHandlerUtil;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -57,6 +63,9 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
@@ -150,6 +159,8 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                             ConditionParamContext.init(conditionParamData).setTranslate(true);
                                             conditionConfigVo = new ConditionConfigVo(moveonConfig);
                                             String script = conditionConfigVo.buildScript();
+                                            /* 将参数名称、表达式、值的value翻译成对应text，目前条件步骤生成活动时用到**/
+                                            translate(conditionConfigVo, currentProcessTaskStepVo.getProcessTaskId());
                                             // ((false || true) || (true && false) || (true || false))
                                             canRun = RunScriptUtil.runScript(script);
                                             ruleObj.put("result", canRun);
@@ -194,6 +205,44 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new ProcessTaskException(e.getMessage());
+        }
+    }
+
+    private void translate(ConditionConfigVo conditionConfigVo, Long processTaskId) {
+        List<ConditionGroupVo> conditionGroupList = conditionConfigVo.getConditionGroupList();
+        if (CollectionUtils.isNotEmpty(conditionGroupList)) {
+            List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTag(processTaskId, ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
+            Map<String, FormAttributeVo> formAttributeVoMap = formAttributeList.stream().collect(Collectors.toMap(FormAttributeVo::getUuid, e -> e));
+            for (ConditionGroupVo conditionGroup : conditionGroupList) {
+                List<ConditionVo> conditionList = conditionGroup.getConditionList();
+                if (CollectionUtils.isNotEmpty(conditionList)) {
+                    for (ConditionVo condition : conditionList) {
+                        if ("common".equals(condition.getType())) {
+                            IConditionHandler conditionHandler = ProcessTaskConditionFactory.getHandler(condition.getName());
+                            if (conditionHandler != null) {
+                                Object valueList = conditionHandler.valueConversionText(condition.getValueList(), null);
+                                condition.setValueList(valueList);
+                                String name = conditionHandler.getDisplayName();
+                                condition.setName(name);
+                            }
+                        } else if ("form".equals(condition.getType())) {
+                            IConditionHandler conditionHandler = ProcessTaskConditionFactory.getHandler("form");
+                            if (conditionHandler != null) {
+                                FormAttributeVo formAttribute = formAttributeVoMap.get(condition.getName());
+                                if (formAttribute != null) {
+                                    JSONObject configObj = new JSONObject();
+                                    configObj.put("formAttribute", formAttribute);
+                                    Object valueList = conditionHandler.valueConversionText(condition.getValueList(), configObj);
+                                    condition.setValueList(valueList);
+                                    condition.setName(formAttribute.getLabel());
+                                }
+                            }
+                        }
+                        String expressionName = Expression.getExpressionName(condition.getExpression());
+                        condition.setExpression(expressionName);
+                    }
+                }
+            }
         }
     }
 

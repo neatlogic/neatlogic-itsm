@@ -29,7 +29,6 @@ import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.form.constvalue.FormHandler;
 import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
-import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.fulltextindex.utils.FullTextIndexUtil;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
@@ -97,54 +96,41 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     @Override
     public Object valueConversionText(Object value, JSONObject config) {
         if (MapUtils.isNotEmpty(config)) {
-            //表单属性的uuid
-            String attributeUuid = config.getString("attributeUuid");
-            //对应表单版本的form_config字段
-            JSONObject formConfig = config.getJSONObject("formConfig");
-            FormVersionVo formVersionVo = new FormVersionVo();
-            formVersionVo.setFormConfig(formConfig);
-            List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
-            if (CollectionUtils.isNotEmpty(formAttributeList)) {
-                for (FormAttributeVo formAttribute : formAttributeList) {
-                    if (Objects.equals(attributeUuid, formAttribute.getUuid())) {
-                        config.put("name", formAttribute.getLabel());
-                        if (value != null) {
-                            IFormAttributeDataConversionHandler formAttributeHandler =
-                                    FormAttributeDataConversionHandlerFactory.getHandler(formAttribute.getHandler());
-                            if (formAttributeHandler != null) {
-                                if (Objects.equals(formAttribute.getHandler(), FormHandler.FORMDATE.getHandler())
-                                        || Objects.equals(formAttribute.getHandler(), FormHandler.FORMTIME.getHandler())) {
-                                    if (value instanceof String) {
-                                        return value;
-                                    } else if (value instanceof JSONArray) {
-                                        List<String> textList = ((JSONArray) value).toJavaList(String.class);
-                                        return String.join("-", textList);
-                                    }
-                                } else {
-                                    AttributeDataVo attributeDataVo = new AttributeDataVo();
-                                    attributeDataVo.setAttributeUuid(attributeUuid);
-                                    attributeDataVo.setHandler(formAttribute.getHandler());
-                                    if (value instanceof String) {
-                                        attributeDataVo.setData((String) value);
-                                    } else if (value instanceof JSONArray) {
-                                        attributeDataVo.setData(JSON.toJSONString(value));
-                                    }
+            FormAttributeVo formAttribute = config.getObject("formAttribute", FormAttributeVo.class);
+            if (value != null) {
+                IFormAttributeDataConversionHandler formAttributeHandler =
+                        FormAttributeDataConversionHandlerFactory.getHandler(formAttribute.getHandler());
+                if (formAttributeHandler != null) {
+                    if (Objects.equals(formAttribute.getHandler(), FormHandler.FORMDATE.getHandler())
+                            || Objects.equals(formAttribute.getHandler(), FormHandler.FORMTIME.getHandler())) {
+                        if (value instanceof String) {
+                            return value;
+                        } else if (value instanceof JSONArray) {
+                            List<String> textList = ((JSONArray) value).toJavaList(String.class);
+                            return String.join("-", textList);
+                        }
+                    } else {
+                        AttributeDataVo attributeDataVo = new AttributeDataVo();
+                        attributeDataVo.setAttributeUuid(formAttribute.getUuid());
+                        attributeDataVo.setHandler(formAttribute.getHandler());
+                        if (value instanceof String) {
+                            attributeDataVo.setData((String) value);
+                        } else if (value instanceof JSONArray) {
+                            attributeDataVo.setData(JSON.toJSONString(value));
+                        }
 
-                                    Object text = formAttributeHandler.valueConversionText(attributeDataVo, formAttribute.getConfig());
-                                    if (text instanceof String) {
-                                        return text;
-                                    } else if (text instanceof List) {
-                                        List<String> textList = JSON.parseArray(JSON.toJSONString(text), String.class);
-                                        if (FormHandler.FORMCASCADER.getHandler().equals(formAttribute.getHandler())) {
-                                            return String.join("/", textList);
-                                        } else {
-                                            return String.join("、", textList);
-                                        }
-                                    }
-                                    return text;
-                                }
+                        Object text = formAttributeHandler.valueConversionText(attributeDataVo, formAttribute.getConfig());
+                        if (text instanceof String) {
+                            return text;
+                        } else if (text instanceof List) {
+                            List<String> textList = JSON.parseArray(JSON.toJSONString(text), String.class);
+                            if (FormHandler.FORMCASCADER.getHandler().equals(formAttribute.getHandler())) {
+                                return String.join("/", textList);
+                            } else {
+                                return String.join("、", textList);
                             }
                         }
+                        return text;
                     }
                 }
             }
