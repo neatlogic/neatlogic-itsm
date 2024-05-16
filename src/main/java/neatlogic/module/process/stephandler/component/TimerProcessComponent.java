@@ -165,6 +165,8 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                                     if (StringUtils.isNotBlank(formContent)) {
                                         FormVersionVo fromFormVersion = new FormVersionVo();
                                         fromFormVersion.setFormConfig(JSONObject.parseObject(formContent));
+                                        String mainSceneUuid = fromFormVersion.getFormConfig().getString("uuid");
+                                        fromFormVersion.setSceneUuid(mainSceneUuid);
                                         List<FormAttributeVo> fromFormAttributeList = fromFormVersion.getFormAttributeList();
                                         for (FormAttributeVo formAttributeVo : fromFormAttributeList) {
                                             if (Objects.equals(formAttributeVo.getUuid(), attributeUuid)) {

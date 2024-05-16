@@ -88,12 +88,14 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
         formVersionVo.setFormUuid(processTaskForm.getFormUuid());
         formVersionVo.setFormName(processTaskForm.getFormName());
         formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
-        List<FormAttributeVo> defaultSceneFormAttributeList = formVersionVo.getFormAttributeList();
-        if (CollectionUtils.isEmpty(defaultSceneFormAttributeList)) {
+        String mainSceneUuid = formVersionVo.getFormConfig().getString("uuid");
+        formVersionVo.setSceneUuid(mainSceneUuid);
+        List<FormAttributeVo> mainSceneFormAttributeList = formVersionVo.getFormAttributeList();
+        if (CollectionUtils.isEmpty(mainSceneFormAttributeList)) {
             return 0;
         }
         // 判断是否修改了表单数据
-        if (!FormUtil.isModifiedFormData(defaultSceneFormAttributeList, processTaskFormAttributeDataList, oldProcessTaskFormAttributeDataList)) {
+        if (!FormUtil.isModifiedFormData(mainSceneFormAttributeList, processTaskFormAttributeDataList, oldProcessTaskFormAttributeDataList)) {
             // 表单未修改，返回值为0，表示不用显示表单内容
             return 0;
         }
@@ -102,7 +104,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
         Map<String, ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataMap = oldProcessTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
         Map<String, JSONObject> attributeConfigMap = new HashMap<>();
         Map<String, String> attributeLabelMap = new HashMap<>();
-        for (FormAttributeVo formAttributeVo : defaultSceneFormAttributeList) {
+        for (FormAttributeVo formAttributeVo : mainSceneFormAttributeList) {
             String attributeUuid = formAttributeVo.getUuid();
             attributeLabelMap.put(attributeUuid, formAttributeVo.getLabel());
             attributeConfigMap.put(attributeUuid, formAttributeVo.getConfig());

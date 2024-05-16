@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.api.channel;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -26,7 +27,6 @@ import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVo;
 import neatlogic.framework.form.exception.FormNotFoundException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.process.dto.ProcessVo;
 import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
@@ -36,11 +36,12 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.framework.form.attribute.handler.CheckboxHandler;
 import neatlogic.module.framework.form.attribute.handler.RadioHandler;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -51,13 +52,13 @@ import java.util.Objects;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ChannelFormGetApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private FormMapper formMapper;
 
-    @Autowired
+    @Resource
     private ProcessMapper processMapper;
 
-    @Autowired
+    @Resource
     private ChannelMapper channelMapper;
 
     @Override
@@ -85,7 +86,7 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<String> channelUuidList =
-                JSONObject.parseArray(jsonObj.getJSONArray("channelUuidList").toJSONString(), String.class);
+                JSON.parseArray(jsonObj.getJSONArray("channelUuidList").toJSONString(), String.class);
         if (CollectionUtils.isEmpty(channelUuidList)) {
             throw new ChannelNotFoundException(channelUuidList.toString());
         }

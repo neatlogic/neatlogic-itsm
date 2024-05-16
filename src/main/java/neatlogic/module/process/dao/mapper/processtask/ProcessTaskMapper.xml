@@ -302,25 +302,6 @@
         WHERE a.`processtask_id` = #{value}
     </select>
 
-    <select id="getProcessTaskFormExtendAttributeListByProcessTaskIdAndTag" parameterType="java.util.HashMap" resultType="neatlogic.framework.process.dto.ProcessTaskFormAttributeVo">
-        SELECT
-            `processtask_id` AS processTaskId,
-            `form_uuid` AS formUuid,
-            `parent_uuid` AS parentUuid,
-            `tag`,
-            `key`,
-            `uuid`,
-            `label`,
-            `type`,
-            `handler`,
-            `config_hash` AS configHash
-        FROM `processtask_form_extend_attribute`
-        WHERE `processtask_id` = #{processTaskId}
-          <if test="tag != null">
-              AND `tag` = #{tag}
-          </if>
-    </select>
-
     <select id="getProcessTaskFormListByProcessTaskIdList" parameterType="java.util.List"
             resultType="neatlogic.framework.process.dto.ProcessTaskFormVo">
         SELECT a.`processtask_id` as processTaskId,
@@ -3649,34 +3630,6 @@
     <insert id="insertProcessTaskInvoke">
         INSERT INTO `processtask_invoke` (`processtask_id`, `source`, `type`, `invoke_id`)
         VALUES (#{processTaskId}, #{source}, #{sourceType}, #{invokeId});
-    </insert>
-
-    <insert id="insertProcessTaskFormExtendAttribute" parameterType="neatlogic.framework.process.dto.ProcessTaskFormAttributeVo">
-        INSERT INTO `processtask_form_extend_attribute` (
-            `processtask_id`,
-            `form_uuid`,
-            `parent_uuid`,
-            `tag`,
-            `key`,
-            `uuid`,
-            `label`,
-            `type`,
-            `handler`,
-            `config_hash`
-        )
-        VALUES
-            (
-                #{processTaskId},
-                #{formUuid},
-                #{parentUuid},
-                #{tag},
-                #{key},
-                #{uuid},
-                #{label},
-                #{type},
-                #{handler},
-                #{configHash}
-            )
     </insert>
 
     <update id="updateProcessTaskStepUserStatus" parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">

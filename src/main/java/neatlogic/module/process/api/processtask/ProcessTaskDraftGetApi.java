@@ -206,6 +206,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         //获取目标表单值
         FormVersionVo toFormVersion = new FormVersionVo();
         toFormVersion.setFormConfig(toProcessTaskFormConfig);
+        String mainSceneUuid = toProcessTaskFormConfig.getString("uuid");
+        toFormVersion.setSceneUuid(mainSceneUuid);
         for (FormAttributeVo formAttributeVo : toFormVersion.getFormAttributeList()) {
             String fromFormAttributeHandler = labelHandlerMap.getString(formAttributeVo.getLabel());
             if (Objects.equals(fromFormAttributeHandler, formAttributeVo.getHandler())) {
@@ -237,8 +239,11 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             if (StringUtils.isNotBlank(formContent)) {
                 Map<String, String> labelUuidMap = new HashMap<>();
                 Map<String, String> labelHandlerMap = new HashMap<>();
+                JSONObject formConfig = JSON.parseObject(formContent);
                 FormVersionVo fromFormVersion = new FormVersionVo();
-                fromFormVersion.setFormConfig(JSON.parseObject(formContent));
+                fromFormVersion.setFormConfig(formConfig);
+                String mainSceneUuid = formConfig.getString("uuid");
+                fromFormVersion.setSceneUuid(mainSceneUuid);
                 List<FormAttributeVo> fromFormAttributeList = fromFormVersion.getFormAttributeList();
                 for (FormAttributeVo formAttributeVo : fromFormAttributeList) {
                     labelUuidMap.put(formAttributeVo.getLabel(), formAttributeVo.getUuid());
@@ -303,6 +308,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                         Map<String, Object> resultObj = new HashMap<>();
                         FormVersionVo toFormVersion = new FormVersionVo();
                         toFormVersion.setFormConfig(processTaskVo.getFormConfig());
+                        String mainSceneUuid = processTaskVo.getFormConfig().getString("uuid");
+                        toFormVersion.setSceneUuid(mainSceneUuid);
                         for (FormAttributeVo formAttributeVo : toFormVersion.getFormAttributeList()) {
                             String parentFormLabel = parentSubProcessTaskStepConfigFormMapping.getString(formAttributeVo.getLabel());
                             if (StringUtils.isNotBlank(parentFormLabel)) {

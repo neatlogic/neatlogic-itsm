@@ -164,6 +164,8 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                 ProcessFormVo processFormVo = processMapper.getProcessFormByProcessUuid(processUuid);
                 if (processFormVo != null) {
                     FormVersionVo actionFormVersionVo = formMapper.getActionFormVersionByFormUuid(processFormVo.getFormUuid());
+                    String mainSceneUuid = actionFormVersionVo.getFormConfig().getString("uuid");
+                    actionFormVersionVo.setSceneUuid(mainSceneUuid);
                     List<FormAttributeVo> formAttributeVoList = actionFormVersionVo.getFormAttributeList();
                     if (CollectionUtils.isNotEmpty(formAttributeVoList)) {
                         List<String> dataTypeNotArrayHandlerList = new ArrayList<>();
