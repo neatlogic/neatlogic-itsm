@@ -3348,20 +3348,6 @@
         VALUES (#{hash}, #{config})
     </insert>
 
-    <!--<insert id="insertProcessTaskStepFormAttribute"
-            parameterType="neatlogic.framework.process.dto.ProcessTaskStepFormAttributeVo">
-        INSERT INTO `processtask_step_formattribute` (`processtask_id`,
-                                                      `processtask_step_id`,
-                                                      `attribute_uuid`,
-                                                      `action`,
-                                                      `type`)
-        VALUES (#{processTaskId},
-                #{processTaskStepId},
-                #{attributeUuid},
-                #{action},
-                #{type})
-    </insert>-->
-
     <insert id="insertIgnoreProcessTaskConfig" parameterType="neatlogic.framework.process.dto.ProcessTaskConfigVo">
         INSERT IGNORE INTO `processtask_config` (`hash`, `config`)
         VALUES (#{hash}, #{config})

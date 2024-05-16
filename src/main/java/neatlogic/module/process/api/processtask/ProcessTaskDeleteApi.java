@@ -123,7 +123,7 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         for (ProcessTaskRelationVo relation : relationList) {
             taskMapper.deleteProcessTaskRelationById(relation.getId());
         }
-        // 表单 processtask_form processtask_formattribute_data
+        // 表单 processtask_form processtask_formattribute processtask_extend_formattribute form_attribute_data form_extend_attribute_data
         taskMapper.deleteProcessTaskFormByProcessTaskId(processTaskId);
         processTaskService.deleteProcessTaskFormAttributeDataByProcessTaskId(processTaskId);
         // 关注人 processtask_focus
@@ -139,7 +139,7 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         // processtask_step_remind
         // processtask_step processtask_step_agent processtask_step_notify_policy processtask_step_comment
         // processtask_step_content
-        // processtask_step_data processtask_step_formattribute processtask_step_sla
+        // processtask_step_data processtask_step_sla
         // processtask_step_rel
         // processtask_step_timeaudit processtask_step_timeout_policy
         // processtask_step_worker_policy
