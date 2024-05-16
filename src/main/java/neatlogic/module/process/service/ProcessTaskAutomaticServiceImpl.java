@@ -390,18 +390,20 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
 //                        }
                     }
                 }
-                if (resultValue != null) {
-                    List<String> currentValueList = new ArrayList<>();
+                List<String> currentValueList = new ArrayList<>();
+                if (StringUtils.isNotBlank(resultValue)) {
                     currentValueList.add(resultValue);
-                    String value = config.getString("value");
-                    List<String> targetValueList = new ArrayList<>();
+                }
+                List<String> targetValueList = new ArrayList<>();
+                String value = config.getString("value");
+                if (StringUtils.isNotBlank(value)) {
                     targetValueList.add(value);
-                    String expression = config.getString("expression");
-                    try {
-                        result = ConditionUtil.predicate(currentValueList, expression, targetValueList);
-                    } catch (Exception e) {
-                        logger.warn(e.getMessage(), e);
-                    }
+                }
+                String expression = config.getString("expression");
+                try {
+                    result = ConditionUtil.predicate(currentValueList, expression, targetValueList);
+                } catch (Exception e) {
+                    logger.warn(e.getMessage(), e);
                 }
             }
         }
@@ -447,7 +449,8 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
             requestAudit.put("endTime", System.currentTimeMillis());
             JSONObject auditResult = new JSONObject();
             auditResult.put("json", resultJson);
-            auditResult.put("template", FreemarkerUtil.transform(JSON.parse(resultJson), template));
+            String templateResult = FreemarkerUtil.transform(JSON.parse(resultJson), template);
+            auditResult.put("template", templateResult);
             requestAudit.put("result", auditResult);
 
             if (predicate(successConfig, resultVo, true)) {// 如果执行成功
@@ -504,12 +507,24 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     failedReason = integrationVo.getUrl() + "\n" + resultVo.getError();
                 } else {
                     if (MapUtils.isNotEmpty(successConfig)) {
-                        if (StringUtils.isBlank(successConfig.getString("name"))) {
+                        String name = successConfig.getString("name");
+                        if (StringUtils.isBlank(name)) {
                             failedReason = "-";
                         } else {
-                            failedReason = String.format("不满足成功条件：%s%s%s", successConfig.getString("name"), successConfig.getString("expressionName"), successConfig.getString("value"));
+                            String expressionName = successConfig.getString("expressionName");
+                            if (expressionName == null) {
+                                expressionName = StringUtils.EMPTY;
+                            }
+                            String value = successConfig.getString("value");
+                            if (value == null) {
+                                value = StringUtils.EMPTY;
+                            }
+                            failedReason = String.format("不满足成功条件：%s%s%s", name, expressionName, value);
                         }
                     }
+                }
+                if (StringUtils.isNotBlank(templateResult)) {
+                    failedReason = failedReason + "\n" + templateResult;
                 }
                 requestAudit.put("failedReason", failedReason);
                 failPolicy(automaticConfigVo, currentProcessTaskStepVo, failedReason, data);
@@ -591,7 +606,8 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
             callbackAudit.put("endTime", System.currentTimeMillis());
             JSONObject auditResult = new JSONObject();
             auditResult.put("json", resultJson);
-            auditResult.put("template", FreemarkerUtil.transform(JSON.parse(resultJson), template));
+            String templateResult = FreemarkerUtil.transform(JSON.parse(resultJson), template);
+            auditResult.put("template", templateResult);
             callbackAudit.put("result", auditResult);
 
             if (predicate(successConfig, resultVo, true)) {// 如果执行成功
@@ -616,12 +632,24 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     failedReason = integrationVo.getUrl() + "\n" + resultVo.getError();
                 } else {
                     if (MapUtils.isNotEmpty(failConfig)) {
-                        if (StringUtils.isBlank(failConfig.getString("name"))) {
+                        String name = failConfig.getString("name");
+                        if (StringUtils.isBlank(name)) {
                             failedReason = "-";
                         } else {
-                            failedReason = String.format("满足失败条件：%s%s%s", failConfig.getString("name"), failConfig.getString("expressionName"), failConfig.getString("value"));
+                            String expressionName = failConfig.getString("expressionName");
+                            if (expressionName == null) {
+                                expressionName = StringUtils.EMPTY;
+                            }
+                            String value = failConfig.getString("value");
+                            if (value == null) {
+                                value = StringUtils.EMPTY;
+                            }
+                            failedReason = String.format("满足失败条件：%s%s%s", name, expressionName, value);
                         }
                     }
+                }
+                if (StringUtils.isNotBlank(templateResult)) {
+                    failedReason = failedReason + "\n" + templateResult;
                 }
                 callbackAudit.put("failedReason", failedReason);
                 failPolicy(automaticConfigVo, currentProcessTaskStepVo, failedReason, data);
@@ -730,6 +758,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
             if (backStepList.size() == 1) {
                 ProcessTaskStepVo nextProcessTaskStepVo = backStepList.get(0);
                 if (processHandler != null) {
+                    processStepHandlerUtil.saveStepRemind(currentProcessTaskStepVo, nextProcessTaskStepVo.getId(), failedReason, ProcessTaskStepRemindType.AUTOMATIC_ERROR);
                     JSONObject jsonParam = currentProcessTaskStepVo.getParamObj();
                     jsonParam.put("action", ProcessTaskOperationType.STEP_BACK.getValue());
                     jsonParam.put("nextStepId", nextProcessTaskStepVo.getId());
@@ -741,6 +770,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
         } else if (FailPolicy.KEEP_ON.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
             //补充下一步骤id
             List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
+            processStepHandlerUtil.saveStepRemind(currentProcessTaskStepVo, nextStepIdList.get(0), failedReason, ProcessTaskStepRemindType.AUTOMATIC_ERROR);
 //            currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepIdList.get(0));
             JSONObject jsonParam = currentProcessTaskStepVo.getParamObj();
             jsonParam.put("action", ProcessTaskOperationType.STEP_COMPLETE.getValue());
@@ -751,6 +781,9 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
             ProcessTaskVo processTaskVo = new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId());
             processTaskVo.getParamObj().put(ProcessTaskAuditDetailType.AUTOMATICINFO.getParamName(), automaticInfo);
             processHandler.abortProcessTask(processTaskVo);
+        } else {
+            // 人工处理
+            processStepHandlerUtil.saveStepRemind(currentProcessTaskStepVo, currentProcessTaskStepVo.getId(), failedReason, ProcessTaskStepRemindType.AUTOMATIC_ERROR);
         }
     }
 }
