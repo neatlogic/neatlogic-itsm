@@ -161,9 +161,21 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
         }
         {
             // 工单表单数据
-            String sql = "SELECT * FROM `processtask_formattribute_data` WHERE `processtask_id` = " + processTaskId;
-            List<Map<String, Object>> processtask_formattribute_data = processTaskDataMapper.getList(sql);
-            put(resultObj, "processtask_formattribute_data", processtask_formattribute_data);
+            String sql = "SELECT * FROM `processtask_formattribute` WHERE `processtask_id` = " + processTaskId;
+            List<Map<String, Object>> processtask_formattribute = processTaskDataMapper.getList(sql);
+            put(resultObj, "processtask_formattribute", processtask_formattribute);
+
+            sql = "SELECT * FROM `processtask_extend_formattribute` WHERE `processtask_id` = " + processTaskId;
+            List<Map<String, Object>> processtask_extend_formattribute = processTaskDataMapper.getList(sql);
+            put(resultObj, "processtask_extend_formattribute", processtask_extend_formattribute);
+
+            sql = "SELECT a.* FROM `form_attribute_data` a JOIN `processtask_formattribute` b ON b.`form_attribute_data_id` = a.`id` WHERE b.`processtask_id` = " + processTaskId;
+            List<Map<String, Object>> form_attribute_data = processTaskDataMapper.getList(sql);
+            put(resultObj, "form_attribute_data", form_attribute_data);
+
+            sql = "SELECT a.* FROM `form_extend_attribute_data` a JOIN `processtask_extend_formattribute` b ON b.`form_attribute_data_id` = a.`id` WHERE b.`processtask_id` = " + processTaskId;
+            List<Map<String, Object>> form_extend_attribute_data = processTaskDataMapper.getList(sql);
+            put(resultObj, "form_extend_attribute_data", form_extend_attribute_data);
         }
         {
             // 工单关联
@@ -390,12 +402,6 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
                 List<Map<String, Object>> event_solution = processTaskDataMapper.getList(sql);
                 put(resultObj, "event_solution", event_solution);
             }
-        }
-        {
-            // 步骤表单权限
-            String sql = "SELECT * FROM `processtask_step_formattribute` WHERE `processtask_id` = " + processTaskId;
-            List<Map<String, Object>> processtask_step_formattribute = processTaskDataMapper.getList(sql);
-            put(resultObj, "processtask_step_formattribute", processtask_step_formattribute);
         }
         {
             // 正在后台进行处理操作的步骤列表

@@ -164,19 +164,6 @@ CREATE TABLE IF NOT EXISTS `process_step_comment_template` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='流程步骤-回复模版关联表';
 
 -- ----------------------------
--- Table structure for process_step_formattribute
--- ----------------------------
-CREATE TABLE IF NOT EXISTS `process_step_formattribute` (
-  `process_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程uuid',
-  `process_step_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '步骤uuid',
-  `form_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '表单uuid',
-  `attribute_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '属性uuid',
-  `action` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '授权类型',
-  `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '类型',
-  PRIMARY KEY (`process_uuid`,`process_step_uuid`,`form_uuid`,`attribute_uuid`,`action`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='流程步骤表单组件授权表';
-
--- ----------------------------
 -- Table structure for process_step_handler
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `process_step_handler` (
@@ -893,18 +880,6 @@ CREATE TABLE IF NOT EXISTS `processtask_step_event` (
   PRIMARY KEY (`processtask_step_id`) USING BTREE,
   UNIQUE KEY `idx_event_id` (`event_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='工单步骤-事件关联表';
-
--- ----------------------------
--- Table structure for processtask_step_formattribute
--- ----------------------------
-CREATE TABLE IF NOT EXISTS `processtask_step_formattribute` (
-  `processtask_id` bigint NOT NULL COMMENT '工单id',
-  `processtask_step_id` bigint NOT NULL COMMENT '工单步骤id',
-  `attribute_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '属性uuid',
-  `action` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '授权类型',
-  `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '类型',
-  PRIMARY KEY (`processtask_id`,`processtask_step_id`,`attribute_uuid`,`action`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='工单步骤可查看的表单属性';
 
 -- ----------------------------
 -- Table structure for processtask_step_in_operation

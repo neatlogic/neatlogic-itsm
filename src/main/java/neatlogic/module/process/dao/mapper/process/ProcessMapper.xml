@@ -118,33 +118,6 @@
 		LEFT JOIN `process_step_worker_policy` h ON a.`uuid` = h.`process_step_uuid`
 		WHERE a.`process_uuid` = #{value}
 	</select>
-	<!--<select id="getProcessStepDetailByProcessUuid" parameterType="java.lang.String" resultMap="processStepDetailMap">
-		SELECT
-		a.`process_uuid` AS processUuid,
-		a.`uuid`,
-		a.`name`,
-		a.`type`,
-		a.`handler`,
-		a.`config` AS stepConfig,
-		b.`form_uuid` AS formUuid,
-		b.`attribute_uuid` AS formAttributeUuid,
-		b.`action` AS action,
-		b.`type` AS actionType,
-		c.`handler` AS formAttributeHandler,
-		c.`type` AS formAttributeType,
-		c.`label` AS attributeLabel,
-		h.`policy` AS workerPolicy,
-		h.`sort` AS workerPolicySort,
-		h.`config` AS workerPolicyConfig,
-		h.`process_uuid` AS workerPolicyProcessUuid,
-		h.`process_step_uuid` AS workerPolicyProcessStepUuid
-		FROM
-		`process_step` a
-		LEFT JOIN `process_step_formattribute` b ON a.`uuid` = b.`process_step_uuid` and a.`process_uuid` = b.`process_uuid`
-		LEFT JOIN `form_attribute` c ON b.`attribute_uuid` = c.`uuid`
-		LEFT JOIN `process_step_worker_policy` h ON a.`uuid` = h.`process_step_uuid`
-		WHERE a.`process_uuid` = #{value}
-	</select>-->
 
 	<select id="getProcessStepUuidListByProcessUuid" parameterType="java.lang.String" resultType="java.lang.String">
 		SELECT `uuid` FROM `process_step` WHERE `process_uuid` = #{value}
@@ -554,26 +527,6 @@
 		)
 	</insert>
 
-	<!--<insert id="insertProcessStepFormAttribute" parameterType="neatlogic.framework.process.dto.ProcessStepFormAttributeVo">
-		INSERT INTO `process_step_formattribute` (
-		`process_uuid`,
-		`process_step_uuid`,
-		`form_uuid`,
-		`attribute_uuid`,
-		`action`,
-		`type`
-		)
-		VALUES
-		(
-		#{processUuid},
-		#{processStepUuid},
-		#{formUuid},
-		#{attributeUuid},
-		#{action},
-		#{type}
-		)
-	</insert>-->
-
 	<insert id="insertProcessStepRel" parameterType="neatlogic.framework.process.dto.ProcessStepRelVo">
 		INSERT INTO `process_step_rel` (
 		`process_uuid`,
@@ -710,13 +663,6 @@
 		`process_step_worker_policy`
 		WHERE process_uuid = #{value}
 	</delete>
-
-	<!--<delete id="deleteProcessStepFormAttributeByProcessUuid" parameterType="java.lang.String">
-		DELETE
-		FROM
-		`process_step_formattribute`
-		WHERE `process_uuid` = #{value}
-	</delete>-->
 
 	<delete id="deleteProcessByUuid" parameterType="java.lang.String">
 		DELETE FROM `process` WHERE `uuid` = #{uuid}
