@@ -274,19 +274,21 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                     resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), value);
                 } else {
                     String data = processTaskFormAttributeDataVo.getData();
-                    JSONObject componentObj = new JSONObject();
-                    componentObj.put("handler", formAttributeVo.getHandler());
-                    componentObj.put("uuid", formAttributeVo.getUuid());
-                    componentObj.put("label", formAttributeVo.getLabel());
-                    componentObj.put("config", formAttributeVo.getConfig());
-                    componentObj.put("type", formAttributeVo.getType());
-                    List<FormAttributeVo> downwardFormAttributeList = FormUtil.getFormAttributeList(componentObj, null);
-                    for (FormAttributeVo downwardFormAttribute : downwardFormAttributeList) {
-                        if (data.contains(downwardFormAttribute.getUuid())) {
-                            data = data.replace(downwardFormAttribute.getUuid(), downwardFormAttribute.getLabel());
+                    if (StringUtils.isNotBlank(data)) {
+                        JSONObject componentObj = new JSONObject();
+                        componentObj.put("handler", formAttributeVo.getHandler());
+                        componentObj.put("uuid", formAttributeVo.getUuid());
+                        componentObj.put("label", formAttributeVo.getLabel());
+                        componentObj.put("config", formAttributeVo.getConfig());
+                        componentObj.put("type", formAttributeVo.getType());
+                        List<FormAttributeVo> downwardFormAttributeList = FormUtil.getFormAttributeList(componentObj, null);
+                        for (FormAttributeVo downwardFormAttribute : downwardFormAttributeList) {
+                            if (data.contains(downwardFormAttribute.getUuid())) {
+                                data = data.replace(downwardFormAttribute.getUuid(), downwardFormAttribute.getLabel());
+                            }
                         }
+                        processTaskFormAttributeDataVo.setData(data);
                     }
-                    processTaskFormAttributeDataVo.setData(data);
                     //另存一份label为key的数据，给条件路由的自定义脚本消费
                     resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), processTaskFormAttributeDataVo.getDataObj());
                 }
