@@ -127,15 +127,10 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
     protected Set<Long> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo,
                                   List<Long> nextStepIdList, Long nextStepId) throws ProcessTaskException {
         try {
-            logger.warn("nextStepId = " + nextStepId);
-            logger.warn("nextStepIdList = " + JSONArray.toJSONString(nextStepIdList));
             UserContext.init(SystemUser.SYSTEM);
             Set<Long> nextStepIdSet = new HashSet<>();
             if (CollectionUtils.isNotEmpty(nextStepIdList)) {
                 List<ProcessTaskStepVo> nextStepList = processTaskMapper.getProcessTaskStepListByIdList(nextStepIdList);
-                nextStepList.forEach(e -> {
-                    logger.warn("step = " + e.getName() + "(" + e.getId() + ")");
-                });
                 Map<String, ProcessTaskStepVo> processTaskStepMap = nextStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getProcessStepUuid, e -> e));
                 Map<String, String> processStepNameMap = nextStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getProcessStepUuid, ProcessTaskStepVo::getName));
                 ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
@@ -148,7 +143,6 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                             JSONObject moveonConfig = moveonConfigList.getJSONObject(i);
                             JSONArray targetStepList = moveonConfig.getJSONArray("targetStepList");
                             if (CollectionUtils.isNotEmpty(targetStepList)) {
-                                logger.warn("开始流转规则: " + currentProcessTaskStepVo.getName() + "流转至: " + targetStepList + ", time: " + System.currentTimeMillis());
                                 JSONObject ruleObj = new JSONObject();
                                 String type = moveonConfig.getString("type");
                                 boolean canRun = false;
@@ -159,7 +153,6 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                 } else if ("optional".equals(type)) {// 自定义
                                     JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
                                     if (CollectionUtils.isNotEmpty(conditionGroupList)) {
-                                        logger.warn("开始条件判断: " + ", time: " + System.currentTimeMillis());
                                         JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), currentProcessTaskStepVo);
                                         ConditionConfigVo conditionConfigVo = null;
                                         try {
@@ -178,7 +171,6 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                             ruleObj.put("conditionGroupList", conditionConfigVo.getConditionGroupList());
                                             ruleObj.put("conditionGroupRelList", conditionConfigVo.getConditionGroupRelList());
                                         }
-                                        logger.warn("完成条件判断: " + ", time: " + System.currentTimeMillis());
                                     }
                                 } else {
                                     ruleObj.putAll(moveonConfig);
@@ -202,14 +194,12 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                 ruleObj.put("type", type);
                                 ruleObj.put("targetStepList", targetStepNameList);
                                 ruleList.add(ruleObj);
-                                logger.warn("结束流转规则: " + currentProcessTaskStepVo.getName() + "流转至: " + targetStepList + ", time: " + System.currentTimeMillis());
                             }
                         }
                         currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.RULE.getParamName(), ruleList);
                     }
                 }
             }
-            logger.warn("nextStepIdSet = " + JSONArray.toJSONString(nextStepIdSet));
             return nextStepIdSet;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
