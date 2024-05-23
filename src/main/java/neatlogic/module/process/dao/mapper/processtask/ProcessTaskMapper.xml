@@ -574,8 +574,7 @@
                b.`name`,
                b.`type`,
                b.`handler`,
-               b.`is_active` AS isActive,
-               a.`is_check`  AS isCheck
+               b.`is_active` AS isActive
         FROM `processtask_converge` a
                  JOIN
              `processtask_step` b ON a.`processtask_step_id` = b.`id`
@@ -670,10 +669,18 @@
             resultType="neatlogic.framework.process.dto.ProcessTaskConvergeVo">
         SELECT `converge_id`         AS convergeId,
                `processtask_step_id` AS processTaskStepId,
-               `processtask_id`      AS processTaskId,
-               `is_check`            AS isCkeck
+               `processtask_id`      AS processTaskId
         FROM `processtask_converge`
         WHERE processtask_step_id = #{processTaskStepId}
+    </select>
+
+    <select id="getProcessTaskConvergeListByProcessTaskId" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskConvergeVo">
+        SELECT `converge_id`         AS convergeId,
+               `processtask_step_id` AS processTaskStepId,
+               `processtask_id`      AS processTaskId
+        FROM `processtask_converge`
+        WHERE processtask_id = #{value}
     </select>
 
     <select id="getStartProcessTaskStepByProcessTaskId" resultType="neatlogic.framework.process.dto.ProcessTaskStepVo">
@@ -3048,6 +3055,15 @@
         VALUES (#{convergeId},
                 #{processTaskStepId},
                 #{processTaskId})
+    </insert>
+
+    <insert id="insertIgnoreProcessTaskConvergeList" parameterType="neatlogic.framework.process.dto.ProcessTaskConvergeVo">
+        INSERT IGNORE INTO `processtask_converge` (`converge_id`, `processtask_step_id`, `processtask_id`)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.convergeId}, #{item.processTaskStepId}, #{item.processTaskId})
+        </foreach>
+
     </insert>
 
     <insert id="insertIgnoreProcessTaskStepWorker"
