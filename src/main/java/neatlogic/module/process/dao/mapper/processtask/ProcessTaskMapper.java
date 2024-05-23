@@ -115,6 +115,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     List<ProcessTaskConvergeVo> getProcessTaskConvergeListByStepId(Long processTaskStepId);
 
+    List<ProcessTaskConvergeVo> getProcessTaskConvergeListByProcessTaskId(Long processTaskId);
+
 //    List<ProcessTaskStepVo> getFromProcessTaskStepByToId(Long toProcessTaskStepId);
 
     List<Long> getFromProcessTaskStepIdListByToId(Long toProcessTaskStepId);
@@ -410,6 +412,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
     int insertIgnoreProcessTaskStepUser(ProcessTaskStepUserVo processTaskStepUserVo);
 
     int insertIgnoreProcessTaskConverge(ProcessTaskConvergeVo processTaskConvergeVo);
+
+    int insertIgnoreProcessTaskConvergeList(List<ProcessTaskConvergeVo> processTaskConvergeList);
 
     int insertIgnoreProcessTaskStepConfig(ProcessTaskStepConfigVo processTaskStepConfigVo);
 
