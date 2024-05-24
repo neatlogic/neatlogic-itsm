@@ -1299,22 +1299,6 @@
         </foreach>
     </select>
 
-    <!--<select id="getProcessTaskStepNotifyPolicy"
-            parameterType="neatlogic.framework.process.dto.ProcessTaskStepNotifyPolicyVo"
-            resultType="neatlogic.framework.process.dto.ProcessTaskStepNotifyPolicyVo">
-        SELECT a.`processtask_step_id` AS processTaskStepId,
-               a.`policy_id`           AS policyId,
-               a.`policy_name`         AS policyName,
-               a.`policy_handler`      AS policyHandler,
-               a.`policy_config_hash`  AS policyConfigHash,
-               b.`config`              AS policyConfig
-        FROM `processtask_step_notify_policy` a
-                 JOIN
-             `processtask_step_notify_policy_config` b ON b.`hash` = a.`policy_config_hash`
-        WHERE a.`processtask_step_id` = #{processTaskStepId}
-          AND a.`policy_id` = #{policyId}
-    </select>-->
-
     <select id="getProcessTaskOldFormAndPropByTaskId" parameterType="java.lang.Long" resultType="java.util.HashMap">
         select form, prop
         from processtask_old_form_prop
@@ -3036,16 +3020,53 @@
                 #{config})
     </insert>
 
+    <insert id="insertProcessTaskStepWorkerPolicyList"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepWorkerPolicyVo">
+        INSERT INTO `processtask_step_worker_policy` (`processtask_id`,
+                                                      `processtask_step_id`,
+                                                      `process_step_uuid`,
+                                                      `policy`,
+                                                      `sort`,
+                                                      `config`)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.processTaskId},
+            #{item.processTaskStepId},
+            #{item.processStepUuid},
+            #{item.policy},
+            #{item.sort},
+            #{item.config})
+        </foreach>
+    </insert>
+
     <insert id="insertProcessTaskFormAttribute"
             parameterType="neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo">
         INSERT ignore INTO `processtask_formattribute` (`processtask_id`, `form_attribute_data_id`)
         VALUES (#{processTaskId}, #{id})
     </insert>
 
+    <insert id="insertProcessTaskFormAttributeList"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo">
+        INSERT ignore INTO `processtask_formattribute` (`processtask_id`, `form_attribute_data_id`)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.processTaskId}, #{item.id})
+        </foreach>
+    </insert>
+
     <insert id="insertProcessTaskExtendFormAttribute"
             parameterType="neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo">
         INSERT ignore INTO `processtask_extend_formattribute` (`processtask_id`, `form_attribute_data_id`, `tag`)
         VALUES (#{processTaskId}, #{id}, #{tag})
+    </insert>
+
+    <insert id="insertProcessTaskExtendFormAttributeList"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo">
+        INSERT ignore INTO `processtask_extend_formattribute` (`processtask_id`, `form_attribute_data_id`, `tag`)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.processTaskId}, #{item.id}, #{item.tag})
+        </foreach>
     </insert>
 
     <insert id="insertIgnoreProcessTaskConverge" parameterType="neatlogic.framework.process.dto.ProcessTaskConvergeVo">
@@ -3103,6 +3124,32 @@
                 #{type})
     </insert>
 
+    <insert id="insertProcessTaskStepRelList" parameterType="neatlogic.framework.process.dto.ProcessTaskStepRelVo">
+        INSERT INTO `processtask_step_rel` (`processtask_id`,
+                                            `from_process_step_uuid`,
+                                            `to_process_step_uuid`,
+                                            `from_processtask_step_id`,
+                                            `to_processtask_step_id`,
+                                            `condition`,
+                                            `is_hit`,
+                                            `uuid`,
+                                            `name`,
+                                            `type`)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+                (#{item.processTaskId},
+                #{item.fromProcessStepUuid},
+                #{item.toProcessStepUuid},
+                #{item.fromProcessTaskStepId},
+                #{item.toProcessTaskStepId},
+                #{item.condition},
+                #{item.isHit},
+                #{item.processStepRelUuid},
+                #{item.name},
+                #{item.type})
+        </foreach>
+    </insert>
+
     <insert id="insertProcessTaskStep" parameterType="neatlogic.framework.process.dto.ProcessTaskStepVo">
         <!-- <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER"> select LAST_INSERT_ID() as id </selectKey> -->
         INSERT INTO `processtask_step` (
@@ -3128,6 +3175,34 @@
         #{isActive},
         #{configHash}
         )
+    </insert>
+
+    <insert id="insertProcessTaskStepList" parameterType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        INSERT INTO `processtask_step` (
+        `id`,
+        `processtask_id`,
+        `name`,
+        `process_step_uuid`,
+        `status`,
+        `type`,
+        `handler`,
+        `is_active`,
+        `config_hash`
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+        (
+        #{item.id},
+        #{item.processTaskId},
+        #{item.name},
+        #{item.processStepUuid},
+        #{item.status},
+        #{item.type},
+        #{item.handler},
+        #{item.isActive},
+        #{item.configHash}
+        )
+        </foreach>
     </insert>
 
     <insert id="replaceProcessTaskStep" parameterType="neatlogic.framework.process.dto.ProcessTaskStepVo">
@@ -3364,6 +3439,15 @@
         VALUES (#{hash}, #{config})
     </insert>
 
+    <insert id="insertIgnoreProcessTaskStepConfigList"
+            parameterType="neatlogic.framework.process.dto.ProcessTaskStepConfigVo">
+        insert ignore INTO `processtask_step_config` (`hash`, `config`)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.hash}, #{item.config})
+        </foreach>
+    </insert>
+
     <insert id="insertIgnoreProcessTaskConfig" parameterType="neatlogic.framework.process.dto.ProcessTaskConfigVo">
         INSERT IGNORE INTO `processtask_config` (`hash`, `config`)
         VALUES (#{hash}, #{config})
@@ -3398,26 +3482,6 @@
                 #{uuid},
                 #{fcu},
                 NOW(3))
-    </insert>
-
-    <!--<insert id="insertIgnoreProcessTaskStepNotifyPolicyConfig"
-            parameterType="neatlogic.framework.process.dto.ProcessTaskStepNotifyPolicyVo">
-        INSERT IGNORE INTO `processtask_step_notify_policy_config` (`hash`, `config`)
-        VALUES (#{policyConfigHash}, #{policyConfig})
-    </insert>-->
-
-    <insert id="insertProcessTaskStepNotifyPolicy"
-            parameterType="neatlogic.framework.process.dto.ProcessTaskStepNotifyPolicyVo">
-        INSERT INTO `processtask_step_notify_policy` (`processtask_step_id`,
-                                                      `policy_id`,
-                                                      `policy_name`,
-                                                      `policy_handler`,
-                                                      `policy_config_hash`)
-        VALUES (#{processTaskStepId},
-                #{policyId},
-                #{policyName},
-                #{policyHandler},
-                #{policyConfigHash})
     </insert>
 
     <insert id="replaceProcessTaskOldFormProp">
@@ -3558,6 +3622,18 @@
         VALUES (#{processTaskId},
                 #{processTaskStepId},
                 #{tagId})
+    </insert>
+
+    <insert id="insertProcessTaskStepTagList" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTagVo">
+        INSERT INTO `processtask_step_tag` (`processtask_id`,
+                                            `processtask_step_id`,
+                                            `tag_id`)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.processTaskId},
+            #{item.processTaskStepId},
+            #{item.tagId})
+        </foreach>
     </insert>
 
     <insert id="replaceProcessTaskRepeatList" parameterType="neatlogic.framework.process.dto.ProcessTaskRepeatVo">
@@ -3931,7 +4007,7 @@
     </delete>
 
     <delete id="deleteProcessTaskStepByProcessTaskId" parameterType="java.lang.Long">
-        DELETE ps,psa,psau,psaud,psc,psnp,psd,psf,psr,psrl,pss,pst,psu,psw,pswp
+        DELETE ps,psa,psau,psaud,psc,psd,psf,psr,psrl,pss,pst,psu,psw,pswp
         FROM `processtask_step` ps
                  LEFT JOIN
              `processtask_step_agent` psa
@@ -3941,7 +4017,6 @@
                  LEFT JOIN `processtask_step_audit_detail` psaud ON psau.id = psaud.audit_id
                  LEFT JOIN `processtask_step_content` psc ON psc.`processtask_id` =
                                                              ps.`processtask_id` AND psc.`processtask_step_id` = ps.id
-                 LEFT JOIN `processtask_step_notify_policy` psnp ON psnp.`processtask_step_id` = ps.id
                  LEFT JOIN `processtask_step_data` psd
                            ON psd.`processtask_id` = ps.`processtask_id` AND psd.`processtask_step_id` =
                                                                              ps.id
