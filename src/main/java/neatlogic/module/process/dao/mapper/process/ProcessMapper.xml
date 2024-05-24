@@ -441,6 +441,15 @@
 		SELECT `tag_id` FROM `process_step_tag` WHERE `process_step_uuid` = #{value}
 	</select>
 
+	<select id="getProcessStepTagListByProcessUuid" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.ProcessStepTagVo">
+		SELECT
+		    `process_uuid` AS processUuid,
+			`process_step_uuid` AS processStepUuid,
+			`tag_id` AS tagId
+		FROM `process_step_tag`
+		WHERE `process_uuid` = #{value}
+	</select>
+
 	<insert id="insertProcessSla" parameterType="neatlogic.framework.process.dto.ProcessSlaVo">
 		INSERT INTO `process_sla` (
 		`uuid`,

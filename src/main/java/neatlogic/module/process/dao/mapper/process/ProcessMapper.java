@@ -94,6 +94,8 @@ public interface ProcessMapper extends IProcessCrossoverMapper {
 
     List<Long> getProcessStepTagIdListByProcessStepUuid(String processStepUuid);
 
+    List<ProcessStepTagVo> getProcessStepTagListByProcessUuid(String processUuid);
+
     int insertProcess(ProcessVo processVo);
 
     int insertProcessStep(ProcessStepVo processStepVo);

@@ -76,7 +76,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
     @Resource
     ProcessTaskService processTaskService;
     @Resource
-    ProcessTaskAgentServiceImpl processTaskAgentServiceImpl;
+    ProcessTaskAgentService processTaskAgentService;
     @Resource
     private FileMapper fileMapper;
 
@@ -713,7 +713,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                 return 1;
             }
         }
-        List<String> fromUuidList = processTaskAgentServiceImpl.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), processTaskVo.getChannelUuid());
+        List<String> fromUuidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), processTaskVo.getChannelUuid());
         if (fromUuidList.contains(stepTaskUserUuid)) {
             return 1;
         }
