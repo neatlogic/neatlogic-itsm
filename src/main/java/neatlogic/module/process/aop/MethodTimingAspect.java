@@ -18,6 +18,7 @@
 package neatlogic.module.process.aop;
 
 import com.alibaba.fastjson.JSON;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.util.UuidUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -66,6 +67,9 @@ public class MethodTimingAspect {
     }
 
     private Object log(ProceedingJoinPoint joinPoint) throws Throwable {
+        if (!Config.ENABLE_METHOD_TIMING_ASPECT()) {
+            return joinPoint.proceed();
+        }
         String uuid = UuidUtil.randomUuid();
         Instant start = Instant.now();
         Object[] args = joinPoint.getArgs();
