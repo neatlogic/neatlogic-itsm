@@ -191,8 +191,6 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     List<ProcessTaskStepVo> getProcessTaskStepListByIdList(List<Long> processTaskStepIdList);
 
-//    ProcessTaskStepNotifyPolicyVo getProcessTaskStepNotifyPolicy(ProcessTaskStepNotifyPolicyVo processTaskStepNotifyPolicyVo);
-
     Map<String, String> getProcessTaskOldFormAndPropByTaskId(Long processTaskId);
 
     List<Map<String, Object>> getWorkloadByTeamUuid(String teamUuid);
@@ -385,6 +383,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     int insertProcessTaskStep(ProcessTaskStepVo processTaskStepVo);
 
+    int insertProcessTaskStepList(List<ProcessTaskStepVo> processTaskStepList);
+
     int replaceProcessTaskStep(ProcessTaskStepVo processTaskStepVo);
 
     int insertProcessTaskStepUser(ProcessTaskStepUserVo processTaskStepUserVo);
@@ -393,7 +393,11 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     int insertProcessTaskStepWorkerPolicy(ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo);
 
+    int insertProcessTaskStepWorkerPolicyList(List<ProcessTaskStepWorkerPolicyVo> processTaskStepWorkerPolicyList);
+
     int insertProcessTaskStepRel(ProcessTaskStepRelVo processTaskStepRelVo);
+
+    int insertProcessTaskStepRelList(List<ProcessTaskStepRelVo> processTaskStepRelList);
 
     int insertProcessTaskStepContent(ProcessTaskStepContentVo processTaskStepContentVo);
 
@@ -417,20 +421,23 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     int insertIgnoreProcessTaskStepConfig(ProcessTaskStepConfigVo processTaskStepConfigVo);
 
-//    int insertProcessTaskStepFormAttribute(
-//            ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo);
+    int insertIgnoreProcessTaskStepConfigList(List<ProcessTaskStepConfigVo> processTaskStepConfigList);
 
     int insertProcessTaskFormAttribute(ProcessTaskFormAttributeDataVo processTaskFromAttributeDataVo);
 
+    int insertProcessTaskFormAttributeList(List<ProcessTaskFormAttributeDataVo> processTaskFromAttributeDataList);
+
     int insertProcessTaskExtendFormAttribute(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo);
+
+    int insertProcessTaskExtendFormAttributeList(List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList);
 
     int insertProcessTaskStepFile(ProcessTaskStepFileVo processTaskStepFileVo);
 
     int insertProcessTaskAssignWorker(ProcessTaskAssignWorkerVo processTaskAssignWorkerVo);
 
-//    int insertIgnoreProcessTaskStepNotifyPolicyConfig(ProcessTaskStepNotifyPolicyVo processTaskStepNotifyPolicyVo);
+//    int insertProcessTaskStepNotifyPolicy(ProcessTaskStepNotifyPolicyVo processTaskStepNotifyPolicyVo);
 
-    int insertProcessTaskStepNotifyPolicy(ProcessTaskStepNotifyPolicyVo processTaskStepNotifyPolicyVo);
+//    int insertProcessTaskStepNotifyPolicyList(List<ProcessTaskStepNotifyPolicyVo> processTaskStepNotifyPolicyList);
 
     int insertProcessTaskTransferReport(ProcessTaskTransferReportVo processTaskTransferReportVo);
 
@@ -454,6 +461,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
     int insertProcessTaskStepInOperation(ProcessTaskStepInOperationVo processTaskStepInOperationVo);
 
     int insertProcessTaskStepTag(ProcessTaskStepTagVo processTaskStepTagVo);
+
+    int insertProcessTaskStepTagList(List<ProcessTaskStepTagVo> processTaskStepTagList);
 
     int replaceProcessTaskRepeatList(List<ProcessTaskRepeatVo> processTaskRepeatList);
 
