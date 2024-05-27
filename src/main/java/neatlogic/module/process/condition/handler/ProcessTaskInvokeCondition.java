@@ -93,7 +93,7 @@ public class ProcessTaskInvokeCondition extends ProcessTaskConditionBase impleme
             List<String> textList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(valueList)) {
                 for (String valueStr : valueList) {
-                    IProcessTaskSource processTaskSource = ProcessTaskSourceFactory.getHandler(value.toString());
+                    IProcessTaskSource processTaskSource = ProcessTaskSourceFactory.getHandler(valueStr);
                     if (processTaskSource != null) {
                         String text = processTaskSource.getText();
                         if (text != null) {
