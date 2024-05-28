@@ -1,26 +1,25 @@
 package neatlogic.module.process.api.processtask;
 
-import java.util.*;
-
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.dto.ProcessTaskStepInOperationVo;
+import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundEditTargetException;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.module.process.service.ProcessTaskService;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.*;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-
 import javax.annotation.Resource;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -88,6 +87,8 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 
 		List<ProcessTaskStepVo> processableStepList = processTaskService.getProcessableStepList(processTaskVo, jsonObj.getString("action"));
 		resultObj.put("tbodyList", processableStepList);
+		List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(Collections.singletonList(processTaskId));
+		resultObj.put("processTask", processTaskList.get(0));
 		return resultObj;
 	}
 
