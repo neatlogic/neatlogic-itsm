@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.ProcessTaskStatus;
 import neatlogic.framework.process.dto.ProcessTaskStepInOperationVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
@@ -20,6 +21,7 @@ import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -65,6 +67,10 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 		}
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("status", "ok");
+		if (Objects.equals(processTaskVo.getStatus(), ProcessTaskStatus.DRAFT.getValue())) {
+			resultObj.put("status", "running");
+			return resultObj;
+		}
 		List<ProcessTaskStepInOperationVo> processTaskStepInOperationList = processTaskMapper.getProcessTaskStepInOperationListByProcessTaskId(processTaskId);
 		if (CollectionUtils.isNotEmpty(processTaskStepInOperationList)) {
 			// 如果后台有正在异步处理中的步骤，则返回status=running，前端等待一定时间后再次请求
