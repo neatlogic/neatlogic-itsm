@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
 import neatlogic.framework.process.dto.ProcessTaskStepInOperationVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
@@ -18,10 +17,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -68,10 +65,10 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("processTaskStatus", processTaskVo.getStatus());
 		resultObj.put("status", "ok");
-		if (Objects.equals(processTaskVo.getStatus(), ProcessTaskStatus.DRAFT.getValue())) {
-			resultObj.put("status", "running");
-			return resultObj;
-		}
+//		if (Objects.equals(processTaskVo.getStatus(), ProcessTaskStatus.DRAFT.getValue())) {
+//			resultObj.put("status", "running");
+//			return resultObj;
+//		}
 		List<ProcessTaskStepInOperationVo> processTaskStepInOperationList = processTaskMapper.getProcessTaskStepInOperationListByProcessTaskId(processTaskId);
 		if (CollectionUtils.isNotEmpty(processTaskStepInOperationList)) {
 			// 如果后台有正在异步处理中的步骤，则返回status=running，前端等待一定时间后再次请求
@@ -94,8 +91,6 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 
 		List<ProcessTaskStepVo> processableStepList = processTaskService.getProcessableStepList(processTaskVo, jsonObj.getString("action"));
 		resultObj.put("tbodyList", processableStepList);
-		List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(Collections.singletonList(processTaskId));
-		resultObj.put("processTask", processTaskList.get(0));
 		return resultObj;
 	}
 
