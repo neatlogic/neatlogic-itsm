@@ -1,23 +1,30 @@
 package neatlogic.module.process.stephandler.utilhandler;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
-import neatlogic.framework.process.constvalue.*;
-import neatlogic.framework.process.dto.*;
+import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
+import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
+import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
+import neatlogic.framework.process.dto.ProcessStepTaskConfigVo;
+import neatlogic.framework.process.dto.ProcessStepVo;
+import neatlogic.framework.process.dto.ProcessStepWorkerPolicyVo;
+import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.processconfig.ActionConfigActionVo;
 import neatlogic.framework.process.dto.processconfig.ActionConfigVo;
-import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
 import neatlogic.framework.process.util.ProcessConfigUtil;
 import neatlogic.module.process.notify.handler.OmnipotentNotifyPolicyHandler;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase {
@@ -43,13 +50,13 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
     public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
         /** 组装通知策略id **/
         JSONObject notifyPolicyConfig = stepConfigObj.getJSONObject("notifyPolicyConfig");
-        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
+        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSON.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
         if (invokeNotifyPolicyConfigVo != null) {
             processStepVo.setNotifyPolicyConfig(invokeNotifyPolicyConfigVo);
         }
 
         JSONObject actionConfig = stepConfigObj.getJSONObject("actionConfig");
-        ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
+        ActionConfigVo actionConfigVo = JSON.toJavaObject(actionConfig, ActionConfigVo.class);
         if (actionConfigVo != null) {
             List<ActionConfigActionVo> actionList = actionConfigVo.getActionList();
             if (CollectionUtils.isNotEmpty(actionList)) {
@@ -97,8 +104,8 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
 
         //保存子任务
         JSONObject taskConfig = stepConfigObj.getJSONObject("taskConfig");
-        if(MapUtils.isNotEmpty(taskConfig)){
-            ProcessStepTaskConfigVo taskConfigVo = JSONObject.toJavaObject(taskConfig,ProcessStepTaskConfigVo.class);
+        if (MapUtils.isNotEmpty(taskConfig)) {
+            ProcessStepTaskConfigVo taskConfigVo = JSON.toJavaObject(taskConfig, ProcessStepTaskConfigVo.class);
             processStepVo.setTaskConfigVo(taskConfigVo);
         }
         // 保存表单场景
@@ -107,6 +114,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
             processStepVo.setFormSceneUuid(formSceneUuid);
         }
     }
+
 
     @Override
     public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
@@ -157,8 +165,17 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
 
         /* 任务 */
         JSONObject taskConfig = configObj.getJSONObject("taskConfig");
-        resultObj.put("taskConfig",taskConfig);
+        resultObj.put("taskConfig", taskConfig);
         return resultObj;
+    }
+
+    public ProcessTaskOperationType[] getStepActions() {
+        return new ProcessTaskOperationType[]{
+                ProcessTaskOperationType.STEP_VIEW,
+                ProcessTaskOperationType.STEP_TRANSFER,
+                ProcessTaskOperationType.STEP_PAUSE,
+                ProcessTaskOperationType.STEP_RETREAT
+        };
     }
 
     @Override
@@ -194,7 +211,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
 
         /** 动作 **/
         JSONObject actionConfig = configObj.getJSONObject("actionConfig");
-        ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
+        ActionConfigVo actionConfigVo = JSON.toJavaObject(actionConfig, ActionConfigVo.class);
         if (actionConfigVo == null) {
             actionConfigVo = new ActionConfigVo();
         }
@@ -230,7 +247,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
 
         /* 任务 */
         JSONObject taskConfig = configObj.getJSONObject("taskConfig");
-        resultObj.put("taskConfig",taskConfig);
+        resultObj.put("taskConfig", taskConfig);
 
         JSONObject simpleSettings = ProcessConfigUtil.regulateSimpleSettings(configObj);
         resultObj.putAll(simpleSettings);
