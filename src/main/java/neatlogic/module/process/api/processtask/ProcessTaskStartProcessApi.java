@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -17,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Collections;
-import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
@@ -85,9 +82,7 @@ public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
 //            throw new PermissionDeniedException();
 //        }
 		processTaskService.startProcessProcessTask(jsonObj);
-		Long processTaskId = jsonObj.getLong("processTaskId");
-		List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(Collections.singletonList(processTaskId));
-		return processTaskList.get(0);
+		return null;
 	}
 
 }
