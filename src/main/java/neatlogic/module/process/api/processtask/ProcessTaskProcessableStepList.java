@@ -66,6 +66,7 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 			throw new ProcessTaskNotFoundEditTargetException(processTaskId);
 		}
 		JSONObject resultObj = new JSONObject();
+		resultObj.put("processTaskStatus", processTaskVo.getStatus());
 		resultObj.put("status", "ok");
 		if (Objects.equals(processTaskVo.getStatus(), ProcessTaskStatus.DRAFT.getValue())) {
 			resultObj.put("status", "running");
