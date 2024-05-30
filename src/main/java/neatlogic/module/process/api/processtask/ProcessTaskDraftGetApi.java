@@ -45,10 +45,10 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
-import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.CatalogService;
 import neatlogic.module.process.service.ProcessTaskService;
@@ -297,7 +297,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             if (processStepUtilHandler == null) {
                 throw new ProcessStepUtilHandlerNotFoundException(parentProcessTaskStepVo.getHandler());
             }
-            Object parenStepInfoObj = processStepUtilHandler.getHandlerStepInitInfo(parentProcessTaskStepVo);
+            Object parenStepInfoObj = processStepUtilHandler.getNonStartStepInfo(parentProcessTaskStepVo);
             if (parenStepInfoObj != null) {
                 JSONObject parenStepInfo = (JSONObject) parenStepInfoObj;
                 JSONObject parentStepChannelFormMapping = parenStepInfo.getJSONObject("formMapping");
@@ -379,7 +379,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         if (startProcessStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(oldStartProcessTaskStepVo.getHandler());
         }
-        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInitInfo(oldStartProcessTaskStepVo));
+        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getNonStartStepInfo(oldStartProcessTaskStepVo));
         processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(copyProcessTaskId, processTaskVo.getFormConfig()));
         // 标签列表
         processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(copyProcessTaskId));

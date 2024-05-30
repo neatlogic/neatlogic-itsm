@@ -1,22 +1,21 @@
 package neatlogic.module.process.api.process;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.dto.ProcessStepHandlerVo;
 import neatlogic.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
-import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.OperationType;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.process.dto.ProcessStepHandlerVo;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import neatlogic.framework.restful.annotation.Description;
+import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -50,7 +49,7 @@ public class ProcessStepHandlerListApi extends PrivateApiComponentBase {
             if (processStepUtilHandler == null) {
                 throw new ProcessStepUtilHandlerNotFoundException(processStepHandlerVo.getHandler());
             }
-            processStepHandlerVo.setConfig(JSONObject.toJSONString(processStepUtilHandler.regulateProcessStepConfig(null)));
+            processStepHandlerVo.setConfig(JSON.toJSONString(processStepUtilHandler.regulateProcessStepConfig(null)));
         }
         return processStepHandlerVoList;
     }

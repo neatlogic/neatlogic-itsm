@@ -51,12 +51,12 @@ public class TimerProcessUtilHandler extends ProcessStepInternalHandlerBase {
     }
 
     @Override
-    public Object getHandlerStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
+    public Object getStartStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
         return null;
     }
 
     @Override
-    public Object getHandlerStepInitInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
+    public Object getNonStartStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
         JSONObject resultObj = new JSONObject();
         ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerByProcessTaskStepId(currentProcessTaskStepVo.getId());
         if (processTaskStepTimerVo != null) {

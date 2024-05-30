@@ -1,13 +1,11 @@
 package neatlogic.module.process.stephandler.utilhandler;
 
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONObject;
-
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.dto.ProcessStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
+import org.springframework.stereotype.Service;
 
 @Service
 public class DistributaryProcessUtilHandler extends ProcessStepInternalHandlerBase {
@@ -18,13 +16,13 @@ public class DistributaryProcessUtilHandler extends ProcessStepInternalHandlerBa
     }
 
     @Override
-    public Object getHandlerStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
+    public Object getStartStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Object getHandlerStepInitInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
+    public Object getNonStartStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
         // TODO Auto-generated method stub
         return null;
     }

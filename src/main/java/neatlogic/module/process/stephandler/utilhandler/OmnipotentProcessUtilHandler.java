@@ -35,13 +35,13 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
     }
 
     @Override
-    public Object getHandlerStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
+    public Object getStartStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Object getHandlerStepInitInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
+    public Object getNonStartStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
         // TODO Auto-generated method stub
         return null;
     }

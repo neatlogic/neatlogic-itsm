@@ -1458,7 +1458,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         if (processStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
         }
-        startProcessTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
+        startProcessTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getStartStepInfo(startProcessTaskStepVo));
         startProcessTaskStepVo.setReplaceableTextList(getReplaceableTextList(startProcessTaskStepVo));
         startProcessTaskStepVo.setCustomStatusList(getCustomStatusList(startProcessTaskStepVo));
         startProcessTaskStepVo.setCustomButtonList(getCustomButtonList(startProcessTaskStepVo));
@@ -1911,7 +1911,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         if (processStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }
-        processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
+        processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getNonStartStepInfo(processTaskStepVo));
         // 步骤评论列表
         List<String> typeList = new ArrayList<>();
         typeList.add(ProcessTaskOperationType.STEP_COMMENT.getValue());

@@ -1,16 +1,14 @@
 package neatlogic.module.process.stephandler.utilhandler;
 
-import neatlogic.framework.process.dto.processconfig.MoveonConfigVo;
 import com.alibaba.fastjson.JSONArray;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONObject;
-
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.dto.ProcessStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.dto.processconfig.MoveonConfigVo;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,13 +23,13 @@ public class ConditionProcessUtilHandler extends ProcessStepInternalHandlerBase 
 	}
 
 	@Override
-	public Object getHandlerStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
+	public Object getStartStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object getHandlerStepInitInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
+	public Object getNonStartStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
 		// TODO Auto-generated method stub
 		return null;
 	}

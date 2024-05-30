@@ -1,36 +1,36 @@
 package neatlogic.module.process.stephandler.utilhandler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
+import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
+import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
+import neatlogic.framework.process.dto.ProcessStepVo;
+import neatlogic.framework.process.dto.ProcessStepWorkerPolicyVo;
 import neatlogic.framework.process.dto.ProcessTaskStepDataVo;
-import neatlogic.framework.process.dto.processconfig.*;
+import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.dto.processconfig.AutomaticCallbackConfigVo;
+import neatlogic.framework.process.dto.processconfig.AutomaticIntervalCallbackConfigVo;
+import neatlogic.framework.process.dto.processconfig.AutomaticRequestConfigVo;
+import neatlogic.framework.process.dto.processconfig.AutomaticTimeWindowConfigVo;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
+import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
 import neatlogic.framework.process.util.ProcessConfigUtil;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
 import neatlogic.module.process.notify.handler.AutomaticNotifyPolicyHandler;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
-import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.dto.ProcessStepVo;
-import neatlogic.framework.process.dto.ProcessStepWorkerPolicyVo;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
-
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase {
@@ -43,13 +43,13 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
     }
 
     @Override
-    public Object getHandlerStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
+    public Object getStartStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Object getHandlerStepInitInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
+    public Object getNonStartStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
         ProcessTaskStepDataVo stepDataVo = processTaskStepDataMapper
                 .getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),
                         currentProcessTaskStepVo.getId(), currentProcessTaskStepVo.getHandler(), SystemUser.SYSTEM.getUserUuid()));
