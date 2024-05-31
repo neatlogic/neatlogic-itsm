@@ -3553,6 +3553,10 @@
                 #{fcu},
                 NOW(3),
                 #{contentHash})
+        ON DUPLICATE KEY UPDATE
+            `content_hash` = #{contentHash},
+            `fcu` = #{fcu},
+            `fcd` = NOW(3)
     </insert>
 
     <insert id="insertProcessTaskScoreTemplate"
