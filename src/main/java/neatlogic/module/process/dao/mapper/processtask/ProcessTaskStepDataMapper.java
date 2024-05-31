@@ -19,15 +19,20 @@ package neatlogic.module.process.dao.mapper.processtask;
 
 import neatlogic.framework.process.crossover.IProcessTaskStepDataCrossoverMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepDataVo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface ProcessTaskStepDataMapper extends IProcessTaskStepDataCrossoverMapper {
-	ProcessTaskStepDataVo getProcessTaskStepData(ProcessTaskStepDataVo processTaskStepDataVo);
+    List<ProcessTaskStepDataVo> getProcessTaskStepDataByProcessTaskIdAndStepId(@Param("processTaskId") Long processTaskId, @Param("processTaskStepId") Long stepId);
+
+    ProcessTaskStepDataVo getProcessTaskStepData(ProcessTaskStepDataVo processTaskStepDataVo);
 
 //	List<ProcessTaskStepDataVo> searchProcessTaskStepData(ProcessTaskStepDataVo processTaskStepDataVo);
 
-	int replaceProcessTaskStepData(ProcessTaskStepDataVo processTaskStepDataVo);
+    int replaceProcessTaskStepData(ProcessTaskStepDataVo processTaskStepDataVo);
 
-	int deleteProcessTaskStepData(ProcessTaskStepDataVo processTaskStepDataVo);
+    int deleteProcessTaskStepData(ProcessTaskStepDataVo processTaskStepDataVo);
 
-	int deleteProcessTaskStepDataById(Long id);
+    int deleteProcessTaskStepDataById(Long id);
 }

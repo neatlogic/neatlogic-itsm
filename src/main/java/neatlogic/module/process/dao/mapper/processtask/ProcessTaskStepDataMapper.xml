@@ -18,6 +18,19 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper">
+    <select id="getProcessTaskStepDataByProcessTaskIdAndStepId"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepDataVo">
+        SELECT `id`,
+               `processtask_id`      as processTaskId,
+               `processtask_step_id` as processTaskStepId,
+               `data`,
+               `type`,
+               `fcu`
+        FROM `processtask_step_data`
+        where `processtask_id` = #{processTaskId}
+          AND `processtask_step_id` = #{processTaskStepId}
+    </select>
+
     <select id="getProcessTaskStepData" parameterType="neatlogic.framework.process.dto.ProcessTaskStepDataVo"
             resultType="neatlogic.framework.process.dto.ProcessTaskStepDataVo">
         SELECT
