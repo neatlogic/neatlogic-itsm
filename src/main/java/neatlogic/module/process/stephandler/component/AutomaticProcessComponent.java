@@ -58,7 +58,7 @@ import java.util.Set;
 
 @Service
 public class AutomaticProcessComponent extends ProcessStepHandlerBase {
-    private Logger logger = LoggerFactory.getLogger(AutomaticProcessComponent.class);
+    private final Logger logger = LoggerFactory.getLogger(AutomaticProcessComponent.class);
     // 激活自动处理步骤时，如果在时间窗口内，在`processtask_step_in_operation`表中插入一条数据，标识该步骤正在后台处理中，有效时长3秒
     private final long EXPIRETIME = 3000;
 
@@ -88,7 +88,6 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
         return ProcessStepMode.MT;
     }
 
-    @SuppressWarnings("serial")
     @Override
     public JSONObject getChartConfig() {
         return new JSONObject() {
@@ -220,7 +219,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 //    }
 //
 //
-//    /**
+//    /*
 //     * automatic 第一次请求
 //     *
 //     * @param automaticConfig
@@ -330,7 +329,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
         if(StringUtils.isNotBlank(currentProcessTaskStepVo.getError())) {
             currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CAUSE.getParamName(), currentProcessTaskStepVo.getError());
         }
-        /** 处理历史记录 **/
+        /* 处理历史记录 **/
         String action = currentProcessTaskStepVo.getParamObj().getString("action");
         processStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
         return 0;

@@ -1,13 +1,12 @@
 package neatlogic.module.process.api.processtask;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.ProcessTaskStepDataType;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepDataVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
@@ -18,8 +17,9 @@ import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFa
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
 import neatlogic.module.process.service.ProcessTaskService;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,9 +87,10 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
         processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
         processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
         processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
-        processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
+        //processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
         processTaskStepDataVo.setData(jsonObj.toJSONString());
         processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
+        handler.saveData(processTaskStepDataVo);
         return null;
     }
 
