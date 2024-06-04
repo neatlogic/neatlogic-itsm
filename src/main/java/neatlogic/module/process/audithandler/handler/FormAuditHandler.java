@@ -116,6 +116,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
             }
             ProcessTaskAuditFormAttributeDataVo auditFormAttributeDataVo = new ProcessTaskAuditFormAttributeDataVo();
             auditFormAttributeDataVo.setAttributeUuid(attributeUuid);
+            auditFormAttributeDataVo.setAttributeKey(formAttributeVo.getKey());
             auditFormAttributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
             auditFormAttributeDataVo.setHandler(formAttributeVo.getHandler());
             auditFormAttributeDataList.add(auditFormAttributeDataVo);

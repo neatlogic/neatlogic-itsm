@@ -99,6 +99,7 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
                 attributeDataVo.setAttributeUuid(formAttribute.getUuid());
                 attributeDataVo.setHandler(formAttribute.getHandler());
             }
+            attributeDataVo.setAttributeKey(formAttribute.getKey());
             attributeDataVo.setAttributeLabel(formAttribute.getLabel());
             IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttribute.getHandler());
             if (handler != null) {

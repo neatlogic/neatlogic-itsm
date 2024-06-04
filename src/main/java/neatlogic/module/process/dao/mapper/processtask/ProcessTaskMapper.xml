@@ -324,7 +324,7 @@
                a.`form_uuid`       AS formUuid,
                a.`handler`,
                a.`attribute_label` AS attributeLabel,
-               b.`attribute_key` AS attributeKey,
+               a.`attribute_key` AS attributeKey,
                a.`attribute_uuid`  AS attributeUuid,
                a.`data`
         FROM `form_attribute_data` a
