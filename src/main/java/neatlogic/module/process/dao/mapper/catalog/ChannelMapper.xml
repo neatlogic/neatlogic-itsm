@@ -645,6 +645,7 @@
         SELECT fa.`form_uuid`        AS formUuid,
                fa.`formversion_uuid` AS formversionUuid,
                fa.`uuid`,
+               fa.`key`,
                fa.`label`,
                fa.`type`,
                fa.`handler`

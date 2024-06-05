@@ -965,6 +965,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 }
                 formAttributeDataVo.setProcessTaskId(processTaskId);
                 formAttributeDataVo.setAttributeUuid(attributeUuid);
+                formAttributeDataVo.setAttributeKey(formAttributeVo.getKey());
                 formAttributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                 formAttributeDataVo.setHandler(formAttributeVo.getHandler());
                 formAttributeDataVo.setDataObj(data);
@@ -1036,6 +1037,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 processTaskExtendFormAttributeDataVo.setHandler(formAttributeVo.getHandler());
                 processTaskExtendFormAttributeDataVo.setTag(tag);
                 processTaskExtendFormAttributeDataVo.setAttributeUuid(formAttributeVo.getUuid());
+                processTaskExtendFormAttributeDataVo.setAttributeKey(formAttributeVo.getKey());
                 processTaskExtendFormAttributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                 processTaskExtendFormAttributeDataVo.setData(dataList);
 //                formMapper.insertFormExtendAttributeData(processTaskExtendFormAttributeDataVo);

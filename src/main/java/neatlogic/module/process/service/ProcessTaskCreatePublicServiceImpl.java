@@ -155,7 +155,8 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                 if (MapUtils.isNotEmpty(formAttributeData)) {
                     String attributeUuid = formAttributeData.getString("attributeUuid");
                     String label = formAttributeData.getString("label");
-                    if (StringUtils.isBlank(attributeUuid) && StringUtils.isNotBlank(label)) {
+                    String key = formAttributeData.getString("key");
+                    if (StringUtils.isBlank(attributeUuid) && (StringUtils.isNotBlank(label) || StringUtils.isNotBlank(key))) {
                         count++;
                     }
                 }
@@ -180,18 +181,29 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                         dataTypeNotArrayHandlerList.add(FormHandler.FORMTREESELECT.getHandler());
                         dataTypeNotArrayHandlerList.add(neatlogic.framework.cmdb.enums.FormHandler.FORMPROTOCOL.getHandler());
                         Map<String, FormAttributeVo> labelAttributeMap = new HashMap<>();
+                        Map<String, FormAttributeVo> keyAttributeMap = new HashMap<>();
                         for (FormAttributeVo formAttributeVo : formAttributeVoList) {
                             labelAttributeMap.put(formAttributeVo.getLabel(), formAttributeVo);
+                            keyAttributeMap.put(formAttributeVo.getKey(), formAttributeVo);
                         }
                         for (int i = 0; i < formAttributeDataList.size(); i++) {
                             JSONObject formAttributeData = formAttributeDataList.getJSONObject(i);
                             if (MapUtils.isNotEmpty(formAttributeData)) {
                                 String attributeUuid = formAttributeData.getString("attributeUuid");
                                 String label = formAttributeData.getString("label");
-                                if (StringUtils.isBlank(attributeUuid) && StringUtils.isNotBlank(label)) {
-                                    FormAttributeVo formAttributeVo = labelAttributeMap.get(label);
-                                    if (formAttributeVo == null) {
-                                        throw new FormAttributeNotFoundException(label);
+                                String key = formAttributeData.getString("key");
+                                if (StringUtils.isBlank(attributeUuid) && (StringUtils.isNotBlank(label) || StringUtils.isNotBlank(key))) {
+                                    FormAttributeVo formAttributeVo = null;
+                                    if (StringUtils.isNotBlank(key)) {
+                                        formAttributeVo = keyAttributeMap.get(key);
+                                        if (formAttributeVo == null) {
+                                            throw new FormAttributeNotFoundException(key);
+                                        }
+                                    } else if (StringUtils.isNotBlank(label)) {
+                                        formAttributeVo = labelAttributeMap.get(label);
+                                        if (formAttributeVo == null) {
+                                            throw new FormAttributeNotFoundException(label);
+                                        }
                                     }
                                     FormHandlerBase formAttributeHandler = (FormHandlerBase) FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                                     if (formAttributeHandler == null) {
@@ -212,6 +224,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                                                 } else {
                                                     AttributeDataVo attributeDataVo = new AttributeDataVo();
                                                     attributeDataVo.setAttributeUuid(formAttributeVo.getUuid());
+                                                    attributeDataVo.setAttributeKey(formAttributeVo.getKey());
                                                     attributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                                                     attributeDataVo.setDataObj(data);
                                                     JSONArray textList = (JSONArray) formAttributeHandler.valueConversionText(attributeDataVo, config);
@@ -237,6 +250,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                                             } else {
                                                 AttributeDataVo attributeDataVo = new AttributeDataVo();
                                                 attributeDataVo.setAttributeUuid(formAttributeVo.getUuid());
+                                                attributeDataVo.setAttributeKey(formAttributeVo.getKey());
                                                 attributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                                                 attributeDataVo.setDataObj(data);
                                                 JSONArray textList = (JSONArray) formAttributeHandler.valueConversionText(attributeDataVo, config);
@@ -259,6 +273,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                                         } else {
                                             AttributeDataVo attributeDataVo = new AttributeDataVo();
                                             attributeDataVo.setAttributeUuid(formAttributeVo.getUuid());
+                                            attributeDataVo.setAttributeKey(formAttributeVo.getKey());
                                             attributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                                             attributeDataVo.setDataObj(data);
                                             JSONArray textList = (JSONArray) formAttributeHandler.valueConversionText(attributeDataVo, config);
@@ -278,6 +293,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                                             } else {
                                                 AttributeDataVo attributeDataVo = new AttributeDataVo();
                                                 attributeDataVo.setAttributeUuid(formAttributeVo.getUuid());
+                                                attributeDataVo.setAttributeKey(formAttributeVo.getKey());
                                                 attributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                                                 attributeDataVo.setDataObj(data);
                                                 JSONArray textList = (JSONArray) formAttributeHandler.valueConversionText(attributeDataVo, config);
