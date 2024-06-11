@@ -887,6 +887,15 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         for (int i = 0; i < formAttributeDataList.size(); i++) {
             JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
             String attributeUuid = formAttributeDataObj.getString("attributeUuid");
+            if (StringUtils.isBlank(attributeUuid)) {
+                String attributeKey = formAttributeDataObj.getString("key");
+                if (StringUtils.isNotBlank(attributeKey)) {
+                    Optional<FormAttributeVo> first = mainSceneFormAttributeList.stream().filter(e -> Objects.equals(e.getKey(), attributeKey)).findFirst();
+                    if (first.isPresent()) {
+                        attributeUuid = first.get().getUuid();
+                    }
+                }
+            }
             Object data = formAttributeDataObj.get("dataList");
             formAttributeDataMap.put(attributeUuid, data);
         }

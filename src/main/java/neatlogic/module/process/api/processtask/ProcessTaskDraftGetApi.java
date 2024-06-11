@@ -202,6 +202,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         JSONObject fromProcessTaskFormAttrDataMap = getFromFormAttributeDataMap(fromProcessTaskId);
         JSONObject labelUuidMap = fromProcessTaskFormAttrDataMap.getJSONObject("labelUuidMap");
         JSONObject labelHandlerMap = fromProcessTaskFormAttrDataMap.getJSONObject("labelHandlerMap");
+        JSONObject keyUuidMap = fromProcessTaskFormAttrDataMap.getJSONObject("keyUuidMap");
+        JSONObject keyHandlerMap = fromProcessTaskFormAttrDataMap.getJSONObject("keyHandlerMap");
         JSONObject formAttributeDataMap = fromProcessTaskFormAttrDataMap.getJSONObject("formAttributeDataMap");
         //获取目标表单值
         FormVersionVo toFormVersion = new FormVersionVo();
@@ -209,13 +211,24 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         String mainSceneUuid = toProcessTaskFormConfig.getString("uuid");
         toFormVersion.setSceneUuid(mainSceneUuid);
         for (FormAttributeVo formAttributeVo : toFormVersion.getFormAttributeList()) {
-            String fromFormAttributeHandler = labelHandlerMap.getString(formAttributeVo.getLabel());
+            String fromFormAttributeHandler = keyHandlerMap.getString(formAttributeVo.getKey());
             if (Objects.equals(fromFormAttributeHandler, formAttributeVo.getHandler())) {
-                String fromFormAttributeUuid = labelUuidMap.getString(formAttributeVo.getLabel());
+                String fromFormAttributeUuid = keyUuidMap.getString(formAttributeVo.getKey());
                 if (StringUtils.isNotBlank(fromFormAttributeUuid)) {
                     Object data = formAttributeDataMap.get(fromFormAttributeUuid);
                     if (data != null) {
                         resultObj.put(formAttributeVo.getUuid(), data);
+                    }
+                }
+            } else {
+                fromFormAttributeHandler = labelHandlerMap.getString(formAttributeVo.getLabel());
+                if (Objects.equals(fromFormAttributeHandler, formAttributeVo.getHandler())) {
+                    String fromFormAttributeUuid = labelUuidMap.getString(formAttributeVo.getLabel());
+                    if (StringUtils.isNotBlank(fromFormAttributeUuid)) {
+                        Object data = formAttributeDataMap.get(fromFormAttributeUuid);
+                        if (data != null) {
+                            resultObj.put(formAttributeVo.getUuid(), data);
+                        }
                     }
                 }
             }
@@ -239,6 +252,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             if (StringUtils.isNotBlank(formContent)) {
                 Map<String, String> labelUuidMap = new HashMap<>();
                 Map<String, String> labelHandlerMap = new HashMap<>();
+                Map<String, String> keyUuidMap = new HashMap<>();
+                Map<String, String> keyHandlerMap = new HashMap<>();
                 JSONObject formConfig = JSON.parseObject(formContent);
                 FormVersionVo fromFormVersion = new FormVersionVo();
                 fromFormVersion.setFormConfig(formConfig);
@@ -248,6 +263,10 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                 for (FormAttributeVo formAttributeVo : fromFormAttributeList) {
                     labelUuidMap.put(formAttributeVo.getLabel(), formAttributeVo.getUuid());
                     labelHandlerMap.put(formAttributeVo.getLabel(), formAttributeVo.getHandler());
+                    if (StringUtils.isNotBlank(formAttributeVo.getKey())) {
+                        keyUuidMap.put(formAttributeVo.getKey(), formAttributeVo.getUuid());
+                        keyHandlerMap.put(formAttributeVo.getKey(), formAttributeVo.getHandler());
+                    }
                 }
                 Map<String, Object> formAttributeDataMap = new HashMap<>();
                 List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(fromProcessTaskId);
@@ -256,6 +275,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                 }
                 resultObj.put("labelUuidMap", labelUuidMap);
                 resultObj.put("labelHandlerMap", labelHandlerMap);
+                resultObj.put("keyUuidMap", keyUuidMap);
+                resultObj.put("keyHandlerMap", keyHandlerMap);
                 resultObj.put("formAttributeDataMap", formAttributeDataMap);
             }
         }
