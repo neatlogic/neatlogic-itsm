@@ -126,7 +126,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             }
             BatchRunner<ProcessTaskVo> runner = new BatchRunner<>();
             List<JSONObject> finalDataList = dataList;
-            runner.execute(processTaskVoList, 3, processTaskVo -> {
+            runner.execute(processTaskVoList, 3, (threadIndex, dataIndex, processTaskVo) -> {
                 JSONObject taskJson = new JSONObject();
                 if (Objects.equals(processTaskVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())) {
                     processTaskVo.setStepList(processTaskMapper.getProcessTaskCurrentStepByProcessTaskId(processTaskVo.getId()));
@@ -194,7 +194,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         JSONObject operationJson = new JSONObject();
         Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
         BatchRunner<Long> runner = new BatchRunner<>();
-        runner.execute(processTaskIdList, 3, processtaskId -> {
+        runner.execute(processTaskIdList, 3, (threadIndex, dataIndex, processtaskId) -> {
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskAndStepById(processtaskId);
             JSONObject taskJson = null;
             if (processTaskVo != null) {

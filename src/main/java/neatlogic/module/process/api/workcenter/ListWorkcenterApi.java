@@ -29,13 +29,13 @@ import neatlogic.framework.process.auth.WORKCENTER_MODIFY;
 import neatlogic.framework.process.auth.WORKCENTER_NEW_TYPE;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterInitType;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterType;
-import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.framework.process.workcenter.dto.WorkcenterUserProfileVo;
 import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.service.AuthenticationInfoService;
+import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.module.process.service.NewWorkcenterService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -110,7 +110,7 @@ public class ListWorkcenterApi extends PrivateApiComponentBase {
                 }
             }
             BatchRunner<WorkcenterVo> runner = new BatchRunner<>();
-            runner.execute(workcenterList, 3, workcenter -> {
+            runner.execute(workcenterList, 3, (threadIndex, dataIndex, workcenter) -> {
                 if (workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
                     workcenter.setIsCanEdit(0);
                     if (Arrays.asList(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getValue(), ProcessWorkcenterInitType.PROCESSING_OF_MINE_PROCESSTASK.getValue()).contains(workcenter.getUuid()) && isWorkcenterManager) {
