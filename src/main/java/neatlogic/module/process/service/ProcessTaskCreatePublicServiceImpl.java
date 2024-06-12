@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.asynchronization.threadpool.CachedThreadPool;
-import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.AuthenticationInfoVo;
@@ -18,16 +17,12 @@ import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
 import neatlogic.framework.form.attribute.core.FormHandlerBase;
 import neatlogic.framework.form.constvalue.FormHandler;
 import neatlogic.framework.form.dao.mapper.FormMapper;
-import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormAttributeHandlerNotFoundException;
 import neatlogic.framework.form.exception.FormAttributeNotFoundException;
 import neatlogic.framework.process.constvalue.ProcessFlowDirection;
 import neatlogic.framework.process.crossover.IProcessTaskCreatePublicCrossoverService;
-import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
-import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.process.dto.PriorityVo;
 import neatlogic.framework.process.dto.ProcessFormVo;
@@ -38,7 +33,10 @@ import neatlogic.framework.process.exception.processtask.ProcessTaskNextStepIlle
 import neatlogic.framework.process.exception.processtask.ProcessTaskNextStepOverOneException;
 import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.framework.util.SnowflakeUtil;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -213,146 +211,13 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                                     formAttributeData.put("attributeUuid", formAttributeVo.getUuid());
                                     formAttributeData.put("handler", formAttributeVo.getHandler());
                                     Object dataObj = formAttributeData.get("dataList");
-                                    if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMSELECT.getHandler())) {
-                                        boolean isMultiple = config.getBooleanValue("isMultiple");
-                                        if (isMultiple) {
-                                            JSONArray dataList = new JSONArray();
-                                            for (Object data : (List) dataObj) {
-                                                Object value = formAttributeHandler.textConversionValue(data, config);
-                                                if (value != null) {
-                                                    dataList.addAll((JSONArray) value);
-                                                } else {
-                                                    AttributeDataVo attributeDataVo = new AttributeDataVo();
-                                                    attributeDataVo.setAttributeUuid(formAttributeVo.getUuid());
-                                                    attributeDataVo.setAttributeKey(formAttributeVo.getKey());
-                                                    attributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
-                                                    attributeDataVo.setDataObj(data);
-                                                    JSONArray textList = (JSONArray) formAttributeHandler.valueConversionText(attributeDataVo, config);
-                                                    if (CollectionUtils.isNotEmpty(textList) && !Objects.equals(textList.get(0), data)) {
-                                                        JSONObject jsonObj = new JSONObject();
-                                                        jsonObj.put("value", data);
-                                                        jsonObj.put("text", textList.get(0));
-                                                        dataList.add(jsonObj);
-                                                    }
-                                                }
-                                            }
-                                            if (CollectionUtils.isNotEmpty(dataList)) {
-                                                formAttributeData.put("dataList", dataList);
-                                            }
-                                        } else {
-                                            Object data = dataObj;
-                                            if (dataObj instanceof List) {
-                                                data = ((List) dataObj).get(0);
-                                            }
-                                            Object value = formAttributeHandler.textConversionValue(data, config);
-                                            if (value != null) {
-                                                formAttributeData.put("dataList", value);
-                                            } else {
-                                                AttributeDataVo attributeDataVo = new AttributeDataVo();
-                                                attributeDataVo.setAttributeUuid(formAttributeVo.getUuid());
-                                                attributeDataVo.setAttributeKey(formAttributeVo.getKey());
-                                                attributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
-                                                attributeDataVo.setDataObj(data);
-                                                JSONArray textList = (JSONArray) formAttributeHandler.valueConversionText(attributeDataVo, config);
-                                                if (CollectionUtils.isNotEmpty(textList) && !Objects.equals(textList.get(0), data)) {
-                                                    JSONObject jsonObj = new JSONObject();
-                                                    jsonObj.put("value", data);
-                                                    jsonObj.put("text", textList.get(0));
-                                                    formAttributeData.put("dataList", jsonObj);
-                                                }
-                                            }
-                                        }
-                                    } else if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMRADIO.getHandler())) {
-                                        Object data = dataObj;
-                                        if (dataObj instanceof List) {
-                                            data = ((List) dataObj).get(0);
-                                        }
-                                        Object value = formAttributeHandler.textConversionValue(data, config);
-                                        if (value != null) {
-                                            formAttributeData.put("dataList", value);
-                                        } else {
-                                            AttributeDataVo attributeDataVo = new AttributeDataVo();
-                                            attributeDataVo.setAttributeUuid(formAttributeVo.getUuid());
-                                            attributeDataVo.setAttributeKey(formAttributeVo.getKey());
-                                            attributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
-                                            attributeDataVo.setDataObj(data);
-                                            JSONArray textList = (JSONArray) formAttributeHandler.valueConversionText(attributeDataVo, config);
-                                            if (CollectionUtils.isNotEmpty(textList) && !Objects.equals(textList.get(0), data)) {
-                                                JSONObject jsonObj = new JSONObject();
-                                                jsonObj.put("value", data);
-                                                jsonObj.put("text", textList.get(0));
-                                                formAttributeData.put("dataList", jsonObj);
-                                            }
-                                        }
-                                    } else if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMCHECKBOX.getHandler())) {
-                                        JSONArray dataList = new JSONArray();
-                                        for (Object data : (List) dataObj) {
-                                            Object value = formAttributeHandler.textConversionValue(data, config);
-                                            if (value != null) {
-                                                dataList.addAll((JSONArray) value);
-                                            } else {
-                                                AttributeDataVo attributeDataVo = new AttributeDataVo();
-                                                attributeDataVo.setAttributeUuid(formAttributeVo.getUuid());
-                                                attributeDataVo.setAttributeKey(formAttributeVo.getKey());
-                                                attributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
-                                                attributeDataVo.setDataObj(data);
-                                                JSONArray textList = (JSONArray) formAttributeHandler.valueConversionText(attributeDataVo, config);
-                                                if (CollectionUtils.isNotEmpty(textList) && !Objects.equals(textList.get(0), data)) {
-                                                    JSONObject jsonObj = new JSONObject();
-                                                    jsonObj.put("value", data);
-                                                    jsonObj.put("text", textList.get(0));
-                                                    dataList.add(jsonObj);
-                                                }
-                                            }
-                                        }
-                                        if (CollectionUtils.isNotEmpty(dataList)) {
-                                            formAttributeData.put("dataList", dataList);
-                                        }
-                                    } else if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMUSERSELECT.getHandler())) {
-                                        boolean isMultiple = config.getBooleanValue("isMultiple");
-                                        if (isMultiple) {
-                                            boolean flag = false;
-                                            for (Object data : (List) dataObj) {
-                                                String dataStr = data.toString();
-                                                if (dataStr.contains(GroupSearch.COMMON.getValuePlugin())
-                                                        || dataStr.contains(GroupSearch.USER.getValuePlugin())
-                                                        || dataStr.contains(GroupSearch.TEAM.getValuePlugin())
-                                                        || dataStr.contains(GroupSearch.ROLE.getValuePlugin())) {
-                                                    flag = true;
-                                                    break;
-                                                }
-                                            }
-                                            if (flag) {
-                                                formAttributeData.put("dataList", dataObj);
-                                            } else {
-                                                Object value = formAttributeHandler.textConversionValue(dataObj, config);
-                                                formAttributeData.put("dataList", value);
-                                            }
-
-                                        } else {
-                                            Object data = dataObj;
-                                            if (dataObj instanceof List) {
-                                                data = ((List) dataObj).get(0);
-                                            }
-                                            String dataStr = data.toString();
-                                            if (dataStr.contains(GroupSearch.COMMON.getValuePlugin())
-                                                    || dataStr.contains(GroupSearch.USER.getValuePlugin())
-                                                    || dataStr.contains(GroupSearch.TEAM.getValuePlugin())
-                                                    || dataStr.contains(GroupSearch.ROLE.getValuePlugin())) {
-                                                formAttributeData.put("dataList", data);
-                                            } else {
-                                                Object value = formAttributeHandler.textConversionValue(data, config);
-                                                formAttributeData.put("dataList", value);
-                                            }
+                                    Object dataList = formAttributeHandler.getStandardValueBySimpleValue(dataObj, config);
+                                    if (dataTypeNotArrayHandlerList.contains(formAttributeVo.getHandler())) {
+                                        if (dataList instanceof List) {
+                                            formAttributeData.put("dataList", ((List) dataList).get(0));
                                         }
                                     } else {
-                                        Object data = dataObj;
-                                        if (dataObj instanceof List) {
-                                            if (dataTypeNotArrayHandlerList.contains(formAttributeVo.getHandler())) {
-                                                data = ((List) dataObj).get(0);
-                                            }
-                                        }
-                                        formAttributeData.put("dataList", data);
+                                        formAttributeData.put("dataList", dataList);
                                     }
                                 }
                             }
