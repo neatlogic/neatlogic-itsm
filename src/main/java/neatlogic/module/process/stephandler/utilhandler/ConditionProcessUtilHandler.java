@@ -47,6 +47,14 @@ public class ConditionProcessUtilHandler extends ProcessStepInternalHandlerBase 
 	}
 
 	@Override
+	public JSONObject makeupConfig(JSONObject configObj) {
+		if (configObj == null) {
+			configObj = new JSONObject();
+		}
+		return configObj;
+	}
+
+	@Override
 	public JSONObject regulateProcessStepConfig(JSONObject configObj) {
 		if (configObj == null) {
 			configObj = new JSONObject();
