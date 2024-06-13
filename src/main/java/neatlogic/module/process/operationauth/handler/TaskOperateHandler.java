@@ -156,8 +156,8 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                             ProcessTaskStatus.DRAFT,
                             ProcessTaskStatus.SUCCEED,
                             ProcessTaskStatus.ABORTED,
-                            ProcessTaskStatus.FAILED,
-                            ProcessTaskStatus.HANG,
+//                            ProcessTaskStatus.FAILED,
+//                            ProcessTaskStatus.HANG,
                             ProcessTaskStatus.SCORED);
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
