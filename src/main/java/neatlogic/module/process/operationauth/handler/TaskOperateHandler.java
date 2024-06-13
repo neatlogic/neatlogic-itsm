@@ -156,16 +156,18 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                             ProcessTaskStatus.DRAFT,
                             ProcessTaskStatus.SUCCEED,
                             ProcessTaskStatus.ABORTED,
-                            ProcessTaskStatus.FAILED,
-                            ProcessTaskStatus.HANG,
+//                            ProcessTaskStatus.FAILED,
+//                            ProcessTaskStatus.HANG,
                             ProcessTaskStatus.SCORED);
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
                         return false;
                     }
-                    // 工单状态为进行中的才能终止
-                    if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                    // 工单状态为进行中、异常、挂起时才能终止
+                    if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())
+                            || ProcessTaskStatus.FAILED.getValue().equals(processTaskVo.getStatus())
+                            || ProcessTaskStatus.HANG.getValue().equals(processTaskVo.getStatus())) {
                         //系统用户默认拥有权限
                         if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
                             return true;
