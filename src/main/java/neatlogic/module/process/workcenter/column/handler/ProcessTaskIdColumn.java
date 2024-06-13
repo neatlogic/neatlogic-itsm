@@ -71,11 +71,6 @@ public class ProcessTaskIdColumn extends ProcessTaskColumnBase implements IProce
 	}
 
 	@Override
-    public Boolean getMyIsShow() {
-        return false;
-    }
-
-	@Override
 	public List<TableSelectColumnVo> getTableSelectColumn() {
 		return new ArrayList<TableSelectColumnVo>(){
 			{
