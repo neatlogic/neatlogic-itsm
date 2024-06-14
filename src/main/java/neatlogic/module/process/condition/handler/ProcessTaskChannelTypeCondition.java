@@ -6,7 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.FormHandlerType;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.common.dto.ValueTextVo;
-import neatlogic.framework.dto.condition.ConditionVo;
+import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
@@ -121,8 +121,8 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
     }
 
     @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-        getSimpleSqlConditionWhere(conditionList.get(index), sqlSb, new ChannelTypeSqlTable().getShortName(), ChannelTypeSqlTable.FieldEnum.UUID.getValue());
+    public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
+        getSimpleSqlConditionWhere(groupVo.getConditionList().get(index), sqlSb, new ChannelTypeSqlTable().getShortName(), ChannelTypeSqlTable.FieldEnum.UUID.getValue());
     }
 
     @Override

@@ -1,8 +1,10 @@
 package neatlogic.module.process.condition.handler;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.FormHandlerType;
 import neatlogic.framework.common.constvalue.ParamType;
-import neatlogic.framework.dto.condition.ConditionVo;
+import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
@@ -13,8 +15,6 @@ import neatlogic.framework.process.workcenter.dto.JoinOnVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import neatlogic.framework.process.workcenter.table.ProcessTaskStepSqlTable;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
@@ -86,8 +86,8 @@ public class ProcessTaskStepActiveTimeCondition extends ProcessTaskConditionBase
     }
 
     @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-        getDateSqlWhereByValueList(conditionList.get(index), sqlSb, new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.ACTIVE_TIME.getValue());
+    public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
+        getDateSqlWhereByValueList(groupVo.getConditionList().get(index), sqlSb, new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.ACTIVE_TIME.getValue());
     }
 
     @Override

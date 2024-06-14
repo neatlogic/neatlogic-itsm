@@ -1,9 +1,9 @@
 package neatlogic.module.process.condition.handler;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.FormHandlerType;
 import neatlogic.framework.common.constvalue.ParamType;
-import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.condition.ConditionVo;
+import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
@@ -14,21 +14,13 @@ import neatlogic.framework.process.workcenter.dto.JoinOnVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import neatlogic.framework.process.workcenter.table.ProcessTaskStepSqlTable;
-import neatlogic.framework.service.AuthenticationInfoService;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class ProcessTaskStepNameCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
-    @Resource
-    UserMapper userMapper;
-
-    @Resource
-    AuthenticationInfoService authenticationInfoService;
 
     @Override
     public String getName() {
@@ -87,13 +79,12 @@ public class ProcessTaskStepNameCondition extends ProcessTaskConditionBase imple
 
     @Override
     public Object valueConversionText(Object value, JSONObject config) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-        getSimpleSqlConditionWhere(conditionList.get(index), sqlSb, new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.NAME.getValue());
+    public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
+        getSimpleSqlConditionWhere(groupVo.getConditionList().get(index), sqlSb, new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.NAME.getValue());
     }
 
     @Override

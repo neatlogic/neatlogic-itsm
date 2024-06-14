@@ -20,6 +20,7 @@ import neatlogic.framework.common.constvalue.*;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
@@ -141,8 +142,8 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
     }
 
     @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-        ConditionVo condition = conditionList.get(index);
+    public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
+        ConditionVo condition = groupVo.getConditionList().get(index);
         List<String> stepUserValueList = new ArrayList<>();
         if (condition.getValueList() instanceof String) {
             stepUserValueList.add((String) condition.getValueList());

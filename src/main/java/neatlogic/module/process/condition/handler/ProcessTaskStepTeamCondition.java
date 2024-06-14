@@ -21,6 +21,7 @@ import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.TeamVo;
+import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
@@ -152,9 +153,9 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
     }
 
     @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
+    public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
         //获取条件
-        ConditionVo condition = conditionList.get(index);
+        ConditionVo condition = groupVo.getConditionList().get(index);
         List<String> stepTeamValueList = new ArrayList<>();
         if (condition.getValueList() instanceof String) {
             stepTeamValueList.add((String) condition.getValueList());

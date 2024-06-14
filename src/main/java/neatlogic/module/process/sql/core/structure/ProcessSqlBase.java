@@ -130,7 +130,7 @@ public abstract class ProcessSqlBase<T extends SqlDecoratorVo> implements IProce
                         handler = ProcessFieldType.FORM.getValue();
                     }
                     IProcessTaskCondition sqlCondition = ProcessTaskConditionFactory.getHandler(handler);
-                    sqlCondition.getSqlConditionWhere(conditionVoList, i, sqlSb);
+                    sqlCondition.getSqlConditionWhere(groupVo, i, sqlSb);
                     fromConditionUuid = toConditionUuid;
                 }
                 sqlSb.append(" ) ");

@@ -6,7 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.FormHandlerType;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.common.dto.ValueTextVo;
-import neatlogic.framework.dto.condition.ConditionVo;
+import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
@@ -17,7 +17,8 @@ import neatlogic.framework.process.constvalue.ProcessTaskSourceFactory;
 import neatlogic.framework.process.dto.SqlDecoratorVo;
 import neatlogic.framework.process.workcenter.dto.JoinOnVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
-import neatlogic.framework.process.workcenter.table.*;
+import neatlogic.framework.process.workcenter.table.ProcessTaskInvokeSqlTable;
+import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -110,8 +111,8 @@ public class ProcessTaskInvokeCondition extends ProcessTaskConditionBase impleme
     }
 
     @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-        getSimpleSqlConditionWhere(conditionList.get(index), sqlSb, new ProcessTaskInvokeSqlTable().getShortName(), ProcessTaskInvokeSqlTable.FieldEnum.SOURCE.getValue());
+    public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
+        getSimpleSqlConditionWhere(groupVo.getConditionList().get(index), sqlSb, new ProcessTaskInvokeSqlTable().getShortName(), ProcessTaskInvokeSqlTable.FieldEnum.SOURCE.getValue());
     }
 
     @Override

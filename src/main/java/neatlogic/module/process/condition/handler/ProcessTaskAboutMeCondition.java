@@ -23,7 +23,6 @@ import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.FormHandlerType;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.common.dto.ValueTextVo;
-import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
@@ -40,24 +39,16 @@ import neatlogic.framework.process.workcenter.table.ProcessTaskFocusSqlTable;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import neatlogic.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import neatlogic.framework.process.workcenter.table.ProcessTaskStepUserSqlTable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 @Component
 public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
-
-    @Autowired
-    UserMapper userMapper;
-
     private String formHandlerType = FormHandlerType.SELECT.toString();
-
-    private final Map<String, Function<String, String>> map = new HashMap<>();
 
     private final Map<String, MyProcessTask<StringBuilder>> mapSql = new HashMap<>();
 
@@ -206,9 +197,9 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
     }
 
     @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
+    public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
         sqlSb.append(" ( ");
-        ConditionVo condition = conditionList.get(index);
+        ConditionVo condition = groupVo.getConditionList().get(index);
         List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
         int i = 0;
         for (String value : valueList) {

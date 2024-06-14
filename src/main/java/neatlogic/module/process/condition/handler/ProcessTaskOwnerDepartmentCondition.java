@@ -22,7 +22,6 @@ import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.common.constvalue.TeamLevel;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dto.TeamVo;
-import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
@@ -33,7 +32,6 @@ import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -49,7 +47,7 @@ public class ProcessTaskOwnerDepartmentCondition extends ProcessTaskConditionBas
     @Resource
     private ProcessTaskMapper processTaskMapper;
 
-    @Autowired
+    @Resource
     private TeamMapper teamMapper;
 
     @Override
@@ -126,11 +124,6 @@ public class ProcessTaskOwnerDepartmentCondition extends ProcessTaskConditionBas
             }
         }
         return value;
-    }
-
-    @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-
     }
 
     @Override

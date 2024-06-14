@@ -1,10 +1,11 @@
 package neatlogic.module.process.condition.handler;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.FormHandlerType;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.dto.UserVo;
-import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
@@ -12,13 +13,10 @@ import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -51,8 +49,6 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
     public JSONObject getConfig(ConditionConfigType type) {
         JSONObject config = new JSONObject();
         config.put("type", FormHandlerType.SELECT.toString());
-//		config.put("multiple", true);
-//		config.put("isMultiple", true);//为兼容旧数据结构
         JSONArray dataList = new JSONArray();
         dataList.add(new ValueTextVo("1", "是"));
         dataList.add(new ValueTextVo("0", "否"));
@@ -78,11 +74,6 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
             return "否";
         }
         return value;
-    }
-
-    @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-
     }
 
     @Override

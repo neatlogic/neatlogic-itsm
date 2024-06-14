@@ -22,6 +22,7 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.*;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
@@ -33,7 +34,6 @@ import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -48,7 +48,7 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
     @Resource
     private ProcessTaskMapper processTaskMapper;
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
     @Override
@@ -150,8 +150,8 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
     }
 
     @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-        ConditionVo condition = conditionList.get(index);
+    public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
+        ConditionVo condition = groupVo.getConditionList().get(index);
         List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
         //替换“当前登录人标识”为当前登录用户
         String loginUser = GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue();

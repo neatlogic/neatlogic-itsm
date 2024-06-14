@@ -18,7 +18,9 @@ package neatlogic.module.process.condition.handler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.ParamType;
+import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
@@ -37,6 +39,7 @@ import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterField;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.Md5Util;
 import neatlogic.framework.util.TimeUtil;
@@ -139,19 +142,29 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     }
 
     @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-        ConditionVo conditionVo = conditionList.get(index);
+    public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
+        ConditionVo conditionVo = groupVo.getConditionList().get(index);
         if (StringUtils.isBlank(conditionVo.getHandler())) {
-            throw new ParamIrregularException("ConditionGroup", " lost handler");
+            throw new ParamIrregularException("Condition", " lost handler");
         }
         IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(conditionVo.getHandler());
         if (formAttributeHandler == null) {
-            throw new ParamIrregularException("ConditionGroup", " handler illegal");
+            throw new ParamIrregularException("Condition", " handler illegal");
         }
-        JSONArray valueArray = JSONArray.parseArray(conditionVo.getValueList().toString());
-        if (CollectionUtils.isEmpty(valueArray)) {
-            return;
+        //补充服务目录条件
+        List<String> channelUuidList = groupVo.getChannelUuidList();
+        if (CollectionUtils.isEmpty(channelUuidList)) {
+            throw new ParamIrregularException("ConditionGroup", " lost channelUuidList");
         }
+        ConditionVo channelCondition = new ConditionVo();
+        channelCondition.setName("channel");
+        channelCondition.setLabel("服务");
+        channelCondition.setType("common");
+        channelCondition.setExpression(Expression.INCLUDE.getExpression());
+        channelCondition.setValueList(channelUuidList);
+        getSimpleSqlConditionWhere(channelCondition, sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.CHANNEL_UUID.getValue());
+        sqlSb.append(" and ");
+        JSONArray valueArray = JSON.parseArray(conditionVo.getValueList().toString());
         if (FormHandler.FORMDATE.getHandler().equals(conditionVo.getHandler())) {
             JSONObject value = valueArray.getJSONObject(0);
             dateSqlBuild(value, conditionVo, sqlSb);
@@ -192,16 +205,36 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
      * @param sqlSb                拼凑的sql
      */
     private void defaultSqlBuild(JSONArray valueArray, ConditionVo conditionVo, IFormAttributeHandler formAttributeHandler, StringBuilder sqlSb) {
-        List<String> valueList = new ArrayList<>();
-        for (Object valueObj : valueArray) {
-            if (valueObj instanceof JSONObject) {
-                JSONObject jsonObj = (JSONObject) valueObj;
-                String value = jsonObj.getString("value");
-                String text = jsonObj.getString("text");
-                String[] valueTmpList = {value, text};
-                for (String valueTmp : valueTmpList) {
+        if (Arrays.asList(Expression.EXCLUDE.getExpression(), Expression.ISNULL.getExpression()).contains(conditionVo.getExpression())) {
+            sqlSb.append(" not ");
+        }
+        if (CollectionUtils.isEmpty(valueArray)) {
+            sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s') ",
+                    conditionVo.getName()));
+        } else {
+            List<String> valueList = new ArrayList<>();
+            for (Object valueObj : valueArray) {
+                if (valueObj instanceof JSONObject) {
+                    JSONObject jsonObj = (JSONObject) valueObj;
+                    String value = jsonObj.getString("value");
+                    String text = jsonObj.getString("text");
+                    String[] valueTmpList = {value, text};
+                    for (String valueTmp : valueTmpList) {
+                        //如果需要分词，则搜索的时候关键字也需分词搜索
+                        if (Boolean.TRUE.equals(formAttributeHandler.isNeedSliceWord())) {
+                            Set<String> sliceKeySet = null;
+                            sliceKeySet = FullTextIndexUtil.sliceKeyword(valueTmp);
+                            if (CollectionUtils.isNotEmpty(sliceKeySet)) {
+                                valueList.addAll(new ArrayList<>(sliceKeySet));
+                            }
+                        } else {//否则直接md5作为整体搜索
+                            valueList.add(Md5Util.encryptMD5(valueTmp).toLowerCase(Locale.ROOT));
+                        }
+                    }
+                } else {
+                    String valueTmp = valueObj.toString();
                     //如果需要分词，则搜索的时候关键字也需分词搜索
-                    if (formAttributeHandler.isNeedSliceWord()) {
+                    if (Boolean.TRUE.equals(formAttributeHandler.isNeedSliceWord())) {
                         Set<String> sliceKeySet = null;
                         sliceKeySet = FullTextIndexUtil.sliceKeyword(valueTmp);
                         if (CollectionUtils.isNotEmpty(sliceKeySet)) {
@@ -211,22 +244,10 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                         valueList.add(Md5Util.encryptMD5(valueTmp).toLowerCase(Locale.ROOT));
                     }
                 }
-            } else {
-                String valueTmp = valueObj.toString();
-                //如果需要分词，则搜索的时候关键字也需分词搜索
-                if (formAttributeHandler.isNeedSliceWord()) {
-                    Set<String> sliceKeySet = null;
-                    sliceKeySet = FullTextIndexUtil.sliceKeyword(valueTmp);
-                    if (CollectionUtils.isNotEmpty(sliceKeySet)) {
-                        valueList.addAll(new ArrayList<>(sliceKeySet));
-                    }
-                } else {//否则直接md5作为整体搜索
-                    valueList.add(Md5Util.encryptMD5(valueTmp).toLowerCase(Locale.ROOT));
-                }
             }
+            sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word IN ('%s')) ",
+                    conditionVo.getName(), String.join("','", valueList)));
         }
-        sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word IN ('%s')) ",
-                conditionVo.getName(), String.join("','", valueList)));
     }
 
     @Override

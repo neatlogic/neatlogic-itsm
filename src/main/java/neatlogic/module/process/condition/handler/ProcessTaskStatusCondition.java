@@ -1,19 +1,19 @@
 package neatlogic.module.process.condition.handler;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.FormHandlerType;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.common.dto.ValueTextVo;
-import neatlogic.framework.dto.condition.ConditionVo;
+import neatlogic.framework.dto.condition.ConditionGroupVo;
+import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
-import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -56,7 +56,6 @@ public class ProcessTaskStatusCondition extends ProcessTaskConditionBase impleme
         dataList.add(new ValueTextVo(ProcessTaskStatus.ABORTED.getValue(), ProcessTaskStatus.ABORTED.getText()));
         dataList.add(new ValueTextVo(ProcessTaskStatus.FAILED.getValue(), ProcessTaskStatus.FAILED.getText()));
         dataList.add(new ValueTextVo(ProcessTaskStatus.SUCCEED.getValue(), ProcessTaskStatus.SUCCEED.getText()));
-        //dataList.add(new ValueTextVo(ProcessTaskStatus.DRAFT.getValue(), ProcessTaskStatus.DRAFT.getText()));
         dataList.add(new ValueTextVo(ProcessTaskStatus.SCORED.getValue(), ProcessTaskStatus.SCORED.getText()));
         dataList.add(new ValueTextVo(ProcessTaskStatus.HANG.getValue(), ProcessTaskStatus.HANG.getText()));
 
@@ -108,7 +107,7 @@ public class ProcessTaskStatusCondition extends ProcessTaskConditionBase impleme
     }
 
     @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-        getSimpleSqlConditionWhere(conditionList.get(index), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.STATUS.getValue());
+    public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
+        getSimpleSqlConditionWhere(groupVo.getConditionList().get(index), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.STATUS.getValue());
     }
 }

@@ -1,18 +1,16 @@
 package neatlogic.module.process.condition.handler;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.FormHandlerType;
 import neatlogic.framework.common.constvalue.ParamType;
-import neatlogic.framework.dto.condition.ConditionVo;
+import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class ProcessTaskSerialNumberCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -43,8 +41,6 @@ public class ProcessTaskSerialNumberCondition extends ProcessTaskConditionBase i
         config.put("value", "");
         config.put("defaultValue", "");
         config.put("maxlength", 16);
-//		config.put("name", "");
-//		config.put("label", "");
         return config;
     }
 
@@ -64,7 +60,7 @@ public class ProcessTaskSerialNumberCondition extends ProcessTaskConditionBase i
     }
 
     @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-        getSimpleSqlConditionWhere(conditionList.get(index), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
+    public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
+        getSimpleSqlConditionWhere(groupVo.getConditionList().get(index), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
     }
 }

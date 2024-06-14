@@ -4,6 +4,7 @@ import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.FormHandlerType;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.common.dto.ValueTextVo;
+import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.form.constvalue.FormConditionModel;
@@ -61,8 +62,6 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
     public JSONObject getConfig(ConditionConfigType type) {
         JSONArray dataList = new JSONArray();
         dataList.add(new ValueTextVo("1", "是"));
-        // TODO es 封装暂时不支持 判断空key
-        // dataList.add(new ValueTextVo("0", "否"));
 
         JSONObject config = new JSONObject();
         config.put("type", formHandlerType);
@@ -92,8 +91,8 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-        ConditionVo condition = conditionList.get(index);
+    public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
+        ConditionVo condition = groupVo.getConditionList().get(index);
         List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
         if(CollectionUtils.isEmpty(valueList)) {
             throw new ParamIrregularException("expiretime");
