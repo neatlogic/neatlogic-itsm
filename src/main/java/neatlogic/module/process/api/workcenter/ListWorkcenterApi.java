@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.api.workcenter;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
@@ -41,7 +42,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -59,7 +59,7 @@ public class ListWorkcenterApi extends PrivateApiComponentBase {
     @Resource
     private AuthenticationInfoService authenticationInfoService;
 
-    @Autowired
+    @Resource
     NewWorkcenterService newWorkcenterService;
 
     @Override
@@ -97,7 +97,7 @@ public class ListWorkcenterApi extends PrivateApiComponentBase {
             Map<String, Integer> workcenterUserSortMap = new HashMap<>();
             boolean isWorkcenterManager = AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName());
             if (userProfile != null) {
-                JSONObject userConfig = JSONObject.parseObject(userProfile.getConfig());
+                JSONObject userConfig = JSON.parseObject(userProfile.getConfig());
                 if (userConfig.containsKey("viewType")) {
                     viewType = userConfig.getString("viewType");
                 }
