@@ -3751,6 +3751,17 @@
         AND `user_type` = #{userType}
     </update>
 
+    <update id="updateProcessTaskStepMajorUserUserTypeAndStatus" parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+        UPDATE `processtask_step_user`
+        SET
+            `user_type` = #{userType},
+            `status` = #{status},
+            `end_time` = NOW(3)
+        WHERE `processtask_step_id` = #{processTaskStepId}
+          AND `user_uuid` = #{userUuid}
+          AND `user_type` = 'major'
+    </update>
+
     <update id="updateProcessTaskStatus" parameterType="neatlogic.framework.process.dto.ProcessTaskVo">
         UPDATE
         `processtask`

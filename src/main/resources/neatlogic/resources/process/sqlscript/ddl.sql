@@ -1402,23 +1402,23 @@ CREATE TABLE IF NOT EXISTS `processtask_step_timer`  (
 -- ----------------------------
 -- Table structure for processtask_step_user
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS `processtask_step_user`  (
+CREATE TABLE IF NOT EXISTS `processtask_step_user` (
   `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `processtask_step_id` bigint NOT NULL COMMENT '步骤ID',
   `user_uuid` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '处理人uuid',
-  `user_type` enum('major','minor') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'major用户必须处理',
-  `user_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '处理人名称',
-  `status` enum('doing','done') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '状态',
-  `action` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '动作',
+  `user_type` enum('major','minor','history_major') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'major用户必须处理',
+  `user_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '处理人名称',
+  `status` enum('doing','done','transferred') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '状态',
+  `action` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '动作',
   `start_time` timestamp(3) NULL DEFAULT NULL COMMENT '开始时间',
   `end_time` timestamp(3) NULL DEFAULT NULL COMMENT '结束时间',
   `active_time` timestamp(3) NULL DEFAULT NULL COMMENT '激活时间',
-  PRIMARY KEY (`processtask_step_id`, `user_uuid`, `user_type`) USING BTREE,
-  INDEX `idx_processtask_id`(`processtask_id`) USING BTREE,
-  INDEX `idx_action`(`action`) USING BTREE,
-  INDEX `idx_type`(`user_type`) USING BTREE,
-  INDEX `idx_useruuid`(`user_uuid`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '工单步骤处理人表';
+  PRIMARY KEY (`processtask_step_id`,`user_uuid`,`user_type`,`status`) USING BTREE,
+  INDEX `idx_processtask_id` (`processtask_id`) USING BTREE,
+  INDEX `idx_action` (`action`) USING BTREE,
+  INDEX `idx_type` (`user_type`) USING BTREE,
+  INDEX `idx_useruuid` (`user_uuid`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='工单步骤处理人表';
 
 -- ----------------------------
 -- Table structure for processtask_step_worker

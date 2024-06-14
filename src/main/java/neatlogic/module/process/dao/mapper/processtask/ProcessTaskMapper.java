@@ -497,6 +497,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     int updateProcessTaskStepUserStatus(ProcessTaskStepUserVo processTaskStepUserVo);
 
+    int updateProcessTaskStepMajorUserUserTypeAndStatus(ProcessTaskStepUserVo processTaskStepUserVo);
+
     int updateProcessTaskIsShow(ProcessTaskVo processTaskVo);
 
     int updateProcessTaskNeedScoreByIdList(@Param("idList") List<Long> idList, @Param("needScore") Integer needScore);
