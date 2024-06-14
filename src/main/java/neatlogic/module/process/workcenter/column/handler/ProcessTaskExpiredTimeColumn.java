@@ -1,5 +1,7 @@
 package neatlogic.module.process.workcenter.column.handler;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnBase;
@@ -10,22 +12,22 @@ import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
 import neatlogic.framework.process.workcenter.dto.SelectColumnVo;
 import neatlogic.framework.process.workcenter.dto.TableSelectColumnVo;
-import neatlogic.framework.process.workcenter.table.*;
+import neatlogic.framework.process.workcenter.table.ISqlTable;
+import neatlogic.framework.process.workcenter.table.ProcessTaskSlaSqlTable;
+import neatlogic.framework.process.workcenter.table.ProcessTaskSlaTimeSqlTable;
+import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import neatlogic.framework.process.workcenter.table.util.SqlTableUtil;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 @Component
 public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
-
-    @Autowired
+    @Resource
     WorktimeMapper worktimeMapper;
     @Override
     public String getName() {
@@ -49,7 +51,6 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 
     @Override
     public String getClassName() {
-        // TODO Auto-generated method stub
         return null;
     }
 

@@ -27,12 +27,6 @@ public class ProcessTaskEndTimeColumn extends ProcessTaskColumnBase implements I
 		return "结束时间";
 	}
 
-	/*@Override
-	public Object getMyValue(JSONObject json) throws RuntimeException {
-		String endTime = json.getString(this.getName());
-		return endTime;
-	}*/
-
 	@Override
 	public Boolean allowSort() {
 		return false;
@@ -45,22 +39,13 @@ public class ProcessTaskEndTimeColumn extends ProcessTaskColumnBase implements I
 
 	@Override
 	public String getClassName() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Integer getSort() {
-		return 13;
+		return 16;
 	}
-
-	/*@Override
-	public Object getSimpleValue(Object json) {
-		if(json != null){
-			return json.toString();
-		}
-		return null;
-	}*/
 
 	@Override
 	public String getSimpleValue(ProcessTaskVo taskVo) {

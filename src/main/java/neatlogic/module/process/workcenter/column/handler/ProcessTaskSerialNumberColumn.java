@@ -26,11 +26,6 @@ public class ProcessTaskSerialNumberColumn extends ProcessTaskColumnBase impleme
 		return "工单号";
 	}
 
-	/*@Override
-	public Object getMyValue(JSONObject json) throws RuntimeException {
-		return json.getString(this.getName());
-	}*/
-
 	@Override
 	public Boolean allowSort() {
 		return false;
@@ -48,16 +43,13 @@ public class ProcessTaskSerialNumberColumn extends ProcessTaskColumnBase impleme
 
 	@Override
 	public Integer getSort() {
-		return 2;
+		return 3;
 	}
 
-	/*@Override
-	public Object getSimpleValue(Object json) {
-		if(json != null){
-			return json.toString();
-		}
-		return null;
-	}*/
+	@Override
+	public Boolean getMyIsShow() {
+		return false;
+	}
 
 	@Override
 	public String getSimpleValue(ProcessTaskVo processTaskVo) {

@@ -30,11 +30,6 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
         return "上报时间";
     }
 
-   /* @Override
-    public Object getMyValue(JSONObject json) throws RuntimeException {
-        return json.getString(this.getName());
-    }*/
-
     @Override
     public Boolean allowSort() {
         return false;
@@ -47,27 +42,18 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
 
     @Override
     public String getClassName() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Integer getSort() {
-        return 10;
+        return 15;
     }
 
     @Override
     public Boolean getIsSort() {
         return true;
     }
-
-   /* @Override
-    public Object getSimpleValue(Object json) {
-        if(json != null){
-            return sdf.format((Date)json);
-        }
-        return null;
-    }*/
 
     @Override
     public String getSimpleValue(ProcessTaskVo processTaskVo) {

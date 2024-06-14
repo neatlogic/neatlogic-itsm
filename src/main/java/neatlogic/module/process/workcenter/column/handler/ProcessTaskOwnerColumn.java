@@ -47,13 +47,12 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 
     @Override
     public String getClassName() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Integer getSort() {
-        return 3;
+        return 11;
     }
 
     @Override

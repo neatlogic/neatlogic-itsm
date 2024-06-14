@@ -49,7 +49,7 @@ public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IPr
 
 	@Override
 	public Integer getSort() {
-		return 1;
+		return 4;
 	}
 
 	/*@Override

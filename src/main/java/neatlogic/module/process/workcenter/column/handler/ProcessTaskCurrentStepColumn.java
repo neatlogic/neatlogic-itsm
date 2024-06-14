@@ -50,7 +50,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 
 	@Override
 	public Integer getSort() {
-		return 5;
+		return 6;
 	}
 
 	@Override

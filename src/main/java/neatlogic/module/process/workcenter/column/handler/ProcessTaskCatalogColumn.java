@@ -32,17 +32,6 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
         return "服务目录";
     }
 
-    /*@Override
-    public Object getMyValue(JSONObject json) throws RuntimeException {
-        String catalogUuid = json.getString(this.getName());
-        String catalogName = StringUtils.EMPTY;
-        CatalogVo catalogVo = catalogMapper.getCatalogByUuid(catalogUuid);
-        if (catalogVo != null) {
-            catalogName = catalogVo.getName();
-        }
-        return catalogName;
-    }*/
-
     @Override
     public Boolean allowSort() {
         return false;
@@ -55,22 +44,18 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
 
     @Override
     public String getClassName() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Integer getSort() {
-        return 7;
+    public Boolean getMyIsShow() {
+        return false;
     }
 
-    /*@Override
-    public Object getSimpleValue(Object json) {
-        if (json != null) {
-            return json.toString();
-        }
-        return null;
-    }*/
+    @Override
+    public Integer getSort() {
+        return 10;
+    }
 
     @Override
     public String getSimpleValue(ProcessTaskVo taskVo) {

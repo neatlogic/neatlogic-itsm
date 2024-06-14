@@ -48,7 +48,7 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
 
     @Override
     public Integer getSort() {
-        return 5;
+        return 8;
     }
 
     @Override

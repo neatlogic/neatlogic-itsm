@@ -68,7 +68,7 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 
 	@Override
 	public Integer getSort() {
-		return 8;
+		return 1;
 	}
 
 	@Override

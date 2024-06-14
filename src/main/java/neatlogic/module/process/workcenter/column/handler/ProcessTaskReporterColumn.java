@@ -32,25 +32,6 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
         return "代报人";
     }
 
-	/*@Override
-	public Object getMyValue(JSONObject json) throws RuntimeException {
-		JSONObject userJson = new JSONObject();
-		String userUuid = json.getString(this.getName());
-		if(StringUtils.isNotBlank(userUuid)) {
-			userUuid =userUuid.replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY);
-		}
-		UserVo userVo =userMapper.getUserBaseInfoByUuid(userUuid);
-		if(userVo != null) {
-			userJson.put("initType", userVo.getInitType());
-			userJson.put("name", userVo.getUserName());
-			userJson.put("pinyin", userVo.getPinyin());
-			userJson.put("vipLevel", userVo.getVipLevel());
-			userJson.put("avatar", userVo.getAvatar());
-		}
-		userJson.put("uuid", userUuid);
-		return userJson;
-	}*/
-
     @Override
     public Boolean allowSort() {
         return false;
@@ -63,23 +44,18 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
 
     @Override
     public String getClassName() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Integer getSort() {
-        return 4;
+        return 12;
     }
 
-	/*@Override
-	public Object getSimpleValue(Object json) {
-		String username = null;
-		if(json != null){
-			username = ((UserVo)json).getUserName();
-		}
-		return username;
-	}*/
+    @Override
+    public Boolean getMyIsShow() {
+        return false;
+    }
 
     @Override
     public String getSimpleValue(ProcessTaskVo processTaskVo) {

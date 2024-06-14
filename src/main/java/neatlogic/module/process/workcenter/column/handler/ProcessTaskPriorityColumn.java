@@ -59,7 +59,7 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
     @Override
     public Integer getSort() {
         // TODO Auto-generated method stub
-        return 3;
+        return 5;
     }
 
     @Override

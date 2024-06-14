@@ -12,8 +12,6 @@ import neatlogic.framework.process.workcenter.table.ChannelSqlTable;
 import neatlogic.framework.process.workcenter.table.ChannelWorkTimeSqlTable;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import neatlogic.framework.process.workcenter.table.WorkTimeSqlTable;
-import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -22,8 +20,6 @@ import java.util.List;
 
 @Component
 public class ProcessTaskWorkTimeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
-	@Autowired
-	WorktimeMapper worktimeMapper;
 	@Override
 	public String getName() {
 		return "worktime";
@@ -34,18 +30,10 @@ public class ProcessTaskWorkTimeColumn extends ProcessTaskColumnBase implements 
 		return "时间窗口";
 	}
 
-	/*@Override
-	public Object getMyValue(JSONObject json) throws RuntimeException {
-		String worktimeUuid = json.getString(this.getName());
-		String worktimeName = StringUtils.EMPTY;
-		if(StringUtils.isBlank(worktimeName)) {
-			WorktimeVo worktimeVo = worktimeMapper.getWorktimeByUuid(worktimeUuid);
-			if(worktimeVo != null) {
-				worktimeName = worktimeVo.getName();
-			}
-		}
-		return worktimeName;
-	}*/
+	@Override
+	public Boolean getMyIsShow() {
+		return false;
+	}
 
 	@Override
 	public Boolean allowSort() {
@@ -59,22 +47,13 @@ public class ProcessTaskWorkTimeColumn extends ProcessTaskColumnBase implements 
 
 	@Override
 	public String getClassName() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Integer getSort() {
-		return 12;
+		return 13;
 	}
-
-	/*@Override
-	public Object getSimpleValue(Object json) {
-		if(json != null){
-			return json.toString();
-		}
-		return null;
-	}*/
 
 	@Override
 	public String getSimpleValue(ProcessTaskVo processTaskVo) {
