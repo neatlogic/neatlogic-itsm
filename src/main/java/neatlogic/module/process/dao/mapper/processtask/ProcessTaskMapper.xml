@@ -1325,6 +1325,14 @@
         WHERE `content_id` = #{value}
     </select>
 
+    <select id="getTargetListByContentId" parameterType="java.lang.Long" resultType="neatlogic.framework.dto.WorkAssignmentUnitVo">
+        SELECT
+            `type` AS initType,
+            `uuid`
+        FROM `processtask_step_content_target`
+        WHERE `content_id` = #{value}
+    </select>
+
     <select id="getProcessTaskStepContentById" parameterType="java.lang.Long"
             resultType="neatlogic.framework.process.dto.ProcessTaskStepContentVo">
         SELECT `id`,
@@ -3355,6 +3363,11 @@
                 #{fcu},
                 NOW(3),
                 #{fcu})
+    </insert>
+
+    <insert id="insertProcessTaskStepContentTarget">
+        INSERT INTO `processtask_step_content_target` (`content_id`, `type`, `uuid`)
+        VALUES (#{contentId}, #{type}, #{uuid})
     </insert>
 
     <insert id="insertProcessTaskOperationContent" parameterType="neatlogic.framework.process.dto.ProcessTaskOperationContentVo">

@@ -1108,6 +1108,16 @@ CREATE TABLE IF NOT EXISTS `processtask_step_content`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '工单步骤内容表';
 
 -- ----------------------------
+-- Table structure for processtask_step_content_target
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS `processtask_step_content_target` (
+  `content_id` bigint NOT NULL COMMENT '工单步骤回复内容ID',
+  `type` enum('user','team','role') COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '对象类型',
+  `uuid` char(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT '对象UUID',
+  PRIMARY KEY (`content_id`,`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='工单步骤回复目标对象表';
+
+-- ----------------------------
 -- Table structure for processtask_step_data
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `processtask_step_data`  (

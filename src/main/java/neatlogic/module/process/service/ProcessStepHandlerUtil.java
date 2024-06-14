@@ -561,6 +561,16 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         } else {
             paramObj.remove("fileIdList");
         }
+
+        JSONArray contentTargetList = paramObj.getJSONArray("contentTargetList");
+        if (CollectionUtils.isNotEmpty(contentTargetList)) {
+            for (int i = 0; i < contentTargetList.size(); i++) {
+                JSONObject contentTargetObj = contentTargetList.getJSONObject(i);
+                String type = contentTargetObj.getString("type");
+                String uuid = contentTargetObj.getString("uuid");
+                processTaskMapper.insertProcessTaskStepContentTarget(processTaskStepContentVo.getId(), type, uuid);
+            }
+        }
     }
 
     @Override

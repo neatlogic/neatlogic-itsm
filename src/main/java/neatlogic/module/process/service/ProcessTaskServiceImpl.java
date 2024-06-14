@@ -467,6 +467,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 processTaskStepReplyVo.setFileList(fileList);
             }
         }
+        List<WorkAssignmentUnitVo> targetList = processTaskMapper.getTargetListByContentId(processTaskStepReplyVo.getId());
+        processTaskStepReplyVo.setTargetList(targetList);
     }
 
     @Override
