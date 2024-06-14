@@ -44,7 +44,6 @@ public class ProcessTaskCreateApi extends PrivateApiComponentBase {
             @Param(name = "reporter", type = ApiParamType.STRING, desc = "term.itsm.reporter"),
             @Param(name = "priority", type = ApiParamType.STRING, isRequired = true, desc = "common.priority"),
             @Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "term.itsm.formattributedatalist"),
-            @Param(name = "formExtendAttributeDataList", type = ApiParamType.JSONARRAY, desc = "term.itsm.formextendattributedatalist"),
             @Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, desc = "term.itsm.hidecomponentlist"),
             @Param(name = "readcomponentList", type = ApiParamType.JSONARRAY, desc = "term.itsm.readcomponentlist"),
             @Param(name = "content", type = ApiParamType.STRING, desc = "common.content"),
