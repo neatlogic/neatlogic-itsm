@@ -18,6 +18,7 @@
 package neatlogic.module.process.dao.mapper.processtask;
 
 import neatlogic.framework.dto.AuthenticationInfoVo;
+import neatlogic.framework.dto.WorkAssignmentUnitVo;
 import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.process.crossover.IProcessTaskCrossoverMapper;
@@ -196,6 +197,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
     List<Map<String, Object>> getWorkloadByTeamUuid(String teamUuid);
 
     List<Long> getFileIdListByContentId(Long contentId);
+
+    List<WorkAssignmentUnitVo> getTargetListByContentId(Long contentId);
 
     ProcessTaskStepContentVo getProcessTaskStepContentById(Long id);
 
@@ -401,6 +404,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     int insertProcessTaskStepContent(ProcessTaskStepContentVo processTaskStepContentVo);
 
+    int insertProcessTaskStepContentTarget(@Param("contentId") Long contentId, @Param("type") String type, @Param("uuid") String uuid);
+
     int insertProcessTaskOperationContent(ProcessTaskOperationContentVo processTaskOperationContentVo);
 
     int insertProcessTaskStepAudit(ProcessTaskStepAuditVo processTaskStepAuditVo);
@@ -491,6 +496,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 //                                                    @Param("convergeId") Long convergeId, @Param("processTaskStepId") Long processTaskStepId);
 
     int updateProcessTaskStepUserStatus(ProcessTaskStepUserVo processTaskStepUserVo);
+
+    int updateProcessTaskStepMajorUserUserTypeAndStatus(ProcessTaskStepUserVo processTaskStepUserVo);
 
     int updateProcessTaskIsShow(ProcessTaskVo processTaskVo);
 

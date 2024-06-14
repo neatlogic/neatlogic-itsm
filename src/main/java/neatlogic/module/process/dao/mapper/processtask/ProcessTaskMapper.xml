@@ -1325,6 +1325,14 @@
         WHERE `content_id` = #{value}
     </select>
 
+    <select id="getTargetListByContentId" parameterType="java.lang.Long" resultType="neatlogic.framework.dto.WorkAssignmentUnitVo">
+        SELECT
+            `type` AS initType,
+            `uuid`
+        FROM `processtask_step_content_target`
+        WHERE `content_id` = #{value}
+    </select>
+
     <select id="getProcessTaskStepContentById" parameterType="java.lang.Long"
             resultType="neatlogic.framework.process.dto.ProcessTaskStepContentVo">
         SELECT `id`,
@@ -3357,6 +3365,11 @@
                 #{fcu})
     </insert>
 
+    <insert id="insertProcessTaskStepContentTarget">
+        INSERT INTO `processtask_step_content_target` (`content_id`, `type`, `uuid`)
+        VALUES (#{contentId}, #{type}, #{uuid})
+    </insert>
+
     <insert id="insertProcessTaskOperationContent" parameterType="neatlogic.framework.process.dto.ProcessTaskOperationContentVo">
         INSERT INTO `processtask_operation_content` (`id`,
                                                 `processtask_id`,
@@ -3736,6 +3749,17 @@
             AND `user_uuid` = #{userUuid}
         </if>
         AND `user_type` = #{userType}
+    </update>
+
+    <update id="updateProcessTaskStepMajorUserUserTypeAndStatus" parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
+        UPDATE `processtask_step_user`
+        SET
+            `user_type` = #{userType},
+            `status` = #{status},
+            `end_time` = NOW(3)
+        WHERE `processtask_step_id` = #{processTaskStepId}
+          AND `user_uuid` = #{userUuid}
+          AND `user_type` = 'major'
     </update>
 
     <update id="updateProcessTaskStatus" parameterType="neatlogic.framework.process.dto.ProcessTaskVo">
