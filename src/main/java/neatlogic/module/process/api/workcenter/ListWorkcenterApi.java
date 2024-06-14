@@ -20,7 +20,6 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
-import neatlogic.framework.batch.BatchRunner;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.util.CommonUtil;
 import neatlogic.framework.dto.AuthenticationInfoVo;
@@ -109,8 +108,7 @@ public class ListWorkcenterApi extends PrivateApiComponentBase {
                     }
                 }
             }
-            BatchRunner<WorkcenterVo> runner = new BatchRunner<>();
-            runner.execute(workcenterList, 3, (threadIndex, dataIndex, workcenter) -> {
+            for (WorkcenterVo workcenter : workcenterList) {
                 if (workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
                     workcenter.setIsCanEdit(0);
                     if (Arrays.asList(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getValue(), ProcessWorkcenterInitType.PROCESSING_OF_MINE_PROCESSTASK.getValue()).contains(workcenter.getUuid()) && isWorkcenterManager) {
@@ -160,7 +158,7 @@ public class ListWorkcenterApi extends PrivateApiComponentBase {
                 //去除返回前端的多余字段
                 workcenter.setConditionGroupList(null);
                 workcenter.setConditionGroupRelList(null);
-            }, "WORKCENTER-LIST-SEARCHER");
+            }
         }
         workcenterJson.put("mobileIsOnline", Config.MOBILE_IS_ONLINE());
         workcenterJson.put("viewType", viewType);
