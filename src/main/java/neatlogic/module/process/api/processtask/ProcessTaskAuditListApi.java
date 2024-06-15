@@ -1,5 +1,6 @@
 package neatlogic.module.process.api.processtask;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -64,7 +65,7 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")
+            @Param(name = "processTaskStepIdList", type = ApiParamType.JSONARRAY, desc = "工单步骤id列表")
     })
     @Output({
             @Param(name = "Return", explode = ProcessTaskStepAuditVo[].class, desc = "工单活动列表"),
@@ -73,28 +74,32 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
     @Description(desc = "工单活动列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        Long processTaskId = jsonObj.getLong("processTaskId");
-        Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW)
-                .build()
-                .checkAndNoPermissionThrowException();
-
         List<ProcessTaskStepAuditVo> resultList = new ArrayList<>();
-        ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-        processTaskStepAuditVo.setProcessTaskId(processTaskId);
-        processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
-        List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
-        Map<Long, Set<ProcessTaskOperationType>> operateMap = new HashMap<>();
+        Long processTaskId = jsonObj.getLong("processTaskId");
+        processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder().addProcessTaskId(processTaskId).addOperationType(ProcessTaskOperationType.PROCESSTASK_VIEW);
+        List<Long> processTaskStepIdList = new ArrayList<>();
         Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
-        List<Long> processtaskStepIdList = processTaskStepAuditList.stream().filter(e -> e.getProcessTaskStepId() != null).map(ProcessTaskStepAuditVo::getProcessTaskStepId).collect(Collectors.toList());
-        if(CollectionUtils.isNotEmpty(processtaskStepIdList)){
-            Long[] processTaskStepIds = new Long[processtaskStepIdList.size()];
-            processtaskStepIdList.toArray(processTaskStepIds);
-            operateMap = new ProcessAuthManager.Builder().addProcessTaskStepId(processTaskStepIds).addOperationType(ProcessTaskOperationType.STEP_VIEW).build().getOperateMap();
-            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processtaskStepIdList);
-            processTaskStepMap = processTaskStepList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
+        JSONArray processTaskStepIdArray = jsonObj.getJSONArray("processTaskStepIdList");
+        if (CollectionUtils.isNotEmpty(processTaskStepIdArray)) {
+            processTaskStepIdList = processTaskStepIdArray.toJavaList(Long.class);
         }
+        List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskId, processTaskStepIdList);
+        if (CollectionUtils.isEmpty(processTaskStepAuditList)) {
+            return resultList;
+        }
+        processTaskStepIdList = processTaskStepAuditList.stream().map(ProcessTaskStepAuditVo::getProcessTaskStepId).collect(Collectors.toList());
+        Long[] processTaskStepIds = new Long[processTaskStepIdList.size()];
+        processTaskStepIdList.toArray(processTaskStepIds);
+        builder.addProcessTaskStepId(processTaskStepIds)
+                .addOperationType(ProcessTaskOperationType.STEP_VIEW);
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
+        processTaskStepMap = processTaskStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getId, e -> e));
+        Map<Long, Set<ProcessTaskOperationType>> operateMap = builder.build().getOperateMap();
+        if (!operateMap.computeIfAbsent(processTaskId, k -> new HashSet<>()).contains(ProcessTaskOperationType.PROCESSTASK_VIEW)) {
+            return resultList;
+        }
+
         for (ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
             if (processTaskStepAudit.getProcessTaskStepId() != null) {
                 // 判断当前用户是否有权限查看该节点信息
