@@ -111,6 +111,13 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
 
     @Override
     public void myRebuildIndex(FullTextIndexTypeVo fullTextIndexTypeVo) {
-
+        fullTextIndexTypeVo.setPageSize(100);
+        List<Long> processTaskIdList = processTaskMapper.getNotIndexProcessTaskIdList(fullTextIndexTypeVo);
+        while (CollectionUtils.isNotEmpty(processTaskIdList)) {
+            for (Long processTaskId : processTaskIdList) {
+                this.createIndex(processTaskId, true);
+            }
+            processTaskIdList = processTaskMapper.getNotIndexProcessTaskIdList(fullTextIndexTypeVo);
+        }
     }
 }

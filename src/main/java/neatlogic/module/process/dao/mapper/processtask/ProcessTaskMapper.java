@@ -21,6 +21,7 @@ import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.WorkAssignmentUnitVo;
 import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.form.dto.AttributeDataVo;
+import neatlogic.framework.fulltextindex.dto.fulltextindex.FullTextIndexTypeVo;
 import neatlogic.framework.process.crossover.IProcessTaskCrossoverMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.dto.automatic.ProcessTaskStepAutomaticRequestVo;
@@ -364,6 +365,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
     List<ProcessTaskVo> SearchSubProcessTaskListByStepId(Long processTaskStepId);
 
     ProcessTaskInvokeVo getInvokeByProcessTaskId(Long processTaskId);
+
+    List<Long> getNotIndexProcessTaskIdList(FullTextIndexTypeVo fullTextIndexTypeVo);
 
     int getSubProcessTaskCountByStepIdAndWithoutEndStatusList(@Param("processTaskStepId") Long processTaskStepId,@Param("statusList") List<String> statusList);
 
