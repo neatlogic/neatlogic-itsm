@@ -28,10 +28,7 @@ import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
-import neatlogic.framework.process.constvalue.ConditionConfigType;
-import neatlogic.framework.process.constvalue.ProcessFieldType;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
-import neatlogic.framework.process.constvalue.ProcessTaskStepUserStatus;
+import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dto.SqlDecoratorVo;
 import neatlogic.framework.process.workcenter.dto.JoinOnVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
@@ -63,7 +60,7 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 
         mapSql.put("doneOfMine", (sqlSb) -> {
             sqlSb.append(" ( ");
-            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStepUserStatus.DONE.getValue()));
+            sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.STATUS.getValue(), String.format("%s','%s",ProcessTaskStepUserStatus.DONE.getValue(), ProcessTaskStepUserStatus.TRANSFERRED.getValue())));
             sqlSb.append(" ) and ( ");
             sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.USER_UUID.getValue(), UserContext.get().getUserUuid(true)));
             sqlSb.append(" ) ");
@@ -91,6 +88,16 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
             sqlSb.append(" ) ");
         });
 
+        mapSql.put("transferredOfMine", (sqlSb) -> {
+            sqlSb.append(" ( ");
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStepUserStatus.TRANSFERRED.getValue()));
+            sqlSb.append(" ) and ( ");
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.USER_UUID.getValue(), UserContext.get().getUserUuid(true)));
+            sqlSb.append(" ) and ( ");
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.USER_TYPE.getValue(), ProcessTaskStepUserType.HISTORY_MAJOR.getValue()));
+            sqlSb.append(" ) ");
+        });
+
         joinTableSqlMap.put("doneOfMine", (list) -> {
             list.add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new ArrayList<JoinOnVo>() {{
                 add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
@@ -103,6 +110,15 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
         joinTableSqlMap.put("focusOfMine", (list) -> {
             list.add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskFocusSqlTable(), new ArrayList<JoinOnVo>() {{
                 add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskFocusSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
+            }}));
+        });
+        joinTableSqlMap.put("transferredOfMine", (list) -> {
+            list.add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new ArrayList<JoinOnVo>() {{
+                add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
+            }}));
+            list.add(new JoinTableColumnVo(new ProcessTaskStepSqlTable(), new ProcessTaskStepUserSqlTable(), new ArrayList<JoinOnVo>() {{
+                add(new JoinOnVo(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(), ProcessTaskStepUserSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
+                add(new JoinOnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepUserSqlTable.FieldEnum.PROCESSTASK_STEP_ID.getValue()));
             }}));
         });
     }
@@ -139,6 +155,7 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
         dataList.add(new ValueTextVo("focusOfMine", "已关注"));
         dataList.add(new ValueTextVo("needScoreOfMine", "待评分"));
         dataList.add(new ValueTextVo("scoredOfMine", "已评分"));
+        dataList.add(new ValueTextVo("transferredOfMine", "已转交"));
 
         JSONObject config = new JSONObject();
         config.put("type", formHandlerType);
@@ -175,6 +192,8 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
                 return "待评分";
             } else if (v.equalsIgnoreCase("scoredOfMine")) {
                 return "已评分";
+            } else if (v.equalsIgnoreCase("transferredOfMine")) {
+                return "已转交";
             }
         } else if (value instanceof JSONArray) {
             List<String> textList = new ArrayList<>();
@@ -189,6 +208,8 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
                     textList.add("待评分");
                 } else if (v.equalsIgnoreCase("scoredOfMine")) {
                     textList.add("已评分");
+                } else if (v.equalsIgnoreCase("transferredOfMine")) {
+                    textList.add("已转交");
                 }
             }
             return String.join("、", textList);
