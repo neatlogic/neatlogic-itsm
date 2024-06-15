@@ -971,7 +971,7 @@
             <result column="new_content" property="newContent"/>
         </collection>
     </resultMap>
-    <select id="getProcessTaskStepAuditList" parameterType="neatlogic.framework.process.dto.ProcessTaskStepAuditVo"
+    <select id="getProcessTaskStepAuditList" parameterType="java.util.HashMap"
             resultMap="processTaskStepAuditMap">
         SELECT
         a.`id`,
@@ -991,8 +991,11 @@
         FROM `processtask_step_audit` a
         LEFT JOIN `processtask_step_audit_detail` b ON b.`audit_id` = a.`id`
         WHERE a.`processtask_id` = #{processTaskId}
-        <if test="processTaskStepId != null">
-            AND a.`processtask_step_id` = #{processTaskStepId}
+        <if test="processTaskStepIdList != null and processTaskStepIdList.size() > 0">
+            AND a.`processtask_step_id` IN
+          <foreach collection="processTaskStepIdList" item="processTaskStepId" open="(" separator="," close=")">
+              #{processTaskStepId}
+          </foreach>
         </if>
     </select>
 
