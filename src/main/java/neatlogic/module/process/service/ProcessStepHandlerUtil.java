@@ -441,7 +441,6 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
      * @param processTaskId 工单id
      * @param currentStepId 当前流转步骤id
      * @param targetStepId  配置了由当前步骤处理人指定处理人的步骤id
-     * @return
      */
     @Override
     public List<Long> getNextStepIdList(Long processTaskId, Long currentStepId, Long targetStepId) {
@@ -634,7 +633,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
         JSONArray tagArray = paramObj.getJSONArray("tagList");
         if (CollectionUtils.isNotEmpty(tagArray)) {
-            List<String> tagNameList = JSONObject.parseArray(tagArray.toJSONString(), String.class);
+            List<String> tagNameList = JSON.parseArray(tagArray.toJSONString(), String.class);
             List<ProcessTagVo> existTagList = processTagMapper.getProcessTagByNameList(tagNameList);
             List<String> existTagNameList = existTagList.stream().map(ProcessTagVo::getName).collect(Collectors.toList());
             List<String> notExistTagList = ListUtils.removeAll(tagNameList, existTagNameList);
@@ -643,7 +642,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 processTagMapper.insertProcessTag(tagVo);
                 existTagList.add(tagVo);
             }
-            List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<ProcessTaskTagVo>();
+            List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<>();
             for (ProcessTagVo processTagVo : existTagList) {
                 processTaskTagVoList.add(new ProcessTaskTagVo(currentProcessTaskStepVo.getProcessTaskId(), processTagVo.getId()));
             }
@@ -875,7 +874,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
         {
             // 主场景的表单
-            JSONObject formConfig = JSONObject.parseObject(formContent);
+            JSONObject formConfig = JSON.parseObject(formContent);
             FormVersionVo formVersionVo = new FormVersionVo();
             formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
             formVersionVo.setFormName(processTaskFormVo.getFormName());
@@ -914,7 +913,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
         formVersionVo.setFormName(processTaskFormVo.getFormName());
-        formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
+        formVersionVo.setFormConfig(JSON.parseObject(formContent));
         if (StringUtils.isBlank(currentProcessTaskStepVo.getConfigHash())) {
             ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             currentProcessTaskStepVo.setConfigHash(stepVo.getConfigHash());
