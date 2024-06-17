@@ -2160,6 +2160,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 }
             }
         }
+        List<FormAttributeVo> formCustomExtendAttributeList = new ArrayList<>();
+        List<FormAttributeVo> allFormCustomExtendAttributeList = formVersionVo.getFormCustomExtendAttributeList();
+        if (CollectionUtils.isNotEmpty(allFormCustomExtendAttributeList)) {
+            for (FormAttributeVo formAttributeVo : allFormCustomExtendAttributeList) {
+                if (Objects.equals(formAttributeVo.getTag(), tag)) {
+                    formCustomExtendAttributeList.add(formAttributeVo);
+                }
+            }
+        }
         for (FormAttributeVo formAttributeVo : formAttributeList) {
             if (parentUuidList.contains(formAttributeVo.getUuid())) {
                 continue;
@@ -2167,6 +2176,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             resultList.add(formAttributeVo);
         }
         resultList.addAll(formExtendAttributeList);
+        resultList.addAll(formCustomExtendAttributeList);
         return resultList;
     }
 
