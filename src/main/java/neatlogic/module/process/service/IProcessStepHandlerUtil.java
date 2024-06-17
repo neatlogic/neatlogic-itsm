@@ -126,6 +126,15 @@ public interface IProcessStepHandlerUtil {
     List<Long> getNextStepIdList(Long processTaskId, Long currentStepId, Long targetStepId);
 
     /**
+     * 找出流转到哪些步骤时，需要指定targetStepId步骤的处理人
+     * @param processTaskId 工单id
+     * @param currentStepId 当前流转步骤id
+     * @param conditionStepUuidList 生效条件步骤列表
+     * @return
+     */
+    List<Long> getNextStepIdList(Long processTaskId, Long currentStepId, List<String> conditionStepUuidList);
+
+    /**
      * @Description: 保存步骤提醒
      * @Author: linbq
      * @Date: 2021/1/21 11:30
