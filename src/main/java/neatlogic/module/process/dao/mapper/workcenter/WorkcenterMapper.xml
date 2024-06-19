@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
         <result column="name" property="name"/>
         <result column="owner" property="owner"/>
         <result column="type" property="type"/>
+        <result column="thead_config_hash" property="theadConfigHash"/>
         <result column="catalogName" property="catalogName"/>
         <result column="catalogId" property="catalogId"/>
         <result column="support" property="support"/>
@@ -135,6 +136,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
                pw.`sort`,
                pw.`condition_config`,
                pw.`is_show_total`,
+               pw.`thead_config_hash`,
                pwo.`user_uuid` AS `owner`,
                pw.`catalog_id` AS catalogId,
                pwc.`name`      AS catalogName,
@@ -156,18 +158,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
     </select>-->
 
     <select id="getWorkcenterThead" parameterType="neatlogic.framework.process.workcenter.dto.WorkcenterTheadVo"
-            resultType="neatlogic.framework.process.workcenter.dto.WorkcenterTheadVo">
-        SELECT `workcenter_uuid` as workcenterUuid,
-               `name`,
-               `sort`,
-               `is_show`         as isShow,
-               `type`,
-               `user_uuid`       as userUuid,
-               `disabled`        as disabled
+            resultType="neatlogic.framework.process.workcenter.dto.WorkcenterVo">
+        SELECT `workcenter_uuid` as uuid,
+               `config_hash`     as theadConfigHash
         FROM `process_workcenter_thead`
         where workcenter_uuid = #{workcenterUuid}
           and user_uuid = #{userUuid}
-        order by sort asc
     </select>
 
     <select id="getWorkcenterUserProfileByUserUuid" parameterType="java.lang.String"
@@ -244,6 +240,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
         SELECT COUNT(1)
         FROM process_workcenter
         WHERE catalog_id = #{value}
+    </select>
+    <select id="getWorkcenterTheadConfigByHash" resultType="java.lang.String">
+        SELECT `config` FROM `process_workcenter_thead_config`
+        WHERE `hash` = #{value}
     </select>
 
     <delete id="deleteWorkcenterByUuid" parameterType="java.lang.String">
@@ -326,21 +326,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
 
     <insert id="insertWorkcenterThead" parameterType="neatlogic.framework.process.workcenter.dto.WorkcenterTheadVo">
         INSERT INTO `process_workcenter_thead` (`workcenter_uuid`,
-                                                `name`,
-                                                `sort`,
-                                                `type`,
-                                                `is_show`,
-                                                `width`,
                                                 `user_uuid`,
-                                                `disabled`)
-        VALUES (#{workcenterUuid},
-                #{name},
-                #{sort},
-                #{type},
-                #{isShow},
-                #{width},
+                                                `config_hash`)
+        VALUES (#{workcenter.uuid},
                 #{userUuid},
-                0);
+                #{workcenter.theadConfigHash})
+        ON DUPLICATE KEY UPDATE `config_hash` = #{workcenter.theadConfigHash}
     </insert>
 
     <insert id="insertWorkcenterOwner" parameterType="java.lang.String">
@@ -364,7 +355,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
         `type` = #{type},
         `support` = #{support},
         `catalog_id` = #{catalogId},
-        `is_show_total` = #{isShowTotal}
+        `is_show_total` = #{isShowTotal},
+        <if test="theadConfigHash != null and theadConfigHash != ''">
+            `thead_config_hash` = #{theadConfigHash}
+        </if>
         WHERE `uuid` = #{uuid}
     </update>
 
@@ -381,6 +375,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
         VALUES (#{id}, #{name})
         ON DUPLICATE KEY
             UPDATE `name` = #{name}
+    </insert>
+    <insert id="insertWorkcenterTheadConfig">
+        INSERT IGNORE INTO `process_workcenter_thead_config` (`hash`, `config`)
+        VALUES (#{hash}, #{config})
     </insert>
 
 </mapper>
