@@ -934,16 +934,17 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         }
 
         Map<String, FormAttributeVo> formExtendAttributeMap = new HashMap<>();
+        Map<String, FormAttributeVo> formCustomExtendAttributeMap = new HashMap<>();
         List<FormAttributeVo> mainSceneFormAttributeList;
         String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+        JSONObject formConfig = JSON.parseObject(formContent);
+        String mainSceneUuid = formConfig.getString("uuid");
         {
             // 主场景的表单
-            JSONObject formConfig = JSON.parseObject(formContent);
             FormVersionVo formVersionVo = new FormVersionVo();
             formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
             formVersionVo.setFormName(processTaskFormVo.getFormName());
             formVersionVo.setFormConfig(formConfig);
-            String mainSceneUuid = formConfig.getString("uuid");
             formVersionVo.setSceneUuid(mainSceneUuid);
             /* 校验表单属性是否合法 **/
             FormUtil.formAttributeValueValid(formVersionVo, formAttributeDataList);
@@ -951,6 +952,10 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
             List<FormAttributeVo> formExtendAttributeList = formVersionVo.getFormExtendAttributeList();
             if (CollectionUtils.isNotEmpty(formExtendAttributeList)) {
                 formExtendAttributeMap = formExtendAttributeList.stream().collect(Collectors.toMap(e -> e.getParentUuid() + "#" + e.getTag() + "#" + e.getKey(), e -> e));
+            }
+            List<FormAttributeVo> formCustomExtendAttributeList = formVersionVo.getFormCustomExtendAttributeList();
+            if (CollectionUtils.isNotEmpty(formCustomExtendAttributeList)) {
+                formCustomExtendAttributeMap = formCustomExtendAttributeList.stream().collect(Collectors.toMap(e -> mainSceneUuid + "#" + e.getTag() + "#" + e.getKey(), e -> e));
             }
         }
         if (CollectionUtils.isEmpty(mainSceneFormAttributeList)) {
@@ -1105,7 +1110,12 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 String parentUuid = formExtendAttributeDataObj.getString("parentUuid");
                 String tag = formExtendAttributeDataObj.getString("tag");
                 String key = formExtendAttributeDataObj.getString("key");
-                FormAttributeVo formAttributeVo = formExtendAttributeMap.get(parentUuid + "#" + tag + "#" + key);
+                FormAttributeVo formAttributeVo = null;
+                if (StringUtils.isNotBlank(parentUuid)) {
+                    formAttributeVo = formExtendAttributeMap.get(parentUuid + "#" + tag + "#" + key);
+                } else {
+                    formAttributeVo = formCustomExtendAttributeMap.get(mainSceneUuid + "#" + tag + "#" + key);
+                }
                 if (formAttributeVo == null) {
                     continue;
                 }
