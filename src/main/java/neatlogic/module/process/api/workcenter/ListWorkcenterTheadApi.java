@@ -63,7 +63,7 @@ public class ListWorkcenterTheadApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.typeuuid", isRequired = true)
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.typeuuid")
     })
     @Output({
             @Param(explode = WorkcenterTheadVo.class, desc = "nmpaw.listworkcentertheadapi.output.param.desc")
@@ -71,20 +71,22 @@ public class ListWorkcenterTheadApi extends PrivateApiComponentBase {
     @Description(desc = "nmpaw.listworkcentertheadapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        String uuid = jsonObj.getString("uuid");
         List<WorkcenterTheadVo> theadList = new ArrayList<>();
-        WorkcenterVo workcenter = workcenterMapper.getWorkcenterByUuid(uuid);
-        if (workcenter == null) {
-            throw new WorkcenterNotFoundException(uuid);
-        }
-        if (StringUtils.isNotBlank(workcenter.getTheadConfigHash())) {
-            String theadConfigStr = workcenterMapper.getWorkcenterTheadConfigByHash(workcenter.getTheadConfigHash());
-            workcenter.setTheadConfigStr(theadConfigStr);
-            theadList = workcenter.getTheadList();
-        }
-        //多删
+        String uuid = jsonObj.getString("uuid");
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
-        theadList.removeIf(thead -> !columnComponentMap.containsKey(thead.getName()));
+        if(StringUtils.isNotBlank(uuid)){
+            WorkcenterVo workcenter = workcenterMapper.getWorkcenterByUuid(uuid);
+            if (workcenter == null) {
+                throw new WorkcenterNotFoundException(uuid);
+            }
+            if (StringUtils.isNotBlank(workcenter.getTheadConfigHash())) {
+                String theadConfigStr = workcenterMapper.getWorkcenterTheadConfigByHash(workcenter.getTheadConfigHash());
+                workcenter.setTheadConfigStr(theadConfigStr);
+                theadList = workcenter.getTheadList();
+            }
+            //多删
+            theadList.removeIf(thead -> !columnComponentMap.containsKey(thead.getName()));
+        }
         // 少补
         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
             IProcessTaskColumn column = entry.getValue();

@@ -297,6 +297,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
                                           `condition_config`,
                                           `is_show_total`,
                                           `support`,
+                                          `thead_config_hash`,
                                           `catalog_id`)
         VALUES (#{uuid},
                 #{name},
@@ -305,6 +306,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
                 #{conditionConfigStr},
                 #{isShowTotal},
                 #{support},
+                #{theadConfigHash},
                 #{catalogId})
         ON DUPLICATE KEY UPDATE `name`            = #{name},
                                 `type`            = #{type},
@@ -312,6 +314,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
                                 `condition_config`=#{conditionConfigStr},
                                 `is_show_total`=#{isShowTotal},
                                 `support`= #{support},
+                                `thead_config_hash`=#{theadConfigHash},
                                 `catalog_id`= #{catalogId}
     </insert>
 

@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.api.workcenter;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
@@ -23,7 +24,6 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.auth.WORKCENTER_MODIFY;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterType;
-import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.framework.process.exception.workcenter.WorkcenterNoModifyAuthException;
 import neatlogic.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import neatlogic.framework.process.exception.workcenter.WorkcenterParamException;
@@ -34,6 +34,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.RegexUtils;
+import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -60,7 +61,7 @@ public class SaveWorkcenterApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单中心分类保存接口";
+        return "nmpaw.saveworkcenterapi.getname";
     }
 
     @Override
@@ -69,20 +70,21 @@ public class SaveWorkcenterApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid"),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, desc = "分类名", xss = true),
-            @Param(name = "type", type = ApiParamType.STRING, desc = "分类类型，system|custom 默认custom"),
-            @Param(name = "catalogName", type = ApiParamType.STRING, desc = "菜单分类"),
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.typeuuid"),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, desc = "nmpaw.editworkcenterapi.input.param.desc.name", xss = true),
+            @Param(name = "type", type = ApiParamType.STRING, desc = "nmpaw.saveworkcenterapi.input.param.desc.type，system|custom 默认custom"),
+            @Param(name = "catalogName", type = ApiParamType.STRING, desc = "nmpaw.editworkcenterapi.input.param.desc.catalogname"),
             @Param(name = "support", type = ApiParamType.ENUM, rule = "all,mobile,pc", desc = "使用范围，all|pc|mobile，默认值是：all"),
-            @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "分类过滤配置，json格式", isRequired = true),
-            @Param(name = "authList", type = ApiParamType.JSONARRAY, desc = "授权列表，如果type是system,则必填"),
-            @Param(name = "isShowTotal", type = ApiParamType.INTEGER, desc = "是否显示总数，默认0：显示待办数")
+            @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "nmpaw.saveworkcenterapi.input.param.desc.conditionconfig", isRequired = true),
+            @Param(name = "authList", type = ApiParamType.JSONARRAY, desc = "nmpaw.saveworkcenterapi.input.param.desc.authlist"),
+            @Param(name = "theadList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "nmpaw.editworkcenterapi.input.param.desc.workcentertheadlist"),
+            @Param(name = "isShowTotal", type = ApiParamType.INTEGER, desc = "nmpaw.editworkcenterapi.input.param.desc.isshowtotal")
     })
     @Output({@Param(type = ApiParamType.STRING, desc = "分类uuid")})
-    @Description(desc = "工单中心分类新增接口")
+    @Description(desc = "nmpaw.saveworkcenterapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        WorkcenterVo workcenterVo = JSONObject.toJavaObject(jsonObj, WorkcenterVo.class);
+        WorkcenterVo workcenterVo = JSON.toJavaObject(jsonObj, WorkcenterVo.class);
         String uuid = jsonObj.getString("uuid");
         WorkcenterVo oldWorkcenterVo = null;
         if (StringUtils.isNotBlank(uuid)) {
@@ -134,6 +136,10 @@ public class SaveWorkcenterApi extends PrivateApiComponentBase {
             workcenterMapper.insertWorkcenter(workcenterVo);
         } else {
             workcenterMapper.updateWorkcenter(workcenterVo);
+        }
+        //update workcenter_thead_config
+        if(StringUtils.isNotBlank(workcenterVo.getTheadConfigStr())) {
+            workcenterMapper.insertWorkcenterTheadConfig(workcenterVo.getTheadConfigHash(), workcenterVo.getTheadConfigStr());
         }
         return workcenterVo.getUuid();
     }
