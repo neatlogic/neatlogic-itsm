@@ -52,13 +52,15 @@ public interface WorkcenterMapper {
 
     //Map<String,String> getWorkcenterConditionConfig();
 
-    List<WorkcenterTheadVo> getWorkcenterThead(WorkcenterTheadVo workcenterTheadVo);
+    WorkcenterVo getWorkcenterThead(WorkcenterTheadVo workcenterTheadVo);
 
     List<WorkcenterVo> getWorkcenterVoListByUuidList(@Param("uuidList") List<String> uuidList);
 
     List<WorkcenterAuthorityVo> getWorkcenterAuthorityVoListByUuidList(@Param("uuidList") List<String> uuidList);
 
     WorkcenterUserProfileVo getWorkcenterUserProfileByUserUuid(String userUuid);
+
+    String getWorkcenterTheadConfigByHash(String theadConfigHash);
 
     Integer deleteWorkcenterUserProfileByUserUuid(String userUuid);
 
@@ -78,7 +80,7 @@ public interface WorkcenterMapper {
 
     Integer insertWorkcenterOwner(@Param("userUuid") String owner, @Param("uuid") String workcenterUuid);
 
-    Integer insertWorkcenterThead(WorkcenterTheadVo workcenterTheadVo);
+    Integer insertWorkcenterThead(@Param("workcenter") WorkcenterVo workcenterVo, @Param("userUuid") String userUuid);
 
     Integer insertWorkcenterUserProfile(WorkcenterUserProfileVo workcenterUserProfileVo);
 
@@ -88,5 +90,6 @@ public interface WorkcenterMapper {
 
     Integer insertWorkcenterCatalog(WorkcenterCatalogVo catalogVo);
 
+    Integer insertWorkcenterTheadConfig(@Param("hash") String theadConfigHash, @Param("config") String theadConfigStr);
 
 }

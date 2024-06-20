@@ -51,6 +51,7 @@ import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.module.process.sql.decorator.SqlBuilder;
 import neatlogic.module.process.workcenter.operate.WorkcenterOperateBuilder;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -251,9 +252,16 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
     @Override
     public List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap) {
-        List<WorkcenterTheadVo> theadList = workcenterMapper.getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(), UserContext.get().getUserUuid()));
+        String theadConfigHash = workcenterVo.getTheadConfigHash();
+        WorkcenterVo workcenterThead = workcenterMapper.getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(), UserContext.get().getUserUuid()));
+        if(workcenterThead != null && StringUtils.isNotBlank(workcenterThead.getTheadConfigHash())){
+            theadConfigHash = workcenterThead.getTheadConfigHash(); //优先使用用户自己定义的thead
+        }
+        String theadConfigStr = workcenterMapper.getWorkcenterTheadConfigByHash(theadConfigHash);
+        workcenterVo.setTheadConfigStr(theadConfigStr);
         // 矫正theadList 或存在表单属性或固定字段增删
         // 多删
+        List<WorkcenterTheadVo> theadList = workcenterVo.getTheadList();
         ListIterator<WorkcenterTheadVo> it = theadList.listIterator();
         while (it.hasNext()) {
             WorkcenterTheadVo thead = it.next();
@@ -261,10 +269,10 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 if (!columnComponentMap.containsKey(thead.getName())) {
                     it.remove();
                 } else {
-                    thead.setDisabled(columnComponentMap.get(thead.getName()).getDisabled() ? 1 : 0);
+                    thead.setDisabled(Boolean.TRUE.equals(columnComponentMap.get(thead.getName()).getDisabled()) ? 1 : 0);
                     thead.setDisplayName($.t(columnComponentMap.get(thead.getName()).getDisplayName()));
                     thead.setClassName(columnComponentMap.get(thead.getName()).getClassName());
-                    thead.setIsExport(columnComponentMap.get(thead.getName()).getIsExport() ? 1 : 0);
+                    thead.setIsExport(Boolean.TRUE.equals(columnComponentMap.get(thead.getName()).getIsExport()) ? 1 : 0);
                 }
             } else {
                 List<String> channelUuidList = workcenterVo.getChannelUuidList();

@@ -1535,3 +1535,9 @@ CREATE TABLE IF NOT EXISTS `task_config`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uniq_name`(`name`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'task_config';
+
+CREATE TABLE IF NOT EXISTS `process_workcenter_thead_config` (
+  `hash` char(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT '配置hash',
+  `config` text COLLATE utf8mb4_general_ci COMMENT '配置',
+  PRIMARY KEY (`hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
