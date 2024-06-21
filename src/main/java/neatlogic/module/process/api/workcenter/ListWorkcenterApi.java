@@ -112,7 +112,7 @@ public class ListWorkcenterApi extends PrivateApiComponentBase {
             BatchRunner<WorkcenterVo> runner = new BatchRunner<>();
             runner.execute(workcenterList, 3, (threadIndex, dataIndex, workcenter) -> {
                 if (workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
-                    workcenter.setIsCanEdit(0);
+                    workcenter.setIsCanEdit(isWorkcenterManager ? 1 : 0);
                     if (Arrays.asList(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getValue(), ProcessWorkcenterInitType.PROCESSING_OF_MINE_PROCESSTASK.getValue()).contains(workcenter.getUuid()) && isWorkcenterManager) {
                         workcenter.setIsCanRole(1);
                     }
@@ -138,8 +138,8 @@ public class ListWorkcenterApi extends PrivateApiComponentBase {
                 if (!StringUtils.equals(workcenter.getUuid(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()) && !StringUtils.equals(workcenter.getUuid(), ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getValue())) {
                     try {
                          /*
-            由于需要一直显示我的待办数量，因此无论输入条件有没有设置我的待办，都需要把我的待办设为1来查询一次数量
-             */
+                        由于需要一直显示我的待办数量，因此无论输入条件有没有设置我的待办，都需要把我的待办设为1来查询一次数量
+                         */
                         if (workcenter.getIsShowTotal() == 0) {
                             workcenter.getConditionConfig().put("isProcessingOfMine", 1);
                         }
