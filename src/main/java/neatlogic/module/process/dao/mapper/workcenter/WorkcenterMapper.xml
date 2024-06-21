@@ -358,9 +358,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
         `type` = #{type},
         `support` = #{support},
         `catalog_id` = #{catalogId},
-        `is_show_total` = #{isShowTotal},
+        `is_show_total` = #{isShowTotal}
         <if test="theadConfigHash != null and theadConfigHash != ''">
-            `thead_config_hash` = #{theadConfigHash}
+            ,`thead_config_hash` = #{theadConfigHash}
         </if>
         WHERE `uuid` = #{uuid}
     </update>
