@@ -63,7 +63,7 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid"),
             @Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.channeluuid"),
-            @Param(name = "title", type = ApiParamType.STRING, isRequired = true, maxLength = 80, desc = "common.title"),
+            @Param(name = "title", type = ApiParamType.STRING, isRequired = true, maxLength = 200, desc = "common.title"),
             @Param(name = "owner", type = ApiParamType.STRING, desc = "term.itsm.owner"),
             @Param(name = "reporter", type = ApiParamType.STRING, desc = "term.itsm.reporter", help = "如果当前登录人和owner不一样则需要额外传reporter。没有代报人，则数据库对应reporter直接null"),
             @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "common.priorityuuid"),

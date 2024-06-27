@@ -89,7 +89,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 
     @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id"),
-            @Param(name = "title", type = ApiParamType.STRING, maxLength = 80, desc = "标题"),
+            @Param(name = "title", type = ApiParamType.STRING, maxLength = 200, desc = "标题"),
             @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "优先级uuid"),
             @Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
             @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),

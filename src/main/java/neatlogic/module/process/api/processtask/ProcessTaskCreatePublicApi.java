@@ -37,7 +37,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase implement
     @SuppressWarnings("unchecked")
     @Input({
             @Param(name = "channel", type = ApiParamType.STRING, isRequired = true, desc = "支持channelUuid和channelName入参"),
-            @Param(name = "title", type = ApiParamType.STRING, isRequired = true, maxLength = 80, desc = "标题"),
+            @Param(name = "title", type = ApiParamType.STRING, isRequired = true, maxLength = 200, desc = "标题"),
             @Param(name = "owner", type = ApiParamType.STRING, isRequired = true, desc = "上报人uuid和上报人id入参"),
             @Param(name = "reporter", type = ApiParamType.STRING, desc = "代报人"),
             @Param(name = "priority", type = ApiParamType.STRING, isRequired = true, desc = "优先级"),
