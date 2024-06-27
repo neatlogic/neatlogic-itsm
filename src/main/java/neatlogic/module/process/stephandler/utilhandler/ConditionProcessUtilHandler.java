@@ -8,6 +8,7 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.processconfig.MoveonConfigVo;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -72,6 +73,11 @@ public class ConditionProcessUtilHandler extends ProcessStepInternalHandlerBase 
 			}
 		}
 		resultObj.put("moveonConfigList", moveonConfigList);
+		String formTag = configObj.getString("formTag");
+		if (StringUtils.isBlank(formTag)) {
+			formTag = StringUtils.EMPTY;
+		}
+		resultObj.put("formTag", formTag);
 		return resultObj;
 	}
 }
