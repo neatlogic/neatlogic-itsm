@@ -2160,15 +2160,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 }
             }
         }
-        List<FormAttributeVo> formCustomExtendAttributeList = new ArrayList<>();
-        List<FormAttributeVo> allFormCustomExtendAttributeList = formVersionVo.getFormCustomExtendAttributeList();
-        if (CollectionUtils.isNotEmpty(allFormCustomExtendAttributeList)) {
-            for (FormAttributeVo formAttributeVo : allFormCustomExtendAttributeList) {
-                if (Objects.equals(formAttributeVo.getTag(), tag)) {
-                    formCustomExtendAttributeList.add(formAttributeVo);
-                }
-            }
-        }
         for (FormAttributeVo formAttributeVo : formAttributeList) {
             if (parentUuidList.contains(formAttributeVo.getUuid())) {
                 continue;
@@ -2176,8 +2167,51 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             resultList.add(formAttributeVo);
         }
         resultList.addAll(formExtendAttributeList);
-        resultList.addAll(formCustomExtendAttributeList);
         return resultList;
+    }
+
+    @Override
+    public List<FormAttributeVo> getFormAttributeListByProcessTaskIdAngTagNew(Long processTaskId, String tag) {
+        List<FormAttributeVo> resultList = new ArrayList<>();
+        ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
+        if (processTaskFormVo == null) {
+            // 工单没有表单直接返回
+            return resultList;
+        }
+        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+        JSONObject config = JSON.parseObject(formContent);
+        // 默认场景的表单
+        FormVersionVo formVersionVo = new FormVersionVo();
+        formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
+        formVersionVo.setFormName(processTaskFormVo.getFormName());
+        formVersionVo.setFormConfig(config);
+        String mainSceneUuid = config.getString("uuid");
+        formVersionVo.setSceneUuid(mainSceneUuid);
+        if (StringUtils.isBlank(tag)) {
+            tag = "common";
+        }
+        Set<String> tagSet = new HashSet<>();
+        {
+            List<FormAttributeVo> formCustomExtendAttributeList = formVersionVo.getFormCustomExtendAttributeList();
+            if (CollectionUtils.isNotEmpty(formCustomExtendAttributeList)) {
+                for (FormAttributeVo formAttributeVo : formCustomExtendAttributeList) {
+                    tagSet.add(formAttributeVo.getTag());
+                }
+            }
+        }
+        if (tagSet.contains(tag)) {
+            List<FormAttributeVo> allFormCustomExtendAttributeList = formVersionVo.getFormCustomExtendAttributeList();
+            if (CollectionUtils.isNotEmpty(allFormCustomExtendAttributeList)) {
+                for (FormAttributeVo formAttributeVo : allFormCustomExtendAttributeList) {
+                    if (Objects.equals(formAttributeVo.getTag(), tag)) {
+                        resultList.add(formAttributeVo);
+                    }
+                }
+            }
+            return resultList;
+        } else {
+            return getFormAttributeListByProcessTaskIdAngTag(processTaskId, tag);
+        }
     }
 
     @Override
@@ -2199,6 +2233,54 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
         return processTaskFormAttributeDataList;
+    }
+
+    @Override
+    public List<ProcessTaskFormAttributeDataVo> getProcessTaskFormAttributeDataListByProcessTaskIdAndTagNew(Long processTaskId, String tag) {
+        ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
+        if (processTaskFormVo == null) {
+            // 工单没有表单直接返回
+            return new ArrayList<>();
+        }
+        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+        JSONObject config = JSON.parseObject(formContent);
+        // 默认场景的表单
+        FormVersionVo formVersionVo = new FormVersionVo();
+        formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
+        formVersionVo.setFormName(processTaskFormVo.getFormName());
+        formVersionVo.setFormConfig(config);
+        String mainSceneUuid = config.getString("uuid");
+        formVersionVo.setSceneUuid(mainSceneUuid);
+        if (StringUtils.isBlank(tag)) {
+            tag = "common";
+        }
+        Set<String> tagSet = new HashSet<>();
+        List<FormAttributeVo> formCustomExtendAttributeList = formVersionVo.getFormCustomExtendAttributeList();
+        if (CollectionUtils.isNotEmpty(formCustomExtendAttributeList)) {
+            for (FormAttributeVo formAttributeVo : formCustomExtendAttributeList) {
+                tagSet.add(formAttributeVo.getTag());
+            }
+        }
+        if (tagSet.contains(tag)) {
+            List<String> attributeUuidList = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(formCustomExtendAttributeList)) {
+                for (FormAttributeVo formAttributeVo : formCustomExtendAttributeList) {
+                    if (Objects.equals(formAttributeVo.getTag(), tag)) {
+                        attributeUuidList.add(formAttributeVo.getUuid());
+                    }
+                }
+            }
+            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = new ArrayList<>();
+            List<AttributeDataVo> extendAttributeDataList = processTaskMapper.getProcessTaskExtendFormAttributeDataListByProcessTaskId(processTaskId, tag);
+            for (AttributeDataVo attributeDataVo : extendAttributeDataList) {
+                if (attributeUuidList.contains(attributeDataVo.getAttributeUuid())) {
+                    processTaskFormAttributeDataList.add(new ProcessTaskFormAttributeDataVo(processTaskId, attributeDataVo));
+                }
+            }
+            return processTaskFormAttributeDataList;
+        } else {
+            return getProcessTaskFormAttributeDataListByProcessTaskIdAndTag(processTaskId, tag);
+        }
     }
 
     @Override

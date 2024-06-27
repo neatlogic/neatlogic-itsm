@@ -136,6 +136,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                 ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
                 String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
                 if (StringUtils.isNotBlank(stepConfig)) {
+                    String formTag = (String) JSONPath.read(stepConfig, "formTag");
                     JSONArray moveonConfigList = (JSONArray) JSONPath.read(stepConfig, "moveonConfigList");
                     if (CollectionUtils.isNotEmpty(moveonConfigList)) {
                         JSONArray ruleList = new JSONArray();
@@ -153,14 +154,14 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                 } else if ("optional".equals(type)) {// 自定义
                                     JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
                                     if (CollectionUtils.isNotEmpty(conditionGroupList)) {
-                                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), currentProcessTaskStepVo);
+                                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), currentProcessTaskStepVo, formTag);
                                         ConditionConfigVo conditionConfigVo = null;
                                         try {
                                             ConditionParamContext.init(conditionParamData).setTranslate(true);
                                             conditionConfigVo = new ConditionConfigVo(moveonConfig);
                                             String script = conditionConfigVo.buildScript();
                                             /* 将参数名称、表达式、值的value翻译成对应text，目前条件步骤生成活动时用到**/
-                                            translate(conditionConfigVo, currentProcessTaskStepVo.getProcessTaskId());
+                                            translate(conditionConfigVo, currentProcessTaskStepVo.getProcessTaskId(), formTag);
                                             // ((false || true) || (true && false) || (true || false))
                                             canRun = RunScriptUtil.runScript(script);
                                             ruleObj.put("result", canRun);
@@ -168,8 +169,10 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                             logger.error(e.getMessage(), e);
                                         } finally {
                                             ConditionParamContext.get().release();
-                                            ruleObj.put("conditionGroupList", conditionConfigVo.getConditionGroupList());
-                                            ruleObj.put("conditionGroupRelList", conditionConfigVo.getConditionGroupRelList());
+                                            if (conditionConfigVo != null) {
+                                                ruleObj.put("conditionGroupList", conditionConfigVo.getConditionGroupList());
+                                                ruleObj.put("conditionGroupRelList", conditionConfigVo.getConditionGroupRelList());
+                                            }
                                         }
                                     }
                                 } else {
@@ -208,10 +211,11 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
         }
     }
 
-    private void translate(ConditionConfigVo conditionConfigVo, Long processTaskId) {
+    private void translate(ConditionConfigVo conditionConfigVo, Long processTaskId, String formTag) {
         List<ConditionGroupVo> conditionGroupList = conditionConfigVo.getConditionGroupList();
         if (CollectionUtils.isNotEmpty(conditionGroupList)) {
-            List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTag(processTaskId, ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
+//            List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTag(processTaskId, ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
+            List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTagNew(processTaskId, formTag);
             Map<String, FormAttributeVo> formAttributeVoMap = formAttributeList.stream().collect(Collectors.toMap(FormAttributeVo::getUuid, e -> e));
             for (ConditionGroupVo conditionGroup : conditionGroupList) {
                 List<ConditionVo> conditionList = conditionGroup.getConditionList();

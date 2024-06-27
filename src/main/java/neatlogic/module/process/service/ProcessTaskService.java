@@ -465,6 +465,14 @@ public interface ProcessTaskService {
     List<FormAttributeVo> getFormAttributeListByProcessTaskIdAngTag(Long processTaskId, String tag);
 
     /**
+     * 根据工单id获取工单绑定的表单信息
+     * @param processTaskId 工单ID
+     * @param tag 标签
+     * @return
+     */
+    List<FormAttributeVo> getFormAttributeListByProcessTaskIdAngTagNew(Long processTaskId, String tag);
+
+    /**
      * 根据工单id获取表单属性数据列表
      * @param processTaskId 工单id
      * @return
@@ -478,6 +486,14 @@ public interface ProcessTaskService {
      * @return
      */
     List<ProcessTaskFormAttributeDataVo> getProcessTaskFormAttributeDataListByProcessTaskIdAndTag(Long processTaskId, String tag);
+
+    /**
+     * 根据工单id获取表单属性数据列表
+     * @param processTaskId 工单id
+     * @param tag 标签
+     * @return
+     */
+    List<ProcessTaskFormAttributeDataVo> getProcessTaskFormAttributeDataListByProcessTaskIdAndTagNew(Long processTaskId, String tag);
 
     /**
      * 根据工单id和表单属性uuid获取表单属性数据
