@@ -28,12 +28,12 @@ import neatlogic.framework.process.constvalue.AutoexecProcessStepHandlerType;
 import neatlogic.framework.process.constvalue.ProcessFlowDirection;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.automatic.FailPolicy;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -42,6 +42,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author linbq
@@ -105,7 +106,11 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
             }
             String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
             if (StringUtils.isNotBlank(config)) {
-                failPolicy = (String) JSONPath.read(config, "autoexecConfig.failPolicy");
+                if (Objects.equals(processTaskStepVo.getHandler(), AutoexecProcessStepHandlerType.AUTOEXEC.getHandler())) {
+                    failPolicy = (String) JSONPath.read(config, "autoexecConfig.failPolicy");
+                } else if (Objects.equals(processTaskStepVo.getHandler(), "createjob")) {
+                    failPolicy = (String) JSONPath.read(config, "createJobConfig.failPolicy");
+                }
             }
             if (failed > 0) {
                 if (FailPolicy.KEEP_ON.getValue().equals(failPolicy)) {
@@ -129,7 +134,7 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
         List<Long> toProcessTaskStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(processTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
         if (toProcessTaskStepIdList.size() == 1) {
             Long nextStepId = toProcessTaskStepIdList.get(0);
-            IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(AutoexecProcessStepHandlerType.AUTOEXEC.getHandler());
+            IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
             if (handler != null) {
                 try {
                     JSONObject paramObj = processTaskStepVo.getParamObj();
