@@ -1,5 +1,6 @@
 package neatlogic.module.process.api.process;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.ConditionParamVo;
@@ -10,11 +11,10 @@ import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerFactory;
 import neatlogic.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
-import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.auth.PROCESS;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@AuthAction(action = PROCESS_BASE.class)
+@AuthAction(action = PROCESS.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessNotifyPolicyParamList extends PrivateApiComponentBase {
 
@@ -57,13 +57,12 @@ public class ProcessNotifyPolicyParamList extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String notifyPolicyHandler = jsonObj.getString("notifyPolicyHandler");
         INotifyPolicyHandler handler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyHandler);
-        if (notifyPolicyHandler == null) {
+        if (handler == null) {
             throw new NotifyPolicyHandlerNotFoundException(notifyPolicyHandler);
         }
         List<ConditionParamVo> systemParamList = handler.getSystemParamList();
         systemParamList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
-        List<ConditionParamVo> paramList = new ArrayList<>();
-        paramList.addAll(systemParamList);
+        List<ConditionParamVo> paramList = new ArrayList<>(systemParamList);
         // 表单条件
         String formUuid = jsonObj.getString("formUuid");
         if (StringUtils.isNotBlank(formUuid)) {
@@ -77,7 +76,7 @@ public class ProcessNotifyPolicyParamList extends PrivateApiComponentBase {
                     ConditionParamVo conditionParamVo = new ConditionParamVo();
                     conditionParamVo.setName(formAttributeVo.getUuid());
                     conditionParamVo.setLabel(formAttributeVo.getLabel());
-                    if (formHandler != null && formHandler.getParamType() != null) {
+                    if (formHandler.getParamType() != null) {
                         conditionParamVo.setParamType(formHandler.getParamType().getName());
                         conditionParamVo.setParamTypeName(formHandler.getParamType().getText());
                     }
