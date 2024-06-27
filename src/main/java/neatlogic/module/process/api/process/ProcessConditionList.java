@@ -24,7 +24,6 @@ import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.process.stephandler.component.ConditionProcessComponent;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -56,6 +55,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "formUuid", type = ApiParamType.STRING, desc = "term.framework.formuuid"),
+            @Param(name = "tag", type = ApiParamType.STRING, desc = "common.tag"),
             @Param(name = "isAll", type = ApiParamType.INTEGER, rule = "0,1", desc = "term.process.isreturnallattr")})
     @Output({@Param(explode = ConditionParamVo[].class, desc = "nmpap.processconditionlist.getname")})
     @Description(desc = "nmpap.processconditionlist.getname")
@@ -103,9 +103,11 @@ public class ProcessConditionList extends PrivateApiComponentBase {
             if (form == null) {
                 throw new FormNotFoundException(formUuid);
             }
-            // TODO 需要确定条件节点表单扩展属性标签
+
+            String tag = jsonObj.getString("tag");
             IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-            List<FormAttributeVo> formAttrList = formCrossoverService.getFormAttributeList(formUuid, form.getName(), ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
+//            List<FormAttributeVo> formAttrList = formCrossoverService.getFormAttributeList(formUuid, form.getName(), ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
+            List<FormAttributeVo> formAttrList = formCrossoverService.getFormAttributeListNew(formUuid, form.getName(), tag);
             for (FormAttributeVo formAttributeVo : formAttrList) {
                 IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                 if (formHandler == null) {
