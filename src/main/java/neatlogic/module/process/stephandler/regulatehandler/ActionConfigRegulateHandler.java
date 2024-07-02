@@ -19,10 +19,10 @@ package neatlogic.module.process.stephandler.regulatehandler;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.process.dto.processconfig.ActionConfigVo;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.IRegulateHandler;
-import neatlogic.module.process.notify.handler.OmnipotentNotifyPolicyHandler;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,7 +40,10 @@ public class ActionConfigRegulateHandler implements IRegulateHandler {
         if (actionConfigVo == null) {
             actionConfigVo = new ActionConfigVo();
         }
-        actionConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
+        Class<? extends INotifyPolicyHandler> clazz = processStepInternalHandler.getNotifyPolicyHandlerClass();
+        if (clazz != null) {
+            actionConfigVo.setHandler(clazz.getName());
+        }
         newConfigObj.put("actionConfig", actionConfigVo);
     }
 }
