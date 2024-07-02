@@ -23,7 +23,6 @@ import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.IRegulateHandler;
-import neatlogic.module.process.notify.handler.OmnipotentNotifyPolicyHandler;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,7 +37,7 @@ public class NotifyPolicyConfigRegulateHandler implements IRegulateHandler {
     public void regulateConfig(IProcessStepInternalHandler processStepInternalHandler, JSONObject oldConfigObj, JSONObject newConfigObj) {
         JSONObject notifyPolicyConfig = oldConfigObj.getJSONObject("notifyPolicyConfig");
         INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
-        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = notifyServiceCrossoverService.regulateNotifyPolicyConfig(notifyPolicyConfig, OmnipotentNotifyPolicyHandler.class);
+        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = notifyServiceCrossoverService.regulateNotifyPolicyConfig(notifyPolicyConfig, processStepInternalHandler.getNotifyPolicyHandlerClass());
         newConfigObj.put("notifyPolicyConfig", invokeNotifyPolicyConfigVo);
     }
 }

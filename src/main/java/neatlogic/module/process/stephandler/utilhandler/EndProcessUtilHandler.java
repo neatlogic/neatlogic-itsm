@@ -2,12 +2,14 @@ package neatlogic.module.process.stephandler.utilhandler;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.dto.ProcessStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
 import neatlogic.framework.process.util.ProcessConfigUtil;
+import neatlogic.module.process.notify.handler.TaskNotifyPolicyHandler;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,6 +39,12 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
     public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
 
     }
+
+    @Override
+    public Class<? extends INotifyPolicyHandler> getNotifyPolicyHandlerClass() {
+        return TaskNotifyPolicyHandler.class;
+    }
+
     @Override
     public String[] getRegulateKeyList() {
         return new String[]{"processConfig", "formConfig", "scoreConfig", "slaList"};
