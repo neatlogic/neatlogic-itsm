@@ -1,5 +1,6 @@
 package neatlogic.module.process.api.process;
 
+import neatlogic.framework.process.stephandler.core.ProcessMessageManager;
 import neatlogic.framework.process.util.ProcessConfigUtil;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
@@ -55,6 +56,7 @@ public class ProcessGetApi extends PrivateApiComponentBase {
         if (processVo == null) {
             throw new ProcessNotFoundEditTargetException(uuid);
         }
+        ProcessMessageManager.setOperationType(OperationTypeEnum.SEARCH);
         processVo.setConfig(ProcessConfigUtil.regulateProcessConfig(processVo.getConfig()));
         int count = processMapper.getProcessReferenceCount(uuid);
         processVo.setReferenceCount(count);

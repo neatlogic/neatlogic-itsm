@@ -6,6 +6,7 @@ import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.process.auth.PROCESS_MODIFY;
 import neatlogic.framework.process.dto.ProcessVo;
 import neatlogic.framework.process.exception.process.ProcessNameRepeatException;
+import neatlogic.framework.process.stephandler.core.ProcessMessageManager;
 import neatlogic.framework.process.util.ProcessConfigUtil;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -60,6 +61,7 @@ public class ProcessSaveApi extends PrivateApiComponentBase {
     @Description(desc = "流程保存接口")
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessVo processVo = JSON.toJavaObject(jsonObj, ProcessVo.class);
+        ProcessMessageManager.setOperationType(OperationTypeEnum.UPDATE);
         processVo.setConfig(ProcessConfigUtil.regulateProcessConfig(processVo.getConfig()));
         processVo.makeupConfigObj();
         processService.saveProcess(processVo);
