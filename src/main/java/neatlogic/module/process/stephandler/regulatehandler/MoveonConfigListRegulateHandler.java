@@ -24,6 +24,7 @@ import neatlogic.framework.process.exception.process.ProcessConfigException;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.IRegulateHandler;
 import neatlogic.framework.process.stephandler.core.ProcessMessageManager;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ public class MoveonConfigListRegulateHandler implements IRegulateHandler {
                     List<String> targetStepList = moveonConfigVo.getTargetStepList();
                     if (CollectionUtils.isNotEmpty(targetStepList)) {
                         List<String> list = ListUtils.removeAll(targetStepList, effectiveStepUuidList);
-                        if (CollectionUtils.isNotEmpty(list)) {
+                        if (CollectionUtils.isNotEmpty(list) && ProcessMessageManager.getOperationType() == OperationTypeEnum.UPDATE) {
                             throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
                         }
                     }

@@ -26,6 +26,7 @@ import neatlogic.framework.process.exception.process.ProcessConfigException;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.IRegulateHandler;
 import neatlogic.framework.process.stephandler.core.ProcessMessageManager;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -61,7 +62,7 @@ public class SlaListRegulateHandler implements IRegulateHandler {
                         processStepUuidList.removeIf(Objects::isNull);
                     }
                     List<String> list = ListUtils.removeAll(processStepUuidList, effectiveStepUuidList);
-                    if (CollectionUtils.isNotEmpty(list)) {
+                    if (CollectionUtils.isNotEmpty(list) && ProcessMessageManager.getOperationType() == OperationTypeEnum.UPDATE) {
                         throw new ProcessConfigException(ProcessConfigException.Type.SLA, slaName);
                     }
                     slaObj.put("processStepUuidList", processStepUuidList);
