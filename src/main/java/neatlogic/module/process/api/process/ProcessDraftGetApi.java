@@ -10,15 +10,16 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 @AuthAction(action = PROCESS_MODIFY.class)
 public class ProcessDraftGetApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ProcessMapper processMapper;
 
     @Override
