@@ -3445,23 +3445,6 @@
                 #{startTime})
     </insert>
 
-    <insert id="insertProcessTaskStepMinorUser" parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
-        INSERT INTO `processtask_step_user` (`processtask_id`,
-                                             `processtask_step_id`,
-                                             `user_uuid`,
-                                             `user_type`,
-                                             `user_name`,
-                                             `status`)
-        VALUES (#{processTaskId},
-                #{processTaskStepId},
-                #{userUuid},
-                'minor',
-                #{userName},
-                #{status})
-        ON DUPLICATE KEY UPDATE
-        `status` = #{status}
-    </insert>
-
     <insert id="insertIgnoreProcessTaskStepConfig"
             parameterType="neatlogic.framework.process.dto.ProcessTaskStepConfigVo">
         insert ignore INTO `processtask_step_config` (`hash`, `config`)
