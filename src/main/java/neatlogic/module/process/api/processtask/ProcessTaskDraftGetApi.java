@@ -245,15 +245,16 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
      */
     private JSONObject getFromFormAttributeDataMap(Long fromProcessTaskId) {
         JSONObject resultObj = new JSONObject();
+        Map<String, String> labelUuidMap = new HashMap<>();
+        Map<String, String> labelHandlerMap = new HashMap<>();
+        Map<String, String> keyUuidMap = new HashMap<>();
+        Map<String, String> keyHandlerMap = new HashMap<>();
+        Map<String, Object> formAttributeDataMap = new HashMap<>();
         // 获取旧工单表单信息
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(fromProcessTaskId);
         if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
             String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
             if (StringUtils.isNotBlank(formContent)) {
-                Map<String, String> labelUuidMap = new HashMap<>();
-                Map<String, String> labelHandlerMap = new HashMap<>();
-                Map<String, String> keyUuidMap = new HashMap<>();
-                Map<String, String> keyHandlerMap = new HashMap<>();
                 JSONObject formConfig = JSON.parseObject(formContent);
                 FormVersionVo fromFormVersion = new FormVersionVo();
                 fromFormVersion.setFormConfig(formConfig);
@@ -268,18 +269,17 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                         keyHandlerMap.put(formAttributeVo.getKey(), formAttributeVo.getHandler());
                     }
                 }
-                Map<String, Object> formAttributeDataMap = new HashMap<>();
                 List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(fromProcessTaskId);
                 for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
                     formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
                 }
-                resultObj.put("labelUuidMap", labelUuidMap);
-                resultObj.put("labelHandlerMap", labelHandlerMap);
-                resultObj.put("keyUuidMap", keyUuidMap);
-                resultObj.put("keyHandlerMap", keyHandlerMap);
-                resultObj.put("formAttributeDataMap", formAttributeDataMap);
             }
         }
+        resultObj.put("labelUuidMap", labelUuidMap);
+        resultObj.put("labelHandlerMap", labelHandlerMap);
+        resultObj.put("keyUuidMap", keyUuidMap);
+        resultObj.put("keyHandlerMap", keyHandlerMap);
+        resultObj.put("formAttributeDataMap", formAttributeDataMap);
         return resultObj;
     }
 
