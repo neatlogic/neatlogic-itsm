@@ -137,6 +137,16 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                                                     new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
                                                             currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(),
                                                             value, ProcessUserType.MAJOR.getValue()));
+                                        } else if (teamMapper.checkTeamIsExists(value) > 0) {
+                                            processTaskStepWorkerList.add(
+                                                    new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
+                                                            currentProcessTaskStepVo.getId(), GroupSearch.TEAM.getValue(),
+                                                            value, ProcessUserType.MAJOR.getValue()));
+                                        } else if (roleMapper.checkRoleIsExists(value) > 0) {
+                                            processTaskStepWorkerList.add(
+                                                    new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
+                                                            currentProcessTaskStepVo.getId(), GroupSearch.ROLE.getValue(),
+                                                            value, ProcessUserType.MAJOR.getValue()));
                                         }
                                     }
                                 }
