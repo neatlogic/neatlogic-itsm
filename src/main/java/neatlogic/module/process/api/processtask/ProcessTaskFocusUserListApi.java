@@ -20,12 +20,12 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -65,7 +65,7 @@ public class ProcessTaskFocusUserListApi extends PrivateApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
         if (processTaskVo == null) {
-            throw new ProcessTaskNotFoundException(processTaskId.toString());
+            throw new ProcessTaskNotFoundException(processTaskId);
         }
         int isFocus = processTaskMapper.checkProcessTaskFocusExists(processTaskId, UserContext.get().getUserUuid()) > 0 ? 1 : 0;
         List<String> focusUserUuidList = processTaskMapper.getFocusUserListByTaskId(processTaskId);

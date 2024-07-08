@@ -557,7 +557,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             throws Exception {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
         if (processTaskVo == null) {
-            throw new ProcessTaskNotFoundException(processTaskId.toString());
+            throw new ProcessTaskNotFoundException(processTaskId);
         }
 //        if (processTaskVo.getIsShow() != 1 && !AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName())) {
 //            throw new PermissionDeniedException(PROCESSTASK_MODIFY.class);

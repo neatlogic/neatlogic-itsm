@@ -1,19 +1,19 @@
 package neatlogic.module.process.api.processtask;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskFocusRepeatException;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -57,7 +57,7 @@ public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 		int isFocus = jsonObj.getIntValue("isFocus");
 		String userUuid = UserContext.get().getUserUuid();
 		if(processTaskMapper.getProcessTaskById(processTaskId) == null){
-			throw new ProcessTaskNotFoundException(processTaskId.toString());
+			throw new ProcessTaskNotFoundException(processTaskId);
 		}
 		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
 		processTaskStepVo.setProcessTaskId(processTaskId);

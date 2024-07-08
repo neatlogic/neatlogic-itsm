@@ -25,7 +25,6 @@ import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.form.constvalue.FormHandler;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
@@ -34,6 +33,7 @@ import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFa
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -93,7 +93,7 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
         BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
         Long processTaskId = jsonObj.getLong("processTaskId");
         if (processTaskMapper.getProcessTaskById(processTaskId) == null) {
-            throw new ProcessTaskNotFoundException(processTaskId.toString());
+            throw new ProcessTaskNotFoundException(processTaskId);
         }
         // 工单上报与步骤附件
         List<FileVo> fileList = processTaskMapper.getFileDetailListByProcessTaskId(processTaskId);

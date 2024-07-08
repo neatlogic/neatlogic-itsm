@@ -1,16 +1,22 @@
 package neatlogic.module.process.api.processtask;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.SlaStatus;
+import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.dto.agent.ProcessTaskAgentVo;
+import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.module.process.service.ProcessTaskAgentService;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.framework.util.TableResultUtil;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
@@ -18,26 +24,13 @@ import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskAgentMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
+import neatlogic.module.process.service.ProcessTaskAgentService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.dto.BasePageVo;
-import neatlogic.framework.process.dto.ChannelTypeVo;
-import neatlogic.framework.process.dto.ChannelVo;
-import neatlogic.framework.process.dto.ProcessTaskSlaTimeVo;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.dto.ProcessTaskVo;
-import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.*;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-
 import javax.annotation.Resource;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -97,7 +90,7 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
         Long currentProcessTaskId = jsonObj.getLong("currentProcessTaskId");
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskId);
         if (processTaskVo == null) {
-            throw new ProcessTaskNotFoundException(currentProcessTaskId.toString());
+            throw new ProcessTaskNotFoundException(currentProcessTaskId);
         }
         List<Long> currentProcessTaskProcessableStepIdList = new ArrayList<>();
         List<ProcessTaskStepVo> currentProcessTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(currentProcessTaskId);

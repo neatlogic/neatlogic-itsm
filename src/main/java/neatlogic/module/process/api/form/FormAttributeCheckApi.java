@@ -1,39 +1,36 @@
 package neatlogic.module.process.api.form;
 
-import java.util.List;
-
-import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.exception.type.ParamIrregularException;
-import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.restful.annotation.*;
-import neatlogic.module.process.dao.mapper.process.ProcessMapper;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONObject;
-
+import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.framework.exception.type.ParamIrregularException;
+import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
+import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
 import neatlogic.framework.form.dao.mapper.FormMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.form.dto.AttributeDataVo;
-import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
+import neatlogic.framework.form.exception.FormActiveVersionNotFoundExcepiton;
+import neatlogic.framework.form.exception.FormAttributeNotFoundException;
+import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.process.dto.ProcessFormVo;
 import neatlogic.framework.process.dto.ProcessTaskFormVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
-import neatlogic.framework.form.exception.FormActiveVersionNotFoundExcepiton;
-import neatlogic.framework.form.exception.FormAttributeNotFoundException;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
-import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.dao.mapper.process.ProcessMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -88,7 +85,7 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 		if(processTaskId != null) {
 			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 			if(processTaskVo == null) {
-				throw new ProcessTaskNotFoundException(processTaskId.toString());
+				throw new ProcessTaskNotFoundException(processTaskId);
 			}
 			worktimeUuid = processTaskVo.getWorktimeUuid();
 			ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);

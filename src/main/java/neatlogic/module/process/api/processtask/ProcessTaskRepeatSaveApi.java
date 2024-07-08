@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.api.processtask;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -24,28 +26,29 @@ import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskRepeatVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.module.process.service.ProcessTaskService;
-import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.SnowflakeUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author linbq
@@ -106,11 +109,7 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
         List<Long> processTaskIdList = processTaskMapper.checkProcessTaskIdListIsExists(repeatProcessTaskIdList);
         if (processTaskIdList.size() < repeatProcessTaskIdList.size()) {
             repeatProcessTaskIdList.removeAll(processTaskIdList);
-            List<String> processTaskIdStrList = new ArrayList<>();
-            for (Long id : repeatProcessTaskIdList) {
-                processTaskIdStrList.add(id.toString());
-            }
-            throw new ProcessTaskNotFoundException(String.join("、",processTaskIdStrList));
+            throw new ProcessTaskNotFoundException(repeatProcessTaskIdList);
         }
         List<Long> markedprocessTaskIdList = new ArrayList<>();
         Long repeatGroupId = processTaskMapper.getRepeatGroupIdByProcessTaskId(processTaskId);
