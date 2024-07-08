@@ -15,14 +15,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.dependency.handler;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
-import neatlogic.framework.dependency.core.CustomTableDependencyHandlerBase;
+import neatlogic.framework.dependency.core.CustomDependencyHandlerBase;
 import neatlogic.framework.dependency.core.IFromType;
 import neatlogic.framework.dependency.dto.DependencyInfoVo;
-import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.framework.process.dto.ChannelVo;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -37,7 +37,7 @@ import java.util.Map;
  * @since: 2021/4/2 17:41
  **/
 @Service
-public class WorktimeChannelDependencyHandler extends CustomTableDependencyHandlerBase {
+public class WorktimeChannelDependencyHandler extends CustomDependencyHandlerBase {
 
     @Resource
     private ChannelMapper channelMapper;

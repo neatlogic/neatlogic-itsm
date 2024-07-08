@@ -18,7 +18,7 @@ package neatlogic.module.process.dependency.handler;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
-import neatlogic.framework.dependency.core.CustomTableDependencyHandlerBase;
+import neatlogic.framework.dependency.core.CustomDependencyHandlerBase;
 import neatlogic.framework.dependency.core.IFromType;
 import neatlogic.framework.dependency.dto.DependencyInfoVo;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerTypeFactory;
@@ -36,7 +36,7 @@ import java.util.Map;
  * @since: 2021/4/5 14:31
  **/
 @Service
-public class NotifyPolicyProcessStepHandlerDependencyHandler extends CustomTableDependencyHandlerBase {
+public class NotifyPolicyProcessStepHandlerDependencyHandler extends CustomDependencyHandlerBase {
 
     /**
      * 表名

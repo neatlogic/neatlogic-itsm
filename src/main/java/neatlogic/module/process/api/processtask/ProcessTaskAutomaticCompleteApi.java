@@ -1,12 +1,12 @@
 package neatlogic.module.process.api.processtask;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessFlowDirection;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import neatlogic.framework.process.exception.processtask.ProcessTaskAutomaticNotAllowNextStepsException;
@@ -16,19 +16,19 @@ import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.core.publicapi.PublicApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_BASE.class)
-public class ProcessTaskAutomaticCompleteApi extends PublicApiComponentBase {
+public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 
-	@Autowired
+	@Resource
 	private ProcessTaskMapper processTaskMapper;
 
 	@Override
@@ -55,7 +55,7 @@ public class ProcessTaskAutomaticCompleteApi extends PublicApiComponentBase {
 		@Param(name = "Status", type = ApiParamType.STRING, desc = "操作成功"),
 		@Param(name = "Message", type = ApiParamType.STRING, desc = "异常信息"),
 	})
-	@Description(desc = "流转自动化处理步骤接口")
+	@Description(desc = "流转自动化处理步骤")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
@@ -72,7 +72,7 @@ public class ProcessTaskAutomaticCompleteApi extends PublicApiComponentBase {
 		if(action.equals(ProcessTaskOperationType.STEP_BACK.getValue())) {
 			flowDirection = ProcessFlowDirection.BACKWARD.getValue();
 		}
-		/** 不允许多个后续步骤 **/
+		/* 不允许多个后续步骤 **/
 		List<Long> processTaskStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(processTaskStepId, flowDirection);
 		if(CollectionUtils.isEmpty(processTaskStepIdList)||(CollectionUtils.isNotEmpty(processTaskStepIdList) && processTaskStepIdList.size()>1)) {
 			throw new ProcessTaskAutomaticNotAllowNextStepsException();

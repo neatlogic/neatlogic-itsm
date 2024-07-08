@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.process.dependency.handler;
 
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
-import neatlogic.framework.dependency.core.CustomTableDependencyHandlerBase;
+import neatlogic.framework.dependency.core.CustomDependencyHandlerBase;
 import neatlogic.framework.dependency.core.IFromType;
 import neatlogic.framework.dependency.dto.DependencyInfoVo;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ import java.util.List;
  * @since: 2021/4/2 18:14
  **/
 @Service
-public class WorktimeProcessTaskDependencyHandler extends CustomTableDependencyHandlerBase {
+public class WorktimeProcessTaskDependencyHandler extends CustomDependencyHandlerBase {
     /**
      * 表名
      *
