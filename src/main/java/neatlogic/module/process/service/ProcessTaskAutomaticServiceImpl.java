@@ -36,6 +36,7 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.dto.automatic.AutomaticConfigVo;
 import neatlogic.framework.process.dto.automatic.ProcessTaskStepAutomaticRequestVo;
+import neatlogic.framework.process.exception.processtask.ProcessTaskException;
 import neatlogic.framework.process.handler.ProcessRequestFrom;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepAutomaticNotifyTriggerType;
 import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
@@ -783,6 +784,11 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
             processHandler.abortProcessTask(processTaskVo);
         } else {
             // 人工处理
+            try {
+                processHandler.assign(currentProcessTaskStepVo);
+            } catch (ProcessTaskException e) {
+                logger.error(e.getMessage(), e);
+            }
             processStepHandlerUtil.saveStepRemind(currentProcessTaskStepVo, currentProcessTaskStepVo.getId(), failedReason, ProcessTaskStepRemindType.AUTOMATIC_ERROR);
         }
     }
