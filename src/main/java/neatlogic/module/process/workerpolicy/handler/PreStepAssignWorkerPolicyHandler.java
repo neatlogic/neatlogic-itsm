@@ -1,15 +1,18 @@
 package neatlogic.module.process.workerpolicy.handler;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.constvalue.WorkerPolicy;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskAssignWorkerVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
 import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
-import com.alibaba.fastjson.JSON;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,16 +51,40 @@ public class PreStepAssignWorkerPolicyHandler implements IWorkerPolicyHandler {
 	@Override
 	public List<ProcessTaskStepWorkerVo> execute(ProcessTaskStepWorkerPolicyVo workerPolicyVo, ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = new ArrayList<>();
-		List<String> processStepUuidList = JSON.parseArray(workerPolicyVo.getConfigObj().getString("processStepUuidList"), String.class);
-		if(CollectionUtils.isNotEmpty(processStepUuidList)) {
-			for(String processStepUuid : processStepUuidList) {
-				ProcessTaskAssignWorkerVo processTaskAssignWorkerVo = new ProcessTaskAssignWorkerVo();
-				processTaskAssignWorkerVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-				processTaskAssignWorkerVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-				processTaskAssignWorkerVo.setFromProcessStepUuid(processStepUuid);
-				List<ProcessTaskAssignWorkerVo> processTaskAssignWorkerList = processTaskMapper.getProcessTaskAssignWorker(processTaskAssignWorkerVo);
-				for(ProcessTaskAssignWorkerVo processTaskAssignWorker : processTaskAssignWorkerList) {
-					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskAssignWorker.getProcessTaskId(), processTaskAssignWorker.getProcessTaskStepId(), processTaskAssignWorker.getType(), processTaskAssignWorker.getUuid(), ProcessUserType.MAJOR.getValue()));
+		JSONObject configObj = workerPolicyVo.getConfigObj();
+		if (MapUtils.isNotEmpty(configObj)) {
+			JSONArray processStepList = configObj.getJSONArray("processStepList");
+			if (CollectionUtils.isNotEmpty(processStepList)) {
+				for (int i = 0; i < processStepList.size(); i++) {
+					JSONObject processStepObj = processStepList.getJSONObject(i);
+					if (MapUtils.isNotEmpty(processStepObj)) {
+						String uuid = processStepObj.getString("uuid");
+						if (StringUtils.isNotEmpty(uuid)) {
+							ProcessTaskAssignWorkerVo processTaskAssignWorkerVo = new ProcessTaskAssignWorkerVo();
+							processTaskAssignWorkerVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+							processTaskAssignWorkerVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+							processTaskAssignWorkerVo.setFromProcessStepUuid(uuid);
+							List<ProcessTaskAssignWorkerVo> processTaskAssignWorkerList = processTaskMapper.getProcessTaskAssignWorker(processTaskAssignWorkerVo);
+							for (ProcessTaskAssignWorkerVo processTaskAssignWorker : processTaskAssignWorkerList) {
+								processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskAssignWorker.getProcessTaskId(), processTaskAssignWorker.getProcessTaskStepId(), processTaskAssignWorker.getType(), processTaskAssignWorker.getUuid(), ProcessUserType.MAJOR.getValue()));
+							}
+						}
+					}
+				}
+			} else {
+				JSONArray processStepUuidArray = configObj.getJSONArray("processStepUuidList");
+				if(CollectionUtils.isNotEmpty(processStepUuidArray)) {
+					List<String> processStepUuidList = processStepUuidArray.toJavaList(String.class);
+					for(String processStepUuid : processStepUuidList) {
+						ProcessTaskAssignWorkerVo processTaskAssignWorkerVo = new ProcessTaskAssignWorkerVo();
+						processTaskAssignWorkerVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+						processTaskAssignWorkerVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+						processTaskAssignWorkerVo.setFromProcessStepUuid(processStepUuid);
+						List<ProcessTaskAssignWorkerVo> processTaskAssignWorkerList = processTaskMapper.getProcessTaskAssignWorker(processTaskAssignWorkerVo);
+						for(ProcessTaskAssignWorkerVo processTaskAssignWorker : processTaskAssignWorkerList) {
+							processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskAssignWorker.getProcessTaskId(), processTaskAssignWorker.getProcessTaskStepId(), processTaskAssignWorker.getType(), processTaskAssignWorker.getUuid(), ProcessUserType.MAJOR.getValue()));
+						}
+					}
 				}
 			}
 		}
