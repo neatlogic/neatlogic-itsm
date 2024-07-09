@@ -247,6 +247,15 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                         thread.setSupplier(() -> processTaskMapper.deleteProcessTaskStepInOperationById(processTaskStepInOperationVo.getId()));
                         TransactionSynchronizationPool.execute(thread);
                     }
+                } else {
+                    IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+                    if (processStepHandler != null) {
+                        try {
+                            processStepHandler.assign(currentProcessTaskStepVo);
+                        } catch (ProcessTaskException e) {
+                            logger.error(e.getMessage(), e);
+                        }
+                    }
                 }
             }
         }
@@ -400,5 +409,10 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
     @Override
     public int getBackwardOutputQuantity() {
         return 0;
+    }
+
+    @Override
+    public boolean disableAssign() {
+        return true;
     }
 }
