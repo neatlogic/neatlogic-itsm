@@ -29,6 +29,7 @@ import neatlogic.framework.process.constvalue.ProcessFlowDirection;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.automatic.FailPolicy;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.exception.processtask.ProcessTaskException;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
@@ -115,6 +116,15 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
             if (failed > 0) {
                 if (FailPolicy.KEEP_ON.getValue().equals(failPolicy)) {
                     processTaskStepComplete(processTaskStepVo);
+                } else {
+                    IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+                    if (processStepHandler != null) {
+                        try {
+                            processStepHandler.assign(processTaskStepVo);
+                        } catch (ProcessTaskException e) {
+                            logger.error(e.getMessage(), e);
+                        }
+                    }
                 }
             } else {
                 processTaskStepComplete(processTaskStepVo);
