@@ -1,27 +1,27 @@
 package neatlogic.module.process.api.catalog.relation;
 
-import java.util.*;
-
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.process.dto.CatalogVo;
+import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-
+import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
+import neatlogic.module.process.service.CatalogService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
-import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
-import neatlogic.framework.process.dto.CatalogVo;
-import neatlogic.framework.process.dto.ChannelVo;
-import neatlogic.module.process.service.CatalogService;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -92,19 +92,18 @@ public class CatalogChannelTreeApi extends PrivateApiComponentBase {
                     CatalogVo parent = uuidKeyMap.get(parentUuid);
                     if(parent != null) {
                         channelVo.setParent(parent);
-                    }
-                    
-                    while(parent.getParent() == null) {
-                        parentUuid = parent.getParentUuid();
-                        if(CatalogVo.ROOT_PARENTUUID.equals(parentUuid)) {
-                            break;
+                        while (parent.getParent() == null) {
+                            parentUuid = parent.getParentUuid();
+                            if (CatalogVo.ROOT_PARENTUUID.equals(parentUuid)) {
+                                break;
+                            }
+                            CatalogVo parentParent = uuidKeyMap.get(parentUuid);
+                            if (parentParent == null) {
+                                break;
+                            }
+                            parent.setParent(parentParent);
+                            parent = parentParent;
                         }
-                        CatalogVo parentParent = uuidKeyMap.get(parentUuid);
-                        if(parentParent == null) {
-                            break;
-                        }
-                        parent.setParent(parentParent);
-                        parent = parentParent;
                     }
                 }
                 return rootCatalog.getChildren();
