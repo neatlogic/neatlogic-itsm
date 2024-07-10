@@ -60,7 +60,7 @@
         LIMIT 1
     </select>
 
-    <!--<select id="searchProcessTaskStepData" parameterType="neatlogic.framework.process.dto.ProcessTaskStepDataVo"
+    <select id="searchProcessTaskStepData" parameterType="neatlogic.framework.process.dto.ProcessTaskStepDataVo"
             resultType="neatlogic.framework.process.dto.ProcessTaskStepDataVo">
         SELECT
         `id`,
@@ -84,11 +84,8 @@
             <if test="fcu != null and fcu != ''">
                 AND `fcu` = #{fcu}
             </if>
-            <if test="type != null and type != ''">
-                and `type` = #{type}
-            </if>
         </where>
-    </select>-->
+    </select>
 
     <insert id="replaceProcessTaskStepData" parameterType="neatlogic.framework.process.dto.ProcessTaskStepDataVo">
         REPLACE INTO `processtask_step_data` (`id`,
