@@ -238,8 +238,8 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
                 if (CollectionUtils.isNotEmpty(processTaskSlaNotifyList)) {
                     processTaskSlaMapper.deleteProcessTaskSlaNotifyBySlaId(slaId);
                 }
+                loadJobNotifyAndtransfer(slaId, slaConfigObj);
             }
-            loadJobNotifyAndtransfer(slaId, slaConfigObj);
         } else {
 //                System.out.println("删除时效id=" + slaId + "的job，因为status=" + status);
             if (CollectionUtils.isNotEmpty(processTaskSlaNotifyList)) {
