@@ -907,7 +907,6 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
     @Override
     public void saveForm(ProcessTaskStepVo currentProcessTaskStepVo) {
         Long processTaskId = currentProcessTaskStepVo.getProcessTaskId();
-        Long processTaskStepId = currentProcessTaskStepVo.getId();
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
         if (processTaskFormVo == null) {
             // 工单没有表单直接返回
@@ -983,11 +982,17 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
         formVersionVo.setFormName(processTaskFormVo.getFormName());
         formVersionVo.setFormConfig(JSON.parseObject(formContent));
-        if (StringUtils.isBlank(currentProcessTaskStepVo.getConfigHash())) {
-            ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-            currentProcessTaskStepVo.setConfigHash(stepVo.getConfigHash());
+        Long processTaskStepId = currentProcessTaskStepVo.getId();
+        if (currentProcessTaskStepVo.getId() != null) {
+            if (StringUtils.isBlank(currentProcessTaskStepVo.getConfigHash())) {
+                ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+                currentProcessTaskStepVo.setConfigHash(stepVo.getConfigHash());
+            }
+            formVersionVo.setSceneUuid(currentProcessTaskStepVo.getFormSceneUuid());
+        } else {
+            formVersionVo.setSceneUuid(mainSceneUuid);
         }
-        formVersionVo.setSceneUuid(currentProcessTaskStepVo.getFormSceneUuid());
+
         List<FormAttributeVo> formAttributeVoList = formVersionVo.getFormAttributeList();
 
         Map<String, String> attributeLabelMap = new HashMap<>();
