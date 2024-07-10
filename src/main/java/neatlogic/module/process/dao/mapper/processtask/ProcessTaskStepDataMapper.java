@@ -28,7 +28,7 @@ public interface ProcessTaskStepDataMapper extends IProcessTaskStepDataCrossover
 
     ProcessTaskStepDataVo getProcessTaskStepData(ProcessTaskStepDataVo processTaskStepDataVo);
 
-//	List<ProcessTaskStepDataVo> searchProcessTaskStepData(ProcessTaskStepDataVo processTaskStepDataVo);
+	List<ProcessTaskStepDataVo> searchProcessTaskStepData(ProcessTaskStepDataVo processTaskStepDataVo);
 
     int replaceProcessTaskStepData(ProcessTaskStepDataVo processTaskStepDataVo);
 

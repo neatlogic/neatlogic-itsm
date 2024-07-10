@@ -18,10 +18,13 @@
 package neatlogic.module.process.api.processtask;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
+import neatlogic.framework.process.constvalue.ProcessTaskStepDataType;
+import neatlogic.framework.process.dto.ProcessTaskStepDataVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.restful.annotation.Description;
@@ -31,12 +34,14 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
 import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 @Transactional
@@ -46,6 +51,9 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    ProcessTaskStepDataMapper processTaskStepDataMapper;
 
     @Resource
     private ProcessTaskService processTaskService;
@@ -84,6 +92,15 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
         param.put("source", paramObj.getString("source"));
         processStepHandlerUtil.saveForm(processTaskStepVo);
         processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UPDATEFORM);
+
+        ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+        processTaskStepDataVo.setProcessTaskId(processTaskId);
+        processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+        processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
+        List<ProcessTaskStepDataVo> stepDraftSaveDataList = processTaskStepDataMapper.searchProcessTaskStepData(processTaskStepDataVo);
+        for (ProcessTaskStepDataVo stepDraftSaveData : stepDraftSaveDataList) {
+            processTaskStepDataMapper.deleteProcessTaskStepDataById(stepDraftSaveData.getId());
+        }
         return null;
     }
 
