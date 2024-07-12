@@ -297,7 +297,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         }
 
         ProcessTaskStepVo startProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId);
-        startProcessTaskStepVo.setContentHelp(channel.getHelp());
+        startProcessTaskStepVo.setContentHelp(channel.getContentHelp());
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
         processTaskService.setTemporaryData(processTaskVo, startProcessTaskStepVo);
         return processTaskVo;
@@ -471,7 +471,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         startProcessTaskStepVo.setIsNeedContent((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isNeedContent"));
         startProcessTaskStepVo.setIsNeedUploadFile((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isNeedUploadFile"));
         startProcessTaskStepVo.setFormSceneUuid((String) JSONPath.read(startProcessStepVo.getConfig(), "formSceneUuid"));
-        startProcessTaskStepVo.setContentHelp(channel.getHelp());
+        startProcessTaskStepVo.setContentHelp(channel.getContentHelp());
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 
         processTaskService.setProcessTaskFormInfo(processTaskVo);

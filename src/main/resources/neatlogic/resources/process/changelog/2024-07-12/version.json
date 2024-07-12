@@ -1,0 +1,10 @@
+{
+  "content":[
+    {
+      "type":"新增功能",
+      "detail":[
+        {"msg":"1.服务上报文本框加placeholder"}
+      ]
+    }
+  ]
+}
