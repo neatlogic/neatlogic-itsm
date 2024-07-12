@@ -285,6 +285,10 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
     private ProcessTaskVo getProcessTaskVoByProcessTaskId(Long processTaskId) throws Exception {
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+        if (channel == null) {
+            throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
+        }
         processTaskService.setProcessTaskDetail(processTaskVo);
         String owner = processTaskVo.getOwner();
         if (StringUtils.isNotBlank(owner)) {
@@ -293,6 +297,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         }
 
         ProcessTaskStepVo startProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId);
+        startProcessTaskStepVo.setContentHelp(channel.getHelp());
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
         processTaskService.setTemporaryData(processTaskVo, startProcessTaskStepVo);
         return processTaskVo;
@@ -466,6 +471,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         startProcessTaskStepVo.setIsNeedContent((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isNeedContent"));
         startProcessTaskStepVo.setIsNeedUploadFile((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isNeedUploadFile"));
         startProcessTaskStepVo.setFormSceneUuid((String) JSONPath.read(startProcessStepVo.getConfig(), "formSceneUuid"));
+        startProcessTaskStepVo.setContentHelp(channel.getHelp());
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 
         processTaskService.setProcessTaskFormInfo(processTaskVo);
