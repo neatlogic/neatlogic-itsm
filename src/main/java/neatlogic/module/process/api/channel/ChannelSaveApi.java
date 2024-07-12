@@ -54,7 +54,7 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "服务通道保存信息接口";
+        return "nmpac.channelsaveapi.getname";
     }
 
     @Override
@@ -63,30 +63,29 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "服务通道uuid"),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "服务通道名称"),
-            @Param(name = "parentUuid", type = ApiParamType.STRING, isRequired = true, desc = "父级uuid"),
-            @Param(name = "processUuid", type = ApiParamType.STRING, isRequired = true, desc = "工作流uuid"),
-            @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "是否激活", rule = "0,1"),
-            @Param(name = "worktimeUuid", type = ApiParamType.STRING, isRequired = true, desc = "工作时间窗口uuid"),
-            @Param(name = "support", type = ApiParamType.STRING, isRequired = true, desc = "使用范围，all/pc/mobile"),
-            @Param(name = "desc", type = ApiParamType.STRING, desc = "服务说明", maxLength = 200, xss = true),
-            @Param(name = "icon", type = ApiParamType.STRING, desc = "图标"),
-            @Param(name = "color", type = ApiParamType.STRING, desc = "颜色"),
-            @Param(name = "sla", type = ApiParamType.INTEGER, desc = "时效(单位：小时)"),
-            @Param(name = "contentHelp", type = ApiParamType.STRING, desc = "工单上报页描述占位符"),
-            @Param(name = "isNeedPriority", type = ApiParamType.INTEGER, isRequired = true, desc = "是否显示优先级"),
-            @Param(name = "defaultPriorityUuid", type = ApiParamType.STRING, desc = "默认优先级uuid"),
-            @Param(name = "priorityUuidList", type = ApiParamType.JSONARRAY, desc = "关联优先级列表"),
-            @Param(name = "priorityUuidList[0]", type = ApiParamType.STRING, desc = "优先级uuid"),
-            @Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
-            @Param(name = "channelTypeUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务类型uuid"),
-            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "配置信息")
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid"),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "common.name"),
+            @Param(name = "parentUuid", type = ApiParamType.STRING, isRequired = true, desc = "common.parentuuid"),
+            @Param(name = "processUuid", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.processuuid"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "common.isactive", rule = "0,1"),
+            @Param(name = "worktimeUuid", type = ApiParamType.STRING, isRequired = true, desc = "common.worktimeuuid"),
+            @Param(name = "support", type = ApiParamType.STRING, isRequired = true, desc = "common.scopeofuse", help = "all/pc/mobile"),
+            @Param(name = "desc", type = ApiParamType.STRING, desc = "common.description", maxLength = 200, xss = true),
+            @Param(name = "icon", type = ApiParamType.STRING, desc = "common.icon"),
+            @Param(name = "color", type = ApiParamType.STRING, desc = "common.color"),
+            @Param(name = "sla", type = ApiParamType.INTEGER, desc = "common.sla"),
+            @Param(name = "contentHelp", type = ApiParamType.STRING, desc = "term.itsm.contenthelp"),
+            @Param(name = "isNeedPriority", type = ApiParamType.INTEGER, isRequired = true, desc = "common.isneedpriority"),
+            @Param(name = "defaultPriorityUuid", type = ApiParamType.STRING, desc = "common.defaultpriorityuuid"),
+            @Param(name = "priorityUuidList", type = ApiParamType.JSONARRAY, desc = "nmrap.updateprioritysortapi.input.param.desc.prioritylist"),
+            @Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "common.authoritylist", help = "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
+            @Param(name = "channelTypeUuid", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.channeltypeuuid"),
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "common.config")
     })
     @Output({
-            @Param(name = "Return", type = ApiParamType.STRING, desc = "服务通道uuid")
+            @Param(name = "Return", type = ApiParamType.STRING, desc = "common.uuid")
     })
-    @Description(desc = "服务通道保存信息接口")
+    @Description(desc = "nmpac.channelsaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ChannelVo channelVo = JSON.toJavaObject(jsonObj, ChannelVo.class);
