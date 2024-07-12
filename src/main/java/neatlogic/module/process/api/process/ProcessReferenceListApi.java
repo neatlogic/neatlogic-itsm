@@ -1,28 +1,25 @@
 package neatlogic.module.process.api.process;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.dto.ChannelTypeVo;
+import neatlogic.framework.process.dto.ChannelVo;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
-import neatlogic.framework.process.dto.ChannelTypeVo;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.*;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.service.CatalogService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.process.dto.ChannelVo;
+import java.util.ArrayList;
+import java.util.List;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -75,7 +72,6 @@ public class ProcessReferenceListApi extends PrivateApiComponentBase {
 				channelVo.setChannelTypeVo(channelTypeVo.clone());
 				boolean effectiveAuthority = catalogService.channelIsAuthority(channelVo.getUuid(), UserContext.get().getUserUuid(true));
 				channelVo.setEffectiveAuthority(effectiveAuthority);
-				channelVo.setAllowDesc(null);
 				channelVo.setParentUuid(null);
 				channelVo.setChannelTypeUuid(null);
 				channelVo.setColor(null);
