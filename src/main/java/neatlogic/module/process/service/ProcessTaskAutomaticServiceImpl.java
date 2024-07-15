@@ -715,7 +715,9 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 } else if (type.equals("integration") && MapUtils.isNotEmpty(resultJson)) {
                     integrationParam.put(name, resultJson.get(value.replace("integration#", StringUtils.EMPTY)));
                 } else {// 常量
-                    integrationParam.put(name, value);
+                    if (StringUtils.isNotBlank(value)) {
+                        integrationParam.put(name, value);
+                    }
                 }
             }
         }

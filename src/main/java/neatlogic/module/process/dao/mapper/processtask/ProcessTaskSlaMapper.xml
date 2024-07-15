@@ -220,6 +220,37 @@
         LIMIT #{startNum}, #{pageSize}
     </select>
 
+    <select id="getProcessTaskStepSlaDelayListBySlaId" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskStepSlaDelayVo">
+        SELECT
+            `id`,
+            `processtask_id` AS processTaskId,
+            `target_processtask_id` AS targetProcessTaskId,
+            `target_processtask_step_id` AS targetProcessTaskStepId,
+            `sla_id` AS slaId,
+            `time`,
+            `fcu`,
+            `fcd`
+        FROM `processtask_step_sla_delay`
+        WHERE `sla_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepSlaDelayListBySlaIdList" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskStepSlaDelayVo">
+        SELECT
+            `id`,
+            `processtask_id` AS processTaskId,
+            `target_processtask_id` AS targetProcessTaskId,
+            `target_processtask_step_id` AS targetProcessTaskStepId,
+            `sla_id` AS slaId,
+            `time`,
+            `fcu`,
+            `fcd`
+        FROM `processtask_step_sla_delay`
+        WHERE `sla_id` IN
+        <foreach collection="list" item="slaId" open="(" separator="," close=")">
+            #{slaId}
+        </foreach>
+    </select>
+
     <insert id="insertProcessTaskSlaNotify" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaNotifyVo">
         <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
             select LAST_INSERT_ID() as id
@@ -329,6 +360,30 @@
         )
     </insert>
 
+    <insert id="insertProcessTaskStepSlaDelay" parameterType="neatlogic.framework.process.dto.ProcessTaskStepSlaDelayVo">
+        INSERT INTO `processtask_step_sla_delay` (
+            `id`,
+            `processtask_id`,
+            `target_processtask_id`,
+            `target_processtask_step_id`,
+            `sla_id`,
+            `time`,
+            `fcu`,
+            `fcd`
+        )
+        VALUES
+            (
+                #{id},
+                #{processTaskId},
+                #{targetProcessTaskId},
+                #{targetProcessTaskStepId},
+                #{slaId},
+                #{time},
+                #{fcu},
+                NOW(3)
+            )
+    </insert>
+
     <update id="updateProcessTaskSlaTransfer" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaTransferVo">
         UPDATE `processtask_sla_transfer`
         SET `trigger_time` = #{triggerTime}
@@ -380,5 +435,9 @@
 
     <delete id="deleteProcessTaskStepSlaTimeBySlaId" parameterType="java.lang.Long">
         DELETE FROM `processtask_step_sla_time` WHERE `sla_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepSlaDelayByTargetProcessTaskStepId" parameterType="java.lang.Long">
+        DELETE FROM `processtask_step_sla_delay` WHERE `target_processtask_step_id` = #{value}
     </delete>
 </mapper>

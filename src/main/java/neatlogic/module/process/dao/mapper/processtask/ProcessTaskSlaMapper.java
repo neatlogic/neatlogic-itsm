@@ -63,6 +63,10 @@ public interface ProcessTaskSlaMapper extends IProcessTaskSlaCrossoverMapper {
 
     List<Long> getDoingOrPauseSlaIdListByWorktimeUuid(@Param("worktimeUuid") String worktimeUuid, @Param("startNum") int startNum, @Param("pageSize") int pageSize);
 
+    List<ProcessTaskStepSlaDelayVo> getProcessTaskStepSlaDelayListBySlaId(Long slaId);
+
+    List<ProcessTaskStepSlaDelayVo> getProcessTaskStepSlaDelayListBySlaIdList(List<Long> slaIdList);
+
     int insertProcessTaskSlaNotify(ProcessTaskSlaNotifyVo processTaskSlaNotifyVo);
 
     int insertProcessTaskSlaTransfer(ProcessTaskSlaTransferVo processTaskSlaTransferVo);
@@ -74,6 +78,8 @@ public interface ProcessTaskSlaMapper extends IProcessTaskSlaCrossoverMapper {
     int insertProcessTaskStepSla(@Param("processTaskStepId") Long processTaskStepId, @Param("slaId") Long slaId);
 
     int insertProcessTaskStepSlaTime(ProcessTaskStepSlaTimeVo processTaskStepSlaTimeVo);
+
+    int insertProcessTaskStepSlaDelay(ProcessTaskStepSlaDelayVo processTaskStepSlaDelayVo);
 
     int updateProcessTaskSlaTransfer(ProcessTaskSlaTransferVo processTaskSlaTransferVo);
 
@@ -94,4 +100,6 @@ public interface ProcessTaskSlaMapper extends IProcessTaskSlaCrossoverMapper {
     int deleteProcessTaskSlaTimeBySlaId(Long slaId);
 
     int deleteProcessTaskStepSlaTimeBySlaId(Long slaId);
+
+    int deleteProcessTaskStepSlaDelayByTargetProcessTaskStepId(Long targetProcessTaskStepId);
 }

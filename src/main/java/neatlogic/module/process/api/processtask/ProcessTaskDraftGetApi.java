@@ -110,6 +110,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             @Param(name = "copyProcessTaskId", type = ApiParamType.LONG, desc = "term.itsm.copyprocesstaskid", help = "从复制上报进入上报页时，传copyProcessTaskId"),
             @Param(name = "channelUuid", type = ApiParamType.STRING, desc = "term.itsm.channeluuid", help = "从服务目录进入上报页时，传channelUuid"),
             @Param(name = "fromProcessTaskId", type = ApiParamType.LONG, desc = "term.itsm.fromprocesstaskid", help = "从转报进入上报页时，传fromProcessTaskId"),
+            @Param(name = "fromProcessTaskStepId", type = ApiParamType.LONG, desc = "term.itsm.fromprocesstaskstepid", help = "从转报进入上报页时，传fromProcessTaskStepId"),
             @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "term.itsm.channeltyperelationid", help = "从转报进入上报页时，传channelTypeRelationId"),
             @Param(name = "parentProcessTaskStepId", type = ApiParamType.LONG, desc = "nmpap.processtaskdraftgetapi.input.param.desc.parentprocesstaskstepid", help = "创建子流程时，传parentProcessTaskStepId")
     })
@@ -158,6 +159,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
                 throw new PermissionDeniedException();
             }
+            Long fromProcessTaskStepId = jsonObj.getLong("fromProcessTaskStepId");
             Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
             Long fromProcessTaskId = jsonObj.getLong("fromProcessTaskId");
             if (fromProcessTaskId != null) {
@@ -181,7 +183,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             } else if (parentProcessTaskStepId != null) {
                 return getParentProcessTask(parentProcessTaskStepId, channelUuid);
             }
-            processTaskVo = getProcessTaskVoByChannelUuid(channelUuid, fromProcessTaskId, channelTypeRelationId);
+            processTaskVo = getProcessTaskVoByChannelUuid(channelUuid, fromProcessTaskId, fromProcessTaskStepId, channelTypeRelationId);
         } else {
             throw new ParamNotExistsException("processTaskId", "copyProcessTaskId", "channelUuid", "parentProcessTaskStepId");
         }
@@ -194,7 +196,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
      * @param fromProcessTaskId       来源工单id
      * @param toProcessTaskFormConfig 目标工单表单配置
      **/
-    private Map<String, Object> getFromFormAttributeDataMap(Long fromProcessTaskId, JSONObject toProcessTaskFormConfig) {
+    private Map<String, Object> getFromFormAttributeDataMap(Long fromProcessTaskId, Long fromProcessTaskStepId, JSONObject toProcessTaskFormConfig) {
         Map<String, Object> resultObj = new HashMap<>();
         if (MapUtils.isEmpty(toProcessTaskFormConfig)) {
             return resultObj;
@@ -233,7 +235,11 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                 }
             }
         }
-
+        for (FormAttributeVo formAttributeVo : toFormVersion.getFormAttributeList()) {
+            if (Objects.equals(formAttributeVo.getKey(), "processTaskStepId")) {
+                resultObj.put(formAttributeVo.getUuid(), fromProcessTaskStepId);
+            }
+        }
 
         return resultObj;
     }
@@ -361,7 +367,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
     private ProcessTaskVo getProcessTaskVoByCopyProcessTaskId(Long copyProcessTaskId) throws Exception {
         ProcessTaskVo oldProcessTaskVo = processTaskService.checkProcessTaskParamsIsLegal(copyProcessTaskId);
-        ProcessTaskVo processTaskVo = getProcessTaskVoByChannelUuid(oldProcessTaskVo.getChannelUuid(), null, null);
+        ProcessTaskVo processTaskVo = getProcessTaskVoByChannelUuid(oldProcessTaskVo.getChannelUuid(), null, null, null);
 
         processTaskVo.setTitle(oldProcessTaskVo.getTitle());
         List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(oldProcessTaskVo.getChannelUuid());
@@ -406,17 +412,17 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             throw new ProcessStepHandlerNotFoundException(oldStartProcessTaskStepVo.getHandler());
         }
         startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getNonStartStepInfo(oldStartProcessTaskStepVo));
-        processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(copyProcessTaskId, processTaskVo.getFormConfig()));
+        processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(copyProcessTaskId, null, processTaskVo.getFormConfig()));
         // 标签列表
         processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(copyProcessTaskId));
         return processTaskVo;
     }
 
     private ProcessTaskVo getProcessTaskVoByChannelUuid(String channelUuid) {
-        return getProcessTaskVoByChannelUuid(channelUuid, null, null);
+        return getProcessTaskVoByChannelUuid(channelUuid, null, null, null);
     }
 
-    private ProcessTaskVo getProcessTaskVoByChannelUuid(String channelUuid, Long fromProcessTaskId, Long channelTypeRelationId) {
+    private ProcessTaskVo getProcessTaskVoByChannelUuid(String channelUuid, Long fromProcessTaskId, Long fromProcessTaskStepId, Long channelTypeRelationId) {
         ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
         if (channel == null) {
             throw new ChannelNotFoundException(channelUuid);
@@ -490,7 +496,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             }
             processTaskVo.getTranferReportProcessTaskList().add(fromProcessTaskVo);
             if (MapUtils.isNotEmpty(processTaskVo.getFormConfig())) {
-                processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(fromProcessTaskId, processTaskVo.getFormConfig()));
+                processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(fromProcessTaskId, fromProcessTaskStepId, processTaskVo.getFormConfig()));
             }
         }
         return processTaskVo;

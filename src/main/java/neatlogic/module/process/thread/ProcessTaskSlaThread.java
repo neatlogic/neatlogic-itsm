@@ -564,6 +564,13 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
 
             // 修正最终超时日期
             if (timeSum != null) {
+                // 加上延时时长
+                List<ProcessTaskStepSlaDelayVo> slaDelayList = processTaskSlaMapper.getProcessTaskStepSlaDelayListBySlaId(slaId);
+                for (ProcessTaskStepSlaDelayVo slaDelay : slaDelayList) {
+                    if (slaDelay.getTime() != null) {
+                        timeSum += slaDelay.getTime();
+                    }
+                }
                 String calculateHandler = slaConfigObj.getString("calculateHandler");
                 if (StringUtils.isBlank(calculateHandler)) {
                     calculateHandler = DefaultSlaCalculateHandler.class.getSimpleName();
