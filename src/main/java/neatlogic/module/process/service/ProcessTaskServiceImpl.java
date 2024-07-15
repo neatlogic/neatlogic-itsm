@@ -757,6 +757,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         if (CollectionUtils.isEmpty(processTaskSlaTimeList)) {
             return processTaskSlaTimeList;
         }
+        List<ProcessTaskStepSlaDelayVo> processTaskStepSlaDelayList = processTaskSlaMapper.getProcessTaskStepSlaDelayListBySlaIdList(slaIdList);
         Set<Long> processTaskIdSet = processTaskSlaTimeList.stream().map(ProcessTaskSlaTimeVo::getProcessTaskId).collect(Collectors.toSet());
         List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
         Map<Long, String> worktimeUuidMap = processTaskList.stream().collect(Collectors.toMap(ProcessTaskVo::getId, ProcessTaskVo::getWorktimeUuid));
@@ -779,6 +780,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             } else {
                 long costTime = worktimeMapper.calculateCostTime(worktimeUuid, calculationTimeLong, currentTimeMillis);
                 processTaskSlaTimeVo.setTimeLeft(processTaskSlaTimeVo.getTimeLeft() - costTime);
+            }
+            if (CollectionUtils.isNotEmpty(processTaskStepSlaDelayList)) {
+                List<ProcessTaskStepSlaDelayVo> delayList = new ArrayList<>();
+                for (ProcessTaskStepSlaDelayVo processTaskStepSlaDelayVo : processTaskStepSlaDelayList) {
+                    if (Objects.equals(processTaskSlaTimeVo.getSlaId(), processTaskStepSlaDelayVo.getSlaId())) {
+                        delayList.add(processTaskStepSlaDelayVo);
+                    }
+                }
+                processTaskSlaTimeVo.setDelayList(delayList);
             }
         }
         return processTaskSlaTimeList;
