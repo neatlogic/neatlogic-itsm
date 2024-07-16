@@ -101,6 +101,7 @@ public class DelayProcessTaskStepSlaApi extends PrivateApiComponentBase {
             processTaskStepSlaDelayVo.setTargetProcessTaskStepId(targetProcessTaskStepVo.getId());
             processTaskStepSlaDelayVo.setTime(millis);
             for (Long slaId : slaIdList) {
+                processTaskStepSlaDelayVo.setId(null);
                 processTaskStepSlaDelayVo.setSlaId(slaId);
                 processTaskSlaMapper.insertProcessTaskStepSlaDelay(processTaskStepSlaDelayVo);
             }
