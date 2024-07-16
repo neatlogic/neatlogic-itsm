@@ -236,16 +236,18 @@
 
     <select id="getProcessTaskStepSlaDelayListBySlaIdList" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskStepSlaDelayVo">
         SELECT
-            `id`,
-            `processtask_id` AS processTaskId,
-            `target_processtask_id` AS targetProcessTaskId,
-            `target_processtask_step_id` AS targetProcessTaskStepId,
-            `sla_id` AS slaId,
-            `time`,
-            `fcu`,
-            `fcd`
-        FROM `processtask_step_sla_delay`
-        WHERE `sla_id` IN
+            a.`id`,
+            a.`processtask_id` AS processTaskId,
+            a.`target_processtask_id` AS targetProcessTaskId,
+            a.`target_processtask_step_id` AS targetProcessTaskStepId,
+            a.`sla_id` AS slaId,
+            a.`time`,
+            a.`fcu`,
+            a.`fcd`,
+            b.`title` AS processTaskTitle
+        FROM `processtask_step_sla_delay` a
+        LEFT JOIN `processtask` b on b.`id` = a.`processtask_id`
+        WHERE a.`sla_id` IN
         <foreach collection="list" item="slaId" open="(" separator="," close=")">
             #{slaId}
         </foreach>
