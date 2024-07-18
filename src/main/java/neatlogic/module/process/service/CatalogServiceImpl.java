@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.DeviceType;
 import neatlogic.framework.dto.AuthenticationInfoVo;
+import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
 import neatlogic.framework.process.crossover.ICatalogCrossoverService;
 import neatlogic.framework.process.dto.CatalogVo;
 import neatlogic.framework.process.dto.ChannelRelationVo;
@@ -63,7 +64,7 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
         List<String> resultList = new ArrayList<>();
         AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
         /* 查出当前用户所有已授权的目录uuid集合  **/
-        List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
+        List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CatalogChannelAuthorityAction.REPORT.getValue(), null);
         if (CollectionUtils.isNotEmpty(currentUserAuthorizedCatalogUuidList)) {
             /* 查出当前用户所有已授权的服务uuid集合  **/
             List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
@@ -112,7 +113,7 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
     }
 
     @Override
-    public boolean channelIsAuthority(String channelUuid, String userUuid) {
+    public boolean channelIsAuthority(String channelUuid, String userUuid, CatalogChannelAuthorityAction action) {
         AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
         /* 查出当前用户所有已授权的服务uuid集合  **/
         List<String> channelUuidList = channelMapper.getActiveAuthorizedChannelUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), channelUuid);
@@ -136,7 +137,7 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
             }
             if (CollectionUtils.isNotEmpty(catalogUuidList)) {
                 /* 查出当前用户所有已授权的目录uuid集合  **/
-                List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidListByCatalogUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), catalogUuidList);
+                List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidListByCatalogUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), action.getValue(), catalogUuidList);
                 catalogUuidList.removeAll(currentUserAuthorizedCatalogUuidList);
                 return CollectionUtils.isEmpty(catalogUuidList);
             }
@@ -171,6 +172,7 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
         List<CatalogVo> catalogList = catalogMapper.getAuthorizedCatalogList(
                 UserContext.get().getUserUuid(),
                 authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(),
+                CatalogChannelAuthorityAction.REPORT.getValue(),
                 catalogUuid,
                 null);
         for (CatalogVo catalogVo : catalogList) {
@@ -213,6 +215,7 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
         List<CatalogVo> catalogList = catalogMapper.getAuthorizedCatalogList(
                 UserContext.get().getUserUuid(),
                 authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(),
+                CatalogChannelAuthorityAction.REPORT.getValue(),
                 catalog.getUuid(),
                 null);
         for (CatalogVo catalogVo : catalogList) {

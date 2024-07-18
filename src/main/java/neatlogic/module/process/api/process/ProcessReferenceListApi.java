@@ -5,6 +5,7 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
 import neatlogic.framework.process.dto.ChannelTypeVo;
 import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.restful.annotation.*;
@@ -44,7 +45,7 @@ public class ProcessReferenceListApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "流程引用列表接口";
+		return "nmpap.processreferencelistapi.getname";
 	}
 
 	@Override
@@ -53,12 +54,12 @@ public class ProcessReferenceListApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-			@Param(name = "processUuid", type = ApiParamType.STRING, isRequired = true, desc = "流程uuid")
+			@Param(name = "processUuid", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.processuuid")
 	})
 	@Output({
-			@Param(name = "channelList", explode = ChannelVo[].class, desc = "流程引用列表")
+			@Param(name = "channelList", explode = ChannelVo[].class, desc = "common.tbodylist")
 	})
-	@Description(desc = "流程引用列表接口")
+	@Description(desc = "nmpap.processreferencelistapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
@@ -70,7 +71,7 @@ public class ProcessReferenceListApi extends PrivateApiComponentBase {
 			for(ChannelVo channelVo : channelVoList){
 				ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
 				channelVo.setChannelTypeVo(channelTypeVo.clone());
-				boolean effectiveAuthority = catalogService.channelIsAuthority(channelVo.getUuid(), UserContext.get().getUserUuid(true));
+				boolean effectiveAuthority = catalogService.channelIsAuthority(channelVo.getUuid(), UserContext.get().getUserUuid(true), CatalogChannelAuthorityAction.REPORT);
 				channelVo.setEffectiveAuthority(effectiveAuthority);
 				channelVo.setParentUuid(null);
 				channelVo.setChannelTypeUuid(null);
