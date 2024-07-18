@@ -21,6 +21,7 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.file.core.FileTypeHandlerBase;
 import neatlogic.framework.file.dto.FileVo;
+import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
 import neatlogic.framework.process.crossover.ICatalogCrossoverService;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskVo;
@@ -48,7 +49,7 @@ public class ProcessFileHandler extends FileTypeHandlerBase {
         List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskStepVoListByFileId(fileId);
         if (CollectionUtils.isNotEmpty(processTaskVoList)) {
             ICatalogCrossoverService iCatalogCrossoverService = CrossoverServiceFactory.getApi(ICatalogCrossoverService.class);
-            if (iCatalogCrossoverService.channelIsAuthority(processTaskVoList.get(0).getChannelUuid(), userUuid)) {
+            if (iCatalogCrossoverService.channelIsAuthority(processTaskVoList.get(0).getChannelUuid(), userUuid, CatalogChannelAuthorityAction.VIEW)) {
                 return true;
             }
             return processTaskService.getProcessFileHasDownloadAuthWithFileIdAndProcessTaskIdList(fileVo.getId(), processTaskVoList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));

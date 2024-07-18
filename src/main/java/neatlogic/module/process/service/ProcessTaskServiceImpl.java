@@ -1557,6 +1557,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             if (StringUtils.isNotBlank(processTaskVo.getReporter())) {
                 receiverMap.computeIfAbsent(ProcessUserType.REPORTER.getValue(), k -> new ArrayList<>())
                         .add(new NotifyReceiverVo(GroupSearch.USER.getValue(), processTaskVo.getReporter()));
+            } else if (StringUtils.isNotBlank(processTaskVo.getOwner())) {
+                receiverMap.computeIfAbsent(ProcessUserType.REPORTER.getValue(), k -> new ArrayList<>())
+                        .add(new NotifyReceiverVo(GroupSearch.USER.getValue(), processTaskVo.getOwner()));
             }
         }
         ProcessTaskStepUserVo processTaskStepUser = new ProcessTaskStepUserVo();
@@ -2593,7 +2596,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         } else {
             /* 判断当前用户是否拥有channelUuid服务的上报权限 **/
-            if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
+            if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true), CatalogChannelAuthorityAction.REPORT)) {
                 throw new PermissionDeniedException();
             }
             startProcessTaskStepVo = new ProcessTaskStepVo();

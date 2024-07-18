@@ -5,6 +5,7 @@ import java.util.*;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -68,7 +69,7 @@ public class CatalogTreeSearchApi extends PrivateApiComponentBase {
 
 		AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
 		//已授权的目录uuid
-		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
+		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CatalogChannelAuthorityAction.REPORT.getValue(), null);
 		if(CollectionUtils.isEmpty(currentUserAuthorizedCatalogUuidList)) {
 			return new ArrayList<>();
 		}

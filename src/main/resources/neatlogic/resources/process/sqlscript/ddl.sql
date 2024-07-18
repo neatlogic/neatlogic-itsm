@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS `catalog_authority`  (
   `catalog_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '目录uuid',
   `type` enum('common','user','team','role') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '类型',
   `uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'uuid',
-  PRIMARY KEY (`catalog_uuid`, `type`, `uuid`) USING BTREE,
+  `action` enum('report','view') COLLATE utf8mb4_general_ci NOT NULL COMMENT '授权类型',
+  PRIMARY KEY (`catalog_uuid`, `type`, `uuid`,`action`) USING BTREE,
   INDEX `idx_uuid`(`uuid`) USING BTREE,
   INDEX `idx_catalog_uuid`(`catalog_uuid`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '目录授权表';

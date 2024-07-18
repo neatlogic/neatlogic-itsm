@@ -6,6 +6,7 @@ import neatlogic.framework.dto.AuthorityVo;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.lrcode.LRCodeManager;
 import neatlogic.framework.process.auth.CATALOG_MODIFY;
+import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
 import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.framework.process.dto.CatalogVo;
 import neatlogic.framework.process.exception.catalog.CatalogNameRepeatException;
@@ -41,7 +42,7 @@ public class CatalogSaveApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "服务目录保存信息接口";
+		return "nmpac.catalogsaveapi.getname";
 	}
 
 	@Override
@@ -50,22 +51,23 @@ public class CatalogSaveApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, desc = "服务目录uuid"),
-		@Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired= true, maxLength = 50, desc = "服务目录名称"),
-		@Param(name = "parentUuid", type = ApiParamType.STRING, isRequired= true, desc = "父级uuid"),
-		@Param(name = "isActive", type = ApiParamType.ENUM, isRequired= true, desc = "是否激活", rule = "0,1"),
-		@Param(name = "icon", type = ApiParamType.STRING, isRequired= false, desc = "图标"),
-		@Param(name = "color", type = ApiParamType.STRING, isRequired= false, desc = "颜色"),
-		@Param(name = "desc", type = ApiParamType.STRING, isRequired= false, desc = "描述", maxLength = 200, xss = true),
-		@Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]")
-		})
+			@Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid"),
+			@Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired= true, maxLength = 50, desc = "common.name"),
+			@Param(name = "parentUuid", type = ApiParamType.STRING, isRequired= true, desc = "common.parentUuid"),
+			@Param(name = "isActive", type = ApiParamType.ENUM, isRequired= true, desc = "common.isactive", rule = "0,1"),
+			@Param(name = "icon", type = ApiParamType.STRING, isRequired= false, desc = "common.icon"),
+			@Param(name = "color", type = ApiParamType.STRING, isRequired= false, desc = "common.color"),
+			@Param(name = "desc", type = ApiParamType.STRING, isRequired= false, desc = "common.description", maxLength = 200, xss = true),
+			@Param(name = "reportAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.reportauthoritylist", help = "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
+			@Param(name = "viewAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.viewauthoritylist", help = "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]")
+	})
 	@Output({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "服务目录uuid")
+		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "common.uuid")
 		})
-	@Description(desc = "服务目录保存信息接口")
+	@Description(desc = "nmpac.catalogsaveapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		CatalogVo catalogVo = JSON.toJavaObject(jsonObj, CatalogVo.class);
+		CatalogVo catalogVo = jsonObj.toJavaObject(CatalogVo.class);
 		//获取父级信息
 		String parentUuid = catalogVo.getParentUuid();
 		//如果parentUuid为0，则表明其目标父目录为root
@@ -95,10 +97,18 @@ public class CatalogSaveApi extends PrivateApiComponentBase {
 			catalogMapper.insertCatalog(catalogVo);
 		}
 
-		List<AuthorityVo> authorityList = catalogVo.getAuthorityVoList();
-		if(CollectionUtils.isNotEmpty(authorityList)) {
-			for(AuthorityVo authorityVo : authorityList) {
-				catalogMapper.insertCatalogAuthority(authorityVo,catalogVo.getUuid());
+		List<String> reportAuthorityList = catalogVo.getReportAuthorityList();
+		if (CollectionUtils.isNotEmpty(reportAuthorityList)) {
+			List<AuthorityVo> authorityVoList = AuthorityVo.getAuthorityVoList(reportAuthorityList, CatalogChannelAuthorityAction.REPORT.getValue());
+			for(AuthorityVo authorityVo : authorityVoList) {
+				catalogMapper.insertCatalogAuthority(authorityVo, catalogVo.getUuid());
+			}
+		}
+		List<String> viewAuthorityList = catalogVo.getViewAuthorityList();
+		if (CollectionUtils.isNotEmpty(viewAuthorityList)) {
+			List<AuthorityVo> viewAuthorityVoList = AuthorityVo.getAuthorityVoList(viewAuthorityList, CatalogChannelAuthorityAction.VIEW.getValue());
+			for(AuthorityVo authorityVo : viewAuthorityVoList) {
+				catalogMapper.insertCatalogAuthority(authorityVo, catalogVo.getUuid());
 			}
 		}
 		return catalogVo.getUuid();
