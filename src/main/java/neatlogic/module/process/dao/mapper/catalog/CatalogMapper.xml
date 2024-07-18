@@ -103,7 +103,8 @@
 		SELECT
 		`catalog_uuid` AS catalogUuid,
 		`type`,
-		`uuid`
+		`uuid`,
+		`action`
 		FROM `catalog_authority`
 		WHERE `catalog_uuid` = #{catalogUuid}
 	</select>
@@ -113,30 +114,32 @@
 		DISTINCT `catalog_uuid`
 		FROM `catalog_authority`
 		<where>
-			<if test="catalogUuid != null and catalogUuid != ''">
-				`catalog_uuid` = #{catalogUuid} AND (
+			<if test="action != null and action != ''">
+				AND `action` = #{action}
 			</if>
-			(type = 'common' AND `uuid` = 'alluser')
+			<if test="catalogUuid != null and catalogUuid != ''">
+				AND `catalog_uuid` = #{catalogUuid}
+			</if>
+			AND (
+			(`type` = 'common' AND `uuid` = 'alluser')
 			<if test="userUuid != null and userUuid != ''">
-				OR (type = 'user' AND `uuid` = #{userUuid})
+				OR (`type` = 'user' AND `uuid` = #{userUuid})
 			</if>
 			<if test="teamUuidList != null and teamUuidList.size() > 0">
-				OR (type = 'team' AND `uuid` IN
+				OR (`type` = 'team' AND `uuid` IN
 				<foreach collection="teamUuidList" item="teamUuid" open="(" separator="," close=")">
 					#{teamUuid}
 				</foreach>
 				)
 			</if>
 			<if test="roleUuidList != null and roleUuidList.size() > 0">
-				OR (type = 'role' AND `uuid` IN
+				OR (`type` = 'role' AND `uuid` IN
 				<foreach collection="roleUuidList" item="roleUuid" open="(" separator="," close=")">
 					#{roleUuid}
 				</foreach>
 				)
 			</if>
-			<if test="catalogUuid != null and catalogUuid != ''">
-				)
-			</if>
+			)
 		</where>
 	</select>
 
@@ -149,6 +152,9 @@
 		<foreach collection="catalogUuidList" item="catalogUuid" open="(" separator="," close=")">
 			 #{catalogUuid}
 		</foreach>
+		<if test="action != null and action != ''">
+			AND `action` = #{action}
+		</if>
 		  AND (
 			(type = 'common' AND a.`uuid` = 'alluser')
 			<if test="userUuid != null and userUuid != ''">
@@ -253,6 +259,9 @@
 		JOIN `catalog` b ON a.`catalog_uuid` = b.`uuid`
 		<where>
 			b.`is_active` =1
+			<if test="action != null and action != ''">
+				AND `action` = #{action}
+			</if>
 			and ((a.type = 'common' AND a.`uuid` = 'alluser')
 			<if test="userUuid != null and userUuid != ''">
 				OR (a.type = 'user' AND a.`uuid` = #{userUuid})
@@ -354,13 +363,15 @@
 		INSERT INTO `catalog_authority` (
 		`catalog_uuid`,
 		`type`,
-		`uuid`
+		`uuid`,
+		`action`
 		)
 		VALUES
 		(
 		#{catalogUuid},
 		#{authorityVo.type},
-		#{authorityVo.uuid}
+		#{authorityVo.uuid},
+		#{authorityVo.action}
 		)
 	</insert>
 

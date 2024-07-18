@@ -5,6 +5,7 @@ import java.util.*;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
 import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
@@ -87,7 +88,7 @@ public class CatalogTreeApi extends PrivateApiComponentBase {
 		if(CollectionUtils.isNotEmpty(channelRelationTargetChannelUuidList)) {
 			AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
 	        //已授权的目录uuid
-	        List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
+	        List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CatalogChannelAuthorityAction.REPORT.getValue(), null);
 			/** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
 //			String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
 //			if(StringUtils.isNotBlank(agentUuid)){

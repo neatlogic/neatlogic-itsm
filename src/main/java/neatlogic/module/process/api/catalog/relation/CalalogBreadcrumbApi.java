@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
 import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -143,7 +144,7 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 				catalogList.add(catalog);
 			}
 			//已授权的目录uuid
-			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
+			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CatalogChannelAuthorityAction.REPORT.getValue(), null);
 			/** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
 //			if(StringUtils.isNotBlank(agentUuid)){
 //				AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);

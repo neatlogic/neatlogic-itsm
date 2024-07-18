@@ -90,12 +90,12 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                         return true;
                     }
                     //5.判断当前用户是否有工单对应服务的上报权限，如果没有，则提示“您没有【xxx】服务的上报权限”；
-                    if (catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid)) {
+                    if (catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid, CatalogChannelAuthorityAction.VIEW)) {
                         return true;
                     }
                     ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
-                            .put(operationType, new ProcessTaskNotChannelReportException(channelVo.getName()));
+                            .put(operationType, new ProcessTaskNotChannelViewException(channelVo.getName()));
                     return false;
                 });
         /**
@@ -627,7 +627,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                         return true;
                     }
                     //2.判断当前用户是否有工单对应服务的上报权限，如果没有，则提示“您没有【xxx】服务的上报权限”；
-                    if (catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid)) {
+                    if (catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid, CatalogChannelAuthorityAction.REPORT)) {
                         return true;
                     }
                     ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());

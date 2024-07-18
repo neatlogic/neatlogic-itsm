@@ -28,6 +28,7 @@ import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.channel.ChannelNotFoundEditTargetException;
@@ -156,7 +157,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                 throw new ChannelNotFoundEditTargetException(channelUuid);
             }
             /* 判断当前用户是否拥有channelUuid服务的上报权限 */
-            if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
+            if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true), CatalogChannelAuthorityAction.REPORT)) {
                 throw new PermissionDeniedException();
             }
             Long fromProcessTaskStepId = jsonObj.getLong("fromProcessTaskStepId");

@@ -44,6 +44,7 @@ public interface CatalogMapper extends ICatalogCrossoverMapper {
 			@Param("userUuid")String userUuid, 
 			@Param("teamUuidList")List<String> teamUuidList, 
 			@Param("roleUuidList")List<String> roleUuidList, 
+			@Param("action") String action,
 			@Param("catalogUuid") String catalogUuid
 			);
 
@@ -51,7 +52,8 @@ public interface CatalogMapper extends ICatalogCrossoverMapper {
 			@Param("userUuid")String userUuid,
 			@Param("teamUuidList")List<String> teamUuidList,
 			@Param("roleUuidList")List<String> roleUuidList,
-			@Param("catalogUuidList") List<String> catalogUuid
+			@Param("action") String action,
+			@Param("catalogUuidList") List<String> catalogUuidList
 			);
 
 //	String getCatalogLockByUuid(String uuid);
@@ -85,6 +87,7 @@ public interface CatalogMapper extends ICatalogCrossoverMapper {
             @Param("userUuid")String userUuid,
             @Param("teamUuidList")List<String> teamUuidList,
             @Param("roleUuidList")List<String> roleUuidList,
+			@Param("action") String action,
             @Param("parentUuid") String parentUuid,
             @Param("uuid") String uuid
     );
