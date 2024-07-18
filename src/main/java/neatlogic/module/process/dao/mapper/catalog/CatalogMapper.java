@@ -53,6 +53,7 @@ public interface CatalogMapper extends ICatalogCrossoverMapper {
 			@Param("teamUuidList")List<String> teamUuidList,
 			@Param("roleUuidList")List<String> roleUuidList,
 			@Param("action") String action,
+			@Param("isActive") Integer isActive,
 			@Param("catalogUuidList") List<String> catalogUuidList
 			);
 

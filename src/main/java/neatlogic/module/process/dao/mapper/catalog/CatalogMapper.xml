@@ -147,28 +147,31 @@
 		SELECT
 		DISTINCT a.`catalog_uuid`
 		FROM `catalog_authority` a
-		JOIN `catalog` b ON b.`uuid` = a.`catalog_uuid` AND b.`is_active` = 1
+		JOIN `catalog` b ON b.`uuid` = a.`catalog_uuid`
 		WHERE a.`catalog_uuid` IN
 		<foreach collection="catalogUuidList" item="catalogUuid" open="(" separator="," close=")">
 			 #{catalogUuid}
 		</foreach>
+		<if test="isActive != null">
+			AND b.`is_active` = #{isActive}
+		</if>
 		<if test="action != null and action != ''">
-			AND `action` = #{action}
+			AND a.`action` = #{action}
 		</if>
 		  AND (
-			(type = 'common' AND a.`uuid` = 'alluser')
+			(a.type = 'common' AND a.`uuid` = 'alluser')
 			<if test="userUuid != null and userUuid != ''">
-				OR (type = 'user' AND a.`uuid` = #{userUuid})
+				OR (a.type = 'user' AND a.`uuid` = #{userUuid})
 			</if>
 			<if test="teamUuidList != null and teamUuidList.size() > 0">
-				OR (type = 'team' AND a.`uuid` IN
+				OR (a.type = 'team' AND a.`uuid` IN
 				<foreach collection="teamUuidList" item="teamUuid" open="(" separator="," close=")">
 					#{teamUuid}
 				</foreach>
 				)
 			</if>
 			<if test="roleUuidList != null and roleUuidList.size() > 0">
-				OR (type = 'role' AND a.`uuid` IN
+				OR (a.type = 'role' AND a.`uuid` IN
 				<foreach collection="roleUuidList" item="roleUuid" open="(" separator="," close=")">
 					#{roleUuid}
 				</foreach>

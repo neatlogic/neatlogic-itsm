@@ -127,17 +127,21 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
             if (catalogVo == null) {
                 return false;
             }
+            Integer isActive = null;
+            if (action == CatalogChannelAuthorityAction.REPORT) {
+                isActive = 1;
+            }
             List<String> catalogUuidList = new ArrayList<>();
             List<CatalogVo> ancestorsAndSelfList = catalogMapper.getAncestorsAndSelfByLftRht(catalogVo.getLft(), catalogVo.getRht());
             for (CatalogVo catalog : ancestorsAndSelfList) {
-                if (Objects.equals(catalog.getIsActive(), 0)) {
+                if (isActive != null && !Objects.equals(catalog.getIsActive(), isActive)) {
                     return false;
                 }
                 catalogUuidList.add(catalog.getUuid());
             }
             if (CollectionUtils.isNotEmpty(catalogUuidList)) {
                 /* 查出当前用户所有已授权的目录uuid集合  **/
-                List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidListByCatalogUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), action.getValue(), catalogUuidList);
+                List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidListByCatalogUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), action.getValue(), isActive, catalogUuidList);
                 catalogUuidList.removeAll(currentUserAuthorizedCatalogUuidList);
                 return CollectionUtils.isEmpty(catalogUuidList);
             }
