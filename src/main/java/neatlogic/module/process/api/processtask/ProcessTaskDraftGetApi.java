@@ -125,7 +125,6 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         Long copyProcessTaskId = jsonObj.getLong("copyProcessTaskId");
         Long parentProcessTaskStepId = jsonObj.getLong("parentProcessTaskStepId");
         String channelUuid = jsonObj.getString("channelUuid");
-        ProcessTaskVo processTaskVo = null;
         if (processTaskId != null) {
             //已经暂存，从工单中心进入上报页
             if (processTaskMapper.getProcessTaskBaseInfoById(processTaskId) == null) {
@@ -138,10 +137,11 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             } catch (ProcessTaskPermissionDeniedException e) {
                 throw new PermissionDeniedException(e.getMessage());
             }
-            processTaskVo = getProcessTaskVoByProcessTaskId(processTaskId);
+            return getProcessTaskVoByProcessTaskId(processTaskId);
         } else if (copyProcessTaskId != null) {
             //复制上报
-            if (processTaskMapper.getProcessTaskBaseInfoById(copyProcessTaskId) == null) {
+            ProcessTaskVo copyProcessTask = processTaskMapper.getProcessTaskBaseInfoById(copyProcessTaskId);
+            if (copyProcessTask == null) {
                 throw new ProcessTaskNotFoundEditTargetException(copyProcessTaskId);
             }
             try {
@@ -151,7 +151,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             } catch (ProcessTaskPermissionDeniedException e) {
                 throw new PermissionDeniedException(e.getMessage());
             }
-            processTaskVo = getProcessTaskVoByCopyProcessTaskId(copyProcessTaskId);
+            return getProcessTaskVoByCopyProcessTaskId(copyProcessTask.getChannelUuid(), copyProcessTaskId);
         } else if (channelUuid != null) {
             if (channelMapper.checkChannelIsExists(channelUuid) == 0) {
                 throw new ChannelNotFoundEditTargetException(channelUuid);
@@ -164,7 +164,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
             Long fromProcessTaskId = jsonObj.getLong("fromProcessTaskId");
             if (fromProcessTaskId != null) {
-//                ProcessTaskVo fromProcessTaskVo = processTaskService.checkProcessTaskParamsIsLegal(fromProcessTaskId);
+                if (processTaskMapper.getProcessTaskBaseInfoById(fromProcessTaskId) == null) {
+                    throw new ProcessTaskNotFoundEditTargetException(fromProcessTaskId);
+                }
                 if (channelTypeRelationId == null) {
                     throw new ParamNotExistsException("channelTypeRelationId");
                 }
@@ -177,18 +179,15 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                 } catch (ProcessTaskPermissionDeniedException e) {
                     throw new PermissionDeniedException(e.getMessage());
                 }
-//                boolean flag = processTaskService.checkTransferReportAuthorization(fromProcessTaskVo, UserContext.get().getUserUuid(true), channelTypeRelationId);
-//                if (!flag) {
-//                    new ProcessTaskOperationUnauthorizedException(ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT);
-//                }
+                return getProcessTaskVoByChannelUuid(channelUuid, fromProcessTaskId, fromProcessTaskStepId, channelTypeRelationId);
             } else if (parentProcessTaskStepId != null) {
                 return getParentProcessTask(parentProcessTaskStepId, channelUuid);
+            } else {
+                return getProcessTaskVoByChannelUuid(channelUuid);
             }
-            processTaskVo = getProcessTaskVoByChannelUuid(channelUuid, fromProcessTaskId, fromProcessTaskStepId, channelTypeRelationId);
         } else {
             throw new ParamNotExistsException("processTaskId", "copyProcessTaskId", "channelUuid", "parentProcessTaskStepId");
         }
-        return processTaskVo;
     }
 
     /**
@@ -290,8 +289,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         return resultObj;
     }
 
-    private ProcessTaskVo getProcessTaskVoByProcessTaskId(Long processTaskId) throws Exception {
-        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+    private ProcessTaskVo getProcessTaskVoByProcessTaskId(Long processTaskId) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
         ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
         if (channel == null) {
             throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
@@ -366,64 +365,78 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         return processTaskVo;
     }
 
-    private ProcessTaskVo getProcessTaskVoByCopyProcessTaskId(Long copyProcessTaskId) throws Exception {
-        ProcessTaskVo oldProcessTaskVo = processTaskService.checkProcessTaskParamsIsLegal(copyProcessTaskId);
-        ProcessTaskVo processTaskVo = getProcessTaskVoByChannelUuid(oldProcessTaskVo.getChannelUuid(), null, null, null);
-
-        processTaskVo.setTitle(oldProcessTaskVo.getTitle());
-        List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(oldProcessTaskVo.getChannelUuid());
-        if (CollectionUtils.isNotEmpty(channelPriorityList)) {
-            processTaskVo.setIsNeedPriority(1);
-            for (ChannelPriorityVo channelPriority : channelPriorityList) {
-                if (oldProcessTaskVo.getPriorityUuid().equals(channelPriority.getPriorityUuid())) {
-                    processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
-                    break;
-                }
-            }
-        } else {
-            processTaskVo.setIsNeedPriority(0);
-        }
-
-        ProcessTaskStepVo startProcessTaskStepVo = processTaskVo.getStartProcessTaskStep();
-        ProcessTaskStepVo oldStartProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(copyProcessTaskId);
-        ProcessTaskStepReplyVo oldComment = oldStartProcessTaskStepVo.getComment();
-        if (oldComment != null) {
-            String processUuid = processTaskVo.getProcessUuid();
-            ProcessStepVo processStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
-            String processStepConfigStr = processStepVo.getConfig();
-            if (StringUtils.isNotBlank(processStepConfigStr)) {
-                Integer isNeedContent = (Integer) JSONPath.read(processStepConfigStr, "isNeedContent");
-                Integer isNeedUploadFile = (Integer) JSONPath.read(processStepConfigStr, "isNeedUploadFile");
-                if (Objects.equals(isNeedContent, 0) && Objects.equals(isNeedUploadFile, 0)) {
-                    oldComment = null;
-                } else if (Objects.equals(isNeedContent, 0)) {
-                    oldComment.setContent(null);
-                } else if (Objects.equals(isNeedUploadFile, 0)) {
-                    oldComment.setFileIdList(null);
-                    oldComment.setFileList(null);
-                }
-                startProcessTaskStepVo.setComment(oldComment);
-            }
-        }
-//        startProcessTaskStepVo.setHandlerStepInfo(oldStartProcessTaskStepVo.getHandlerStepInfo());
-        /** 当前步骤特有步骤信息 **/
-        IProcessStepInternalHandler startProcessStepUtilHandler =
-                ProcessStepInternalHandlerFactory.getHandler(oldStartProcessTaskStepVo.getHandler());
-        if (startProcessStepUtilHandler == null) {
-            throw new ProcessStepHandlerNotFoundException(oldStartProcessTaskStepVo.getHandler());
-        }
-        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getNonStartStepInfo(oldStartProcessTaskStepVo));
-        processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(copyProcessTaskId, null, processTaskVo.getFormConfig()));
-        // 标签列表
-        processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(copyProcessTaskId));
+    private ProcessTaskVo getProcessTaskVoByCopyProcessTaskId(String channelUuid, Long copyProcessTaskId) {
+        ProcessTaskVo processTaskVo = getProcessTaskVoByChannelUuid(channelUuid);
+        copyProcessTaskInfo(processTaskVo, copyProcessTaskId, Arrays.asList("title", "priority", "contentAndUploadFile", "handlerStepInfo", "form", "tag"));
         return processTaskVo;
     }
 
-    private ProcessTaskVo getProcessTaskVoByChannelUuid(String channelUuid) {
-        return getProcessTaskVoByChannelUuid(channelUuid, null, null, null);
+    private void copyProcessTaskInfo(ProcessTaskVo processTaskVo, Long copyProcessTaskId, List<String> list) {
+        ProcessTaskVo oldProcessTaskVo = processTaskMapper.getProcessTaskBaseInfoById(copyProcessTaskId);
+        if (list.contains("title")) {
+            processTaskVo.setTitle(oldProcessTaskVo.getTitle());
+        }
+        if (list.contains("priority")) {
+            List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
+            if (CollectionUtils.isNotEmpty(channelPriorityList)) {
+                processTaskVo.setIsNeedPriority(1);
+                for (ChannelPriorityVo channelPriority : channelPriorityList) {
+                    if (Objects.equals(oldProcessTaskVo.getPriorityUuid(), channelPriority.getPriorityUuid())) {
+                        processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
+                        break;
+                    }
+                }
+            } else {
+                processTaskVo.setIsNeedPriority(0);
+            }
+        }
+        ProcessTaskStepVo oldStartProcessTaskStepVo = null;
+        if (list.contains("contentAndUploadFile")) {
+            ProcessTaskStepVo startProcessTaskStepVo = processTaskVo.getStartProcessTaskStep();
+            oldStartProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(copyProcessTaskId);
+            ProcessTaskStepReplyVo oldComment = oldStartProcessTaskStepVo.getComment();
+            if (oldComment != null) {
+                String processUuid = processTaskVo.getProcessUuid();
+                ProcessStepVo processStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
+                String processStepConfigStr = processStepVo.getConfig();
+                if (StringUtils.isNotBlank(processStepConfigStr)) {
+                    Integer isNeedContent = (Integer) JSONPath.read(processStepConfigStr, "isNeedContent");
+                    Integer isNeedUploadFile = (Integer) JSONPath.read(processStepConfigStr, "isNeedUploadFile");
+                    if (Objects.equals(isNeedContent, 0) && Objects.equals(isNeedUploadFile, 0)) {
+                        oldComment = null;
+                    } else if (Objects.equals(isNeedContent, 0)) {
+                        oldComment.setContent(null);
+                    } else if (Objects.equals(isNeedUploadFile, 0)) {
+                        oldComment.setFileIdList(null);
+                        oldComment.setFileList(null);
+                    }
+                    startProcessTaskStepVo.setComment(oldComment);
+                }
+            }
+        }
+        /* 当前步骤特有步骤信息 */
+        if (list.contains("handlerStepInfo")) {
+            if (oldStartProcessTaskStepVo == null) {
+                oldStartProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(copyProcessTaskId);
+            }
+            IProcessStepInternalHandler startProcessStepUtilHandler =
+                    ProcessStepInternalHandlerFactory.getHandler(oldStartProcessTaskStepVo.getHandler());
+            if (startProcessStepUtilHandler == null) {
+                throw new ProcessStepHandlerNotFoundException(oldStartProcessTaskStepVo.getHandler());
+            }
+            ProcessTaskStepVo startProcessTaskStepVo = processTaskVo.getStartProcessTaskStep();
+            startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getNonStartStepInfo(oldStartProcessTaskStepVo));
+        }
+        if (list.contains("form")) {
+            processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(copyProcessTaskId, null, processTaskVo.getFormConfig()));
+        }
+        // 标签列表
+        if (list.contains("tag")) {
+            processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(copyProcessTaskId));
+        }
     }
 
-    private ProcessTaskVo getProcessTaskVoByChannelUuid(String channelUuid, Long fromProcessTaskId, Long fromProcessTaskStepId, Long channelTypeRelationId) {
+    private ProcessTaskVo getProcessTaskVoByChannelUuid(String channelUuid) {
         ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
         if (channel == null) {
             throw new ChannelNotFoundException(channelUuid);
@@ -482,6 +495,11 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 
         processTaskService.setProcessTaskFormInfo(processTaskVo);
+        return processTaskVo;
+    }
+
+    private ProcessTaskVo getProcessTaskVoByChannelUuid(String channelUuid, Long fromProcessTaskId, Long fromProcessTaskStepId, Long channelTypeRelationId) {
+        ProcessTaskVo processTaskVo = getProcessTaskVoByChannelUuid(channelUuid);
         if (fromProcessTaskId != null) {
             ProcessTaskVo fromProcessTaskVo = processTaskService.getFromProcessTaskById(fromProcessTaskId);
             ChannelRelationVo channelRelationVo = new ChannelRelationVo();
@@ -499,6 +517,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             if (MapUtils.isNotEmpty(processTaskVo.getFormConfig())) {
                 processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(fromProcessTaskId, fromProcessTaskStepId, processTaskVo.getFormConfig()));
             }
+            copyProcessTaskInfo(processTaskVo, fromProcessTaskId, Arrays.asList("title", "contentAndUploadFile"));
         }
         return processTaskVo;
     }
