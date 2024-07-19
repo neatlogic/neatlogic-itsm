@@ -21,7 +21,6 @@ import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dto.ProcessTaskSlaTimeVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
-import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.module.process.service.ProcessTaskService;
@@ -101,7 +100,8 @@ public class StepSlaParamHandler extends ProcessTaskNotifyParamHandlerBase {
             jsonObj.put("name", slaTimeVo.getName());
             jsonObj.put("status", slaTimeVo.getStatus());
             jsonObj.put("timeLeft", slaTimeVo.getTimeLeft());
-            if (slaTimeVo.getTimeLeft() > 0 || Objects.equals(slaTimeVo.getDisplayModeAfterTimeout(), "workTime")) {
+//            if (slaTimeVo.getTimeLeft() > 0 || Objects.equals(slaTimeVo.getDisplayModeAfterTimeout(), "workTime")) {
+            if (Objects.equals(slaTimeVo.getSlaTimeDisplayMode(), "workTime")) {
                 jsonObj.put("timeLeftFormat", TimeUtil.millisecondsFormat(slaTimeVo.getTimeLeft(), 3, TimeUnit.MINUTES, " "));
             } else {
                 jsonObj.put("timeLeftFormat", TimeUtil.millisecondsFormat((System.currentTimeMillis() - slaTimeVo.getExpireTime().getTime()), 3, TimeUnit.MINUTES, " "));

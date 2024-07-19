@@ -97,7 +97,8 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
         List<ProcessTaskSlaVo> processTaskSlaList = processTaskVo.getProcessTaskSlaVoList();
         JSONArray resultArray = new JSONArray();
         if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus()) && CollectionUtils.isNotEmpty(processTaskSlaList)) {
-            String displayModeAfterTimeout = ConfigManager.getConfig(ItsmTenantConfig.DISPLAY_MODE_AFTER_TIMEOUT);
+//            String displayModeAfterTimeout = ConfigManager.getConfig(ItsmTenantConfig.DISPLAY_MODE_AFTER_TIMEOUT);
+            String slaTimeDisplayMode = ConfigManager.getConfig(ItsmTenantConfig.SLA_TIME_DISPLAY_MODE);
             long currentTimeMillis = System.currentTimeMillis();
             for (ProcessTaskSlaVo slaVo : processTaskSlaList) {
                 //判断需要 同时满足 该步骤是进行中状态，以及包含sla策略
@@ -107,7 +108,8 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
                     continue;
                 }
                 JSONObject tmpJson = new JSONObject();
-                tmpJson.put(ItsmTenantConfig.DISPLAY_MODE_AFTER_TIMEOUT.getKey(), displayModeAfterTimeout);
+//                tmpJson.put(ItsmTenantConfig.DISPLAY_MODE_AFTER_TIMEOUT.getKey(), displayModeAfterTimeout);
+                tmpJson.put("slaTimeDisplayMode", slaTimeDisplayMode);
                 ProcessTaskSlaTimeVo slaTimeVo = slaVo.getSlaTimeVo();
                 if (slaTimeVo == null) {
                     continue;

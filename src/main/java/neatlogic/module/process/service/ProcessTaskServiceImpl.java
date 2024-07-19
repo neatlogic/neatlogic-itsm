@@ -762,9 +762,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
         Map<Long, String> worktimeUuidMap = processTaskList.stream().collect(Collectors.toMap(ProcessTaskVo::getId, ProcessTaskVo::getWorktimeUuid));
         long currentTimeMillis = System.currentTimeMillis();
-        String displayModeAfterTimeout = ConfigManager.getConfig(ItsmTenantConfig.DISPLAY_MODE_AFTER_TIMEOUT);
+//        String displayModeAfterTimeout = ConfigManager.getConfig(ItsmTenantConfig.DISPLAY_MODE_AFTER_TIMEOUT);
+        String slaTimeDisplayMode = ConfigManager.getConfig(ItsmTenantConfig.SLA_TIME_DISPLAY_MODE);
         for (ProcessTaskSlaTimeVo processTaskSlaTimeVo : processTaskSlaTimeList) {
-            processTaskSlaTimeVo.setDisplayModeAfterTimeout(displayModeAfterTimeout);
+//            processTaskSlaTimeVo.setDisplayModeAfterTimeout(displayModeAfterTimeout);
+            processTaskSlaTimeVo.setSlaTimeDisplayMode(slaTimeDisplayMode);
             if (!Objects.equals(SlaStatus.DOING.name().toLowerCase(), processTaskSlaTimeVo.getStatus())) {
                 continue;
             }
