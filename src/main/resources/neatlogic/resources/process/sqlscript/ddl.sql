@@ -58,7 +58,8 @@ CREATE TABLE IF NOT EXISTS `channel_authority`  (
   `channel_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '服务uuid',
   `type` enum('common','user','team','role') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '类型',
   `uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'uuid',
-  PRIMARY KEY (`channel_uuid`, `type`, `uuid`) USING BTREE,
+  `action` enum('report','view') COLLATE utf8mb4_general_ci NOT NULL COMMENT '授权类型',
+  PRIMARY KEY (`channel_uuid`, `type`, `uuid`, `action`) USING BTREE,
   INDEX `idx_channel_uuid`(`channel_uuid`) USING BTREE,
   INDEX `idx_uuid`(`uuid`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '服务授权表';

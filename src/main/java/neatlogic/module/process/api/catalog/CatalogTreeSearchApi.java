@@ -74,7 +74,7 @@ public class CatalogTreeSearchApi extends PrivateApiComponentBase {
 			return new ArrayList<>();
 		}
 		//已授权的服务uuid
-		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
+		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CatalogChannelAuthorityAction.REPORT.getValue(), null);
 		if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
 		    return new ArrayList<>();
 		}
