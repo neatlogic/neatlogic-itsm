@@ -66,11 +66,15 @@ public interface ChannelMapper extends IChannelCrossoverMapper {
     List<AuthorityVo> getChannelAuthorityListByChannelUuid(String uuid);
 
     List<String> getAuthorizedChannelUuidList(@Param("userUuid") String userUuid,
-                                                     @Param("teamUuidList") List<String> teamUuidList, @Param("roleUuidList") List<String> roleUuidList,
-                                                     @Param("channelUuid") String channelUuid);
+                                              @Param("teamUuidList") List<String> teamUuidList,
+                                              @Param("roleUuidList") List<String> roleUuidList,
+                                              @Param("action") String action,
+                                              @Param("channelUuid") String channelUuid);
 
     List<String> getActiveAuthorizedChannelUuidList(@Param("userUuid") String userUuid,
-                                                    @Param("teamUuidList") List<String> teamUuidList, @Param("roleUuidList") List<String> roleUuidList,
+                                                    @Param("teamUuidList") List<String> teamUuidList,
+                                                    @Param("roleUuidList") List<String> roleUuidList,
+                                                    @Param("action") String action,
                                                     @Param("channelUuid") String channelUuid);
 
     List<ChannelVo> getAuthorizedChannelListByParentUuid(@Param("userUuid") String userUuid,

@@ -67,7 +67,7 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
         List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CatalogChannelAuthorityAction.REPORT.getValue(), null);
         if (CollectionUtils.isNotEmpty(currentUserAuthorizedCatalogUuidList)) {
             /* 查出当前用户所有已授权的服务uuid集合  **/
-            List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
+            List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CatalogChannelAuthorityAction.REPORT.getValue(), null);
             if (CollectionUtils.isNotEmpty(currentUserAuthorizedChannelUuidList)) {
                 Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
                 //构造一个虚拟的root节点
@@ -114,9 +114,18 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
 
     @Override
     public boolean channelIsAuthority(String channelUuid, String userUuid, CatalogChannelAuthorityAction action) {
+        Integer isActive = null;
+        if (action == CatalogChannelAuthorityAction.REPORT) {
+            isActive = 1;
+        }
         AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
         /* 查出当前用户所有已授权的服务uuid集合  **/
-        List<String> channelUuidList = channelMapper.getActiveAuthorizedChannelUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), channelUuid);
+        List<String> channelUuidList = null;
+        if (action == CatalogChannelAuthorityAction.REPORT) {
+            channelUuidList = channelMapper.getActiveAuthorizedChannelUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), action.getValue(), channelUuid);
+        } else {
+            channelUuidList = channelMapper.getAuthorizedChannelUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), action.getValue(), channelUuid);
+        }
         /* 服务已授权 **/
         if (channelUuidList.contains(channelUuid)) {
             ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
@@ -126,10 +135,6 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
             CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channel.getParentUuid());
             if (catalogVo == null) {
                 return false;
-            }
-            Integer isActive = null;
-            if (action == CatalogChannelAuthorityAction.REPORT) {
-                isActive = 1;
             }
             List<String> catalogUuidList = new ArrayList<>();
             List<CatalogVo> ancestorsAndSelfList = catalogMapper.getAncestorsAndSelfByLftRht(catalogVo.getLft(), catalogVo.getRht());
@@ -154,7 +159,7 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
         List<CatalogVo> cataLogVoList = new ArrayList<>();
         AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
         //已授权的服务uuid
-        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
+        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CatalogChannelAuthorityAction.REPORT.getValue(), null);
         if (CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
             return cataLogVoList;
         }
@@ -193,7 +198,7 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
         JSONObject catalogParentJson = new JSONObject();
         AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
         //已授权的服务uuid
-        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
+        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CatalogChannelAuthorityAction.REPORT.getValue(), null);
         if (CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
             return catalogParentJson;
         }

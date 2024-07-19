@@ -391,7 +391,8 @@
             resultType="neatlogic.framework.dto.AuthorityVo" useCache="false">
         SELECT `channel_uuid` AS channelUuid,
                `type`,
-               `uuid`
+               `uuid`,
+               `action`
         FROM `channel_authority`
         WHERE `channel_uuid` = #{channelUuid}
     </select>
@@ -402,8 +403,12 @@
         FROM `channel_authority`
         <where>
             <if test="channelUuid != null and channelUuid != ''">
-                `channel_uuid` = #{channelUuid} AND (
+                AND `channel_uuid` = #{channelUuid}
             </if>
+            <if test="action != null and action != ''">
+                AND `action` = #{action}
+            </if>
+            AND (
             (type = 'common' AND `uuid` = 'alluser')
             <if test="userUuid != null and userUuid != ''">
                 OR (type = 'user' AND `uuid` = #{userUuid})
@@ -422,9 +427,7 @@
                 </foreach>
                 )
             </if>
-            <if test="channelUuid != null and channelUuid != ''">
-                )
-            </if>
+            )
         </where>
     </select>
 
@@ -432,11 +435,15 @@
         SELECT
         DISTINCT a.`channel_uuid`
         FROM `channel_authority` a
-        JOIN `channel` b ON b.`uuid` = a.`channel_uuid` AND b.`is_active` = 1
+        JOIN `channel` b ON b.`uuid` = a.`channel_uuid`AND b.`is_active` = 1
         <where>
             <if test="channelUuid != null and channelUuid != ''">
-                a.`channel_uuid` = #{channelUuid} AND (
+                AND a.`channel_uuid` = #{channelUuid}
             </if>
+            <if test="action != null and action != ''">
+                AND a.`action` = #{action}
+            </if>
+            AND (
             (type = 'common' AND a.`uuid` = 'alluser')
             <if test="userUuid != null and userUuid != ''">
                 OR (type = 'user' AND a.`uuid` = #{userUuid})
@@ -455,9 +462,7 @@
                 </foreach>
                 )
             </if>
-            <if test="channelUuid != null and channelUuid != ''">
-                )
-            </if>
+            )
         </where>
     </select>
 
@@ -481,6 +486,7 @@
         LEFT JOIN `channel_user` cu ON cu.`channel_uuid` = c.`uuid`
         <where>
             c.`is_active` =1
+            and ca.`action` = 'report'
             and
             ((ca.type = 'common' AND ca.`uuid` = 'alluser')
             <if test="userUuid != null and userUuid != ''">
@@ -726,10 +732,12 @@
     <insert id="insertChannelAuthority">
         INSERT INTO `channel_authority` (`channel_uuid`,
                                          `type`,
-                                         `uuid`)
+                                         `uuid`,
+                                         `action`)
         VALUES (#{channelUuid},
                 #{authorityVo.type},
-                #{authorityVo.uuid})
+                #{authorityVo.uuid},
+                #{authorityVo.action})
     </insert>
 
     <insert id="replaceChannelWorktime">

@@ -5,6 +5,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.AuthorityVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.framework.process.dto.ChannelPriorityVo;
 import neatlogic.framework.process.dto.ChannelVo;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -71,7 +74,10 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 		}
 		channel.setPriorityUuidList(priorityUuidList);
 		List<AuthorityVo> authorityVoList = channelMapper.getChannelAuthorityListByChannelUuid(uuid);
-		channel.setAuthorityVoList(authorityVoList);
+		List<AuthorityVo> viewAuthorityVoList = authorityVoList.stream().filter(e -> Objects.equals(e.getAction(), CatalogChannelAuthorityAction.VIEW.getValue())).collect(Collectors.toList());
+		channel.setViewAuthorityList(AuthorityVo.getAuthorityList(viewAuthorityVoList));
+		List<AuthorityVo> reportAuthorityVoList = authorityVoList.stream().filter(e -> Objects.equals(e.getAction(), CatalogChannelAuthorityAction.REPORT.getValue())).collect(Collectors.toList());
+		channel.setReportAuthorityList(AuthorityVo.getAuthorityList(reportAuthorityVoList));
 		if(channelMapper.checkChannelIsFavorite(UserContext.get().getUserUuid(true), uuid) == 0) {
 		    channel.setIsFavorite(0);
 		}else {

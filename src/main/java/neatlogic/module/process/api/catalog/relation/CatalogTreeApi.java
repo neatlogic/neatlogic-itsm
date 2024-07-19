@@ -102,7 +102,7 @@ public class CatalogTreeApi extends PrivateApiComponentBase {
 //			}
 	        if(CollectionUtils.isNotEmpty(currentUserAuthorizedCatalogUuidList)) {
 	          //已授权的服务uuid
-	            List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
+	            List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CatalogChannelAuthorityAction.REPORT.getValue(), null);
 				/** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
 //	            if(StringUtils.isNotBlank(agentUuid)){
 //					AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);

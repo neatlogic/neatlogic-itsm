@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dto.AuthorityVo;
+import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
 import neatlogic.framework.process.crossover.IProcessCrossoverMapper;
 import neatlogic.framework.process.dto.CatalogVo;
 import neatlogic.framework.process.dto.ChannelPriorityVo;
@@ -117,12 +118,22 @@ public class ChannelServiceImpl implements ChannelService {
                 channelMapper.insertChannelPriority(channelPriority);
             }
         }
-        List<AuthorityVo> authorityList = channelVo.getAuthorityVoList();
-        if (CollectionUtils.isNotEmpty(authorityList)) {
-            for (AuthorityVo authorityVo : authorityList) {
+
+        List<String> reportAuthorityList = channelVo.getReportAuthorityList();
+        if (CollectionUtils.isNotEmpty(reportAuthorityList)) {
+            List<AuthorityVo> authorityVoList = AuthorityVo.getAuthorityVoList(reportAuthorityList, CatalogChannelAuthorityAction.REPORT.getValue());
+            for(AuthorityVo authorityVo : authorityVoList) {
                 channelMapper.insertChannelAuthority(authorityVo, channelVo.getUuid());
             }
         }
+        List<String> viewAuthorityList = channelVo.getViewAuthorityList();
+        if (CollectionUtils.isNotEmpty(viewAuthorityList)) {
+            List<AuthorityVo> viewAuthorityVoList = AuthorityVo.getAuthorityVoList(viewAuthorityList, CatalogChannelAuthorityAction.VIEW.getValue());
+            for(AuthorityVo authorityVo : viewAuthorityVoList) {
+                channelMapper.insertChannelAuthority(authorityVo, channelVo.getUuid());
+            }
+        }
+
         /* 转报设置逻辑，允许转报后，转报设置必填 **/
         channelMapper.deleteChannelRelationBySource(channelVo.getUuid());
         channelMapper.deleteChannelRelationAuthorityBySource(channelVo.getUuid());

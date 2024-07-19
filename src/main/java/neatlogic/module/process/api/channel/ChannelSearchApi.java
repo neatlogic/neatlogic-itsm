@@ -7,6 +7,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
 import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
@@ -92,7 +93,7 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");
 		if(Objects.equal(isAuthenticate, 1)) {
 			AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
-		    List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
+		    List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CatalogChannelAuthorityAction.REPORT.getValue(), null);
 		    if(CollectionUtils.isNotEmpty(authorizedChannelUuidList)) {
 		        String channelUuid = jsonObj.getString("channelUuid");
 	            if(StringUtils.isNotBlank(channelUuid) && channelMapper.checkChannelIsExists(channelUuid) == 0) {
