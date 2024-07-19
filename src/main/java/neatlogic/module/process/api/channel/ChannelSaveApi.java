@@ -78,7 +78,7 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
             @Param(name = "isNeedPriority", type = ApiParamType.INTEGER, isRequired = true, desc = "common.isneedpriority"),
             @Param(name = "defaultPriorityUuid", type = ApiParamType.STRING, desc = "common.defaultpriorityuuid"),
             @Param(name = "priorityUuidList", type = ApiParamType.JSONARRAY, desc = "nmrap.updateprioritysortapi.input.param.desc.prioritylist"),
-            @Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "common.authoritylist", help = "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
+            @Param(name = "reportAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.reportauthoritylist", help = "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
             @Param(name = "viewAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.viewauthoritylist", help = "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
             @Param(name = "channelTypeUuid", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.channeltypeuuid"),
             @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "common.config")
