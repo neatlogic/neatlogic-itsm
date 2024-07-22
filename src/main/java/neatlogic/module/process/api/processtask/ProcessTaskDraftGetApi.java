@@ -478,6 +478,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                 for (ChannelPriorityVo channelPriority : channelPriorityList) {
                     if (Objects.equals(channelPriority.getIsDefault(), 1)) {
                         processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
+                        processTaskVo.setDefaultPriorityUuid(channelPriority.getPriorityUuid());
+                        break;
                     }
                 }
             }

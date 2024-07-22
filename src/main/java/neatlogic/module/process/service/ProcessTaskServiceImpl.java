@@ -1406,6 +1406,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                         priorityVo.setUuid(processTaskVo.getPriorityUuid());
                     }
                     processTaskVo.setPriority(priorityVo);
+                    for (ChannelPriorityVo channelPriority : channelPriorityList) {
+                        if (Objects.equals(channelPriority.getIsDefault(), 1)) {
+                            processTaskVo.setDefaultPriorityUuid(channelPriority.getPriorityUuid());
+                            break;
+                        }
+                    }
                 }
             }
         }
