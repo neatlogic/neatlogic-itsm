@@ -66,6 +66,8 @@
         <result column="name" property="name"/>
         <result column="parent_uuid" property="parentUuid"/>
         <result column="is_active" property="isActive"/>
+        <result column="is_active_priority" property="isActivePriority"/>
+        <result column="is_display_priority" property="isDisplayPriority"/>
         <result column="icon" property="icon"/>
         <result column="color" property="color"/>
         <result column="desc" property="desc"/>
@@ -93,6 +95,8 @@
         c.`parent_uuid`) AND rht >=
         (SELECT rht FROM `catalog` WHERE UUID = c.`parent_uuid`)) AS parentUuids,
         c.`is_active`,
+        c.`is_active_priority`,
+        c.`is_display_priority`,
         c.`icon`,
         c.`color`,
         c.`desc`,
@@ -154,6 +158,8 @@
                `name`,
                `parent_uuid`       AS parentUuid,
                `is_active`         AS isActive,
+               `is_active_priority` AS isActivePriority,
+               `is_display_priority` AS isDisplayPriority,
                `icon`,
                `color`,
                `desc`,
@@ -220,6 +226,8 @@
                `name`,
                `parent_uuid`       AS parentUuid,
                `is_active`         AS isActive,
+               `is_active_priority` AS isActivePriority,
+               `is_display_priority` AS isDisplayPriority,
                `icon`,
                `color`,
                `desc`,
@@ -239,6 +247,8 @@
                c.`name`,
                c.`parent_uuid`       AS parentUuid,
                c.`is_active`         AS isActive,
+               c.`is_active_priority` AS isActivePriority,
+               c.`is_display_priority` AS isDisplayPriority,
                c.`icon`,
                c.`color`,
                c.`desc`,
@@ -259,6 +269,8 @@
         c.`name`,
         c.`parent_uuid` AS parentUuid,
         c.`is_active` AS isActive,
+        c.`is_active_priority` AS isActivePriority,
+        c.`is_display_priority` AS isDisplayPriority,
         c.`icon`,
         c.`color`,
         c.`desc`,
@@ -286,6 +298,8 @@
         `name`,
         `parent_uuid` AS parentUuid,
         `is_active` AS isActive,
+        `is_active_priority` AS isActivePriority,
+        `is_display_priority` AS isDisplayPriority,
         `icon`,
         `color`,
         `sort`,
@@ -472,6 +486,8 @@
         c.`uuid`,
         c.`name`,
         c.`is_active` AS isActive,
+        c.`is_active_priority` AS isActivePriority,
+        c.`is_display_priority` AS isDisplayPriority,
         c.`icon`,
         c.`color`,
         c.`desc`,
@@ -608,6 +624,8 @@
         c.`parent_uuid`) AND rht >=
         (SELECT rht FROM `catalog` WHERE UUID = c.`parent_uuid`)) AS parentUuids,
         c.`is_active`,
+        c.`is_active_priority`,
+        c.`is_display_priority`,
         c.`icon`,
         c.`color`,
         c.`desc`,
@@ -690,6 +708,8 @@
                                 `name`,
                                 `parent_uuid`,
                                 `is_active`,
+                                `is_active_priority`,
+                                `is_display_priority`,
                                 `icon`,
                                 `color`,
                                 `desc`,
@@ -703,6 +723,8 @@
                 #{name},
                 #{parentUuid},
                 #{isActive},
+                #{isActivePriority},
+                #{isDisplayPriority},
                 #{icon},
                 #{color},
                 #{desc},

@@ -49,6 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -120,17 +121,24 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         }
 
         String priorityUuid = jsonObj.getString("priorityUuid");
-        String oldPriorityUuid = processTaskVo.getPriorityUuid();
-        if (StringUtils.isNotBlank(priorityUuid) && !priorityUuid.equals(oldPriorityUuid)) {
-            if (priorityMapper.checkPriorityIsExists(priorityUuid) == 0) {
-                throw new PriorityNotFoundException(priorityUuid);
+        if (priorityUuid != null) {
+            if (Objects.equals(processTaskVo.getIsActivePriority(), 1)) {
+                String oldPriorityUuid = processTaskVo.getPriorityUuid();
+                if (StringUtils.isNotBlank(priorityUuid) && !priorityUuid.equals(oldPriorityUuid)) {
+                    if (priorityMapper.checkPriorityIsExists(priorityUuid) == 0) {
+                        throw new PriorityNotFoundException(priorityUuid);
+                    }
+                    isUpdate = true;
+                    processTaskVo.setPriorityUuid(priorityUuid);
+                    jsonObj.put(ProcessTaskAuditDetailType.PRIORITY.getOldDataParamName(), oldPriorityUuid);
+                } else {
+                    jsonObj.remove("priorityUuid");
+                }
+            } else {
+                jsonObj.remove("priorityUuid");
             }
-            isUpdate = true;
-            processTaskVo.setPriorityUuid(priorityUuid);
-            jsonObj.put(ProcessTaskAuditDetailType.PRIORITY.getOldDataParamName(), oldPriorityUuid);
-        } else {
-            jsonObj.remove("priorityUuid");
         }
+
         if (isUpdate) {
             processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
         }

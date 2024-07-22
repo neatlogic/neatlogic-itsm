@@ -64,15 +64,18 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 		channel.setProcessUuid(processUuid);
 		String worktimeUuid = channelMapper.getWorktimeUuidByChannelUuid(uuid);
 		channel.setWorktimeUuid(worktimeUuid);
-		List<String> priorityUuidList = new ArrayList<>();
-		List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(uuid);
-		for(ChannelPriorityVo channelPriority : channelPriorityList) {
-			priorityUuidList.add(channelPriority.getPriorityUuid());
-			if(channelPriority.getIsDefault().intValue() == 1) {
-				channel.setDefaultPriorityUuid(channelPriority.getPriorityUuid());
+		if (Objects.equals(channelVo.getIsActivePriority(), 1)) {
+			List<String> priorityUuidList = new ArrayList<>();
+			List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(uuid);
+			for(ChannelPriorityVo channelPriority : channelPriorityList) {
+				priorityUuidList.add(channelPriority.getPriorityUuid());
+				if(Objects.equals(channelPriority.getIsDefault(), 1)) {
+					channel.setDefaultPriorityUuid(channelPriority.getPriorityUuid());
+				}
 			}
+			channel.setPriorityUuidList(priorityUuidList);
 		}
-		channel.setPriorityUuidList(priorityUuidList);
+
 		List<AuthorityVo> authorityVoList = channelMapper.getChannelAuthorityListByChannelUuid(uuid);
 		List<AuthorityVo> viewAuthorityVoList = authorityVoList.stream().filter(e -> Objects.equals(e.getAction(), CatalogChannelAuthorityAction.VIEW.getValue())).collect(Collectors.toList());
 		channel.setViewAuthorityList(AuthorityVo.getAuthorityList(viewAuthorityVoList));

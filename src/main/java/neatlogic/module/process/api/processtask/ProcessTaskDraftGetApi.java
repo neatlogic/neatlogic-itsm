@@ -377,17 +377,16 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             processTaskVo.setTitle(oldProcessTaskVo.getTitle());
         }
         if (list.contains("priority")) {
-            List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
-            if (CollectionUtils.isNotEmpty(channelPriorityList)) {
-                processTaskVo.setIsNeedPriority(1);
-                for (ChannelPriorityVo channelPriority : channelPriorityList) {
-                    if (Objects.equals(oldProcessTaskVo.getPriorityUuid(), channelPriority.getPriorityUuid())) {
-                        processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
-                        break;
+            if (Objects.equals(processTaskVo.getIsActivePriority(), 1)) {
+                List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
+                if (CollectionUtils.isNotEmpty(channelPriorityList)) {
+                    for (ChannelPriorityVo channelPriority : channelPriorityList) {
+                        if (Objects.equals(oldProcessTaskVo.getPriorityUuid(), channelPriority.getPriorityUuid())) {
+                            processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
+                            break;
+                        }
                     }
                 }
-            } else {
-                processTaskVo.setIsNeedPriority(0);
             }
         }
         ProcessTaskStepVo oldStartProcessTaskStepVo = null;
@@ -471,16 +470,17 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
         String worktimeUuid = channelMapper.getWorktimeUuidByChannelUuid(channelUuid);
         processTaskVo.setWorktimeUuid(worktimeUuid);
-        List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
-        if (CollectionUtils.isNotEmpty(channelPriorityList)) {
-            processTaskVo.setIsNeedPriority(1);
-            for (ChannelPriorityVo channelPriority : channelPriorityList) {
-                if (channelPriority.getIsDefault().intValue() == 1) {
-                    processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
+        processTaskVo.setIsActivePriority(channel.getIsActivePriority());
+        processTaskVo.setIsDisplayPriority(channel.getIsDisplayPriority());
+        if (Objects.equals(channel.getIsActivePriority(), 1)) {
+            List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
+            if (CollectionUtils.isNotEmpty(channelPriorityList)) {
+                for (ChannelPriorityVo channelPriority : channelPriorityList) {
+                    if (Objects.equals(channelPriority.getIsDefault(), 1)) {
+                        processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
+                    }
                 }
             }
-        } else {
-            processTaskVo.setIsNeedPriority(0);
         }
 
         ProcessStepVo startProcessStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);

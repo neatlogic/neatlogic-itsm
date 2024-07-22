@@ -100,7 +100,7 @@ public class ChannelServiceImpl implements ChannelService {
         }
         channelMapper.replaceChannelWorktime(uuid, channelVo.getWorktimeUuid());
         //优先级
-        if (channelVo.getIsNeedPriority() == 1) {
+        if (Objects.equals(channelVo.getIsActivePriority(), 1)) {
             String defaultPriorityUuid = channelVo.getDefaultPriorityUuid();
             List<String> priorityUuidList = channelVo.getPriorityUuidList();
             for (String priorityUuid : priorityUuidList) {
