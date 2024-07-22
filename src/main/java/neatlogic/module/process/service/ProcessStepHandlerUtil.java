@@ -932,6 +932,10 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
             readcomponentList = readcomponentArray.toJavaList(String.class);
         }
 
+        Boolean needVerifyIsRequired = paramObj.getBoolean("needVerifyIsRequired");
+        if (needVerifyIsRequired == null) {
+            needVerifyIsRequired = true;
+        }
         Map<String, FormAttributeVo> formExtendAttributeMap = new HashMap<>();
         Map<String, FormAttributeVo> formCustomExtendAttributeMap = new HashMap<>();
         List<FormAttributeVo> mainSceneFormAttributeList;
@@ -995,12 +999,12 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
 
         List<FormAttributeVo> formAttributeVoList = formVersionVo.getFormAttributeList();
 
-        Map<String, String> attributeLabelMap = new HashMap<>();
+//        Map<String, String> attributeLabelMap = new HashMap<>();
 
         if (CollectionUtils.isNotEmpty(formAttributeVoList)) {
             for (FormAttributeVo formAttributeVo : formAttributeVoList) {
-                attributeLabelMap.put(formAttributeVo.getUuid(), formAttributeVo.getLabel());
-                if (formAttributeVo.isRequired()) {
+//                attributeLabelMap.put(formAttributeVo.getUuid(), formAttributeVo.getLabel());
+                if (formAttributeVo.isRequired() && needVerifyIsRequired) {
                     if (hidecomponentList.contains(formAttributeVo.getUuid())) {
                         continue;
                     }
