@@ -89,6 +89,7 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
         param.put("formExtendAttributeDataList", paramObj.getJSONArray("formExtendAttributeDataList"));
         param.put("hidecomponentList", paramObj.getJSONArray("hidecomponentList"));
         param.put("readcomponentList", paramObj.getJSONArray("readcomponentList"));
+        param.put("needVerifyIsRequired", false);
         param.put("source", paramObj.getString("source"));
         processStepHandlerUtil.saveForm(processTaskStepVo);
         processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UPDATEFORM);
