@@ -117,6 +117,8 @@ public class ChannelServiceImpl implements ChannelService {
                 }
                 channelMapper.insertChannelPriority(channelPriority);
             }
+        } else {
+            channelVo.setIsDisplayPriority(0);
         }
 
         List<String> reportAuthorityList = channelVo.getReportAuthorityList();
