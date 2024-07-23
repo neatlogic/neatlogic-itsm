@@ -416,11 +416,11 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         JSONArray returnArray = new JSONArray();
 //        workcenterVo.setSqlFieldType(FieldTypeEnum.FULL_TEXT.getValue());
         // 搜索标题
-        workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.TITLE.getHandlerName());
-        workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.TITLE.getText());
-        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.TITLE.getProName());
-        workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.TITLE.getValue());
-        returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
+//        workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.TITLE.getHandlerName());
+//        workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.TITLE.getText());
+//        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.TITLE.getProName());
+//        workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.TITLE.getValue());
+//        returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
 
         // 搜索SerialNumber
         JSONObject titleObj = new JSONObject();

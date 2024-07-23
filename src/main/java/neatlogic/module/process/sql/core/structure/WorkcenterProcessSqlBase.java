@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.sql.core.structure;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.fulltextindex.dto.fulltextindex.FullTextIndexWordOffsetVo;
@@ -155,12 +156,22 @@ public abstract class WorkcenterProcessSqlBase extends ProcessSqlBase<Workcenter
                 JSONObject condition = JSONObject.parseObject(obj.toString());
                 //title serialNumber 全词匹配
                 if (ProcessTaskSqlTable.FieldEnum.TITLE.getValue().equals(condition.getString("name"))) {
-                    sqlSb.append(String.format(" AND pt.title in ('%s') ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("','"))));
+                    JSONArray valueList = condition.getJSONArray("valueList");
+                    if (CollectionUtils.isNotEmpty(valueList)) {
+                        sqlSb.append(" AND (");
+                        for (int i = 0; i < valueList.size(); i++) {
+                            sqlSb.append(String.format(" pt.title like ('%%%s%%') ", valueList.getString(i)));
+                            if (i < (valueList.size()-1)) {
+                                sqlSb.append(" OR ");
+                            }
+                        }
+                        sqlSb.append(")");
+                    }
                 } else if (ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue().equals(condition.getString("name"))) {
                     sqlSb.append(String.format(" AND pt.serial_number in ('%s') ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("','"))));
                 } else if (ProcessTaskSqlTable.FieldEnum.ID.getValue().equals(condition.getString("name"))) {
                     sqlSb.append(String.format(" AND pt.id in ('%s') ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("','"))));
-                }else {
+                } else {
                     try {
                         List<FullTextIndexWordOffsetVo> wordOffsetVoList = FullTextIndexUtil.sliceWord(condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("")));
                         String contentWord = wordOffsetVoList.stream().map(FullTextIndexWordOffsetVo::getWord).collect(Collectors.joining("','"));
