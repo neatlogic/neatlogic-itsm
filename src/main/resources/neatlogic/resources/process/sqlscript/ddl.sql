@@ -37,6 +37,8 @@ CREATE TABLE IF NOT EXISTS `channel`  (
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '名称',
   `parent_uuid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'catalog的uuid',
   `is_active` int NOT NULL COMMENT '是否启用',
+  `is_active_priority` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否启用优先级',
+  `is_display_priority` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否显示优先级',
   `icon` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '图标',
   `color` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '颜色',
   `desc` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '描述',

@@ -1395,17 +1395,24 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 processTaskVo.setChannelType(channelTypeVo.clone());
             } catch (CloneNotSupportedException ignored) {
             }
-            List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
-            if (CollectionUtils.isNotEmpty(channelPriorityList)) {
-                PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
-                if (priorityVo == null) {
-                    priorityVo = new PriorityVo();
-                    priorityVo.setUuid(processTaskVo.getPriorityUuid());
+            processTaskVo.setIsActivePriority(channelVo.getIsActivePriority());
+            processTaskVo.setIsDisplayPriority(channelVo.getIsDisplayPriority());
+            if (Objects.equals(channelVo.getIsActivePriority(), 1)) {
+                List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
+                if (CollectionUtils.isNotEmpty(channelPriorityList)) {
+                    PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
+                    if (priorityVo == null) {
+                        priorityVo = new PriorityVo();
+                        priorityVo.setUuid(processTaskVo.getPriorityUuid());
+                    }
+                    processTaskVo.setPriority(priorityVo);
+                    for (ChannelPriorityVo channelPriority : channelPriorityList) {
+                        if (Objects.equals(channelPriority.getIsDefault(), 1)) {
+                            processTaskVo.setDefaultPriorityUuid(channelPriority.getPriorityUuid());
+                            break;
+                        }
+                    }
                 }
-                processTaskVo.setPriority(priorityVo);
-                processTaskVo.setIsNeedPriority(1);
-            } else {
-                processTaskVo.setIsNeedPriority(0);
             }
         }
         // 耗时
@@ -2527,7 +2534,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     @Override
     public JSONObject saveProcessTaskDraft(JSONObject jsonObj, Long newProcessTaskId) throws Exception {
         String channelUuid = jsonObj.getString("channelUuid");
-        if (channelMapper.checkChannelIsExists(channelUuid) == 0) {
+        ChannelVo channelVo = channelMapper.getChannelByUuid(channelUuid);
+        if (channelVo == null) {
             throw new ChannelNotFoundException(channelUuid);
         }
         String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
@@ -2539,22 +2547,19 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
           如果不校验优先级，那么会出现批量上报记录显示上报失败，
           而实际上已经生成工单，只是状态是草稿
          */
-        List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
-        if (CollectionUtils.isNotEmpty(channelPriorityList)) {
+        if (Objects.equals(channelVo.getIsActivePriority(), 1)) {
             String priorityUuid = jsonObj.getString("priorityUuid");
             if (StringUtils.isBlank(priorityUuid)) {
-                // PC端和移动端暂存工单时，优先级非必填
-                String source = jsonObj.getString("source");
-                if (!Objects.equals(source, ProcessTaskSource.PC.getValue())
-                        && !Objects.equals(source, ProcessTaskSource.MOBILE.getValue())) {
-                    throw new ProcessTaskPriorityIsEmptyException();
-                }
-            } else {
-                if (channelPriorityList.stream().noneMatch(o -> o.getPriorityUuid().equals(priorityUuid))) {
-                    throw new ProcessTaskPriorityNotMatchException();
-                }
+                throw new ProcessTaskPriorityIsEmptyException();
             }
+            List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
+            if (channelPriorityList.stream().noneMatch(o -> o.getPriorityUuid().equals(priorityUuid))) {
+                throw new ProcessTaskPriorityNotMatchException();
+            }
+        } else {
+            jsonObj.remove("priorityUuid");
         }
+
         String owner = jsonObj.getString("owner");
         if (StringUtils.isNotBlank(owner)) {
             if (owner.contains("#")) {

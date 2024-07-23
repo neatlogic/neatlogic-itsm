@@ -15,21 +15,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.api.channel;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.process.auth.CATALOG_MODIFY;
-import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.process.exception.channel.ChannelNameRepeatException;
-import neatlogic.module.process.service.ChannelService;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.RegexUtils;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.service.ChannelService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,7 +74,9 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
             @Param(name = "color", type = ApiParamType.STRING, desc = "common.color"),
             @Param(name = "sla", type = ApiParamType.INTEGER, desc = "common.sla"),
             @Param(name = "contentHelp", type = ApiParamType.STRING, desc = "term.itsm.contenthelp"),
-            @Param(name = "isNeedPriority", type = ApiParamType.INTEGER, isRequired = true, desc = "common.isneedpriority"),
+//            @Param(name = "isNeedPriority", type = ApiParamType.INTEGER, isRequired = true, desc = "common.isneedpriority"),
+            @Param(name = "isActivePriority", type = ApiParamType.INTEGER, isRequired = true, desc = "是否启用优先级"),
+            @Param(name = "isDisplayPriority", type = ApiParamType.INTEGER, isRequired = true, desc = "是否显示优先级"),
             @Param(name = "defaultPriorityUuid", type = ApiParamType.STRING, desc = "common.defaultpriorityuuid"),
             @Param(name = "priorityUuidList", type = ApiParamType.JSONARRAY, desc = "nmrap.updateprioritysortapi.input.param.desc.prioritylist"),
             @Param(name = "reportAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.reportauthoritylist", help = "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
@@ -95,8 +96,8 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
 
     public IValid name() {
         return value -> {
-            /** 需要传parentUuid，同一个目录下，不能出现重名服务 **/
-            ChannelVo channelVo = JSON.toJavaObject(value, ChannelVo.class);
+            /* 需要传parentUuid，同一个目录下，不能出现重名服务 */
+            ChannelVo channelVo = value.toJavaObject(ChannelVo.class);
             if (channelMapper.checkChannelNameIsRepeat(channelVo) > 0) {
                 return new FieldValidResultVo(new ChannelNameRepeatException(channelVo.getName()));
             }
