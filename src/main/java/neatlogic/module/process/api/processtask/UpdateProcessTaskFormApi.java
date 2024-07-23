@@ -21,12 +21,15 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
+import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskStepDataType;
 import neatlogic.framework.process.dto.ProcessTaskStepDataVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
+import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -101,6 +104,11 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
         List<ProcessTaskStepDataVo> stepDraftSaveDataList = processTaskStepDataMapper.searchProcessTaskStepData(processTaskStepDataVo);
         for (ProcessTaskStepDataVo stepDraftSaveData : stepDraftSaveDataList) {
             processTaskStepDataMapper.deleteProcessTaskStepDataById(stepDraftSaveData.getId());
+        }
+        //创建全文检索索引
+        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getHandler(ProcessFullTextIndexType.PROCESSTASK);
+        if (indexHandler != null) {
+            indexHandler.createIndex(processTaskId);
         }
         return null;
     }
