@@ -289,18 +289,20 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 throw new UserNotFoundException(processTaskVo.getReporter());
             }
         }
-        List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
-        if (StringUtils.isBlank(processTaskVo.getPriorityUuid())) {
-            //且存在channelPriorityList,则优先级必填
-            if (CollectionUtils.isNotEmpty(channelPriorityList)) {
+        ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+        if (Objects.equals(channelVo.getIsActivePriority(), 1)) {
+            List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
+            if (StringUtils.isBlank(processTaskVo.getPriorityUuid())) {
                 throw new ProcessTaskPriorityIsEmptyException();
             }
-        }
-        if (CollectionUtils.isNotEmpty(channelPriorityList) && channelPriorityList.stream().noneMatch(o -> o.getPriorityUuid().equals(processTaskVo.getPriorityUuid()))) {
-            throw new ProcessTaskPriorityNotMatchException();
+            if (channelPriorityList.stream().noneMatch(o -> o.getPriorityUuid().equals(processTaskVo.getPriorityUuid()))) {
+                throw new ProcessTaskPriorityNotMatchException();
+            }
+            paramObj.put(ProcessTaskAuditDetailType.PRIORITY.getParamName(), processTaskVo.getPriorityUuid());
+        } else {
+            processTaskVo.setPriorityUuid(null);
         }
 
-        paramObj.put(ProcessTaskAuditDetailType.PRIORITY.getParamName(), processTaskVo.getPriorityUuid());
 
         // 获取上报描述内容
 //        List<Long> fileIdList = new ArrayList<>();
