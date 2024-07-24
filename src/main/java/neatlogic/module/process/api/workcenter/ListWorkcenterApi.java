@@ -39,7 +39,6 @@ import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.module.process.service.NewWorkcenterService;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -134,15 +133,14 @@ public class ListWorkcenterApi extends PrivateApiComponentBase {
                     }
                 }
 
-                //查询代办工单数量
-                if (!StringUtils.equals(workcenter.getUuid(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()) && !StringUtils.equals(workcenter.getUuid(), ProcessWorkcenterInitType.DONE_OF_MINE_PROCESSTASK.getValue())) {
+                if (workcenter.getIsShowTotal() == 1) {
                     try {
                          /*
                         由于需要一直显示我的待办数量，因此无论输入条件有没有设置我的待办，都需要把我的待办设为1来查询一次数量
                          */
-                        if (workcenter.getIsShowTotal() == 0) {
-                            workcenter.getConditionConfig().put("isProcessingOfMine", 1);
-                        }
+//                        if (workcenter.getIsShowTotal() == 0) {
+//                            workcenter.getConditionConfig().put("isProcessingOfMine", 1);
+//                        }
                         workcenter.setExpectOffsetRowNum(100);
                         Integer ProcessingOfMineCount = newWorkcenterService.doSearchLimitCount(workcenter);
                         workcenter.setProcessingOfMineCount(ProcessingOfMineCount > 99 ? "99+" : ProcessingOfMineCount.toString());
