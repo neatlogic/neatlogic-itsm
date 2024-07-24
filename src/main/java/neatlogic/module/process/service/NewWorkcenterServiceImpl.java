@@ -22,6 +22,7 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.batch.BatchRunner;
 import neatlogic.framework.common.constvalue.GroupSearch;
+import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
@@ -186,7 +187,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         returnObj.put("processingOfMineCount", count > 99 ? "99+" : count.toString());
         //System.out.println((System.currentTimeMillis() - ofMineStartTime) + " ##end workcenter-ofMine:-------------------------------------------------------------------------------");
         //System.out.println((System.currentTimeMillis() - theadStartTime) + " ##end workcenter:-------------------------------------------------------------------------------");
-
+        returnObj.put("isAutoRefresh", Objects.equals(ConfigManager.getConfig(ItsmTenantConfig.WORKCENTER_AUTO_REFRESH), "1"));
         return returnObj;
     }
 
@@ -254,7 +255,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     public List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap) {
         String theadConfigHash = workcenterVo.getTheadConfigHash();
         WorkcenterVo workcenterThead = workcenterMapper.getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(), UserContext.get().getUserUuid()));
-        if(workcenterThead != null && StringUtils.isNotBlank(workcenterThead.getTheadConfigHash())){
+        if (workcenterThead != null && StringUtils.isNotBlank(workcenterThead.getTheadConfigHash())) {
             theadConfigHash = workcenterThead.getTheadConfigHash(); //优先使用用户自己定义的thead
         }
         String theadConfigStr = workcenterMapper.getWorkcenterTheadConfigByHash(theadConfigHash);
