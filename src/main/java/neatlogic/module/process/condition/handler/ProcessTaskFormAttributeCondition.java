@@ -287,14 +287,54 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                 if (formAttributeVo == null) {
                     continue;
                 }
-                if (Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMRADIO.getHandler())
-                        || Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMCHECKBOX.getHandler())
-                        || Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMSELECT.getHandler())) {
-                    Object value = FormUtil.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
-                    resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), value);
+                Object dataObj = processTaskFormAttributeDataVo.getDataObj();
+                JSONObject componentObj = new JSONObject();
+                componentObj.put("handler", formAttributeVo.getHandler());
+                componentObj.put("uuid", formAttributeVo.getUuid());
+                componentObj.put("label", formAttributeVo.getLabel());
+                componentObj.put("config", formAttributeVo.getConfig());
+                componentObj.put("type", formAttributeVo.getType());
+                List<FormAttributeVo> downwardFormAttributeList = FormUtil.getFormAttributeList(componentObj, null);
+                if (downwardFormAttributeList.size() > 1 && dataObj instanceof JSONArray) {
+                    // 表格组件
+                    JSONArray dataList = new JSONArray();
+                    JSONArray dataArray = JSONArray.parseArray(((JSONArray) dataObj).toJSONString());
+                    for (int i = 0; i < dataArray.size(); i++) {
+                        JSONObject newRowObj = new JSONObject();
+                        JSONObject rowObj = dataArray.getJSONObject(i);
+                        for (FormAttributeVo downwardFormAttribute : downwardFormAttributeList) {
+                            Object value = rowObj.get(downwardFormAttribute.getUuid());
+                            if (value != null) {
+                                IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(downwardFormAttribute.getHandler());
+                                if (handler != null) {
+                                    Object simpleValue = handler.getSimpleValue(value);
+                                    newRowObj.put(downwardFormAttribute.getUuid(), simpleValue);
+                                } else {
+                                    newRowObj.put(downwardFormAttribute.getUuid(), value);
+                                }
+                            }
+                        }
+                        dataList.add(newRowObj);
+                    }
+                    resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
                 } else {
-                    resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+                    // 非表格组件
+                    IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo.getHandler());
+                    if (handler != null) {
+                        Object simpleValue = handler.getSimpleValue(dataObj);
+                        resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), simpleValue);
+                    } else {
+                        resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataObj);
+                    }
                 }
+//                if (Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMRADIO.getHandler())
+//                        || Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMCHECKBOX.getHandler())
+//                        || Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMSELECT.getHandler())) {
+//                    Object value = FormUtil.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
+//                    resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), value);
+//                } else {
+//                    resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+//                }
             }
         }
         return resultObj;
@@ -355,32 +395,73 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                 if (formAttributeVo == null) {
                     continue;
                 }
-                if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMRADIO.getHandler())
-                        || Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMCHECKBOX.getHandler())
-                        || Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMSELECT.getHandler())) {
-                    Object value = FormUtil.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
-                    //另存一份label为key的数据，给条件路由的自定义脚本消费
-                    resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), value);
-                } else {
-                    String data = processTaskFormAttributeDataVo.getData();
-                    if (StringUtils.isNotBlank(data)) {
-                        JSONObject componentObj = new JSONObject();
-                        componentObj.put("handler", formAttributeVo.getHandler());
-                        componentObj.put("uuid", formAttributeVo.getUuid());
-                        componentObj.put("label", formAttributeVo.getLabel());
-                        componentObj.put("config", formAttributeVo.getConfig());
-                        componentObj.put("type", formAttributeVo.getType());
-                        List<FormAttributeVo> downwardFormAttributeList = FormUtil.getFormAttributeList(componentObj, null);
+
+                Object dataObj = processTaskFormAttributeDataVo.getDataObj();
+                JSONObject componentObj = new JSONObject();
+                componentObj.put("handler", formAttributeVo.getHandler());
+                componentObj.put("uuid", formAttributeVo.getUuid());
+                componentObj.put("label", formAttributeVo.getLabel());
+                componentObj.put("config", formAttributeVo.getConfig());
+                componentObj.put("type", formAttributeVo.getType());
+                List<FormAttributeVo> downwardFormAttributeList = FormUtil.getFormAttributeList(componentObj, null);
+                if (downwardFormAttributeList.size() > 1 && dataObj instanceof JSONArray) {
+                    // 表格组件
+                    JSONArray dataList = new JSONArray();
+                    JSONArray dataArray = JSONArray.parseArray(((JSONArray) dataObj).toJSONString());
+                    for (int i = 0; i < dataArray.size(); i++) {
+                        JSONObject newRowObj = new JSONObject();
+                        JSONObject rowObj = dataArray.getJSONObject(i);
                         for (FormAttributeVo downwardFormAttribute : downwardFormAttributeList) {
-                            if (data.contains(downwardFormAttribute.getUuid())) {
-                                data = data.replace(downwardFormAttribute.getUuid(), downwardFormAttribute.getLabel());
+                            Object value = rowObj.get(downwardFormAttribute.getUuid());
+                            if (value != null) {
+                                IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(downwardFormAttribute.getHandler());
+                                if (handler != null) {
+                                    Object simpleValue = handler.getSimpleValue(value);
+                                    newRowObj.put(downwardFormAttribute.getLabel(), simpleValue);
+                                } else {
+                                    newRowObj.put(downwardFormAttribute.getLabel(), value);
+                                }
                             }
                         }
-                        processTaskFormAttributeDataVo.setData(data);
+                        dataList.add(newRowObj);
                     }
-                    //另存一份label为key的数据，给条件路由的自定义脚本消费
-                    resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), processTaskFormAttributeDataVo.getDataObj());
+                    resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), dataList);
+                } else {
+                    // 非表格组件
+                    IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo.getHandler());
+                    if (handler != null) {
+                        Object simpleValue = handler.getSimpleValue(dataObj);
+                        resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), simpleValue);
+                    } else {
+                        resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), dataObj);
+                    }
                 }
+//                if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMRADIO.getHandler())
+//                        || Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMCHECKBOX.getHandler())
+//                        || Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMSELECT.getHandler())) {
+//                    Object value = FormUtil.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
+//                    //另存一份label为key的数据，给条件路由的自定义脚本消费
+//                    resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), value);
+//                } else {
+//                    String data = processTaskFormAttributeDataVo.getData();
+//                    if (StringUtils.isNotBlank(data)) {
+//                        JSONObject componentObj = new JSONObject();
+//                        componentObj.put("handler", formAttributeVo.getHandler());
+//                        componentObj.put("uuid", formAttributeVo.getUuid());
+//                        componentObj.put("label", formAttributeVo.getLabel());
+//                        componentObj.put("config", formAttributeVo.getConfig());
+//                        componentObj.put("type", formAttributeVo.getType());
+//                        List<FormAttributeVo> downwardFormAttributeList = FormUtil.getFormAttributeList(componentObj, null);
+//                        for (FormAttributeVo downwardFormAttribute : downwardFormAttributeList) {
+//                            if (data.contains(downwardFormAttribute.getUuid())) {
+//                                data = data.replace(downwardFormAttribute.getUuid(), downwardFormAttribute.getLabel());
+//                            }
+//                        }
+//                        processTaskFormAttributeDataVo.setData(data);
+//                    }
+//                    //另存一份label为key的数据，给条件路由的自定义脚本消费
+//                    resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), processTaskFormAttributeDataVo.getDataObj());
+//                }
             }
         }
         return resultObj;
