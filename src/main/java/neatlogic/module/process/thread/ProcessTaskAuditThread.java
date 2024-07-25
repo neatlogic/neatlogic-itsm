@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.Objects;
 
 @Service
@@ -82,6 +83,11 @@ public class ProcessTaskAuditThread extends NeatLogicThread {
             processTaskStepAuditVo.setUserUuid(UserContext.get().getUserUuid());// 兼容automatic作业无用户
             processTaskStepAuditVo.setStepStatus(currentProcessTaskStepVo.getStatus());
             processTaskStepAuditVo.setOriginalUser(currentProcessTaskStepVo.getOriginalUser());
+            Date operateTime = paramObj.getDate("operateTime");
+            if (operateTime == null) {
+                operateTime = new Date();
+            }
+            processTaskStepAuditVo.setActionTime(operateTime);
             String source = paramObj.getString("source");
             if (StringUtils.isNotBlank(source)) {
                 processTaskStepAuditVo.setSource(source);
