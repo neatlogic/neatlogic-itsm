@@ -1,5 +1,6 @@
 package neatlogic.module.process.operationauth.handler;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.config.ConfigManager;
@@ -7,13 +8,15 @@ import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.constvalue.*;
-import neatlogic.framework.process.dto.*;
+import neatlogic.framework.process.dto.ProcessTaskStepRelVo;
+import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
+import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.operationauth.*;
 import neatlogic.framework.process.operationauth.core.OperationAuthHandlerBase;
 import neatlogic.framework.process.operationauth.core.OperationAuthHandlerType;
 import neatlogic.framework.process.operationauth.core.TernaryPredicate;
 import neatlogic.module.process.service.ProcessTaskService;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -78,6 +81,10 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             } else if (checkIsProcessTaskStepUser(processTaskStepVo, userUuid)) {
                 return true;
             } else if (checkIsWorker(processTaskStepVo, userUuid)) {
+                return true;
+            }
+            // 条件节点没有地方设置查看权限，默认所有人都有查看权限
+            if (Objects.equals(processTaskStepVo.getHandler(), ProcessStepHandlerType.CONDITION.getHandler())) {
                 return true;
             }
             //5.判断当前用户是否有当前步骤“查看节点信息”操作权限，如果没有，则提示“您的'查看节点信息'操作未获得授权”；
