@@ -68,9 +68,9 @@ public class ProcessTaskStepCostPostProcessor implements IProcessTaskOperatePost
         list.add(ProcessTaskOperationType.STEP_REDO);
         list.add(ProcessTaskOperationType.STEP_REAPPROVAL);
         if (list.contains(operationType)) {
-            Date actionTime = otherParam.getDate("actionTime");
-            if (actionTime == null) {
-                actionTime = new Date();
+            Date operateTime = otherParam.getDate("operateTime");
+            if (operateTime == null) {
+                operateTime = new Date();
             }
             String stepStatus = currentProcessTaskStepVo.getStatus();
             if (ProcessTaskOperationType.STEP_COMPLETE == operationType || ProcessTaskOperationType.STEP_BACK == operationType) {
@@ -84,7 +84,7 @@ public class ProcessTaskStepCostPostProcessor implements IProcessTaskOperatePost
                         workerList.add(workerVo);
                     }
                 }
-                saveProcessTaskStepCost(processTaskId, processTaskStepId, operationType, actionTime, stepStatus, workerList);
+                saveProcessTaskStepCost(processTaskId, processTaskStepId, operationType, operateTime, stepStatus, workerList);
             } else {
                 List<ProcessTaskStepCostWorkerVo> workerList = new ArrayList<>();
                 List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = processTaskMapper.getProcessTaskStepWorkerListByProcessTaskStepIdListAndUserType(Collections.singletonList(processTaskStepId), ProcessUserType.MAJOR.getValue());
@@ -96,24 +96,24 @@ public class ProcessTaskStepCostPostProcessor implements IProcessTaskOperatePost
                         workerList.add(workerVo);
                     }
                 }
-                saveProcessTaskStepCost(processTaskId, processTaskStepId, operationType, actionTime, stepStatus, workerList);
+                saveProcessTaskStepCost(processTaskId, processTaskStepId, operationType, operateTime, stepStatus, workerList);
             }
         }
     }
 
-    private void saveProcessTaskStepCost(Long processTaskId, Long processTaskStepId, IOperationType operationType, Date actionTime, String stepStatus, List<ProcessTaskStepCostWorkerVo> workerList) {
+    private void saveProcessTaskStepCost(Long processTaskId, Long processTaskStepId, IOperationType operationType, Date operateTime, String stepStatus, List<ProcessTaskStepCostWorkerVo> workerList) {
         String startUserUuid = UserContext.get().getUserUuid();
         ProcessTaskStepCostVo lastProcessTaskStepCostVo = processTaskStepTimeAuditMapper.getLastProcessTaskStepCostByProcessTaskStepId(processTaskStepId);
         if (lastProcessTaskStepCostVo != null) {
-            lastProcessTaskStepCostVo.setEndAction(operationType.getValue());
+            lastProcessTaskStepCostVo.setEndOperate(operationType.getValue());
             lastProcessTaskStepCostVo.setEndStatus(stepStatus);
-            lastProcessTaskStepCostVo.setEndTime(actionTime);
+            lastProcessTaskStepCostVo.setEndTime(operateTime);
             lastProcessTaskStepCostVo.setEndUserUuid(startUserUuid);
-            long realtimeCost = actionTime.getTime() - lastProcessTaskStepCostVo.getStartTime().getTime();
+            long realtimeCost = operateTime.getTime() - lastProcessTaskStepCostVo.getStartTime().getTime();
             long timeCost = realtimeCost;
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
             if (processTaskVo.getWorktimeUuid() != null) {
-                timeCost = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), lastProcessTaskStepCostVo.getStartTime().getTime(), actionTime.getTime());
+                timeCost = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), lastProcessTaskStepCostVo.getStartTime().getTime(), operateTime.getTime());
             }
             lastProcessTaskStepCostVo.setTimeCost(timeCost);
             lastProcessTaskStepCostVo.setRealTimeCost(realtimeCost);
@@ -122,19 +122,19 @@ public class ProcessTaskStepCostPostProcessor implements IProcessTaskOperatePost
         ProcessTaskStepCostVo processTaskStepCostVo = new ProcessTaskStepCostVo();
         processTaskStepCostVo.setProcessTaskId(processTaskId);
         processTaskStepCostVo.setProcessTaskStepId(processTaskStepId);
-        processTaskStepCostVo.setStartAction(operationType.getValue());
+        processTaskStepCostVo.setStartOperate(operationType.getValue());
         processTaskStepCostVo.setStartStatus(stepStatus);
-        processTaskStepCostVo.setStartTime(actionTime);
+        processTaskStepCostVo.setStartTime(operateTime);
         processTaskStepCostVo.setStartUserUuid(startUserUuid);
         doSaveProcessTaskStepCost(processTaskStepCostVo, workerList);
     }
 
     private void doSaveProcessTaskStepCost(ProcessTaskStepCostVo processTaskStepCostVo, List<ProcessTaskStepCostWorkerVo> workderList) {
-        String actionType = "end";
+        String operateType = "end";
         Long id = processTaskStepCostVo.getId();
         if (id == null) {
             id = SnowflakeUtil.uniqueLong();
-            actionType = "start";
+            operateType = "start";
             processTaskStepCostVo.setId(id);
             processTaskStepTimeAuditMapper.insertProcessTaskStepCost(processTaskStepCostVo);
         } else {
@@ -144,7 +144,7 @@ public class ProcessTaskStepCostPostProcessor implements IProcessTaskOperatePost
             for (ProcessTaskStepCostWorkerVo processTaskStepCostWorkerVo : workderList) {
                 processTaskStepCostWorkerVo.setId(SnowflakeUtil.uniqueLong());
                 processTaskStepCostWorkerVo.setCostId(id);
-                processTaskStepCostWorkerVo.setActionType(actionType);
+                processTaskStepCostWorkerVo.setOperateType(operateType);
                 processTaskStepTimeAuditMapper.insertProcessTaskStepCostWorker(processTaskStepCostWorkerVo);
             }
         }

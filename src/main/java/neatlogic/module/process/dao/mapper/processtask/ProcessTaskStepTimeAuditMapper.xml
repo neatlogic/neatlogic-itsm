@@ -57,11 +57,11 @@
 			`id`,
 			`processtask_id` AS processTaskId,
 			`processtask_step_id` AS processTaskStepId,
-			`start_action` AS startAction,
+			`start_operate` AS startOperate,
 			`start_status` AS startStatus,
 			`start_time` AS startTime,
 			`start_user_uuid` AS startUserUuid,
-			`end_action` AS endAction,
+			`end_operate` AS endOperate,
 			`end_status` AS endStatus,
 			`end_time` AS endTime,
 			`end_user_uuid` AS endUserUuid,
@@ -107,7 +107,7 @@
 			`id`,
 			`processtask_id`,
 			`processtask_step_id`,
-			`start_action`,
+			`start_operate`,
 			`start_status`,
 			`start_time`,
 			`start_user_uuid`
@@ -117,7 +117,7 @@
 				#{id},
 				#{processTaskId},
 				#{processTaskStepId},
-				#{startAction},
+				#{startOperate},
 				#{startStatus},
 				#{startTime},
 				#{startUserUuid}
@@ -125,8 +125,8 @@
 	</insert>
 
 	<insert id="insertProcessTaskStepCostWorker" parameterType="neatlogic.framework.process.dto.ProcessTaskStepCostWorkerVo">
-		INSERT INTO `processtask_step_cost_worker` (`id`, `action_type`, `cost_id`, `type`, `uuid`)
-		VALUES (#{id}, #{actionType}, #{costId}, #{type}, #{uuid})
+		INSERT INTO `processtask_step_cost_worker` (`id`, `operate_type`, `cost_id`, `type`, `uuid`)
+		VALUES (#{id}, #{operateType}, #{costId}, #{type}, #{uuid})
 	</insert>
 
 	<update id="updateProcessTaskStepTimeAudit" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTimeAuditVo">
@@ -148,7 +148,7 @@
 	<update id="updateProcessTaskStepCost" parameterType="neatlogic.framework.process.dto.ProcessTaskStepCostVo">
 		UPDATE  `processtask_step_cost`
 		SET
-			`end_action` = #{endAction},
+			`end_operate` = #{endOperate},
 			`end_status` = #{endStatus},
 			`end_time` = #{endTime},
 			`end_user_uuid` = #{endUserUuid},
