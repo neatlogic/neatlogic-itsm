@@ -139,6 +139,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                     String formTag = (String) JSONPath.read(stepConfig, "formTag");
                     JSONArray moveonConfigList = (JSONArray) JSONPath.read(stepConfig, "moveonConfigList");
                     if (CollectionUtils.isNotEmpty(moveonConfigList)) {
+                        JSONObject conditionParamData = null;
                         JSONArray ruleList = new JSONArray();
                         for (int i = 0; i < moveonConfigList.size(); i++) {
                             JSONObject moveonConfig = moveonConfigList.getJSONObject(i);
@@ -154,7 +155,12 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                 } else if ("optional".equals(type)) {// 自定义
                                     JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
                                     if (CollectionUtils.isNotEmpty(conditionGroupList)) {
-                                        JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), currentProcessTaskStepVo, formTag);
+                                        if (conditionParamData == null) {
+                                            conditionParamData = ProcessTaskConditionFactory.getConditionParamData(ConditionProcessTaskOptions.values(), currentProcessTaskStepVo, formTag);
+                                            if (logger.isDebugEnabled()) {
+                                                logger.debug("conditionParamData = " + conditionParamData.toJSONString());
+                                            }
+                                        }
                                         ConditionConfigVo conditionConfigVo = null;
                                         try {
                                             ConditionParamContext.init(conditionParamData).setTranslate(true);
