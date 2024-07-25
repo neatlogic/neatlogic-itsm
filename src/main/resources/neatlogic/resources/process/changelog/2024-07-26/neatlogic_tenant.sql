@@ -8,5 +8,4 @@ SELECT a.`uuid`, 'common', 'alluser', 'view' FROM catalog a
 LEFT JOIN `catalog_authority` b ON b.`catalog_uuid` = a.`uuid`
 WHERE b.`catalog_uuid` IS NULL;
 
-UPDATE `channel` SET `is_active_priority` = 0, `is_display_priority` = 0
-WHERE `uuid` NOT IN (SELECT DISTINCT `channel_uuid` FROM `channel_priority`);
+UPDATE `channel` SET `is_active_priority` = 0, `is_display_priority` = 0 WHERE `uuid` NOT IN (SELECT DISTINCT `channel_uuid` FROM `channel_priority`);
