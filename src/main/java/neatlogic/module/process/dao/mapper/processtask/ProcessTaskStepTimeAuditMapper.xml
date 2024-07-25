@@ -52,6 +52,27 @@
 		ORDER BY id DESC LIMIT 1
 	</select>
 
+	<select id="getLastProcessTaskStepCostByProcessTaskStepId" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskStepCostVo">
+		SELECT
+			`id`,
+			`processtask_id` AS processTaskId,
+			`processtask_step_id` AS processTaskStepId,
+			`start_action` AS startAction,
+			`start_status` AS startStatus,
+			`start_time` AS startTime,
+			`start_user_uuid` AS startUserUuid,
+			`end_action` AS endAction,
+			`end_status` AS endStatus,
+			`end_time` AS endTime,
+			`end_user_uuid` AS endUserUuid,
+			`time_cost` AS timeCost,
+			`realtime_cost` AS realTimeCost
+		FROM `processtask_step_cost`
+		WHERE `processtask_step_id` = #{value}
+		ORDER BY `id` DESC
+		LIMIT 1
+	</select>
+
 	<insert id="insertProcessTaskStepTimeAudit" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTimeAuditVo">
 		<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
 			select LAST_INSERT_ID() as id
@@ -81,6 +102,33 @@
 		)
 	</insert>
 
+	<insert id="insertProcessTaskStepCost" parameterType="neatlogic.framework.process.dto.ProcessTaskStepCostVo">
+		INSERT INTO `processtask_step_cost` (
+			`id`,
+			`processtask_id`,
+			`processtask_step_id`,
+			`start_action`,
+			`start_status`,
+			`start_time`,
+			`start_user_uuid`
+		)
+		VALUES
+			(
+				#{id},
+				#{processTaskId},
+				#{processTaskStepId},
+				#{startAction},
+				#{startStatus},
+				#{startTime},
+				#{startUserUuid}
+			)
+	</insert>
+
+	<insert id="insertProcessTaskStepCostWorker" parameterType="neatlogic.framework.process.dto.ProcessTaskStepCostWorkerVo">
+		INSERT INTO `processtask_step_cost_worker` (`id`, `action_type`, `cost_id`, `type`, `uuid`)
+		VALUES (#{id}, #{actionType}, #{costId}, #{type}, #{uuid})
+	</insert>
+
 	<update id="updateProcessTaskStepTimeAudit" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTimeAuditVo">
 		UPDATE
 		`processtask_step_timeaudit`
@@ -94,6 +142,18 @@
 			<when test="backTime != null and backTime == 'now'">,`back_time` = NOW(3)</when>
 			<when test="pauseTime != null and pauseTime == 'now'">,`pause_time` = NOW(3)</when>
 		</choose>
+		WHERE `id` = #{id}
+	</update>
+
+	<update id="updateProcessTaskStepCost" parameterType="neatlogic.framework.process.dto.ProcessTaskStepCostVo">
+		UPDATE  `processtask_step_cost`
+		SET
+			`end_action` = #{endAction},
+			`end_status` = #{endStatus},
+			`end_time` = #{endTime},
+			`end_user_uuid` = #{endUserUuid},
+			`time_cost` = #{timeCost},
+			`realtime_cost` = #{realTimeCost}
 		WHERE `id` = #{id}
 	</update>
 </mapper>

@@ -2973,7 +2973,7 @@
         #{processTaskId},
         #{processTaskStepId},
         #{userUuid},
-        NOW(3),
+        #{actionTime},
         #{action},
         #{stepStatus},
         #{originalUser},
