@@ -7,9 +7,11 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.asynchronization.threadpool.CachedThreadPool;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dao.mapper.region.RegionMapper;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.JwtVo;
 import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.dto.region.RegionVo;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
@@ -32,6 +34,7 @@ import neatlogic.framework.process.exception.process.ProcessNotFoundException;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNextStepIllegalException;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNextStepOverOneException;
 import neatlogic.framework.service.AuthenticationInfoService;
+import neatlogic.framework.service.RegionService;
 import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
@@ -78,6 +81,12 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
     @Resource
     private FileMapper fileMapper;
 
+    @Resource
+    RegionMapper regionMapper;
+
+    @Resource
+    RegionService regionService;
+
     /**
      * 创建工单
      *
@@ -97,6 +106,21 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                 throw new UserNotFoundException(owner);
             }
             paramObj.put("owner", userVo.getUuid());
+        }
+        //地域
+        String region = paramObj.getString("region");
+        Long regionId = null;
+        if(StringUtils.isNotBlank(region)){
+            RegionVo regionVo = regionMapper.getRegionByUpwardNamePath(region);
+            if(regionVo == null){
+                regionVo = regionMapper.getRegionById(region);
+            }
+        }else {
+            List<Long> regionIdList = regionService.getRegionIdListByUserUuid(userVo.getUuid());
+            if(CollectionUtils.isNotEmpty(regionIdList)){
+                regionId = regionIdList.get(0);
+                paramObj.put("regionId", regionId);
+            }
         }
         //处理channel，支持channelUuid和channelName入参
         String channel = paramObj.getString("channel");
