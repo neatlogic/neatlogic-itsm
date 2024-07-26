@@ -114,6 +114,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
             RegionVo regionVo = regionMapper.getRegionByUpwardNamePath(region);
             if(regionVo == null){
                 regionVo = regionMapper.getRegionById(region);
+                paramObj.put("regionId", regionVo.getId());
             }
         }else {
             List<Long> regionIdList = regionService.getRegionIdListByUserUuid(userVo.getUuid());
