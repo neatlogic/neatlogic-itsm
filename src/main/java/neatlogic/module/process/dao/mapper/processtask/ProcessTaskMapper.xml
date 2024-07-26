@@ -102,6 +102,7 @@
         <result column="need_score" property="needScore"/>
         <result column="source" property="source"/>
         <result column="is_deleted" property="isDeleted"/>
+        <result column="region_id" property="regionId"/>
         <!--<association property="ownerVo" javaType="neatlogic.framework.dto.UserVo">
             <result property="uuid" column="owner"/>
             <result property="userName" column="ownerName"/>
@@ -137,6 +138,7 @@
                `serial_number`,
                `need_score`,
                `source`,
+               `region_id`,
                `is_deleted`
         FROM `processtask`
     </sql>
@@ -2079,6 +2081,11 @@
             <result property="name" column="priorityName"/>
             <result property="color" column="priorityColor"/>
         </association>
+        <association property="regionVo" javaType="neatlogic.framework.dto.region.RegionVo">
+            <result property="id" column="regionId"/>
+            <result property="name" column="regionName"/>
+            <result property="upwardNamePath" column="regionUpwardNamePath"/>
+        </association>
         <!--<collection property="stepList" ofType="neatlogic.framework.process.dto.ProcessTaskStepVo">
             <id column="processTaskStepId" property="id"/>
             <result column="processTaskStepName" property="name"/>
@@ -2136,7 +2143,6 @@
                 <result column="calculationTime" property="calculationTime"/>
             </association>
         </collection>
-
     </resultMap>
 
     <select id="getProcessTaskBySql" parameterType="java.lang.String" resultMap="workcenterProcessTaskMap">

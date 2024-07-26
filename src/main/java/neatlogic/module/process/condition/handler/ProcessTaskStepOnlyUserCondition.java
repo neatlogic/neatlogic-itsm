@@ -15,10 +15,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.condition.handler;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.*;
 import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.dto.condition.ConditionVo;
@@ -29,12 +31,8 @@ import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.dto.SqlDecoratorVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
-import neatlogic.framework.process.workcenter.table.ProcessTaskStepUserSqlTable;
+import neatlogic.framework.process.workcenter.table.ProcessTaskStepWorkerSqlTable;
 import neatlogic.framework.process.workcenter.table.util.SqlTableUtil;
-import neatlogic.framework.service.AuthenticationInfoService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -42,26 +40,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+public class ProcessTaskStepOnlyUserCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     @Resource
     UserMapper userMapper;
 
-    @Resource
-    AuthenticationInfoService authenticationInfoService;
-
     @Override
     public String getName() {
-        return "stepuser";
+        return "steponlyuser";
     }
 
     @Override
     public String getDisplayName() {
-        return "步骤处理人";
+        return "步骤处理人(人)";
     }
 
     @Override
-    public String getDesc(){
-        return "过滤出该用户待处理或处理过的工单（包含分派到该用户所在组或者角色抢单的工单）";
+    public String getDesc() {
+        return "过滤出分派到指定该用户和该用户正在处理的工单（不包含分派到该用户所以在的组或者角色抢单的工单）";
     }
 
     @Override
@@ -104,7 +99,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 
     @Override
     public Integer getSort() {
-        return 12;
+        return 13;
     }
 
     @Override
@@ -157,41 +152,21 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
             stepUserValueList.addAll(valueList);
         }
         List<String> userList = new ArrayList<String>();
-        List<String> teamList = new ArrayList<String>();
-        List<String> roleList = new ArrayList<String>();
         for (String user : stepUserValueList) {
             user = user.replace(GroupSearch.USER.getValuePlugin(), "");
-            AuthenticationInfoVo authenticationInfoVo;
             if (user.equals(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue())) {
                 user = UserContext.get().getUserUuid();
-                authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
-            } else {
-                authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(user);
             }
-            //如果是待处理状态，则需额外匹配角色和组
-            if (authenticationInfoVo != null) {
-                userList.add(user);
-                teamList.addAll(authenticationInfoVo.getTeamUuidList());
-                roleList.addAll(authenticationInfoVo.getRoleUuidList());
-            }
+            userList.add(user);
         }
         sqlSb.append(" (");
-        // status
-        /*List<String> statusList = Stream.of(ProcessTaskStatus.RUNNING.getValue())
-                .map(String::toString).collect(Collectors.toList());
-        sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), String.join("','", statusList)));
-        sqlSb.append(" and ( ");*/
-        //补充待处理人sql 条件
-        getProcessingTaskOfMineSqlWhere(sqlSb, userList, teamList, roleList);
-        //补充处理人sql 条件
-        sqlSb.append(" or ");
-        sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.USER_UUID.getValue(), String.join("','", userList)));
+        sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskStepWorkerSqlTable().getShortName(), ProcessTaskStepWorkerSqlTable.FieldEnum.UUID.getValue(), String.join("','", userList)));
         sqlSb.append(" ) ");
 
     }
 
     @Override
     public List<JoinTableColumnVo> getMyJoinTableColumnList(SqlDecoratorVo sqlDecoratorVo) {
-        return SqlTableUtil.getStepUserJoinTableSql();
+        return SqlTableUtil.getWorkerJoinTableSql();
     }
 }

@@ -28,7 +28,9 @@ import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dao.mapper.region.RegionMapper;
 import neatlogic.framework.dto.*;
+import neatlogic.framework.dto.region.RegionVo;
 import neatlogic.framework.event.constvalue.EventProcessStepHandlerType;
 import neatlogic.framework.exception.file.FileNotFoundException;
 import neatlogic.framework.exception.type.ParamNotExistsException;
@@ -174,6 +176,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     private TaskConfigManager taskConfigManager;
     @Resource
     private IProcessStepHandlerUtil processStepHandlerUtil;
+
+    @Resource
+    private RegionMapper regionMapper;
 //    @Override
 //    public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo,
 //                                                  Map<String, String> formAttributeActionMap, int mode) {
@@ -1485,6 +1490,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 ownerVo.setTeamList(teamList);
             }
             processTaskVo.setOwnerVo(ownerVo);
+        }
+        //补充地域
+        if (processTaskVo.getRegionId() != null) {
+            RegionVo regionVo = regionMapper.getRegionById(processTaskVo.getRegionId());
+            if (regionVo != null) {
+                processTaskVo.setRegionVo(regionVo);
+            }
         }
     }
 

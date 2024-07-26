@@ -6,7 +6,6 @@ import neatlogic.framework.dashboard.dto.DashboardWidgetGroupDefineVo;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnBase;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
-import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.dto.JoinOnVo;
@@ -15,17 +14,18 @@ import neatlogic.framework.process.workcenter.dto.SelectColumnVo;
 import neatlogic.framework.process.workcenter.dto.TableSelectColumnVo;
 import neatlogic.framework.process.workcenter.table.ChannelSqlTable;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
 
-    @Autowired
+    @Resource
     ChannelMapper channelMapper;
 
     @Override
