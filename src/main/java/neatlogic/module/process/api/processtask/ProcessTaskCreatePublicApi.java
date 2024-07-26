@@ -48,7 +48,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase implement
             @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "附件id列表"),
             @Param(name = "handlerStepInfo", type = ApiParamType.JSONOBJECT, desc = "处理器特有的步骤信息"),
             @Param(name = "source", type = ApiParamType.STRING, desc = "来源"),
-            @Param(name = "region", type = ApiParamType.STRING, desc = "地域")
+            @Param(name = "region", type = ApiParamType.STRING, desc = "地域, 全路径or地域id")
 
     })
     @Output({

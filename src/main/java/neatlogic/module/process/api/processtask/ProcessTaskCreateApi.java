@@ -54,7 +54,7 @@ public class ProcessTaskCreateApi extends PrivateApiComponentBase {
             @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
             @Param(name = "isAsync", type = ApiParamType.INTEGER, rule="0,1", desc = "是否异步模式"),
             @Param(name = "newProcessTaskId", type = ApiParamType.LONG, desc = "指定工单id，则会使用该id作为工单id"),
-            @Param(name = "region", type = ApiParamType.STRING, desc = "地域")
+            @Param(name = "region", type = ApiParamType.STRING, desc = "地域, 全路径or地域id")
     })
     @Output({
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid")
