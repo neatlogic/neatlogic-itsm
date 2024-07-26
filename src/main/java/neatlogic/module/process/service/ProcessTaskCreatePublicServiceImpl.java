@@ -22,7 +22,6 @@ import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormAttributeHandlerNotFoundException;
-import neatlogic.framework.form.exception.FormAttributeNotFoundException;
 import neatlogic.framework.process.constvalue.ProcessFlowDirection;
 import neatlogic.framework.process.crossover.IProcessTaskCreatePublicCrossoverService;
 import neatlogic.framework.process.dto.ChannelVo;
@@ -222,17 +221,23 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                                 String attributeUuid = formAttributeData.getString("attributeUuid");
                                 String label = formAttributeData.getString("label");
                                 String key = formAttributeData.getString("key");
+                                Object dataObj = formAttributeData.get("dataList");
+                                if (dataObj == null) {
+                                    continue;
+                                }
                                 if (StringUtils.isBlank(attributeUuid) && (StringUtils.isNotBlank(label) || StringUtils.isNotBlank(key))) {
                                     FormAttributeVo formAttributeVo = null;
                                     if (StringUtils.isNotBlank(key)) {
                                         formAttributeVo = keyAttributeMap.get(key);
                                         if (formAttributeVo == null) {
-                                            throw new FormAttributeNotFoundException(key);
+                                            continue;
+//                                            throw new FormAttributeNotFoundException(key);
                                         }
                                     } else if (StringUtils.isNotBlank(label)) {
                                         formAttributeVo = labelAttributeMap.get(label);
                                         if (formAttributeVo == null) {
-                                            throw new FormAttributeNotFoundException(label);
+                                            continue;
+//                                            throw new FormAttributeNotFoundException(label);
                                         }
                                     }
                                     FormHandlerBase formAttributeHandler = (FormHandlerBase) FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
@@ -242,7 +247,6 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                                     JSONObject config = formAttributeVo.getConfig();
                                     formAttributeData.put("attributeUuid", formAttributeVo.getUuid());
                                     formAttributeData.put("handler", formAttributeVo.getHandler());
-                                    Object dataObj = formAttributeData.get("dataList");
                                     Object dataList = formAttributeHandler.getStandardValueBySimpleValue(dataObj, config);
                                     if (dataTypeNotArrayHandlerList.contains(formAttributeVo.getHandler())) {
                                         if (dataList instanceof List) {
