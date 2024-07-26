@@ -56,12 +56,12 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 
     @Override
     public String getDisplayName() {
-        return "步骤处理人";
+        return "步骤处理对象";
     }
 
     @Override
     public String getDesc(){
-        return "过滤出该用户待处理或处理过的工单（包含分派到该用户所在组或者角色抢单的工单）";
+        return "过滤出该用户待处理、正在处理或处理过的工单（包含分派到该用户所在组或者角色抢单的工单）";
     }
 
     @Override

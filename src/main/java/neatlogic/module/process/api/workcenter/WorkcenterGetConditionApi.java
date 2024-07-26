@@ -102,6 +102,7 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
             commonObj.put("type", condition.getType());
             commonObj.put("config", config);
             commonObj.put("sort", condition.getSort());
+            commonObj.put("desc", condition.getDesc());
             ParamType paramType = condition.getParamType();
             if (paramType != null) {
                 commonObj.put("defaultExpression", paramType.getDefaultExpression().getExpression());

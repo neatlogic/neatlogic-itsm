@@ -51,12 +51,12 @@ public class ProcessTaskStepOnlyUserCondition extends ProcessTaskConditionBase i
 
     @Override
     public String getDisplayName() {
-        return "步骤处理人(人)";
+        return "步骤处理人";
     }
 
     @Override
     public String getDesc() {
-        return "过滤出分派到指定该用户和该用户正在处理的工单（不包含分派到该用户所以在的组或者角色抢单的工单）";
+        return "过滤出分派到该用户和该用户正在处理的工单（不包含分派到该用户所以在组或者角色抢单的工单）";
     }
 
     @Override
