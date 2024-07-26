@@ -86,6 +86,8 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
                 this.put("groupList", new JSONArray() {
                     {
                         this.add(GroupSearch.USER.getValue());
+                        this.add(GroupSearch.ROLE.getValue());
+                        this.add(GroupSearch.TEAM.getValue());
                         this.add(GroupSearch.COMMON.getValue());
                     }
                 });
@@ -149,31 +151,36 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
     @Override
     public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
         ConditionVo condition = groupVo.getConditionList().get(index);
-        List<String> stepUserValueList = new ArrayList<>();
+        List<String> valueList = new ArrayList<>();
         if (condition.getValueList() instanceof String) {
-            stepUserValueList.add((String) condition.getValueList());
+            valueList.add((String) condition.getValueList());
         } else if (condition.getValueList() instanceof List) {
-            List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
-            stepUserValueList.addAll(valueList);
+            List<String> valueListTmp = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+            valueList.addAll(valueListTmp);
         }
         List<String> userList = new ArrayList<String>();
         List<String> teamList = new ArrayList<String>();
         List<String> roleList = new ArrayList<String>();
-        for (String user : stepUserValueList) {
-            user = user.replace(GroupSearch.USER.getValuePlugin(), "");
-            AuthenticationInfoVo authenticationInfoVo;
-            if (user.equals(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue())) {
-                user = UserContext.get().getUserUuid();
-                authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
-            } else {
-                authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(user);
+        for (String value : valueList) {
+            if(value.startsWith(GroupSearch.USER.getValuePlugin()) || value.startsWith(GroupSearch.COMMON.getValuePlugin())) {
+                AuthenticationInfoVo authenticationInfoVo;
+                if (value.equals(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue())) {
+                    authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
+                } else {
+                    authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(GroupSearch.removePrefix(value));
+                }
+                //如果是待处理状态，则需额外匹配角色和组
+                if (authenticationInfoVo != null) {
+                    userList.add(authenticationInfoVo.getUserUuid());
+                    teamList.addAll(authenticationInfoVo.getTeamUuidList());
+                    roleList.addAll(authenticationInfoVo.getRoleUuidList());
+                }
+            }else if(value.startsWith(GroupSearch.TEAM.getValuePlugin())) {
+                teamList.add(GroupSearch.removePrefix(value));
+            }else if(value.startsWith(GroupSearch.ROLE.getValuePlugin())) {
+                roleList.add(GroupSearch.removePrefix(value));
             }
-            //如果是待处理状态，则需额外匹配角色和组
-            if (authenticationInfoVo != null) {
-                userList.add(user);
-                teamList.addAll(authenticationInfoVo.getTeamUuidList());
-                roleList.addAll(authenticationInfoVo.getRoleUuidList());
-            }
+
         }
         sqlSb.append(" (");
         // status
