@@ -80,11 +80,12 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
             @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "term.itsm.channeltyperelationid", help = "从转报进入上报页时，传channelTypeRelationId"),
             @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source"),
             @Param(name = "parentProcessTaskStepId", type = ApiParamType.LONG, desc = "nmpap.processtaskdraftgetapi.input.param.desc.parentprocesstaskstepid", help = "创建子流程时，传parentProcessTaskStepId"),
-            @Param(name = "invoke", type = ApiParamType.STRING, desc = "nmpap.processtaskdraftsaveapi.input.param.desc.invoke", help = "subprocess :子流程")
+            @Param(name = "invoke", type = ApiParamType.STRING, desc = "nmpap.processtaskdraftsaveapi.input.param.desc.invoke", help = "subprocess :子流程"),
+            @Param(name = "regionId", type = ApiParamType.LONG, desc = "nmtar.searchregionteamapi.input.param.desc.regionid")
     })
     @Output({
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id")
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "term.itsm.processtaskstepid")
     })
     @Description(desc = "nmpap.processtaskdraftsaveapi.getname")
     @Override
