@@ -1,0 +1,10 @@
+{
+  "content":[
+    {
+      "type":"新增功能",
+      "detail":[
+        {"msg":"1.通过changelog刷新channel表和channel_authority表数据"}
+      ]
+    }
+  ]
+}
