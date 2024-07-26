@@ -114,15 +114,22 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
             RegionVo regionVo = regionMapper.getRegionByUpwardNamePath(region);
             if(regionVo == null){
                 regionVo = regionMapper.getRegionById(region);
-                paramObj.put("regionId", regionVo.getId());
+                if(regionVo != null) {
+                    regionId = regionVo.getId();
+                }
+            }else{
+                regionId = regionVo.getId();
             }
-        }else {
+        }
+
+        if(regionId == null) {
             List<Long> regionIdList = regionService.getRegionIdListByUserUuid(userVo.getUuid());
             if(CollectionUtils.isNotEmpty(regionIdList)){
                 regionId = regionIdList.get(0);
-                paramObj.put("regionId", regionId);
             }
         }
+
+        paramObj.put("regionId", regionId);
         //处理channel，支持channelUuid和channelName入参
         String channel = paramObj.getString("channel");
         ChannelVo channelVo = channelMapper.getChannelByUuid(channel);
