@@ -29,7 +29,10 @@ import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
+import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -44,6 +47,9 @@ public class ProcessTaskRegionCondition extends ProcessTaskConditionBase impleme
 
     @Resource
     RegionMapper regionMapper;
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getName() {
@@ -79,6 +85,8 @@ public class ProcessTaskRegionCondition extends ProcessTaskConditionBase impleme
         config.put("multiple", true);
         config.put("value", "");
         config.put("defaultValue", "");
+        /** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
+        config.put("isMultiple", true);
         return config;
     }
 
@@ -126,5 +134,30 @@ public class ProcessTaskRegionCondition extends ProcessTaskConditionBase impleme
     @Override
     public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
         getSimpleSqlConditionWhere(groupVo.getConditionList().get(index), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.REGION_ID.getValue());
+    }
+
+    @Override
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo == null) {
+            return null;
+        }
+        return processTaskVo.getRegionId();
+    }
+
+    @Override
+    public Object getConditionParamDataForHumanization(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo == null) {
+            return null;
+        }
+        if (processTaskVo.getRegionId() == null) {
+            return null;
+        }
+        RegionVo regionVo = regionMapper.getRegionById(processTaskVo.getRegionId());
+        if (regionVo == null) {
+            return null;
+        }
+        return regionVo.getName();
     }
 }
