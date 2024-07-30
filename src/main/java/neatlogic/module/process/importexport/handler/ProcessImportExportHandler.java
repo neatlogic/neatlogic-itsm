@@ -72,6 +72,9 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
         ProcessVo oldProcess = processMapper.getProcessByName(importExportVo.getName());
         boolean isChangeUuid = false;
         if (oldProcess != null) {
+            if (processMapper.getProcessByUuid(process.getUuid()) != null) {
+                isChangeUuid = true;
+            }
             process.setUuid(oldProcess.getUuid());
         } else {
             if (processMapper.getProcessByUuid(process.getUuid()) != null) {
