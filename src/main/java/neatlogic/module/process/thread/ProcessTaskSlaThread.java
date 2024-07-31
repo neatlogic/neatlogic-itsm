@@ -436,35 +436,30 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
         ProcessTaskSlaVo processTaskSlaVo = new ProcessTaskSlaVo();
         List<Long> allSlaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskId(processTaskId);
         for (Long slaId : allSlaIdList) {
-//            System.out.println("slaId=" + slaId);
             processTaskSlaVo.setId(slaId);
-            boolean invalid = true;
+            boolean isActive = false;
             List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
             for (Long processTaskStepId : processTaskStepIdList) {
-                invalid = true;
-//                ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
                 List<ProcessTaskStepRelVo> processTaskStepRelList = processTaskMapper.getProcessTaskStepRelByToId(processTaskStepId);
                 for (ProcessTaskStepRelVo processTaskStepRelVo : processTaskStepRelList) {
-//                    ProcessTaskStepVo fromProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepRelVo.getFromProcessTaskStepId());
                     if (processTaskStepRelVo.getType().equals(ProcessFlowDirection.FORWARD.getValue())) {
-//                        System.out.println(fromProcessTaskStepVo.getName() + "-->" + processTaskStepVo.getName() + "=" + processTaskStepRelVo.getIsHit());
                         if (!Objects.equals(processTaskStepRelVo.getIsHit(), -1)) {
-                            invalid = false;
+                            isActive = true;
                             break;
                         }
                     }
                 }
-                if (invalid) {
+                if (isActive) {
                     break;
                 }
             }
-            if (invalid) {
+            if (isActive) {
+                resultList.add(slaId);
+                processTaskSlaVo.setIsActive(1);
+            } else {
                 //该时效失效
                 processTaskSlaVo.setIsActive(0);
                 deleteSlaById(slaId);
-            } else {
-                resultList.add(slaId);
-                processTaskSlaVo.setIsActive(1);
             }
             processTaskSlaMapper.updateProcessTaskSlaIsActiveBySlaId(processTaskSlaVo);
         }
