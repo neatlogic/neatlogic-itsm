@@ -697,12 +697,8 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
      * 组装请求参数
      */
     private JSONObject getIntegrationParam(ProcessTaskStepVo currentProcessTaskStepVo, JSONArray paramList, JSONObject resultJson) {
-        JSONObject processTaskJson = ProcessTaskConditionFactory.getConditionParamData(Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList()), currentProcessTaskStepVo);
-//        ProcessTaskStepVo stepVo = processTaskService.getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
-//        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
-//        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
-//        processTaskVo.setCurrentProcessTaskStep(stepVo);
-//        JSONObject processTaskJson = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
+        List<String> processTaskParams = Arrays.stream(ProcessTaskParams.values()).map(ProcessTaskParams::getValue).collect(Collectors.toList());
+        JSONObject processTaskJson = ProcessTaskConditionFactory.getConditionParamData(processTaskParams, currentProcessTaskStepVo);
         JSONObject integrationParam = new JSONObject();
         if (CollectionUtils.isNotEmpty(paramList)) {
             for (Object paramObj : paramList) {
