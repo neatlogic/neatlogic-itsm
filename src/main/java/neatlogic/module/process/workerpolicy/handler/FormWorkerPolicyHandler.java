@@ -6,18 +6,19 @@ import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeDataConversionHandler;
 import neatlogic.framework.form.constvalue.FormHandler;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.constvalue.WorkerPolicy;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
 import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -147,6 +149,14 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                                                     new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
                                                             currentProcessTaskStepVo.getId(), GroupSearch.ROLE.getValue(),
                                                             value, ProcessUserType.MAJOR.getValue()));
+                                        } else {
+                                            UserVo user = userMapper.getUserByUserId(value);
+                                            if (user != null && Objects.equals(user.getIsActive(), 1)) {
+                                                processTaskStepWorkerList.add(
+                                                        new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
+                                                                currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(),
+                                                                user.getUuid(), ProcessUserType.MAJOR.getValue()));
+                                            }
                                         }
                                     }
                                 }
