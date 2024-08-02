@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.processtask.ProcessTaskAsyncCreateMapper">
+
+    <select id="getProcessTaskAsyncCreateById" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo">
+        SELECT
+            `id`,
+            `processtask_id` AS processTaskId,
+            `title`,
+            `status`,
+            `config` AS configStr
+        FROM `processtask_async_create`
+        WHERE `id` = #{value}
+    </select>
+
+    <select id="getProcessTaskAsyncCreateList" parameterType="neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo" resultType="neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo">
+        SELECT
+            `id`,
+            `processtask_id` AS processTaskId,
+            `title`,
+            `status`,
+            `config` AS configStr
+        FROM `processtask_async_create`
+        WHERE `status` = #{status}
+          AND `server_id` = #{serverId}
+        LIMIT #{startNum}, #{pageSize}
+    </select>
+
+    <select id="getProcessTaskAsyncCreateCount" parameterType="neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo" resultType="int">
+        SELECT
+            COUNT(1)
+        FROM `processtask_async_create`
+        WHERE `status` = #{status}
+        AND `server_id` = #{serverId}
+    </select>
+
+    <insert id="insertProcessTaskAsyncCreate" parameterType="neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo">
+        INSERT INTO `processtask_async_create` (
+            `id`,
+            `processtask_id`,
+            `title`,
+            `status`,
+            `config`,
+            `try_count`,
+            `server_id`,
+            `fcu`,
+            `fcd`
+        )
+        VALUES
+            (
+                #{id},
+                #{processTaskId},
+                #{title},
+                #{status},
+                #{configStr},
+                0,
+                #{serverId},
+                #{fcu},
+                NOW(3)
+            )
+    </insert>
+
+    <update id="updateProcessTaskAsyncCreate" parameterType="neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo">
+        UPDATE `processtask_async_create`
+        SET
+            `processtask_id` = #{processTaskId},
+            `status` = #{status},
+            `error` = #{error},
+            `try_count` = `try_count` + 1,
+            `lcd` = NOW(3)
+        WHERE `id` = #{id}
+    </update>
+</mapper>
