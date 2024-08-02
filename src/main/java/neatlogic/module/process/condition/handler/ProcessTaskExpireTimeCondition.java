@@ -77,7 +77,7 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
 
     @Override
     public Integer getSort() {
-        return 10;
+        return 15;
     }
 
     @Override

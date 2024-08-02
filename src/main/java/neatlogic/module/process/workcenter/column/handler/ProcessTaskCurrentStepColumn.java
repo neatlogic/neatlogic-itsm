@@ -5,6 +5,7 @@ import neatlogic.framework.process.column.core.ProcessTaskColumnBase;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
 import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
+import neatlogic.framework.process.constvalue.ProcessTaskStepUserStatus;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -81,10 +84,11 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 	public Object getValue(ProcessTaskVo processTaskVo) {
 		JSONArray currentStepArray = new JSONArray();
 		List<ProcessTaskStepVo> stepVoList =  processTaskVo.getStepList();
-		if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+		if(Arrays.asList(ProcessTaskStatus.RUNNING.getValue(),ProcessTaskStatus.HANG.getValue()).contains(processTaskVo.getStatus())) {
 			for (ProcessTaskStepVo stepVo : stepVoList) {
 				if(ProcessTaskStepStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
 						ProcessTaskStepStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
+						(ProcessTaskStepStatus.HANG.getValue().equals(stepVo.getStatus())&&stepVo.getUserList().stream().anyMatch(o-> Objects.equals(o.getStatus(), ProcessTaskStepUserStatus.DOING.getValue()))) ||
 						(ProcessTaskStepStatus.PENDING.getValue().equals(stepVo.getStatus())&& stepVo.getIsActive() == 1)
 				) {
 					JSONObject currentStepJson  = new JSONObject();

@@ -2223,7 +2223,7 @@
                  LEFT JOIN processtask_step_sla ptssl ON pts.id = ptssl.processtask_step_id
                  LEFT JOIN processtask_sla_time ptslt ON ptssl.sla_id = ptslt.sla_id
         WHERE pts.processtask_id = #{value}
-          and (pts.status = 'running' or (pts.status = 'pending' and pts.is_active = 1))
+          and (pts.status = 'running' or (pts.status = 'pending' and pts.is_active = 1) or (pts.status = 'hang' and ptsu.status = 'doing'))
     </select>
 
     <select id="getProcessTaskIdByChannelUuidLimitOne" parameterType="java.lang.String" resultType="java.lang.Long">

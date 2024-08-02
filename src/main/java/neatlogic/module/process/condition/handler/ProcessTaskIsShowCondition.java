@@ -64,7 +64,7 @@ public class ProcessTaskIsShowCondition extends ProcessTaskConditionBase impleme
 
     @Override
     public Integer getSort() {
-        return 10;
+        return 15;
     }
 
     @Override
