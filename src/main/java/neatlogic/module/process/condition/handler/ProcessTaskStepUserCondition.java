@@ -66,7 +66,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 
     @Override
     public String getHandler(FormConditionModel processWorkcenterConditionType) {
-        return FormHandlerType.USERSELECT.toString();
+        return FormHandlerType.STEPUSER.toString();
     }
 
     @Override
@@ -77,7 +77,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
     @Override
     public JSONObject getConfig(ConditionConfigType configType) {
         JSONObject config = new JSONObject();
-        config.put("type", FormHandlerType.USERSELECT.toString());
+        config.put("type", FormHandlerType.STEPUSER.toString());
         config.put("initConfig", new JSONObject() {
             {
                 this.put("excludeList", new JSONArray() {{
