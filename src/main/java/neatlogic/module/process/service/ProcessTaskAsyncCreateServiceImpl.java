@@ -146,9 +146,10 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
         Long processTaskId = config.getLong("newProcessTaskId");
         if (processTaskId != null) {
             if (processTaskMapper.getProcessTaskById(processTaskId) != null) {
-                return null;
+                processTaskId = null;
             }
-        } else {
+        }
+        if (processTaskId == null) {
             processTaskId = SnowflakeUtil.uniqueLong();
             config.put("newProcessTaskId", processTaskId);
         }

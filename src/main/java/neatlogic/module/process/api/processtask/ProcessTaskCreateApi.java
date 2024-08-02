@@ -71,10 +71,9 @@ public class ProcessTaskCreateApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Integer isAsync = jsonObj.getInteger("isAsync");
         if (Objects.equals(isAsync, 1)) {
-            Long newProcessTaskId = jsonObj.getLong("newProcessTaskId");
-            processTaskAsyncCreateService.addNewProcessTaskAsyncCreate(new ProcessTaskAsyncCreateVo(jsonObj));
+            Long processTaskId = processTaskAsyncCreateService.addNewProcessTaskAsyncCreate(new ProcessTaskAsyncCreateVo(jsonObj));
             JSONObject resultObj = new JSONObject();
-            resultObj.put("processTaskId", newProcessTaskId);
+            resultObj.put("processTaskId", processTaskId);
             return resultObj;
         } else {
             return processTaskCreatePublicService.createProcessTask(jsonObj);
