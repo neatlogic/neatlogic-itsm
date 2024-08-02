@@ -211,7 +211,6 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                         builder.addOperationType(ProcessTaskOperationType.PROCESSTASK_ABORT)
                                 .addOperationType(ProcessTaskOperationType.PROCESSTASK_RECOVER)
                                 .addOperationType(ProcessTaskOperationType.PROCESSTASK_URGE)
-                                .addOperationType(ProcessTaskOperationType.STEP_RECOVER)
                                 .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
 
                 processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
