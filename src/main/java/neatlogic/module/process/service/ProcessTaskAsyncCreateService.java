@@ -25,12 +25,12 @@ public interface ProcessTaskAsyncCreateService {
      * @param processTaskAsyncCreateVo
      * @throws InterruptedException
      */
-    void addNewProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) throws InterruptedException;
+    Long addNewProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) throws InterruptedException;
 
     /**
      * 添加需要重新执行的工单信息到阻塞队列
      * @param processTaskAsyncCreateVo
      * @throws InterruptedException
      */
-    void addRedoProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) throws InterruptedException;
+    Long addRedoProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) throws InterruptedException;
 }

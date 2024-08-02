@@ -28,9 +28,11 @@ import neatlogic.framework.dto.TenantVo;
 import neatlogic.framework.process.crossover.IProcessTaskAsyncCreateCrossoverService;
 import neatlogic.framework.process.crossover.IProcessTaskCreatePublicCrossoverService;
 import neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo;
+import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskAsyncCreateMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +42,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
@@ -79,7 +80,7 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
                 for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
                     searchVo.setCurrentPage(currentPage);
                     List<ProcessTaskAsyncCreateVo> list = processTaskAsyncCreateMapper.getProcessTaskAsyncCreateList(searchVo);
-                    List<Long> processTaskIdList = list.stream().map(ProcessTaskAsyncCreateVo::getProcessTaskId).filter(Objects::nonNull).collect(Collectors.toList());
+                    List<Long> processTaskIdList = list.stream().map(ProcessTaskAsyncCreateVo::getProcessTaskId).collect(Collectors.toList());
                     if (CollectionUtils.isNotEmpty(processTaskIdList)) {
                         processTaskIdList = processTaskMapper.checkProcessTaskIdListIsExists(processTaskIdList);
                     }
@@ -109,9 +110,7 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
                     try {
                         processTaskAsyncCreateVo = blockingQueue.take();
                         TenantContext.get().switchTenant(processTaskAsyncCreateVo.getTenantUuid());
-                        JSONObject resultObj = processTaskCreatePublicCrossoverService.createProcessTask(processTaskAsyncCreateVo.getConfig());
-                        Long processTaskId = resultObj.getLong("processTaskId");
-                        processTaskAsyncCreateVo.setProcessTaskId(processTaskId);
+                        processTaskCreatePublicCrossoverService.createProcessTask(processTaskAsyncCreateVo.getConfig());
                         processTaskAsyncCreateVo.setStatus("done");
                     } catch (InterruptedException e) {
                         if (processTaskAsyncCreateVo != null) {
@@ -139,20 +138,35 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
     }
 
     @Override
-    public void addNewProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) throws InterruptedException {
+    public Long addNewProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) throws InterruptedException {
+        JSONObject config = processTaskAsyncCreateVo.getConfig();
+        if (MapUtils.isEmpty(config)) {
+            return null;
+        }
+        Long processTaskId = config.getLong("newProcessTaskId");
+        if (processTaskId != null) {
+            if (processTaskMapper.getProcessTaskById(processTaskId) != null) {
+                return null;
+            }
+        } else {
+            processTaskId = SnowflakeUtil.uniqueLong();
+            config.put("newProcessTaskId", processTaskId);
+        }
+        processTaskAsyncCreateVo.setProcessTaskId(processTaskId);
         processTaskAsyncCreateVo.setTenantUuid(TenantContext.get().getTenantUuid());
-        processTaskAsyncCreateVo.setTitle(processTaskAsyncCreateVo.getConfig().getString("title"));
-        processTaskAsyncCreateVo.setProcessTaskId(processTaskAsyncCreateVo.getConfig().getLong("newProcessTaskId"));
+        processTaskAsyncCreateVo.setTitle(config.getString("title"));
         processTaskAsyncCreateVo.setStatus("doing");
         processTaskAsyncCreateVo.setFcu(UserContext.get().getUserUuid());
         processTaskAsyncCreateVo.setServerId(Config.SCHEDULE_SERVER_ID);
         processTaskAsyncCreateMapper.insertProcessTaskAsyncCreate(processTaskAsyncCreateVo);
         blockingQueue.put(processTaskAsyncCreateVo);
+        return processTaskId;
     }
 
     @Override
-    public void addRedoProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) throws InterruptedException {
+    public Long addRedoProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) throws InterruptedException {
         processTaskAsyncCreateVo.setTenantUuid(TenantContext.get().getTenantUuid());
         blockingQueue.put(processTaskAsyncCreateVo);
+        return processTaskAsyncCreateVo.getProcessTaskId();
     }
 }

@@ -658,7 +658,7 @@ CREATE TABLE IF NOT EXISTS `processtask_auto_score`  (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `processtask_async_create` (
   `id` bigint NOT NULL COMMENT '主键ID',
-  `processtask_id` bigint DEFAULT NULL COMMENT '工单ID',
+  `processtask_id` bigint NOT NULL COMMENT '工单ID',
   `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL COMMENT '标题',
   `status` enum('doing','done','failed','aborted','redo') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '状态',
   `config` longtext COLLATE utf8mb4_general_ci NOT NULL COMMENT '配置信息',
@@ -668,7 +668,8 @@ CREATE TABLE IF NOT EXISTS `processtask_async_create` (
   `fcu` char(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT '创建人',
   `fcd` timestamp(3) NOT NULL COMMENT '创建时间',
   `lcd` timestamp(3) NULL DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_processtask_id` (`processtask_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT = '异步创建工单表';
 
 -- ----------------------------

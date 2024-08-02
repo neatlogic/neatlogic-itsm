@@ -66,16 +66,20 @@ public class RedoAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
     @Description(desc = "nmpap.redoasynccreateprocesstaskapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
+        JSONObject resultObj = new JSONObject();
         List<Long> processTaskIdArray = new ArrayList<>();
         Long id = paramObj.getLong("id");
         Integer serverId = paramObj.getInteger("serverId");
         if (id != null) {
             ProcessTaskAsyncCreateVo processTaskAsyncCreateVo = processTaskAsyncCreateMapper.getProcessTaskAsyncCreateById(id);
-            if (processTaskAsyncCreateVo != null) {
-                processTaskIdArray.add(processTaskAsyncCreateVo.getProcessTaskId());
+            if (processTaskAsyncCreateVo != null && Objects.equals(processTaskAsyncCreateVo.getStatus(), "redo")) {
+                Long processTaskId = processTaskAsyncCreateVo.getProcessTaskId();
+                if (processTaskMapper.getProcessTaskById(processTaskId) == null) {
+                    return resultObj;
+                }
+                processTaskIdArray.add(processTaskId);
                 processTaskAsyncCreateService.addRedoProcessTaskAsyncCreate(processTaskAsyncCreateVo);
             }
-
         } else if (serverId != null) {
             ProcessTaskAsyncCreateVo searchVo = new ProcessTaskAsyncCreateVo();
             searchVo.setStatus("redo");
@@ -89,7 +93,7 @@ public class RedoAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
                 for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
                     searchVo.setCurrentPage(currentPage);
                     List<ProcessTaskAsyncCreateVo> list = processTaskAsyncCreateMapper.getProcessTaskAsyncCreateList(searchVo);
-                    List<Long> processTaskIdList = list.stream().map(ProcessTaskAsyncCreateVo::getProcessTaskId).filter(Objects::nonNull).collect(Collectors.toList());
+                    List<Long> processTaskIdList = list.stream().map(ProcessTaskAsyncCreateVo::getProcessTaskId).collect(Collectors.toList());
                     if (CollectionUtils.isNotEmpty(processTaskIdList)) {
                         processTaskIdList = processTaskMapper.checkProcessTaskIdListIsExists(processTaskIdList);
                     }
@@ -98,7 +102,7 @@ public class RedoAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
                             processTaskAsyncCreateVo.setStatus("done");
                             doneList.add(processTaskAsyncCreateVo);
                         } else {
-                            processTaskIdList.add(processTaskAsyncCreateVo.getProcessTaskId());
+                            processTaskIdArray.add(processTaskAsyncCreateVo.getProcessTaskId());
                             processTaskAsyncCreateService.addRedoProcessTaskAsyncCreate(processTaskAsyncCreateVo);
                         }
 
@@ -109,7 +113,6 @@ public class RedoAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
                 }
             }
         }
-        JSONObject resultObj = new JSONObject();
         resultObj.put("processTaskIdList", processTaskIdArray);
         return resultObj;
     }
