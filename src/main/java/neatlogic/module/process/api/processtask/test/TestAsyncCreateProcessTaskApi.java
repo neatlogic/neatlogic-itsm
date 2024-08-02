@@ -25,7 +25,6 @@ import neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.module.process.service.ProcessTaskAsyncCreateService;
 import org.springframework.stereotype.Service;
 
@@ -78,11 +77,11 @@ public class TestAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
         List<Long> processTaskIdList = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             JSONObject config = JSONObject.parseObject(jsonString);
-            Long newProcessTaskId = SnowflakeUtil.uniqueLong();
-            config.put("newProcessTaskId", newProcessTaskId);
+//            Long processTaskId = SnowflakeUtil.uniqueLong();
+//            config.put("newProcessTaskId", processTaskId);
             config.put("title", title + "-" + i);
-            processTaskAsyncCreateService.addNewProcessTaskAsyncCreate(new ProcessTaskAsyncCreateVo(config));
-            processTaskIdList.add(newProcessTaskId);
+            Long processTaskId = processTaskAsyncCreateService.addNewProcessTaskAsyncCreate(new ProcessTaskAsyncCreateVo(config));
+            processTaskIdList.add(processTaskId);
         }
         System.out.println("end = ");
         JSONObject resultObj = new JSONObject();
