@@ -29,7 +29,9 @@ import neatlogic.module.process.service.ProcessTaskAsyncCreateService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -70,7 +72,9 @@ public class TestAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
     @Description(desc = "nmpapt.testasynccreateprocesstaskapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        System.out.println("start = ");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Date startDate = new Date();
+        System.out.println("start = " + dateFormat.format(startDate));
         Integer count = paramObj.getInteger("count");
         String title = paramObj.getString("title");
         String jsonString = paramObj.toJSONString();
@@ -83,7 +87,9 @@ public class TestAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
             Long processTaskId = processTaskAsyncCreateService.addNewProcessTaskAsyncCreate(new ProcessTaskAsyncCreateVo(config));
             processTaskIdList.add(processTaskId);
         }
-        System.out.println("end = ");
+        Date endDate = new Date();
+        System.out.println("end = " + dateFormat.format(endDate));
+        System.out.println("cost = " + (endDate.getTime() - startDate.getTime()));
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTaskIdList", processTaskIdList);
         return resultObj;

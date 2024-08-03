@@ -40,6 +40,7 @@
         FROM `processtask_async_create`
         WHERE `status` = #{status}
           AND `server_id` = #{serverId}
+        ORDER BY `id` DESC
         LIMIT #{startNum}, #{pageSize}
     </select>
 

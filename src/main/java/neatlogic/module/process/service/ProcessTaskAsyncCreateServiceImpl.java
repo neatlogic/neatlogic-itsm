@@ -41,6 +41,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -68,6 +69,8 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
         List<TenantVo> tenantList = tenantMapper.getAllActiveTenant();
         for (TenantVo tenantVo : tenantList) {
             TenantContext.get().switchTenant(tenantVo.getUuid());
+            List<ProcessTaskAsyncCreateVo> doneList = new ArrayList<>();
+            List<ProcessTaskAsyncCreateVo> doingList = new ArrayList<>();
             ProcessTaskAsyncCreateVo searchVo = new ProcessTaskAsyncCreateVo();
             searchVo.setStatus("doing");
             searchVo.setServerId(Config.SCHEDULE_SERVER_ID);
@@ -76,7 +79,6 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
                 searchVo.setRowNum(rowNum);
                 searchVo.setPageSize(100);
                 Integer pageCount = searchVo.getPageCount();
-                List<ProcessTaskAsyncCreateVo> doneList = new ArrayList<>();
                 for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
                     searchVo.setCurrentPage(currentPage);
                     List<ProcessTaskAsyncCreateVo> list = processTaskAsyncCreateMapper.getProcessTaskAsyncCreateList(searchVo);
@@ -90,13 +92,17 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
                             doneList.add(processTaskAsyncCreateVo);
                         } else {
                             processTaskAsyncCreateVo.setTenantUuid(tenantVo.getUuid());
-                            blockingQueue.put(processTaskAsyncCreateVo);
+                            doingList.add(processTaskAsyncCreateVo);
                         }
                     }
                 }
-                for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : doneList) {
-                    processTaskAsyncCreateMapper.updateProcessTaskAsyncCreate(processTaskAsyncCreateVo);
-                }
+            }
+            for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : doneList) {
+                processTaskAsyncCreateMapper.updateProcessTaskAsyncCreate(processTaskAsyncCreateVo);
+            }
+            doingList.sort(Comparator.comparing(ProcessTaskAsyncCreateVo::getId));
+            for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : doingList) {
+                blockingQueue.put(processTaskAsyncCreateVo);
             }
         }
         TenantContext.get().setUseDefaultDatasource(true);

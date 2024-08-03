@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -81,6 +82,8 @@ public class RedoAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
                 processTaskAsyncCreateService.addRedoProcessTaskAsyncCreate(processTaskAsyncCreateVo);
             }
         } else if (serverId != null) {
+            List<ProcessTaskAsyncCreateVo> doneList = new ArrayList<>();
+            List<ProcessTaskAsyncCreateVo> redoList = new ArrayList<>();
             ProcessTaskAsyncCreateVo searchVo = new ProcessTaskAsyncCreateVo();
             searchVo.setStatus("redo");
             searchVo.setServerId(serverId);
@@ -89,7 +92,6 @@ public class RedoAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
                 searchVo.setRowNum(rowNum);
                 searchVo.setPageSize(100);
                 Integer pageCount = searchVo.getPageCount();
-                List<ProcessTaskAsyncCreateVo> doneList = new ArrayList<>();
                 for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
                     searchVo.setCurrentPage(currentPage);
                     List<ProcessTaskAsyncCreateVo> list = processTaskAsyncCreateMapper.getProcessTaskAsyncCreateList(searchVo);
@@ -103,14 +105,18 @@ public class RedoAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
                             doneList.add(processTaskAsyncCreateVo);
                         } else {
                             processTaskIdArray.add(processTaskAsyncCreateVo.getProcessTaskId());
-                            processTaskAsyncCreateService.addRedoProcessTaskAsyncCreate(processTaskAsyncCreateVo);
+                            redoList.add(processTaskAsyncCreateVo);
                         }
 
                     }
                 }
-                for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : doneList) {
-                    processTaskAsyncCreateMapper.updateProcessTaskAsyncCreate(processTaskAsyncCreateVo);
-                }
+            }
+            for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : doneList) {
+                processTaskAsyncCreateMapper.updateProcessTaskAsyncCreate(processTaskAsyncCreateVo);
+            }
+            redoList.sort(Comparator.comparing(ProcessTaskAsyncCreateVo::getId));
+            for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : redoList) {
+                processTaskAsyncCreateService.addRedoProcessTaskAsyncCreate(processTaskAsyncCreateVo);
             }
         }
         resultObj.put("processTaskIdList", processTaskIdArray);
