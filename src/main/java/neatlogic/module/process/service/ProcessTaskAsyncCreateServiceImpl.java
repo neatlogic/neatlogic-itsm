@@ -145,6 +145,9 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
 
     @Override
     public Long addNewProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) throws InterruptedException {
+        if (processTaskAsyncCreateVo == null) {
+            return null;
+        }
         JSONObject config = processTaskAsyncCreateVo.getConfig();
         if (MapUtils.isEmpty(config)) {
             return null;
@@ -172,6 +175,9 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
 
     @Override
     public Long addRedoProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) throws InterruptedException {
+        if (processTaskAsyncCreateVo == null) {
+            return null;
+        }
         processTaskAsyncCreateVo.setTenantUuid(TenantContext.get().getTenantUuid());
         blockingQueue.put(processTaskAsyncCreateVo);
         return processTaskAsyncCreateVo.getProcessTaskId();
