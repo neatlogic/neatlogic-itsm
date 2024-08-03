@@ -63,7 +63,7 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
     private TenantMapper tenantMapper;
 
     @PostConstruct
-    public void init() throws InterruptedException {
+    public void init() {
         // 启动服务器时加载数据库中`processtask_async_create`表status为doing，server_id为Config.SCHEDULE_SERVER_ID的数据到blockingQueue中
         TenantContext.get().setUseDefaultDatasource(true);
         List<TenantVo> tenantList = tenantMapper.getAllActiveTenant();
@@ -102,7 +102,10 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
             }
             doingList.sort(Comparator.comparing(ProcessTaskAsyncCreateVo::getId));
             for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : doingList) {
-                blockingQueue.put(processTaskAsyncCreateVo);
+                boolean offer = blockingQueue.offer(processTaskAsyncCreateVo);
+                if (!offer && logger.isDebugEnabled()) {
+                    logger.debug("异步创建工单数据加入队列失败, processTaskAsyncCreateVo: " + JSONObject.toJSONString(processTaskAsyncCreateVo));
+                }
             }
         }
         TenantContext.get().setUseDefaultDatasource(true);
@@ -144,7 +147,7 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
     }
 
     @Override
-    public Long addNewProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) throws InterruptedException {
+    public Long addNewProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) {
         if (processTaskAsyncCreateVo == null) {
             return null;
         }
@@ -169,17 +172,24 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
         processTaskAsyncCreateVo.setFcu(UserContext.get().getUserUuid());
         processTaskAsyncCreateVo.setServerId(Config.SCHEDULE_SERVER_ID);
         processTaskAsyncCreateMapper.insertProcessTaskAsyncCreate(processTaskAsyncCreateVo);
-        blockingQueue.put(processTaskAsyncCreateVo);
+        boolean offer = blockingQueue.offer(processTaskAsyncCreateVo);
+        if (!offer && logger.isDebugEnabled()) {
+            logger.debug("异步创建工单数据加入队列失败, processTaskAsyncCreateVo: " + JSONObject.toJSONString(processTaskAsyncCreateVo));
+        }
         return processTaskId;
     }
 
     @Override
-    public Long addRedoProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) throws InterruptedException {
+    public Long addRedoProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) {
         if (processTaskAsyncCreateVo == null) {
             return null;
         }
         processTaskAsyncCreateVo.setTenantUuid(TenantContext.get().getTenantUuid());
-        blockingQueue.put(processTaskAsyncCreateVo);
+
+        boolean offer = blockingQueue.offer(processTaskAsyncCreateVo);
+        if (!offer && logger.isDebugEnabled()) {
+            logger.debug("异步创建工单数据加入队列失败, processTaskAsyncCreateVo: " + JSONObject.toJSONString(processTaskAsyncCreateVo));
+        }
         return processTaskAsyncCreateVo.getProcessTaskId();
     }
 }
