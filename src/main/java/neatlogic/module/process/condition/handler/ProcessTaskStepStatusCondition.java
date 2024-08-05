@@ -77,7 +77,7 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 
     @Override
     public Integer getSort() {
-        return 9;
+        return 5;
     }
 
     @Override

@@ -92,7 +92,7 @@ public class ProcessTaskRegionCondition extends ProcessTaskConditionBase impleme
 
     @Override
     public Integer getSort() {
-        return 14;
+        return 12;
     }
 
     @Override

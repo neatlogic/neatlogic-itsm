@@ -10,6 +10,7 @@ import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
+import neatlogic.framework.process.constvalue.ProcessTaskConditionType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
@@ -22,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -114,5 +116,10 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
             return sdf.format(processTaskVo.getStartTime());
         }
         return null;
+    }
+
+    @Override
+    public boolean isShow(JSONObject object, String type) {
+        return !Objects.equals(type, ProcessTaskConditionType.WORKCENTER.getValue());
     }
 }

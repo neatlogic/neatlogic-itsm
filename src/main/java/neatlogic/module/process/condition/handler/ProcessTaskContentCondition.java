@@ -9,6 +9,7 @@ import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
+import neatlogic.framework.process.constvalue.ProcessTaskConditionType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class ProcessTaskContentCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -85,5 +87,10 @@ public class ProcessTaskContentCondition extends ProcessTaskConditionBase implem
             return content;
         }
         return "";
+    }
+
+    @Override
+    public boolean isShow(JSONObject object, String type) {
+        return !Objects.equals(type, ProcessTaskConditionType.WORKCENTER.getValue());
     }
 }

@@ -2,17 +2,22 @@ package neatlogic.module.process.condition.handler;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.common.constvalue.FormHandlerType;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
+import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
+import neatlogic.framework.process.constvalue.ProcessTaskConditionType;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 @Component
 public class ProcessTaskIsShowCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -64,7 +69,7 @@ public class ProcessTaskIsShowCondition extends ProcessTaskConditionBase impleme
 
     @Override
     public Integer getSort() {
-        return 15;
+        return 14;
     }
 
     @Override
@@ -80,5 +85,13 @@ public class ProcessTaskIsShowCondition extends ProcessTaskConditionBase impleme
     @Override
     public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
         getSimpleSqlConditionWhere(groupVo.getConditionList().get(index), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.IS_SHOW.getValue());
+    }
+
+    @Override
+    public boolean isShow(JSONObject jsonObj, String type) {
+        if(Objects.equals(type, ProcessTaskConditionType.WORKCENTER.getValue())){
+            return AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
+        }
+        return true;
     }
 }

@@ -10,9 +10,7 @@ import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.form.constvalue.FormConditionModel;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
-import neatlogic.framework.process.constvalue.ConditionConfigType;
-import neatlogic.framework.process.constvalue.ProcessFieldType;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dto.SqlDecoratorVo;
 import neatlogic.framework.process.workcenter.dto.JoinOnVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
@@ -27,6 +25,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -77,7 +76,7 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
 
     @Override
     public Integer getSort() {
-        return 15;
+        return 13;
     }
 
     @Override
@@ -133,5 +132,14 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
                 }}));
             }
         };
+    }
+
+    @Override
+    public boolean isShow(JSONObject jsonObj, String type) {
+        if(Objects.equals(type, ProcessTaskConditionType.WORKCENTER.getValue())){
+            String workcenterUuid = jsonObj.getString("workcenterUuid");
+            return !Objects.equals(workcenterUuid, ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue());
+        }
+        return true;
     }
 }

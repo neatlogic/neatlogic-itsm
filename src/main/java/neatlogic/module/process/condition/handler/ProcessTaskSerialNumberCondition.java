@@ -9,8 +9,11 @@ import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
+import neatlogic.framework.process.constvalue.ProcessTaskConditionType;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 @Component
 public class ProcessTaskSerialNumberCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -24,15 +27,15 @@ public class ProcessTaskSerialNumberCondition extends ProcessTaskConditionBase i
         return "工单号";
     }
 
-	@Override
-	public String getHandler(FormConditionModel processWorkcenterConditionType) {
-		return FormHandlerType.INPUT.toString();
-	}
-	
-	@Override
-	public String getType() {
-		return ProcessFieldType.COMMON.getValue();
-	}
+    @Override
+    public String getHandler(FormConditionModel processWorkcenterConditionType) {
+        return FormHandlerType.INPUT.toString();
+    }
+
+    @Override
+    public String getType() {
+        return ProcessFieldType.COMMON.getValue();
+    }
 
     @Override
     public JSONObject getConfig(ConditionConfigType type) {
@@ -63,4 +66,10 @@ public class ProcessTaskSerialNumberCondition extends ProcessTaskConditionBase i
     public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
         getSimpleSqlConditionWhere(groupVo.getConditionList().get(index), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
     }
+
+    @Override
+    public boolean isShow(JSONObject object, String type) {
+        return !Objects.equals(type, ProcessTaskConditionType.WORKCENTER.getValue());
+    }
+
 }

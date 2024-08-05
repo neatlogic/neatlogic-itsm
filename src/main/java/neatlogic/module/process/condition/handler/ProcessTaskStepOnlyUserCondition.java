@@ -99,7 +99,7 @@ public class ProcessTaskStepOnlyUserCondition extends ProcessTaskConditionBase i
 
     @Override
     public Integer getSort() {
-        return 13;
+        return 7;
     }
 
     @Override
