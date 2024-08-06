@@ -33,7 +33,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -79,11 +78,11 @@ public class RedoAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
                     return resultObj;
                 }
                 processTaskIdArray.add(processTaskId);
-                processTaskAsyncCreateService.addRedoProcessTaskAsyncCreate(processTaskAsyncCreateVo);
+                processTaskAsyncCreateService.addRedoProcessTaskAsyncCreate(processTaskAsyncCreateVo.getId());
             }
         } else if (serverId != null) {
-            List<ProcessTaskAsyncCreateVo> doneList = new ArrayList<>();
-            List<ProcessTaskAsyncCreateVo> redoList = new ArrayList<>();
+            List<Long> doneIdList = new ArrayList<>();
+            List<Long> redoIdList = new ArrayList<>();
             ProcessTaskAsyncCreateVo searchVo = new ProcessTaskAsyncCreateVo();
             searchVo.setStatus("redo");
             searchVo.setServerId(serverId);
@@ -101,22 +100,22 @@ public class RedoAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
                     }
                     for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : list) {
                         if (processTaskIdList.contains(processTaskAsyncCreateVo.getProcessTaskId())) {
-                            processTaskAsyncCreateVo.setStatus("done");
-                            doneList.add(processTaskAsyncCreateVo);
+//                            processTaskAsyncCreateVo.setStatus("done");
+                            doneIdList.add(processTaskAsyncCreateVo.getId());
                         } else {
                             processTaskIdArray.add(processTaskAsyncCreateVo.getProcessTaskId());
-                            redoList.add(processTaskAsyncCreateVo);
+                            redoIdList.add(processTaskAsyncCreateVo.getId());
                         }
 
                     }
                 }
             }
-            for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : doneList) {
-                processTaskAsyncCreateMapper.updateProcessTaskAsyncCreate(processTaskAsyncCreateVo);
+            if (CollectionUtils.isNotEmpty(doneIdList)) {
+                processTaskAsyncCreateMapper.deleteProcessTaskAsyncCreateByIdList(doneIdList);
             }
-            redoList.sort(Comparator.comparing(ProcessTaskAsyncCreateVo::getId));
-            for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : redoList) {
-                processTaskAsyncCreateService.addRedoProcessTaskAsyncCreate(processTaskAsyncCreateVo);
+            redoIdList.sort(Long::compareTo);
+            for (Long redoId : redoIdList) {
+                processTaskAsyncCreateService.addRedoProcessTaskAsyncCreate(redoId);
             }
         }
         resultObj.put("processTaskIdList", processTaskIdArray);

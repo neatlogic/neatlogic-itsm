@@ -28,11 +28,11 @@ import neatlogic.framework.dto.TenantVo;
 import neatlogic.framework.process.crossover.IProcessTaskAsyncCreateCrossoverService;
 import neatlogic.framework.process.crossover.IProcessTaskCreatePublicCrossoverService;
 import neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo;
+import neatlogic.framework.process.dto.ProcessTaskCreateVo;
 import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskAsyncCreateMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -51,7 +50,7 @@ import java.util.stream.Collectors;
 public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreateService, IProcessTaskAsyncCreateCrossoverService {
     private static final Logger logger = LoggerFactory.getLogger(ProcessTaskAsyncCreateServiceImpl.class);
 
-    private final static BlockingQueue<ProcessTaskAsyncCreateVo> blockingQueue = new LinkedBlockingQueue<>();
+    private final static BlockingQueue<Task> blockingQueue = new LinkedBlockingQueue<>();
 
     @Resource
     private ProcessTaskAsyncCreateMapper processTaskAsyncCreateMapper;
@@ -69,8 +68,8 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
         List<TenantVo> tenantList = tenantMapper.getAllActiveTenant();
         for (TenantVo tenantVo : tenantList) {
             TenantContext.get().switchTenant(tenantVo.getUuid());
-            List<ProcessTaskAsyncCreateVo> doneList = new ArrayList<>();
-            List<ProcessTaskAsyncCreateVo> doingList = new ArrayList<>();
+            List<Long> doneIdList = new ArrayList<>();
+            List<Long> doingIdList = new ArrayList<>();
             ProcessTaskAsyncCreateVo searchVo = new ProcessTaskAsyncCreateVo();
             searchVo.setStatus("doing");
             searchVo.setServerId(Config.SCHEDULE_SERVER_ID);
@@ -89,22 +88,21 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
                     for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : list) {
                         if (processTaskIdList.contains(processTaskAsyncCreateVo.getProcessTaskId())) {
                             processTaskAsyncCreateVo.setStatus("done");
-                            doneList.add(processTaskAsyncCreateVo);
+                            doneIdList.add(processTaskAsyncCreateVo.getId());
                         } else {
-                            processTaskAsyncCreateVo.setTenantUuid(tenantVo.getUuid());
-                            doingList.add(processTaskAsyncCreateVo);
+                            doingIdList.add(processTaskAsyncCreateVo.getId());
                         }
                     }
                 }
             }
-            for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : doneList) {
-                processTaskAsyncCreateMapper.updateProcessTaskAsyncCreate(processTaskAsyncCreateVo);
+            if (CollectionUtils.isNotEmpty(doneIdList)) {
+                processTaskAsyncCreateMapper.deleteProcessTaskAsyncCreateByIdList(doneIdList);
             }
-            doingList.sort(Comparator.comparing(ProcessTaskAsyncCreateVo::getId));
-            for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : doingList) {
-                boolean offer = blockingQueue.offer(processTaskAsyncCreateVo);
+            doingIdList.sort(Long::compareTo);
+            for (Long id : doingIdList) {
+                boolean offer = blockingQueue.offer(new Task(id));
                 if (!offer && logger.isDebugEnabled()) {
-                    logger.debug("异步创建工单数据加入队列失败, processTaskAsyncCreateVo: " + JSONObject.toJSONString(processTaskAsyncCreateVo));
+                    logger.debug("异步创建工单数据加入队列失败, id: " + id);
                 }
             }
         }
@@ -115,29 +113,36 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
             protected void execute() {
                 IProcessTaskCreatePublicCrossoverService processTaskCreatePublicCrossoverService = CrossoverServiceFactory.getApi(IProcessTaskCreatePublicCrossoverService.class);
                 while (!Thread.currentThread().isInterrupted()) {
-                    ProcessTaskAsyncCreateVo processTaskAsyncCreateVo = null;
+                    Task task = null;
                     try {
-                        processTaskAsyncCreateVo = blockingQueue.take();
-                        TenantContext.get().switchTenant(processTaskAsyncCreateVo.getTenantUuid());
-                        processTaskCreatePublicCrossoverService.createProcessTask(processTaskAsyncCreateVo.getConfig());
-                        processTaskAsyncCreateVo.setStatus("done");
+                        task = blockingQueue.take();
+                        TenantContext.get().switchTenant(task.getTenantUuid());
+                        ProcessTaskAsyncCreateVo processTaskAsyncCreate = processTaskAsyncCreateMapper.getProcessTaskAsyncCreateById(task.getId());
+                        if (processTaskAsyncCreate != null) {
+                            processTaskCreatePublicCrossoverService.createProcessTask(processTaskAsyncCreate.getConfig());
+                        }
+//                        processTaskAsyncCreateVo.setStatus("done");
+                        processTaskAsyncCreateMapper.deleteProcessTaskAsyncCreateById(task.getId());
+                        int i = 10 / 0;
                     } catch (InterruptedException e) {
-                        if (processTaskAsyncCreateVo != null) {
+                        if (task != null) {
+                            ProcessTaskAsyncCreateVo processTaskAsyncCreateVo = new ProcessTaskAsyncCreateVo();
+                            processTaskAsyncCreateVo.setId(task.getId());
                             processTaskAsyncCreateVo.setStatus("failed");
                             processTaskAsyncCreateVo.setError(ExceptionUtils.getStackTrace(e));
+                            processTaskAsyncCreateMapper.updateProcessTaskAsyncCreate(processTaskAsyncCreateVo);
                         }
                         Thread.currentThread().interrupt();
                         break;
                     } catch (Exception e) {
-                        if (processTaskAsyncCreateVo != null) {
+                        if (task != null) {
+                            ProcessTaskAsyncCreateVo processTaskAsyncCreateVo = new ProcessTaskAsyncCreateVo();
+                            processTaskAsyncCreateVo.setId(task.getId());
                             processTaskAsyncCreateVo.setStatus("failed");
                             processTaskAsyncCreateVo.setError(ExceptionUtils.getStackTrace(e));
-                        }
-                        logger.error(e.getMessage(), e);
-                    } finally {
-                        if (processTaskAsyncCreateVo != null) {
                             processTaskAsyncCreateMapper.updateProcessTaskAsyncCreate(processTaskAsyncCreateVo);
                         }
+                        logger.error(e.getMessage(), e);
                     }
                 }
             }
@@ -146,16 +151,31 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
         t.start();
     }
 
+    private static class Task {
+
+        private final Long id;
+        private final String tenantUuid;
+
+        public Task(Long id) {
+            this.id = id;
+            this.tenantUuid = TenantContext.get().getTenantUuid();
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public String getTenantUuid() {
+            return tenantUuid;
+        }
+    }
+
     @Override
-    public Long addNewProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) {
-        if (processTaskAsyncCreateVo == null) {
+    public Long addNewProcessTaskAsyncCreate(ProcessTaskCreateVo processTaskCreateVo) {
+        if (processTaskCreateVo == null) {
             return null;
         }
-        JSONObject config = processTaskAsyncCreateVo.getConfig();
-        if (MapUtils.isEmpty(config)) {
-            return null;
-        }
-        Long processTaskId = config.getLong("newProcessTaskId");
+        Long processTaskId = processTaskCreateVo.getNewProcessTaskId();
         if (processTaskId != null) {
             if (processTaskMapper.getProcessTaskById(processTaskId) != null) {
                 processTaskId = null;
@@ -163,16 +183,17 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
         }
         if (processTaskId == null) {
             processTaskId = SnowflakeUtil.uniqueLong();
-            config.put("newProcessTaskId", processTaskId);
+            processTaskCreateVo.setNewProcessTaskId(processTaskId);
         }
+        ProcessTaskAsyncCreateVo processTaskAsyncCreateVo = new ProcessTaskAsyncCreateVo();
         processTaskAsyncCreateVo.setProcessTaskId(processTaskId);
-        processTaskAsyncCreateVo.setTenantUuid(TenantContext.get().getTenantUuid());
-        processTaskAsyncCreateVo.setTitle(config.getString("title"));
+        processTaskAsyncCreateVo.setTitle(processTaskCreateVo.getTitle());
         processTaskAsyncCreateVo.setStatus("doing");
         processTaskAsyncCreateVo.setFcu(UserContext.get().getUserUuid());
         processTaskAsyncCreateVo.setServerId(Config.SCHEDULE_SERVER_ID);
+        processTaskAsyncCreateVo.setConfig(processTaskCreateVo);
         processTaskAsyncCreateMapper.insertProcessTaskAsyncCreate(processTaskAsyncCreateVo);
-        boolean offer = blockingQueue.offer(processTaskAsyncCreateVo);
+        boolean offer = blockingQueue.offer(new Task(processTaskAsyncCreateVo.getId()));
         if (!offer && logger.isDebugEnabled()) {
             logger.debug("异步创建工单数据加入队列失败, processTaskAsyncCreateVo: " + JSONObject.toJSONString(processTaskAsyncCreateVo));
         }
@@ -180,16 +201,14 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
     }
 
     @Override
-    public Long addRedoProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo) {
-        if (processTaskAsyncCreateVo == null) {
-            return null;
+    public void addRedoProcessTaskAsyncCreate(Long id) {
+        if (id == null) {
+            return;
         }
-        processTaskAsyncCreateVo.setTenantUuid(TenantContext.get().getTenantUuid());
 
-        boolean offer = blockingQueue.offer(processTaskAsyncCreateVo);
+        boolean offer = blockingQueue.offer(new Task(id));
         if (!offer && logger.isDebugEnabled()) {
-            logger.debug("异步创建工单数据加入队列失败, processTaskAsyncCreateVo: " + JSONObject.toJSONString(processTaskAsyncCreateVo));
+            logger.debug("异步创建工单数据加入队列失败, id: " + id);
         }
-        return processTaskAsyncCreateVo.getProcessTaskId();
     }
 }

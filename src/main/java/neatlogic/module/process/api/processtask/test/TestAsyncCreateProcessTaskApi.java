@@ -21,7 +21,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
-import neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo;
+import neatlogic.framework.process.dto.ProcessTaskCreateVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -80,11 +80,13 @@ public class TestAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
         String jsonString = paramObj.toJSONString();
         List<Long> processTaskIdList = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            JSONObject config = JSONObject.parseObject(jsonString);
+            ProcessTaskCreateVo processTaskCreateVo = paramObj.toJavaObject(ProcessTaskCreateVo.class);
+//            JSONObject config = JSONObject.parseObject(jsonString);
 //            Long processTaskId = SnowflakeUtil.uniqueLong();
 //            config.put("newProcessTaskId", processTaskId);
-            config.put("title", title + "-" + i);
-            Long processTaskId = processTaskAsyncCreateService.addNewProcessTaskAsyncCreate(new ProcessTaskAsyncCreateVo(config));
+//            config.put("title", title + "-" + i);
+            processTaskCreateVo.setTitle(title + "-" + i);
+            Long processTaskId = processTaskAsyncCreateService.addNewProcessTaskAsyncCreate(processTaskCreateVo);
             processTaskIdList.add(processTaskId);
         }
         Date endDate = new Date();

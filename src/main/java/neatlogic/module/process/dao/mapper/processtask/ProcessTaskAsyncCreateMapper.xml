@@ -35,8 +35,7 @@
             `id`,
             `processtask_id` AS processTaskId,
             `title`,
-            `status`,
-            `config` AS configStr
+            `status`
         FROM `processtask_async_create`
         WHERE `status` = #{status}
           AND `server_id` = #{serverId}
@@ -81,11 +80,22 @@
     <update id="updateProcessTaskAsyncCreate" parameterType="neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo">
         UPDATE `processtask_async_create`
         SET
-            `processtask_id` = #{processTaskId},
             `status` = #{status},
             `error` = #{error},
             `try_count` = `try_count` + 1,
             `lcd` = NOW(3)
         WHERE `id` = #{id}
     </update>
+
+    <delete id="deleteProcessTaskAsyncCreateById" parameterType="java.lang.Long">
+        DELETE FROM `processtask_async_create` WHERE `id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskAsyncCreateByIdList" parameterType="java.lang.Long">
+        DELETE FROM `processtask_async_create`
+        WHERE `id` IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>

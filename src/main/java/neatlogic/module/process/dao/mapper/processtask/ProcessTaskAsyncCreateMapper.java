@@ -33,4 +33,8 @@ public interface ProcessTaskAsyncCreateMapper extends IProcessTaskAsyncCreateCro
     int insertProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo);
 
     int updateProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo);
+
+    int deleteProcessTaskAsyncCreateById(Long id);
+
+    int deleteProcessTaskAsyncCreateByIdList(List<Long> idList);
 }

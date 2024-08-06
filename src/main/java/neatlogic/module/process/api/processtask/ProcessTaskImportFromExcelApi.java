@@ -1,5 +1,7 @@
 package neatlogic.module.process.api.processtask;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.file.*;
@@ -11,9 +13,6 @@ import neatlogic.framework.form.exception.FormActiveVersionNotFoundExcepiton;
 import neatlogic.framework.form.exception.FormNotFoundException;
 import neatlogic.framework.process.auth.BATCH_REPORT_PROCESS_TASK;
 import neatlogic.framework.process.constvalue.ProcessTaskSource;
-import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
-import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
 import neatlogic.framework.process.exception.process.ProcessNotFoundException;
@@ -21,10 +20,11 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.ExcelUtil;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskCreatePublicService;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -192,12 +192,13 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                 int successCount = 0;
                 /** 上报工单 */
                 for (Map<String, String> map : contentList) {
-                    JSONObject task = parseTask(channelUuid, formAttributeVoList, map, isNeedPriority);
-                    task.put("source", ProcessTaskSource.IMPORT.getValue());
+                    ProcessTaskCreateVo task = parseTask(channelUuid, formAttributeVoList, map, isNeedPriority);
+//                    task.put("source", ProcessTaskSource.IMPORT.getValue());
+                    task.setSource(ProcessTaskSource.IMPORT.getValue());
                     ProcessTaskImportAuditVo auditVo = new ProcessTaskImportAuditVo();
                     auditVo.setChannelUuid(channelUuid);
-                    auditVo.setTitle(task.getString("title"));
-                    auditVo.setOwner(task.getString("owner"));
+                    auditVo.setTitle(task.getTitle());
+                    auditVo.setOwner(task.getOwner());
                     try {
                         JSONObject resultObj = processTaskCreatePublicService.createProcessTask(task);
                         auditVo.setProcessTaskId(resultObj.getLong("processTaskId"));
@@ -247,25 +248,31 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
      * @param isNeedPriority    是否需要优先级
      * @return
      */
-    private JSONObject parseTask(String channelUuid, List<FormAttributeVo> formAttributeList, Map<String, String> map, int isNeedPriority) {
-        JSONObject task = new JSONObject();
+    private ProcessTaskCreateVo parseTask(String channelUuid, List<FormAttributeVo> formAttributeList, Map<String, String> map, int isNeedPriority) {
+//        JSONObject task = new JSONObject();
+        ProcessTaskCreateVo processTaskCreateVo = new ProcessTaskCreateVo();
         JSONArray formAttributeDataList = new JSONArray();
-        task.put("channel", channelUuid);
+//        task.put("channel", channelUuid);
+        processTaskCreateVo.setChannel(channelUuid);
         for (Map.Entry<String, String> entry : map.entrySet()) {
             String key = entry.getKey().replace("(必填)", "");
             if ("标题".equals(key)) {
-                task.put("title", entry.getValue());
+//                task.put("title", entry.getValue());
+                processTaskCreateVo.setTitle(entry.getValue());
             } else if ("请求人".equals(key)) {
                 if (StringUtils.isNotBlank(entry.getValue())) {
-                    task.put("owner", entry.getValue());
+//                    task.put("owner", entry.getValue());
+                    processTaskCreateVo.setOwner(entry.getValue());
                 }
             } else if ("优先级".equals(key)) {
                 PriorityVo priority = null;
                 if (isNeedPriority == 1 && StringUtils.isNotBlank(entry.getValue()) && (priority = priorityMapper.getPriorityByName(entry.getValue())) != null) {
-                    task.put("priority", priority.getUuid());
+//                    task.put("priority", priority.getUuid());
+                    processTaskCreateVo.setPriority(priority.getUuid());
                 }
             } else if ("描述".equals(key)) {
-                task.put("content", entry.getValue());
+//                task.put("content", entry.getValue());
+                processTaskCreateVo.setContent(entry.getValue());
             } else {
                 if (CollectionUtils.isNotEmpty(formAttributeList) && formAttributeList.stream().anyMatch(o -> Objects.equals(o.getLabel(), key))) {
                     JSONObject formdata = new JSONObject();
@@ -284,10 +291,13 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                 }
             }
         }
-        task.put("formAttributeDataList", formAttributeDataList);
-        task.put("hidecomponentList", new JSONArray());
-        task.put("readcomponentList", new JSONArray());
-        return task;
+//        task.put("formAttributeDataList", formAttributeDataList);
+//        task.put("hidecomponentList", new JSONArray());
+//        task.put("readcomponentList", new JSONArray());
+        processTaskCreateVo.setFormAttributeDataList(formAttributeDataList);
+        processTaskCreateVo.setHidecomponentList(new JSONArray());
+        processTaskCreateVo.setReadcomponentList(new JSONArray());
+        return processTaskCreateVo;
     }
 
     private Map<String, Object> getTaskDataFromFirstSheet(MultipartFile file) throws Exception {

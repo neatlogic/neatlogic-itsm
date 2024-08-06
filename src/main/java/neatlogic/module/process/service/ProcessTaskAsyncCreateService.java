@@ -17,18 +17,18 @@
 
 package neatlogic.module.process.service;
 
-import neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo;
+import neatlogic.framework.process.dto.ProcessTaskCreateVo;
 
 public interface ProcessTaskAsyncCreateService {
     /**
      * 添加新的工单信息到阻塞队列
-     * @param processTaskAsyncCreateVo
+     * @param processTaskCreateVo
      */
-    Long addNewProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo);
+    Long addNewProcessTaskAsyncCreate(ProcessTaskCreateVo processTaskCreateVo);
 
     /**
      * 添加需要重新执行的工单信息到阻塞队列
-     * @param processTaskAsyncCreateVo
+     * @param id
      */
-    Long addRedoProcessTaskAsyncCreate(ProcessTaskAsyncCreateVo processTaskAsyncCreateVo);
+    void addRedoProcessTaskAsyncCreate(Long id);
 }

@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo;
+import neatlogic.framework.process.dto.ProcessTaskCreateVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -69,14 +69,15 @@ public class ProcessTaskCreateApi extends PrivateApiComponentBase {
     @Description(desc = "nmpap.processtaskcreateapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        ProcessTaskCreateVo processTaskCreateVo = jsonObj.toJavaObject(ProcessTaskCreateVo.class);
         Integer isAsync = jsonObj.getInteger("isAsync");
         if (Objects.equals(isAsync, 1)) {
-            Long processTaskId = processTaskAsyncCreateService.addNewProcessTaskAsyncCreate(new ProcessTaskAsyncCreateVo(jsonObj));
+            Long processTaskId = processTaskAsyncCreateService.addNewProcessTaskAsyncCreate(processTaskCreateVo);
             JSONObject resultObj = new JSONObject();
             resultObj.put("processTaskId", processTaskId);
             return resultObj;
         } else {
-            return processTaskCreatePublicService.createProcessTask(jsonObj);
+            return processTaskCreatePublicService.createProcessTask(processTaskCreateVo);
         }
     }
 }
