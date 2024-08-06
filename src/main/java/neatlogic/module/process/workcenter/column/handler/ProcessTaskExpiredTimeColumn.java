@@ -12,10 +12,7 @@ import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
 import neatlogic.framework.process.workcenter.dto.SelectColumnVo;
 import neatlogic.framework.process.workcenter.dto.TableSelectColumnVo;
-import neatlogic.framework.process.workcenter.table.ISqlTable;
-import neatlogic.framework.process.workcenter.table.ProcessTaskSlaSqlTable;
-import neatlogic.framework.process.workcenter.table.ProcessTaskSlaTimeSqlTable;
-import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
+import neatlogic.framework.process.workcenter.table.*;
 import neatlogic.framework.process.workcenter.table.util.SqlTableUtil;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -186,6 +183,10 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
                                 new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue())
                         )
                 ));
+                add(new TableSelectColumnVo(new WorkTimeSqlTable(), Arrays.asList(
+                        new SelectColumnVo(WorkTimeSqlTable.FieldEnum.UUID.getValue(),"worktimeUuid"),
+                        new SelectColumnVo(WorkTimeSqlTable.FieldEnum.NAME.getValue(),"worktimeName")
+                )));
                 /*add(new TableSelectColumnVo(new ProcessTaskStepSlaSqlTable(),
                         Arrays.asList(
                                 new SelectColumnVo(ProcessTaskStepSlaSqlTable.FieldEnum.PROCESSTASK_STEP_ID.getValue(), "slaStepId"),
