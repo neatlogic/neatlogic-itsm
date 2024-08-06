@@ -3,14 +3,14 @@ package neatlogic.module.process.workcenter.column.handler;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dashboard.dto.DashboardWidgetChartConfigVo;
-import neatlogic.framework.dashboard.dto.DashboardWidgetGroupDefineVo;
-import neatlogic.framework.dashboard.dto.DashboardWidgetAllGroupDefineVo;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnBase;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.dto.ProcessTaskVo;
-import neatlogic.framework.process.workcenter.dto.*;
+import neatlogic.framework.process.workcenter.dto.JoinOnVo;
+import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
+import neatlogic.framework.process.workcenter.dto.SelectColumnVo;
+import neatlogic.framework.process.workcenter.dto.TableSelectColumnVo;
 import neatlogic.framework.process.workcenter.table.ChannelSqlTable;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import neatlogic.framework.process.workcenter.table.ProcessTaskStepSqlTable;
@@ -107,20 +107,6 @@ public class ProcessTaskStepNameColumn extends ProcessTaskColumnBase implements 
 				}}));
 			}
 		};
-	}
-
-	@Override
-	public void getMyDashboardAllGroupDefine(DashboardWidgetAllGroupDefineVo dashboardWidgetAllGroupDefineVo, List<Map<String, Object>> mapList) {
-		DashboardWidgetChartConfigVo dashboardWidgetChartConfigVo = dashboardWidgetAllGroupDefineVo.getChartConfigVo();
-		if (getName().equals(dashboardWidgetChartConfigVo.getGroup())) {
-			DashboardWidgetGroupDefineVo dashboardDataGroupVo = new DashboardWidgetGroupDefineVo("processTaskStepNameChannel", dashboardWidgetChartConfigVo.getGroup(), "processTaskStepName","channelName");
-			dashboardWidgetAllGroupDefineVo.setGroupDefineVo(dashboardDataGroupVo);
-		}
-		//如果存在子分组
-		if (getName().equals(dashboardWidgetChartConfigVo.getSubGroup())) {
-			DashboardWidgetGroupDefineVo dashboardDataSubGroupVo = new DashboardWidgetGroupDefineVo("processTaskStepName", dashboardWidgetChartConfigVo.getSubGroup(), "processTaskStepName","channelName");
-			dashboardWidgetAllGroupDefineVo.setSubGroupDefineVo(dashboardDataSubGroupVo);
-		}
 	}
 
 	@Override
