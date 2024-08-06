@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -72,7 +73,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
     public Object getValue(ProcessTaskVo processTaskVo) {
         JSONArray workerArray = new JSONArray();
         List<ProcessTaskStepVo> stepVoList = processTaskVo.getStepList();
-        if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+        if (Arrays.asList(ProcessTaskStatus.RUNNING.getValue(),ProcessTaskStatus.HANG.getValue()).contains(processTaskVo.getStatus())) {
             for (ProcessTaskStepVo stepVo : stepVoList) {
                 //查询其它步骤handler minorList
                 newWorkcenterService.getStepTaskWorkerList(workerArray,stepVo);
