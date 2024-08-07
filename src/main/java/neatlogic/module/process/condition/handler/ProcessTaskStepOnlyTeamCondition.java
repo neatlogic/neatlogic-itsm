@@ -20,8 +20,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.*;
-import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.dao.mapper.TeamMapper;
+import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.condition.ConditionGroupVo;
 import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.form.constvalue.FormConditionModel;
@@ -29,41 +29,43 @@ import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.dto.ProcessTaskVo;
-import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
+import neatlogic.framework.process.dto.SqlDecoratorVo;
+import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
+import neatlogic.framework.process.workcenter.table.ProcessTaskStepSqlTable;
+import neatlogic.framework.process.workcenter.table.ProcessTaskStepWorkerSqlTable;
+import neatlogic.framework.process.workcenter.table.util.SqlTableUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
-public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
-
+public class ProcessTaskStepOnlyTeamCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     @Resource
-    private ProcessTaskMapper processTaskMapper;
-
-    @Resource
-    private UserMapper userMapper;
+    TeamMapper teamMapper;
 
     @Override
     public String getName() {
-        return "owner";
+        return "steponlyteam";
     }
 
     @Override
     public String getDisplayName() {
-        return "上报人";
+        return "步骤处理组";
+    }
+
+    @Override
+    public String getDesc() {
+        return "过滤出分派到该组的工单（指定抢单包含该组的工单）";
     }
 
     @Override
     public String getHandler(FormConditionModel processWorkcenterConditionType) {
-        return FormHandlerType.USERSELECT.toString();
+        return FormHandlerType.TEAMSELECT.toString();
     }
 
     @Override
@@ -73,10 +75,11 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 
     @Override
     public JSONObject getConfig(ConditionConfigType configType) {
-        JSONObject config = new JSONObject();
-        config.put("type", FormHandlerType.USERSELECT.toString());
-        config.put("multiple", true);
-        config.put("initConfig", new JSONObject() {
+        JSONObject returnObj = new JSONObject();
+        returnObj.put("type", FormHandlerType.USERSELECT.toString());
+        returnObj.put("multiple", true);
+        returnObj.put("isMultiple", true);
+        returnObj.put("initConfig", new JSONObject() {
             {
                 this.put("excludeList", new JSONArray() {{
                     if (ConditionConfigType.WORKCENTER.getValue().equals(configType.getValue())) {
@@ -85,30 +88,25 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
                 }});
                 this.put("groupList", new JSONArray() {
                     {
-                        if (ConditionConfigType.WORKCENTER.getValue().equals(configType.getValue())) {
-                            this.add(GroupSearch.COMMON.getValue());
-                        }
-                        this.add(GroupSearch.USER.getValue());
+                        this.add(GroupSearch.TEAM.getValue());
+                        this.add(GroupSearch.COMMON.getValue());
                     }
                 });
                 this.put("includeList", new JSONArray() {
                     {
                         if (ConditionConfigType.WORKCENTER.getValue().equals(configType.getValue())) {
-                            this.add(GroupSearch.COMMON.getValuePlugin() + UserType.VIP_USER.getValue());
-                            this.add(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue());
+                            this.add(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_TEAM.getValue());
                         }
                     }
                 });
             }
         });
-        /* 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
-        config.put("isMultiple", true);
-        return config;
+        return returnObj;
     }
 
     @Override
     public Integer getSort() {
-        return 1;
+        return 8;
     }
 
     @Override
@@ -116,13 +114,14 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
         return ParamType.ARRAY;
     }
 
+
     @Override
     public Object valueConversionText(Object value, JSONObject config) {
         if (value != null) {
             if (value instanceof String) {
-                UserVo userVo = userMapper.getUserBaseInfoByUuid(value.toString().substring(5));
-                if (userVo != null) {
-                    return userVo.getUserName();
+                TeamVo teamVo = teamMapper.getTeamByUuid(value.toString().substring(5));
+                if (teamVo != null) {
+                    return teamVo.getName();
                 } else {
                     if (value.toString().startsWith("common#")) {
                         return UserType.getText(value.toString().substring(7));
@@ -132,9 +131,9 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
                 List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
                 List<String> textList = new ArrayList<>();
                 for (String valueStr : valueList) {
-                    UserVo userVo = userMapper.getUserBaseInfoByUuid(valueStr.substring(5));
-                    if (userVo != null) {
-                        textList.add(userVo.getUserName());
+                    TeamVo teamVo = teamMapper.getTeamByUuid(valueStr.substring(5));
+                    if (teamVo != null) {
+                        textList.add(teamVo.getName());
                     } else {
                         if (valueStr.startsWith("common#")) {
                             textList.add(UserType.getText(valueStr.substring(7)));
@@ -151,53 +150,47 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 
     @Override
     public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
+        //获取条件
         ConditionVo condition = groupVo.getConditionList().get(index);
-        List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
-        //替换“当前登录人标识”为当前登录用户
-        String loginUser = GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue();
-        String vipUser = GroupSearch.COMMON.getValuePlugin() + UserType.VIP_USER.getValue();
-        if (valueList.contains(loginUser) || valueList.contains(vipUser)) {
-            Iterator<String> valueIterator = valueList.iterator();
-            if (valueIterator.hasNext()) {
-                String value = valueIterator.next();
-                if (value.equals(loginUser)) {
-                    valueIterator.remove();
-                    valueList.add(UserContext.get().getUserUuid());
-                } else if (value.equals(vipUser)) {
-                    valueIterator.remove();
-                    List<UserVo> userVoList = userMapper.getUserVip();
-                    if (CollectionUtils.isNotEmpty(userVoList)) {
-                        for (UserVo user : userVoList) {
-                            valueList.add(user.getUuid());
-                        }
-                    }
+        List<String> stepTeamValueList = new ArrayList<>();
+        if (condition.getValueList() instanceof String) {
+            stepTeamValueList.add((String) condition.getValueList());
+        } else if (condition.getValueList() instanceof List) {
+            List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+            stepTeamValueList.addAll(valueList);
+        }
+        List<String> teamUuidList = new ArrayList<String>();
+
+        //如果存在当前登录人所在组
+        String loginTeam = GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_TEAM.getValue();
+        if (stepTeamValueList.contains(loginTeam)) {
+            List<TeamVo> teamTmpList = teamMapper.getTeamListByUserUuid(UserContext.get().getUserUuid(true));
+            if (CollectionUtils.isNotEmpty(teamTmpList)) {
+                for (TeamVo team : teamTmpList) {
+                    stepTeamValueList.add(team.getUuid());
                 }
             }
+            stepTeamValueList.remove(loginTeam);
         }
-        String value = valueList.stream().map(o -> o.replaceAll(GroupSearch.USER.getValuePlugin(), "")).collect(Collectors.joining("','"));
-        sqlSb.append(Expression.getExpressionSql(condition.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.OWNER.getValue(), value.toString()));
+
+        //获取所有组的成员
+        for (String team : stepTeamValueList) {
+            teamUuidList.add(team.replaceAll(GroupSearch.TEAM.getValuePlugin(), StringUtils.EMPTY));
+        }
+
+
+
+        sqlSb.append(" (");
+        //非开始节点
+        sqlSb.append(Expression.getExpressionSql(Expression.UNEQUAL.getExpression(), new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.TYPE.getValue(), ProcessStepHandlerType.START.getHandler()));
+        sqlSb.append(" and (");
+        sqlSb.append(Expression.getExpressionSql(condition.getExpression(), new ProcessTaskStepWorkerSqlTable().getShortName(), ProcessTaskStepWorkerSqlTable.FieldEnum.UUID.getValue(), String.join("','", teamUuidList)));
+        sqlSb.append(" )) ");
+
     }
 
     @Override
-    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
-        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
-        if (processTaskVo == null) {
-            return null;
-        }
-        return processTaskVo.getOwner();
+    public List<JoinTableColumnVo> getMyJoinTableColumnList(SqlDecoratorVo sqlDecoratorVo) {
+        return SqlTableUtil.getWorkerJoinTableSql();
     }
-
-    @Override
-    public Object getConditionParamDataForHumanization(ProcessTaskStepVo processTaskStepVo) {
-        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
-        if (processTaskVo == null) {
-            return null;
-        }
-        UserVo user = userMapper.getUserBaseInfoByUuid(processTaskVo.getOwner());
-        if (user != null) {
-            return user.getUserName();
-        }
-        return null;
-    }
-
 }

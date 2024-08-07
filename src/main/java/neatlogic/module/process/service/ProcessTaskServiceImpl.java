@@ -2390,11 +2390,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         } else if (ProcessTaskOperationType.STEP_RECOVER.getValue().equals(action)) {
             actionType = ProcessTaskOperationType.STEP_RECOVER;
             builder.addOperationType(actionType);
+        } else if (ProcessTaskOperationType.STEP_PAUSE.getValue().equals(action)) {
+            actionType = ProcessTaskOperationType.STEP_PAUSE;
+            builder.addOperationType(actionType);
         } else {
             builder.addOperationType(ProcessTaskOperationType.STEP_ACCEPT);
             builder.addOperationType(ProcessTaskOperationType.STEP_START);
             builder.addOperationType(ProcessTaskOperationType.STEP_COMPLETE);
             builder.addOperationType(ProcessTaskOperationType.STEP_RECOVER);
+            builder.addOperationType(ProcessTaskOperationType.STEP_PAUSE);
         }
         String userUuid = UserContext.get().getUserUuid(true);
         AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
@@ -2414,6 +2418,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     } else if (set.contains(ProcessTaskOperationType.STEP_COMPLETE)) {
                         resultList.add(processTaskStepVo);
                     } else if (set.contains(ProcessTaskOperationType.STEP_RECOVER)) {
+                        resultList.add(processTaskStepVo);
+                    } else if (set.contains(ProcessTaskOperationType.STEP_PAUSE)) {
                         resultList.add(processTaskStepVo);
                     }
                 }

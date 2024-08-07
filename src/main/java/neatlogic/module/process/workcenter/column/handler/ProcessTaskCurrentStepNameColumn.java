@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -72,7 +73,7 @@ public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase impl
     public Object getValue(ProcessTaskVo processTaskVo) {
         List<ProcessTaskStepVo> stepVoList = processTaskVo.getStepList();
         List<String> stepNameList = new ArrayList<>();
-        if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+        if (Arrays.asList(ProcessTaskStatus.RUNNING.getValue(),ProcessTaskStatus.HANG.getValue()).contains(processTaskVo.getStatus())) {
             for (ProcessTaskStepVo stepVo : stepVoList) {
                 if ((ProcessTaskStepStatus.DRAFT.getValue().equals(stepVo.getStatus()) || (ProcessTaskStepStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1) || ProcessTaskStepStatus.RUNNING.getValue().equals(stepVo.getStatus()))) {
                     stepNameList.add(stepVo.getName());

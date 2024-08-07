@@ -119,6 +119,18 @@
 		WHERE a.`process_uuid` = #{value}
 	</select>
 
+	<select id="getProcessStepDetailByProcessUuidAndType" resultType="neatlogic.framework.process.dto.ProcessStepVo">
+		SELECT
+			a.`process_uuid` AS processUuid,
+			a.`uuid`,
+			a.`name`,
+			a.`type`,
+			a.`handler`
+		FROM
+			`process_step` a
+		WHERE a.`process_uuid` = #{processUuid} and a.`type` = #{type}
+	</select>
+
 	<select id="getProcessStepUuidListByProcessUuid" parameterType="java.lang.String" resultType="java.lang.String">
 		SELECT `uuid` FROM `process_step` WHERE `process_uuid` = #{value}
 	</select>

@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.process.sql.core.structure;
 
 import neatlogic.framework.dto.condition.*;
+import neatlogic.framework.exception.condition.ConditionNotFoundException;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
@@ -130,6 +131,9 @@ public abstract class ProcessSqlBase<T extends SqlDecoratorVo> implements IProce
                         handler = ProcessFieldType.FORM.getValue();
                     }
                     IProcessTaskCondition sqlCondition = ProcessTaskConditionFactory.getHandler(handler);
+                    if(sqlCondition == null){
+                        throw new ConditionNotFoundException(handler);
+                    }
                     sqlCondition.getSqlConditionWhere(groupVo, i, sqlSb);
                     fromConditionUuid = toConditionUuid;
                 }

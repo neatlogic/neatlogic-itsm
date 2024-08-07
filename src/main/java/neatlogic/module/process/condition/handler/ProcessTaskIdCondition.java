@@ -8,8 +8,11 @@ import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
+import neatlogic.framework.process.constvalue.ProcessTaskConditionType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 @Component
 public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -61,5 +64,10 @@ public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements 
     @Override
     public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
         return processTaskStepVo.getProcessTaskId();
+    }
+
+    @Override
+    public boolean isShow(JSONObject object, String type) {
+        return !Objects.equals(type, ProcessTaskConditionType.WORKCENTER.getValue());
     }
 }

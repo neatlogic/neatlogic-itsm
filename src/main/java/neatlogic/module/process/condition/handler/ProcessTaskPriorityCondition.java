@@ -82,7 +82,7 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
 
     @Override
     public Integer getSort() {
-        return 5;
+        return 2;
     }
 
     @Override

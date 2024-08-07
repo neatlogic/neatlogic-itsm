@@ -3,27 +3,21 @@ package neatlogic.module.process.api.workcenter;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.ParamType;
-import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.form.constvalue.FormConditionModel;
-import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
+import neatlogic.framework.process.constvalue.ProcessTaskConditionType;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterField;
-import neatlogic.framework.process.constvalue.ProcessWorkcenterInitType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.process.condition.handler.ProcessTaskIsShowCondition;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Objects;
 
 @Service
 @Transactional
@@ -64,33 +58,15 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray resultArray = new JSONArray();
         String conditionModel = jsonObj.getString("conditionModel");
-        String workcenterUuid = jsonObj.getString("workcenterUuid");
         FormConditionModel formConditionModel = FormConditionModel.getFormConditionModel(conditionModel);
         formConditionModel = formConditionModel == null ? FormConditionModel.CUSTOM : formConditionModel;
         //固定字段条件
-        for (IConditionHandler condition : ProcessTaskConditionFactory.getConditionHandlerList()) {
-            //不支持endTime过滤，如果是简单模式 title、id、content 不返回
-            //没有工单管理权限则不显示“是否隐藏工单”选项
-            if ((condition.getName().equals(ProcessWorkcenterField.TITLE.getValue())
-                    || condition.getName().equals(ProcessWorkcenterField.ID.getValue()) || condition.getName().equals(ProcessWorkcenterField.CONTENT.getValue()))
-                    || condition.getName().equals(ProcessWorkcenterField.ENDTIME.getValue())
-                    || condition.getName().equals(ProcessWorkcenterField.SERIAL_NUMBER.getValue())
-                    || condition.getName().equals(ProcessWorkcenterField.STARTTIME.getValue())
-                    || condition.getName().equals(ProcessWorkcenterField.ACTIVETIME.getValue())
-                    || (Objects.equals(workcenterUuid, ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()) && condition.getName().equals(ProcessWorkcenterField.EXPIRED_TIME.getValue()))
-                    || ProcessWorkcenterField.getValue(condition.getName()) == null
-                    || !(condition instanceof IProcessTaskCondition)
-                    || (!AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName()) && (condition instanceof ProcessTaskIsShowCondition))
-                    || condition.getName().equals(ProcessWorkcenterField.STEP_NAME.getValue())
-            ) {
+        for(ProcessWorkcenterField f : ProcessWorkcenterField.values() ){
+            IProcessTaskCondition condition = ProcessTaskConditionFactory.getHandler(f.getValue());
+            if (condition == null || !condition.isShow(jsonObj, ProcessTaskConditionType.WORKCENTER.getValue())) {
                 continue;
             }
             JSONObject config = condition.getConfig(ConditionConfigType.WORKCENTER);
-            //非草稿的时候，过滤条件：工单状态去掉”未提交“
-            /*if (condition.getName().equals(ProcessWorkcenterField.STATUS.getValue()) && !Objects.equals(workcenterUuid, ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue())) {
-                JSONArray dataArray = config.getJSONArray("dataList");
-                config.put("dataList", dataArray.stream().filter(o -> !Objects.equals(ProcessTaskStatus.DRAFT.getValue(), ((ValueTextVo) o).getValue())).collect(Collectors.toList()));
-            }*/
             JSONObject commonObj = new JSONObject();
             commonObj.put("handler", condition.getName());
             commonObj.put("handlerName", condition.getDisplayName());

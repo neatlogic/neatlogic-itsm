@@ -130,7 +130,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             List<JSONObject> finalDataList = dataList;
             runner.execute(processTaskVoList, 3, (threadIndex, dataIndex, processTaskVo) -> {
                 JSONObject taskJson = new JSONObject();
-                if (Objects.equals(processTaskVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())) {
+                if (Arrays.asList(ProcessTaskStatus.RUNNING.getValue(), ProcessTaskStatus.HANG.getValue()).contains(processTaskVo.getStatus())) {
                     processTaskVo.setStepList(processTaskMapper.getProcessTaskCurrentStepByProcessTaskId(processTaskVo.getId()));
                 }
                 //重新渲染工单字段
@@ -469,6 +469,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     public void getStepTaskWorkerList(JSONArray workerArray, ProcessTaskStepVo stepVo) {
         if (ProcessTaskStepStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
                 ProcessTaskStepStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
+                (ProcessTaskStepStatus.HANG.getValue().equals(stepVo.getStatus()) && stepVo.getUserList().stream().anyMatch(o -> Objects.equals(o.getStatus(), ProcessTaskStepUserStatus.DOING.getValue()))) ||
                 ProcessTaskStepStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1
         ) {
             List<ProcessTaskStepWorkerVo> majorWorkerList = stepVo.getWorkerList().stream().filter(o -> Objects.equals(o.getUserType(), ProcessUserType.MAJOR.getValue())).collect(Collectors.toList());

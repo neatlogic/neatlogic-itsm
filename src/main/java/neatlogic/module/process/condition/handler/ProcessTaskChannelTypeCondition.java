@@ -87,7 +87,7 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 
     @Override
     public Integer getSort() {
-        return 6;
+        return 3;
     }
 
     @Override

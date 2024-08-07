@@ -9,6 +9,7 @@ import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
+import neatlogic.framework.process.constvalue.ProcessTaskConditionType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
@@ -16,6 +17,7 @@ import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 @Component
 public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -72,6 +74,7 @@ public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implemen
     public void getSqlConditionWhere(ConditionGroupVo groupVo, Integer index, StringBuilder sqlSb) {
         getSimpleSqlConditionWhere(groupVo.getConditionList().get(index), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.TITLE.getValue());
     }
+
     @Override
     public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo) {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
@@ -79,5 +82,10 @@ public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implemen
             return null;
         }
         return processTaskVo.getTitle();
+    }
+
+    @Override
+    public boolean isShow(JSONObject object, String type) {
+        return !Objects.equals(type, ProcessTaskConditionType.WORKCENTER.getValue());
     }
 }

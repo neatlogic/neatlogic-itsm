@@ -56,7 +56,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 
     @Override
     public String getDisplayName() {
-        return "步骤处理对象";
+        return "处理人";
     }
 
     @Override
@@ -104,7 +104,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 
     @Override
     public Integer getSort() {
-        return 12;
+        return 10;
     }
 
     @Override

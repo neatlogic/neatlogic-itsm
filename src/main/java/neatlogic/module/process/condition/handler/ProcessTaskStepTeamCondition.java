@@ -15,6 +15,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.condition.handler;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.*;
 import neatlogic.framework.dao.mapper.RoleMapper;
@@ -35,17 +38,13 @@ import neatlogic.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import neatlogic.framework.process.workcenter.table.ProcessTaskStepUserSqlTable;
 import neatlogic.framework.process.workcenter.table.ProcessTaskStepWorkerSqlTable;
 import neatlogic.framework.process.workcenter.table.util.SqlTableUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.*;
 
-@Component
+//@Component
 public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     @Resource
     TeamMapper teamMapper;

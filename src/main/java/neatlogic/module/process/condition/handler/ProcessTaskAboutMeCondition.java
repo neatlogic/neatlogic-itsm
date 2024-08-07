@@ -171,7 +171,7 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 
     @Override
     public Integer getSort() {
-        return 8;
+        return 6;
     }
 
     @Override
