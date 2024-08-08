@@ -95,7 +95,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
      * @throws Exception
      */
     @Override
-    public JSONObject createProcessTask(ProcessTaskCreateVo processTaskCreateVo) throws Exception {
+    public Long createProcessTask(ProcessTaskCreateVo processTaskCreateVo) throws Exception {
         JSONObject result = new JSONObject();
         JSONObject paramObj = new JSONObject();
         paramObj.put("title", processTaskCreateVo.getTitle());
@@ -351,7 +351,6 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
             processTaskService.startProcessProcessTask(saveResultObj);
 //        }
 
-        result.put("processTaskId", processTaskId);
-        return result;
+        return processTaskId;
     }
 }

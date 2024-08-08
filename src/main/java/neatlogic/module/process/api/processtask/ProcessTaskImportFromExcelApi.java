@@ -200,8 +200,8 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                     auditVo.setTitle(task.getTitle());
                     auditVo.setOwner(task.getOwner());
                     try {
-                        JSONObject resultObj = processTaskCreatePublicService.createProcessTask(task);
-                        auditVo.setProcessTaskId(resultObj.getLong("processTaskId"));
+                        Long processTaskId = processTaskCreatePublicService.createProcessTask(task);
+                        auditVo.setProcessTaskId(processTaskId);
                         auditVo.setStatus(1);
                         successCount++;
                     } catch (Exception e) {
