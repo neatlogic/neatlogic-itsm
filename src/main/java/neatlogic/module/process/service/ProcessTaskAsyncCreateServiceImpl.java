@@ -18,6 +18,7 @@
 package neatlogic.module.process.service;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.queue.NeatLogicBlockingQueue;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
@@ -42,7 +43,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreateService, IProcessTaskAsyncCreateCrossoverService {
     private static final Logger logger = LoggerFactory.getLogger(ProcessTaskAsyncCreateServiceImpl.class);
 
-    private final static BlockingQueue<Task> blockingQueue = new LinkedBlockingQueue<>();
+    private final static NeatLogicBlockingQueue<Long> blockingQueue = new NeatLogicBlockingQueue<>(new LinkedBlockingQueue<>());
 
     @Resource
     private ProcessTaskAsyncCreateMapper processTaskAsyncCreateMapper;
@@ -99,7 +99,7 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
             }
             doingIdList.sort(Long::compareTo);
             for (Long id : doingIdList) {
-                boolean offer = blockingQueue.offer(new Task(id));
+                boolean offer = blockingQueue.offer(id);
                 if (!offer && logger.isDebugEnabled()) {
                     logger.debug("异步创建工单数据加入队列失败, id: " + id);
                 }
@@ -112,19 +112,18 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
             protected void execute() {
                 IProcessTaskCreatePublicCrossoverService processTaskCreatePublicCrossoverService = CrossoverServiceFactory.getApi(IProcessTaskCreatePublicCrossoverService.class);
                 while (!Thread.currentThread().isInterrupted()) {
-                    Task task = null;
+                    Long id = null;
                     try {
-                        task = blockingQueue.take();
-                        TenantContext.get().switchTenant(task.getTenantUuid());
-                        ProcessTaskAsyncCreateVo processTaskAsyncCreate = processTaskAsyncCreateMapper.getProcessTaskAsyncCreateById(task.getId());
+                        id = blockingQueue.take();
+                        ProcessTaskAsyncCreateVo processTaskAsyncCreate = processTaskAsyncCreateMapper.getProcessTaskAsyncCreateById(id);
                         if (processTaskAsyncCreate != null) {
                             processTaskCreatePublicCrossoverService.createProcessTask(processTaskAsyncCreate.getConfig());
                         }
-                        processTaskAsyncCreateMapper.deleteProcessTaskAsyncCreateById(task.getId());
+                        processTaskAsyncCreateMapper.deleteProcessTaskAsyncCreateById(id);
                     } catch (InterruptedException e) {
-                        if (task != null) {
+                        if (id != null) {
                             ProcessTaskAsyncCreateVo processTaskAsyncCreateVo = new ProcessTaskAsyncCreateVo();
-                            processTaskAsyncCreateVo.setId(task.getId());
+                            processTaskAsyncCreateVo.setId(id);
                             processTaskAsyncCreateVo.setStatus("failed");
                             processTaskAsyncCreateVo.setError(ExceptionUtils.getStackTrace(e));
                             processTaskAsyncCreateMapper.updateProcessTaskAsyncCreate(processTaskAsyncCreateVo);
@@ -132,9 +131,9 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
                         Thread.currentThread().interrupt();
                         break;
                     } catch (Exception e) {
-                        if (task != null) {
+                        if (id != null) {
                             ProcessTaskAsyncCreateVo processTaskAsyncCreateVo = new ProcessTaskAsyncCreateVo();
-                            processTaskAsyncCreateVo.setId(task.getId());
+                            processTaskAsyncCreateVo.setId(id);
                             processTaskAsyncCreateVo.setStatus("failed");
                             processTaskAsyncCreateVo.setError(ExceptionUtils.getStackTrace(e));
                             processTaskAsyncCreateMapper.updateProcessTaskAsyncCreate(processTaskAsyncCreateVo);
@@ -146,25 +145,6 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
         });
         t.setDaemon(true);
         t.start();
-    }
-
-    private static class Task {
-
-        private final Long id;
-        private final String tenantUuid;
-
-        public Task(Long id) {
-            this.id = id;
-            this.tenantUuid = TenantContext.get().getTenantUuid();
-        }
-
-        public Long getId() {
-            return id;
-        }
-
-        public String getTenantUuid() {
-            return tenantUuid;
-        }
     }
 
     @Override
@@ -190,7 +170,7 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
         processTaskAsyncCreateVo.setServerId(Config.SCHEDULE_SERVER_ID);
         processTaskAsyncCreateVo.setConfig(processTaskCreateVo);
         processTaskAsyncCreateMapper.insertProcessTaskAsyncCreate(processTaskAsyncCreateVo);
-        boolean offer = blockingQueue.offer(new Task(processTaskAsyncCreateVo.getId()));
+        boolean offer = blockingQueue.offer(processTaskAsyncCreateVo.getId());
         if (!offer && logger.isDebugEnabled()) {
             logger.debug("异步创建工单数据加入队列失败, processTaskAsyncCreateVo: " + JSONObject.toJSONString(processTaskAsyncCreateVo));
         }
@@ -203,7 +183,7 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
             return;
         }
 
-        boolean offer = blockingQueue.offer(new Task(id));
+        boolean offer = blockingQueue.offer(id);
         if (!offer && logger.isDebugEnabled()) {
             logger.debug("异步创建工单数据加入队列失败, id: " + id);
         }
