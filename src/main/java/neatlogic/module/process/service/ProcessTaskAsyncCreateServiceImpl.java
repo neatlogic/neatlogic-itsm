@@ -87,7 +87,6 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
                     }
                     for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : list) {
                         if (processTaskIdList.contains(processTaskAsyncCreateVo.getProcessTaskId())) {
-                            processTaskAsyncCreateVo.setStatus("done");
                             doneIdList.add(processTaskAsyncCreateVo.getId());
                         } else {
                             doingIdList.add(processTaskAsyncCreateVo.getId());
@@ -121,9 +120,7 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
                         if (processTaskAsyncCreate != null) {
                             processTaskCreatePublicCrossoverService.createProcessTask(processTaskAsyncCreate.getConfig());
                         }
-//                        processTaskAsyncCreateVo.setStatus("done");
                         processTaskAsyncCreateMapper.deleteProcessTaskAsyncCreateById(task.getId());
-                        int i = 10 / 0;
                     } catch (InterruptedException e) {
                         if (task != null) {
                             ProcessTaskAsyncCreateVo processTaskAsyncCreateVo = new ProcessTaskAsyncCreateVo();

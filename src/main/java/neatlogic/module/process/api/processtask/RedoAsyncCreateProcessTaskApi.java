@@ -100,7 +100,6 @@ public class RedoAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
                     }
                     for (ProcessTaskAsyncCreateVo processTaskAsyncCreateVo : list) {
                         if (processTaskIdList.contains(processTaskAsyncCreateVo.getProcessTaskId())) {
-//                            processTaskAsyncCreateVo.setStatus("done");
                             doneIdList.add(processTaskAsyncCreateVo.getId());
                         } else {
                             processTaskIdArray.add(processTaskAsyncCreateVo.getProcessTaskId());
