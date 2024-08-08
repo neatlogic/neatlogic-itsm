@@ -2,9 +2,7 @@ package neatlogic.module.process.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.asynchronization.threadpool.CachedThreadPool;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dao.mapper.region.RegionMapper;
@@ -27,6 +25,7 @@ import neatlogic.framework.process.crossover.IProcessTaskCreatePublicCrossoverSe
 import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.process.dto.PriorityVo;
 import neatlogic.framework.process.dto.ProcessFormVo;
+import neatlogic.framework.process.dto.ProcessTaskCreateVo;
 import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
 import neatlogic.framework.process.exception.priority.PriorityNotFoundException;
 import neatlogic.framework.process.exception.process.ProcessNotFoundException;
@@ -34,7 +33,6 @@ import neatlogic.framework.process.exception.processtask.ProcessTaskNextStepIlle
 import neatlogic.framework.process.exception.processtask.ProcessTaskNextStepOverOneException;
 import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.framework.service.RegionService;
-import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
@@ -47,7 +45,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePublicService, IProcessTaskCreatePublicCrossoverService {
@@ -89,15 +90,25 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
     /**
      * 创建工单
      *
-     * @param paramObj
+     * @param processTaskCreateVo
      * @return
      * @throws Exception
      */
     @Override
-    public JSONObject createProcessTask(JSONObject paramObj) throws Exception {
+    public Long createProcessTask(ProcessTaskCreateVo processTaskCreateVo) throws Exception {
         JSONObject result = new JSONObject();
+        JSONObject paramObj = new JSONObject();
+        paramObj.put("title", processTaskCreateVo.getTitle());
+        paramObj.put("owner", processTaskCreateVo.getOwner());
+        paramObj.put("reporter", processTaskCreateVo.getReporter());
+        paramObj.put("hidecomponentList", processTaskCreateVo.getHidecomponentList());
+        paramObj.put("readcomponentList", processTaskCreateVo.getReadcomponentList());
+        paramObj.put("content", processTaskCreateVo.getContent());
+        paramObj.put("fileIdList", processTaskCreateVo.getFileIdList());//
+        paramObj.put("handlerStepInfo", processTaskCreateVo.getHandlerStepInfo());
+        paramObj.put("source", processTaskCreateVo.getSource());
         //上报人，支持上报人uuid和上报人id入参
-        String owner = paramObj.getString("owner");
+        String owner = processTaskCreateVo.getOwner();
         UserVo userVo = userMapper.getUserByUuid(owner);
         if (userVo == null) {
             userVo = userMapper.getUserByUserId(owner);
@@ -107,7 +118,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
             paramObj.put("owner", userVo.getUuid());
         }
         //地域
-        String region = paramObj.getString("region");
+        String region = processTaskCreateVo.getRegion();
         Long regionId = null;
         if(StringUtils.isNotBlank(region)){
             RegionVo regionVo = regionMapper.getRegionByUpwardNamePath(region);
@@ -130,7 +141,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
 
         paramObj.put("regionId", regionId);
         //处理channel，支持channelUuid和channelName入参
-        String channel = paramObj.getString("channel");
+        String channel = processTaskCreateVo.getChannel();
         ChannelVo channelVo = channelMapper.getChannelByUuid(channel);
         if (channelVo == null) {
             channelVo = channelMapper.getChannelByName(channel);
@@ -140,7 +151,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
         }
         paramObj.put("channelUuid", channelVo.getUuid());
         //优先级
-        String priority = paramObj.getString("priority");
+        String priority = processTaskCreateVo.getPriority();
         if (StringUtils.isNotBlank(priority)) {
             PriorityVo priorityVo = priorityMapper.getPriorityByUuid(priority);
             if (priorityVo == null) {
@@ -152,9 +163,9 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
             paramObj.put("priorityUuid", priorityVo.getUuid());
         }
         // 附件传递文件路径
-        JSONArray filePathList = paramObj.getJSONArray("filePathList");
-        if( filePathList != null && filePathList.size() > 0  ){
-            String filePathPrefix = paramObj.getString("filePathPrefix");
+        JSONArray filePathList = processTaskCreateVo.getFilePathList();
+        if( filePathList != null && !filePathList.isEmpty()){
+            String filePathPrefix = processTaskCreateVo.getFilePathPrefix();
             JSONArray fileIdList  = new JSONArray();
 //            MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
             for (Object filePath: filePathList ) {
@@ -176,7 +187,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
             throw new ProcessNotFoundException(processUuid);
         }
         //如果表单属性数据列表，使用的唯一标识是label时，需要转换成attributeUuid
-        JSONArray formAttributeDataList = paramObj.getJSONArray("formAttributeDataList");
+        JSONArray formAttributeDataList = processTaskCreateVo.getFormAttributeDataList();
         if (CollectionUtils.isNotEmpty(formAttributeDataList)) {
             int count = 0;
             for (int i = 0; i < formAttributeDataList.size(); i++) {
@@ -262,9 +273,10 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                 }
             }
         }
+        paramObj.put("formAttributeDataList", formAttributeDataList);
 
         //代报人，支持代报人uuid和代报人id入参
-        String reporter = paramObj.getString("reporter");
+        String reporter = processTaskCreateVo.getReporter();
         if (StringUtils.isNotBlank(reporter)) {
             UserVo reporterUserVo = userMapper.getUserByUuid(reporter);
             if (reporterUserVo == null) {
@@ -285,43 +297,43 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
         }
 
         Long processTaskId = null;
-        Integer isAsync = paramObj.getInteger("isAsync");
-        if (Objects.equals(isAsync, 1)) {
-            Long newProcessTaskId = SnowflakeUtil.uniqueLong();
-            NeatLogicThread neatLogicThread = new NeatLogicThread("PUBLIC_CREATE_PROCESSTASK_" + newProcessTaskId, true) {
-                @Override
-                protected void execute() {
-                    try {
-                        //暂存
-                        //TODO isNeedValid 参数是否需要？？？
-                        paramObj.put("isNeedValid", 1);
-                        JSONObject saveResultObj = processTaskService.saveProcessTaskDraft(paramObj, newProcessTaskId);
-
-                        //查询可执行下一 步骤
-                        Long processTaskId = saveResultObj.getLong("processTaskId");
-                        List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(saveResultObj.getLong("processTaskStepId"), ProcessFlowDirection.FORWARD.getValue());
-                        if (nextStepIdList.isEmpty()) {
-                            throw new ProcessTaskNextStepIllegalException(processTaskId);
-                        }
-                        if (nextStepIdList.size() != 1) {
-                            throw new ProcessTaskNextStepOverOneException(processTaskId);
-                        }
-                        saveResultObj.put("nextStepId", nextStepIdList.get(0));
-
-                        //流转
-                        processTaskService.startProcessProcessTask(saveResultObj);
-                    } catch (Exception e) {
-                        logger.error(e.getMessage(), e);
-                    }
-                }
-            };
-            CachedThreadPool.execute(neatLogicThread);
-            processTaskId = newProcessTaskId;
-        } else {
+//        Integer isAsync = paramObj.getInteger("isAsync");
+//        if (Objects.equals(isAsync, 1)) {
+//            Long newProcessTaskId = SnowflakeUtil.uniqueLong();
+//            NeatLogicThread neatLogicThread = new NeatLogicThread("PUBLIC_CREATE_PROCESSTASK_" + newProcessTaskId, true) {
+//                @Override
+//                protected void execute() {
+//                    try {
+//                        //暂存
+//                        //TODO isNeedValid 参数是否需要？？？
+//                        paramObj.put("isNeedValid", 1);
+//                        JSONObject saveResultObj = processTaskService.saveProcessTaskDraft(paramObj, newProcessTaskId);
+//
+//                        //查询可执行下一 步骤
+//                        Long processTaskId = saveResultObj.getLong("processTaskId");
+//                        List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(saveResultObj.getLong("processTaskStepId"), ProcessFlowDirection.FORWARD.getValue());
+//                        if (nextStepIdList.isEmpty()) {
+//                            throw new ProcessTaskNextStepIllegalException(processTaskId);
+//                        }
+//                        if (nextStepIdList.size() != 1) {
+//                            throw new ProcessTaskNextStepOverOneException(processTaskId);
+//                        }
+//                        saveResultObj.put("nextStepId", nextStepIdList.get(0));
+//
+//                        //流转
+//                        processTaskService.startProcessProcessTask(saveResultObj);
+//                    } catch (Exception e) {
+//                        logger.error(e.getMessage(), e);
+//                    }
+//                }
+//            };
+//            CachedThreadPool.execute(neatLogicThread);
+//            processTaskId = newProcessTaskId;
+//        } else {
             //暂存
             //TODO isNeedValid 参数是否需要？？？
             paramObj.put("isNeedValid", 1);
-            Long newProcessTaskId = paramObj.getLong("newProcessTaskId");
+            Long newProcessTaskId = processTaskCreateVo.getNewProcessTaskId();
             JSONObject saveResultObj = processTaskService.saveProcessTaskDraft(paramObj, newProcessTaskId);
 
             //查询可执行下一 步骤
@@ -337,9 +349,8 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
 
             //流转
             processTaskService.startProcessProcessTask(saveResultObj);
-        }
+//        }
 
-        result.put("processTaskId", processTaskId);
-        return result;
+        return processTaskId;
     }
 }

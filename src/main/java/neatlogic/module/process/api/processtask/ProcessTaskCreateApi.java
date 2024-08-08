@@ -4,13 +4,16 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.dto.ProcessTaskCreateVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.service.ProcessTaskAsyncCreateService;
 import neatlogic.module.process.service.ProcessTaskCreatePublicService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 @AuthAction(action = PROCESS_BASE.class)
 @Service
@@ -20,6 +23,9 @@ public class ProcessTaskCreateApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskCreatePublicService processTaskCreatePublicService;
+
+    @Resource
+    private ProcessTaskAsyncCreateService processTaskAsyncCreateService;
 
     @Override
     public String getToken() {
@@ -63,6 +69,16 @@ public class ProcessTaskCreateApi extends PrivateApiComponentBase {
     @Description(desc = "nmpap.processtaskcreateapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        return processTaskCreatePublicService.createProcessTask(jsonObj);
+        JSONObject resultObj = new JSONObject();
+        ProcessTaskCreateVo processTaskCreateVo = jsonObj.toJavaObject(ProcessTaskCreateVo.class);
+        Integer isAsync = jsonObj.getInteger("isAsync");
+        if (Objects.equals(isAsync, 1)) {
+            Long processTaskId = processTaskAsyncCreateService.addNewProcessTaskAsyncCreate(processTaskCreateVo);
+            resultObj.put("processTaskId", processTaskId);
+        } else {
+            Long processTaskId = processTaskCreatePublicService.createProcessTask(processTaskCreateVo);
+            resultObj.put("processTaskId", processTaskId);
+        }
+        return resultObj;
     }
 }
