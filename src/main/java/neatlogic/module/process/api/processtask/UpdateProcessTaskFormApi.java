@@ -130,9 +130,8 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
                 }
             }
         }
-
-        processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UPDATEFORM);
         processStepHandlerUtil.calculateSla(new ProcessTaskVo(processTaskId), false);
+        processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UPDATEFORM);
         ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
         processTaskStepDataVo.setProcessTaskId(processTaskId);
         processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
