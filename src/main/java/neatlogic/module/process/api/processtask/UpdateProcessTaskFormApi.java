@@ -26,9 +26,7 @@ import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskStepDataType;
-import neatlogic.framework.process.dto.ProcessTaskStepDataVo;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.dto.ProcessTaskVo;
+import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
@@ -36,21 +34,31 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
 import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.module.process.service.ProcessTaskService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESSTASK_MODIFY.class)
 public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
+
+    @Resource
+    private ChannelMapper channelMapper;
+
+    @Resource
+    private PriorityMapper priorityMapper;
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
@@ -76,6 +84,7 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
             @Param(name = "formExtendAttributeDataList", type = ApiParamType.JSONARRAY, desc = "term.itsm.formextendattributedatalist"),
             @Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, desc = "term.itsm.hidecomponentlist"),
             @Param(name = "readcomponentList", type = ApiParamType.JSONARRAY, desc = "term.itsm.readcomponentlist"),
+            @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "common.priorityuuid"),
     })
     @Description(desc = "nmpap.updateprocesstaskformapi.getname")
     @Override
@@ -95,8 +104,35 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
         param.put("needVerifyIsRequired", false);
         param.put("source", paramObj.getString("source"));
         processStepHandlerUtil.saveForm(processTaskStepVo);
-        processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UPDATEFORM);
 
+        // 更新优先级
+        String priorityUuid = paramObj.getString("priorityUuid");
+        if (StringUtils.isNotBlank(priorityUuid) && !Objects.equals(processTaskVo.getPriorityUuid(), priorityUuid)) {
+            PriorityVo priorityVo = priorityMapper.getPriorityByUuid(priorityUuid);
+            if (priorityVo != null) {
+                ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+                if (channel != null) {
+                    if (Objects.equals(channel.getIsActivePriority(), 1)) {
+                        List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
+                        for (ChannelPriorityVo channelPriority : channelPriorityList) {
+                            if (Objects.equals(channelPriority.getPriorityUuid(), priorityUuid)) {
+                                processTaskVo.setPriorityUuid(priorityUuid);
+                                processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    if (processTaskVo.getPriorityUuid() != null) {
+                        processTaskVo.setPriorityUuid(priorityUuid);
+                        processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
+                    }
+                }
+            }
+        }
+
+        processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UPDATEFORM);
+        processStepHandlerUtil.calculateSla(new ProcessTaskVo(processTaskId), false);
         ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
         processTaskStepDataVo.setProcessTaskId(processTaskId);
         processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
