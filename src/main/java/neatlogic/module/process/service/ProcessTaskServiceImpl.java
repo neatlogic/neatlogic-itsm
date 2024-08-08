@@ -2591,6 +2591,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         } else {
             jsonObj.put("owner", null);
         }
+        // 为了兼容第三方上报接口认证，当owner与当前登录用户不一致时，无须校验reporter必填
         String reporter = jsonObj.getString("reporter");
         if (StringUtils.isNotBlank(reporter)) {
             if (reporter.contains("#")) {
