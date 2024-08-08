@@ -69,15 +69,16 @@ public class ProcessTaskCreateApi extends PrivateApiComponentBase {
     @Description(desc = "nmpap.processtaskcreateapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        JSONObject resultObj = new JSONObject();
         ProcessTaskCreateVo processTaskCreateVo = jsonObj.toJavaObject(ProcessTaskCreateVo.class);
         Integer isAsync = jsonObj.getInteger("isAsync");
         if (Objects.equals(isAsync, 1)) {
             Long processTaskId = processTaskAsyncCreateService.addNewProcessTaskAsyncCreate(processTaskCreateVo);
-            JSONObject resultObj = new JSONObject();
             resultObj.put("processTaskId", processTaskId);
-            return resultObj;
         } else {
-            return processTaskCreatePublicService.createProcessTask(processTaskCreateVo);
+            Long processTaskId = processTaskCreatePublicService.createProcessTask(processTaskCreateVo);
+            resultObj.put("processTaskId", processTaskId);
         }
+        return resultObj;
     }
 }
