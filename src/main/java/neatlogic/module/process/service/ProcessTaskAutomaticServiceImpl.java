@@ -697,8 +697,14 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
      * 组装请求参数
      */
     private JSONObject getIntegrationParam(ProcessTaskStepVo currentProcessTaskStepVo, JSONArray paramList, JSONObject resultJson) {
+        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+        String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+        String formTag = null;
+        if (StringUtils.isNotBlank(stepConfig)) {
+            formTag = (String) JSONPath.read(stepConfig, "formTag");
+        }
         List<String> processTaskParams = Arrays.stream(ProcessTaskParams.values()).map(ProcessTaskParams::getValue).collect(Collectors.toList());
-        JSONObject processTaskJson = ProcessTaskConditionFactory.getConditionParamData(processTaskParams, currentProcessTaskStepVo);
+        JSONObject processTaskJson = ProcessTaskConditionFactory.getConditionParamData(processTaskParams, currentProcessTaskStepVo, formTag);
         JSONObject integrationParam = new JSONObject();
         if (CollectionUtils.isNotEmpty(paramList)) {
             for (Object paramObj : paramList) {

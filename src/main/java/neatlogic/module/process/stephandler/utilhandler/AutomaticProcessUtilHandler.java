@@ -298,6 +298,9 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
         String formSceneName = configObj.getString("formSceneName");
         resultObj.put("formSceneUuid", formSceneUuid == null ? "" : formSceneUuid);
         resultObj.put("formSceneName", formSceneName == null ? "" : formSceneName);
+        /** 表单标签 **/
+        String formTag = configObj.getString("formTag");
+        resultObj.put("formTag", formTag == null ? "" : formTag);
         return resultObj;
     }
 

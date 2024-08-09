@@ -5,6 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.ParamType;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
+import neatlogic.framework.form.dto.FormVo;
+import neatlogic.framework.form.exception.FormNotFoundException;
+import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.dto.ConditionParamVo;
@@ -47,8 +51,14 @@ public class ProcessParamList extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "formUuid", type = ApiParamType.STRING, desc = "流程绑定表单的uuid")})
-    @Output({@Param(explode = ConditionParamVo[].class, desc = "流程参数列表")})
+    @Input({
+            @Param(name = "formUuid", type = ApiParamType.STRING, desc = "term.framework.formuuid"),
+            @Param(name = "tag", type = ApiParamType.STRING, desc = "common.tag"),
+            @Param(name = "isAll", type = ApiParamType.INTEGER, rule = "0,1", desc = "term.process.isreturnallattr")
+    })
+    @Output({
+            @Param(explode = ConditionParamVo[].class, desc = "common.tbodylist")
+    })
     @Description(desc = "nmpap.processparamlist.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -84,13 +94,21 @@ public class ProcessParamList extends PrivateApiComponentBase {
         // 表单条件
         String formUuid = jsonObj.getString("formUuid");
         if (StringUtils.isNotBlank(formUuid)) {
-            List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
+            FormVo form = formMapper.getFormByUuid(formUuid);
+            if (form == null) {
+                throw new FormNotFoundException(formUuid);
+            }
+            Integer isAll = jsonObj.getInteger("isAll");
+            String tag = jsonObj.getString("tag");
+            IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+            List<FormAttributeVo> formAttrList = formCrossoverService.getFormAttributeListNew(formUuid, form.getName(), tag);
+//            List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
             for (FormAttributeVo formAttributeVo : formAttrList) {
                 IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                 if(formHandler == null){
                     continue;
                 }
-                if (formHandler.isConditionable()) {
+                if ((isAll != null && isAll.equals(1)) || formHandler.isConditionable()) {
                     ConditionParamVo conditionParamVo = new ConditionParamVo();
                     conditionParamVo.setName(formAttributeVo.getUuid());
                     conditionParamVo.setLabel(formAttributeVo.getLabel());
