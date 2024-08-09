@@ -93,13 +93,13 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
     public Object getValue(ProcessTaskVo processTaskVo) {
         List<ProcessTaskSlaVo> processTaskSlaList = processTaskVo.getProcessTaskSlaVoList();
         JSONArray resultArray = new JSONArray();
-        if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus()) && CollectionUtils.isNotEmpty(processTaskSlaList)) {
+        if ((ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus()) || ProcessTaskStatus.HANG.getValue().equals(processTaskVo.getStatus())) && CollectionUtils.isNotEmpty(processTaskSlaList)) {
 //            String displayModeAfterTimeout = ConfigManager.getConfig(ItsmTenantConfig.DISPLAY_MODE_AFTER_TIMEOUT);
             String slaTimeDisplayMode = ConfigManager.getConfig(ItsmTenantConfig.SLA_TIME_DISPLAY_MODE);
             long currentTimeMillis = System.currentTimeMillis();
             for (ProcessTaskSlaVo slaVo : processTaskSlaList) {
                 //判断需要 同时满足 该步骤是进行中状态，以及包含sla策略
-                if (processTaskVo.getStepList().stream().noneMatch(o -> (Objects.equals(o.getStatus(), ProcessTaskStepStatus.RUNNING.getValue()) || (Objects.equals(o.getStatus(), ProcessTaskStepStatus.PENDING.getValue()) && o.getIsActive() == 1))
+                if (processTaskVo.getStepList().stream().noneMatch(o -> (Objects.equals(o.getStatus(), ProcessTaskStepStatus.RUNNING.getValue()) || (Objects.equals(o.getStatus(), ProcessTaskStepStatus.PENDING.getValue()) && o.getIsActive() == 1) || (Objects.equals(o.getStatus(), ProcessTaskStepStatus.HANG.getValue()) && o.getIsActive() == 1))
                         && CollectionUtils.isNotEmpty(o.getSlaTimeList())
                         && o.getSlaTimeList().stream().anyMatch(c -> Objects.equals(c.getSlaId(), slaVo.getId())))) {
                     continue;
@@ -133,6 +133,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
                     tmpJson.put("realExpireTime", realExpireTimeLong);
                 }
                 tmpJson.put("slaName", slaVo.getName());
+                tmpJson.put("status", status);
                 //获取即将超时规则，默认分钟（从超时通知策略获取）
                 JSONObject configJson = slaVo.getConfigObj();
                 if (configJson.containsKey("notifyPolicyList") && CollectionUtils.isNotEmpty(configJson.getJSONArray("notifyPolicyList"))) {

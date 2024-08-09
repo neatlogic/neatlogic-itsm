@@ -9,6 +9,7 @@ import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessStepType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
+import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import neatlogic.framework.process.exception.process.ProcessStepHandlerNotFoundException;
@@ -112,6 +113,16 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
                     }
                 } else {
                     processTaskStepVo.setIsView(0);
+                }
+            }
+        }
+        for (ProcessTaskStepVo processTaskStepVo : resultList) {
+            processTaskStepVo.setIsInTheCurrentStepTab(0);
+            if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
+                if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.PENDING.getValue())
+                        || Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())
+                        || Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.HANG.getValue())) {
+                    processTaskStepVo.setIsInTheCurrentStepTab(1);
                 }
             }
         }
