@@ -32,10 +32,7 @@ import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dto.SqlDecoratorVo;
 import neatlogic.framework.process.workcenter.dto.JoinOnVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
-import neatlogic.framework.process.workcenter.table.ProcessTaskFocusSqlTable;
-import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
-import neatlogic.framework.process.workcenter.table.ProcessTaskStepSqlTable;
-import neatlogic.framework.process.workcenter.table.ProcessTaskStepUserSqlTable;
+import neatlogic.framework.process.workcenter.table.*;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -60,7 +57,7 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 
         mapSql.put("doneOfMine", (sqlSb) -> {
             sqlSb.append(" ( ");
-            sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.STATUS.getValue(), String.format("%s','%s",ProcessTaskStepUserStatus.DONE.getValue(), ProcessTaskStepUserStatus.TRANSFERRED.getValue())));
+            sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.STATUS.getValue(), String.format("%s','%s", ProcessTaskStepUserStatus.DONE.getValue(), ProcessTaskStepUserStatus.TRANSFERRED.getValue())));
             sqlSb.append(" ) and ( ");
             sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.USER_UUID.getValue(), UserContext.get().getUserUuid(true)));
             sqlSb.append(" ) ");
@@ -90,11 +87,9 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 
         mapSql.put("transferredOfMine", (sqlSb) -> {
             sqlSb.append(" ( ");
-            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStepUserStatus.TRANSFERRED.getValue()));
-            sqlSb.append(" ) and ( ");
-            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.USER_UUID.getValue(), UserContext.get().getUserUuid(true)));
-            sqlSb.append(" ) and ( ");
-            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.USER_TYPE.getValue(), ProcessTaskStepUserType.HISTORY_MAJOR.getValue()));
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepAuditSqlTable().getShortName(), ProcessTaskStepAuditSqlTable.FieldEnum.ACTION.getValue(), ProcessTaskAuditType.TRANSFER.getValue()));
+            sqlSb.append(" and ");
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepAuditSqlTable().getShortName(), ProcessTaskStepAuditSqlTable.FieldEnum.USER_UUID.getValue(), UserContext.get().getUserUuid(true)));
             sqlSb.append(" ) ");
         });
 
@@ -113,12 +108,8 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
             }}));
         });
         joinTableSqlMap.put("transferredOfMine", (list) -> {
-            list.add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new ArrayList<JoinOnVo>() {{
-                add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
-            }}));
-            list.add(new JoinTableColumnVo(new ProcessTaskStepSqlTable(), new ProcessTaskStepUserSqlTable(), new ArrayList<JoinOnVo>() {{
-                add(new JoinOnVo(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(), ProcessTaskStepUserSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
-                add(new JoinOnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepUserSqlTable.FieldEnum.PROCESSTASK_STEP_ID.getValue()));
+            list.add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepAuditSqlTable(), new ArrayList<JoinOnVo>() {{
+                add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepAuditSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
             }}));
         });
     }
