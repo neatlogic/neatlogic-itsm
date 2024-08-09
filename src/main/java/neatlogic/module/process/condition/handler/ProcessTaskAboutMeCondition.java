@@ -87,9 +87,9 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 
         mapSql.put("transferredOfMine", (sqlSb) -> {
             sqlSb.append(" ( ");
-            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepAuditSqlTable().getShortName(), ProcessTaskStepAuditSqlTable.FieldEnum.ACTION.getValue(), ProcessTaskAuditType.TRANSFER.getValue()));
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepAuditSqlTable().getShortName(), ProcessTaskStepCostSqlTable.FieldEnum.START_OPERATE.getValue(), ProcessTaskOperationType.STEP_TRANSFER.getValue()));
             sqlSb.append(" and ");
-            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepAuditSqlTable().getShortName(), ProcessTaskStepAuditSqlTable.FieldEnum.USER_UUID.getValue(), UserContext.get().getUserUuid(true)));
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepAuditSqlTable().getShortName(), ProcessTaskStepCostSqlTable.FieldEnum.START_USER_UUID.getValue(), UserContext.get().getUserUuid(true)));
             sqlSb.append(" ) ");
         });
 
@@ -108,8 +108,8 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
             }}));
         });
         joinTableSqlMap.put("transferredOfMine", (list) -> {
-            list.add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepAuditSqlTable(), new ArrayList<JoinOnVo>() {{
-                add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepAuditSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
+            list.add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepCostSqlTable(), new ArrayList<JoinOnVo>() {{
+                add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepCostSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
             }}));
         });
     }
