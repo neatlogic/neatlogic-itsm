@@ -166,8 +166,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
         sqlSb.append(" and ");
         JSONArray valueArray = JSON.parseArray(conditionVo.getValueList().toString());
         if (FormHandler.FORMDATE.getHandler().equals(conditionVo.getHandler())) {
-            JSONObject value = valueArray.getJSONObject(0);
-            dateSqlBuild(value, conditionVo, sqlSb);
+            dateSqlBuild(valueArray, conditionVo, sqlSb);
         } else {
             defaultSqlBuild(valueArray, conditionVo, formAttributeHandler, sqlSb);
         }
@@ -176,24 +175,30 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     /**
      * date的sql拼凑
      *
-     * @param value       条件的值
+     * @param valueArray  条件的值
      * @param conditionVo 条件
      * @param sqlSb       拼凑的sql
      */
-    private void dateSqlBuild(JSONObject value, ConditionVo conditionVo, StringBuilder sqlSb) {
-        SimpleDateFormat format = new SimpleDateFormat(TimeUtil.YYYY_MM_DD_HH_MM_SS);
-        String startTime;
-        String endTime;
-        if (value.containsKey(ProcessWorkcenterField.STARTTIME.getValuePro())) {
-            startTime = format.format(new Date(value.getLong(ProcessWorkcenterField.STARTTIME.getValuePro())));
-            endTime = format.format(new Date(value.getLong(ProcessWorkcenterField.ENDTIME.getValuePro())));
+    private void dateSqlBuild(JSONArray valueArray, ConditionVo conditionVo, StringBuilder sqlSb) {
+        if (CollectionUtils.isEmpty(valueArray)) {
+            sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s') ",
+                    conditionVo.getName()));
         } else {
-            startTime = TimeUtil.timeTransfer(value.getInteger("timeRange"), value.getString("timeUnit"));
-            endTime = TimeUtil.timeNow();
-        }
-        sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word between '%s' and '%s' ) ",
-                conditionVo.getName(), startTime, endTime));
+            JSONObject value = valueArray.getJSONObject(0);
+            SimpleDateFormat format = new SimpleDateFormat(TimeUtil.YYYY_MM_DD_HH_MM_SS);
+            String startTime;
+            String endTime;
+            if (value.containsKey(ProcessWorkcenterField.STARTTIME.getValuePro())) {
+                startTime = format.format(new Date(value.getLong(ProcessWorkcenterField.STARTTIME.getValuePro())));
+                endTime = format.format(new Date(value.getLong(ProcessWorkcenterField.ENDTIME.getValuePro())));
+            } else {
+                startTime = TimeUtil.timeTransfer(value.getInteger("timeRange"), value.getString("timeUnit"));
+                endTime = TimeUtil.timeNow();
+            }
+            sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word between '%s' and '%s' ) ",
+                    conditionVo.getName(), startTime, endTime));
 
+        }
     }
 
     /**
