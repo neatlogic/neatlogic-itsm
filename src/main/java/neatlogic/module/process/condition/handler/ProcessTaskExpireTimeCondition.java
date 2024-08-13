@@ -119,16 +119,13 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
                 add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new ArrayList<JoinOnVo>() {{
                     add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
                 }}));
-                add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskSlaSqlTable(), new ArrayList<JoinOnVo>() {{
-                    add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskSlaSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
-                }}));
                 add(new JoinTableColumnVo(new ProcessTaskStepSqlTable(), new ProcessTaskStepSlaSqlTable(), new ArrayList<JoinOnVo>() {{
                     add(new JoinOnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSlaSqlTable.FieldEnum.PROCESSTASK_STEP_ID.getValue()));
                     add(new JoinOnVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStatus.RUNNING.getValue(), true));
                     add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStatus.RUNNING.getValue(), true, new ProcessTaskSqlTable().getShortName()));
                 }}));
-                add(new JoinTableColumnVo(new ProcessTaskSlaSqlTable(), new ProcessTaskSlaTimeSqlTable(), new ArrayList<JoinOnVo>() {{
-                    add(new JoinOnVo(ProcessTaskSlaSqlTable.FieldEnum.ID.getValue(), ProcessTaskSlaTimeSqlTable.FieldEnum.SLA_ID.getValue()));
+                add(new JoinTableColumnVo(new ProcessTaskStepSlaSqlTable(), new ProcessTaskSlaTimeSqlTable(), new ArrayList<JoinOnVo>() {{
+                    add(new JoinOnVo(ProcessTaskStepSlaSqlTable.FieldEnum.SLA_ID.getValue(), ProcessTaskSlaTimeSqlTable.FieldEnum.SLA_ID.getValue()));
                 }}));
             }
         };
