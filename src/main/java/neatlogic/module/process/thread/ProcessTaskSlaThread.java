@@ -434,23 +434,29 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
     private List<Long> slaIsInvalid(Long processTaskId) {
         List<Long> resultList = new ArrayList<>();
         ProcessTaskSlaVo processTaskSlaVo = new ProcessTaskSlaVo();
+        ProcessTaskStepVo startProcessTaskStep = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
         List<Long> allSlaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskId(processTaskId);
         for (Long slaId : allSlaIdList) {
             processTaskSlaVo.setId(slaId);
             boolean isActive = false;
             List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
-            for (Long processTaskStepId : processTaskStepIdList) {
-                List<ProcessTaskStepRelVo> processTaskStepRelList = processTaskMapper.getProcessTaskStepRelByToId(processTaskStepId);
-                for (ProcessTaskStepRelVo processTaskStepRelVo : processTaskStepRelList) {
-                    if (processTaskStepRelVo.getType().equals(ProcessFlowDirection.FORWARD.getValue())) {
-                        if (!Objects.equals(processTaskStepRelVo.getIsHit(), -1)) {
-                            isActive = true;
-                            break;
+            if (processTaskStepIdList.contains(startProcessTaskStep.getId())) {
+                // 时效关联开始步骤，则一定会被激活
+                isActive = true;
+            } else {
+                for (Long processTaskStepId : processTaskStepIdList) {
+                    List<ProcessTaskStepRelVo> processTaskStepRelList = processTaskMapper.getProcessTaskStepRelByToId(processTaskStepId);
+                    for (ProcessTaskStepRelVo processTaskStepRelVo : processTaskStepRelList) {
+                        if (processTaskStepRelVo.getType().equals(ProcessFlowDirection.FORWARD.getValue())) {
+                            if (!Objects.equals(processTaskStepRelVo.getIsHit(), -1)) {
+                                isActive = true;
+                                break;
+                            }
                         }
                     }
-                }
-                if (isActive) {
-                    break;
+                    if (isActive) {
+                        break;
+                    }
                 }
             }
             if (isActive) {
