@@ -212,4 +212,9 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
         return 0;
     }
 
+    @Override
+    public boolean allowDispatchStepWorker() {
+        return false;
+    }
+
 }

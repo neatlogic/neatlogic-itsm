@@ -183,8 +183,8 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public boolean disableAssign() {
-		return true;
+	public boolean allowDispatchStepWorker() {
+		return false;
 	}
 
 }
