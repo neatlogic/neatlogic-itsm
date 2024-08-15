@@ -197,8 +197,8 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public boolean disableAssign() {
-		return true;
+	public boolean allowDispatchStepWorker() {
+		return false;
 	}
 
 }

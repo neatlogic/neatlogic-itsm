@@ -415,4 +415,9 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
     public boolean disableAssign() {
         return true;
     }
+
+    @Override
+    public boolean allowDispatchStepWorker() {
+        return false;
+    }
 }
