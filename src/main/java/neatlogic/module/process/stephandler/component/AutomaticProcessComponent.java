@@ -384,4 +384,9 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
     public boolean disableAssign() {
         return true;
     }
+
+    @Override
+    public boolean allowDispatchStepWorker() {
+        return false;
+    }
 }

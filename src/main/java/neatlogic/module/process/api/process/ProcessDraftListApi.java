@@ -1,5 +1,6 @@
 package neatlogic.module.process.api.process;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
@@ -10,6 +11,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -46,11 +48,13 @@ public class ProcessDraftListApi extends PrivateApiComponentBase {
 	@Description(desc = "流程草稿列表接口，最后更新时间2020-02-18 14:55，修改参数说明及输出参数列表")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		String processUuid = jsonObj.getString("processUuid");
+		if (StringUtils.isBlank(processUuid)) {
+			return new JSONArray();
+		}
 		ProcessDraftVo processDraftVo = new ProcessDraftVo();
 		processDraftVo.setFcu(UserContext.get().getUserUuid(true));
-		if(jsonObj.containsKey("processUuid")) {
-			processDraftVo.setProcessUuid(jsonObj.getString("processUuid"));
-		}
+		processDraftVo.setProcessUuid(processUuid);
 		return processMapper.getProcessDraftList(processDraftVo);
 	}
 
