@@ -133,7 +133,7 @@ public class ProcessTaskProcessStepCondition extends ProcessTaskConditionBase im
         sqlSb.append(" and ");
         getSimpleSqlConditionWhere(conditionVo, sqlSb, new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.PROCESS_STEP_UUID.getValue());
         sqlSb.append(" and ");
-        sqlSb.append(Expression.getExpressionSql(Expression.EXCLUDE.getExpression(), new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.IS_ACTIVE.getValue(), "0','-1"));
+        sqlSb.append(Expression.getExpressionSql(Expression.EXCLUDE.getExpression(), new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.IS_ACTIVE.getValue(), "0"));
     }
 
     @Override
