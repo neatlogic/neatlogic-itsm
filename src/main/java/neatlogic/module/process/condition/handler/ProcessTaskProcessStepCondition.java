@@ -60,6 +60,11 @@ public class ProcessTaskProcessStepCondition extends ProcessTaskConditionBase im
     }
 
     @Override
+    public String getDesc() {
+        return "过滤已激活的步骤";
+    }
+
+    @Override
     public String getHandler(FormConditionModel processWorkcenterConditionType) {
         return null;
     }
@@ -127,6 +132,8 @@ public class ProcessTaskProcessStepCondition extends ProcessTaskConditionBase im
         getSimpleSqlConditionWhere(channelCondition, sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.CHANNEL_UUID.getValue());
         sqlSb.append(" and ");
         getSimpleSqlConditionWhere(conditionVo, sqlSb, new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.PROCESS_STEP_UUID.getValue());
+        sqlSb.append(" and ");
+        sqlSb.append(Expression.getExpressionSql(Expression.EXCLUDE.getExpression(), new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.IS_ACTIVE.getValue(), "0','-1"));
     }
 
     @Override
