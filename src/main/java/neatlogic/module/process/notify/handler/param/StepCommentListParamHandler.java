@@ -26,6 +26,7 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import neatlogic.module.process.notify.constvalue.SlaNotifyTriggerType;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -54,7 +55,7 @@ public class StepCommentListParamHandler extends ProcessTaskNotifyParamHandlerBa
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
-        if (!(notifyTriggerType instanceof ProcessTaskStepNotifyTriggerType)) {
+        if (!(notifyTriggerType instanceof ProcessTaskStepNotifyTriggerType) && !(notifyTriggerType instanceof SlaNotifyTriggerType)) {
             return null;
         }
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepVo.getId());

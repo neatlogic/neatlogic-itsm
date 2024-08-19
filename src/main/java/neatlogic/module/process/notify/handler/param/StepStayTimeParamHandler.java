@@ -22,6 +22,7 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import neatlogic.module.process.notify.constvalue.SlaNotifyTriggerType;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -44,7 +45,7 @@ public class StepStayTimeParamHandler extends ProcessTaskNotifyParamHandlerBase 
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
-        if (!(notifyTriggerType instanceof ProcessTaskStepNotifyTriggerType)) {
+        if (!(notifyTriggerType instanceof ProcessTaskStepNotifyTriggerType) && !(notifyTriggerType instanceof SlaNotifyTriggerType)) {
             return null;
         }
         ProcessTaskStepVo stepVo =  processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepVo.getId());
