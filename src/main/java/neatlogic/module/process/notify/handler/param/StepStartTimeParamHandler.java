@@ -16,11 +16,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.process.notify.handler.param;
 
 import neatlogic.framework.notify.core.INotifyTriggerType;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.notify.constvalue.SlaNotifyTriggerType;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -40,7 +41,7 @@ public class StepStartTimeParamHandler extends ProcessTaskNotifyParamHandlerBase
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
-        if (!(notifyTriggerType instanceof ProcessTaskStepNotifyTriggerType)) {
+        if (!(notifyTriggerType instanceof ProcessTaskStepNotifyTriggerType) && !(notifyTriggerType instanceof SlaNotifyTriggerType)) {
             return null;
         }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

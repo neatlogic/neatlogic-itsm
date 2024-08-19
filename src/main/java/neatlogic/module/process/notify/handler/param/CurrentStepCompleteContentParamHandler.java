@@ -47,7 +47,7 @@ public class CurrentStepCompleteContentParamHandler extends ProcessTaskNotifyPar
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
-        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.BACK)) {
+        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.SUCCEED)) {
             return null;
         }
         // 查询步骤的所有处理内容，已倒序排好
