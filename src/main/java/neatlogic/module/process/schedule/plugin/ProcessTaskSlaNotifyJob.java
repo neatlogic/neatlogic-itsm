@@ -78,8 +78,6 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
     @Override
     public void reloadJob(JobObject jobObject) {
 //        System.out.println("开始加载sla通知策略job");
-        String tenantUuid = jobObject.getTenantUuid();
-        TenantContext.get().switchTenant(tenantUuid);
         Long slaNotifyId = Long.valueOf(jobObject.getJobName());
 //        System.out.println("slaNotifyId=" + slaNotifyId);
 //        ProcessTaskSlaVo processTaskSlaVo = processTaskMapper.getProcessTaskSlaById(processTaskSlaNotifyVo.getSlaId());
