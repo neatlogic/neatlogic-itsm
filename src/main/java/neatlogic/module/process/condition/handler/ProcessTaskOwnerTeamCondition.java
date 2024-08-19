@@ -31,7 +31,6 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -42,7 +41,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class ProcessTaskOwnerCompanyCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+public class ProcessTaskOwnerTeamCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
@@ -52,12 +51,12 @@ public class ProcessTaskOwnerCompanyCondition extends ProcessTaskConditionBase i
 
     @Override
     public String getName() {
-        return "ownercompany";
+        return "ownerteam";
     }
 
     @Override
     public String getDisplayName() {
-        return "上报人公司";
+        return "上报人组";
     }
 
 	@Override
@@ -75,7 +74,7 @@ public class ProcessTaskOwnerCompanyCondition extends ProcessTaskConditionBase i
         JSONObject config = new JSONObject();
         config.put("type", FormHandlerType.SELECT.toString());
         config.put("search", true);
-        config.put("dynamicUrl", "/api/rest/team/list/forselect?level=company");
+        config.put("dynamicUrl", "/api/rest/team/list/forselect?level=team");
         config.put("rootName", "tbodyList");
         config.put("valueName", "uuid");
         config.put("textName", "name");
@@ -135,25 +134,26 @@ public class ProcessTaskOwnerCompanyCondition extends ProcessTaskConditionBase i
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTaskVo.getOwner());
         if (CollectionUtils.isNotEmpty(teamUuidList)) {
             Set<String> upwardUuidSet = new HashSet<>();
-            List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
-            for (TeamVo teamVo : teamList) {
-                String upwardUuidPath = teamVo.getUpwardUuidPath();
-                if (StringUtils.isNotBlank(upwardUuidPath)) {
-                    String[] upwardUuidArray = upwardUuidPath.split(",");
-                    for (String upwardUuid : upwardUuidArray) {
-                        upwardUuidSet.add(upwardUuid);
-                    }
-                }
-            }
+//            List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
+//            for (TeamVo teamVo : teamList) {
+//                String upwardUuidPath = teamVo.getUpwardUuidPath();
+//                if (StringUtils.isNotBlank(upwardUuidPath)) {
+//                    String[] upwardUuidArray = upwardUuidPath.split(",");
+//                    for (String upwardUuid : upwardUuidArray) {
+//                        upwardUuidSet.add(upwardUuid);
+//                    }
+//                }
+//            }
+            upwardUuidSet.addAll(teamUuidList);
             if (CollectionUtils.isNotEmpty(upwardUuidSet)) {
                 List<TeamVo> upwardTeamList = teamMapper.getTeamByUuidList(new ArrayList<>(upwardUuidSet));
-                List<String> companyUuidList = new ArrayList<>();
+                List<String> uuidList = new ArrayList<>();
                 for (TeamVo teamVo : upwardTeamList) {
-                    if (TeamLevel.COMPANY.getValue().equals(teamVo.getLevel())) {
-                        companyUuidList.add(teamVo.getUuid());
+                    if (TeamLevel.TEAM.getValue().equals(teamVo.getLevel())) {
+                        uuidList.add(teamVo.getUuid());
                     }
                 }
-                return companyUuidList;
+                return uuidList;
             }
         }
         return null;
@@ -161,11 +161,11 @@ public class ProcessTaskOwnerCompanyCondition extends ProcessTaskConditionBase i
 
     @Override
     public Object getConditionParamDataForHumanization(ProcessTaskStepVo processTaskStepVo) {
-        List<String> companyUuidList = (List<String>) getConditionParamData(processTaskStepVo);
-        if (CollectionUtils.isEmpty(companyUuidList)) {
+        List<String> teamUuidList = (List<String>) getConditionParamData(processTaskStepVo);
+        if (CollectionUtils.isEmpty(teamUuidList)) {
             return null;
         }
-        List<TeamVo> teamList = teamMapper.getTeamByUuidList(companyUuidList);
+        List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
         return teamList.stream().map(TeamVo::getName).collect(Collectors.toList());
     }
 }
