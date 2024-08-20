@@ -35,9 +35,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -133,28 +131,14 @@ public class ProcessTaskOwnerTeamCondition extends ProcessTaskConditionBase impl
         }
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTaskVo.getOwner());
         if (CollectionUtils.isNotEmpty(teamUuidList)) {
-            Set<String> upwardUuidSet = new HashSet<>();
-//            List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
-//            for (TeamVo teamVo : teamList) {
-//                String upwardUuidPath = teamVo.getUpwardUuidPath();
-//                if (StringUtils.isNotBlank(upwardUuidPath)) {
-//                    String[] upwardUuidArray = upwardUuidPath.split(",");
-//                    for (String upwardUuid : upwardUuidArray) {
-//                        upwardUuidSet.add(upwardUuid);
-//                    }
-//                }
-//            }
-            upwardUuidSet.addAll(teamUuidList);
-            if (CollectionUtils.isNotEmpty(upwardUuidSet)) {
-                List<TeamVo> upwardTeamList = teamMapper.getTeamByUuidList(new ArrayList<>(upwardUuidSet));
-                List<String> uuidList = new ArrayList<>();
-                for (TeamVo teamVo : upwardTeamList) {
-                    if (TeamLevel.TEAM.getValue().equals(teamVo.getLevel())) {
-                        uuidList.add(teamVo.getUuid());
-                    }
+            List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
+            List<String> uuidList = new ArrayList<>();
+            for (TeamVo teamVo : teamList) {
+                if (teamVo.getLevel() == null || TeamLevel.TEAM.getValue().equals(teamVo.getLevel())) {
+                    uuidList.add(teamVo.getUuid());
                 }
-                return uuidList;
             }
+            return uuidList;
         }
         return null;
     }
