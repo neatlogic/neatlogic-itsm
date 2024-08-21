@@ -182,7 +182,7 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
         if (id == null) {
             return;
         }
-
+        processTaskAsyncCreateMapper.updateProcessTaskAsyncCreateStatusToDoingById(id);
         boolean offer = blockingQueue.offer(id);
         if (!offer && logger.isDebugEnabled()) {
             logger.debug("异步创建工单数据加入队列失败, id: " + id);
