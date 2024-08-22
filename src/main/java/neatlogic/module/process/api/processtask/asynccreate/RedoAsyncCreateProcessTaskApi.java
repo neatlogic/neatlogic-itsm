@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package neatlogic.module.process.api.processtask;
+package neatlogic.module.process.api.processtask.asynccreate;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
@@ -72,9 +72,12 @@ public class RedoAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
         Integer serverId = paramObj.getInteger("serverId");
         if (id != null) {
             ProcessTaskAsyncCreateVo processTaskAsyncCreateVo = processTaskAsyncCreateMapper.getProcessTaskAsyncCreateById(id);
-            if (processTaskAsyncCreateVo != null && Objects.equals(processTaskAsyncCreateVo.getStatus(), "redo")) {
+            if (processTaskAsyncCreateVo != null
+                    && (Objects.equals(processTaskAsyncCreateVo.getStatus(), "redo")
+                    || Objects.equals(processTaskAsyncCreateVo.getStatus(), "failed"))
+            ) {
                 Long processTaskId = processTaskAsyncCreateVo.getProcessTaskId();
-                if (processTaskMapper.getProcessTaskById(processTaskId) == null) {
+                if (processTaskMapper.getProcessTaskById(processTaskId) != null) {
                     return resultObj;
                 }
                 processTaskIdArray.add(processTaskId);

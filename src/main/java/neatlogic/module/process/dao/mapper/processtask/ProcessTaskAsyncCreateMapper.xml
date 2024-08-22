@@ -25,7 +25,8 @@
             `processtask_id` AS processTaskId,
             `title`,
             `status`,
-            `config` AS configStr
+            `config` AS configStr,
+            `server_id` AS serverId
         FROM `processtask_async_create`
         WHERE `id` = #{value}
     </select>
@@ -49,6 +50,38 @@
         FROM `processtask_async_create`
         WHERE `status` = #{status}
         AND `server_id` = #{serverId}
+    </select>
+
+    <select id="getProcessTaskAsyncCreateFailedList" parameterType="neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo" resultType="neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo">
+        SELECT
+            `id`,
+            `processtask_id` AS processTaskId,
+            `title`,
+            `status`,
+            `config` AS configStr,
+            `error`,
+            `try_count` AS tryCount,
+            `server_id` AS serverId,
+            `fcu`,
+            `fcd`,
+            `lcd`
+        FROM `processtask_async_create`
+        WHERE `status` IN ('failed', 'redo')
+        <if test="keyword != null and keyword != ''">
+            AND (`title` LIKE CONCAT('%', #{keyword}, '%') OR `config` LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY `id` DESC
+        LIMIT #{startNum}, #{pageSize}
+    </select>
+
+    <select id="getProcessTaskAsyncCreateFailedCount" parameterType="neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo" resultType="int">
+        SELECT
+            COUNT(1)
+        FROM `processtask_async_create`
+        WHERE `status` IN ('failed', 'redo')
+        <if test="keyword != null and keyword != ''">
+            AND (`title` LIKE CONCAT('%', #{keyword}, '%') OR `config` LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
     </select>
 
     <insert id="insertProcessTaskAsyncCreate" parameterType="neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo">
@@ -83,6 +116,35 @@
             `status` = #{status},
             `error` = #{error},
             `try_count` = `try_count` + 1,
+            `lcd` = NOW(3)
+        WHERE `id` = #{id}
+    </update>
+
+    <update id="updateProcessTaskAsyncCreateStatusToDoingById" parameterType="java.lang.Long">
+        UPDATE `processtask_async_create`
+        SET
+            `status` = 'doing'
+        WHERE `id` = #{id}
+    </update>
+
+    <update id="updateProcessTaskAsyncCreateForManualIntervention" parameterType="neatlogic.framework.process.dto.ProcessTaskAsyncCreateVo">
+        UPDATE `processtask_async_create`
+        SET
+        <if test="processTaskId != null">
+            `processtask_id` = #{processTaskId},
+        </if>
+        <if test="title != null and title != ''">
+            `title` = #{title},
+        </if>
+        <if test="status != null and status != ''">
+            `status` = #{status},
+        </if>
+        <if test="serverId != null">
+            `server_id` = #{serverId},
+        </if>
+        <if test="configStr != null and configStr != ''">
+            `config` = #{configStr},
+        </if>
             `lcd` = NOW(3)
         WHERE `id` = #{id}
     </update>
