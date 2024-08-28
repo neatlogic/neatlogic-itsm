@@ -45,6 +45,8 @@ import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormActiveVersionNotFoundExcepiton;
 import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
+import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
+import neatlogic.framework.integration.dto.IntegrationVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.notify.dto.NotifyReceiverVo;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
@@ -61,6 +63,7 @@ import neatlogic.framework.process.exception.process.ProcessStepUtilHandlerNotFo
 import neatlogic.framework.process.exception.processtask.*;
 import neatlogic.framework.process.exception.processtask.task.ProcessTaskStepTaskNotCompleteException;
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
@@ -85,10 +88,7 @@ import neatlogic.module.process.dao.mapper.process.ProcessCommentTemplateMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessStepHandlerMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessTagMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -179,6 +179,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Resource
     private RegionMapper regionMapper;
+
+    @Resource
+    private ProcessTaskActionMapper processTaskActionMapper;
+    @Resource
+    private IntegrationMapper integrationMapper;
 //    @Override
 //    public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo,
 //                                                  Map<String, String> formAttributeActionMap, int mode) {
@@ -2347,6 +2352,32 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             formMapper.deleteFormExtendAttributeDataByIdList(formAttributeDataIdList);
             processTaskMapper.deleteProcessTaskExtendFormAttributeByProcessTaskId(processTaskId);
         }
+    }
+
+    @Override
+    public List<ProcessTaskActionVo> getProcessTaskActionListByProcessTaskStepId(Long processTaskStepId) {
+        List<ProcessTaskActionVo> processTaskActionList = processTaskActionMapper.getProcessTaskActionListByProcessTaskStepId(processTaskStepId);
+        if (CollectionUtils.isNotEmpty(processTaskActionList)) {
+            List<String> integrationUuidList = processTaskActionList.stream().map(ProcessTaskActionVo::getIntegrationUuid).collect(Collectors.toList());
+            List<IntegrationVo> integrationList = integrationMapper.getIntegrationListByUuidList(integrationUuidList);
+            Map<String, String> uuid2NameMap = integrationList.stream().collect(Collectors.toMap(IntegrationVo::getUuid, IntegrationVo::getName));
+            for (ProcessTaskActionVo processTaskActionVo : processTaskActionList) {
+                String integrationName = uuid2NameMap.get(processTaskActionVo.getIntegrationUuid());
+                if (StringUtils.isNotBlank(integrationName)) {
+                    processTaskActionVo.setIntegrationName(integrationName);
+                }
+                if (Objects.equals(processTaskActionVo.getStatus(), "succeed")) {
+                    processTaskActionVo.setStatusText("已成功");
+                } else {
+                    processTaskActionVo.setStatusText("已失败");
+                }
+                String triggerText = ProcessTaskStepNotifyTriggerType.getText(processTaskActionVo.getTrigger());
+                if(StringUtils.isNotBlank(triggerText)) {
+                    processTaskActionVo.setTriggerText(triggerText);
+                }
+            }
+        }
+        return processTaskActionList;
     }
 
     /**

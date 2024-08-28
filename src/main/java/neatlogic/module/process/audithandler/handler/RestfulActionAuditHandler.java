@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSON;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
 import neatlogic.framework.integration.dto.IntegrationVo;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;
-import neatlogic.framework.process.dto.ActionVo;
+import neatlogic.framework.process.dto.ProcessTaskActionVo;
 import neatlogic.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 
@@ -28,7 +28,7 @@ public class RestfulActionAuditHandler implements IProcessTaskStepAuditDetailHan
 	@Override
 	public int handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getNewContent())) {
-			ActionVo actionVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), ActionVo.class);
+			ProcessTaskActionVo actionVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), ProcessTaskActionVo.class);
 			IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(actionVo.getIntegrationUuid());
 			if(integrationVo != null) {
 				actionVo.setIntegrationName(integrationVo.getName());

@@ -504,4 +504,11 @@ public interface ProcessTaskService {
     ProcessTaskFormAttributeDataVo getProcessTaskFormAttributeDataByProcessTaskIdAndAttributeUuid(Long processTaskId, String attributeUuid);
 
     void deleteProcessTaskFormAttributeDataByProcessTaskId(Long processTaskId);
+
+    /**
+     * 根据步骤ID获取动作列表
+     * @param processTaskStepId
+     * @return
+     */
+    List<ProcessTaskActionVo> getProcessTaskActionListByProcessTaskStepId(Long processTaskStepId);
 }
