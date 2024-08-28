@@ -177,7 +177,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         typeList.add(ProcessTaskOperationType.STEP_TRANSFER.getValue());
         processTaskStepVo.setCommentList(
                 processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepVo.getId(), typeList));
-
+        processTaskStepVo.setActionList(processTaskService.getProcessTaskActionListByProcessTaskStepId(processTaskStepVo.getId()));
         //任务列表
         processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
         List<TaskConfigVo> taskConfigList = processTaskStepTaskService.getTaskConfigList(processTaskStepVo);

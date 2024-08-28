@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
+import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
 import neatlogic.framework.exception.integration.IntegrationNotFoundException;
 import neatlogic.framework.integration.core.IIntegrationHandler;
@@ -34,14 +35,15 @@ import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskParams;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
-import neatlogic.framework.process.dto.ActionVo;
+import neatlogic.framework.process.dto.ProcessTaskActionVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.handler.ProcessRequestFrom;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.util.ConditionUtil;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskActionMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -59,12 +61,18 @@ import java.util.stream.Collectors;
 public class ProcessTaskActionThread extends NeatLogicThread {
     private static Logger logger = LoggerFactory.getLogger(ProcessTaskActionThread.class);
     private static ProcessTaskMapper processTaskMapper;
+    private static ProcessTaskActionMapper processTaskActionMapper;
     private static SelectContentByHashMapper selectContentByHashMapper;
     private static IntegrationMapper integrationMapper;
 
     @Autowired
     public void setProcessTaskMapper(ProcessTaskMapper _processTaskMapper) {
         processTaskMapper = _processTaskMapper;
+    }
+
+    @Autowired
+    public void setProcessTaskActionMapper(ProcessTaskActionMapper _processTaskActionMapper) {
+        processTaskActionMapper = _processTaskActionMapper;
     }
 
     @Autowired
@@ -105,7 +113,6 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                 String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
                 actionList = (JSONArray) JSONPath.read(stepConfig, "actionConfig.actionList");
             }
-
             /* 从步骤配置信息中获取动作列表 **/
             if (CollectionUtils.isNotEmpty(actionList)) {
                 List<String> processTaskParams = Arrays.stream(ProcessTaskParams.values()).map(ProcessTaskParams::getValue).collect(Collectors.toList());
@@ -117,44 +124,40 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                         if (integrationVo == null) {
                             throw new IntegrationNotFoundException(integrationUuid);
                         }
-                        IIntegrationHandler iIntegrationHandler =
-                                IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+                        IIntegrationHandler iIntegrationHandler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
                         if (iIntegrationHandler == null) {
                             throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
                         }
+                        String failedReason = null;
+                        JSONObject config = new JSONObject();
+                        config.put("integrationName", integrationVo.getName());
+                        config.put("actionConfig", actionObj);
                         /** 参数映射 **/
-                        List<ParamMappingVo> paramMappingList = JSON.parseArray(
-                                actionObj.getJSONArray("paramMappingList").toJSONString(), ParamMappingVo.class);
-                        if (CollectionUtils.isNotEmpty(paramMappingList)) {
+                        JSONObject integrationParam = new JSONObject();
+                        JSONArray paramMappingArray = actionObj.getJSONArray("paramMappingList");
+                        if (CollectionUtils.isNotEmpty(paramMappingArray)) {
                             JSONObject processFieldData = ProcessTaskConditionFactory.getConditionParamData(processTaskParams, currentProcessTaskStepVo);
-//                            ProcessTaskVo processTaskVo =
-//                                    processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
-//                            processTaskVo.setStartProcessTaskStep(
-//                                    processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
-//                            processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
-//                            JSONObject processFieldData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
+                            List<ParamMappingVo> paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
                             for (ParamMappingVo paramMappingVo : paramMappingList) {
                                 if (ProcessFieldType.CONSTANT.getValue().equals(paramMappingVo.getType())) {
-                                    integrationVo.getParamObj().put(paramMappingVo.getName(),
-                                            paramMappingVo.getValue());
+                                    integrationParam.put(paramMappingVo.getName(), paramMappingVo.getValue());
                                 } else if (StringUtils.isNotBlank(paramMappingVo.getType())) {
                                     Object processFieldValue = processFieldData.get(paramMappingVo.getValue());
                                     if (processFieldValue != null) {
-                                        integrationVo.getParamObj().put(paramMappingVo.getName(),
-                                                processFieldValue);
+                                        integrationParam.put(paramMappingVo.getName(), processFieldValue);
                                     } else {
                                         logger.error("没有找到参数'" + paramMappingVo.getValue() + "'信息");
                                     }
                                 }
                             }
                         }
-                        integrationVo.getParamObj().put("triggerType", triggerType.getTrigger());
+                        integrationParam.put("triggerType", triggerType.getTrigger());
+                        integrationVo.getParamObj().putAll(integrationParam);
+                        config.put("param", integrationParam);
                         boolean isSucceed = false;
-                        IntegrationResultVo integrationResultVo =
-                                iIntegrationHandler.sendRequest(integrationVo, ProcessRequestFrom.PROCESS);
+                        IntegrationResultVo integrationResultVo = iIntegrationHandler.sendRequest(integrationVo, ProcessRequestFrom.PROCESS);
                         if (StringUtils.isNotBlank(integrationResultVo.getError())) {
                             logger.error(integrationResultVo.getError());
-//                                throw new IntegrationSendRequestException(integrationVo.getUuid());
                         } else {
                             JSONObject successConditionObj = actionObj.getJSONObject("successCondition");
                             if (MapUtils.isNotEmpty(successConditionObj)) {
@@ -163,6 +166,7 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                                     String resultValue = null;
                                     String transformedResult = integrationResultVo.getTransformedResult();
                                     if (StringUtils.isNotBlank(transformedResult)) {
+                                        config.put("result", transformedResult);
                                         JSONObject transformedResultObj = JSON.parseObject(transformedResult);
                                         if (MapUtils.isNotEmpty(transformedResultObj)) {
                                             resultValue = transformedResultObj.getString(name);
@@ -171,6 +175,7 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                                     if (resultValue == null) {
                                         String rawResult = integrationResultVo.getRawResult();
                                         if (StringUtils.isNotEmpty(rawResult)) {
+                                            config.put("result", rawResult);
                                             JSONObject rawResultObj = JSON.parseObject(rawResult);
                                             if (MapUtils.isNotEmpty(rawResultObj)) {
                                                 resultValue = rawResultObj.getString(name);
@@ -184,8 +189,11 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                                         List<String> targetValueList = new ArrayList<>();
                                         targetValueList.add(value);
                                         String expression = successConditionObj.getString("expression");
-                                        isSucceed =
-                                                ConditionUtil.predicate(curentValueList, expression, targetValueList);
+                                        isSucceed = ConditionUtil.predicate(curentValueList, expression, targetValueList);
+                                        if (!isSucceed) {
+                                            String expressionName = Expression.getExpressionName(expression);
+                                            failedReason = String.format("不满足成功条件：%s%s%s", name, expressionName, value);
+                                        }
                                     }
                                 }
                             } else {
@@ -196,7 +204,8 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                             }
                         }
 
-                        ActionVo actionVo = new ActionVo();
+                        ProcessTaskActionVo actionVo = new ProcessTaskActionVo();
+                        actionVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
                         actionVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
                         actionVo.setProcessTaskStepName(currentProcessTaskStepVo.getName());
                         actionVo.setIntegrationUuid(integrationUuid);
@@ -204,13 +213,22 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                         actionVo.setTrigger(triggerType.getTrigger());
                         actionVo.setTriggerText(triggerType.getText());
                         actionVo.setSucceed(isSucceed);
-                        if (StringUtils.isNotBlank(integrationResultVo.getError())) {
-                            String error = integrationResultVo.getError();
-                            if (error.startsWith("failed\n")) {
-                                error = error.substring("failed\n".length());
+                        actionVo.setConfig(config);
+                        if (isSucceed) {
+                            actionVo.setStatus("succeed");
+                        } else {
+                            actionVo.setStatus("failed");
+                            if (StringUtils.isNotBlank(integrationResultVo.getError())) {
+                                String error = integrationResultVo.getError();
+                                if (error.startsWith("failed\n")) {
+                                    error = error.substring("failed\n".length());
+                                }
+                                actionVo.setError(error);
+                            } else if (StringUtils.isNotBlank(failedReason)) {
+                                actionVo.setError(failedReason);
                             }
-                            actionVo.setError(error);
                         }
+                        processTaskActionMapper.insertProcessTaskAction(actionVo);
                         currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.RESTFULACTION.getParamName(), JSON.toJSONString(actionVo));
                         ProcessTaskAuditThread.audit(currentProcessTaskStepVo, ProcessTaskAuditType.RESTFULACTION);
                     }

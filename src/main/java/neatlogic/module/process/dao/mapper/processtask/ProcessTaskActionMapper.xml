@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.process.dao.mapper.processtask.ProcessTaskActionMapper">
+
+    <select id="getProcessTaskActionListByProcessTaskStepId" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskActionVo">
+        SELECT
+            `id`,
+            `processtask_id` AS processTaskId,
+            `processtask_step_id` AS processTaskStepId,
+            `trigger`,
+            `integration_uuid` AS integrationUuid,
+            `trigger_time` AS triggerTime,
+            `status`,
+            `error`,
+            `config` AS configStr
+        FROM `processtask_action`
+        WHERE `processtask_step_id` = #{value}
+    </select>
+
+    <insert id="insertProcessTaskAction" parameterType="neatlogic.framework.process.dto.ProcessTaskActionVo">
+        INSERT INTO `processtask_action` (
+            `id`,
+            `processtask_id`,
+            `processtask_step_id`,
+            `trigger`,
+            `integration_uuid`,
+            `status`,
+            `error`,
+            `config`,
+            `trigger_time`
+        )
+        VALUES
+            (
+                #{id},
+                #{processTaskId},
+                #{processTaskStepId},
+                #{trigger},
+                #{integrationUuid},
+                #{status},
+                #{error},
+                #{configStr},
+                NOW(3)
+            )
+    </insert>
+</mapper>
