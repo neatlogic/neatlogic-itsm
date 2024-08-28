@@ -130,6 +130,8 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                         }
                         String failedReason = null;
                         JSONObject config = new JSONObject();
+                        config.put("integrationName", integrationVo.getName());
+                        config.put("actionConfig", actionObj);
                         /** 参数映射 **/
                         JSONObject integrationParam = new JSONObject();
                         JSONArray paramMappingArray = actionObj.getJSONArray("paramMappingList");

@@ -2365,6 +2365,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 String integrationName = uuid2NameMap.get(processTaskActionVo.getIntegrationUuid());
                 if (StringUtils.isNotBlank(integrationName)) {
                     processTaskActionVo.setIntegrationName(integrationName);
+                } else {
+                    JSONObject config = processTaskActionVo.getConfig();
+                    if (MapUtils.isNotEmpty(config)) {
+                        integrationName = config.getString("integrationName");
+                        if (StringUtils.isNotBlank(integrationName)) {
+                            processTaskActionVo.setIntegrationName(integrationName);
+                        }
+                    }
                 }
                 if (Objects.equals(processTaskActionVo.getStatus(), "succeed")) {
                     processTaskActionVo.setStatusText("已成功");
