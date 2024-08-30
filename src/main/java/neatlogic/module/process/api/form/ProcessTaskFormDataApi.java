@@ -5,7 +5,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.core.publicapi.PublicApiComponentBase;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.springframework.stereotype.Service;
 
@@ -13,14 +13,14 @@ import javax.annotation.Resource;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessTaskFormDataPublicApi extends PublicApiComponentBase {
+public class ProcessTaskFormDataApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskService processTaskService;
 
     @Override
     public String getToken() {
-        return "processtask/form/data/public";
+        return "processtask/form/data";
     }
 
     @Override
