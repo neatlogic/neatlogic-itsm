@@ -15,19 +15,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.api.processtask;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.core.publicapi.PublicApiComponentBase;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.service.ProcessTaskService;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessTaskWhichCurrentStepIsTagStepOfMineApi extends PublicApiComponentBase {
+public class ProcessTaskWhichCurrentStepIsTagStepOfMineApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskService processTaskService;
