@@ -1,11 +1,16 @@
 package neatlogic.module.process.api.processtask;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.ProcessTaskStepDataType;
 import neatlogic.framework.process.constvalue.ProcessUserType;
-import neatlogic.framework.process.crossover.IProcessTaskTransferApiCrossoverService;
+import neatlogic.framework.process.dto.ProcessTaskStepDataVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
@@ -15,23 +20,25 @@ import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
 import neatlogic.module.process.service.ProcessTaskService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_BASE.class)
-public class ProcessTaskTransferApi extends PrivateApiComponentBase implements IProcessTaskTransferApiCrossoverService {
+public class ProcessTaskTransferApi extends PrivateApiComponentBase {
     
     @Autowired
     private ProcessTaskService processTaskService;
+
+	@Autowired
+	private ProcessTaskStepDataMapper processTaskStepDataMapper;
 	
 	@Override
 	public String getToken() {
@@ -40,7 +47,7 @@ public class ProcessTaskTransferApi extends PrivateApiComponentBase implements I
 
 	@Override
 	public String getName() {
-		return "工单转交接口";
+		return "nmpap.processtasktransferapi.getname";
 	}
 
 	@Override
@@ -50,14 +57,15 @@ public class ProcessTaskTransferApi extends PrivateApiComponentBase implements I
 
 	@Override
 	@Input({
-			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
-			@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤Id"),
-			@Param(name = "workerList", type = ApiParamType.NOAUTH, isRequired = true, desc = "新可处理对象列表，[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
-			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "原因")
+			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+			@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
+			@Param(name = "workerList", type = ApiParamType.NOAUTH, isRequired = true, desc = "nmpap.processtasktransferapi.input.param.desc.workerlist", help = "[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
+			@Param(name = "isSaveData", type = ApiParamType.ENUM, rule = "0,1", desc = "nmpap.processtasktransferapi.input.param.desc.issavedata"),
+			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source"),
+			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content")
 	})
 	@Output({})
-	@Description(desc = "工单转交接口")
+	@Description(desc = "nmpap.processtasktransferapi.getname")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");       
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
@@ -81,8 +89,21 @@ public class ProcessTaskTransferApi extends PrivateApiComponentBase implements I
                 processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, split[0], split[1], ProcessUserType.MAJOR.getValue()));
             }
         }
-        processTaskStepVo.getParamObj().putAll(jsonObj);
+		Integer isSaveData = jsonObj.getInteger("isSaveData");
+		if (Objects.equals(isSaveData, 1)) {
+			JSONObject data = processTaskService.getProcessTaskStepStagingData(processTaskId, processTaskStepId);
+			processTaskStepVo.getParamObj().putAll(data);
+		}
+		processTaskStepVo.getParamObj().putAll(jsonObj);
 		handler.transfer(processTaskStepVo,processTaskStepWorkerList);
+		if (Objects.equals(isSaveData, 1)) {
+			ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+			processTaskStepDataVo.setProcessTaskId(processTaskId);
+			processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
+			processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+			processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
+			processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
+		}
 		return null;
 	}
 
