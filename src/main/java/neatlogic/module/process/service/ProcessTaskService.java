@@ -511,4 +511,12 @@ public interface ProcessTaskService {
      * @return
      */
     List<ProcessTaskActionVo> getProcessTaskActionListByProcessTaskStepId(Long processTaskStepId);
+
+    /**
+     * 获取步骤暂存数据
+     * @param processTaskId 工单id
+     * @param processTaskStepId 步骤id
+     * @return
+     */
+    JSONObject getProcessTaskStepStagingData(Long processTaskId, Long processTaskStepId);
 }
