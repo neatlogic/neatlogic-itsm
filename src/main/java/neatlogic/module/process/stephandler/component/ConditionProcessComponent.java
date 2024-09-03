@@ -23,11 +23,9 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.condition.core.IConditionHandler;
-import neatlogic.framework.dto.condition.ConditionConfigVo;
-import neatlogic.framework.dto.condition.ConditionGroupVo;
-import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
+import neatlogic.framework.process.condition.dto.ConditionConfigVo;
 import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dto.ProcessTaskStepRelVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
@@ -164,7 +162,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                         ConditionConfigVo conditionConfigVo = null;
                                         try {
                                             ConditionParamContext.init(conditionParamData).setTranslate(true);
-                                            conditionConfigVo = new ConditionConfigVo(moveonConfig);
+                                            conditionConfigVo = moveonConfig.toJavaObject(ConditionConfigVo.class);
                                             String script = conditionConfigVo.buildScript();
                                             /* 将参数名称、表达式、值的value翻译成对应text，目前条件步骤生成活动时用到**/
                                             translate(conditionConfigVo, currentProcessTaskStepVo.getProcessTaskId(), formTag);
@@ -218,15 +216,15 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
     }
 
     private void translate(ConditionConfigVo conditionConfigVo, Long processTaskId, String formTag) {
-        List<ConditionGroupVo> conditionGroupList = conditionConfigVo.getConditionGroupList();
+        List<ConditionConfigVo.ConditionGroupVo<ConditionConfigVo.ConditionVo>> conditionGroupList = conditionConfigVo.getConditionGroupList();
         if (CollectionUtils.isNotEmpty(conditionGroupList)) {
 //            List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTag(processTaskId, ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
             List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTagNew(processTaskId, formTag);
             Map<String, FormAttributeVo> formAttributeVoMap = formAttributeList.stream().collect(Collectors.toMap(FormAttributeVo::getUuid, e -> e));
-            for (ConditionGroupVo conditionGroup : conditionGroupList) {
-                List<ConditionVo> conditionList = conditionGroup.getConditionList();
+            for (ConditionConfigVo.ConditionGroupVo<ConditionConfigVo.ConditionVo> conditionGroup : conditionGroupList) {
+                List<ConditionConfigVo.ConditionVo> conditionList = conditionGroup.getConditionList();
                 if (CollectionUtils.isNotEmpty(conditionList)) {
-                    for (ConditionVo condition : conditionList) {
+                    for (ConditionConfigVo.ConditionVo condition : conditionList) {
                         if ("common".equals(condition.getType())) {
                             IConditionHandler conditionHandler = ProcessTaskConditionFactory.getHandler(condition.getName());
                             if (conditionHandler != null) {
