@@ -323,7 +323,7 @@
 	<select id="getParentUuidByUuid" parameterType="java.lang.String" resultType="java.lang.String" useCache="false">
 		SELECT `parent_uuid` FROM `catalog` WHERE `uuid` = #{value}
 	</select>
-    <!--<select id="getCatalogByName" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.CatalogVo">
+    <select id="getCatalogByName" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.CatalogVo">
 		SELECT
 			`uuid`,
 			`name`,
@@ -337,7 +337,7 @@
 		FROM
 			`catalog`
 		where `name` = #{value}
-	</select>-->
+	</select>
 
 	<select id="getCatalogListByUuidList" parameterType="java.util.List" resultType="neatlogic.framework.process.dto.CatalogVo">
 		SELECT

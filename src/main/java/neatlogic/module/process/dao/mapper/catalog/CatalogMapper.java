@@ -111,7 +111,7 @@ public interface CatalogMapper extends ICatalogCrossoverMapper {
 
 	String getParentUuidByUuid(String uuid);
 
-//	List<CatalogVo> getCatalogByName(String name);
+	List<CatalogVo> getCatalogByName(String name);
 
 	List<CatalogVo> getCatalogListByUuidList(List<String> uuidList);
 

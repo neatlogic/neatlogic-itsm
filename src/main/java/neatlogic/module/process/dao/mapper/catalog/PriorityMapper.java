@@ -18,13 +18,14 @@
 package neatlogic.module.process.dao.mapper.catalog;
 
 import neatlogic.framework.common.dto.ValueTextVo;
+import neatlogic.framework.process.crossover.IPriorityCrossoverMapper;
 import neatlogic.framework.process.dto.PrioritySearchVo;
 import neatlogic.framework.process.dto.PriorityVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-public interface PriorityMapper {
+public interface PriorityMapper extends IPriorityCrossoverMapper {
 
 	int searchPriorityCount(PriorityVo priorityVo);
 

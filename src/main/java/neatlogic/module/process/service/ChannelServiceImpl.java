@@ -22,6 +22,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dto.AuthorityVo;
 import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
+import neatlogic.framework.process.crossover.IChannelCrossoverService;
 import neatlogic.framework.process.crossover.IProcessCrossoverMapper;
 import neatlogic.framework.process.dto.CatalogVo;
 import neatlogic.framework.process.dto.ChannelPriorityVo;
@@ -47,7 +48,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class ChannelServiceImpl implements ChannelService {
+public class ChannelServiceImpl implements ChannelService, IChannelCrossoverService {
 
     //private static final Logger logger = LoggerFactory.getLogger(ChannelServiceImpl.class);
 
