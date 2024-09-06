@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProcessTaskActionThread extends NeatLogicThread {
-    private static Logger logger = LoggerFactory.getLogger(ProcessTaskActionThread.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProcessTaskActionThread.class);
     private static ProcessTaskMapper processTaskMapper;
     private static ProcessTaskActionMapper processTaskActionMapper;
     private static SelectContentByHashMapper selectContentByHashMapper;
@@ -132,7 +132,7 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                         JSONObject config = new JSONObject();
                         config.put("integrationName", integrationVo.getName());
                         config.put("actionConfig", actionObj);
-                        /** 参数映射 **/
+                        /* 参数映射 **/
                         JSONObject integrationParam = new JSONObject();
                         JSONArray paramMappingArray = actionObj.getJSONArray("paramMappingList");
                         if (CollectionUtils.isNotEmpty(paramMappingArray)) {
