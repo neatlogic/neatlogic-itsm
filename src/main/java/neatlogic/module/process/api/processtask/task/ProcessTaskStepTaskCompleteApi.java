@@ -15,15 +15,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.api.processtask.task;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.crossover.IProcessTaskStepTaskCompleteApiCrossoverService;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.service.ProcessTaskStepTaskService;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +36,7 @@ import javax.annotation.Resource;
 @Transactional
 @OperationType(type = OperationTypeEnum.OPERATE)
 @AuthAction(action = PROCESS_BASE.class)
-public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase implements IProcessTaskStepTaskCompleteApiCrossoverService {
+public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
     @Resource
     ProcessTaskStepTaskService processTaskStepTaskService;
 
