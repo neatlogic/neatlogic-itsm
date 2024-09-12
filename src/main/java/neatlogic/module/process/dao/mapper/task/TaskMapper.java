@@ -15,10 +15,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.dao.mapper.task;
 
+import com.alibaba.fastjson.JSONArray;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.dto.ValueTextVo;
+import neatlogic.framework.process.crossover.ITaskCrossoverMapper;
 import neatlogic.framework.process.dto.TaskConfigVo;
-import com.alibaba.fastjson.JSONArray;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -28,7 +29,7 @@ import java.util.Map;
  * @author lvzk
  * @since 2021/9/1 14:18
  **/
-public interface TaskMapper {
+public interface TaskMapper extends ITaskCrossoverMapper {
 
     int searchTaskConfigCount(TaskConfigVo taskConfigVo);
 
