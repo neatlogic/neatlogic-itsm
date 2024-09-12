@@ -211,7 +211,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
             return nextStepIdSet;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new ProcessTaskException(e.getMessage());
+            throw new ProcessTaskException(e);
         }
     }
 
