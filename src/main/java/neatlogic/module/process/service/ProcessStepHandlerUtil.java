@@ -25,6 +25,8 @@ import neatlogic.framework.asynchronization.threadpool.TransactionSynchronizatio
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.exception.user.UserNotFoundException;
+import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
+import neatlogic.framework.form.attribute.core.IFormAttributeDataConversionHandler;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
@@ -1055,6 +1057,10 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
             String attributeUuid = formAttributeVo.getUuid();
             if (formAttributeDataMap.containsKey(attributeUuid)) {
                 Object data = formAttributeDataMap.get(attributeUuid);
+                IFormAttributeDataConversionHandler formAttributeDataConversionHandler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo.getHandler());
+                if (formAttributeDataConversionHandler != null) {
+                    data = formAttributeDataConversionHandler.passwordEncryption(data, formAttributeVo.getConfig());
+                }
 
                 ProcessTaskFormAttributeDataVo formAttributeDataVo = new ProcessTaskFormAttributeDataVo();
                 ProcessTaskFormAttributeDataVo oldProcessTaskFormAttributeData = oldProcessTaskFormAttributeDataMap.get(attributeUuid);
@@ -1130,7 +1136,12 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 if (formAttributeVo == null) {
                     continue;
                 }
-                String dataList = formExtendAttributeDataObj.getString("dataList");
+                Object data = formExtendAttributeDataObj.get("dataList");
+                IFormAttributeDataConversionHandler formAttributeDataConversionHandler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo.getHandler());
+                if (formAttributeDataConversionHandler != null) {
+                    data = formAttributeDataConversionHandler.passwordEncryption(data, formAttributeVo.getConfig());
+                }
+
                 ProcessTaskFormAttributeDataVo processTaskExtendFormAttributeDataVo = new ProcessTaskFormAttributeDataVo();
                 AttributeDataVo oldAttributeDataVo = oldExtendAttributeDataMap.get(formAttributeVo.getUuid());
                 if (oldAttributeDataVo != null) {
@@ -1142,7 +1153,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 processTaskExtendFormAttributeDataVo.setAttributeUuid(formAttributeVo.getUuid());
                 processTaskExtendFormAttributeDataVo.setAttributeKey(formAttributeVo.getKey());
                 processTaskExtendFormAttributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
-                processTaskExtendFormAttributeDataVo.setData(dataList);
+                processTaskExtendFormAttributeDataVo.setDataObj(data);
 //                formMapper.insertFormExtendAttributeData(processTaskExtendFormAttributeDataVo);
                 processTaskExtendFormAttributeDataVo.setProcessTaskId(processTaskId);
 //                processTaskMapper.insertProcessTaskExtendFormAttribute(processTaskExtendFormAttributeDataVo);
