@@ -25,6 +25,7 @@ import neatlogic.framework.form.exception.FormNotFoundException;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
 import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
+import neatlogic.framework.process.crossover.IProcessCrossoverService;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.process.ProcessNameRepeatException;
 import neatlogic.framework.process.exception.sla.SlaCalculateHandlerNotFoundException;
@@ -44,7 +45,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class ProcessServiceImpl implements ProcessService {
+public class ProcessServiceImpl implements ProcessService, IProcessCrossoverService {
 
     @Resource
     private ProcessMapper processMapper;
