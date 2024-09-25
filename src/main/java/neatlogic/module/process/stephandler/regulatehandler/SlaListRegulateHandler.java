@@ -19,6 +19,7 @@ package neatlogic.module.process.stephandler.regulatehandler;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
 import neatlogic.framework.process.dto.processconfig.SlaCalculatePolicyVo;
 import neatlogic.framework.process.dto.processconfig.SlaNotifyPolicyVo;
 import neatlogic.framework.process.dto.processconfig.SlaTransferPolicyVo;
@@ -27,6 +28,7 @@ import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.IRegulateHandler;
 import neatlogic.framework.process.stephandler.core.ProcessMessageManager;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.module.process.notify.handler.SlaNotifyPolicyHandler;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -99,6 +101,8 @@ public class SlaListRegulateHandler implements IRegulateHandler {
                         for (int j = 0; j < notifyPolicyList.size(); j++) {
                             SlaNotifyPolicyVo slaNotifyPolicyVo = notifyPolicyList.getObject(j, SlaNotifyPolicyVo.class);
                             if (slaNotifyPolicyVo != null) {
+                                InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = slaNotifyPolicyVo.getNotifyPolicyConfig();
+                                invokeNotifyPolicyConfigVo.setHandler(SlaNotifyPolicyHandler.class.getName());
                                 notifyPolicyArray.add(slaNotifyPolicyVo);
                             }
                         }
