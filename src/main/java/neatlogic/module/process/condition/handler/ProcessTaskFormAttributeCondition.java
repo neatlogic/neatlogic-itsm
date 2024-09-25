@@ -227,10 +227,9 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                     for (String valueTmp : valueTmpList) {
                         //如果需要分词，则搜索的时候关键字也需分词搜索
                         if (Boolean.TRUE.equals(formAttributeHandler.isNeedSliceWord())) {
-                            Set<String> sliceKeySet = null;
-                            sliceKeySet = FullTextIndexUtil.sliceKeyword(valueTmp);
+                            List<String> sliceKeySet = FullTextIndexUtil.sliceKeyword(valueTmp);
                             if (CollectionUtils.isNotEmpty(sliceKeySet)) {
-                                valueList.addAll(new ArrayList<>(sliceKeySet));
+                                valueList.addAll(sliceKeySet);
                             }
                         } else {//否则直接md5作为整体搜索
                             valueList.add(Md5Util.encryptMD5(valueTmp).toLowerCase(Locale.ROOT));
@@ -240,10 +239,9 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                     String valueTmp = valueObj.toString();
                     //如果需要分词，则搜索的时候关键字也需分词搜索
                     if (Boolean.TRUE.equals(formAttributeHandler.isNeedSliceWord())) {
-                        Set<String> sliceKeySet = null;
-                        sliceKeySet = FullTextIndexUtil.sliceKeyword(valueTmp);
+                        List<String> sliceKeySet = FullTextIndexUtil.sliceKeyword(valueTmp);
                         if (CollectionUtils.isNotEmpty(sliceKeySet)) {
-                            valueList.addAll(new ArrayList<>(sliceKeySet));
+                            valueList.addAll(sliceKeySet);
                         }
                     } else {//否则直接md5作为整体搜索
                         valueList.add(Md5Util.encryptMD5(valueTmp).toLowerCase(Locale.ROOT));
