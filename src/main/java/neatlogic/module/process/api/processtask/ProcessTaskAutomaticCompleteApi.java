@@ -52,7 +52,7 @@ public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
 	})
 	@Output({
-		@Param(name = "Status", type = ApiParamType.STRING, desc = "操作成功"),
+		@Param(name = "Status", type = ApiParamType.STRING, desc = "状态"),
 		@Param(name = "Message", type = ApiParamType.STRING, desc = "异常信息"),
 	})
 	@Description(desc = "流转自动化处理步骤")
