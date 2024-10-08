@@ -92,7 +92,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
     public JSONObject getChartConfig() {
         return new JSONObject() {
             {
-                this.put("icon", "tsfont-auto");
+                this.put("icon", "tsfont-duixiangcunchu");
                 this.put("shape", "L-rectangle-50%:R-rectangle-50%");
                 this.put("width", 68);
                 this.put("height", 40);
