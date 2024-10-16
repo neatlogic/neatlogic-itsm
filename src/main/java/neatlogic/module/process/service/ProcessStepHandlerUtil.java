@@ -912,7 +912,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
     public void saveForm(ProcessTaskStepVo currentProcessTaskStepVo) {
         Long processTaskId = currentProcessTaskStepVo.getProcessTaskId();
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-        if (processTaskFormVo == null) {
+        if (processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContent())) {
             // 工单没有表单直接返回
             return;
         }
@@ -943,8 +943,8 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         Map<String, FormAttributeVo> formExtendAttributeMap = new HashMap<>();
         Map<String, FormAttributeVo> formCustomExtendAttributeMap = new HashMap<>();
         List<FormAttributeVo> mainSceneFormAttributeList;
-        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-        JSONObject formConfig = JSON.parseObject(formContent);
+//        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+        JSONObject formConfig = JSON.parseObject(processTaskFormVo.getFormContent());
         String mainSceneUuid = formConfig.getString("uuid");
         {
             // 主场景的表单
@@ -989,7 +989,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
         formVersionVo.setFormName(processTaskFormVo.getFormName());
-        formVersionVo.setFormConfig(JSON.parseObject(formContent));
+        formVersionVo.setFormConfig(JSON.parseObject(processTaskFormVo.getFormContent()));
         Long processTaskStepId = currentProcessTaskStepVo.getId();
         if (currentProcessTaskStepVo.getId() != null) {
             if (StringUtils.isBlank(currentProcessTaskStepVo.getConfigHash())) {

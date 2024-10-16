@@ -258,10 +258,10 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         Map<String, Object> formAttributeDataMap = new HashMap<>();
         // 获取旧工单表单信息
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(fromProcessTaskId);
-        if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
-            String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-            if (StringUtils.isNotBlank(formContent)) {
-                JSONObject formConfig = JSON.parseObject(formContent);
+        if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContent())) {
+//            String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+//            if (StringUtils.isNotBlank(formContent)) {
+                JSONObject formConfig = JSON.parseObject(processTaskFormVo.getFormContent());
                 FormVersionVo fromFormVersion = new FormVersionVo();
                 fromFormVersion.setFormConfig(formConfig);
                 String mainSceneUuid = formConfig.getString("uuid");
@@ -279,7 +279,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                 for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
                     formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
                 }
-            }
+//            }
         }
         resultObj.put("labelUuidMap", labelUuidMap);
         resultObj.put("labelHandlerMap", labelHandlerMap);

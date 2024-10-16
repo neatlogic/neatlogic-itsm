@@ -160,11 +160,11 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                             if (StringUtils.isNotBlank(value)) {
                                 String format = "yyyy-MM-dd HH:mm";
                                 ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-                                if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
-                                    String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-                                    if (StringUtils.isNotBlank(formContent)) {
+                                if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContent())) {
+//                                    String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+//                                    if (StringUtils.isNotBlank(formContent)) {
                                         FormVersionVo fromFormVersion = new FormVersionVo();
-                                        fromFormVersion.setFormConfig(JSONObject.parseObject(formContent));
+                                        fromFormVersion.setFormConfig(JSONObject.parseObject(processTaskFormVo.getFormContent()));
                                         String mainSceneUuid = fromFormVersion.getFormConfig().getString("uuid");
                                         fromFormVersion.setSceneUuid(mainSceneUuid);
                                         List<FormAttributeVo> fromFormAttributeList = fromFormVersion.getFormAttributeList();
@@ -190,7 +190,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                                                 }
                                             }
                                         }
-                                    }
+//                                    }
                                 }
                                 SimpleDateFormat sdf = new SimpleDateFormat(format);
                                 try {
