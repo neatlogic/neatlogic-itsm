@@ -299,8 +299,10 @@
         SELECT a.`processtask_id`    as processTaskId,
                a.`form_uuid`         as formUuid,
                a.`form_name`         as formName,
-               a.`form_content_hash` as formContentHash
+               a.`form_content_hash` as formContentHash,
+               b.`content`           as formContent
         FROM `processtask_form` a
+        JOIN `processtask_form_content` b ON b.`hash` = a.`form_content_hash`
         WHERE a.`processtask_id` = #{value}
     </select>
 

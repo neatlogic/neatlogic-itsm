@@ -71,12 +71,12 @@
 		SELECT `content` FROM `processtask_form_content` WHERE `hash` = #{value}
 	</select>
 
-	<select id="getProcessTaskFromContentByProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.String">
+	<!--<select id="getProcessTaskFromContentByProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.String">
 		SELECT `content` FROM `processtask_form_content` a
 		JOIN `processtask_form` b on b.`form_content_hash` = a.`hash`
 		WHERE b.`processtask_id` = #{value}
 		LIMIT 1
-	</select>
+	</select>-->
 
 	<!--<select id="getProcessTaskFromContentCountByHash" parameterType="java.lang.String" resultType="int">
 		SELECT COUNT(1) FROM `processtask_form_content` WHERE `hash` = #{value}

@@ -80,14 +80,14 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
         }
         Long processTaskId = processTaskFormAttributeDataList.get(0).getProcessTaskId();
         ProcessTaskFormVo processTaskForm = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-        if (processTaskForm == null || StringUtils.isBlank(processTaskForm.getFormContentHash())) {
+        if (processTaskForm == null || StringUtils.isBlank(processTaskForm.getFormContent())) {
             return 0;
         }
-        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskForm.getFormContentHash());
+//        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskForm.getFormContentHash());
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setFormUuid(processTaskForm.getFormUuid());
         formVersionVo.setFormName(processTaskForm.getFormName());
-        formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
+        formVersionVo.setFormConfig(JSONObject.parseObject(processTaskForm.getFormContent()));
         String mainSceneUuid = formVersionVo.getFormConfig().getString("uuid");
         formVersionVo.setSceneUuid(mainSceneUuid);
         List<FormAttributeVo> mainSceneFormAttributeList = formVersionVo.getFormAttributeList();

@@ -74,13 +74,13 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
         if (processTaskFormVo == null) {
             return null;
         }
-        if (StringUtils.isBlank(processTaskFormVo.getFormContentHash())) {
+        if (StringUtils.isBlank(processTaskFormVo.getFormContent())) {
             return null;
         }
-        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-        if (StringUtils.isBlank(formContent)) {
-            return null;
-        }
+//        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+//        if (StringUtils.isBlank(formContent)) {
+//            return null;
+//        }
         Map<String, AttributeDataVo> attributeDataMap = new HashMap<>();
         List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(processTaskVo.getId());
         if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
@@ -88,7 +88,7 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
         }
         List<AttributeExtendedDataVo> attributeExtendedDataList = new ArrayList<>();
         FormVersionVo formVersionVo = new FormVersionVo();
-        formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
+        formVersionVo.setFormConfig(JSONObject.parseObject(processTaskFormVo.getFormContent()));
         String mainSceneUuid = formVersionVo.getFormConfig().getString("uuid");
         formVersionVo.setSceneUuid(mainSceneUuid);
         List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();

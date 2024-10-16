@@ -35,7 +35,7 @@ public interface SelectContentByHashMapper extends ISelectContentByHashCrossover
 
     String getProcessTaskFromContentByHash(String hash);
 
-    String getProcessTaskFromContentByProcessTaskId(Long processTaskId);
+//    String getProcessTaskFromContentByProcessTaskId(Long processTaskId);
 
 //    int getProcessTaskFromContentCountByHash(String hash);
 

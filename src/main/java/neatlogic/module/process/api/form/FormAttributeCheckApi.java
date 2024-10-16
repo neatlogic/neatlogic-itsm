@@ -89,17 +89,17 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 			}
 			worktimeUuid = processTaskVo.getWorktimeUuid();
 			ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-			if(processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContentHash())) {
+			if(processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContent())) {
 				return false;
 			}
-			String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-            if(StringUtils.isBlank(formContent)) {
-				return false;
-            }
+//			String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+//            if(StringUtils.isBlank(formContent)) {
+//				return false;
+//            }
 			formVersionVo = new FormVersionVo();
 			formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
 			formVersionVo.setFormName(processTaskFormVo.getFormName());
-			formVersionVo.setFormConfig(JSONObject.parseObject(formContent));
+			formVersionVo.setFormConfig(JSONObject.parseObject(processTaskFormVo.getFormContent()));
 			
 		}else if(StringUtils.isNotBlank(channelUuid)){
 			ChannelVo channelVo = channelMapper.getChannelByUuid(channelUuid);

@@ -281,9 +281,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     public void setProcessTaskFormInfo(ProcessTaskVo processTaskVo) {
         Long processTaskId = processTaskVo.getId();
         if (processTaskId != null) {
-            String formContent = selectContentByHashMapper.getProcessTaskFromContentByProcessTaskId(processTaskId);
-            if (StringUtils.isNotBlank(formContent)) {
-                processTaskVo.setFormConfig(JSON.parseObject(formContent));
+            ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
+//            String formContent = selectContentByHashMapper.getProcessTaskFromContentByProcessTaskId(processTaskId);
+            if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContent())) {
+                processTaskVo.setFormConfig(JSON.parseObject(processTaskFormVo.getFormContent()));
                 List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = getProcessTaskFormAttributeDataListByProcessTaskId(processTaskVo.getId());
                 for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
                     processTaskVo.getFormAttributeDataMap().put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
@@ -2171,12 +2172,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     public List<FormAttributeVo> getFormAttributeListByProcessTaskIdAngTag(Long processTaskId, String tag) {
         List<FormAttributeVo> resultList = new ArrayList<>();
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-        if (processTaskFormVo == null) {
+        if (processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContent())) {
             // 工单没有表单直接返回
             return resultList;
         }
-        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-        JSONObject config = JSON.parseObject(formContent);
+//        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+        JSONObject config = JSON.parseObject(processTaskFormVo.getFormContent());
         // 默认场景的表单
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
@@ -2213,12 +2214,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     public List<FormAttributeVo> getFormAttributeListByProcessTaskIdAngTagNew(Long processTaskId, String tag) {
         List<FormAttributeVo> resultList = new ArrayList<>();
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-        if (processTaskFormVo == null) {
+        if (processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContent())) {
             // 工单没有表单直接返回
             return resultList;
         }
-        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-        JSONObject config = JSON.parseObject(formContent);
+//        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+        JSONObject config = JSON.parseObject(processTaskFormVo.getFormContent());
         // 默认场景的表单
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
@@ -2277,12 +2278,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     @Override
     public List<ProcessTaskFormAttributeDataVo> getProcessTaskFormAttributeDataListByProcessTaskIdAndTagNew(Long processTaskId, String tag) {
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-        if (processTaskFormVo == null) {
+        if (processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContent())) {
             // 工单没有表单直接返回
             return new ArrayList<>();
         }
-        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-        JSONObject config = JSON.parseObject(formContent);
+//        String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+        JSONObject config = JSON.parseObject(processTaskFormVo.getFormContent());
         // 默认场景的表单
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
@@ -2652,12 +2653,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             checkProcessTaskParamsIsLegal(processTaskId);
             startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
             ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-            if (processTaskFormVo != null) {
-                String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+            if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContent())) {
+//                String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
                 formVersionVo = new FormVersionVo();
                 formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
                 formVersionVo.setFormName(processTaskFormVo.getFormName());
-                formVersionVo.setFormConfig(JSON.parseObject(formContent));
+                formVersionVo.setFormConfig(JSON.parseObject(processTaskFormVo.getFormContent()));
             }
         } else {
             /* 判断当前用户是否拥有channelUuid服务的上报权限 **/
