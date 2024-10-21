@@ -40,11 +40,12 @@ import neatlogic.framework.process.workcenter.table.ProcessTaskStepWorkerSqlTabl
 import neatlogic.framework.process.workcenter.table.util.SqlTableUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.*;
 
-//@Component
+@Component
 public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     @Resource
     TeamMapper teamMapper;
@@ -240,5 +241,10 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
     @Override
     public List<JoinTableColumnVo> getMyJoinTableColumnList(SqlDecoratorVo sqlDecoratorVo) {
         return SqlTableUtil.getStepUserJoinTableSql();
+    }
+
+    @Override
+    public boolean isShow(JSONObject jsonObj, String type) {
+        return false;
     }
 }
