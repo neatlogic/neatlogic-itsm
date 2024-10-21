@@ -2,6 +2,7 @@ package neatlogic.module.process.matrix.handler;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.matrix.constvalue.SearchExpression;
 import neatlogic.framework.matrix.core.IMatrixPrivateDataSourceHandler;
 import neatlogic.framework.matrix.dto.MatrixAttributeVo;
 import neatlogic.framework.matrix.dto.MatrixDataVo;
@@ -9,12 +10,10 @@ import neatlogic.framework.matrix.dto.MatrixFilterVo;
 import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMatrixPrivateDataSourceHandler {
@@ -91,16 +90,52 @@ public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMat
         return dataList;
     }
 
-    private Boolean checkFilter(ProcessTaskStepStatus type , List<MatrixFilterVo> filterList){
-        boolean isContain = false ;
-        flag:for (MatrixFilterVo filter : filterList) {
-            for(String value:filter.getValueList()){
-                if(type.getText().contains(value) || type.getValue().contains(value)){
-                    isContain = true ;
-                    break flag;
+    private Boolean checkFilter(ProcessTaskStepStatus status , List<MatrixFilterVo> filterList) {
+        for (MatrixFilterVo filter : filterList) {
+            String label = null;
+            for (MatrixAttributeVo matrixAttributeVo : matrixAttributeList) {
+                if (Objects.equals(matrixAttributeVo.getUuid(), filter.getUuid())) {
+                    label = matrixAttributeVo.getLabel();
+                }
+            }
+            String statusValue = null;
+            if (Objects.equals(label, "status")) {
+                statusValue = status.getValue();
+            } else if (Objects.equals(label, "statusText")) {
+                statusValue = status.getText();
+            } else {
+                continue;
+            }
+            String expression = filter.getExpression();
+            if (StringUtils.isBlank(expression)) {
+                expression = SearchExpression.EQ.getExpression();
+            }
+            if (Objects.equals(expression, SearchExpression.EQ.getExpression())) {
+                if (!Objects.equals(filter.getValueList().get(0), statusValue)) {
+                    return false;
+                }
+            } else if (Objects.equals(expression, SearchExpression.NE.getExpression())) {
+                if (Objects.equals(filter.getValueList().get(0), statusValue)) {
+                    return false;
+                }
+            } else if (Objects.equals(expression, SearchExpression.LI.getExpression())) {
+                if (!statusValue.contains(filter.getValueList().get(0))) {
+                    return false;
+                }
+            } else if (Objects.equals(expression, SearchExpression.NL.getExpression())) {
+                if (statusValue.contains(filter.getValueList().get(0))) {
+                    return false;
+                }
+            }else if (Objects.equals(expression, SearchExpression.NULL.getExpression())) {
+                if (StringUtils.isNotBlank(statusValue)) {
+                    return false;
+                }
+            } else if (Objects.equals(expression, SearchExpression.NOTNULL.getExpression())) {
+                if (StringUtils.isBlank(statusValue)) {
+                    return false;
                 }
             }
         }
-        return isContain;
+        return true;
     }
 }
