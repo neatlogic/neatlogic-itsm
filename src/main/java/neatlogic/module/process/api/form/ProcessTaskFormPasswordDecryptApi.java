@@ -24,6 +24,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeDataConversionHandler;
+import neatlogic.framework.form.constvalue.FormHandler;
 import neatlogic.framework.form.dto.FormAttributeParentVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
@@ -42,7 +43,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -80,13 +80,72 @@ public class ProcessTaskFormPasswordDecryptApi extends PrivateApiComponentBase {
         if (processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContent())) {
             return resultObj;
         }
+        List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(processTaskId);
+        if (CollectionUtils.isEmpty(processTaskFormAttributeDataList)) {
+            return resultObj;
+        }
+
+        JSONObject passwordDecryptionObj = null;
         String formAttributeUuid = paramObj.getString("formAttributeUuid");
+        JSONObject otherParamConfig = paramObj.getJSONObject("otherParamConfig");
+        String rowUuid = otherParamConfig.getString("rowUuid");
+        for (ProcessTaskFormAttributeDataVo processTaskFormAttributeData : processTaskFormAttributeDataList) {
+            if (StringUtils.isBlank(processTaskFormAttributeData.getData())) {
+                continue;
+            }
+            IFormAttributeDataConversionHandler formAttributeDataConversionHandler = FormAttributeDataConversionHandlerFactory.getHandler(processTaskFormAttributeData.getHandler());
+            if (formAttributeDataConversionHandler == null) {
+                continue;
+            }
+            if (StringUtils.isNotBlank(rowUuid)) {
+                if (processTaskFormAttributeData.getData().contains(rowUuid)) {
+                    if (Objects.equals(processTaskFormAttributeData.getHandler(), FormHandler.FORMTABLEINPUTER.getHandler())
+                            || Objects.equals(processTaskFormAttributeData.getHandler(), FormHandler.FORMSUBASSEMBLY.getHandler())) {
+                        passwordDecryptionObj = formAttributeDataConversionHandler.passwordDecryption(processTaskFormAttributeData.getDataObj(), formAttributeUuid, otherParamConfig);
+                        if (MapUtils.isNotEmpty(passwordDecryptionObj)) {
+                            JSONArray parentUuidList = passwordDecryptionObj.getJSONArray("parentUuidList");
+                            if (parentUuidList == null) {
+                                parentUuidList = new JSONArray();
+                                passwordDecryptionObj.put("parentUuidList", parentUuidList);
+                            }
+                            parentUuidList.add(processTaskFormAttributeData.getAttributeUuid());
+                        }
+                    }
+                }
+            } else {
+                if (Objects.equals(processTaskFormAttributeData.getHandler(), FormHandler.FORMPASSWORD.getHandler())) {
+                    if (Objects.equals(processTaskFormAttributeData.getAttributeUuid(), formAttributeUuid)) {
+                        passwordDecryptionObj = formAttributeDataConversionHandler.passwordDecryption(processTaskFormAttributeData.getDataObj(), formAttributeUuid, otherParamConfig);
+                    }
+                }
+            }
+            if (MapUtils.isNotEmpty(passwordDecryptionObj)) {
+                break;
+            }
+        }
+        if (MapUtils.isEmpty(passwordDecryptionObj)) {
+            return resultObj;
+        }
+        JSONArray parentUuidList = passwordDecryptionObj.getJSONArray("parentUuidList");
         FormAttributeVo formAttributeVo = null;
         List<FormAttributeVo> allFormAttributeList = FormUtil.getAllFormAttributeList(processTaskFormVo.getFormContent());
         for (FormAttributeVo formAttribute : allFormAttributeList) {
             if (Objects.equals(formAttribute.getUuid(), formAttributeUuid)) {
-                formAttributeVo = formAttribute;
-                break;
+                boolean flag = true;
+                FormAttributeParentVo parent = formAttribute.getParent();
+                while (parent != null) {
+                    if (!Objects.equals(parent.getHandler(), FormHandler.FORMTAB.getHandler()) && !Objects.equals(parent.getHandler(), FormHandler.FORMCOLLAPSE.getHandler())) {
+                        if (!parentUuidList.contains(parent.getUuid())){
+                            flag = false;
+                            break;
+                        }
+                    }
+                    parent = parent.getParent();
+                }
+                if (flag) {
+                    formAttributeVo = formAttribute;
+                    break;
+                }
             }
         }
         if (formAttributeVo == null) {
@@ -129,30 +188,8 @@ public class ProcessTaskFormPasswordDecryptApi extends PrivateApiComponentBase {
             resultObj.put("error", $.t("nmpaf.processtaskformpassworddecryptapi.nopermissiontoviewpassword"));
             return resultObj;
         }
-        List<FormAttributeParentVo> parentList = new ArrayList<>();
-        FormAttributeParentVo parent = formAttributeVo.getParent();
-        while (parent != null) {
-            parentList.add(0, parent);
-            parent = parent.getParent();
-        }
-        FormAttributeVo formAttributeVo2 = null;
-        if (CollectionUtils.isNotEmpty(parentList)) {
-            for (FormAttributeVo formAttribute : allFormAttributeList) {
-                if (Objects.equals(formAttribute.getUuid(), parentList.get(0).getUuid())) {
-                    formAttributeVo2 = formAttribute;
-                    break;
-                }
-            }
-        } else {
-            formAttributeVo2 = formAttributeVo;
-        }
-        ProcessTaskFormAttributeDataVo processTaskFormAttributeData = processTaskService.getProcessTaskFormAttributeDataByProcessTaskIdAndAttributeUuid(processTaskId, formAttributeVo2.getUuid());
-        IFormAttributeDataConversionHandler formAttributeDataConversionHandler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo2.getHandler());
-        if (formAttributeDataConversionHandler != null) {
-            JSONObject otherParamConfig = paramObj.getJSONObject("otherParamConfig");
-            String result = formAttributeDataConversionHandler.passwordDecryption(processTaskFormAttributeData.getDataObj(), formAttributeVo2.getConfig(), formAttributeUuid, otherParamConfig);
-            resultObj.put("password", result);
-        }
+        String password = passwordDecryptionObj.getString("password");
+        resultObj.put("password", password);
         return resultObj;
     }
 
@@ -160,4 +197,89 @@ public class ProcessTaskFormPasswordDecryptApi extends PrivateApiComponentBase {
     public String getToken() {
         return "processtask/form/password/decrypt";
     }
+
+//    private JSONObject back(JSONObject paramObj) {
+//        JSONObject resultObj = new JSONObject();
+//        Long processTaskId = paramObj.getLong("processTaskId");
+//        ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
+//        if (processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContent())) {
+//            return resultObj;
+//        }
+//        String formAttributeUuid = paramObj.getString("formAttributeUuid");
+//        FormAttributeVo formAttributeVo = null;
+//        List<FormAttributeVo> allFormAttributeList = FormUtil.getAllFormAttributeList(processTaskFormVo.getFormContent());
+//        for (FormAttributeVo formAttribute : allFormAttributeList) {
+//            if (Objects.equals(formAttribute.getUuid(), formAttributeUuid)) {
+//                formAttributeVo = formAttribute;
+//                break;
+//            }
+//        }
+//        if (formAttributeVo == null) {
+//            resultObj.put("error", $.t("nffe.formattributenotfoundexception.formattributenotfoundexception_a", formAttributeUuid));
+//            return resultObj;
+//        }
+//        boolean flag = false;
+//        JSONObject config = formAttributeVo.getConfig();
+//        if (MapUtils.isNotEmpty(config)) {
+//            JSONArray viewAuthorityList = config.getJSONArray("viewPasswordAuthorityList");
+//            if (CollectionUtils.isNotEmpty(viewAuthorityList)) {
+//                String userUuid = UserContext.get().getUserUuid();
+//                List<String> teamUuidList = UserContext.get().getTeamUuidList();
+//                List<String> roleUuidList = UserContext.get().getRoleUuidList();
+//                for (int i = 0; i < viewAuthorityList.size(); i++) {
+//                    String viewAuthority = viewAuthorityList.getString(i);
+//                    if (StringUtils.isNotBlank(viewAuthority)) {
+//                        String[] split = viewAuthority.split("#");
+//                        if (Objects.equals(split[0], "user")) {
+//                            if (Objects.equals(split[1], userUuid)) {
+//                                flag = true;
+//                                break;
+//                            }
+//                        } else if (Objects.equals(split[0], "team")) {
+//                            if (teamUuidList.contains(split[1])) {
+//                                flag = true;
+//                                break;
+//                            }
+//                        } else if (Objects.equals(split[0], "role")) {
+//                            if (roleUuidList.contains(split[1])) {
+//                                flag = true;
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        if (!flag) {
+//            resultObj.put("error", $.t("nmpaf.processtaskformpassworddecryptapi.nopermissiontoviewpassword"));
+//            return resultObj;
+//        }
+//        List<FormAttributeParentVo> parentList = new ArrayList<>();
+//        FormAttributeParentVo parent = formAttributeVo.getParent();
+//        while (parent != null) {
+//            if (!Objects.equals(parent.getHandler(), FormHandler.FORMTAB.getHandler()) && !Objects.equals(parent.getHandler(), FormHandler.FORMCOLLAPSE.getHandler())) {
+//                parentList.add(0, parent);
+//            }
+//            parent = parent.getParent();
+//        }
+//        FormAttributeVo formAttributeVo2 = null;
+//        if (CollectionUtils.isNotEmpty(parentList)) {
+//            for (FormAttributeVo formAttribute : allFormAttributeList) {
+//                if (Objects.equals(formAttribute.getUuid(), parentList.get(0).getUuid())) {
+//                    formAttributeVo2 = formAttribute;
+//                    break;
+//                }
+//            }
+//        } else {
+//            formAttributeVo2 = formAttributeVo;
+//        }
+//        ProcessTaskFormAttributeDataVo processTaskFormAttributeData = processTaskService.getProcessTaskFormAttributeDataByProcessTaskIdAndAttributeUuid(processTaskId, formAttributeVo2.getUuid());
+//        IFormAttributeDataConversionHandler formAttributeDataConversionHandler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo2.getHandler());
+//        if (formAttributeDataConversionHandler != null) {
+//            JSONObject otherParamConfig = paramObj.getJSONObject("otherParamConfig");
+//            String result = formAttributeDataConversionHandler.passwordDecryption(processTaskFormAttributeData.getDataObj(), formAttributeVo2.getConfig(), formAttributeUuid, otherParamConfig);
+//            resultObj.put("password", result);
+//        }
+//        return resultObj;
+//    }
 }
