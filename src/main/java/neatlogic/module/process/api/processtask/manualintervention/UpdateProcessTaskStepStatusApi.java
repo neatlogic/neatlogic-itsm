@@ -26,7 +26,7 @@ import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.exception.user.UserNotFoundException;
-import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.processtask.*;
@@ -50,7 +50,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 @Service
-@AuthAction(action = PROCESS_BASE.class)
+@AuthAction(action = PROCESSTASK_MODIFY.class)
 @Transactional
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class UpdateProcessTaskStepStatusApi extends PrivateApiComponentBase {//

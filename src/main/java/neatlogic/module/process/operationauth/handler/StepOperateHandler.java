@@ -1049,49 +1049,4 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
         return operationBiPredicateMap;
     }
 
-//    @Override
-//    public Boolean getOperateMap(ProcessTaskVo processTaskVo, String userUuid, IOperationType operationType, Map<Long, Map<IOperationType, ProcessTaskPermissionDeniedException>> operationTypePermissionDeniedExceptionMap, Map<Long, JSONObject> extraParamMap, Set<Long> processTaskStepIdSet) {
-//        if (CollectionUtils.isNotEmpty(processTaskStepIdSet)) {
-//            for (ProcessTaskStepVo processTaskStepVo : processTaskVo.getStepList()) {
-//                if (processTaskStepIdSet.contains(processTaskStepVo.getId())) {
-//                    JSONObject extraParam = extraParamMap.computeIfAbsent(processTaskStepVo.getId(), key -> new JSONObject());
-//                    Boolean result = null;
-//                    IOperationAuthHandler handler = OperationAuthHandlerFactory.getHandler(processTaskStepVo.getHandler());
-//                    if (handler != null) {
-//                        result = handler.getOperateMap(processTaskVo, processTaskStepVo, userUuid, operationType, operationTypePermissionDeniedExceptionMap, extraParam);
-//                    }
-//                    if(result == null || result) {
-//                        result = operationAuthHandler.getOperateMap(processTaskVo, processTaskStepVo, userUuid, operationType, operationTypePermissionDeniedExceptionMap, extraParam);
-//                        if (result == null) {
-//                            result = false;
-//                        }
-//                    }
-//                    if (result) {
-//                        resultMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashSet<>()).add(operationType);
-//                    } else {
-//                        /** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
-//                        List<String> fromUuidList = getFromUuidListByChannelUuid(processTaskVo.getChannelUuid(), userUuid);
-//                        if (CollectionUtils.isNotEmpty(fromUuidList)) {
-//                            result = null;
-//                            for (String fromUuid : fromUuidList) {
-//                                if (handler != null) {
-//                                    result = handler.getOperateMap(processTaskVo, processTaskStepVo, fromUuid, operationType, operationTypePermissionDeniedExceptionMap, extraParam);
-//                                }
-//                                if(result == null || result) {
-//                                    result = operationAuthHandler.getOperateMap(processTaskVo, processTaskStepVo, fromUuid, operationType, operationTypePermissionDeniedExceptionMap, extraParam);
-//                                    if (result == null) {
-//                                        result = false;
-//                                    }
-//                                }
-//                                if (result) {
-//                                    resultMap.computeIfAbsent(processTaskStepVo.getId(), key -> new HashSet<>()).add(operationType);
-//                                    break;
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
 }
