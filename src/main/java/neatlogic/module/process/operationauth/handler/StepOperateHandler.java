@@ -13,20 +13,26 @@ import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.operationauth.*;
-import neatlogic.framework.process.operationauth.core.*;
+import neatlogic.framework.process.operationauth.core.IOperationType;
+import neatlogic.framework.process.operationauth.core.OperationAuthHandlerBase;
+import neatlogic.framework.process.operationauth.core.OperationAuthHandlerType;
+import neatlogic.framework.process.operationauth.core.TernaryPredicate;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class StepOperateHandler extends OperationAuthHandlerBase {
 
     private final Map<IOperationType,
-        TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<IOperationType, ProcessTaskPermissionDeniedException>>, JSONObject>> operationBiPredicateMap = new HashMap<>();
+            TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<IOperationType, ProcessTaskPermissionDeniedException>>, JSONObject>> operationBiPredicateMap = new HashMap<>();
 
     @Resource
     private UserMapper userMapper;
