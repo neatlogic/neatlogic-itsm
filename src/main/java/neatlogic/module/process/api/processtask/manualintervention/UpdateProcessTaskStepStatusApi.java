@@ -1,37 +1,24 @@
-/*Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+/*
+ * Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
-
-
-package neatlogic.module.process.api.processtask;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Consumer;
-
-import neatlogic.framework.process.constvalue.*;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+package neatlogic.module.process.api.processtask.manualintervention;
 
 import com.alibaba.fastjson.JSONObject;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.GroupSearch;
@@ -40,29 +27,33 @@ import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.framework.process.dto.ProcessTaskStepRelVo;
-import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
-import neatlogic.framework.process.dto.ProcessTaskVo;
-import neatlogic.framework.process.exception.processtask.ProcessTaskNextStepIllegalException;
-import neatlogic.framework.process.exception.processtask.ProcessTaskNextStepNameOrIdUnAssignException;
-import neatlogic.framework.process.exception.processtask.ProcessTaskStepFoundMultipleException;
-import neatlogic.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import neatlogic.framework.process.exception.processtask.ProcessTaskStepUserUnAssignException;
+import neatlogic.framework.process.constvalue.*;
+import neatlogic.framework.process.dto.*;
+import neatlogic.framework.process.exception.processtask.*;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @Transactional
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class ProcessTaskStepStatusChangeApi extends PrivateApiComponentBase {
+public class UpdateProcessTaskStepStatusApi extends PrivateApiComponentBase {//
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
@@ -72,12 +63,12 @@ public class ProcessTaskStepStatusChangeApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "processtask/step/status/change";
+        return "manualintervention/processtask/step/status/update";
     }
 
     @Override
     public String getName() {
-        return "手动更改工单步骤状态";
+        return "nmpapm.updateprocesstaskstepstatusapi.getname";
     }
 
     @Override
@@ -86,15 +77,15 @@ public class ProcessTaskStepStatusChangeApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id"),
-            @Param(name = "processTaskStepName", type = ApiParamType.STRING, desc = "工单步骤名称"),
-            @Param(name = "processTaskNextStepName", type = ApiParamType.STRING, desc = "需要激活的下一步骤名称(更改步骤状态为succeed时需要填此参数)"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤Id(待更改状态的步骤名称重复时需要填此参数。此参数存在时，无需填processTaskId与processTaskStepName)"),
-            @Param(name = "processTaskNextStepId", type = ApiParamType.LONG, desc = "下一步工单步骤Id(待激活的下一步骤名称重复时需要填此参数。此参数存在时，无需填processTaskNextStepName)"),
-            @Param(name = "status", type = ApiParamType.ENUM, rule = "pending,running,succeed,hang", isRequired = true, desc = "工单步骤状态"),
-            @Param(name = "userId", type = ApiParamType.STRING, desc = "处理人userId"),
+            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid"),
+            @Param(name = "processTaskStepName", type = ApiParamType.STRING, desc = "term.itsm.processtaskstepname"),
+            @Param(name = "processTaskNextStepName", type = ApiParamType.STRING, desc = "term.itsm.processtasknextstepname", help = "更改步骤状态为succeed时需要填此参数"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "term.itsm.processtaskstepid", help = "待更改状态的步骤名称重复时需要填此参数。此参数存在时，无需填processTaskId与processTaskStepName"),
+            @Param(name = "processTaskNextStepId", type = ApiParamType.LONG, desc = "term.itsm.processtasknextstepid", help = "待激活的下一步骤名称重复时需要填此参数。此参数存在时，无需填processTaskNextStepName"),
+            @Param(name = "status", type = ApiParamType.ENUM, rule = "pending,running,succeed,hang", isRequired = true, desc = "common.status"),
+            @Param(name = "userId", type = ApiParamType.STRING, desc = "common.userid"),
     })
-    @Description(desc = "手动更改工单步骤状态")
+    @Description(desc = "nmpapm.updateprocesstaskstepstatusapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");

@@ -3893,6 +3893,21 @@
         WHERE `id` = #{id}
     </update>
 
+    <update id="updateProcessTaskConfigHashById">
+        UPDATE `processtask`
+        SET
+            `config_hash` = #{configHash}
+            WHERE `id` = #{id}
+    </update>
+
+    <update id="updateProcessTaskStepConfigHashByProcessTaskIdAndProcessStepUuid">
+        UPDATE `processtask_step`
+        SET
+            `config_hash` = #{configHash}
+        WHERE `processtask_id` = #{processTaskId}
+          AND `process_step_uuid` = #{processStepUuid}
+    </update>
+
     <delete id="deleteProcessTaskConvergeByStepId" parameterType="java.lang.Long">
         DELETE
         FROM `processtask_converge`
@@ -4145,5 +4160,11 @@
         DELETE
         FROM `processtask_form_content`
         WHERE `hash` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepWorkerPolicyByProcessTaskStepId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_step_worker_policy`
+        WHERE `processtask_step_id` = #{value}
     </delete>
 </mapper>
