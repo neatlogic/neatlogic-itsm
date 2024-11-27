@@ -32,7 +32,7 @@ import java.util.Objects;
 public class StepOperateHandler extends OperationAuthHandlerBase {
 
     private final Map<IOperationType,
-            TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<IOperationType, ProcessTaskPermissionDeniedException>>, JSONObject>> operationBiPredicateMap = new HashMap<>();
+        TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String, Map<Long, Map<IOperationType, ProcessTaskPermissionDeniedException>>, JSONObject>> operationBiPredicateMap = new HashMap<>();
 
     @Resource
     private UserMapper userMapper;
