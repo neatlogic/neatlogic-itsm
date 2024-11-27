@@ -528,6 +528,10 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     int updateProcessTaskIsDeletedById(@Param("id") Long id, @Param("isDeleted") Integer isDeleted);
 
+    int updateProcessTaskConfigHashById(@Param("id") Long id, @Param("configHash") String configHash);
+
+    int updateProcessTaskStepConfigHashByProcessTaskIdAndProcessStepUuid(@Param("processTaskId") Long processTaskId, @Param("processStepUuid") String processStepUuid, @Param("configHash") String configHash);
+
     int deleteProcessTaskFormAttributeByProcessTaskId(Long processTaskId);
 
     int deleteProcessTaskExtendFormAttributeByProcessTaskId(Long processTaskId);
@@ -594,4 +598,6 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
     int deleteProcessTaskTimeCostByProcessTaskId(Long processTaskId);
 
     int deleteProcessTaskFormContentByHash(String hash);
+
+    int deleteProcessTaskStepWorkerPolicyByProcessTaskStepId(Long processTaskStepId);
 }
