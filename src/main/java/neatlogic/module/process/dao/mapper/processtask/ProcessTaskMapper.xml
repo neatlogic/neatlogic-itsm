@@ -4046,7 +4046,7 @@
     </delete>
 
     <delete id="deleteProcessTaskStepByProcessTaskId" parameterType="java.lang.Long">
-        DELETE ps,psa,psau,psaud,psc,psd,psf,psr,psrl,pss,pst,psu,psw,pswp
+        DELETE ps,psa,psau,psaud,psc,psd,psr,psrl,pss,pst,psu,psw,pswp
         FROM `processtask_step` ps
                  LEFT JOIN
              `processtask_step_agent` psa
