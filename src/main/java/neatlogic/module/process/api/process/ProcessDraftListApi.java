@@ -1,6 +1,5 @@
 package neatlogic.module.process.api.process;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
@@ -49,12 +48,11 @@ public class ProcessDraftListApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String processUuid = jsonObj.getString("processUuid");
-		if (StringUtils.isBlank(processUuid)) {
-			return new JSONArray();
-		}
 		ProcessDraftVo processDraftVo = new ProcessDraftVo();
 		processDraftVo.setFcu(UserContext.get().getUserUuid(true));
-		processDraftVo.setProcessUuid(processUuid);
+		if (StringUtils.isNotBlank(processUuid)) {
+			processDraftVo.setProcessUuid(processUuid);
+		}
 		return processMapper.getProcessDraftList(processDraftVo);
 	}
 
