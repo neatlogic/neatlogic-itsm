@@ -40,6 +40,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,7 +88,7 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
         processTaskMapper.insertIgnoreProcessTaskConfig(processTaskConfigVo);
         processTaskMapper.updateProcessTaskConfigHashById(processTaskId, configHash);
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
-        Map<String, Long> processStepUuid2IdMap = processTaskStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getProcessStepUuid, ProcessTaskStepVo::getId));
+        Map<String, ProcessTaskStepVo> processTaskStepMap = processTaskStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getProcessStepUuid, e -> e));
         JSONObject config = JSONObject.parseObject(configStr);
         JSONObject process = config.getJSONObject("process");
         JSONArray stepList = process.getJSONArray("stepList");
@@ -96,40 +97,47 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
                 JSONObject stepObj = stepList.getJSONObject(i);
                 if (MapUtils.isNotEmpty(stepObj)) {
                     String uuid = stepObj.getString("uuid");
-                    Long processTaskStepId = processStepUuid2IdMap.get(uuid);
-                    if (processTaskStepId == null) {
+                    ProcessTaskStepVo processTaskStepVo = processTaskStepMap.get(uuid);
+                    if (processTaskStepVo == null) {
                         continue;
                     }
+                    Long processTaskStepId = processTaskStepVo.getId();
+                    String name = stepObj.getString("name");
                     JSONObject stepConfigObj = stepObj.getJSONObject("stepConfig");
                     String stepConfig = stepConfigObj.toJSONString();
                     String stepConfigHash = DigestUtils.md5DigestAsHex(stepConfig.getBytes());
-                    processTaskMapper.insertIgnoreProcessTaskStepConfig(new ProcessTaskStepConfigVo(stepConfigHash, stepConfig));
-                    processTaskMapper.updateProcessTaskStepConfigHashByProcessTaskIdAndProcessStepUuid(processTaskId, uuid, stepConfigHash);
-                    processTaskMapper.deleteProcessTaskStepWorkerPolicyByProcessTaskStepId(processTaskStepId);
-                    JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-                    if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-                        JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
-                        if (CollectionUtils.isNotEmpty(policyList)) {
-                            List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
-                            for (int k = 0; k < policyList.size(); k++) {
-                                JSONObject policyObj = policyList.getJSONObject(k);
-                                if (!"1".equals(policyObj.getString("isChecked"))) {
-                                    continue;
+                    if (Objects.equals(name, processTaskStepVo.getName()) && Objects.equals(stepConfigHash, processTaskStepVo.getConfigHash())) {
+                        continue;
+                    }
+                    if (!Objects.equals(stepConfigHash, processTaskStepVo.getConfigHash())) {
+                        processTaskMapper.insertIgnoreProcessTaskStepConfig(new ProcessTaskStepConfigVo(stepConfigHash, stepConfig));
+                        processTaskMapper.deleteProcessTaskStepWorkerPolicyByProcessTaskStepId(processTaskStepId);
+                        JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+                        if (MapUtils.isNotEmpty(workerPolicyConfig)) {
+                            JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
+                            if (CollectionUtils.isNotEmpty(policyList)) {
+                                List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
+                                for (int k = 0; k < policyList.size(); k++) {
+                                    JSONObject policyObj = policyList.getJSONObject(k);
+                                    if (!"1".equals(policyObj.getString("isChecked"))) {
+                                        continue;
+                                    }
+                                    ProcessTaskStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
+                                    processStepWorkerPolicyVo.setProcessTaskId(processTaskId);
+                                    processStepWorkerPolicyVo.setProcessTaskStepId(processTaskStepId);
+                                    processStepWorkerPolicyVo.setProcessStepUuid(uuid);
+                                    processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
+                                    processStepWorkerPolicyVo.setSort(k + 1);
+                                    processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
+                                    workerPolicyList.add(processStepWorkerPolicyVo);
                                 }
-                                ProcessTaskStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
-                                processStepWorkerPolicyVo.setProcessTaskId(processTaskId);
-                                processStepWorkerPolicyVo.setProcessTaskStepId(processTaskStepId);
-                                processStepWorkerPolicyVo.setProcessStepUuid(uuid);
-                                processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
-                                processStepWorkerPolicyVo.setSort(k + 1);
-                                processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
-                                workerPolicyList.add(processStepWorkerPolicyVo);
-                            }
-                            if (CollectionUtils.isNotEmpty(workerPolicyList)) {
-                                processTaskMapper.insertProcessTaskStepWorkerPolicyList(workerPolicyList);
+                                if (CollectionUtils.isNotEmpty(workerPolicyList)) {
+                                    processTaskMapper.insertProcessTaskStepWorkerPolicyList(workerPolicyList);
+                                }
                             }
                         }
                     }
+                    processTaskMapper.updateProcessTaskStepNameAndConfigHashByProcessTaskIdAndProcessStepUuid(processTaskId, uuid, name, stepConfigHash);
                 }
             }
         }

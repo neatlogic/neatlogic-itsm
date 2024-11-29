@@ -3900,9 +3900,10 @@
             WHERE `id` = #{id}
     </update>
 
-    <update id="updateProcessTaskStepConfigHashByProcessTaskIdAndProcessStepUuid">
+    <update id="updateProcessTaskStepNameAndConfigHashByProcessTaskIdAndProcessStepUuid">
         UPDATE `processtask_step`
         SET
+            `name` = #{name},
             `config_hash` = #{configHash}
         WHERE `processtask_id` = #{processTaskId}
           AND `process_step_uuid` = #{processStepUuid}

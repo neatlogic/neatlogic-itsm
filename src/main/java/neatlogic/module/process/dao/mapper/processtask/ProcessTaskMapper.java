@@ -530,7 +530,7 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     int updateProcessTaskConfigHashById(@Param("id") Long id, @Param("configHash") String configHash);
 
-    int updateProcessTaskStepConfigHashByProcessTaskIdAndProcessStepUuid(@Param("processTaskId") Long processTaskId, @Param("processStepUuid") String processStepUuid, @Param("configHash") String configHash);
+    int updateProcessTaskStepNameAndConfigHashByProcessTaskIdAndProcessStepUuid(@Param("processTaskId") Long processTaskId, @Param("processStepUuid") String processStepUuid, @Param("name") String name, @Param("configHash") String configHash);
 
     int deleteProcessTaskFormAttributeByProcessTaskId(Long processTaskId);
 
