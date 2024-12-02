@@ -3029,6 +3029,8 @@
                 #{formUuid},
                 #{formName},
                 #{formContentHash})
+        ON DUPLICATE KEY
+        UPDATE `form_content_hash` = #{formContentHash}
     </insert>
 
     <insert id="insertIgnoreProcessTaskFormContent" parameterType="neatlogic.framework.process.dto.ProcessTaskFormVo">
