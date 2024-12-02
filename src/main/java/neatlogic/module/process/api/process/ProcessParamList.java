@@ -5,23 +5,25 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.ParamType;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.form.dto.FormVo;
-import neatlogic.framework.form.exception.FormNotFoundException;
-import neatlogic.framework.form.service.IFormCrossoverService;
-import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.condition.core.IConditionHandler;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dto.ConditionParamVo;
 import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.FormAttributeVo;
+import neatlogic.framework.form.dto.FormVo;
+import neatlogic.framework.form.exception.FormNotFoundException;
+import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.constvalue.ProcessTaskParams;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.service.ProcessTaskService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,9 @@ public class ProcessParamList extends PrivateApiComponentBase {
 
     @Resource
     private FormMapper formMapper;
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @Override
     public String getToken() {
@@ -52,6 +57,7 @@ public class ProcessParamList extends PrivateApiComponentBase {
     }
 
     @Input({
+            @Param(name = "processTaskId", type = ApiParamType.STRING, desc = "term.itsm.processtaskid"),
             @Param(name = "formUuid", type = ApiParamType.STRING, desc = "term.framework.formuuid"),
             @Param(name = "tag", type = ApiParamType.STRING, desc = "common.tag"),
             @Param(name = "isAll", type = ApiParamType.INTEGER, rule = "0,1", desc = "term.process.isreturnallattr")
@@ -91,19 +97,26 @@ public class ProcessParamList extends PrivateApiComponentBase {
 //        param.setType("common");
 //        resultArray.add(param);
 
-        // 表单条件
-        String formUuid = jsonObj.getString("formUuid");
-        if (StringUtils.isNotBlank(formUuid)) {
-            FormVo form = formMapper.getFormByUuid(formUuid);
-            if (form == null) {
-                throw new FormNotFoundException(formUuid);
+        List<FormAttributeVo> formAttributeList = null;
+        String tag = jsonObj.getString("tag");
+        Long processTaskId = jsonObj.getLong("processTaskId");
+        if (processTaskId != null) {
+            formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTagNew(processTaskId, tag);
+        } else {
+            // 表单条件
+            String formUuid = jsonObj.getString("formUuid");
+            if (StringUtils.isNotBlank(formUuid)) {
+                FormVo form = formMapper.getFormByUuid(formUuid);
+                if (form == null) {
+                    throw new FormNotFoundException(formUuid);
+                }
+                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+                formAttributeList = formCrossoverService.getFormAttributeListNew(formUuid, form.getName(), tag);
             }
+        }
+        if (CollectionUtils.isNotEmpty(formAttributeList)) {
             Integer isAll = jsonObj.getInteger("isAll");
-            String tag = jsonObj.getString("tag");
-            IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-            List<FormAttributeVo> formAttrList = formCrossoverService.getFormAttributeListNew(formUuid, form.getName(), tag);
-//            List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
-            for (FormAttributeVo formAttributeVo : formAttrList) {
+            for (FormAttributeVo formAttributeVo : formAttributeList) {
                 IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                 if(formHandler == null){
                     continue;

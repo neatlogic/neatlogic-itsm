@@ -24,6 +24,7 @@ import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,9 @@ public class ProcessConditionList extends PrivateApiComponentBase {
 
     @Resource
     private FormMapper formMapper;
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @Override
     public String getToken() {
@@ -54,10 +58,15 @@ public class ProcessConditionList extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "formUuid", type = ApiParamType.STRING, desc = "term.framework.formuuid"),
+    @Input({
+            @Param(name = "processTaskId", type = ApiParamType.STRING, desc = "term.itsm.processtaskid"),
+            @Param(name = "formUuid", type = ApiParamType.STRING, desc = "term.framework.formuuid"),
             @Param(name = "tag", type = ApiParamType.STRING, desc = "common.tag"),
-            @Param(name = "isAll", type = ApiParamType.INTEGER, rule = "0,1", desc = "term.process.isreturnallattr")})
-    @Output({@Param(explode = ConditionParamVo[].class, desc = "nmpap.processconditionlist.getname")})
+            @Param(name = "isAll", type = ApiParamType.INTEGER, rule = "0,1", desc = "term.process.isreturnallattr")
+    })
+    @Output({
+            @Param(explode = ConditionParamVo[].class, desc = "nmpap.processconditionlist.getname")
+    })
     @Description(desc = "nmpap.processconditionlist.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -95,20 +104,26 @@ public class ProcessConditionList extends PrivateApiComponentBase {
                 resultArray.add(conditionParamVo);
             }
         }
+        List<FormAttributeVo> formAttributeList = null;
+        String tag = jsonObj.getString("tag");
+        Long processTaskId = jsonObj.getLong("processTaskId");
+        if (processTaskId != null) {
+            formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTagNew(processTaskId, tag);
+        } else {
+            // 表单条件
+            String formUuid = jsonObj.getString("formUuid");
+            if (StringUtils.isNotBlank(formUuid)) {
+                FormVo form = formMapper.getFormByUuid(formUuid);
+                if (form == null) {
+                    throw new FormNotFoundException(formUuid);
+                }
+                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+                formAttributeList = formCrossoverService.getFormAttributeListNew(formUuid, form.getName(), tag);
 
-        // 表单条件
-        String formUuid = jsonObj.getString("formUuid");
-        if (StringUtils.isNotBlank(formUuid)) {
-            FormVo form = formMapper.getFormByUuid(formUuid);
-            if (form == null) {
-                throw new FormNotFoundException(formUuid);
             }
-
-            String tag = jsonObj.getString("tag");
-            IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-//            List<FormAttributeVo> formAttrList = formCrossoverService.getFormAttributeList(formUuid, form.getName(), ConditionProcessComponent.FORM_EXTEND_ATTRIBUTE_TAG);
-            List<FormAttributeVo> formAttrList = formCrossoverService.getFormAttributeListNew(formUuid, form.getName(), tag);
-            for (FormAttributeVo formAttributeVo : formAttrList) {
+        }
+        if (CollectionUtils.isNotEmpty(formAttributeList)) {
+            for (FormAttributeVo formAttributeVo : formAttributeList) {
                 IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                 if (formHandler == null) {
                     continue;
