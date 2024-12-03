@@ -13,10 +13,7 @@ import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.operationauth.*;
-import neatlogic.framework.process.operationauth.core.IOperationType;
-import neatlogic.framework.process.operationauth.core.OperationAuthHandlerBase;
-import neatlogic.framework.process.operationauth.core.OperationAuthHandlerType;
-import neatlogic.framework.process.operationauth.core.TernaryPredicate;
+import neatlogic.framework.process.operationauth.core.*;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -60,7 +57,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName()) && !SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskHiddenException());
-                    return false;
+                    return PredicateResult.DENY;
                 }
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
@@ -68,34 +65,34 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //4.依次判断当前用户是否是工单上报人、代报人、处理人、待处理人，如果都不是，则执行第5步；
             if (userUuid.equals(processTaskVo.getOwner())) {
-                return true;
+                return PredicateResult.ACCEPT;
             } else if (userUuid.equals(processTaskVo.getReporter())) {
-                return true;
+                return PredicateResult.ACCEPT;
             } else if (checkIsProcessTaskStepUser(processTaskStepVo, userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             } else if (checkIsWorker(processTaskStepVo, userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             // 条件节点没有地方设置查看权限，默认所有人都有查看权限
             if (Objects.equals(processTaskStepVo.getHandler(), ProcessStepHandlerType.CONDITION.getHandler())) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //5.判断当前用户是否有当前步骤“查看节点信息”操作权限，如果没有，则提示“您的'查看节点信息'操作未获得授权”；
             boolean flag = checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, operationType, userUuid);
             if (flag) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                     .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
-            return false;
+            return PredicateResult.DENY;
         });
         /**
          * 步骤转交权限
@@ -110,7 +107,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 if (processTaskVo.getIsShow() == 0) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskHiddenException());
-                    return false;
+                    return PredicateResult.DENY;
                 }
                 //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
                 //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -128,14 +125,14 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 if (exception != null) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, exception);
-                    return false;
+                    return PredicateResult.DENY;
                 }
                 //8.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
                 // 步骤状态为已激活的才能转交
                 if (processTaskStepVo.getIsActive() == 0) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskStepNotActiveException());
-                    return false;
+                    return PredicateResult.DENY;
                 }
                 //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
                 //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
@@ -146,20 +143,20 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 if (exception != null) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, exception);
-                    return false;
+                    return PredicateResult.DENY;
                 }
                 //系统用户默认拥有权限
                 if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                    return true;
+                    return PredicateResult.ACCEPT;
                 }
                 //12.判断当前用户是否有当前步骤“转交”操作权限，如果没有，则提示“您的'转交'操作未获得授权”；
                 boolean flag = checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, operationType, userUuid);
                 if (flag) {
-                    return true;
+                    return PredicateResult.ACCEPT;
                 }
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
-                return false;
+                return PredicateResult.DENY;
             });
         /**
          * 步骤接受（抢单）权限
@@ -173,7 +170,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -191,13 +188,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //8.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
             if (processTaskStepVo.getIsActive() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotActiveException());
-                return false;
+                return PredicateResult.DENY;
             }
             //9.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
             //10.判断步骤状态是否是“已挂起”，如果是，则提示“步骤已挂起”；
@@ -206,7 +203,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             if (ProcessTaskStepStatus.SUCCEED.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStepStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStepStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {
                 List<ProcessTaskStepUserVo> userList = processTaskStepVo.getUserList();
@@ -221,14 +218,14 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                                 if (exception != null) {
                                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                             .put(operationType, exception);
-                                    return false;
+                                    return PredicateResult.DENY;
                                 }
                             } else {
                                 UserVo userVo = userMapper.getUserBaseInfoByUuid(processTaskStepUserVo.getUserUuid());
                                 if (userVo != null) {
                                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                             .put(operationType, new ProcessTaskStepHandledByOthersException(userVo.getUserId(), userVo.getUserName()));
-                                    return false;
+                                    return PredicateResult.DENY;
                                 }
                             }
                         }
@@ -237,21 +234,21 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             }
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //13.判断当前用户是否是当前步骤的待处理人，如果不是，则提示“您不是步骤待处理人”；
             if (!checkIsWorker(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotWorkerException());
-                return false;
+                return PredicateResult.DENY;
             }
             //14.判断当前用户是否是当前步骤的处理人，如果是，则提示“您已经是步骤处理人”；
             if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepMajorUserException());
-                return false;
+                return PredicateResult.DENY;
             }
-            return true;
+            return PredicateResult.ACCEPT;
         });
         /**
          * 步骤开始权限
@@ -265,7 +262,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -283,13 +280,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //8.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
             if (processTaskStepVo.getIsActive() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotActiveException());
-                return false;
+                return PredicateResult.DENY;
             }
             //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
             //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
@@ -302,20 +299,20 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //13.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
             // 有主处理人时是start
             if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                     .put(operationType, new ProcessTaskStepNotMajorUserException());
-            return false;
+            return PredicateResult.DENY;
         });
         /**
          * 步骤流转权限
@@ -329,7 +326,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
             //3.判断工单状态是否是“已取消”，如果是，则提示“工单已取消”；
@@ -345,13 +342,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //7.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
             if (processTaskStepVo.getIsActive() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotActiveException());
-                return false;
+                return PredicateResult.DENY;
             }
             //8.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
             //9.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
@@ -364,25 +361,25 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //12.判断当前步骤是否有下一步骤，如果没有，则提示“该步骤没有下一步骤”；
             if (!checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo, processTaskStepVo.getId(), ProcessFlowDirection.FORWARD)) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotNextStepException());
-                return false;
+                return PredicateResult.DENY;
             }
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //13.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
             if (!checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotMajorUserException());
-                return false;
+                return PredicateResult.DENY;
             }
-            return true;
+            return PredicateResult.ACCEPT;
         });
         /**
          * 步骤回退权限
@@ -396,7 +393,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -414,13 +411,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //8.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
             if (processTaskStepVo.getIsActive() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotActiveException());
-                return false;
+                return PredicateResult.DENY;
             }
             //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
             //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
@@ -433,25 +430,25 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //13.判断当前步骤是否有回退线，如果没有，则提示“该步骤未启用回退功能”；
             if (!checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo, processTaskStepVo.getId(), ProcessFlowDirection.BACKWARD)) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepBackNotEnabledException());
-                return false;
+                return PredicateResult.DENY;
             }
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //14.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
             if (!checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotMajorUserException());
-                return false;
+                return PredicateResult.DENY;
             }
-            return true;
+            return PredicateResult.ACCEPT;
         });
         /**
          * 步骤暂存权限
@@ -465,7 +462,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -483,13 +480,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //8.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
             if (processTaskStepVo.getIsActive() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotActiveException());
-                return false;
+                return PredicateResult.DENY;
             }
             //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
             //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
@@ -502,19 +499,19 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //13.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
             if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                     .put(operationType, new ProcessTaskStepNotMajorUserException());
-            return false;
+            return PredicateResult.DENY;
         });
         /**
          * 步骤回复权限
@@ -524,7 +521,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskStepOperationType.STEP_COMMENT, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
             String processTaskStepEnableComment = ConfigManager.getConfig(ItsmTenantConfig.PROCESS_TASK_STEP_ENABLE_COMMENT);
             if (!Objects.equals(processTaskStepEnableComment, "1")) {
-                return false;
+                return PredicateResult.DENY;
             }
             Long id = processTaskStepVo.getId();
             ProcessTaskStepOperationType operationType = ProcessTaskStepOperationType.STEP_COMMENT;
@@ -532,7 +529,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -550,13 +547,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //8.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
             if (processTaskStepVo.getIsActive() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotActiveException());
-                return false;
+                return PredicateResult.DENY;
             }
             //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
             //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
@@ -569,19 +566,19 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //13.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
             if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                     .put(operationType, new ProcessTaskStepNotMajorUserException());
-            return false;
+            return PredicateResult.DENY;
         });
         /**
          * 步骤暂停权限
@@ -595,7 +592,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -613,13 +610,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //8.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
             if (processTaskStepVo.getIsActive() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotActiveException());
-                return false;
+                return PredicateResult.DENY;
             }
             //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
             //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
@@ -632,19 +629,19 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //13.判断当前用户是否有当前步骤“暂停”操作权限，如果没有，则提示“您的'暂停'操作未获得授权”；
             if (checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, operationType, userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                     .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
-            return false;
+            return PredicateResult.DENY;
         });
         /**
          * 步骤恢复权限
@@ -658,7 +655,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -674,13 +671,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //8.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
             if (processTaskStepVo.getIsActive() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotActiveException());
-                return false;
+                return PredicateResult.DENY;
             }
             //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
             //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
@@ -693,19 +690,19 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //13.判断当前用户是否有当前步骤“暂停”操作权限，如果没有，则提示“您的'恢复'操作未获得授权”；
             if (checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, ProcessTaskStepOperationType.STEP_PAUSE, userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                     .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
-            return false;
+            return PredicateResult.DENY;
         });
         /**
          * 步骤撤回权限
@@ -720,7 +717,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 if (processTaskVo.getIsShow() == 0) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskHiddenException());
-                    return false;
+                    return PredicateResult.DENY;
                 }
                 //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
                 //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -738,32 +735,32 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 if (exception != null) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, exception);
-                    return false;
+                    return PredicateResult.DENY;
                 }
                 //8.判断步骤状态是否是“已完成”，如果不是，则提示“步骤未完成”；
                 if (!ProcessTaskStatus.SUCCEED.getValue().equals(processTaskStepVo.getStatus())) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskStepUndoneException());
-                    return false;
+                    return PredicateResult.DENY;
                 }
                 //9.判断当前步骤的下一步骤是否已经完成，如果是，则提示“该步骤已经不能撤回”；
                 if (!checkCurrentStepIsRetractableByProcessTaskStepId(processTaskVo, processTaskStepVo.getId())) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskStepCannotRetreatException());
-                    return false;
+                    return PredicateResult.DENY;
                 }
                 //系统用户默认拥有权限
                 if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                    return true;
+                    return PredicateResult.ACCEPT;
                 }
                 //10.判断当前用户是否有当前步骤“撤回”操作权限，如果没有，则提示“您的'撤回'操作未获得授权”；
                 // 撤销权限retreat
                 if (!checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, operationType, userUuid)) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
-                    return false;
+                    return PredicateResult.DENY;
                 }
-                return true;
+                return PredicateResult.ACCEPT;
             });
         /**
          * 步骤重审权限
@@ -778,7 +775,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
                     //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -796,13 +793,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //8.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
                     if (processTaskStepVo.getIsActive() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskStepNotActiveException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
                     //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
@@ -815,13 +812,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //13.判断当前步骤是否启用重审功能，如果没有，则提示“该步骤未启用重审功能”；
                     if (!Objects.equals(processTaskStepVo.getEnableReapproval(), 1)){
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskStepReapprovalNotEnabledException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //14.判断当前步骤有没有对应需要重审的步骤，如果没有，则提示“没有需要重审的步骤”；
                     boolean flag = false;
@@ -838,19 +835,19 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     if (!flag) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskStepNoNeedReapprovalStepException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //系统用户默认拥有权限
                     if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     //15.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
                     if (!checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskStepNotMajorUserException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
-                    return true;
+                    return PredicateResult.ACCEPT;
                 });
         /**
          * 步骤处理权限
@@ -865,7 +862,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 if (processTaskVo.getIsShow() == 0) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskHiddenException());
-                    return false;
+                    return PredicateResult.DENY;
                 }
                 //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
                 //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -883,13 +880,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 if (exception != null) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, exception);
-                    return false;
+                    return PredicateResult.DENY;
                 }
                 //8.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
                 if (processTaskStepVo.getIsActive() == 0) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskStepNotActiveException());
-                    return false;
+                    return PredicateResult.DENY;
                 }
                 //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
                 //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
@@ -900,19 +897,19 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 if (exception != null) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, exception);
-                    return false;
+                    return PredicateResult.DENY;
                 }
                 //系统用户默认拥有权限
                 if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                    return true;
+                    return PredicateResult.ACCEPT;
                 }
                 //12.判断当前用户是否是当前步骤的待处理人，如果不是，则提示“您不是步骤待处理人”；
                 if (checkIsWorker(processTaskStepVo, userUuid)) {
-                    return true;
+                    return PredicateResult.ACCEPT;
                 }
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskStepNotWorkerException());
-                return false;
+                return PredicateResult.DENY;
             });
 
         /**
@@ -928,7 +925,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
                     //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -946,13 +943,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //8.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
                     if (processTaskStepVo.getIsActive() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskStepNotActiveException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
                     //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
@@ -965,19 +962,19 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //系统用户默认拥有权限
                     if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     //13.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
                     if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskStepNotMajorUserException());
-                    return false;
+                    return PredicateResult.DENY;
                 });
 
         /**
@@ -993,7 +990,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
                     //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -1011,13 +1008,13 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //8.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
                     if (processTaskStepVo.getIsActive() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskStepNotActiveException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //9.判断步骤状态是否是“已完成”，如果是，则提示“步骤已完成”；
                     //10.判断步骤状态是否是“异常”，如果是，则提示“步骤异常”；
@@ -1028,19 +1025,19 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //系统用户默认拥有权限
                     if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     //12.判断当前用户是否是当前步骤的处理人，如果不是，则提示“您不是步骤处理人”；
                     if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskStepNotMajorUserException());
-                    return false;
+                    return PredicateResult.DENY;
                 });
     }
 

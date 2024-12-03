@@ -6,15 +6,12 @@ import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.constvalue.*;
-import neatlogic.framework.process.operationauth.core.IOperationType;
+import neatlogic.framework.process.operationauth.core.*;
 import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.operationauth.*;
-import neatlogic.framework.process.operationauth.core.OperationAuthHandlerBase;
-import neatlogic.framework.process.operationauth.core.OperationAuthHandlerType;
-import neatlogic.framework.process.operationauth.core.TernaryPredicate;
 import neatlogic.module.process.service.CatalogService;
 import neatlogic.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
@@ -66,7 +63,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                         if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName()) && !SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
                             operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                     .put(operationType, new ProcessTaskHiddenException());
-                            return false;
+                            return PredicateResult.DENY;
                         }
                     }
                     //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
@@ -74,30 +71,30 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //系统用户默认拥有权限
                     if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     //4.依次判断当前用户是否是工单上报人、代报人、处理人、待处理人，如果都不是，执行第5步；
                     if (userUuid.equals(processTaskVo.getOwner())) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     } else if (userUuid.equals(processTaskVo.getReporter())) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     } else if (checkIsProcessTaskStepUser(processTaskVo, userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     } else if (checkIsWorker(processTaskVo, userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     //5.判断当前用户是否有工单对应服务的上报权限，如果没有，则提示“您没有【xxx】服务的上报权限”；
                     if (catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid, CatalogChannelAuthorityAction.VIEW)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskNotChannelViewException(channelVo.getName()));
-                    return false;
+                    return PredicateResult.DENY;
                 });
         /**
          * 工单提交权限
@@ -112,25 +109,25 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //2.判断工单状态是否是“未提交”，如果不是，则提示“工单已提交”；
                     if (!ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskSubmittedException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //系统用户默认拥有权限
                     if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     //3.依次判断当前用户是否是工单上报人、代报人，如果都不是，则提示“您不是工单上报人或代报人”；
                     if (userUuid.equals(processTaskVo.getOwner()) || userUuid.equals(processTaskVo.getReporter())) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskNotOwnerException());
-                    return false;
+                    return PredicateResult.DENY;
                 });
         /**
          * 工单取消权限
@@ -145,7 +142,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
                     //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -163,24 +160,24 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     // 工单状态为进行中、异常才能终止
                     if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())
                             || ProcessTaskStatus.FAILED.getValue().equals(processTaskVo.getStatus())) {
                         //系统用户默认拥有权限
                         if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                            return true;
+                            return PredicateResult.ACCEPT;
                         }
                         //8.判断当前用户是否有“取消”操作权限，如果没有，则提示“您的'取消'操作未获得授权”；
                         if (!checkOperationAuthIsConfigured(processTaskVo, operationType, userUuid)) {
                             operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                     .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
-                            return false;
+                            return PredicateResult.DENY;
                         }
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
-                    return false;
+                    return PredicateResult.DENY;
                 });
         /**
          * 工单恢复权限
@@ -195,7 +192,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
                     //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -213,23 +210,23 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     // 工单状态为已终止的才能恢复
                     if (ProcessTaskStatus.ABORTED.getValue().equals(processTaskVo.getStatus())) {
                         //系统用户默认拥有权限
                         if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                            return true;
+                            return PredicateResult.ACCEPT;
                         }
                         //8.判断当前用户是否有“取消”操作权限，如果没有，则提示“您的'恢复'操作未获得授权”；
                         if (!checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.PROCESSTASK_ABORT, userUuid)) {
                             operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                     .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
-                            return false;
+                            return PredicateResult.DENY;
                         }
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
-                    return false;
+                    return PredicateResult.DENY;
                 });
         /**
          * 工单修改上报内容（包括标题、优先级、描述）权限
@@ -243,7 +240,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -261,22 +258,22 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                 //系统用户默认拥有权限
                 if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                    return true;
+                    return PredicateResult.ACCEPT;
                 }
                 //8.判断当前用户是否有“修改上报内容”操作权限，如果没有，则提示“您的'修改上报内容'操作未获得授权”；
                 if (!checkOperationAuthIsConfigured(processTaskVo, operationType, userUuid)) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
-                    return false;
+                    return PredicateResult.DENY;
                 }
-                return true;
+                return PredicateResult.ACCEPT;
             }
-            return false;
+            return PredicateResult.DENY;
         });
         /**
          * 工单催单权限
@@ -290,7 +287,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -308,22 +305,22 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                 //系统用户默认拥有权限
                 if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                    return true;
+                    return PredicateResult.ACCEPT;
                 }
                 //8.判断当前用户是否有“催办”操作权限，如果没有，则提示“您的'催办'操作未获得授权”；
                 if (!checkOperationAuthIsConfigured(processTaskVo, operationType, userUuid)) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
-                    return false;
+                    return PredicateResult.DENY;
                 }
-                return true;
+                return PredicateResult.ACCEPT;
             }
-            return false;
+            return PredicateResult.DENY;
         });
         /**
          * 工单处理权限
@@ -337,7 +334,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -355,23 +352,23 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                 //系统用户默认拥有权限
                 if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                    return true;
+                    return PredicateResult.ACCEPT;
                 }
                 //8.判断当前用户是否是工单某个步骤的待处理人，如果不是，则提示“工单里没有您可以处理的步骤”；
                 // 有可处理步骤work
                 if (checkIsWorker(processTaskVo, userUuid)) {
-                    return true;
+                    return PredicateResult.ACCEPT;
                 }
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskNoProcessableStepsException());
-                return false;
+                return PredicateResult.DENY;
             }
-            return false;
+            return PredicateResult.DENY;
         });
         /**
          * 工单撤回权限
@@ -386,7 +383,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -404,13 +401,13 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             // 撤销权限retreat
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                 //系统用户默认拥有权限
                 if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                    return true;
+                    return PredicateResult.ACCEPT;
                 }
                 //8.判断当前用户是否有工单某个步骤的撤回权限，如果没有，则提示“工单里没有您可以撤回的步骤”；
                 boolean flag = false;
@@ -418,17 +415,17 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (processTaskStep.getIsActive().intValue() == 1) {
                         flag = checkIsRetractableStepByProcessTaskStepId(processTaskVo, processTaskStep.getId(), userUuid);
                         if (flag) {
-                            return true;
+                            return PredicateResult.ACCEPT;
                         }
                     }
                 }
                 if (!flag) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskNoRetreatableStepsException());
-                    return false;
+                    return PredicateResult.DENY;
                 }
             }
-            return false;
+            return PredicateResult.DENY;
         });
         /**
          * 工单评分权限
@@ -442,33 +439,33 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“已完成”，如果不是，则提示“工单未完成”；
             if (!ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskUndoneException());
-                return false;
+                return PredicateResult.DENY;
             }
             //3.判断工单是否启用“评分”功能，如果没有，则提示“工单未启用评分功能”；
             Integer isActive = (Integer) JSONPath.read(processTaskVo.getConfig(), "process.scoreConfig.isActive");
             if (!Objects.equals(isActive, 1)) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskScoreNotEnabledException());
-                return false;
+                return PredicateResult.DENY;
             }
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //4.依次判断当前用户是否是工单上报人、代报人，如果都不是，则提示“您不是工单上报人或代报人”；
             // 评分权限score
             if (!userUuid.equals(processTaskVo.getOwner()) && !userUuid.equals(processTaskVo.getReporter())) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskNotOwnerException());
-                return false;
+                return PredicateResult.DENY;
             }
-            return true;
+            return PredicateResult.ACCEPT;
         });
         /**
          * 工单转报权限
@@ -483,7 +480,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //2.判断工单对应的服务是否启用转报功能，如果没有，则提示“工单对应的服务【"xxx"】未启用转报功能”；
                     ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
@@ -492,11 +489,11 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (!Objects.equals(allowTranferReport, 1)) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskChannelTransferReportNotEnabledException(channelVo.getName()));
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //系统用户默认拥有权限
                     if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     //3.判断当前用户是否有“转报”操作权限，如果没有，则提示“您的'转报'操作未获得授权”；
 //                    boolean flag = processTaskService.checkTransferReportAuthorization(processTaskVo, userUuid);
@@ -559,10 +556,10 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                                 }
                                 for (ChannelRelationVo channelRelation : channelRelationTargetList) {
                                     if ("channel".equals(channelRelation.getType())) {
-                                        return true;
+                                        return PredicateResult.ACCEPT;
                                     } else if ("catalog".equals(channelRelation.getType())) {
                                         if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(channelRelation.getTarget(), channelTypeUuidList) > 0) {
-                                            return true;
+                                            return PredicateResult.ACCEPT;
                                         } else {
                                             CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channelRelation.getTarget());
                                             if (catalogVo != null) {
@@ -570,7 +567,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                                                 for (String uuid : uuidList) {
                                                     if (!channelRelation.getTarget().equals(uuid)) {
                                                         if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(uuid, channelTypeUuidList) > 0) {
-                                                            return true;
+                                                            return PredicateResult.ACCEPT;
                                                         }
                                                     }
                                                 }
@@ -583,7 +580,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     }
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskOperationUnauthorizedException(operationType));
-                    return false;
+                    return PredicateResult.DENY;
                 });
 
         /**
@@ -597,16 +594,16 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //2.判断工单是否启用“标记重复事件”功能，如果没有，则提示“工单未启用标记重复事件功能”；
                     Integer enableMarkRepeat = (Integer) JSONPath.read(processTaskVo.getConfig(), "process.processConfig.enableMarkRepeat");
                     if (Objects.equals(enableMarkRepeat, 1)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskMarkRepeatNotEnabledException());
-                    return false;
+                    return PredicateResult.DENY;
                 });
         /**
          * 工单复制上报权限
@@ -621,20 +618,20 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //系统用户默认拥有权限
                     if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     //2.判断当前用户是否有工单对应服务的上报权限，如果没有，则提示“您没有【xxx】服务的上报权限”；
                     if (catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid, CatalogChannelAuthorityAction.REPORT)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskNotChannelReportException(channelVo.getName()));
-                    return false;
+                    return PredicateResult.DENY;
                 });
         /**
          * 工单重做权限
@@ -648,7 +645,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             //4.判断工单状态是否是“处理中”，如果是，则提示“工单处理中”；
@@ -666,7 +663,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
                 //8.判断工单是否启用“重做”功能，如果没有，则提示“工单未启用重做功能”；
@@ -680,21 +677,21 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 if (!flag) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskBackNotEnabledException());
-                    return false;
+                    return PredicateResult.DENY;
                 }
                 //系统用户默认拥有权限
                 if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                    return true;
+                    return PredicateResult.ACCEPT;
                 }
                 //9.依次判断当前用户是否是工单上报人、代报人，如果都不是，则提示“您不是工单上报人或代报人”；
                 if (!userUuid.equals(processTaskVo.getOwner()) && !userUuid.equals(processTaskVo.getReporter())) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskNotOwnerException());
-                    return false;
+                    return PredicateResult.DENY;
                 }
-                return true;
+                return PredicateResult.ACCEPT;
             }
-            return false;
+            return PredicateResult.DENY;
         });
         /**
          * 工单转交权限
@@ -709,7 +706,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
             //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -727,12 +724,12 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (exception != null) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, exception);
-                return false;
+                return PredicateResult.DENY;
             }
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                 //系统用户默认拥有权限
                 if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                    return true;
+                    return PredicateResult.ACCEPT;
                 }
                 //8.判断当前用户是否有工单某个步骤的转交权限，如果没有，则提示“工单里没有您可以转交的步骤”；
                 boolean flag = false;
@@ -751,16 +748,16 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     }
                     flag = checkOperationAuthIsConfigured(processTaskVo, processTaskStep, ProcessTaskStepOperationType.STEP_TRANSFER, userUuid);
                     if (flag) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                 }
                 if (!flag) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskNoTransferableStepsException());
-                    return false;
+                    return PredicateResult.DENY;
                 }
             }
-            return false;
+            return PredicateResult.DENY;
         });
 
         /**
@@ -773,19 +770,19 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 1) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskShownException());
-                return false;
+                return PredicateResult.DENY;
             }
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //2.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
             if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskNotProcessTaskModifyException());
-                return false;
+                return PredicateResult.DENY;
             }
-            return true;
+            return PredicateResult.ACCEPT;
         });
         /**
          * 工单隐藏权限
@@ -797,19 +794,19 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 0) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskHiddenException());
-                return false;
+                return PredicateResult.DENY;
             }
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //2.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
             if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskNotProcessTaskModifyException());
-                return false;
+                return PredicateResult.DENY;
             }
-            return true;
+            return PredicateResult.ACCEPT;
         });
         /**
          * 工单删除权限
@@ -817,22 +814,22 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_DELETE, (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
             //系统用户默认拥有权限
             if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             Long id = processTaskVo.getId();
             ProcessTaskOperationType operationType = ProcessTaskOperationType.PROCESSTASK_DELETE;
 
             //如果当前工单是草稿状态，则上报人允许删除
             if (Objects.equals(ProcessTaskStatus.DRAFT.getValue(), processTaskVo.getStatus()) && Objects.equals(processTaskVo.getOwner(), UserContext.get().getUserUuid(true))) {
-                return true;
+                return PredicateResult.ACCEPT;
             }
             //2.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
             if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskNotProcessTaskModifyException());
-                return false;
+                return PredicateResult.DENY;
             }
-            return true;
+            return PredicateResult.ACCEPT;
         });
         /**
          * 修改工单关注人权限
@@ -851,36 +848,36 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
                     if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskUnsubmittedException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //系统用户默认拥有权限
                     if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
                     //3.依次判断当前用户是否是工单上报人、代报人、处理人、待处理人，如果都不是，则提示“您不是工单干系人”；
                     if (userUuid.equals(processTaskVo.getOwner())) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     } else if (userUuid.equals(processTaskVo.getReporter())) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     } else if (checkIsProcessTaskStepUser(processTaskVo, userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     } else if (checkIsWorker(processTaskVo, userUuid)) {
-                        return true;
+                        return PredicateResult.ACCEPT;
                     }
 
                     //4.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
                     if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskNotProcessTaskModifyException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
-                    return true;
+                    return PredicateResult.ACCEPT;
                 });
 
         /**
@@ -896,7 +893,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (processTaskVo.getIsShow() == 0) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskHiddenException());
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
                     //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
@@ -914,12 +911,12 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     if (exception != null) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, exception);
-                        return false;
+                        return PredicateResult.DENY;
                     }
                     if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                         //系统用户默认拥有权限
                         if (SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
-                            return true;
+                            return PredicateResult.ACCEPT;
                         }
                         //8.判断当前用户是否有工单某个步骤的转交权限，如果没有，则提示“工单里没有您可以转交的步骤”；
                         boolean flag = false;
@@ -941,16 +938,16 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                             }
                             flag = checkOperationAuthIsConfigured(processTaskVo, processTaskStep, ProcessTaskStepOperationType.STEP_TRANSFER, userUuid);
                             if (flag) {
-                                return true;
+                                return PredicateResult.ACCEPT;
                             }
                         }
                         if (!flag) {
                             operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                     .put(operationType, new ProcessTaskNoTransferableStepsException());
-                            return false;
+                            return PredicateResult.DENY;
                         }
                     }
-                    return false;
+                    return PredicateResult.DENY;
                 });
     }
 
