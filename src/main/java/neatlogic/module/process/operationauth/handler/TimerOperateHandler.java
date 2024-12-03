@@ -1,14 +1,15 @@
 package neatlogic.module.process.operationauth.handler;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.process.operationauth.core.IOperationType;
+import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.constvalue.ProcessTaskStepOperationType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskTimerHandlerNotEnableOperateException;
+import neatlogic.framework.process.operationauth.core.IOperationType;
 import neatlogic.framework.process.operationauth.core.OperationAuthHandlerBase;
-import neatlogic.framework.process.operationauth.core.OperationAuthHandlerType;
+import neatlogic.framework.process.operationauth.core.PredicateResult;
 import neatlogic.framework.process.operationauth.core.TernaryPredicate;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +32,7 @@ public class TimerOperateHandler extends OperationAuthHandlerBase {
                 //1.提示“定时节点不支持'撤回'操作”；
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskTimerHandlerNotEnableOperateException(operationType));
-                return false;
+                return PredicateResult.DENY;
             });
         operationBiPredicateMap.put(ProcessTaskStepOperationType.STEP_WORK,
             (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
@@ -40,7 +41,7 @@ public class TimerOperateHandler extends OperationAuthHandlerBase {
                 //1.提示“定时节点不支持'处理'操作”；
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskTimerHandlerNotEnableOperateException(operationType));
-                return false;
+                return PredicateResult.DENY;
             });
         operationBiPredicateMap.put(ProcessTaskStepOperationType.STEP_COMMENT,
             (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
@@ -49,13 +50,13 @@ public class TimerOperateHandler extends OperationAuthHandlerBase {
                 //1.提示“定时节点不支持'回复'操作”；
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskTimerHandlerNotEnableOperateException(operationType));
-                return false;
+                return PredicateResult.DENY;
             });
     }
 
     @Override
     public String getHandler() {
-        return OperationAuthHandlerType.TIMER.getValue();
+        return ProcessStepHandlerType.TIMER.getHandler();
     }
 
     @Override

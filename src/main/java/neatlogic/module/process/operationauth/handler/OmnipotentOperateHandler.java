@@ -1,12 +1,12 @@
 package neatlogic.module.process.operationauth.handler;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.process.operationauth.core.IOperationType;
+import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
+import neatlogic.framework.process.operationauth.core.IOperationType;
 import neatlogic.framework.process.operationauth.core.OperationAuthHandlerBase;
-import neatlogic.framework.process.operationauth.core.OperationAuthHandlerType;
 import neatlogic.framework.process.operationauth.core.TernaryPredicate;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +27,7 @@ public class OmnipotentOperateHandler extends OperationAuthHandlerBase {
 
     @Override
     public String getHandler() {
-        return OperationAuthHandlerType.OMNIPOTENT.getValue();
+        return ProcessStepHandlerType.OMNIPOTENT.getHandler();
     }
 
     @Override
