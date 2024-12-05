@@ -19,10 +19,14 @@ package neatlogic.module.process.api.processtask.manualintervention;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
+import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.ProcessTaskStepOperationType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
+import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.restful.annotation.*;
@@ -35,7 +39,7 @@ import javax.annotation.Resource;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-@AuthAction(action = PROCESSTASK_MODIFY.class)
+@AuthAction(action = PROCESS_BASE.class)
 public class ActiveProcessTaskStepApi extends PrivateApiComponentBase {
 
     @Resource
@@ -57,6 +61,9 @@ public class ActiveProcessTaskStepApi extends PrivateApiComponentBase {
         Long processTaskId = paramObj.getLong("processTaskId");
         Long processTaskStepId = paramObj.getLong("processTaskStepId");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        if (!AuthActionChecker.check(PROCESSTASK_MODIFY.class)) {
+            new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskStepOperationType.STEP_REACTIVATE).build().checkAndNoPermissionThrowException();
+        }
         ProcessTaskStepVo currentProcessTaskStep = processTaskVo.getCurrentProcessTaskStep();
         IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStep.getHandler());
         processStepHandler.active(currentProcessTaskStep);
