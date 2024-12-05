@@ -1039,6 +1039,64 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                             .put(operationType, new ProcessTaskStepNotMajorUserException());
                     return PredicateResult.DENY;
                 });
+
+        /**
+         * 步骤重新激活权限
+         */
+        operationBiPredicateMap.put(ProcessTaskStepOperationType.STEP_REACTIVATE,
+                (processTaskVo, processTaskStepVo, userUuid, operationTypePermissionDeniedExceptionMap, extraParam) -> {
+                    Long id = processTaskStepVo.getId();
+                    ProcessTaskStepOperationType operationType = ProcessTaskStepOperationType.STEP_REACTIVATE;
+                    //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
+                    if (processTaskVo.getIsShow() == 0) {
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, new ProcessTaskHiddenException());
+                        return PredicateResult.DENY;
+                    }
+                    //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
+                    //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
+                    //4.判断工单状态是否是“已取消”，如果是，则提示“工单已取消”；
+                    //5.判断工单状态是否是“异常”，如果是，则提示“工单异常”；
+                    //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
+                    //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
+                    ProcessTaskPermissionDeniedException exception = processTaskService.checkProcessTaskStatus(processTaskVo.getStatus(),
+                            ProcessTaskStatus.DRAFT,
+                            ProcessTaskStatus.SUCCEED,
+                            ProcessTaskStatus.ABORTED,
+                            ProcessTaskStatus.HANG,
+                            ProcessTaskStatus.SCORED);
+                    if (exception != null) {
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, exception);
+                        return PredicateResult.DENY;
+                    }
+                    //8.判断步骤是否未激活，如果isActive=0，则提示“步骤未激活”；
+                    if (processTaskStepVo.getIsActive() == 0) {
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, new ProcessTaskStepNotActiveException());
+                        return PredicateResult.DENY;
+                    }
+                    if (Objects.equals(processTaskStepVo.getHandler(), ProcessStepHandlerType.CONDITION.getHandler())) {
+                        if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.FAILED.getValue())) {
+                            if (AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
+                                return PredicateResult.ACCEPT;
+                            }
+                        }
+                    } else if (Objects.equals(processTaskStepVo.getHandler(), "createjob")) {
+                        if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())) {
+                            if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
+                                return PredicateResult.ACCEPT;
+                            }
+                        }
+                    } else if (Objects.equals(processTaskStepVo.getHandler(), "dataconversion")) {
+                        if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())) {
+                            if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
+                                return PredicateResult.ACCEPT;
+                            }
+                        }
+                    }
+                    return PredicateResult.DENY;
+                });
     }
 
     @Override
