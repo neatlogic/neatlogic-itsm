@@ -260,8 +260,10 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         if (workcenterThead != null && StringUtils.isNotBlank(workcenterThead.getTheadConfigHash())) {
             theadConfigHash = workcenterThead.getTheadConfigHash(); //优先使用用户自己定义的thead
         }
-        String theadConfigStr = workcenterMapper.getWorkcenterTheadConfigByHash(theadConfigHash);
-        workcenterVo.setTheadConfigStr(theadConfigStr);
+        if(StringUtils.isNotBlank(theadConfigHash)) {
+            String theadConfigStr = workcenterMapper.getWorkcenterTheadConfigByHash(theadConfigHash);
+            workcenterVo.setTheadConfigStr(theadConfigStr);
+        }
         // 矫正theadList 或存在表单属性或固定字段增删
         // 多删
         List<WorkcenterTheadVo> theadList = workcenterVo.getTheadList();
