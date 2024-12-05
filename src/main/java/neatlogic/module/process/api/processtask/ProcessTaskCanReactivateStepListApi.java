@@ -53,7 +53,7 @@ public class ProcessTaskCanReactivateStepListApi extends PrivateApiComponentBase
     private ProcessTaskService processTaskService;
     @Override
     public String getName() {
-        return "当前用户可以重新激活的步骤列表";
+        return "nmpap.processtaskcanreactivatesteplistapi.getname";
     }
 
     @Input({
@@ -62,7 +62,7 @@ public class ProcessTaskCanReactivateStepListApi extends PrivateApiComponentBase
     @Output({
             @Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "common.tbodylist")
     })
-    @Description(desc = "当前用户可以重新激活的步骤列表")
+    @Description(desc = "nmpap.processtaskcanreactivatesteplistapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long processTaskId = paramObj.getLong("processTaskId");
