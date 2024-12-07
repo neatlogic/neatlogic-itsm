@@ -1,5 +1,6 @@
 package neatlogic.module.process.api.processtask;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
@@ -8,8 +9,8 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.FileUtil;
 import neatlogic.module.process.dao.mapper.ProcessTaskDataMapper;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -80,6 +83,10 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
             if (processtask == null) {
                 return resultObj;
             }
+            Map<String, Object> processtask_config = new HashMap<>();
+            processtask_config.put("hash", processtask.remove("hash"));
+            processtask_config.put("config", processtask.remove("config"));
+            put(resultObj, "processtask_config", processtask_config);
             put(resultObj, "processtask", processtask);
 
             sql = "SELECT * FROM `process` WHERE `uuid` = '" + processtask.get("process_uuid") + "'";
@@ -122,6 +129,26 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
             sql = "SELECT * FROM `channel_relation_isusepreowner` WHERE `source` = '" + channelUuid + "'";
             List<Map<String, Object>> channel_relation_isusepreowner = processTaskDataMapper.getList(sql);
             put(resultObj, "channel_relation_isusepreowner", channel_relation_isusepreowner);
+
+            if (channel != null) {
+                sql = "SELECT * FROM `catalog` WHERE `uuid` = '" + channel.get("parent_uuid") + "'";
+                Map<String, Object> catalog = processTaskDataMapper.getOne(sql);
+                if (catalog != null) {
+                    sql = "SELECT * FROM `catalog` WHERE `lft` <= " + catalog.get("lft") + " AND `rht` >= " + catalog.get("rht");
+                    List<String> catalogUuidList = new ArrayList<>();
+                    List<Map<String, Object>> catalogList = processTaskDataMapper.getList(sql);
+                    for (Map<String, Object> map : catalogList) {
+                        catalogUuidList.add((String) map.get("uuid"));
+                    }
+                    if (CollectionUtils.isNotEmpty(catalogUuidList)) {
+                        String catalogUuidListStr = String.join("','", catalogUuidList);
+                        sql = "SELECT * FROM `catalog_authority` WHERE `catalog_uuid` IN ('" + catalogUuidListStr + "')";
+                        List<Map<String, Object>> catalog_authority = processTaskDataMapper.getList(sql);
+                        put(resultObj, "catalog_authority", catalog_authority);
+                    }
+                    put(resultObj, "catalog", catalogList);
+                }
+            }
         }
         {
             // 指派处理人
@@ -157,6 +184,18 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
             // 工单表单配置信息
             String sql = "SELECT a.*, b.* FROM `processtask_form` a LEFT JOIN `processtask_form_content` b ON b.`hash` = a.`form_content_hash` WHERE a.`processtask_id` = " + processTaskId;
             List<Map<String, Object>> processtask_form = processTaskDataMapper.getList(sql);
+            List<Map<String, Object>> processtask_form_content = new ArrayList<>();
+            for (Map<String, Object> map : processtask_form) {
+                Object hash = map.remove("hash");
+                Object content = map.remove("content");
+                if (hash != null && content != null) {
+                    Map<String, Object> newMap = new HashMap<>();
+                    newMap.put("hash", hash);
+                    newMap.put("content", content);
+                    processtask_form_content.add(newMap);
+                }
+            }
+            put(resultObj, "processtask_form_content", processtask_form_content);
             put(resultObj, "processtask_form", processtask_form);
         }
         {
@@ -225,14 +264,29 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
         }
         {
             // 评分
-            String sql = "SELECT a.*, b.* FROM `processtask_score_content` a LEFT JOIN `processtask_content` b ON b.`hash` = a.`content_hash` WHERE a.`processtask_id` = " + processTaskId;
+            String sql = "SELECT * FROM `processtask_score_content` WHERE `processtask_id` = " + processTaskId;
             List<Map<String, Object>> processtask_score_content = processTaskDataMapper.getList(sql);
+            for (Map<String, Object> map : processtask_score_content) {
+                addNotNullElement(contentHashSet, map.get("content_hash"));
+            }
             put(resultObj, "processtask_score_content", processtask_score_content);
         }
         {
             // 评分模板
             String sql = "SELECT a.*, b.* FROM `processtask_score_template` a LEFT JOIN `processtask_score_template_config` b ON b.`hash` = a.`config_hash` WHERE a.`processtask_id` = " + processTaskId;
             List<Map<String, Object>> processtask_score_template = processTaskDataMapper.getList(sql);
+            List<Map<String, Object>> processtask_score_template_config = new ArrayList<>();
+            for (Map<String, Object> map : processtask_score_template) {
+                Object hash = map.remove("hash");
+                Object config = map.remove("config");
+                if (hash != null && config != null) {
+                    Map<String, Object> newMap = new HashMap<>();
+                    newMap.put("hash", hash);
+                    newMap.put("config", config);
+                    processtask_score_template_config.add(newMap);
+                }
+            }
+            put(resultObj, "processtask_score_template_config", processtask_score_template_config);
             put(resultObj, "processtask_score_template", processtask_score_template);
         }
         {
@@ -280,14 +334,24 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
             // 步骤列表
             String sql = "SELECT a.*, b.* FROM `processtask_step` a LEFT JOIN `processtask_step_config` b ON b.`hash` = a.`config_hash` WHERE a.`processtask_id` = " + processTaskId;
             List<Map<String, Object>> processtask_step = processTaskDataMapper.getList(sql);
-            put(resultObj, "processtask_step", processtask_step);
+            List<Map<String, Object>> processtask_step_config = new ArrayList<>();
             List<String> stepIdList = new ArrayList<>();
             for (Map<String, Object> map : processtask_step) {
                 Object id = map.get("id");
                 if (id != null) {
                     stepIdList.add(id.toString());
                 }
+                Object hash = map.remove("hash");
+                Object config = map.remove("config");
+                if (hash != null && config != null) {
+                    Map<String, Object> newMap = new HashMap<>();
+                    newMap.put("hash", hash);
+                    newMap.put("config", config);
+                    processtask_step_config.add(newMap);
+                }
             }
+            put(resultObj, "processtask_step_config", processtask_step_config);
+            put(resultObj, "processtask_step", processtask_step);
             if (CollectionUtils.isNotEmpty(stepIdList)) {
                 String stepIdListStr = String.join(",", stepIdList);
                 sql = "SELECT * FROM `processtask_step_timeaudit` WHERE `processtask_step_id` IN (" + stepIdListStr + ")";
@@ -339,8 +403,11 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
         }
         {
             // 步骤回复内容
-            String sql = "SELECT a.*, b.* FROM `processtask_step_content` a LEFT JOIN `processtask_content` b ON b.`hash` = a.`content_hash` WHERE a.`processtask_id` = " + processTaskId;
+            String sql = "SELECT * FROM `processtask_step_content` WHERE `processtask_id` = " + processTaskId;
             List<Map<String, Object>> processtask_step_content = processTaskDataMapper.getList(sql);
+            for (Map<String, Object> map : processtask_step_content) {
+                addNotNullElement(contentHashSet, map.get("content_hash"));
+            }
             put(resultObj, "processtask_step_content", processtask_step_content);
         }
         {
@@ -426,8 +493,11 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
         }
         {
             //步骤提醒信息
-            String sql = "SELECT a.*, b.* FROM `processtask_step_remind` a LEFT JOIN `processtask_content` b ON b.`hash` = a.`content_hash` WHERE a.`processtask_id` = " + processTaskId;
+            String sql = "SELECT * FROM `processtask_step_remind` WHERE `processtask_id` = " + processTaskId;
             List<Map<String, Object>> processtask_step_remind = processTaskDataMapper.getList(sql);
+            for (Map<String, Object> map : processtask_step_remind) {
+                addNotNullElement(contentHashSet, map.get("content_hash"));
+            }
             put(resultObj, "processtask_step_remind", processtask_step_remind);
         }
         {
@@ -474,15 +544,16 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
         }
         {
             //子任务
-            String sql = "SELECT a.*, b.* FROM `processtask_step_task` a LEFT JOIN `processtask_content` b ON b.`hash` = a.`content_hash` WHERE a.`processtask_id` = " + processTaskId;
+            String sql = "SELECT * FROM `processtask_step_task` WHERE `processtask_id` = " + processTaskId;
             List<Map<String, Object>> processtask_step_task = processTaskDataMapper.getList(sql);
-            put(resultObj, "processtask_step_task", processtask_step_task);
             List<String> taskIdList = new ArrayList<>();
             List<String> taskConfigIdList = new ArrayList<>();
             for (Map<String, Object> map : processtask_step_task) {
                 taskIdList.add(map.get("id").toString());
                 taskConfigIdList.add(map.get("task_config_id").toString());
+                addNotNullElement(contentHashSet, map.get("content_hash"));
             }
+            put(resultObj, "processtask_step_task", processtask_step_task);
             if (CollectionUtils.isNotEmpty(taskIdList)) {
                 String taskIdListStr = String.join(",", taskIdList);
                 sql = "SELECT * FROM `processtask_step_task_user` WHERE `processtask_step_task_id` IN (" + taskIdListStr + ")";
@@ -502,8 +573,11 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
                         fileIdSet.add(fileId.toString());
                     }
                 }
-                sql = "SELECT a.*, b.* FROM `processtask_step_task_user_content` a LEFT JOIN `processtask_content` b ON b.`hash` = a.`content_hash` WHERE a.`processtask_step_task_id` IN (" + taskIdListStr + ")";
+                sql = "SELECT * FROM `processtask_step_task_user_content` WHERE `processtask_step_task_id` IN (" + taskIdListStr + ")";
                 List<Map<String, Object>> processtask_step_task_user_content = processTaskDataMapper.getList(sql);
+                for (Map<String, Object> map : processtask_step_task_user_content) {
+                    addNotNullElement(contentHashSet, map.get("content_hash"));
+                }
                 put(resultObj, "processtask_step_task_user_content", processtask_step_task_user_content);
             }
             if (CollectionUtils.isNotEmpty(taskConfigIdList)) {
@@ -524,6 +598,7 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
                 changeIdSet.add(map.get("change_id").toString());
             }
             if (CollectionUtils.isNotEmpty(changeIdSet)) {
+                Set<String> changeContentHashSet = new HashSet<>();
                 String changeIdSetStr = String.join(",", changeIdSet);
                 sql = "SELECT * FROM `change` WHERE `id` IN (" + changeIdSetStr + ")";
                 List<Map<String, Object>> change = processTaskDataMapper.getList(sql);
@@ -537,8 +612,11 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
                 List<Map<String, Object>> change_change_template = processTaskDataMapper.getList(sql);
                 put(resultObj, "change_change_template", change_change_template);
 
-                sql = "SELECT a.*, b.* FROM `change_description` a LEFT JOIN `change_content` b ON b.`hash` = a.`content_hash` WHERE a.`change_id` IN (" + changeIdSetStr + ")";
+                sql = "SELECT * FROM `change_description` WHERE `change_id` IN (" + changeIdSetStr + ")";
                 List<Map<String, Object>> change_description = processTaskDataMapper.getList(sql);
+                for (Map<String, Object> map : change_description) {
+                    addNotNullElement(changeContentHashSet, map.get("content_hash"));
+                }
                 put(resultObj, "change_description", change_description);
 
                 sql = "SELECT * FROM `change_file` WHERE `change_id` IN (" + changeIdSetStr + ")";
@@ -554,12 +632,18 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
                 List<Map<String, Object>> change_step = processTaskDataMapper.getList(sql);
                 put(resultObj, "change_step", change_step);
 
-                sql = "SELECT a.*, b.* FROM `change_step_content` a LEFT JOIN `change_content` b ON b.`hash` = a.`content_hash` WHERE a.`change_id` IN (" + changeIdSetStr + ")";
+                sql = "SELECT * FROM `change_step_content` WHERE `change_id` IN (" + changeIdSetStr + ")";
                 List<Map<String, Object>> change_step_content = processTaskDataMapper.getList(sql);
+                for (Map<String, Object> map : change_step_content) {
+                    addNotNullElement(changeContentHashSet, map.get("content_hash"));
+                }
                 put(resultObj, "change_step_content", change_step_content);
 
-                sql = "SELECT a.*, b.* FROM `change_step_comment` a LEFT JOIN `change_content` b ON b.`hash` = a.`content_hash` WHERE a.`change_id` IN (" + changeIdSetStr + ")";
+                sql = "SELECT * FROM `change_step_comment` WHERE `change_id` IN (" + changeIdSetStr + ")";
                 List<Map<String, Object>> change_step_comment = processTaskDataMapper.getList(sql);
+                for (Map<String, Object> map : change_step_comment) {
+                    addNotNullElement(changeContentHashSet, map.get("content_hash"));
+                }
                 put(resultObj, "change_step_comment", change_step_comment);
 
                 sql = "SELECT * FROM `change_step_file` WHERE `change_id` IN (" + changeIdSetStr + ")";
@@ -587,6 +671,13 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
                 sql = "SELECT * FROM `change_auto_start` WHERE `change_id` IN (" + changeIdSetStr + ")";
                 List<Map<String, Object>> change_auto_start = processTaskDataMapper.getList(sql);
                 put(resultObj, "change_auto_start", change_auto_start);
+
+                if (CollectionUtils.isNotEmpty(changeContentHashSet)) {
+                    String contentHashSetStr = String.join("','", changeContentHashSet);
+                    sql = "SELECT * FROM `change_content` WHERE `hash` IN ('" + contentHashSetStr + "')";
+                    List<Map<String, Object>> change_content = processTaskDataMapper.getList(sql);
+                    put(resultObj, "change_content", change_content);
+                }
             }
         }
 
@@ -644,11 +735,42 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
         set.add(obj);
     }
 
-    private void put(Map map, String key, Object value) {
-        if (map.containsKey(key)) {
-            ((ArrayList) map.computeIfAbsent("repeatKey", e -> new ArrayList<String>())).add(key);
+    private void put(JSONObject resultObj, String key, Map<String, Object> map) {
+        if (resultObj.containsKey(key)) {
+            ((ArrayList) resultObj.computeIfAbsent("repeatKey", e -> new ArrayList<String>())).add(key);
             return;
         }
-        map.put(key, value);
+        parseDate(map);
+        resultObj.put(key, map);
+    }
+
+    private void put(JSONObject resultObj, String key, List<Map<String, Object>> list) {
+        if (resultObj.containsKey(key)) {
+            ((ArrayList) resultObj.computeIfAbsent("repeatKey", e -> new ArrayList<String>())).add(key);
+            return;
+        }
+        parseDate(list);
+        resultObj.put(key, list);
+    }
+
+    private void parseDate(Map<String, Object> map) {
+        if (MapUtils.isNotEmpty(map)) {
+            Map<String, Object> dateMap = new HashMap<>();
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                Object value = entry.getValue();
+                if (value instanceof Timestamp) {
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+                    dateMap.put(entry.getKey(), simpleDateFormat.format((Timestamp) value));
+                }
+            }
+            map.putAll(dateMap);
+        }
+    }
+    private void parseDate(List<Map<String, Object>> list) {
+        if (CollectionUtils.isNotEmpty(list)) {
+            for (Map<String, Object> map : list) {
+                parseDate(map);
+            }
+        }
     }
 }
