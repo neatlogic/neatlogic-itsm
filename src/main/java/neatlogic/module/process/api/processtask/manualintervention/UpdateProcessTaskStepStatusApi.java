@@ -217,6 +217,7 @@ public class UpdateProcessTaskStepStatusApi extends PrivateApiComponentBase {//
                 processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.SUCCEED));
             } else if (nextStep != null) {
                 processTaskMapper.updateProcessTaskStepRelIsHit(new ProcessTaskStepRelVo(processTaskStepVo.getId(), nextStep.getId(), 1));
+                map.get(ProcessTaskStepStatus.SUCCEED.getValue()).accept(nextStep);
             }
         });
         map.put(ProcessTaskStepStatus.HANG.getValue(), processTaskStepVo -> {
