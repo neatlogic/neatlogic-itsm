@@ -308,20 +308,24 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                             // POI不允许重复创建Row，遍历到表格类属性时，需要创建多个Row，把这些Row记录下来，待到下一个表格类属性时，重复使用这些Row
                             Map<Integer, Row> rowMap = new HashMap<>();
                             for (FormAttributeVo formAttributeVo : formAttributeList) {
-                                IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo.getHandler());
-                                if (handler == null) {
+                                String handler = formAttributeVo.getHandler();
+                                ProcessTaskFormAttributeDataVo formAttributeDataVo = processTaskFormAttributeDataMap.get(formAttributeVo.getLabel());
+                                if (formAttributeDataVo != null && StringUtils.isNotBlank(formAttributeDataVo.getHandler())) {
+                                    handler = formAttributeDataVo.getHandler();
+                                }
+                                IFormAttributeDataConversionHandler formAttributeDataConversionHandler = FormAttributeDataConversionHandlerFactory.getHandler(handler);
+                                if (formAttributeDataConversionHandler == null) {
                                     continue;
                                 }
                                 Object detailedData = "";
-                                ProcessTaskFormAttributeDataVo formAttributeDataVo = processTaskFormAttributeDataMap.get(formAttributeVo.getLabel());
                                 // 因为表头中已经有了当前组件的label，所以如果当前工单表单中没有当前组件或组件值为null，那么使用空串来占位，防止后续组件前移
                                 if (formAttributeDataVo != null && formAttributeDataVo.getData() != null) {
-                                    detailedData = handler.dataTransformationForExcel(formAttributeDataVo, formAttributeVo.getConfig());
+                                    detailedData = formAttributeDataConversionHandler.dataTransformationForExcel(formAttributeDataVo, formAttributeVo.getConfig());//
                                 }
                                 if (detailedData == null) {
                                     detailedData = "";
                                 }
-                                int excelHeadLength = handler.getExcelHeadLength(formAttributeVo.getConfig());
+                                int excelHeadLength = formAttributeDataConversionHandler.getExcelHeadLength(formAttributeVo.getConfig());
                                 // excelHeadLength > 1表示该表单属性为表格类属性，需要生成嵌套表格
                                 if (excelHeadLength > 1 && StringUtils.isNotBlank(detailedData.toString())) {
                                     JSONObject jsonObject = (JSONObject) detailedData;
@@ -354,7 +358,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                                             Set<String> keySet = value.keySet();
                                             for (String head : headKeyList) {
                                                 if (!keySet.contains(head)) {
-                                                    value.put(head, new JSONObject());
+                                                    value.put(head, "");
                                                 }
                                             }
                                             Set<Map.Entry<String, Object>> entrySet = value.entrySet();
@@ -363,19 +367,19 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                                                 for (Map.Entry<String, Object> entry : entrySet) {
                                                     if (valueMap.getKey().equals(entry.getKey())) {
                                                         Cell cell = contentRow.createCell(formCellIndex + k + 1);
-                                                        JSONObject entryValue = (JSONObject) entry.getValue();
-                                                        String _value = "";
-                                                        if (entryValue != null) {
-                                                            Object text = entryValue.get("text");
-                                                            if (text != null) {
-                                                                if (text instanceof List) {
-                                                                    _value = String.join("", ((List) text));
-                                                                } else {
-                                                                    _value = text.toString();
-                                                                }
-                                                            }
-                                                        }
-                                                        cell.setCellValue(_value);
+//                                                        JSONObject entryValue = (JSONObject) entry.getValue();
+//                                                        String _value = "";
+//                                                        if (entryValue != null) {
+//                                                            Object text = entryValue.get("text");
+//                                                            if (text != null) {
+//                                                                if (text instanceof List) {
+//                                                                    _value = String.join("", ((List) text));
+//                                                                } else {
+//                                                                    _value = text.toString();
+//                                                                }
+//                                                            }
+//                                                        }
+                                                        cell.setCellValue(entry.getValue().toString());
                                                         k++;
                                                     }
                                                 }
