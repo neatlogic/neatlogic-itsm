@@ -320,7 +320,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                                 Object detailedData = "";
                                 // 因为表头中已经有了当前组件的label，所以如果当前工单表单中没有当前组件或组件值为null，那么使用空串来占位，防止后续组件前移
                                 if (formAttributeDataVo != null && formAttributeDataVo.getData() != null) {
-                                    detailedData = formAttributeDataConversionHandler.dataTransformationForExcel(formAttributeDataVo, formAttributeVo.getConfig());//
+                                    detailedData = formAttributeDataConversionHandler.dataTransformationForExcel(formAttributeDataVo, formAttributeVo.getConfig());
                                 }
                                 if (detailedData == null) {
                                     detailedData = "";
