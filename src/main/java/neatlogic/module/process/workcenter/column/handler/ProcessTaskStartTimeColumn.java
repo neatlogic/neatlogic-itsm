@@ -57,7 +57,10 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
 
     @Override
     public String getSimpleValue(ProcessTaskVo processTaskVo) {
-        return sdf.format(processTaskVo.getStartTime());
+        if (processTaskVo.getStartTime() != null) {
+            return sdf.format(processTaskVo.getStartTime());
+        }
+        return null;
     }
 
     @Override
