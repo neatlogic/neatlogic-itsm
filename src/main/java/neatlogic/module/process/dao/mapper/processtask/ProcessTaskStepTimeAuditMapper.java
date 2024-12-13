@@ -21,6 +21,7 @@ import neatlogic.framework.process.crossover.IProcessTaskStepTimeAuditCrossoverM
 import neatlogic.framework.process.dto.ProcessTaskStepCostVo;
 import neatlogic.framework.process.dto.ProcessTaskStepCostWorkerVo;
 import neatlogic.framework.process.dto.ProcessTaskStepTimeAuditVo;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -30,6 +31,8 @@ public interface ProcessTaskStepTimeAuditMapper extends IProcessTaskStepTimeAudi
 	ProcessTaskStepTimeAuditVo getLastProcessTaskStepTimeAuditByStepId(Long processTaskStepId);
 
 	ProcessTaskStepCostVo getLastProcessTaskStepCostByProcessTaskStepId(Long processTaskStepId);
+
+	int getProcessTaskStepCostCountByProcessTaskStepIdAndStartOperateList(@Param("processTaskStepId") Long processTaskStepId, @Param("startOperateList") List<String> startOperateList);
 
 	int updateProcessTaskStepTimeAudit(ProcessTaskStepTimeAuditVo processTaskStepTimeAuditVo);
 

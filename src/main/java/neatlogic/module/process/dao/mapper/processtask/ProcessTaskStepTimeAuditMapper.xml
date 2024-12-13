@@ -73,6 +73,17 @@
 		LIMIT 1
 	</select>
 
+	<select id="getProcessTaskStepCostCountByProcessTaskStepIdAndStartOperateList" resultType="int">
+		SELECT
+			COUNT(1)
+		FROM `processtask_step_cost`
+		WHERE `processtask_step_id` = #{processTaskStepId}
+		AND `start_operate` IN
+		<foreach collection="startOperateList" item="startOperate" open="(" separator="," close=")">
+		#{startOperate}
+		</foreach>
+	</select>
+
 	<insert id="insertProcessTaskStepTimeAudit" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTimeAuditVo">
 		<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
 			select LAST_INSERT_ID() as id
