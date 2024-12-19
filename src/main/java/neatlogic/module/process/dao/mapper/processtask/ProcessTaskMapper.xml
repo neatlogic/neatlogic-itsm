@@ -4170,4 +4170,10 @@
         FROM `processtask_step_worker_policy`
         WHERE `processtask_step_id` = #{value}
     </delete>
+
+    <delete id="deleteProcessTaskStepRelByProcessTaskId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_step_rel`
+        WHERE `processtask_id` = #{value}
+    </delete>
 </mapper>
