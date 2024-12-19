@@ -17,10 +17,8 @@ package neatlogic.module.process.api.processtask;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
@@ -32,7 +30,6 @@ import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -95,7 +92,7 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long processTaskId = paramObj.getLong("processTaskId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        ProcessTaskVo processTask = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_MARKREPEAT)
                 .build()
                 .checkAndNoPermissionThrowException();
@@ -150,24 +147,32 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
                 processTaskMapper.replaceProcessTaskRepeatList(processTaskRepeatList);
                 processTaskRepeatList.clear();
             }
-            ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-            processTaskStepVo.setProcessTaskId(processTaskVo.getId());
-            processTaskStepVo.getParamObj().put("source", source);
-            processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.BINDREPEAT);
+            {
+                ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+                processTaskStepVo.setProcessTaskId(processTaskVo.getId());
+                processTaskStepVo.getParamObj().put("source", source);
+                processTaskStepVo.getParamObj().put("repeatProcessTaskSerialNumber", processTask.getSerialNumber());
+                processTaskStepVo.getParamObj().put("repeatProcessTaskTitle", processTask.getTitle());
+                processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.BOUNDREPEAT);
+            }
+            {
+                processTaskMapper.replaceProcessTaskRepeat(new ProcessTaskRepeatVo(processTaskId, repeatGroupId));
+                ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+                processTaskStepVo.setProcessTaskId(processTaskId);
+                processTaskStepVo.getParamObj().put("source", source);
+                processTaskStepVo.getParamObj().put("repeatProcessTaskSerialNumber", processTaskVo.getSerialNumber());
+                processTaskStepVo.getParamObj().put("repeatProcessTaskTitle", processTaskVo.getTitle());
+                processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.BINDREPEAT);
+            }
         }
         if (CollectionUtils.isNotEmpty(processTaskRepeatList)) {
             processTaskMapper.replaceProcessTaskRepeatList(processTaskRepeatList);
         }
-        processTaskMapper.replaceProcessTaskRepeat(new ProcessTaskRepeatVo(processTaskId, repeatGroupId));
-        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-        processTaskStepVo.setProcessTaskId(processTaskId);
-        processTaskStepVo.getParamObj().put("source", source);
-        processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.BINDREPEAT);
 
         for (ProcessTaskVo processTaskVo : runningProcessTaskList) {
             //当前用户可能没有工单的取消权限，所以用系统用户操作
-            UserContext.init(SystemUser.SYSTEM);
-            ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
+//            UserContext.init(SystemUser.SYSTEM);
+//            ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
             ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
             processTaskStep.setProcessTaskId(processTaskVo.getId());
             processTaskStep.getParamObj().put("source", source);
