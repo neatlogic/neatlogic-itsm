@@ -600,4 +600,6 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
     int deleteProcessTaskFormContentByHash(String hash);
 
     int deleteProcessTaskStepWorkerPolicyByProcessTaskStepId(Long processTaskStepId);
+
+    int deleteProcessTaskStepRelByProcessTaskId(Long processTaskId);
 }
