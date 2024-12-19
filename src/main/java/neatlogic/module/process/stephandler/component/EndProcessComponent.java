@@ -1,16 +1,16 @@
 package neatlogic.module.process.stephandler.component;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
-import neatlogic.framework.process.constvalue.ProcessStepMode;
-import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.common.constvalue.SystemUser;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
+import neatlogic.framework.process.constvalue.*;
+import neatlogic.framework.process.crossover.IProcessTaskCrossoverMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskException;
-import neatlogic.framework.process.stephandler.core.IProcessStepExtendHandler;
-import neatlogic.framework.process.stephandler.core.ProcessStepExtendHandlerFactory;
-import neatlogic.framework.process.stephandler.core.ProcessStepHandlerBase;
+import neatlogic.framework.process.stephandler.core.*;
 import neatlogic.framework.transaction.core.AfterTransactionJob;
 import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -109,10 +109,10 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
-        ProcessTaskVo processTaskVo = new ProcessTaskVo();
+        String source = currentProcessTaskStepVo.getParamObj().getString("source");
+        IProcessTaskCrossoverMapper processTaskCrossoverMapper = CrossoverServiceFactory.getApi(IProcessTaskCrossoverMapper.class);
+        ProcessTaskVo processTaskVo = processTaskCrossoverMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
         processTaskVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
-        processTaskVo.setId(currentProcessTaskStepVo.getProcessTaskId());
-        //processTaskMapper.updateProcessTaskStatus(processTaskVo);
         //自动评分
         processStepHandlerUtil.autoScore(processTaskVo);
 
@@ -125,6 +125,35 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
             }
         }
 
+        // 重复事件工单自动取消
+        Long repeatGroupId = processTaskCrossoverMapper.getRepeatGroupIdByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+        if (repeatGroupId != null) {
+            List<Long> repeatProcessTaskIdList = processTaskCrossoverMapper.getProcessTaskIdListByRepeatGroupId(repeatGroupId);
+            repeatProcessTaskIdList.remove(currentProcessTaskStepVo.getProcessTaskId());
+            if (CollectionUtils.isNotEmpty(repeatProcessTaskIdList)) {
+                List<ProcessTaskVo> repeatProcessTaskList = processTaskCrossoverMapper.getProcessTaskListByIdList(repeatProcessTaskIdList);
+                for (ProcessTaskVo repeatProcessTask : repeatProcessTaskList) {
+                    ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+                    processTaskStepVo.setProcessTaskId(repeatProcessTask.getId());
+                    processTaskStepVo.setIsAutoGenerateId(false);
+                    processTaskStepVo.getParamObj().put("source", source);
+                    processTaskStepVo.getParamObj().put("repeatProcessTaskSerialNumber", processTaskVo.getSerialNumber());
+                    processTaskStepVo.getParamObj().put("repeatProcessTaskTitle", processTaskVo.getTitle());
+                    ProcessTaskStepThread thread = new ProcessTaskStepThread(ProcessTaskOperationType.PROCESSTASK_ABORT, processTaskStepVo, null) {
+                        @Override
+                        protected void myExecute(ProcessTaskStepVo processTaskStepVo) {
+                            processTaskStepVo.getParamObj().put("repeatProcessTaskSerialNumber", processTaskVo.getSerialNumber());
+                            processTaskStepVo.getParamObj().put("repeatProcessTaskTitle", processTaskVo.getTitle());
+                            processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.AUTOCANCELREPEAT);
+                            UserContext.init(SystemUser.SYSTEM);
+                            ProcessStepHandlerFactory.getHandler().abortProcessTask(new ProcessTaskVo(processTaskStepVo.getProcessTaskId()));
+                        }
+                    };
+                    AfterTransactionJob<ProcessStepThread> afterTransactionJob = new AfterTransactionJob<>("PROCESSTASK-REPEAT-ABORT");
+                    afterTransactionJob.execute(thread);
+                }
+            }
+        }
         return 0;
     }
 

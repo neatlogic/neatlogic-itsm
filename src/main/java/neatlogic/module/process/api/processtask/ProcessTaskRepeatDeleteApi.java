@@ -19,6 +19,8 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
+import neatlogic.framework.process.dto.ProcessTaskVo;
+import neatlogic.framework.restful.annotation.Description;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.module.process.service.ProcessTaskService;
@@ -59,7 +61,7 @@ public class ProcessTaskRepeatDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "解绑重复工单接口";
+        return "nmpap.processtaskrepeatdeleteapi.getname";
     }
 
     @Override
@@ -68,28 +70,39 @@ public class ProcessTaskRepeatDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+            @Param(name = "repeatProcessTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.repeatprocesstaskid"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source"),
     })
+    @Description(desc = "nmpap.processtaskrepeatdeleteapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
+        String source = paramObj.getString("source");
         Long processTaskId = paramObj.getLong("processTaskId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        Long repeatGroupId = processTaskMapper.getRepeatGroupIdByProcessTaskId(processTaskId);
+        Long repeatProcessTaskId = paramObj.getLong("repeatProcessTaskId");
+        ProcessTaskVo processTask = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        ProcessTaskVo repeatProcessTask = processTaskService.checkProcessTaskParamsIsLegal(repeatProcessTaskId);
+        Long repeatGroupId = processTaskMapper.getRepeatGroupIdByProcessTaskId(repeatProcessTaskId);
         if (repeatGroupId != null) {
-            processTaskMapper.deleteProcessTaskRepeatByProcessTaskId(processTaskId);
-            ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-            processTaskStepVo.setProcessTaskId(processTaskId);
-            processTaskStepVo.getParamObj().put("source", paramObj.getString("source"));
-//        processTaskStepVo.setParamObj(jsonObj);
-            processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UNBINDREPEAT);
+            processTaskMapper.deleteProcessTaskRepeatByProcessTaskId(repeatProcessTaskId);
+            {
+                ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+                processTaskStepVo.setProcessTaskId(repeatProcessTaskId);
+                processTaskStepVo.getParamObj().put("source", source);
+                processTaskStepVo.getParamObj().put("repeatProcessTaskSerialNumber", processTask.getSerialNumber());
+                processTaskStepVo.getParamObj().put("repeatProcessTaskTitle", processTask.getTitle());
+                processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UNBOUNDREPEAT);
+            }
             List<Long> repeatProcessTaskIdList = processTaskMapper.getProcessTaskIdListByRepeatGroupId(repeatGroupId);
             if (repeatProcessTaskIdList.size() == 1) {
                 processTaskMapper.deleteProcessTaskRepeatByProcessTaskId(repeatProcessTaskIdList.get(0));
+            }
+            {
                 ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
-                processTaskStep.setProcessTaskId(repeatProcessTaskIdList.get(0));
-                processTaskStep.getParamObj().put("source", paramObj.getString("source"));
-//        processTaskStepVo.setParamObj(jsonObj);
+                processTaskStep.setProcessTaskId(processTaskId);
+                processTaskStep.getParamObj().put("source", source);
+                processTaskStep.getParamObj().put("repeatProcessTaskSerialNumber", repeatProcessTask.getSerialNumber());
+                processTaskStep.getParamObj().put("repeatProcessTaskTitle", repeatProcessTask.getTitle());
                 processStepHandlerUtil.audit(processTaskStep, ProcessTaskAuditType.UNBINDREPEAT);
             }
         }
