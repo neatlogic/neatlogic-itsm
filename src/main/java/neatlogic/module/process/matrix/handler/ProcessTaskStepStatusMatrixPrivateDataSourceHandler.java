@@ -111,7 +111,7 @@ public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMat
                 expression = SearchExpression.EQ.getExpression();
             }
             if (Objects.equals(expression, SearchExpression.EQ.getExpression())) {
-                if (!Objects.equals(filter.getValueList().get(0), statusValue)) {
+                if (!filter.getValueList().contains(statusValue)) {
                     return false;
                 }
             } else if (Objects.equals(expression, SearchExpression.NE.getExpression())) {
