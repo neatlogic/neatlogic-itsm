@@ -107,11 +107,11 @@ public class ProcessTaskStatusMatrixPrivateDataSourceHandler implements IMatrixP
                 continue;
             }
             String expression = filter.getExpression();
-            if (StringUtils.isNotBlank(expression)) {
+            if (StringUtils.isBlank(expression)) {
                 expression = SearchExpression.EQ.getExpression();
             }
             if (Objects.equals(expression, SearchExpression.EQ.getExpression())) {
-                if (!Objects.equals(filter.getValueList().get(0), statusValue)) {
+                if (!filter.getValueList().contains(statusValue)) {
                     return false;
                 }
             } else if (Objects.equals(expression, SearchExpression.NE.getExpression())) {
