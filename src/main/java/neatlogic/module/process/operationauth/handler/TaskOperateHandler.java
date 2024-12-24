@@ -596,6 +596,22 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                                 .put(operationType, new ProcessTaskHiddenException());
                         return PredicateResult.DENY;
                     }
+                    //2.判断工单状态是否是“未提交”，如果是，则提示“工单未提交”；
+                    //3.判断工单状态是否是“已完成”，如果是，则提示“工单已完成”；
+                    //4.判断工单状态是否是“已取消”，如果是，则提示“工单已取消”；
+                    //6.判断工单状态是否是“已挂起”，如果是，则提示“工单已挂起”；
+                    //7.判断工单状态是否是“已评分”，如果是，则提示“工单已评分”；
+                    ProcessTaskPermissionDeniedException exception = processTaskService.checkProcessTaskStatus(processTaskVo.getStatus(),
+                            ProcessTaskStatus.DRAFT,
+                            ProcessTaskStatus.SUCCEED,
+                            ProcessTaskStatus.ABORTED,
+                            ProcessTaskStatus.HANG,
+                            ProcessTaskStatus.SCORED);
+                    if (exception != null) {
+                        operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
+                                .put(operationType, exception);
+                        return PredicateResult.DENY;
+                    }
                     //2.判断工单是否启用“标记重复事件”功能，如果没有，则提示“工单未启用标记重复事件功能”；
                     Integer enableMarkRepeat = (Integer) JSONPath.read(processTaskVo.getConfig(), "process.processConfig.enableMarkRepeat");
                     if (Objects.equals(enableMarkRepeat, 1)) {
