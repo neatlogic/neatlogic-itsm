@@ -140,7 +140,7 @@
 		<result column="name" property="name" />
 		<result column="isActive" property="isActive" />
 		<result column="formUuid" property="formUuid" />
-		<result column="config" property="config" />
+		<result column="configStr" property="configStr" />
 	</resultMap>
 
 	<select id="getProcessByUuid" parameterType="java.lang.String" resultMap="processDetailMap">
@@ -148,7 +148,7 @@
 		a.`uuid`,
 		a.`name`,
 		a.`is_active` AS isActive,
-		a.`config`,
+		a.`config` AS configStr,
 		d.`form_uuid` AS formUuid
 		FROM
 		`process` a
@@ -162,7 +162,7 @@
 		a.`uuid`,
 		a.`name`,
 		a.`is_active` AS isActive,
-		a.`config`,
+		a.`config` AS configStr,
 		d.`form_uuid` AS formUuid
 		FROM
 		`process` a
@@ -176,7 +176,7 @@
 		`uuid`,
 		`name`,
 		`is_active` AS isActive,
-		`config`
+		`config` AS configStr
 		FROM
 		`process`
 		WHERE
