@@ -678,11 +678,18 @@
 		WHERE `process_uuid` = #{value}
 	</delete>-->
 
-	<delete id="deleteProcessStepWorkerPolicyByProcessUuid" parameterType="java.lang.String">
+	<!--<delete id="deleteProcessStepWorkerPolicyByProcessUuid" parameterType="java.lang.String">
 		DELETE
 		FROM
 		`process_step_worker_policy`
 		WHERE process_uuid = #{value}
+	</delete>-->
+
+	<delete id="deleteProcessStepWorkerPolicyByProcessStepUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+			`process_step_worker_policy`
+		WHERE process_step_uuid = #{value}
 	</delete>
 
 	<delete id="deleteProcessByUuid" parameterType="java.lang.String">
@@ -716,9 +723,14 @@
 		DELETE FROM `process_step_comment_template` WHERE `process_step_uuid` = #{value}
 	</delete>
 
-	<delete id="deleteProcessStepTagByProcessUuid" parameterType="java.lang.String">
+	<!--<delete id="deleteProcessStepTagByProcessUuid" parameterType="java.lang.String">
 		DELETE FROM `process_step_tag` WHERE `process_uuid` = #{value}
+	</delete>-->
+
+	<delete id="deleteProcessStepTagByProcessStepUuid" parameterType="java.lang.String">
+		DELETE FROM `process_step_tag` WHERE `process_step_uuid` = #{value}
 	</delete>
+
     <delete id="deleteProcessStepTaskByProcessStepUuid">
 		DELETE FROM `process_step_task_config` WHERE `process_step_uuid` = #{value}
 	</delete>
