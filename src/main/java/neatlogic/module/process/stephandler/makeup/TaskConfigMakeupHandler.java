@@ -17,37 +17,45 @@
 
 package neatlogic.module.process.stephandler.makeup;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.dependency.core.DependencyManager;
-import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
-import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
+import neatlogic.framework.process.dto.ProcessStepTaskConfigVo;
 import neatlogic.framework.process.dto.ProcessStepVo;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.IProcessStepMakeupHandler;
-import neatlogic.module.process.dependency.handler.NotifyPolicyProcessStepDependencyHandler;
+import neatlogic.module.process.dao.mapper.process.ProcessMapper;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Objects;
 
 @Service
-public class NotifyPolicyConfigMakeupHandler implements IProcessStepMakeupHandler {
+public class TaskConfigMakeupHandler implements IProcessStepMakeupHandler {
+
+    @Resource
+    private ProcessMapper processMapper;
+
     @Override
     public String getName() {
-        return "notifyPolicyConfig";
+        return "taskConfig";
     }
 
     @Override
     public void makeup(IProcessStepInternalHandler processStepInternalHandler, ProcessStepVo processStepVo, JSONObject stepConfigObj, String action) {
-        /* 组装通知策略id **/
-        InvokeNotifyPolicyConfigVo notifyPolicyConfig = stepConfigObj.getObject("notifyPolicyConfig", InvokeNotifyPolicyConfigVo.class);
-        if (notifyPolicyConfig != null) {
-            INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
-            if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(notifyPolicyConfig)) {
+        //保存子任务
+        JSONObject taskConfig = stepConfigObj.getJSONObject("taskConfig");
+        if (MapUtils.isNotEmpty(taskConfig)) {
+            ProcessStepTaskConfigVo taskConfigVo = JSON.toJavaObject(taskConfig, ProcessStepTaskConfigVo.class);
+            if (CollectionUtils.isNotEmpty(taskConfigVo.getIdList())) {
                 if (Objects.equals(action, "save")) {
-                    DependencyManager.insert(NotifyPolicyProcessStepDependencyHandler.class, notifyPolicyConfig.getPolicyId(), processStepVo.getUuid());
+                    taskConfigVo.getIdList().forEach(id -> {
+                        ProcessStepTaskConfigVo tmpVo = new ProcessStepTaskConfigVo(processStepVo.getUuid(), id);
+                        processMapper.insertProcessStepTask(tmpVo);
+                    });
                 } else if (Objects.equals(action, "delete")) {
-                    DependencyManager.delete(NotifyPolicyProcessStepDependencyHandler.class, processStepVo.getUuid());
+                    processMapper.deleteProcessStepTaskByProcessStepUuid(processStepVo.getUuid());
                 }
             }
         }

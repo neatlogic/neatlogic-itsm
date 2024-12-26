@@ -23,42 +23,49 @@ import neatlogic.framework.process.dto.ProcessStepVo;
 import neatlogic.framework.process.dto.ProcessStepWorkerPolicyVo;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.IProcessStepMakeupHandler;
+import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.annotation.Resource;
+import java.util.Objects;
 
 @Service
 public class WorkerPolicyConfigMakeupHandler implements IProcessStepMakeupHandler {
+
+    @Resource
+    private ProcessMapper processMapper;
+
     @Override
     public String getName() {
         return "workerPolicyConfig";
     }
 
     @Override
-    public void makeup(IProcessStepInternalHandler processStepInternalHandler, ProcessStepVo processStepVo, JSONObject stepConfigObj) {
+    public void makeup(IProcessStepInternalHandler processStepInternalHandler, ProcessStepVo processStepVo, JSONObject stepConfigObj, String action) {
         /* 组装分配策略 **/
         JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
         if (MapUtils.isNotEmpty(workerPolicyConfig)) {
             JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
             if (CollectionUtils.isNotEmpty(policyList)) {
-                List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
-                for (int k = 0; k < policyList.size(); k++) {
-                    JSONObject policyObj = policyList.getJSONObject(k);
-                    if (!"1".equals(policyObj.getString("isChecked"))) {
-                        continue;
+                if (Objects.equals(action, "save")) {
+                    for (int k = 0; k < policyList.size(); k++) {
+                        JSONObject policyObj = policyList.getJSONObject(k);
+                        if (!"1".equals(policyObj.getString("isChecked"))) {
+                            continue;
+                        }
+                        ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
+                        processStepWorkerPolicyVo.setProcessUuid(processStepVo.getProcessUuid());
+                        processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
+                        processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
+                        processStepWorkerPolicyVo.setSort(k + 1);
+                        processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
+                        processMapper.insertProcessStepWorkerPolicy(processStepWorkerPolicyVo);
                     }
-                    ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
-                    processStepWorkerPolicyVo.setProcessUuid(processStepVo.getProcessUuid());
-                    processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
-                    processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
-                    processStepWorkerPolicyVo.setSort(k + 1);
-                    processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
-                    workerPolicyList.add(processStepWorkerPolicyVo);
+                } else if (Objects.equals(action, "delete")) {
+                    processMapper.deleteProcessStepWorkerPolicyByProcessStepUuid(processStepVo.getUuid());
                 }
-                processStepVo.setWorkerPolicyList(workerPolicyList);
             }
         }
     }

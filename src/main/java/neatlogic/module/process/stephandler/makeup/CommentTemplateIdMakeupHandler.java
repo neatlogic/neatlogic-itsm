@@ -21,19 +21,33 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.process.dto.ProcessStepVo;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.IProcessStepMakeupHandler;
+import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.Objects;
 
 @Service
 public class CommentTemplateIdMakeupHandler implements IProcessStepMakeupHandler {
+
+    @Resource
+    private ProcessMapper processMapper;
+
     @Override
     public String getName() {
         return "commentTemplateId";
     }
 
     @Override
-    public void makeup(IProcessStepInternalHandler processStepInternalHandler, ProcessStepVo processStepVo, JSONObject stepConfigObj) {
+    public void makeup(IProcessStepInternalHandler processStepInternalHandler, ProcessStepVo processStepVo, JSONObject stepConfigObj, String action) {
         //保存回复模版ID
         Long commentTemplateId = stepConfigObj.getLong("commentTemplateId");
-        processStepVo.setCommentTemplateId(commentTemplateId);
+        if (commentTemplateId != null) {
+            if (Objects.equals(action, "save")) {
+                processMapper.insertProcessStepCommentTemplate(processStepVo);
+            } else if (Objects.equals(action, "delete")) {
+                processMapper.deleteProcessStepCommentTemplate(processStepVo.getUuid());
+            }
+        }
     }
 }
