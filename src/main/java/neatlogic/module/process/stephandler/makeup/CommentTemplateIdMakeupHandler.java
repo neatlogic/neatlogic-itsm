@@ -44,7 +44,7 @@ public class CommentTemplateIdMakeupHandler implements IProcessStepMakeupHandler
         Long commentTemplateId = stepConfigObj.getLong("commentTemplateId");
         if (commentTemplateId != null) {
             if (Objects.equals(action, "save")) {
-                processMapper.insertProcessStepCommentTemplate(processStepVo);
+                processMapper.insertProcessStepCommentTemplate(processStepVo.getUuid(), commentTemplateId);
             } else if (Objects.equals(action, "delete")) {
                 processMapper.deleteProcessStepCommentTemplate(processStepVo.getUuid());
             }

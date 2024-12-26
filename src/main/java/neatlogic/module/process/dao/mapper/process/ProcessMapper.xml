@@ -616,9 +616,9 @@
 		VALUES (#{processUuid}, #{processStepUuid}, #{tagId})
 	</insert>
 
-	<insert id="insertProcessStepCommentTemplate" parameterType="neatlogic.framework.process.dto.ProcessStepVo">
+	<insert id="insertProcessStepCommentTemplate">
 		INSERT INTO `process_step_comment_template` (`process_step_uuid`, `comment_template_id`)
-		VALUES (#{uuid}, #{commentTemplateId})
+		VALUES (#{processStepUuid}, #{commentTemplateId})
 	</insert>
 	<insert id="insertProcessStepTask">
 		insert into `process_step_task_config` (

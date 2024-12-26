@@ -120,7 +120,7 @@ public interface ProcessMapper extends IProcessCrossoverMapper {
 
     int insertProcessStepTag(ProcessStepTagVo processStepTagVo);
 
-    int insertProcessStepCommentTemplate(ProcessStepVo vo);
+    int insertProcessStepCommentTemplate(@Param("processStepUuid") String processStepUuid, @Param("commentTemplateId") Long commentTemplateId);
 
     int insertProcessStepTask(ProcessStepTaskConfigVo tmpVo);
 
