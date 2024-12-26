@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
@@ -25,24 +27,33 @@ import neatlogic.framework.form.exception.FormNotFoundException;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
 import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
+import neatlogic.framework.process.constvalue.ProcessFlowDirection;
+import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
+import neatlogic.framework.process.constvalue.ProcessStepType;
 import neatlogic.framework.process.crossover.IProcessCrossoverService;
 import neatlogic.framework.process.dto.*;
+import neatlogic.framework.process.dto.score.ProcessScoreTemplateVo;
 import neatlogic.framework.process.exception.process.ProcessNameRepeatException;
+import neatlogic.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import neatlogic.framework.process.exception.sla.SlaCalculateHandlerNotFoundException;
 import neatlogic.framework.process.sla.core.ISlaCalculateHandler;
 import neatlogic.framework.process.sla.core.SlaCalculateHandlerFactory;
+import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
+import neatlogic.framework.process.stephandler.core.ProcessStepHandlerTypeFactory;
+import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import neatlogic.framework.util.UuidUtil;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
-import neatlogic.module.process.dao.mapper.process.ProcessTagMapper;
 import neatlogic.module.process.dao.mapper.score.ScoreTemplateMapper;
-import neatlogic.module.process.dependency.handler.*;
+import neatlogic.module.process.dependency.handler.IntegrationProcessDependencyHandler;
+import neatlogic.module.process.dependency.handler.NotifyPolicyProcessDependencyHandler;
+import neatlogic.module.process.dependency.handler.NotifyPolicyProcessSlaDependencyHandler;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class ProcessServiceImpl implements ProcessService, IProcessCrossoverService {
@@ -51,13 +62,7 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
     private ProcessMapper processMapper;
 
     @Resource
-    private ProcessTagMapper processTagMapper;
-
-    @Resource
     private FormMapper formMapper;
-
-    //@Resource
-    //private NotifyMapper notifyMapper;
 
     @Resource
     private IntegrationMapper integrationMapper;
@@ -67,196 +72,243 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
 
     @Override
     public int saveProcess(ProcessVo processVo) throws ProcessNameRepeatException {
-        INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
         if (processMapper.checkProcessNameIsRepeat(processVo) > 0) {
             throw new ProcessNameRepeatException(processVo.getName());
         }
         String uuid = processVo.getUuid();
-        if (processMapper.checkProcessIsExists(uuid) > 0) {
-            deleteProcessRelevantData(uuid);
+        ProcessVo oldProcessVo = processMapper.getProcessByUuid(uuid);
+        if (oldProcessVo != null) {
+            saveOrDeleteProcessDependency(oldProcessVo, "delete");
             processMapper.updateProcess(processVo);
         } else {
             processVo.setFcu(UserContext.get().getUserUuid(true));
             processMapper.insertProcess(processVo);
         }
-
+        saveOrDeleteProcessDependency(processVo, "save");
         /* 清空自己的草稿 **/
         ProcessDraftVo processDraftVo = new ProcessDraftVo();
         processDraftVo.setProcessUuid(uuid);
         processDraftVo.setFcu(UserContext.get().getUserUuid(true));
         processMapper.deleteProcessDraft(processDraftVo);
-
-        String formUuid = processVo.getFormUuid();
-        if (StringUtils.isNotBlank(formUuid)) {
-            if (formMapper.checkFormIsExists(formUuid) == 0) {
-                throw new FormNotFoundException(formUuid);
-            }
-            processMapper.insertProcessForm(new ProcessFormVo(uuid, formUuid));
-        }
-
-        if (CollectionUtils.isNotEmpty(processVo.getSlaList())) {
-            for (ProcessSlaVo slaVo : processVo.getSlaList()) {
-                ISlaCalculateHandler slaCalculateHandler = SlaCalculateHandlerFactory.getHandler(slaVo.getCalculateHandler());
-                if (slaCalculateHandler == null) {
-                    throw new SlaCalculateHandlerNotFoundException(slaVo.getCalculateHandler());
-                }
-                if (CollectionUtils.isEmpty(slaVo.getProcessStepUuidList())) {
-                    continue;
-                }
-                if (Objects.equals(slaCalculateHandler.isSum(), 1)) {
-                    //关联的多个步骤共用一个时效
-                    processMapper.insertProcessSla(slaVo);
-                    for (String stepUuid : slaVo.getProcessStepUuidList()) {
-                        processMapper.insertProcessStepSla(stepUuid, slaVo.getUuid());
-                    }
-                    for (InvokeNotifyPolicyConfigVo notifyPolicyConfig : slaVo.getNotifyPolicyConfigList()) {
-                        if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(notifyPolicyConfig)) {
-                            DependencyManager.insert(NotifyPolicyProcessSlaDependencyHandler.class, notifyPolicyConfig.getPolicyId(), slaVo.getUuid());
-                        }
-                    }
-                } else {
-                    //关联的多个步骤各用一个时效
-                    for (String stepUuid : slaVo.getProcessStepUuidList()) {
-                        slaVo.setUuid(UuidUtil.randomUuid());
-                        processMapper.insertProcessSla(slaVo);
-                        processMapper.insertProcessStepSla(stepUuid, slaVo.getUuid());
-                        for (InvokeNotifyPolicyConfigVo notifyPolicyConfig : slaVo.getNotifyPolicyConfigList()) {
-                            if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(notifyPolicyConfig)) {
-                                DependencyManager.insert(NotifyPolicyProcessSlaDependencyHandler.class, notifyPolicyConfig.getPolicyId(), slaVo.getUuid());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (CollectionUtils.isNotEmpty(processVo.getStepList())) {
-            for (ProcessStepVo stepVo : processVo.getStepList()) {
-                List<String> integrationUuidList = stepVo.getIntegrationUuidList();
-                if (CollectionUtils.isNotEmpty(integrationUuidList)) {
-                    for (String integrationUuid : integrationUuidList) {
-                        if (integrationMapper.checkIntegrationExists(integrationUuid) == 0) {
-                            throw new IntegrationNotFoundException(integrationUuid);
-                        }
-                        DependencyManager.insert(IntegrationProcessStepDependencyHandler.class, integrationUuid, stepVo.getUuid());
-                    }
-                }
-                processMapper.insertProcessStep(stepVo);
-//                if (CollectionUtils.isNotEmpty(stepVo.getFormAttributeList())) {
-//                    for (ProcessStepFormAttributeVo processStepAttributeVo : stepVo.getFormAttributeList()) {
-//                        processMapper.insertProcessStepFormAttribute(processStepAttributeVo);
-//                    }
-//                }
-                if (StringUtils.isNotBlank(stepVo.getFormSceneUuid())) {
-                    JSONObject config = new JSONObject();
-                    config.put("processUuid", uuid);
-                    config.put("processName", processVo.getName());
-                    config.put("stepUuid", stepVo.getUuid());
-                    config.put("stepName", stepVo.getName());
-                    DependencyManager.insert(FormScene2ProcessStepDependencyHandler.class, stepVo.getFormSceneUuid(), stepVo.getUuid(), config);
-                }
-                if (CollectionUtils.isNotEmpty(stepVo.getEoaTemplateIdList())) {
-                    for (Long eoaTemplateId : stepVo.getEoaTemplateIdList()) {
-                        JSONObject config = new JSONObject();
-                        config.put("processUuid", uuid);
-                        config.put("processName", processVo.getName());
-                        config.put("stepUuid", stepVo.getUuid());
-                        config.put("stepName", stepVo.getName());
-                        DependencyManager.insert(EoaTemplate2ProcessStepDependencyHandler.class, eoaTemplateId, stepVo.getUuid(), config);
-                    }
-                }
-                if (CollectionUtils.isNotEmpty(stepVo.getWorkerPolicyList())) {
-                    for (ProcessStepWorkerPolicyVo processStepWorkerPolicyVo : stepVo.getWorkerPolicyList()) {
-                        processMapper.insertProcessStepWorkerPolicy(processStepWorkerPolicyVo);
-                    }
-                }
-                InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = stepVo.getNotifyPolicyConfig();
-                if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(invokeNotifyPolicyConfigVo)) {
-                    DependencyManager.insert(NotifyPolicyProcessStepDependencyHandler.class, invokeNotifyPolicyConfigVo.getPolicyId(), stepVo.getUuid());
-                }
-                processMapper.deleteProcessStepCommentTemplate(stepVo.getUuid());
-                if (stepVo.getCommentTemplateId() != null) {
-                    processMapper.insertProcessStepCommentTemplate(stepVo);
-                }
-                List<String> tagNameList = stepVo.getTagList();
-                if (CollectionUtils.isNotEmpty(tagNameList)) {
-                    ProcessStepTagVo processStepTagVo = new ProcessStepTagVo();
-                    processStepTagVo.setProcessUuid(stepVo.getProcessUuid());
-                    processStepTagVo.setProcessStepUuid(stepVo.getUuid());
-                    List<ProcessTagVo> processTagList = processTagMapper.getProcessTagByNameList(tagNameList);
-                    for (ProcessTagVo processTagVo : processTagList) {
-                        processStepTagVo.setTagId(processTagVo.getId());
-                        tagNameList.remove(processTagVo.getName());
-                        processMapper.insertProcessStepTag(processStepTagVo);
-                    }
-                    if (CollectionUtils.isNotEmpty(tagNameList)) {
-                        for (String tagName : tagNameList) {
-                            ProcessTagVo processTagVo = new ProcessTagVo(tagName);
-                            processTagMapper.insertProcessTag(processTagVo);
-                            processStepTagVo.setTagId(processTagVo.getId());
-                            processMapper.insertProcessStepTag(processStepTagVo);
-                        }
-                    }
-                }
-
-                //子任务
-                ProcessStepTaskConfigVo taskConfigVo = stepVo.getTaskConfigVo();
-                processMapper.deleteProcessStepTaskByProcessStepUuid(stepVo.getUuid());
-                if (taskConfigVo != null) {
-                    if (CollectionUtils.isNotEmpty(taskConfigVo.getIdList())) {
-                        taskConfigVo.getIdList().forEach(id -> {
-                            ProcessStepTaskConfigVo tmpVo = new ProcessStepTaskConfigVo(stepVo.getUuid(), id);
-                            processMapper.insertProcessStepTask(tmpVo);
-                        });
-                    }
-                }
-            }
-        }
-
-        if (CollectionUtils.isNotEmpty(processVo.getStepRelList())) {
-            for (ProcessStepRelVo stepRelVo : processVo.getStepRelList()) {
-                processMapper.insertProcessStepRel(stepRelVo);
-            }
-        }
-
-        if (processVo.getProcessScoreTemplateVo() != null) {
-            scoreTemplateMapper.insertProcessScoreTemplate(processVo.getProcessScoreTemplateVo());
-        }
-
-        InvokeNotifyPolicyConfigVo notifyPolicyConfig = processVo.getNotifyPolicyConfig();
-        if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(notifyPolicyConfig)) {
-            DependencyManager.insert(NotifyPolicyProcessDependencyHandler.class, notifyPolicyConfig.getPolicyId(), uuid);
-        }
-        if (CollectionUtils.isNotEmpty(processVo.getIntegrationUuidList())) {
-            for (String integrationUuid : processVo.getIntegrationUuidList()) {
-                if (integrationMapper.checkIntegrationExists(integrationUuid) == 0) {
-                    throw new IntegrationNotFoundException(integrationUuid);
-                }
-                DependencyManager.insert(IntegrationProcessDependencyHandler.class, integrationUuid, uuid);
-            }
-        }
         return 1;
     }
 
     @Override
-    public void deleteProcessRelevantData(String uuid) {
-        List<String> slaUuidList = processMapper.getSlaUuidListByProcessUuid(uuid);
-        List<String> processStepUuidList = processMapper.getProcessStepUuidListByProcessUuid(uuid);
-        DependencyManager.delete(NotifyPolicyProcessSlaDependencyHandler.class, slaUuidList);
-        DependencyManager.delete(NotifyPolicyProcessStepDependencyHandler.class, processStepUuidList);
-        DependencyManager.delete(IntegrationProcessStepDependencyHandler.class, processStepUuidList);
-        DependencyManager.delete(NotifyPolicyProcessDependencyHandler.class, uuid);
-        DependencyManager.delete(IntegrationProcessDependencyHandler.class, uuid);
-        processMapper.deleteProcessStepWorkerPolicyByProcessUuid(uuid);
-        processMapper.deleteProcessStepByProcessUuid(uuid);
-        processMapper.deleteProcessStepRelByProcessUuid(uuid);
-        processMapper.deleteProcessFormByProcessUuid(uuid);
-        processMapper.deleteProcessSlaByProcessUuid(uuid);
-        scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(uuid);
-        processMapper.deleteProcessStepTagByProcessUuid(uuid);
-        for (String stepUuid : processStepUuidList) {
-            DependencyManager.delete(FormScene2ProcessStepDependencyHandler.class, stepUuid);
-            DependencyManager.delete(EoaTemplate2ProcessStepDependencyHandler.class, stepUuid);
+    public void saveOrDeleteProcessDependency(ProcessVo processVo, String action) {
+        JSONObject config = processVo.getConfig();
+        if (MapUtils.isEmpty(config)) {
+            return;
+        }
+        JSONObject processObj = config.getJSONObject("process");
+        if (MapUtils.isEmpty(processObj)) {
+            return;
+        }
+
+        JSONObject formConfig = processObj.getJSONObject("formConfig");
+        if (MapUtils.isNotEmpty(formConfig)) {
+            String formUuid = formConfig.getString("uuid");
+            if (StringUtils.isNotBlank(formUuid)) {
+                if (Objects.equals(action, "save")) {
+                    if (formMapper.checkFormIsExists(formUuid) == 0) {
+                        throw new FormNotFoundException(formUuid);
+                    }
+                    processMapper.insertProcessForm(new ProcessFormVo(processVo.getUuid(), formUuid));
+                } else if (Objects.equals(action, "delete")) {
+                    processMapper.deleteProcessFormByProcessUuid(processVo.getUuid());
+                }
+            }
+        }
+        JSONArray slaList = processObj.getJSONArray("slaList");
+        if (CollectionUtils.isNotEmpty(slaList)) {
+            if (Objects.equals(action, "save")) {
+                for (int i = 0; i < slaList.size(); i++) {
+                    JSONObject slaObj = slaList.getJSONObject(i);
+                    /* 关联了步骤的sla策略才保存 **/
+                    JSONArray processStepUuidList = slaObj.getJSONArray("processStepUuidList");
+                    if (CollectionUtils.isNotEmpty(processStepUuidList)) {
+                        String calculateHandler = slaObj.getString("calculateHandler");
+                        ISlaCalculateHandler slaCalculateHandler = SlaCalculateHandlerFactory.getHandler(calculateHandler);
+                        if (slaCalculateHandler == null) {
+                            throw new SlaCalculateHandlerNotFoundException(calculateHandler);
+                        }
+                        List<String> slaUuidList = new ArrayList<>();
+                        ProcessSlaVo processSlaVo = new ProcessSlaVo();
+                        processSlaVo.setProcessUuid(processVo.getUuid());
+                        processSlaVo.setName(slaObj.getString("name"));
+                        processSlaVo.setCalculateHandler(calculateHandler);
+                        processSlaVo.setConfig(slaObj.toJSONString());
+
+                        if (Objects.equals(slaCalculateHandler.isSum(), 1)) {
+                            //关联的多个步骤共用一个时效
+                            processSlaVo.setUuid(slaObj.getString("uuid"));
+                            processMapper.insertProcessSla(processSlaVo);
+                            for (int p = 0; p < processStepUuidList.size(); p++) {
+                                String stepUuid = processStepUuidList.getString(p);
+                                processMapper.insertProcessStepSla(stepUuid, processSlaVo.getUuid());
+                            }
+                            slaUuidList.add(processSlaVo.getUuid());
+                        } else {
+                            //关联的多个步骤各用一个时效
+                            for (int p = 0; p < processStepUuidList.size(); p++) {
+                                String stepUuid = processStepUuidList.getString(p);
+                                processSlaVo.setUuid(UuidUtil.randomUuid());
+                                processMapper.insertProcessSla(processSlaVo);
+                                processMapper.insertProcessStepSla(stepUuid, processSlaVo.getUuid());
+                                slaUuidList.add(processSlaVo.getUuid());
+                            }
+                        }
+
+                        JSONArray notifyPolicyList = slaObj.getJSONArray("notifyPolicyList");
+                        if (CollectionUtils.isNotEmpty(notifyPolicyList)) {
+                            INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
+                            for (int j = 0; j < notifyPolicyList.size(); j++) {
+                                JSONObject notifyPolicy = notifyPolicyList.getJSONObject(j);
+                                if (MapUtils.isNotEmpty(notifyPolicy)) {
+                                    InvokeNotifyPolicyConfigVo notifyPolicyConfig = notifyPolicy.getObject("notifyPolicyConfig", InvokeNotifyPolicyConfigVo.class);
+                                    if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(notifyPolicyConfig)) {
+                                        for (String slaUuid : slaUuidList) {
+                                            DependencyManager.insert(NotifyPolicyProcessSlaDependencyHandler.class, notifyPolicyConfig.getPolicyId(), slaUuid);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if (Objects.equals(action, "delete")) {
+                List<String> slaUuidList = processMapper.getSlaUuidListByProcessUuid(processVo.getUuid());
+                DependencyManager.delete(NotifyPolicyProcessSlaDependencyHandler.class, slaUuidList);
+                processMapper.deleteProcessSlaByProcessUuid(processVo.getUuid());
+            }
+
+        }
+        String virtualStartStepUuid = "";// 虚拟开始节点uuid
+        Map<String, ProcessStepVo> stepMap = new HashMap<>();
+        JSONArray stepList = processObj.getJSONArray("stepList");
+        if (CollectionUtils.isNotEmpty(stepList)) {
+            for (int i = 0; i < stepList.size(); i++) {
+                JSONObject stepObj = stepList.getJSONObject(i);
+                String handler = stepObj.getString("handler");
+                if (ProcessStepHandlerType.START.getHandler().equals(handler)) {// 找到虚拟开始节点uuid,虚拟开始节点不写入process_step表
+                    virtualStartStepUuid = stepObj.getString("uuid");
+                    continue;
+                }
+                ProcessStepVo processStepVo = new ProcessStepVo();
+                processStepVo.setProcessUuid(processVo.getUuid());
+                processStepVo.setConfig(stepObj.getString("stepConfig"));
+
+                String uuid = stepObj.getString("uuid");
+                if (StringUtils.isNotBlank(uuid)) {
+                    processStepVo.setUuid(uuid);
+                }
+                String name = stepObj.getString("name");
+                if (StringUtils.isNotBlank(name)) {
+                    processStepVo.setName(name);
+                }
+
+                if (StringUtils.isNotBlank(handler)) {
+                    processStepVo.setHandler(handler);
+                    String type = ProcessStepHandlerTypeFactory.getType(handler);
+                    processStepVo.setType(type);
+                    IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(handler);
+                    if (processStepUtilHandler != null) {
+                        JSONObject stepConfigObj = stepObj.getJSONObject("stepConfig");
+                        if (stepConfigObj != null) {
+                            processStepVo.setProcessUuid(processVo.getUuid());
+                            processStepUtilHandler.makeupProcessStep(processStepVo, stepConfigObj, action);
+                        }
+                    } else {
+                        throw new ProcessStepHandlerNotFoundException(handler);
+                    }
+                }
+                if (Objects.equals(action, "save")) {
+                    processMapper.insertProcessStep(processStepVo);
+                }
+                stepMap.put(processStepVo.getUuid(), processStepVo);
+            }
+            if (Objects.equals(action, "delete")) {
+                processMapper.deleteProcessStepByProcessUuid(processVo.getUuid());
+            }
+        }
+
+        JSONArray relList = processObj.getJSONArray("connectionList");
+        if (CollectionUtils.isNotEmpty(relList)) {
+            if (Objects.equals(action, "save")) {
+                for (int i = 0; i < relList.size(); i++) {
+                    ProcessStepRelVo processStepRelVo = relList.getObject(i, ProcessStepRelVo.class);
+                    String fromStepUuid = processStepRelVo.getFromStepUuid();
+                    String toStepUuid = processStepRelVo.getToStepUuid();
+                    if (virtualStartStepUuid.equals(fromStepUuid)) {// 通过虚拟开始节点连线找到真正的开始步骤
+                        ProcessStepVo startStep = stepMap.get(toStepUuid);
+                        if (startStep != null) {
+                            startStep.setType(ProcessStepType.START.getValue());
+                        }
+                        continue;
+                    }
+                    processStepRelVo.setProcessUuid(processVo.getUuid());
+                    String type = processStepRelVo.getType();
+                    if (!ProcessFlowDirection.BACKWARD.getValue().equals(type)) {
+                        type = ProcessFlowDirection.FORWARD.getValue();
+                    }
+                    processStepRelVo.setType(type);
+                    processMapper.insertProcessStepRel(processStepRelVo);
+                }
+            } else if (Objects.equals(action, "delete")) {
+                processMapper.deleteProcessStepRelByProcessUuid(processVo.getUuid());
+            }
+        }
+
+        /* 组装评分设置 */
+        JSONObject scoreConfig = processObj.getJSONObject("scoreConfig");
+        if (MapUtils.isNotEmpty(scoreConfig)) {
+            Integer isActive = scoreConfig.getInteger("isActive");
+            if (Objects.equals(isActive, 1)) {
+                if (Objects.equals(action, "save")) {
+                    ProcessScoreTemplateVo processScoreTemplateVo = JSON.toJavaObject(scoreConfig, ProcessScoreTemplateVo.class);
+                    processScoreTemplateVo.setProcessUuid(processVo.getUuid());
+                    scoreTemplateMapper.insertProcessScoreTemplate(processScoreTemplateVo);
+                } else if (Objects.equals(action, "delete")) {
+                    scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(processVo.getUuid());
+                }
+
+            }
+        }
+
+        /* 组装通知策略 **/
+        JSONObject processConfig = processObj.getJSONObject("processConfig");
+        if (MapUtils.isNotEmpty(processConfig)) {
+            InvokeNotifyPolicyConfigVo notifyPolicyConfig = processConfig.getObject("notifyPolicyConfig", InvokeNotifyPolicyConfigVo.class);
+            if (notifyPolicyConfig != null) {
+                INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
+                if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(notifyPolicyConfig)) {
+                    if (Objects.equals(action, "save")) {
+                        DependencyManager.insert(NotifyPolicyProcessDependencyHandler.class, notifyPolicyConfig.getPolicyId(), processVo.getUuid());
+                    } else if (Objects.equals(action, "delete")) {
+                        DependencyManager.delete(NotifyPolicyProcessDependencyHandler.class, processVo.getUuid());
+                    }
+                }
+            }
+
+            JSONObject actionConfig = processConfig.getJSONObject("actionConfig");
+            if (MapUtils.isNotEmpty(actionConfig)) {
+                JSONArray actionList = actionConfig.getJSONArray("actionList");
+                if (CollectionUtils.isNotEmpty(actionList)) {
+                    if (Objects.equals(action, "save")) {
+                        for (int i = 0; i < actionList.size(); i++) {
+                            JSONObject ationObj = actionList.getJSONObject(i);
+                            String integrationUuid = ationObj.getString("integrationUuid");
+                            if (StringUtils.isNotBlank(integrationUuid)) {
+                                if (integrationMapper.checkIntegrationExists(integrationUuid) == 0) {
+                                    throw new IntegrationNotFoundException(integrationUuid);
+                                }
+                                DependencyManager.insert(IntegrationProcessDependencyHandler.class, integrationUuid, processVo.getUuid());
+                            }
+                        }
+                    } else if (Objects.equals(action, "delete")) {
+                        DependencyManager.delete(IntegrationProcessDependencyHandler.class, processVo.getUuid());
+                    }
+                }
+            }
         }
     }
 
