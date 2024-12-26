@@ -17,6 +17,7 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.RegexUtils;
+import neatlogic.framework.util.UuidUtil;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.service.ProcessService;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -75,29 +75,29 @@ public class ProcessCopyApi extends PrivateApiComponentBase {
             throw new ProcessNameRepeatException(name);
         }
 
-        String newUuid = processVo.getUuid();
-        String config = processVo.getConfigStr();
-        config = config.replace(uuid, newUuid);
+        String newUuid = UuidUtil.randomUuid();
+        String configStr = processVo.getConfigStr();
+        configStr = configStr.replace(uuid, newUuid);
 
         ProcessStepVo processStepVo = new ProcessStepVo();
         processStepVo.setProcessUuid(uuid);
         List<ProcessStepVo> processStepList = processMapper.searchProcessStep(processStepVo);
         for (ProcessStepVo processStep : processStepList) {
-            String newStepUuid = UUID.randomUUID().toString().replace("-", "");
-            config = config.replace(processStep.getUuid(), newStepUuid);
+            String newStepUuid = UuidUtil.randomUuid();
+            configStr = configStr.replace(processStep.getUuid(), newStepUuid);
         }
         List<ProcessStepRelVo> processStepRelList = processMapper.getProcessStepRelByProcessUuid(uuid);
         for (ProcessStepRelVo processStepRel : processStepRelList) {
-            String newRelUuid = UUID.randomUUID().toString().replace("-", "");
-            config = config.replace(processStepRel.getUuid(), newRelUuid);
+            String newRelUuid = UuidUtil.randomUuid();
+            configStr = configStr.replace(processStepRel.getUuid(), newRelUuid);
         }
         List<ProcessSlaVo> processSlaList = processMapper.getProcessSlaByProcessUuid(uuid);
         for (ProcessSlaVo processSla : processSlaList) {
-            String newSlaUuid = UUID.randomUUID().toString().replace("-", "");
-            config = config.replace(processSla.getUuid(), newSlaUuid);
+            String newSlaUuid = UuidUtil.randomUuid();
+            configStr = configStr.replace(processSla.getUuid(), newSlaUuid);
         }
+        JSONObject config = JSON.parseObject(configStr);
         processVo.setConfig(config);
-        processVo.makeupConfigObj();
         processService.saveProcess(processVo);
         processVo.setConfig(null);
         return processVo;

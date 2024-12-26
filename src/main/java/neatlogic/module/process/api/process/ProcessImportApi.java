@@ -95,7 +95,6 @@ public class ProcessImportApi extends PrivateBinaryStreamApiComponentBase {
 					result = "更新流程：'" + processVo.getName() +"'";
 				}
 				processVo.setFcu(UserContext.get().getUserUuid(true));
-				processVo.makeupConfigObj();
 				processService.saveProcess(processVo);
 				return result;
 			}else {

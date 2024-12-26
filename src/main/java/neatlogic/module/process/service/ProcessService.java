@@ -12,7 +12,7 @@ public interface ProcessService {
 	 * 删除流程相关数据
 	 * @param uuid 流程uuid
 	 */
-	void deleteProcessRelevantData(String uuid);
+//	void deleteProcessRelevantData(String uuid);
 
 	/**
 	 * 保存或删除流程的依赖关系数据

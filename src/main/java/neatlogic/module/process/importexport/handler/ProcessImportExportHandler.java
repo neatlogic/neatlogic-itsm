@@ -1,5 +1,6 @@
 package neatlogic.module.process.importexport.handler;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.exception.core.ApiRuntimeException;
@@ -83,7 +84,6 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
             }
         }
         importHandle(process, primaryChangeList, isChangeUuid);
-        process.makeupConfigObj();
         processService.saveProcess(process);
         return process.getUuid();
     }
@@ -543,7 +543,7 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
                 for (Map.Entry<String, String> entry : oldUuid2NewUuidMap.entrySet()) {
                     configStr = configStr.replace(entry.getKey(), entry.getValue());
                 }
-                process.setConfig(configStr);
+                process.setConfig(JSON.parseObject(configStr));
             }
         }
     }

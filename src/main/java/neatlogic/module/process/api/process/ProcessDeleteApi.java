@@ -5,6 +5,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_MODIFY;
 import neatlogic.framework.process.dto.ProcessDraftVo;
+import neatlogic.framework.process.dto.ProcessVo;
 import neatlogic.framework.process.exception.process.ProcessNotFoundException;
 import neatlogic.framework.process.exception.process.ProcessReferencedCannotBeDeleteException;
 import neatlogic.framework.restful.annotation.*;
@@ -54,13 +55,14 @@ public class ProcessDeleteApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
-		if(processMapper.checkProcessIsExists(uuid) == 0) {
+		ProcessVo oldProcessVo = processMapper.getProcessByUuid(uuid);
+		if(oldProcessVo == null) {
 			throw new ProcessNotFoundException(uuid);
 		}
 		if(processMapper.getProcessReferenceCount(uuid) > 0) {
 			throw new ProcessReferencedCannotBeDeleteException(uuid);
 		}
-		processService.deleteProcessRelevantData(uuid);
+		processService.saveOrDeleteProcessDependency(oldProcessVo, "delete");
 		processMapper.deleteProcessByUuid(uuid);
 		ProcessDraftVo processDraftVo = new ProcessDraftVo();
 		processDraftVo.setProcessUuid(uuid);
