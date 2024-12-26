@@ -31,11 +31,6 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
     }
 
     @Override
-    public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-
-    }
-
-    @Override
     public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
 
     }

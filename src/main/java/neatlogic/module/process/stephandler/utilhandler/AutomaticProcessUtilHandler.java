@@ -6,13 +6,13 @@ import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
-import neatlogic.framework.process.constvalue.*;
-import neatlogic.framework.process.dto.ProcessStepVo;
-import neatlogic.framework.process.dto.ProcessStepWorkerPolicyVo;
+import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
+import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
+import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.ProcessTaskStepOperationType;
 import neatlogic.framework.process.dto.ProcessTaskStepDataVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.processconfig.AutomaticCallbackConfigVo;
-import neatlogic.framework.process.dto.processconfig.AutomaticIntervalCallbackConfigVo;
 import neatlogic.framework.process.dto.processconfig.AutomaticRequestConfigVo;
 import neatlogic.framework.process.dto.processconfig.AutomaticTimeWindowConfigVo;
 import neatlogic.framework.process.operationauth.core.IOperationType;
@@ -21,14 +21,9 @@ import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBa
 import neatlogic.framework.process.util.ProcessConfigUtil;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
 import neatlogic.module.process.notify.handler.AutomaticNotifyPolicyHandler;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -78,91 +73,6 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
             }
         }
         return stepDataJson;
-    }
-
-    @Override
-    public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-        /** 组装通知策略id **/
-        JSONObject notifyPolicyConfig = stepConfigObj.getJSONObject("notifyPolicyConfig");
-        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
-        if (invokeNotifyPolicyConfigVo != null) {
-            processStepVo.setNotifyPolicyConfig(invokeNotifyPolicyConfigVo);
-        }
-
-//        JSONObject actionConfig = stepConfigObj.getJSONObject("actionConfig");
-//        ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
-//        if (actionConfigVo != null) {
-//            List<ActionConfigActionVo> actionList = actionConfigVo.getActionList();
-//            if (CollectionUtils.isNotEmpty(actionList)) {
-//                List<String> integrationUuidList = new ArrayList<>();
-//                for (ActionConfigActionVo actionVo : actionList) {
-//                    String integrationUuid = actionVo.getIntegrationUuid();
-//                    if (StringUtils.isNotBlank(integrationUuid)) {
-//                        integrationUuidList.add(integrationUuid);
-//                    }
-//                }
-//                processStepVo.setIntegrationUuidList(integrationUuidList);
-//            }
-//        }
-
-        /** 组装分配策略 **/
-        JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-        if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-            JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
-            if (CollectionUtils.isNotEmpty(policyList)) {
-                List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
-                for (int k = 0; k < policyList.size(); k++) {
-                    JSONObject policyObj = policyList.getJSONObject(k);
-                    if (!"1".equals(policyObj.getString("isChecked"))) {
-                        continue;
-                    }
-                    ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
-                    processStepWorkerPolicyVo.setProcessUuid(processStepVo.getProcessUuid());
-                    processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
-                    processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
-                    processStepWorkerPolicyVo.setSort(k + 1);
-                    processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
-                    workerPolicyList.add(processStepWorkerPolicyVo);
-                }
-                processStepVo.setWorkerPolicyList(workerPolicyList);
-            }
-        }
-
-        JSONArray tagList = stepConfigObj.getJSONArray("tagList");
-        if (CollectionUtils.isNotEmpty(tagList)) {
-            processStepVo.setTagList(tagList.toJavaList(String.class));
-        }
-        /** 收集引用的外部调用uuid **/
-        JSONObject automaticConfig = stepConfigObj.getJSONObject("automaticConfig");
-        if (MapUtils.isNotEmpty(automaticConfig)) {
-            List<String> integrationUuidList = new ArrayList<>();
-            JSONObject requestConfig = automaticConfig.getJSONObject("requestConfig");
-            AutomaticRequestConfigVo requestConfigVo = JSONObject.toJavaObject(requestConfig, AutomaticRequestConfigVo.class);
-            if (requestConfigVo != null) {
-                String integrationUuid = requestConfigVo.getIntegrationUuid();
-                if (StringUtils.isNotBlank(integrationUuid)) {
-                    integrationUuidList.add(integrationUuid);
-                }
-            }
-
-            JSONObject callbackConfig = automaticConfig.getJSONObject("callbackConfig");
-            AutomaticCallbackConfigVo callbackConfigVo = JSONObject.toJavaObject(callbackConfig, AutomaticCallbackConfigVo.class);
-            if (callbackConfigVo != null) {
-                AutomaticIntervalCallbackConfigVo configVo = callbackConfigVo.getConfig();
-                if (configVo != null) {
-                    String integrationUuid = configVo.getIntegrationUuid();
-                    if (StringUtils.isNotBlank(integrationUuid)) {
-                        integrationUuidList.add(integrationUuid);
-                    }
-                }
-            }
-            processStepVo.setIntegrationUuidList(integrationUuidList);
-        }
-        // 保存表单场景
-        String formSceneUuid = stepConfigObj.getString("formSceneUuid");
-        if (StringUtils.isNotBlank(formSceneUuid)) {
-            processStepVo.setFormSceneUuid(formSceneUuid);
-        }
     }
 
     @Override
