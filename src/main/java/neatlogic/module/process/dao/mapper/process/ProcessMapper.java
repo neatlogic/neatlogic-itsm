@@ -120,7 +120,7 @@ public interface ProcessMapper extends IProcessCrossoverMapper {
 
     int insertProcessStepTag(ProcessStepTagVo processStepTagVo);
 
-    int insertProcessStepCommentTemplate(ProcessStepVo vo);
+    int insertProcessStepCommentTemplate(@Param("processStepUuid") String processStepUuid, @Param("commentTemplateId") Long commentTemplateId);
 
     int insertProcessStepTask(ProcessStepTaskConfigVo tmpVo);
 
@@ -133,7 +133,9 @@ public interface ProcessMapper extends IProcessCrossoverMapper {
     int deleteProcessStepRelByProcessUuid(String processUuid);
 
     //	int deleteProcessStepTeamByProcessUuid(String processUuid);
-    int deleteProcessStepWorkerPolicyByProcessUuid(String processUuid);
+//    int deleteProcessStepWorkerPolicyByProcessUuid(String processUuid);
+
+    int deleteProcessStepWorkerPolicyByProcessStepUuid(String processUuid);
 
 //    int deleteProcessStepFormAttributeByProcessUuid(String processUuid);
 
@@ -149,7 +151,9 @@ public interface ProcessMapper extends IProcessCrossoverMapper {
 
     int deleteProcessStepCommentTemplate(String stepUuid);
 
-    int deleteProcessStepTagByProcessUuid(String processUuid);
+//    int deleteProcessStepTagByProcessUuid(String processUuid);
+
+    int deleteProcessStepTagByProcessStepUuid(String processStepUuid);
 
     int deleteProcessStepTaskByProcessStepUuid(String processStepUuid);
 

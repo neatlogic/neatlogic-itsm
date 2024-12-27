@@ -5,11 +5,12 @@ import neatlogic.framework.process.exception.process.ProcessNameRepeatException;
 
 public interface ProcessService {
 
-	public int saveProcess(ProcessVo processVo) throws ProcessNameRepeatException;
+	int saveProcess(ProcessVo processVo) throws ProcessNameRepeatException;
 
 	/**
-	 * 删除流程相关数据
-	 * @param uuid 流程uuid
+	 * 保存或删除流程的依赖关系数据
+	 * @param processVo 流程信息
+	 * @param action 保存或删除
 	 */
-	void deleteProcessRelevantData(String uuid);
+	void saveOrDeleteProcessDependency(ProcessVo processVo, String action);
 }

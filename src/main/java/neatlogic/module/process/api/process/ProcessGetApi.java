@@ -1,5 +1,6 @@
 package neatlogic.module.process.api.process;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -72,9 +73,11 @@ public class ProcessGetApi extends PrivateApiComponentBase {
                     processVo.setIsActive(1);
                 }
                 processVo.setName(processVo.getName() + "【工单：" + processTaskVo.getTitle()+ "】");
-                processVo.setConfig(configStr);
+                JSONObject config = JSON.parseObject(configStr);
+//                processVo.setConfig(configStr);
                 ProcessMessageManager.setOperationType(OperationTypeEnum.SEARCH);
-                processVo.setConfig(ProcessConfigUtil.regulateProcessConfig(processVo.getConfig()));
+                config = ProcessConfigUtil.regulateProcessConfig(config);
+                processVo.setConfig(config);
                 processVo.setReferenceCount(1);
                 return processVo;
             }

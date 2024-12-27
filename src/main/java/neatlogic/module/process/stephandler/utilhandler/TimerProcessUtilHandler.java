@@ -66,37 +66,6 @@ public class TimerProcessUtilHandler extends ProcessStepInternalHandlerBase {
     }
 
     @Override
-    public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-    /** 组装分配策略 **/
-        JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-        if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-            JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
-            if (CollectionUtils.isNotEmpty(policyList)) {
-                List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
-                for (int k = 0; k < policyList.size(); k++) {
-                    JSONObject policyObj = policyList.getJSONObject(k);
-                    if (!"1".equals(policyObj.getString("isChecked"))) {
-                        continue;
-                    }
-                    ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
-                    processStepWorkerPolicyVo.setProcessUuid(processStepVo.getProcessUuid());
-                    processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
-                    processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
-                    processStepWorkerPolicyVo.setSort(k + 1);
-                    processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
-                    workerPolicyList.add(processStepWorkerPolicyVo);
-                }
-                processStepVo.setWorkerPolicyList(workerPolicyList);
-            }
-        }
-        // 保存表单场景
-        String formSceneUuid = stepConfigObj.getString("formSceneUuid");
-        if (StringUtils.isNotBlank(formSceneUuid)) {
-            processStepVo.setFormSceneUuid(formSceneUuid);
-        }
-    }
-
-    @Override
     public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
 
     }

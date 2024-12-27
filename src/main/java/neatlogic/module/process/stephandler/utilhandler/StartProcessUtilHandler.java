@@ -28,12 +28,6 @@ public class StartProcessUtilHandler extends ProcessStepInternalHandlerBase {
     }
 
     @Override
-    public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
         // TODO Auto-generated method stub
 

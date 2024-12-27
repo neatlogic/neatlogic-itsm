@@ -53,7 +53,7 @@ public class ProcessSaveApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "流程uuid", isRequired = true),
             @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "流程名称"),
-            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "流程配置内容", isRequired = true)
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "流程配置内容", minSize = 1, isRequired = true)
     })
     @Output({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "流程uuid")
@@ -62,8 +62,7 @@ public class ProcessSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessVo processVo = JSON.toJavaObject(jsonObj, ProcessVo.class);
         ProcessMessageManager.setOperationType(OperationTypeEnum.UPDATE);
-        processVo.setConfig(ProcessConfigUtil.regulateProcessConfig(processVo.getConfig()));
-        processVo.makeupConfigObj();
+        ProcessConfigUtil.regulateProcessConfig(processVo.getConfig());
         processService.saveProcess(processVo);
         return processVo.getUuid();
     }

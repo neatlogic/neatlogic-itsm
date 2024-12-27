@@ -17,47 +17,58 @@
 
 package neatlogic.module.process.stephandler.makeup;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.dependency.core.DependencyManager;
 import neatlogic.framework.exception.integration.IntegrationNotFoundException;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
 import neatlogic.framework.process.dto.ProcessStepVo;
-import neatlogic.framework.process.dto.processconfig.ActionConfigActionVo;
-import neatlogic.framework.process.dto.processconfig.ActionConfigVo;
+import neatlogic.framework.process.dto.processconfig.AutomaticCallbackConfigVo;
+import neatlogic.framework.process.dto.processconfig.AutomaticIntervalCallbackConfigVo;
+import neatlogic.framework.process.dto.processconfig.AutomaticRequestConfigVo;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.IProcessStepMakeupHandler;
 import neatlogic.module.process.dependency.handler.IntegrationProcessStepDependencyHandler;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
 import java.util.Objects;
 
 @Service
-public class ActionConfigMakeupHandler implements IProcessStepMakeupHandler {
+public class AutomaticConfigMakeupHandler implements IProcessStepMakeupHandler {
 
     @Resource
     private IntegrationMapper integrationMapper;
 
     @Override
     public String getName() {
-        return "actionConfig";
+        return "automaticConfig";
     }
 
     @Override
     public void makeup(IProcessStepInternalHandler processStepInternalHandler, ProcessStepVo processStepVo, JSONObject stepConfigObj, String action) {
-        /* 组装动作 **/
-        JSONObject actionConfig = stepConfigObj.getJSONObject("actionConfig");
-        ActionConfigVo actionConfigVo = JSON.toJavaObject(actionConfig, ActionConfigVo.class);
-        if (actionConfigVo != null) {
-            List<ActionConfigActionVo> actionList = actionConfigVo.getActionList();
-            if (CollectionUtils.isNotEmpty(actionList)) {
-                if (Objects.equals(action, "save")) {
-                    for (ActionConfigActionVo actionVo : actionList) {
-                        String integrationUuid = actionVo.getIntegrationUuid();
+        JSONObject automaticConfig = stepConfigObj.getJSONObject("automaticConfig");
+        if (MapUtils.isNotEmpty(automaticConfig)) {
+            if (Objects.equals(action, "save")) {
+                JSONObject requestConfig = automaticConfig.getJSONObject("requestConfig");
+                AutomaticRequestConfigVo requestConfigVo = JSONObject.toJavaObject(requestConfig, AutomaticRequestConfigVo.class);
+                if (requestConfigVo != null) {
+                    String integrationUuid = requestConfigVo.getIntegrationUuid();
+                    if (StringUtils.isNotBlank(integrationUuid)) {
+                        if (integrationMapper.checkIntegrationExists(integrationUuid) == 0) {
+                            throw new IntegrationNotFoundException(integrationUuid);
+                        }
+                        DependencyManager.insert(IntegrationProcessStepDependencyHandler.class, integrationUuid, processStepVo.getUuid());
+                    }
+                }
+
+                JSONObject callbackConfig = automaticConfig.getJSONObject("callbackConfig");
+                AutomaticCallbackConfigVo callbackConfigVo = JSONObject.toJavaObject(callbackConfig, AutomaticCallbackConfigVo.class);
+                if (callbackConfigVo != null) {
+                    AutomaticIntervalCallbackConfigVo configVo = callbackConfigVo.getConfig();
+                    if (configVo != null) {
+                        String integrationUuid = configVo.getIntegrationUuid();
                         if (StringUtils.isNotBlank(integrationUuid)) {
                             if (integrationMapper.checkIntegrationExists(integrationUuid) == 0) {
                                 throw new IntegrationNotFoundException(integrationUuid);
@@ -65,9 +76,9 @@ public class ActionConfigMakeupHandler implements IProcessStepMakeupHandler {
                             DependencyManager.insert(IntegrationProcessStepDependencyHandler.class, integrationUuid, processStepVo.getUuid());
                         }
                     }
-                } else if (Objects.equals(action, "delete")) {
-                    DependencyManager.delete(IntegrationProcessStepDependencyHandler.class, processStepVo.getUuid());
                 }
+            } else if (Objects.equals(action, "delete")) {
+                DependencyManager.delete(IntegrationProcessStepDependencyHandler.class, processStepVo.getUuid());
             }
         }
     }

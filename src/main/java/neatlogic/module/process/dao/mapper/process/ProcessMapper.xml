@@ -140,7 +140,7 @@
 		<result column="name" property="name" />
 		<result column="isActive" property="isActive" />
 		<result column="formUuid" property="formUuid" />
-		<result column="config" property="config" />
+		<result column="configStr" property="configStr" />
 	</resultMap>
 
 	<select id="getProcessByUuid" parameterType="java.lang.String" resultMap="processDetailMap">
@@ -148,7 +148,7 @@
 		a.`uuid`,
 		a.`name`,
 		a.`is_active` AS isActive,
-		a.`config`,
+		a.`config` AS configStr,
 		d.`form_uuid` AS formUuid
 		FROM
 		`process` a
@@ -162,7 +162,7 @@
 		a.`uuid`,
 		a.`name`,
 		a.`is_active` AS isActive,
-		a.`config`,
+		a.`config` AS configStr,
 		d.`form_uuid` AS formUuid
 		FROM
 		`process` a
@@ -176,7 +176,7 @@
 		`uuid`,
 		`name`,
 		`is_active` AS isActive,
-		`config`
+		`config` AS configStr
 		FROM
 		`process`
 		WHERE
@@ -616,9 +616,9 @@
 		VALUES (#{processUuid}, #{processStepUuid}, #{tagId})
 	</insert>
 
-	<insert id="insertProcessStepCommentTemplate" parameterType="neatlogic.framework.process.dto.ProcessStepVo">
+	<insert id="insertProcessStepCommentTemplate">
 		INSERT INTO `process_step_comment_template` (`process_step_uuid`, `comment_template_id`)
-		VALUES (#{uuid}, #{commentTemplateId})
+		VALUES (#{processStepUuid}, #{commentTemplateId})
 	</insert>
 	<insert id="insertProcessStepTask">
 		insert into `process_step_task_config` (
@@ -678,11 +678,18 @@
 		WHERE `process_uuid` = #{value}
 	</delete>-->
 
-	<delete id="deleteProcessStepWorkerPolicyByProcessUuid" parameterType="java.lang.String">
+	<!--<delete id="deleteProcessStepWorkerPolicyByProcessUuid" parameterType="java.lang.String">
 		DELETE
 		FROM
 		`process_step_worker_policy`
 		WHERE process_uuid = #{value}
+	</delete>-->
+
+	<delete id="deleteProcessStepWorkerPolicyByProcessStepUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+			`process_step_worker_policy`
+		WHERE process_step_uuid = #{value}
 	</delete>
 
 	<delete id="deleteProcessByUuid" parameterType="java.lang.String">
@@ -716,9 +723,14 @@
 		DELETE FROM `process_step_comment_template` WHERE `process_step_uuid` = #{value}
 	</delete>
 
-	<delete id="deleteProcessStepTagByProcessUuid" parameterType="java.lang.String">
+	<!--<delete id="deleteProcessStepTagByProcessUuid" parameterType="java.lang.String">
 		DELETE FROM `process_step_tag` WHERE `process_uuid` = #{value}
+	</delete>-->
+
+	<delete id="deleteProcessStepTagByProcessStepUuid" parameterType="java.lang.String">
+		DELETE FROM `process_step_tag` WHERE `process_step_uuid` = #{value}
 	</delete>
+
     <delete id="deleteProcessStepTaskByProcessStepUuid">
 		DELETE FROM `process_step_task_config` WHERE `process_step_uuid` = #{value}
 	</delete>

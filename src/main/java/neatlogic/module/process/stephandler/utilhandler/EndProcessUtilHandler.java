@@ -1,14 +1,11 @@
 package neatlogic.module.process.stephandler.utilhandler;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.framework.process.dto.ProcessStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.operationauth.core.IOperationType;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
-import neatlogic.framework.process.util.ProcessConfigUtil;
 import neatlogic.module.process.notify.handler.TaskNotifyPolicyHandler;
 import org.springframework.stereotype.Service;
 
@@ -31,11 +28,6 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
     }
 
     @Override
-    public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-
-    }
-
-    @Override
     public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
 
     }
@@ -46,28 +38,18 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
     }
 
     @Override
-    public String[] getRegulateKeyList() {
-        return new String[]{"processConfig", "formConfig", "scoreConfig", "slaList"};
-    }
-
-    @Override
-    public JSONObject makeupConfig(JSONObject configObj) {
-        if (configObj == null) {
-            configObj = new JSONObject();
-        }
-        JSONObject resultObj = new JSONObject();
-
-        /* 授权 **/
-        ProcessTaskOperationType[] stepActions = {
+    public IOperationType[] getStepActions() {
+        /* 授权 */
+        return new IOperationType[]{
                 ProcessTaskOperationType.PROCESSTASK_ABORT,
                 ProcessTaskOperationType.PROCESSTASK_UPDATE,
                 ProcessTaskOperationType.PROCESSTASK_URGE
         };
-        JSONArray authorityList = configObj.getJSONArray("authorityList");
-        JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
-        resultObj.put("authorityList", authorityArray);
+    }
 
-        return resultObj;
+    @Override
+    public String[] getRegulateKeyList() {
+        return new String[]{"processConfig", "formConfig", "scoreConfig", "slaList", "authorityList"};
     }
 
 //    @Override
