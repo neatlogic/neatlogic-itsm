@@ -15,25 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.schedule.plugin;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSONObject;
-
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.GroupSearch;
@@ -45,50 +27,56 @@ import neatlogic.framework.exception.role.RoleNotFoundException;
 import neatlogic.framework.exception.team.TeamNotFoundException;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.process.constvalue.ProcessUserType;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.framework.process.dto.ProcessTaskSlaTimeVo;
-import neatlogic.framework.process.dto.ProcessTaskSlaTransferVo;
-import neatlogic.framework.process.dto.ProcessTaskSlaVo;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
+import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.scheduler.core.JobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskSlaTransferJob extends JobBase {
     static Logger logger = LoggerFactory.getLogger(ProcessTaskSlaTransferJob.class);
 
-    private final static Integer INTERVAL_IN_SECONDS = 60 * 60;
+    private static final Integer INTERVAL_IN_SECONDS = 60 * 60;
 
-    @Autowired
+    @Resource
     private ProcessTaskMapper processTaskMapper;
 
     @Resource
     private ProcessTaskSlaMapper processTaskSlaMapper;
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
-    @Autowired
+    @Resource
     private TeamMapper teamMapper;
 
-    @Autowired
+    @Resource
     private RoleMapper roleMapper;
 
     @Override
     public Boolean isMyHealthy(JobObject jobObject) {
         Long slaTransferId = Long.valueOf(jobObject.getJobName());
         ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskSlaMapper.getProcessTaskSlaTransferById(slaTransferId);
-        if (processTaskSlaTransferVo == null) {
-            return false;
-        } else {
-            return true;
-        }
+        return processTaskSlaTransferVo != null;
     }
 
     @Override
@@ -126,7 +114,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
                         transferDate.add(Calendar.MINUTE, time);
                     }
                 }
-                /** 如果触发时间在当前时间之前，则将触发时间改为当前时间 **/
+                /* 如果触发时间在当前时间之前，则将触发时间改为当前时间 **/
                 if (transferDate.before(Calendar.getInstance())) {
                     transferDate = Calendar.getInstance();
                 }
@@ -203,7 +191,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
                             workerVo.setType(split[0]);
                             workerVo.setUuid(split[1]);
                             workerVo.setUserType(ProcessUserType.MAJOR.getValue());
-                            /** 执行转交前，设置当前用户为system,用于权限校验 **/
+                            /* 执行转交前，设置当前用户为system,用于权限校验 **/
                             UserContext.init(SystemUser.SYSTEM);
                             List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
                             if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
