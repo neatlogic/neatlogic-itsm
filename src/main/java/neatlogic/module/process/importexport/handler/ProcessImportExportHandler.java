@@ -79,7 +79,7 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
             process.setUuid(oldProcess.getUuid());
         } else {
             if (processMapper.getProcessByUuid(process.getUuid()) != null) {
-                process.setUuid(null);
+                process.setUuid(UuidUtil.randomUuid());
                 isChangeUuid = true;
             }
         }
