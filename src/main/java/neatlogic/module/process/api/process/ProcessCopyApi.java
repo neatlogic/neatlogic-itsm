@@ -98,6 +98,7 @@ public class ProcessCopyApi extends PrivateApiComponentBase {
         }
         JSONObject config = JSON.parseObject(configStr);
         processVo.setConfig(config);
+        processVo.setUuid(newUuid);
         processService.saveProcess(processVo);
         processVo.setConfig(null);
         return processVo;
