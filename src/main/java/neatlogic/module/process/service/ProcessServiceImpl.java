@@ -76,6 +76,17 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
             throw new ProcessNameRepeatException(processVo.getName());
         }
         String uuid = processVo.getUuid();
+        JSONObject config = processVo.getConfig();
+        if (MapUtils.isNotEmpty(config)) {
+            JSONObject processObj = config.getJSONObject("process");
+            if (MapUtils.isNotEmpty(processObj)) {
+                JSONObject processConfig = processObj.getJSONObject("processConfig");
+                if (MapUtils.isNotEmpty(processConfig)) {
+                    processConfig.put("uuid", uuid);
+                    processConfig.put("name", processVo.getName());
+                }
+            }
+        }
         ProcessVo oldProcessVo = processMapper.getProcessByUuid(uuid);
         if (oldProcessVo != null) {
             saveOrDeleteProcessDependency(oldProcessVo, "delete");
@@ -221,10 +232,28 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
                         throw new ProcessStepHandlerNotFoundException(handler);
                     }
                 }
-                if (Objects.equals(action, "save")) {
+                stepMap.put(processStepVo.getUuid(), processStepVo);
+            }
+            if (Objects.equals(action, "save")) {
+                JSONArray relList = processObj.getJSONArray("connectionList");
+                if (CollectionUtils.isNotEmpty(relList)) {
+                    for (int i = 0; i < relList.size(); i++) {
+                        ProcessStepRelVo processStepRelVo = relList.getObject(i, ProcessStepRelVo.class);
+                        String fromStepUuid = processStepRelVo.getFromStepUuid();
+                        String toStepUuid = processStepRelVo.getToStepUuid();
+                        if (virtualStartStepUuid.equals(fromStepUuid)) {// 通过虚拟开始节点连线找到真正的开始步骤
+                            ProcessStepVo startStep = stepMap.get(toStepUuid);
+                            if (startStep != null) {
+                                startStep.setType(ProcessStepType.START.getValue());
+                            }
+                            break;
+                        }
+                    }
+                }
+                for (Map.Entry<String, ProcessStepVo> entry : stepMap.entrySet()) {
+                    ProcessStepVo processStepVo = entry.getValue();
                     processMapper.insertProcessStep(processStepVo);
                 }
-                stepMap.put(processStepVo.getUuid(), processStepVo);
             }
             if (Objects.equals(action, "delete")) {
                 processMapper.deleteProcessStepByProcessUuid(processVo.getUuid());
@@ -236,15 +265,6 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
             if (Objects.equals(action, "save")) {
                 for (int i = 0; i < relList.size(); i++) {
                     ProcessStepRelVo processStepRelVo = relList.getObject(i, ProcessStepRelVo.class);
-                    String fromStepUuid = processStepRelVo.getFromStepUuid();
-                    String toStepUuid = processStepRelVo.getToStepUuid();
-                    if (virtualStartStepUuid.equals(fromStepUuid)) {// 通过虚拟开始节点连线找到真正的开始步骤
-                        ProcessStepVo startStep = stepMap.get(toStepUuid);
-                        if (startStep != null) {
-                            startStep.setType(ProcessStepType.START.getValue());
-                        }
-                        continue;
-                    }
                     processStepRelVo.setProcessUuid(processVo.getUuid());
                     String type = processStepRelVo.getType();
                     if (!ProcessFlowDirection.BACKWARD.getValue().equals(type)) {
