@@ -1,5 +1,6 @@
 package neatlogic.module.process.api.processtask;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.asynchronization.threadpool.CachedThreadPool;
@@ -8,7 +9,6 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.operationauth.core.IOperationType;
 import neatlogic.framework.process.constvalue.ItsmTenantConfig;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.ProcessTaskStepOperationType;
@@ -16,6 +16,7 @@ import neatlogic.framework.process.dto.ProcessTaskScoreTemplateVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
+import neatlogic.framework.process.operationauth.core.IOperationType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -24,6 +25,7 @@ import neatlogic.module.process.common.config.ProcessConfig;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.dao.mapper.score.ScoreTemplateMapper;
 import neatlogic.module.process.service.ProcessTaskService;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -195,7 +197,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
         // TODO 兼容老工单表单（判断是否存在旧表单）
         Map<String, String> oldFormPropMap = processTaskMapper.getProcessTaskOldFormAndPropByTaskId(processTaskId);
-        if (oldFormPropMap != null && oldFormPropMap.size() > 0) {
+        if (MapUtils.isNotEmpty(oldFormPropMap)) {
             processTaskVo.setIsHasOldFormProp(1);
         }
         // 移动端默认展开表单
@@ -219,6 +221,12 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTask", processTaskVo);
         resultObj.put("processTaskRelationCount", processTaskMapper.getProcessTaskRelationCountByProcessTaskId(processTaskVo.getId()));
+        JSONObject processTaskTabLayoutObj = new JSONObject();
+        String processTaskTabLayout = ConfigManager.getConfig(ItsmTenantConfig.PROCESSTASK_TAB_LAYOUT);
+        if (StringUtils.isNotBlank(processTaskTabLayout)) {
+            processTaskTabLayoutObj = JSON.parseObject(processTaskTabLayout);
+        }
+        resultObj.put("processTaskTabLayout", processTaskTabLayoutObj);
         return resultObj;
     }
 
