@@ -92,7 +92,17 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
         String channelUuid = jsonObj.getString("channelUuid");
         if (processTaskId != null) {
             ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-            String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+            String configStr = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+            JSONObject config = JSONObject.parseObject(configStr);
+            if (MapUtils.isNotEmpty(config)) {
+                JSONObject processObj = config.getJSONObject("process");
+                if (MapUtils.isNotEmpty(processObj)) {
+                    JSONObject processConfig = processObj.getJSONObject("processConfig");
+                    if (MapUtils.isNotEmpty(processConfig)) {
+                        processConfig.put("uuid", processTaskVo.getProcessUuid());
+                    }
+                }
+            }
             List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
             if (CollectionUtils.isNotEmpty(processTaskStepList)) {
                 for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
@@ -119,7 +129,7 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
             }
             List<ProcessTaskStepRelVo> processTaskStepRelVoList = processTaskMapper.getProcessTaskStepRelByProcessTaskId(processTaskId);
             JSONObject resultObj = new JSONObject();
-            resultObj.put("config", JSONObject.parseObject(config));
+            resultObj.put("config", config);
             resultObj.put("processTaskStepList", processTaskStepList);
             resultObj.put("processTaskStepRelList", processTaskStepRelVoList);
             return resultObj;
