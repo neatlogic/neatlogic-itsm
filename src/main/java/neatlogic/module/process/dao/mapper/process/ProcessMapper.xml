@@ -78,6 +78,21 @@
 		process_uuid = #{processUuid}
 	</select>
 
+	<select id="getProcessStepRelByUuid" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.ProcessStepRelVo">
+		SELECT
+			`process_uuid` AS processUuid,
+			`uuid`,
+			`from_step_uuid` AS fromStepUuid,
+			`to_step_uuid` AS toStepUuid,
+			`name`,
+			`type`,
+			`condition`
+		FROM
+			`process_step_rel`
+		WHERE
+			`uuid` = #{value}
+	</select>
+
 	<resultMap id="processStepDetailMap" type="neatlogic.framework.process.dto.ProcessStepVo">
 		<id column="processUuid" property="processUuid" />
 		<id column="uuid" property="uuid" />

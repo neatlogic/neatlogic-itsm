@@ -34,6 +34,8 @@ public interface ProcessMapper extends IProcessCrossoverMapper {
 
     List<ProcessStepRelVo> getProcessStepRelByProcessUuid(String processUuid);
 
+    ProcessStepRelVo getProcessStepRelByUuid(String uuid);
+
     List<ProcessSlaVo> getProcessSlaByProcessUuid(String processUuid);
 
     List<String> getSlaUuidListByProcessUuid(String processUuid);

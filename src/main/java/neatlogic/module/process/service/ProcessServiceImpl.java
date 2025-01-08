@@ -90,12 +90,14 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
         ProcessVo oldProcessVo = processMapper.getProcessByUuid(uuid);
         if (oldProcessVo != null) {
             saveOrDeleteProcessDependency(oldProcessVo, "delete");
+        }
+        saveOrDeleteProcessDependency(processVo, "save");
+        if (oldProcessVo != null) {
             processMapper.updateProcess(processVo);
         } else {
             processVo.setFcu(UserContext.get().getUserUuid(true));
             processMapper.insertProcess(processVo);
         }
-        saveOrDeleteProcessDependency(processVo, "save");
         /* 清空自己的草稿 **/
         ProcessDraftVo processDraftVo = new ProcessDraftVo();
         processDraftVo.setProcessUuid(uuid);
@@ -264,7 +266,12 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
         if (CollectionUtils.isNotEmpty(relList)) {
             if (Objects.equals(action, "save")) {
                 for (int i = 0; i < relList.size(); i++) {
-                    ProcessStepRelVo processStepRelVo = relList.getObject(i, ProcessStepRelVo.class);
+                    JSONObject relObj = relList.getJSONObject(i);
+                    String uuid = relObj.getString("uuid");
+                    if (processMapper.getProcessStepRelByUuid(uuid) != null) {
+                        relObj.put("uuid", UuidUtil.randomUuid());
+                    }
+                    ProcessStepRelVo processStepRelVo = relObj.toJavaObject(ProcessStepRelVo.class);
                     processStepRelVo.setProcessUuid(processVo.getUuid());
                     String type = processStepRelVo.getType();
                     if (!ProcessFlowDirection.BACKWARD.getValue().equals(type)) {
