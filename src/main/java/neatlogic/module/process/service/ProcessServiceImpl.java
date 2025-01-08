@@ -108,6 +108,7 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
 
     @Override
     public void saveOrDeleteProcessDependency(ProcessVo processVo, String action) {
+        Map<String, String> oldUuid2NewUuidMap = new HashMap<>();
         JSONObject config = processVo.getConfig();
         if (MapUtils.isEmpty(config)) {
             return;
@@ -269,7 +270,9 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
                     JSONObject relObj = relList.getJSONObject(i);
                     String uuid = relObj.getString("uuid");
                     if (processMapper.getProcessStepRelByUuid(uuid) != null) {
-                        relObj.put("uuid", UuidUtil.randomUuid());
+                        String newUuid = UuidUtil.randomUuid();
+                        oldUuid2NewUuidMap.put(uuid, newUuid);
+                        relObj.put("uuid", newUuid);
                     }
                     ProcessStepRelVo processStepRelVo = relObj.toJavaObject(ProcessStepRelVo.class);
                     processStepRelVo.setProcessUuid(processVo.getUuid());
@@ -336,6 +339,14 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
                     }
                 }
             }
+        }
+
+        if (MapUtils.isNotEmpty(oldUuid2NewUuidMap)) {
+            String configStr = config.toJSONString();
+            for (Map.Entry<String, String> entry : oldUuid2NewUuidMap.entrySet()) {
+                configStr = configStr.replace(entry.getKey(), entry.getValue());
+            }
+            processVo.setConfig(JSONObject.parseObject(configStr));
         }
     }
 
