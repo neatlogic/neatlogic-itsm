@@ -22,7 +22,7 @@ import com.alibaba.fastjson.JSONPath;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.change.constvalue.ChangeProcessStepHandlerType;
 import neatlogic.framework.common.constvalue.GroupSearch;
-import neatlogic.framework.common.constvalue.SystemUser;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.common.constvalue.UserType;
 import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.dao.mapper.RoleMapper;

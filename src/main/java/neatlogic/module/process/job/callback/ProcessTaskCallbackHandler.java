@@ -22,7 +22,7 @@ import neatlogic.framework.autoexec.constvalue.JobStatus;
 import neatlogic.framework.autoexec.dao.mapper.AutoexecJobMapper;
 import neatlogic.framework.autoexec.dto.job.AutoexecJobVo;
 import neatlogic.framework.autoexec.job.callback.core.AutoexecJobCallbackBase;
-import neatlogic.framework.common.constvalue.SystemUser;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.process.constvalue.AutoExecJobProcessSource;
 import neatlogic.framework.process.constvalue.AutoexecProcessStepHandlerType;
 import neatlogic.framework.process.constvalue.ProcessFlowDirection;

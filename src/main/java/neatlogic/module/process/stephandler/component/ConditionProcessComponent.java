@@ -21,7 +21,7 @@ import com.alibaba.fastjson.JSONPath;
 import neatlogic.framework.asynchronization.threadlocal.ConditionParamContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.Expression;
-import neatlogic.framework.common.constvalue.SystemUser;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.condition.core.IConditionHandler;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;

@@ -19,7 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.common.constvalue.SystemUser;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.process.constvalue.ProcessTaskStepDataType;
 import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;

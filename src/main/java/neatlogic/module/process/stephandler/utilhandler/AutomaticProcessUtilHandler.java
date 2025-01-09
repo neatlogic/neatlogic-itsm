@@ -1,7 +1,7 @@
 package neatlogic.module.process.stephandler.utilhandler;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.common.constvalue.SystemUser;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
