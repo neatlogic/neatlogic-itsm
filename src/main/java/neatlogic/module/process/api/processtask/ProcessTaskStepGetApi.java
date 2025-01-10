@@ -218,6 +218,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         if (StringUtils.isNotBlank(processTaskStepCommentEditorToolbarIsShow)) {
             processTaskVo.setIsShowProcessTaskStepCommentEditorToolbar(Integer.valueOf(processTaskStepCommentEditorToolbarIsShow));
         }
+        String processTaskStepListIsShow = ConfigManager.getConfig(ItsmTenantConfig.PROCESS_TASK_STEP_LIST_IS_SHOW);
+        if (StringUtils.isNotBlank(processTaskStepListIsShow)) {
+            processTaskVo.setIsShowStepList(Integer.valueOf(processTaskStepListIsShow));
+        }
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTask", processTaskVo);
         resultObj.put("processTaskRelationCount", processTaskMapper.getProcessTaskRelationCountByProcessTaskId(processTaskVo.getId()));
