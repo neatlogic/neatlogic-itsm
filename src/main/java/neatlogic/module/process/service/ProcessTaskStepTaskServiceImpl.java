@@ -15,6 +15,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.dao.mapper.UserMapper;
@@ -22,11 +25,7 @@ import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.process.constvalue.*;
-import neatlogic.framework.process.operationauth.core.IOperationType;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTaskMapper;
-import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
-import neatlogic.module.process.dao.mapper.task.TaskMapper;
+import neatlogic.framework.process.crossover.IProcessTaskStepTaskCrossoverService;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskHiddenException;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
@@ -35,13 +34,15 @@ import neatlogic.framework.process.exception.operationauth.ProcessTaskStepNotMin
 import neatlogic.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import neatlogic.framework.process.exception.processtask.task.*;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
+import neatlogic.framework.process.operationauth.core.IOperationType;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import neatlogic.framework.process.task.TaskConfigManager;
 import neatlogic.framework.service.UserService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTaskMapper;
+import neatlogic.module.process.dao.mapper.task.TaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -57,7 +58,7 @@ import java.util.stream.Collectors;
  * @since 2021/8/31 11:49
  **/
 @Service
-public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskService {
+public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskService, IProcessTaskStepTaskCrossoverService {
     @Resource
     ProcessTaskMapper processTaskMapper;
     @Resource

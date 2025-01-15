@@ -2,9 +2,7 @@ package neatlogic.module.process.stephandler.utilhandler;
 
 import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
-import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.operationauth.core.IOperationType;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
 import neatlogic.module.process.notify.handler.TaskNotifyPolicyHandler;
 import org.springframework.stereotype.Service;
@@ -38,18 +36,8 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
     }
 
     @Override
-    public IOperationType[] getStepActions() {
-        /* 授权 */
-        return new IOperationType[]{
-                ProcessTaskOperationType.PROCESSTASK_ABORT,
-                ProcessTaskOperationType.PROCESSTASK_UPDATE,
-                ProcessTaskOperationType.PROCESSTASK_URGE
-        };
-    }
-
-    @Override
     public String[] getRegulateKeyList() {
-        return new String[]{"processConfig", "formConfig", "scoreConfig", "slaList", "authorityList"};
+        return new String[]{"processConfig", "formConfig", "scoreConfig", "slaList"};
     }
 
 //    @Override

@@ -287,10 +287,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     processTaskVo.getFormAttributeDataMap().put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
                 }
                 processTaskVo.setProcessTaskFormAttributeDataList(processTaskFormAttributeDataList);
-                // 获取工单流程图信息
-                String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
-                JSONArray formConfigAuthorityList = (JSONArray) JSONPath.read(taskConfig, "process.formConfig.authorityList");
-                processTaskVo.setFormConfigAuthorityList(formConfigAuthorityList);
                 List<String> formAttributeHideList = getFormConfigAuthorityConfig(processTaskVo);
                 processTaskVo.setFormAttributeHideList(formAttributeHideList);
             }
@@ -306,17 +302,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                             throw new FormActiveVersionNotFoundExcepiton(formUuid);
                         }
                         processTaskVo.setFormConfig(formVersion.getFormConfig());
-                        JSONObject processConfig = processVo.getConfig();
-                        if (MapUtils.isNotEmpty(processConfig)) {
-                            JSONObject process = processConfig.getJSONObject("process");
-                            if (MapUtils.isNotEmpty(process)) {
-                                JSONObject formConfig = process.getJSONObject("formConfig");
-                                if (MapUtils.isNotEmpty(formConfig)) {
-                                    JSONArray authorityList = formConfig.getJSONArray("authorityList");
-                                    processTaskVo.setFormConfigAuthorityList(authorityList);
-                                }
-                            }
-                        }
                         List<String> formAttributeHideList = getFormConfigAuthorityConfig(processTaskVo);
                         processTaskVo.setFormAttributeHideList(formAttributeHideList);
                     }

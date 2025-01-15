@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.workcenter.init;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.DeviceType;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.UserType;
@@ -26,6 +27,7 @@ import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
 import neatlogic.framework.startup.StartupBase;
 import neatlogic.framework.tenantinit.ITenantInit;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -232,6 +234,16 @@ public class WorkcenterInit extends StartupBase implements ITenantInit {
                 if (oldWorkcenterVo != null) {
                     if (StringUtils.isNotBlank(oldWorkcenterVo.getSupport())) {
                         workcenterVo.setSupport(oldWorkcenterVo.getSupport());
+                    }
+                    JSONObject oldConditionConfig = oldWorkcenterVo.getConditionConfig();
+                    if (MapUtils.isNotEmpty(oldConditionConfig)) {
+                        JSONObject startTimeCondition = oldConditionConfig.getJSONObject("startTimeCondition");
+                        if (MapUtils.isNotEmpty(startTimeCondition)) {
+                            JSONObject conditionConfig = workcenterVo.getConditionConfig();
+                            if (MapUtils.isNotEmpty(conditionConfig)) {
+                                conditionConfig.put("startTimeCondition", startTimeCondition);
+                            }
+                        }
                     }
                 }
                 workcenterMapper.insertWorkcenter(workcenterVo);
