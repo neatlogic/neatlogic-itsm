@@ -90,7 +90,6 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
 
             resultObj.put("formAttributeDataMap", processTaskVo.getFormAttributeDataMap());
             resultObj.put("formConfig", processTaskVo.getFormConfig());
-            resultObj.put("formConfigAuthorityList", processTaskVo.getFormConfigAuthorityList());
             resultObj.put("formAttributeHideList", processTaskVo.getFormAttributeHideList());
         }
 

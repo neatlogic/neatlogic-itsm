@@ -173,7 +173,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
         `sort`,
         `type`,
         `support`,
-        `is_show_total`
+        `is_show_total`,
+        `condition_config`
         from `process_workcenter`
         where `uuid` in
         <foreach collection="uuidList" item="uuid" separator="," open="(" close=")">
