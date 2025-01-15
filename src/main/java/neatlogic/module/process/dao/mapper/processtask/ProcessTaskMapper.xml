@@ -2869,12 +2869,20 @@
     <select id="getNotIndexProcessTaskIdList"
             parameterType="neatlogic.framework.fulltextindex.dto.fulltextindex.FullTextIndexTypeVo"
             resultType="java.lang.Long" useCache="false">
-        select a.id
+        <!--select a.id
         from processtask a
                  left join fulltextindex_target_process b
                            on a.id = b.target_id and b.target_type = #{type}
         where a.is_deleted = 0 and b.target_id is null
-        limit #{pageSize}
+        limit #{pageSize}-->
+        SELECT a.id
+        FROM processtask a
+        WHERE NOT EXISTS (
+        SELECT 1
+        FROM fulltextindex_target_process b
+        WHERE a.id = b.target_id and b.target_type = #{type}
+        ) AND a.is_deleted = 0
+        LIMIT #{pageSize}
     </select>
 
     <!--<update id="updateProcessTaskStepConvergeIsCheck">
