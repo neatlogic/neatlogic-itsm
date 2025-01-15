@@ -1,5 +1,6 @@
 package neatlogic.module.process.stephandler.utilhandler;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
@@ -29,6 +30,14 @@ public class ConditionProcessUtilHandler extends ProcessStepInternalHandlerBase 
 	public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public JSONObject makeupConfig(JSONObject configObj) {
+		if (configObj == null) {
+			configObj = new JSONObject();
+		}
+		return configObj;
 	}
 
 	@Override
