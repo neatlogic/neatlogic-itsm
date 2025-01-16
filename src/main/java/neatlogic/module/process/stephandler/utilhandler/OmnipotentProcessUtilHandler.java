@@ -1,5 +1,6 @@
 package neatlogic.module.process.stephandler.utilhandler;
 
+import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.ProcessTaskStepOperationType;
@@ -11,6 +12,7 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.operationauth.core.IOperationType;
 import neatlogic.framework.process.stephandler.core.IProcessStepAssistantHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
+import neatlogic.module.process.notify.handler.OmnipotentNotifyPolicyHandler;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -63,6 +65,11 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                 ProcessTaskOperationType.PROCESSTASK_RECOVER,
                 ProcessTaskStepOperationType.STEP_REAPPROVAL
         };
+    }
+
+    @Override
+    public Class<? extends INotifyPolicyHandler> getNotifyPolicyHandlerClass() {
+        return OmnipotentNotifyPolicyHandler.class;
     }
 
     @Override
