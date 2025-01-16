@@ -2,6 +2,7 @@ package neatlogic.module.process.stephandler.utilhandler;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
+import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
@@ -12,6 +13,7 @@ import neatlogic.framework.process.operationauth.core.IOperationType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
+import neatlogic.module.process.notify.handler.AutomaticNotifyPolicyHandler;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -84,6 +86,11 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
                 ProcessTaskOperationType.PROCESSTASK_TRANSFER,
                 ProcessTaskStepOperationType.STEP_ACCEPT
         };
+    }
+
+    @Override
+    public Class<? extends INotifyPolicyHandler> getNotifyPolicyHandlerClass() {
+        return AutomaticNotifyPolicyHandler.class;
     }
 
     @Override
