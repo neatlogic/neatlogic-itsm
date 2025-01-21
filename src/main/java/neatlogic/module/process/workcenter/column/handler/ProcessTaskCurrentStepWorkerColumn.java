@@ -13,10 +13,7 @@ import neatlogic.module.process.service.NewWorkcenterService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -33,7 +30,6 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
     public String getDisplayName() {
         return "当前步骤处理对象";
     }
-
 
 
     @Override
@@ -76,19 +72,21 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
     public Object getValue(ProcessTaskVo processTaskVo) {
         JSONArray workerArray = new JSONArray();
         List<ProcessTaskStepVo> stepVoList = processTaskVo.getStepList();
-        if (Arrays.asList(ProcessTaskStatus.RUNNING.getValue(),ProcessTaskStatus.HANG.getValue()).contains(processTaskVo.getStatus())) {
+        if (Arrays.asList(ProcessTaskStatus.RUNNING.getValue(), ProcessTaskStatus.HANG.getValue()).contains(processTaskVo.getStatus())) {
             for (ProcessTaskStepVo stepVo : stepVoList) {
                 //查询其它步骤handler minorList
-                newWorkcenterService.getStepTaskWorkerList(workerArray,stepVo);
+                newWorkcenterService.getStepTaskWorkerList(workerArray, stepVo);
             }
         }
 
+        // 去重逻辑，保持原顺序
         Collection<JSONObject> uniqueObjects = workerArray.stream()
                 .map(JSONObject.class::cast) // 转为 JSONObject
                 .collect(Collectors.toMap(
-                        obj -> obj.getJSONObject("workerVo").getString("uuid"), // 根据 uuid 作为键
-                        obj -> obj,                  // 直接存储 JSONObject
-                        (existing, replacement) -> existing // 保留先出现的对象
+                        obj -> obj.getString("workTypename") + obj.getJSONObject("workerVo").getString("uuid"), // 根据 uuid 作为键
+                        obj -> obj, // 直接存储 JSONObject
+                        (existing, replacement) -> existing, // 保留先出现的对象
+                        LinkedHashMap::new // 使用 LinkedHashMap 保持顺序
                 ))
                 .values(); // 获取唯一值集合
 
