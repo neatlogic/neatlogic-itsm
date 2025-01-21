@@ -1,5 +1,7 @@
 package neatlogic.module.process.workcenter.column.handler;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnBase;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
@@ -8,13 +10,14 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.workcenter.dto.TableSelectColumnVo;
 import neatlogic.module.process.service.NewWorkcenterService;
-import com.alibaba.fastjson.JSONArray;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
@@ -79,7 +82,20 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                 newWorkcenterService.getStepTaskWorkerList(workerArray,stepVo);
             }
         }
-        return workerArray;
+
+        Collection<JSONObject> uniqueObjects = workerArray.stream()
+                .map(JSONObject.class::cast) // 转为 JSONObject
+                .collect(Collectors.toMap(
+                        obj -> obj.getJSONObject("workerVo").getString("uuid"), // 根据 uuid 作为键
+                        obj -> obj,                  // 直接存储 JSONObject
+                        (existing, replacement) -> existing // 保留先出现的对象
+                ))
+                .values(); // 获取唯一值集合
+
+        // 转回 JSONArray
+        JSONArray distinctArray = new JSONArray();
+        distinctArray.addAll(uniqueObjects);
+        return distinctArray;
     }
 
 }
