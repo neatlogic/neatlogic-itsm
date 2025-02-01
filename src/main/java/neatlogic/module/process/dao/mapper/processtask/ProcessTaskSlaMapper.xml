@@ -268,7 +268,7 @@
         #{slaId},
         #{hash},
         #{triggerTime},
-        #{config}
+        #{config, typeHandler=CompressHandler}
         )
     </insert>
 
@@ -287,7 +287,7 @@
         #{slaId},
         #{hash},
         #{triggerTime},
-        #{config}
+        #{config, typeHandler=CompressHandler}
         )
     </insert>
 
@@ -306,7 +306,7 @@
         #{processTaskId},
         #{name},
         #{isActive},
-        #{config}
+        #{config, typeHandler=CompressHandler}
         )
     </insert>
 

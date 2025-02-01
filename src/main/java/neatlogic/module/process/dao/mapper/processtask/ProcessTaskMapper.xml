@@ -2619,13 +2619,13 @@
         </if>
     </select>
 
-    <select id="getProcessTaskFormContentListByContentLikeKeyword" parameterType="java.lang.String"
+    <!--<select id="getProcessTaskFormContentListByContentLikeKeyword" parameterType="java.lang.String"
             resultType="neatlogic.framework.process.dto.ProcessTaskFormVo">
         SELECT `hash`    AS formContentHash,
                `content` AS formContent
         FROM `processtask_form_content`
         WHERE `content` LIKE CONCAT('%', #{value}, '%')
-    </select>
+    </select>-->
 
     <select id="getProcessTaskFormContentList" resultType="neatlogic.framework.process.dto.ProcessTaskFormVo">
         SELECT `hash`    AS formContentHash,
@@ -3043,7 +3043,7 @@
 
     <insert id="insertIgnoreProcessTaskFormContent" parameterType="neatlogic.framework.process.dto.ProcessTaskFormVo">
         INSERT IGNORE INTO `processtask_form_content` (`hash`, `content`)
-        VALUES (#{formContentHash}, #{formContent});
+        VALUES (#{formContentHash}, #{formContent, typeHandler=CompressHandler});
     </insert>
 
     <insert id="insertProcessTaskStepWorkerPolicy"
@@ -3059,7 +3059,7 @@
                 #{processStepUuid},
                 #{policy},
                 #{sort},
-                #{config})
+                #{config, typeHandler=CompressHandler})
     </insert>
 
     <insert id="insertProcessTaskStepWorkerPolicyList"
@@ -3077,7 +3077,7 @@
             #{item.processStepUuid},
             #{item.policy},
             #{item.sort},
-            #{item.config})
+            #{item.config, typeHandler=CompressHandler})
         </foreach>
     </insert>
 
@@ -3466,7 +3466,7 @@
     <insert id="insertIgnoreProcessTaskStepConfig"
             parameterType="neatlogic.framework.process.dto.ProcessTaskStepConfigVo">
         insert ignore INTO `processtask_step_config` (`hash`, `config`)
-        VALUES (#{hash}, #{config})
+        VALUES (#{hash}, #{config, typeHandler=CompressHandler})
     </insert>
 
     <insert id="insertIgnoreProcessTaskStepConfigList"
@@ -3474,13 +3474,13 @@
         insert ignore INTO `processtask_step_config` (`hash`, `config`)
         VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.hash}, #{item.config})
+            (#{item.hash}, #{item.config, typeHandler=CompressHandler})
         </foreach>
     </insert>
 
     <insert id="insertIgnoreProcessTaskConfig" parameterType="neatlogic.framework.process.dto.ProcessTaskConfigVo">
         INSERT IGNORE INTO `processtask_config` (`hash`, `config`)
-        VALUES (#{hash}, #{config})
+        VALUES (#{hash}, #{config, typeHandler=CompressHandler})
     </insert>
 
     <insert id="insertProcessTaskStepFile" parameterType="neatlogic.framework.process.dto.ProcessTaskStepFileVo">
@@ -3692,7 +3692,7 @@
         VALUES (#{processTaskId},
                 #{processTaskStepId},
                 #{backupStepId},
-                #{configStr},
+                #{configStr, typeHandler=CompressHandler},
                 #{sort})
     </insert>
 
