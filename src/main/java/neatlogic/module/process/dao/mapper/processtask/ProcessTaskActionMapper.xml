@@ -55,7 +55,7 @@
                 #{integrationUuid},
                 #{status},
                 #{error},
-                #{configStr},
+                #{configStr, typeHandler=CompressHandler},
                 NOW(3)
             )
     </insert>
