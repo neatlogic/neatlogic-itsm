@@ -381,6 +381,18 @@ public interface ProcessTaskService {
     void startProcessTaskStep(JSONObject paramObj) throws Exception;
 
     /**
+     * 转交步骤
+     * @param processTaskId
+     * @param processTaskStepId
+     * @param workerList
+     * @param isSaveData
+     * @param content
+     * @param source
+     * @throws Exception
+     */
+    void transferProcessTaskStep(Long processTaskId, Long processTaskStepId, List<String> workerList, Integer isSaveData, String content, String source) throws Exception;
+
+    /**
      * 某个用户的待办的工单中当前处理节点是打了某个标签的节点的工单列表
      *
      * @param jsonObj 参数结构见processtask/currentstepistagstepofmine/list接口
