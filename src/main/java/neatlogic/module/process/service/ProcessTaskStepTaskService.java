@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.service;
 
+import com.alibaba.fastjson.JSONArray;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
 import com.alibaba.fastjson.JSONObject;
@@ -26,6 +27,15 @@ import java.util.List;
  * @since 2021/8/31 11:38
  **/
 public interface ProcessTaskStepTaskService {
+    /**
+     * 创建任务
+     *
+     * @param id
+     * @param processTaskStepTaskVo
+     * @param stepTaskUserVoList
+     * @param source
+     */
+    Long saveTask(Long id, ProcessTaskStepTaskVo processTaskStepTaskVo, JSONArray stepTaskUserVoList, String source);
     /**
      * 创建任务
      *

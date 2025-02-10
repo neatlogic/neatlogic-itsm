@@ -2870,6 +2870,40 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     }
 
     @Override
+    public void transferProcessTaskStep(Long processTaskId, Long processTaskStepId, List<String> workerList, Integer isSaveData, String content, String source) throws Exception {
+        ProcessTaskVo processTaskVo = checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
+        IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+        if(handler == null) {
+            throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+        }
+        List<ProcessTaskStepWorkerVo> processTaskStepWorkerList =  new ArrayList<>();
+        for(String worker : workerList) {
+            String[] split = worker.split("#");
+            if(GroupSearch.getValue(split[0]) != null) {
+                processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, split[0], split[1], ProcessUserType.MAJOR.getValue()));
+            }
+        }
+        if (Objects.equals(isSaveData, 1)) {
+            JSONObject data = getProcessTaskStepStagingData(processTaskId, processTaskStepId);
+            processTaskStepVo.getParamObj().putAll(data);
+        }
+        JSONArray workerArray = new JSONArray();
+        workerArray.addAll(workerList);
+        processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.WORKERLIST.getParamName(), workerArray);
+        processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CONTENT.getParamName(), content);
+        handler.transfer(processTaskStepVo, processTaskStepWorkerList);
+        if (Objects.equals(isSaveData, 1)) {
+            ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+            processTaskStepDataVo.setProcessTaskId(processTaskId);
+            processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
+            processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+            processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
+            processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
+        }
+    }
+
+    @Override
     public List<Map<String, Object>> getProcessTaskListWhichIsProcessingByUserAndTag(JSONObject jsonObj) {
         String userId = jsonObj.getString("userId");
         String tag = jsonObj.getString("tag");
