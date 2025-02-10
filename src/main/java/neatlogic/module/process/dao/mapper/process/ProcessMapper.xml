@@ -99,7 +99,7 @@
 		<result column="type" property="type" />
 		<result column="name" property="name" />
 		<result column="handler" property="handler" />
-		<result column="stepConfig" property="config" />
+		<result column="stepConfig" property="config" typeHandler="neatlogic.framework.dao.plugin.CompressHandler" />
 		<!--<collection property="formAttributeList" ofType="neatlogic.framework.process.dto.ProcessStepFormAttributeVo">
 			<result column="formAttributeUuid" property="attributeUuid" />
 			<result column="formUuid" property="formUuid" />
@@ -155,7 +155,7 @@
 		<result column="name" property="name" />
 		<result column="isActive" property="isActive" />
 		<result column="formUuid" property="formUuid" />
-		<result column="configStr" property="configStr" />
+		<result column="configStr" property="configStr" typeHandler="neatlogic.framework.dao.plugin.CompressHandler"/>
 	</resultMap>
 
 	<select id="getProcessByUuid" parameterType="java.lang.String" resultMap="processDetailMap">
@@ -240,7 +240,11 @@
 	</select>
 
 	<select id="checkProcessNameIsRepeat" resultType="int">
-		SELECT count(1) FROM `process` WHERE name=#{name} AND uuid != #{uuid}
+		SELECT count(1) FROM `process`
+		WHERE name=#{name}
+		  <if test="uuid != null and uuid != ''">
+		  AND uuid != #{uuid}
+		  </if>
 	</select>
 
 	<sql id="searchProcessWhere">
@@ -489,7 +493,7 @@
 		#{uuid},
 		#{processUuid},
 		#{name},
-		#{config}
+		#{config, typeHandler=CompressHandler}
 		)
 	</insert>
 
@@ -515,7 +519,7 @@
 		#{uuid},
 		#{name},
 		#{isActive},
-		#{configStr},
+		#{configStr, typeHandler=CompressHandler},
 		now(3),
 		#{fcu},
 		now(3),
@@ -540,7 +544,7 @@
 		#{name},
 		#{type},
 		#{handler},
-		#{config},
+		#{config, typeHandler=CompressHandler},
 		#{description}
 		)
 	</insert>
@@ -619,7 +623,7 @@
 		#{uuid},
 		#{processUuid},
 		#{name},
-		#{configStr},
+		#{configStr, typeHandler=CompressHandler},
 		now(3),
 		#{fcu},
 		#{md5}
@@ -657,7 +661,7 @@
 			`is_active` = #{isActive},
 		</if>
 		<if test="configStr != null and configStr != ''">
-			`config` = #{configStr},
+			`config` = #{configStr, typeHandler=CompressHandler},
 		</if>
 		`lcu` = #{lcu},
 		`lcd` = NOW(3)
