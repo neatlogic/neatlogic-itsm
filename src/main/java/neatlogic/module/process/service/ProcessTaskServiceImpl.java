@@ -2892,6 +2892,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         workerArray.addAll(workerList);
         processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.WORKERLIST.getParamName(), workerArray);
         processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CONTENT.getParamName(), content);
+        processTaskStepVo.getParamObj().put("source", source);
         handler.transfer(processTaskStepVo, processTaskStepWorkerList);
         if (Objects.equals(isSaveData, 1)) {
             ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
