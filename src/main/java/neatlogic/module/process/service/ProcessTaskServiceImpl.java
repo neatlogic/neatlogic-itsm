@@ -1638,6 +1638,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         List<ProcessTaskStepWorkerVo> workerList =
                 processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(
                         currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId());
+        if (CollectionUtils.isEmpty(workerList)) {
+            workerList = currentProcessTaskStepVo.getWorkerList();
+        }
         for (ProcessTaskStepWorkerVo processTaskStepWorkerVo : workerList) {
             receiverMap.computeIfAbsent(ProcessUserType.WORKER.getValue(), k -> new ArrayList<>())
                     .add(new NotifyReceiverVo(processTaskStepWorkerVo.getType(), processTaskStepWorkerVo.getUuid()));
