@@ -22,8 +22,8 @@ import com.alibaba.fastjson.JSONPath;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.change.constvalue.ChangeProcessStepHandlerType;
 import neatlogic.framework.common.constvalue.GroupSearch;
-import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.common.constvalue.UserType;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
@@ -69,8 +69,6 @@ import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.stephandler.core.*;
 import neatlogic.framework.process.stepremind.core.ProcessTaskStepRemindTypeFactory;
 import neatlogic.framework.process.task.TaskConfigManager;
-import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
-import neatlogic.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.framework.util.$;
 import neatlogic.framework.util.FormUtil;
@@ -655,11 +653,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         if (CollectionUtils.isEmpty(processTaskStepWorkerPolicyList)) {
             return assignableWorkerStepMap;
         }
-        int isOnlyOnceExecute = 0;
-        IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(WorkerPolicy.PRESTEPASSIGN.getValue());
-        if (workerPolicyHandler == null) {
-            isOnlyOnceExecute = workerPolicyHandler.isOnlyOnceExecute();
-        }
+        int isOnlyOnceExecute = Integer.parseInt(ConfigManager.getConfig(ItsmTenantConfig.PROCESSTASK_WORKERPOLICY_ISONLYONCEEXECUTE));
+//        IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(WorkerPolicy.PRESTEPASSIGN.getValue());
+//        if (workerPolicyHandler == null) {
+//            isOnlyOnceExecute = workerPolicyHandler.isOnlyOnceExecute();
+//        }
         for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : processTaskStepWorkerPolicyList) {
             if (!WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
                 continue;
