@@ -2130,7 +2130,7 @@
             <result property="vipLevel" column="focusVipLevel"/>
             <result property="pinyin" column="focusPinyin"/>
             <result property="isActive" column="focusIsActive"/>
-            <result property="isDelete" column="rfocusIsDelete"/>
+            <result property="isDelete" column="focusIsDelete"/>
         </collection>
         <collection property="processTaskSlaVoList" ofType="neatlogic.framework.process.dto.ProcessTaskSlaVo">
             <result column="ProcessTaskSlaId" property="id"/>
