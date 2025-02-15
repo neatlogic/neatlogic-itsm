@@ -2135,7 +2135,7 @@
         <collection property="processTaskSlaVoList" ofType="neatlogic.framework.process.dto.ProcessTaskSlaVo">
             <result column="ProcessTaskSlaId" property="id"/>
             <result column="ProcessTaskSlaName" property="name"/>
-            <result column="ProcessTaskSlaConfig" property="config"/>
+            <result column="ProcessTaskSlaConfig" property="config" typeHandler="CompressHandler"/>
             <association property="slaTimeVo" javaType="neatlogic.framework.process.dto.ProcessTaskSlaTimeVo">
                 <result column="expireTime" property="expireTime"/>
                 <result column="realExpireTime" property="realExpireTime"/>
