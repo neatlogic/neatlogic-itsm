@@ -226,7 +226,11 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 //重新渲染工单字段
                 for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                     IProcessTaskColumn column = entry.getValue();
-                    taskJson.put(column.getName(), column.getValue(processTaskVo));
+                    try {
+                        taskJson.put(column.getName(), column.getValue(processTaskVo));
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                    }
                 }
                 // route 供前端跳转路由信息
                 //JSONObject routeJson = new JSONObject();
