@@ -54,6 +54,8 @@ import neatlogic.module.process.sql.decorator.SqlBuilder;
 import neatlogic.module.process.workcenter.operate.WorkcenterOperateBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -64,7 +66,7 @@ import java.util.stream.Collectors;
 @Service
 public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
-    //Logger logger = LoggerFactory.getLogger(NewWorkcenterServiceImpl.class);
+    Logger logger = LoggerFactory.getLogger(NewWorkcenterServiceImpl.class);
 
     @Resource
     WorkcenterMapper workcenterMapper;
@@ -138,7 +140,11 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                     //long tmp = System.currentTimeMillis();
                     IProcessTaskColumn column = entry.getValue();
-                    taskJson.put(column.getName(), column.getValue(processTaskVo));
+                    try {
+                        taskJson.put(column.getName(), column.getValue(processTaskVo));
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                    }
                     /*if (Objects.equals("currentstep", column.getName())) {
                         System.out.println(System.currentTimeMillis() - tmp + " ##end workcenter-column " + column.getName() + ":-------------------------------------------------------------------------------");
                     }*/
@@ -260,7 +266,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         if (workcenterThead != null && StringUtils.isNotBlank(workcenterThead.getTheadConfigHash())) {
             theadConfigHash = workcenterThead.getTheadConfigHash(); //优先使用用户自己定义的thead
         }
-        if(StringUtils.isNotBlank(theadConfigHash)) {
+        if (StringUtils.isNotBlank(theadConfigHash)) {
             String theadConfigStr = workcenterMapper.getWorkcenterTheadConfigByHash(theadConfigHash);
             workcenterVo.setTheadConfigStr(theadConfigStr);
         }
