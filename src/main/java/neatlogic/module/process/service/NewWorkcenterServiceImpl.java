@@ -552,16 +552,17 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     @Override
     public void otherWorker(ProcessTaskStepWorkerVo workerVo, ProcessTaskStepVo stepVo, JSONArray workerArray, List<String> workerUuidTypeList) {
         IProcessStepHandler stepHandler = ProcessStepHandlerFactory.getHandler(stepVo.getHandler());
-        List<ProcessTaskStepWorkerVo> stepMinorWorkerList = stepHandler.getMinorWorkerList(stepVo);
-        if (CollectionUtils.isNotEmpty(stepMinorWorkerList)) {
-            if (stepMinorWorkerList.stream().anyMatch(w -> Objects.equals(workerVo.getUuid(), w.getUuid()))) {
-                String workerUuidType = workerVo.getUuid() + stepHandler.getMinorName();
-                if (!workerUuidTypeList.contains(workerUuidType)) {
-                    JSONObject workerJson = new JSONObject();
-                    workerJson.put("workTypename", stepHandler.getMinorName());
-                    getWorkerInfo(workerVo, workerJson, workerArray);
-                    workerUuidTypeList.add(workerUuidType);
-                }
+        if(stepHandler != null) {
+            List<ProcessTaskStepWorkerVo> stepMinorWorkerList = stepHandler.getMinorWorkerList(stepVo);
+            if (CollectionUtils.isNotEmpty(stepMinorWorkerList) && (stepMinorWorkerList.stream().anyMatch(w -> Objects.equals(workerVo.getUuid(), w.getUuid())))) {
+                    String workerUuidType = workerVo.getUuid() + stepHandler.getMinorName();
+                    if (!workerUuidTypeList.contains(workerUuidType)) {
+                        JSONObject workerJson = new JSONObject();
+                        workerJson.put("workTypename", stepHandler.getMinorName());
+                        getWorkerInfo(workerVo, workerJson, workerArray);
+                        workerUuidTypeList.add(workerUuidType);
+                    }
+
             }
         }
     }
