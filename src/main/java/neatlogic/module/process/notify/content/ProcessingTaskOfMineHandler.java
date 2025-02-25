@@ -143,6 +143,8 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 						this.put("name","toList");
 						this.put("type", FormHandlerType.SELECT.toString());
 						this.put("placeholder","工单内容对应的处理人");
+						this.put("value","工单内容对应的处理人");
+						this.put("dataList", Collections.singletonList(new ValueTextVo("工单内容对应的处理人", "工单内容对应的处理人")));
 						this.put("disabled",true);
 					}
 				});
@@ -175,6 +177,8 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 						this.put("name","toList");
 						this.put("type", FormHandlerType.SELECT.toString());
 						this.put("placeholder","工单内容对应的处理人");
+						this.put("value","工单内容对应的处理人");
+						this.put("dataList", Collections.singletonList(new ValueTextVo("工单内容对应的处理人", "工单内容对应的处理人")));
 						this.put("disabled",true);
 					}
 				});
@@ -201,16 +205,18 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				for(int i = 0;i < 12;i++){
 					Map<String, String> map = new HashMap<>();
 					map.put("标题","机房进出申请-202101080000" + i);
+					map.put("工单id",(1363740810797056L + i) + "");
 					map.put("工单号","202101080000" + i);
 					map.put("上报人","admin");
 					map.put("优先级","P3");
 					map.put("代报人","admin");
-					map.put("当前步骤处理人","张三");
+					map.put("当前步骤处理对象","张三");
 					map.put("当前步骤名","机房监督");
 					map.put("工单状态","处理中");
 					map.put("服务目录","机房");
 					map.put("服务类型","事件");
 					map.put("服务","机房进出申请");
+					map.put("地域","广东省/深圳市");
 					map.put("上报时间","2021-01-08 10:10:57");
 					map.put("时间窗口","工作日");
 					map.put("结束时间","2021-01-12 15:18:23");
