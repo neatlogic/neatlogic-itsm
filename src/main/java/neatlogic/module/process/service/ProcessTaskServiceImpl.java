@@ -48,6 +48,7 @@ import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
 import neatlogic.framework.integration.dto.IntegrationVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
+import neatlogic.framework.notify.core.NotifyTriggerTypeFactory;
 import neatlogic.framework.notify.dto.NotifyReceiverVo;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
@@ -63,7 +64,6 @@ import neatlogic.framework.process.exception.process.ProcessStepUtilHandlerNotFo
 import neatlogic.framework.process.exception.processtask.*;
 import neatlogic.framework.process.exception.processtask.task.ProcessTaskStepTaskNotCompleteException;
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
-import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.IOperationType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.stephandler.core.*;
@@ -2390,7 +2390,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 } else {
                     processTaskActionVo.setStatusText("已失败");
                 }
-                String triggerText = ProcessTaskStepNotifyTriggerType.getText(processTaskActionVo.getTrigger());
+                String triggerText = NotifyTriggerTypeFactory.getText(processTaskActionVo.getTrigger());
                 if(StringUtils.isNotBlank(triggerText)) {
                     processTaskActionVo.setTriggerText(triggerText);
                 }
