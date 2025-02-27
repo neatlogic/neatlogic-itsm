@@ -581,6 +581,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     int deleteProcessTaskStepInOperationByProcessTaskId(Long processTaskId);
 
+    int deleteProcessTaskStepInOperationByServerId(Long serverId);
+
     int deleteProcessTaskStepWorkerMinorByProcessTaskStepId(Long processTaskStepId);
 
     int deleteProcessTaskStepUserMinorByProcessTaskStepId(Long processTaskStepId);
