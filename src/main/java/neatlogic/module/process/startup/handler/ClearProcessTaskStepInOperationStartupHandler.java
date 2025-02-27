@@ -37,7 +37,6 @@ public class ClearProcessTaskStepInOperationStartupHandler extends StartupBase {
 
     @Override
     public int executeForCurrentTenant() {
-        System.out.println("ClearProcessTaskStepInOperationStartupHandler Config.SCHEDULE_SERVER_ID = " + Config.SCHEDULE_SERVER_ID);
         return processTaskMapper.deleteProcessTaskStepInOperationByServerId((long) Config.SCHEDULE_SERVER_ID);
     }
 
