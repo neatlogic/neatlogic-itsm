@@ -1,17 +1,21 @@
 package neatlogic.module.process.api.processtask;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.framework.process.dto.ProcessTaskStepInOperationVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.util.TableResultUtil;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 @Transactional
@@ -29,7 +33,7 @@ public class DeleteProcessTaskStepInOperationApi extends PrivateApiComponentBase
 
     @Override
     public String getName() {
-        return "根据工单ID删除processtask_step_in_operation表数据";
+        return "nmpap.deleteprocesstaskstepinoperationapi.getname";
     }
 
     @Override
@@ -38,13 +42,19 @@ public class DeleteProcessTaskStepInOperationApi extends PrivateApiComponentBase
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单ID")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid")
     })
-    @Output({})
-    @Description(desc = "根据工单ID删除processtask_step_in_operation表数据")
+    @Output({
+            @Param(name = "tbodyList", explode = ProcessTaskStepInOperationVo[].class, desc = "common.tbodylist")
+    })
+    @Description(desc = "nmpap.deleteprocesstaskstepinoperationapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long processTaskId = paramObj.getLong("processTaskId");
-        return processTaskMapper.deleteProcessTaskStepInOperationByProcessTaskId(processTaskId);
+        List<ProcessTaskStepInOperationVo> processTaskStepInOperationList = processTaskMapper.getProcessTaskStepInOperationListByProcessTaskId(processTaskId);
+        if (CollectionUtils.isNotEmpty(processTaskStepInOperationList)) {
+            processTaskMapper.deleteProcessTaskStepInOperationByProcessTaskId(processTaskId);
+        }
+        return TableResultUtil.getResult(processTaskStepInOperationList);
     }
 }
