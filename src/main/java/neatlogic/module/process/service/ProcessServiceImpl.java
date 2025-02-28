@@ -309,11 +309,13 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
         if (MapUtils.isNotEmpty(processConfig)) {
             InvokeNotifyPolicyConfigVo notifyPolicyConfig = processConfig.getObject("notifyPolicyConfig", InvokeNotifyPolicyConfigVo.class);
             if (notifyPolicyConfig != null) {
-                INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
-                if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(notifyPolicyConfig)) {
-                    if (Objects.equals(action, "save")) {
+                if (Objects.equals(action, "save")) {
+                    INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
+                    if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(notifyPolicyConfig)) {
                         DependencyManager.insert(NotifyPolicyProcessDependencyHandler.class, notifyPolicyConfig.getPolicyId(), processVo.getUuid());
-                    } else if (Objects.equals(action, "delete")) {
+                    }
+                } else if (Objects.equals(action, "delete")) {
+                    if (Objects.equals(notifyPolicyConfig.getIsCustom(), 1)) {
                         DependencyManager.delete(NotifyPolicyProcessDependencyHandler.class, processVo.getUuid());
                     }
                 }

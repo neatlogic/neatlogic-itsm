@@ -42,11 +42,13 @@ public class NotifyPolicyConfigMakeupHandler implements IProcessStepMakeupHandle
         /* 组装通知策略id **/
         InvokeNotifyPolicyConfigVo notifyPolicyConfig = stepConfigObj.getObject("notifyPolicyConfig", InvokeNotifyPolicyConfigVo.class);
         if (notifyPolicyConfig != null) {
-            INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
-            if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(notifyPolicyConfig)) {
-                if (Objects.equals(action, "save")) {
+            if (Objects.equals(action, "save")) {
+                INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
+                if (notifyServiceCrossoverService.checkNotifyPolicyIsExists(notifyPolicyConfig)) {
                     DependencyManager.insert(NotifyPolicyProcessStepDependencyHandler.class, notifyPolicyConfig.getPolicyId(), processStepVo.getUuid());
-                } else if (Objects.equals(action, "delete")) {
+                }
+            } else if (Objects.equals(action, "delete")) {
+                if (Objects.equals(notifyPolicyConfig.getIsCustom(), 1)) {
                     DependencyManager.delete(NotifyPolicyProcessStepDependencyHandler.class, processStepVo.getUuid());
                 }
             }
