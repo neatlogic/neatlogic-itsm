@@ -167,7 +167,7 @@ public class ProcessTaskNotifyThread extends NeatLogicThread {
             String notifyPolicyHandler = notifyPolicyVo.getHandler();
             NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, notifyPolicyVo, paramMappingList, conditionParamData, receiverMap, currentProcessTaskStepVo, fileList, notifyAuditMessageStringBuilder.toString());
         } catch (Exception ex) {
-            logger.error("通知失败：" + ex.getMessage(), ex);
+            logger.error("通知失败：{}", ex.getMessage(), ex);
         }
     }
 
