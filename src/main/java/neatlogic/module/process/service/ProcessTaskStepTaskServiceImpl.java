@@ -548,6 +548,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                 }
                 if (isCanStepComplete) {
                     processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.COMPLETEALLTASK);
+                    processStepHandlerUtil.action(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.COMPLETEALLTASK);
                 }
             }
             processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.COMPLETETASK);
