@@ -63,9 +63,10 @@ public class WorkerPolicyConfigMakeupHandler implements IProcessStepMakeupHandle
                         processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
                         processMapper.insertProcessStepWorkerPolicy(processStepWorkerPolicyVo);
                     }
-                } else if (Objects.equals(action, "delete")) {
-                    processMapper.deleteProcessStepWorkerPolicyByProcessStepUuid(processStepVo.getUuid());
                 }
+//                else if (Objects.equals(action, "delete")) {
+//                    processMapper.deleteProcessStepWorkerPolicyByProcessStepUuid(processStepVo.getUuid());
+//                }
             }
         }
     }
