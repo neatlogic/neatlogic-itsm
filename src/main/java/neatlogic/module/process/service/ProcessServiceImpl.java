@@ -34,7 +34,7 @@ import neatlogic.framework.process.crossover.IProcessCrossoverService;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.dto.score.ProcessScoreTemplateVo;
 import neatlogic.framework.process.exception.process.ProcessNameRepeatException;
-import neatlogic.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import neatlogic.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import neatlogic.framework.process.exception.sla.SlaCalculateHandlerNotFoundException;
 import neatlogic.framework.process.sla.core.ISlaCalculateHandler;
 import neatlogic.framework.process.sla.core.SlaCalculateHandlerFactory;
@@ -197,7 +197,6 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
                 DependencyManager.delete(NotifyPolicyProcessSlaDependencyHandler.class, slaUuidList);
                 processMapper.deleteProcessSlaByProcessUuid(processVo.getUuid());
             }
-
         }
         String virtualStartStepUuid = "";// 虚拟开始节点uuid
         Map<String, ProcessStepVo> stepMap = new HashMap<>();
@@ -235,7 +234,9 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
                             processStepUtilHandler.makeupProcessStep(processStepVo, stepConfigObj, action);
                         }
                     } else {
-                        throw new ProcessStepHandlerNotFoundException(handler);
+                        if (Objects.equals(action, "save")) {
+                            throw new ProcessStepUtilHandlerNotFoundException(handler);
+                        }
                     }
                 }
                 stepMap.put(processStepVo.getUuid(), processStepVo);
