@@ -104,9 +104,13 @@ public interface ProcessMapper extends IProcessCrossoverMapper {
 
     int insertProcessStep(ProcessStepVo processStepVo);
 
+    int insertProcessStepList(List<ProcessStepVo> processStepVo);
+
 //    int insertProcessStepFormAttribute(ProcessStepFormAttributeVo processStepFormAttributeVo);
 
     int insertProcessStepRel(ProcessStepRelVo processStepRelVo);
+
+    int insertProcessStepRelList(List<ProcessStepRelVo> processStepRelList);
 
 //	int insertProcessStepTeam(ProcessStepTeamVo processStepTeamVo);
 
@@ -135,7 +139,7 @@ public interface ProcessMapper extends IProcessCrossoverMapper {
     int deleteProcessStepRelByProcessUuid(String processUuid);
 
     //	int deleteProcessStepTeamByProcessUuid(String processUuid);
-//    int deleteProcessStepWorkerPolicyByProcessUuid(String processUuid);
+    int deleteProcessStepWorkerPolicyByProcessUuid(String processUuid);
 
     int deleteProcessStepWorkerPolicyByProcessStepUuid(String processUuid);
 

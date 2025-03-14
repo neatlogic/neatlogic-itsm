@@ -34,7 +34,7 @@ import neatlogic.framework.process.crossover.IProcessCrossoverService;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.dto.score.ProcessScoreTemplateVo;
 import neatlogic.framework.process.exception.process.ProcessNameRepeatException;
-import neatlogic.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import neatlogic.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import neatlogic.framework.process.exception.sla.SlaCalculateHandlerNotFoundException;
 import neatlogic.framework.process.sla.core.ISlaCalculateHandler;
 import neatlogic.framework.process.sla.core.SlaCalculateHandlerFactory;
@@ -118,6 +118,9 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
             return;
         }
 
+        if (Objects.equals(action, "delete")) {
+            processMapper.deleteProcessStepWorkerPolicyByProcessUuid(processVo.getUuid());
+        }
         JSONObject formConfig = processObj.getJSONObject("formConfig");
         if (MapUtils.isNotEmpty(formConfig)) {
             String formUuid = formConfig.getString("uuid");
@@ -194,7 +197,6 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
                 DependencyManager.delete(NotifyPolicyProcessSlaDependencyHandler.class, slaUuidList);
                 processMapper.deleteProcessSlaByProcessUuid(processVo.getUuid());
             }
-
         }
         String virtualStartStepUuid = "";// 虚拟开始节点uuid
         Map<String, ProcessStepVo> stepMap = new HashMap<>();
@@ -232,7 +234,9 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
                             processStepUtilHandler.makeupProcessStep(processStepVo, stepConfigObj, action);
                         }
                     } else {
-                        throw new ProcessStepHandlerNotFoundException(handler);
+                        if (Objects.equals(action, "save")) {
+                            throw new ProcessStepUtilHandlerNotFoundException(handler);
+                        }
                     }
                 }
                 stepMap.put(processStepVo.getUuid(), processStepVo);
@@ -253,9 +257,17 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
                         }
                     }
                 }
+                List<ProcessStepVo> processStepList = new ArrayList<>();
                 for (Map.Entry<String, ProcessStepVo> entry : stepMap.entrySet()) {
                     ProcessStepVo processStepVo = entry.getValue();
-                    processMapper.insertProcessStep(processStepVo);
+                    processStepList.add(processStepVo);
+                    if (processStepList.size() > 50) {
+                        processMapper.insertProcessStepList(processStepList);
+                        processStepList.clear();
+                    }
+                }
+                if (!processStepList.isEmpty()) {
+                    processMapper.insertProcessStepList(processStepList);
                 }
             }
             if (Objects.equals(action, "delete")) {
@@ -266,6 +278,7 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
         JSONArray relList = processObj.getJSONArray("connectionList");
         if (CollectionUtils.isNotEmpty(relList)) {
             if (Objects.equals(action, "save")) {
+                List<ProcessStepRelVo> processStepRelList = new ArrayList<>();
                 for (int i = 0; i < relList.size(); i++) {
                     JSONObject relObj = relList.getJSONObject(i);
                     String uuid = relObj.getString("uuid");
@@ -281,7 +294,14 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
                         type = ProcessFlowDirection.FORWARD.getValue();
                     }
                     processStepRelVo.setType(type);
-                    processMapper.insertProcessStepRel(processStepRelVo);
+                    processStepRelList.add(processStepRelVo);
+                    if (processStepRelList.size() > 50) {
+                        processMapper.insertProcessStepRelList(processStepRelList);
+                        processStepRelList.clear();
+                    }
+                }
+                if (!processStepRelList.isEmpty()) {
+                    processMapper.insertProcessStepRelList(processStepRelList);
                 }
             } else if (Objects.equals(action, "delete")) {
                 processMapper.deleteProcessStepRelByProcessUuid(processVo.getUuid());

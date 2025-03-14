@@ -549,6 +549,30 @@
 		)
 	</insert>
 
+	<insert id="insertProcessStepList" parameterType="neatlogic.framework.process.dto.ProcessStepVo">
+		INSERT INTO `process_step` (
+			`process_uuid`,
+			`uuid`,
+			`name`,
+			`type`,
+			`handler`,
+			`config`,
+			`description`
+		)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(
+				#{item.processUuid},
+				#{item.uuid},
+				#{item.name},
+				#{item.type},
+				#{item.handler},
+				#{item.config, typeHandler=CompressHandler},
+				#{item.description}
+			)
+		</foreach>
+	</insert>
+
 	<insert id="insertProcessStepWorkerPolicy" parameterType="neatlogic.framework.process.dto.ProcessStepWorkerPolicyVo">
 		INSERT INTO `process_step_worker_policy` (
 		`process_uuid`,
@@ -587,6 +611,30 @@
 		#{name},
 		#{type}
 		)
+	</insert>
+
+	<insert id="insertProcessStepRelList" parameterType="neatlogic.framework.process.dto.ProcessStepRelVo">
+		INSERT INTO `process_step_rel` (
+			`process_uuid`,
+			`uuid`,
+			`from_step_uuid`,
+			`to_step_uuid`,
+			`condition`,
+			`name`,
+			`type`
+		)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(
+				#{item.processUuid},
+				#{item.uuid},
+				#{item.fromStepUuid},
+				#{item.toStepUuid},
+				#{item.condition},
+				#{item.name},
+				#{item.type}
+			)
+		</foreach>
 	</insert>
 
 	<!--<insert id="insertProcessStepTeam" parameterType="neatlogic.framework.process.dto.ProcessStepTeamVo">
@@ -697,12 +745,12 @@
 		WHERE `process_uuid` = #{value}
 	</delete>-->
 
-	<!--<delete id="deleteProcessStepWorkerPolicyByProcessUuid" parameterType="java.lang.String">
+	<delete id="deleteProcessStepWorkerPolicyByProcessUuid" parameterType="java.lang.String">
 		DELETE
 		FROM
 		`process_step_worker_policy`
 		WHERE process_uuid = #{value}
-	</delete>-->
+	</delete>
 
 	<delete id="deleteProcessStepWorkerPolicyByProcessStepUuid" parameterType="java.lang.String">
 		DELETE
