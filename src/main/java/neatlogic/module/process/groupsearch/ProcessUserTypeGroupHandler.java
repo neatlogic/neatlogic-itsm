@@ -15,15 +15,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.groupsearch;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSON;
 import neatlogic.framework.process.constvalue.ProcessTaskGroupSearch;
 import neatlogic.framework.process.constvalue.ProcessUserType;
-import neatlogic.module.process.dao.mapper.task.TaskMapper;
 import neatlogic.framework.process.dto.TaskConfigVo;
 import neatlogic.framework.restful.groupsearch.core.GroupSearchOptionVo;
 import neatlogic.framework.restful.groupsearch.core.GroupSearchVo;
 import neatlogic.framework.restful.groupsearch.core.IGroupSearchHandler;
 import neatlogic.framework.util.$;
+import neatlogic.module.process.dao.mapper.task.TaskMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -125,7 +125,7 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
                     }
                 }
             }
-            List<TaskConfigVo> configVoList = taskMapper.getTaskConfigByIdList(JSONArray.parseArray(JSONArray.toJSONString(valueList.stream().map(v -> v.replace(getHeader(), "")).collect(Collectors.toList()))));
+            List<TaskConfigVo> configVoList = taskMapper.getTaskConfigByIdList(JSON.parseArray(JSON.toJSONString(valueList.stream().map(v -> v.replace(getHeader(), "")).collect(Collectors.toList()))));
             if (CollectionUtils.isNotEmpty(configVoList)) {
                 configVoList.forEach(o -> {
                     GroupSearchOptionVo groupSearchOptionVo = new GroupSearchOptionVo();
