@@ -515,20 +515,23 @@
         WHERE `id` = #{id};
     </update>
 
-    <update id="updateTaskUserByTaskIdAndUserUuid">
+    <!--<update id="updateTaskUserByTaskIdAndUserUuid">
         UPDATE
             `processtask_step_task_user`
         SET `end_time` = now(3),
             `status`   = #{status}
         WHERE `processtask_step_task_id` = #{processTaskStepTaskId}
           and `user_uuid` = #{userUuid}
-    </update>
+    </update>-->
 
     <update id="updateTaskUserById" parameterType = "neatlogic.framework.process.dto.ProcessTaskStepTaskUserVo">
         UPDATE
             `processtask_step_task_user`
         SET `end_time` = now(3),
             `user_uuid` = #{userUuid},
+            <if test="status != null">
+                `button` = #{button},
+            </if>
             `status` = #{status}
         WHERE `id` = #{id}
     </update>

@@ -89,7 +89,7 @@ public interface ProcessTaskStepTaskMapper extends IProcessTaskStepTaskCrossover
 
     int updateTask(ProcessTaskStepTaskVo processTaskStepTaskVo);
 
-    int updateTaskUserByTaskIdAndUserUuid(@Param("status") String status, @Param("processTaskStepTaskId") Long processtaskStepTaskId, @Param("userUuid") String userUuid);
+//    int updateTaskUserByTaskIdAndUserUuid(@Param("status") String status, @Param("processTaskStepTaskId") Long processtaskStepTaskId, @Param("userUuid") String userUuid);
 
     int updateTaskUserById(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo);
 

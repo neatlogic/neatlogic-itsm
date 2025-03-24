@@ -514,11 +514,12 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                         isChangeContent = true;
                     }
                 }
-                if (isChangeContent || Objects.equals(oldProcessTaskStepTaskUserVo.getStatus(), ProcessTaskStepTaskUserStatus.PENDING) || !Objects.equals(oldProcessTaskStepTaskUserVo.getUserUuid(), UserContext.get().getUserUuid())) {
+                if (isChangeContent || Objects.equals(oldProcessTaskStepTaskUserVo.getStatus(), ProcessTaskStepTaskUserStatus.PENDING.getValue()) || !Objects.equals(oldProcessTaskStepTaskUserVo.getUserUuid(), UserContext.get().getUserUuid())) {
                     ProcessTaskStepTaskUserVo processTaskStepTaskUserVo = new ProcessTaskStepTaskUserVo();
                     processTaskStepTaskUserVo.setId(stepTaskUserId);
                     processTaskStepTaskUserVo.setUserUuid(UserContext.get().getUserUuid());
                     processTaskStepTaskUserVo.setStatus(ProcessTaskStepTaskUserStatus.SUCCEED.getValue());
+                    processTaskStepTaskUserVo.setButton(button);
                     processTaskStepTaskMapper.updateTaskUserById(processTaskStepTaskUserVo);
                     isChange = true;
                 }
