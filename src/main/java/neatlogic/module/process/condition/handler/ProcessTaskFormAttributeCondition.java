@@ -312,8 +312,12 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                                 if (handler != null) {
                                     Object simpleValue = handler.getSimpleValue(value);
                                     newRowObj.put(downwardFormAttribute.getUuid(), simpleValue);
+                                    newRowObj.put(downwardFormAttribute.getKey(), simpleValue);
+                                    newRowObj.put(downwardFormAttribute.getLabel(), simpleValue);
                                 } else {
                                     newRowObj.put(downwardFormAttribute.getUuid(), value);
+                                    newRowObj.put(downwardFormAttribute.getKey(), value);
+                                    newRowObj.put(downwardFormAttribute.getLabel(), value);
                                 }
                             }
                         }
