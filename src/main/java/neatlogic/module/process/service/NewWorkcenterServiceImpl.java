@@ -61,6 +61,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -201,6 +203,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
     @Override
     public JSONObject doSearch(List<Long> processTaskIdList) throws ParseException {
+        ConcurrentMap<String, JSONObject> concurrentMap = new ConcurrentHashMap<>();
         JSONObject operationJson = new JSONObject();
         Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
         BatchRunner<Long> runner = new BatchRunner<>();
@@ -235,9 +238,10 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 // route 供前端跳转路由信息
                 //JSONObject routeJson = new JSONObject();
                 // operate 获取对应工单的操作
-                operationJson.put(processTaskVo.getId().toString(), getTaskOperate(processTaskVo, operateTypeSetMap));
+                concurrentMap.put(processTaskVo.getId().toString(), getTaskOperate(processTaskVo, operateTypeSetMap));
             }
         }, "WORKCENTER-OPERATION-SEARCHER");
+        operationJson.putAll(concurrentMap);
         return operationJson;
     }
 
