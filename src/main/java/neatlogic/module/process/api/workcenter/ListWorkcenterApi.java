@@ -21,7 +21,6 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
-import neatlogic.framework.batch.BatchRunner;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.util.CommonUtil;
 import neatlogic.framework.dto.AuthenticationInfoVo;
@@ -105,7 +104,7 @@ public class ListWorkcenterApi extends PrivateApiComponentBase {
                     }
                 }
             }
-            BatchRunner<WorkcenterVo> runner = new BatchRunner<>();
+//            BatchRunner<WorkcenterVo> runner = new BatchRunner<>();
 //            runner.execute(workcenterList, 3, (threadIndex, dataIndex, workcenter) -> {
             for (WorkcenterVo workcenter : workcenterList) {
                 if (workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
