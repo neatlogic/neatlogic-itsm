@@ -130,6 +130,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        currentProcessTaskStepVo.setStatus(ProcessTaskStepStatus.RUNNING.getValue());
         try {
         String configHash = currentProcessTaskStepVo.getConfigHash();
         String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(configHash);
@@ -268,7 +269,8 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, Set<ProcessTaskStepWorkerVo> workerSet) throws ProcessTaskException {
-        return defaultAssign(currentProcessTaskStepVo, workerSet);
+        defaultAssign(currentProcessTaskStepVo, workerSet);
+        return 1;
     }
 
     @Override

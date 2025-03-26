@@ -112,6 +112,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        currentProcessTaskStepVo.setStatus(ProcessTaskStepStatus.RUNNING.getValue());
         try {
             AutomaticConfigVo automaticConfigVo = processTaskAutomaticService.getAutomaticConfigVoByProcessTaskStepId(currentProcessTaskStepVo.getId());
             JSONObject requestAudit = new JSONObject();
@@ -274,7 +275,8 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, Set<ProcessTaskStepWorkerVo> workerSet) throws ProcessTaskException {
-        return defaultAssign(currentProcessTaskStepVo, workerSet);
+        defaultAssign(currentProcessTaskStepVo, workerSet);
+        return 1;
     }
 
     @Override
