@@ -346,7 +346,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
                 throw new ProcessTaskNextStepOverOneException(processTaskId);
             }
             saveResultObj.put("nextStepId", nextStepIdList.get(0));
-
+            saveResultObj.put("assignWorkerList", processTaskCreateVo.getAssignWorkerList());
             //流转
             processTaskService.startProcessProcessTask(saveResultObj);
 //        }
