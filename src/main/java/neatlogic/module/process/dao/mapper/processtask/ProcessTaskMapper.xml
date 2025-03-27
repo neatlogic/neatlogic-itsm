@@ -1282,6 +1282,7 @@
         <foreach collection="list" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
+        AND `is_deleted` = 0
     </select>
 
     <select id="getProcessTaskStepListByIdList" parameterType="java.lang.Long" resultMap="processTaskStepMap">

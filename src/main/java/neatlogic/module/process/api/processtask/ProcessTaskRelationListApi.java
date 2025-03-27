@@ -1,46 +1,31 @@
 package neatlogic.module.process.api.processtask;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.dto.BasePageVo;
+import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
+import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
+import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.operationauth.ProcessTaskPermissionDeniedException;
+import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.dto.BasePageVo;
-import neatlogic.framework.common.util.PageUtil;
-import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
-import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.framework.process.dto.ChannelTypeRelationVo;
-import neatlogic.framework.process.dto.ChannelTypeVo;
-import neatlogic.framework.process.dto.ChannelVo;
-import neatlogic.framework.process.dto.ProcessTaskRelationVo;
-import neatlogic.framework.process.dto.ProcessTaskStatusVo;
-import neatlogic.framework.process.dto.ProcessTaskVo;
-import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.process.service.ProcessTaskService;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -104,7 +89,7 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
 //            }
 //        }
         JSONObject resultObj = new JSONObject();
-        resultObj.put("processTaskRelationList", new ArrayList<>());
+        List<ProcessTaskRelationVo> resultList = new ArrayList<>();
         int pageCount = 0;
         if (processTaskRelationVo.getNeedPage()) {
             int rowNum =
@@ -116,21 +101,11 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
             resultObj.put("rowNum", rowNum);
         }
         if (!processTaskRelationVo.getNeedPage() || processTaskRelationVo.getCurrentPage() <= pageCount) {
-            Set<Long> processTaskIdSet = new HashSet<>();
-            List<ProcessTaskRelationVo> processTaskRelationList =
-                processTaskMapper.getProcessTaskRelationList(processTaskRelationVo);
-            for (ProcessTaskRelationVo processTaskRelation : processTaskRelationList) {
-                processTaskIdSet.add(processTaskRelation.getProcessTaskId());
-                ChannelTypeRelationVo channelTypeRelationVo =
-                    channelTypeMapper.getChannelTypeRelationById(processTaskRelation.getChannelTypeRelationId());
-                if (channelTypeRelationVo != null) {
-                    processTaskRelation.setChannelTypeRelationName(channelTypeRelationVo.getName());
-                }
-            }
+            List<ProcessTaskRelationVo> processTaskRelationList = processTaskMapper.getProcessTaskRelationList(processTaskRelationVo);
+            Set<Long> processTaskIdSet = processTaskRelationList.stream().filter(Objects::nonNull).map(ProcessTaskRelationVo::getProcessTaskId).collect(Collectors.toSet());
             Map<Long, ProcessTaskVo> processTaskMap = new HashMap<>();
             if (CollectionUtils.isNotEmpty(processTaskIdSet)) {
-                List<ProcessTaskVo> processTaskList =
-                        processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
+                List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
                 for (ProcessTaskVo processTask : processTaskList) {
                     ChannelVo channelVo = channelMapper.getChannelByUuid(processTask.getChannelUuid());
                     if (channelVo != null && StringUtils.isNotBlank(channelVo.getChannelTypeUuid())) {
@@ -151,10 +126,15 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
                     processTaskRelation.setTitle(processTask.getTitle());
                     processTaskRelation.setStatusVo(new ProcessTaskStatusVo(processTask.getStatus()));
                     processTaskRelation.setChannelTypeVo(processTask.getChannelType().clone());
+                    ChannelTypeRelationVo channelTypeRelationVo = channelTypeMapper.getChannelTypeRelationById(processTaskRelation.getChannelTypeRelationId());
+                    if (channelTypeRelationVo != null) {
+                        processTaskRelation.setChannelTypeRelationName(channelTypeRelationVo.getName());
+                    }
+                    resultList.add(processTaskRelation);
                 }
             }
-            resultObj.put("processTaskRelationList", processTaskRelationList);
         }
+        resultObj.put("processTaskRelationList", resultList);
         return resultObj;
     }
 
