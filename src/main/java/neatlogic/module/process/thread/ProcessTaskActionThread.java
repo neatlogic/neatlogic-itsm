@@ -31,7 +31,10 @@ import neatlogic.framework.integration.dto.IntegrationVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.notify.dto.ParamMappingVo;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
-import neatlogic.framework.process.constvalue.*;
+import neatlogic.framework.process.constvalue.ProcessFieldType;
+import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;
+import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
+import neatlogic.framework.process.constvalue.ProcessTaskParams;
 import neatlogic.framework.process.dto.ProcessTaskActionVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
@@ -193,22 +196,25 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                                             }
                                         }
                                     }
+                                    List<String> curentValueList = new ArrayList<>();
                                     if (resultValue != null) {
-                                        List<String> curentValueList = new ArrayList<>();
                                         curentValueList.add(resultValue);
-                                        String value = successConditionObj.getString("value");
-                                        List<String> targetValueList = new ArrayList<>();
+                                    }
+                                    List<String> targetValueList = new ArrayList<>();
+                                    String value = successConditionObj.getString("value");
+                                    if (StringUtils.isNotBlank(value)) {
                                         targetValueList.add(value);
-                                        String expression = successConditionObj.getString("expression");
-                                        isSucceed = ConditionUtil.predicate(curentValueList, expression, targetValueList);
-                                        if (!isSucceed) {
-                                            String expressionName = Expression.getExpressionName(expression);
-                                            failedReason = String.format("不满足成功条件：%s%s%s", name, expressionName, value);
-                                        }
+                                    }
+                                    String expression = successConditionObj.getString("expression");
+                                    isSucceed = ConditionUtil.predicate(curentValueList, expression, targetValueList);
+                                    if (!isSucceed) {
+                                        String expressionName = Expression.getExpressionName(expression);
+                                        failedReason = String.format("不满足成功条件：%s%s%s", name, expressionName, value);
                                     }
                                 }
                             } else {
                                 String statusCode = String.valueOf(integrationResultVo.getStatusCode());
+                                System.out.println("statusCode = " + statusCode);
                                 if (statusCode.startsWith("2") || statusCode.startsWith("3")) {
                                     isSucceed = true;
                                 }
@@ -242,6 +248,7 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                         processTaskActionMapper.insertProcessTaskAction(actionVo);
                         currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.RESTFULACTION.getParamName(), JSON.toJSONString(actionVo));
                         ProcessTaskAuditThread.audit(currentProcessTaskStepVo, ProcessTaskAuditType.RESTFULACTION);
+                        break;
                     }
                 }
             }

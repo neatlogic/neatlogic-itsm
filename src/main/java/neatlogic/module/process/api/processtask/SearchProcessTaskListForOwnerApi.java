@@ -81,7 +81,7 @@ public class SearchProcessTaskListForOwnerApi extends PrivateApiComponentBase {
         ProcessTaskSearchVo searchVo = paramObj.toJavaObject(ProcessTaskSearchVo.class);
         int rowNum = processTaskMapper.searchProcessTaskCountByOwnerAndExcludeId(searchVo);
         if (rowNum == 0) {
-            return TableResultUtil.getResult(new ArrayList(), searchVo);
+            return TableResultUtil.getResult(new ArrayList<>(), searchVo);
         }
         searchVo.setRowNum(rowNum);
         Map<String, PriorityVo> priorityMap = new HashMap<>();
