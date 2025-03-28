@@ -214,7 +214,6 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                                 }
                             } else {
                                 String statusCode = String.valueOf(integrationResultVo.getStatusCode());
-                                System.out.println("statusCode = " + statusCode);
                                 if (statusCode.startsWith("2") || statusCode.startsWith("3")) {
                                     isSucceed = true;
                                 }
