@@ -15,20 +15,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.notify.handler.param;
 
-import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.dto.UrlInfoVo;
 import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
-import neatlogic.framework.util.HtmlUtil;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class StepCommentUserParamHandler extends ProcessTaskNotifyParamHandlerBase {
@@ -39,24 +32,31 @@ public class StepCommentUserParamHandler extends ProcessTaskNotifyParamHandlerBa
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo, INotifyTriggerType notifyTriggerType) {
-        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.COMMENT)) {
-            return null;
+        if (notifyTriggerType == ProcessTaskStepNotifyTriggerType.COMMENT) {
+            UserContext userContext = UserContext.get();
+            if (userContext != null) {
+                return userContext.getUserName() + "(" + userContext.getUserId() + ")";
+            }
         }
-        if (processTaskStepVo == null) {
-            return null;
-        }
-        JSONObject paramObj = processTaskStepVo.getParamObj();
-        if (MapUtils.isEmpty(paramObj)) {
-            return null;
-        }
-        String content = paramObj.getString("content");
-        if (StringUtils.isBlank(content)) {
-            return null;
-        }
-        UserContext userContext = UserContext.get();
-        if (userContext == null) {
-            return null;
-        }
-        return userContext.getUserName() + "(" + userContext.getUserId() + ")";
+        return null;
+//        if (!(notifyTriggerType == ProcessTaskStepNotifyTriggerType.COMMENT)) {
+//            return null;
+//        }
+//        if (processTaskStepVo == null) {
+//            return null;
+//        }
+//        JSONObject paramObj = processTaskStepVo.getParamObj();
+//        if (MapUtils.isEmpty(paramObj)) {
+//            return null;
+//        }
+//        String content = paramObj.getString("content");
+//        if (StringUtils.isBlank(content)) {
+//            return null;
+//        }
+//        UserContext userContext = UserContext.get();
+//        if (userContext == null) {
+//            return null;
+//        }
+//        return userContext.getUserName() + "(" + userContext.getUserId() + ")";
     }
 }
