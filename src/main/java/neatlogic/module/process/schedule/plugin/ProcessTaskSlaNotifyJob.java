@@ -15,10 +15,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.schedule.plugin;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.file.dto.FileVo;
-import neatlogic.framework.notify.crossover.INotifyServiceCrossoverService;
 import neatlogic.framework.notify.dao.mapper.NotifyMapper;
 import neatlogic.framework.notify.dto.InvokeNotifyPolicyConfigVo;
 import neatlogic.framework.notify.dto.NotifyPolicyVo;
@@ -27,21 +27,22 @@ import neatlogic.framework.notify.dto.ParamMappingVo;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionFactory;
 import neatlogic.framework.process.constvalue.ConditionProcessTaskOptions;
 import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.scheduler.core.JobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.util.NotifyPolicyUtil;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
 import neatlogic.module.process.message.handler.ProcessTaskMessageHandler;
 import neatlogic.module.process.notify.constvalue.SlaNotifyTriggerType;
 import neatlogic.module.process.service.ProcessTaskService;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -51,6 +52,8 @@ import java.util.stream.Collectors;
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskSlaNotifyJob extends JobBase {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProcessTaskSlaNotifyJob.class);
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
@@ -182,138 +185,161 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {
-//        System.out.println("开始执行sla通知策略逻辑...");
-        Long slaNotifyId = Long.valueOf(jobObject.getJobName());
-//        System.out.println("slaNotifyId=" + slaNotifyId);
-        ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskSlaMapper.getProcessTaskSlaNotifyById(slaNotifyId);
-        if (processTaskSlaNotifyVo == null) {
-            schedulerManager.unloadJob(jobObject);
-            return;
-//            System.out.println("由于processTaskSlaNotifyVo为null，卸载job");
-        }
-        JSONObject policyObj = processTaskSlaNotifyVo.getConfigObj();
-        /** 存在未完成步骤才发超时通知，否则清除通知作业 **/
-        if (MapUtils.isEmpty(policyObj)) {
-            schedulerManager.unloadJob(jobObject);
-            // 删除通知记录
-            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-            return;
-//                System.out.println("由于不满足执行条件，卸载job");
-        }
-        Long slaId = processTaskSlaNotifyVo.getSlaId();
-        ProcessTaskSlaVo processTaskSlaVo = processTaskSlaMapper.getProcessTaskSlaById(slaId);
-        if (processTaskSlaVo == null) {
-            schedulerManager.unloadJob(jobObject);
-            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-            return;
-        }
-        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskSlaVo.getProcessTaskId());
-        if (processTaskVo == null) {
-            schedulerManager.unloadJob(jobObject);
-            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-            return;
-        }
-        ProcessTaskSlaTimeVo processTaskSlaTimeVo = processTaskSlaMapper.getProcessTaskSlaTimeBySlaId(slaId);
-        if (processTaskSlaTimeVo == null) {
-            schedulerManager.unloadJob(jobObject);
-            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-            return;
-        }
-        // 如果是超时前触发通知，当前时间已经超过了超时时间点，则不再发送通知
-        String expression = policyObj.getString("expression");
-        if (expression.equalsIgnoreCase("before") && new Date().after(processTaskSlaTimeVo.getExpireTime())) {
-            schedulerManager.unloadJob(jobObject);
-            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-            return;
-        }
-        List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
-        if (CollectionUtils.isEmpty(processTaskStepIdList)) {
-            schedulerManager.unloadJob(jobObject);
-            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-            return;
-        }
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
-        if (CollectionUtils.isEmpty(processTaskStepList)) {
-            schedulerManager.unloadJob(jobObject);
-            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-            return;
-        }
-        List<ProcessTaskStepVo> needNotifyStepList = new ArrayList<>();
-        for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-            // 未处理、处理中和挂起的步骤才需要发送通知
-            if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
-                if (processTaskStepVo.getStatus().equals(ProcessTaskStepStatus.PENDING.getValue())) {
-                    needNotifyStepList.add(processTaskStepVo);
+        boolean flag = false;
+        StringBuilder notifyAuditMessageStringBuilder = new StringBuilder();
+        Long slaNotifyId = null;
+        try {
+            notifyAuditMessageStringBuilder.append("触发点为 ").append(SlaNotifyTriggerType.TIMEOUT.getTrigger()).append("(").append(SlaNotifyTriggerType.TIMEOUT.getText()).append(")");
+            slaNotifyId = Long.valueOf(jobObject.getJobName());
+            ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskSlaMapper.getProcessTaskSlaNotifyById(slaNotifyId);
+            if (processTaskSlaNotifyVo != null) {
+                notifyAuditMessageStringBuilder.append(" slaNotifyId为 ").append(slaNotifyId);
+                Long slaId = processTaskSlaNotifyVo.getSlaId();
+                ProcessTaskSlaVo processTaskSlaVo = processTaskSlaMapper.getProcessTaskSlaById(slaId);
+                if (processTaskSlaVo != null) {
+                    notifyAuditMessageStringBuilder.append(" 时效为 ").append(processTaskSlaVo.getId()).append("(").append(processTaskSlaVo.getName()).append(")");
+                    ProcessTaskSlaTimeVo processTaskSlaTimeVo = processTaskSlaMapper.getProcessTaskSlaTimeBySlaId(slaId);
+                    if (processTaskSlaTimeVo != null) {
+                        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskSlaVo.getProcessTaskId());
+                        if (processTaskVo != null) {
+                            notifyAuditMessageStringBuilder.append(" 工单为 ").append(processTaskVo.getTitle()).append("(").append(processTaskVo.getId()).append(")");
+                            JSONObject policyObj = processTaskSlaNotifyVo.getConfigObj();
+                            if (MapUtils.isNotEmpty(policyObj)) {
+                                // 如果是超时前触发通知，当前时间已经超过了超时时间点，则不再发送通知
+                                String expression = policyObj.getString("expression");
+                                if (!expression.equalsIgnoreCase("before") || new Date().before(processTaskSlaTimeVo.getExpireTime())) {
+                                    JSONObject notifyPolicyConfig = policyObj.getJSONObject("notifyPolicyConfig");
+                                    if (notifyPolicyConfig != null) {
+                                        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = JSON.toJavaObject(notifyPolicyConfig, InvokeNotifyPolicyConfigVo.class);
+                                        // 触发点被排除，不用发送邮件
+                                        List<String> excludeTriggerList = invokeNotifyPolicyConfigVo.getExcludeTriggerList();
+                                        if (CollectionUtils.isNotEmpty(excludeTriggerList) && excludeTriggerList.contains(SlaNotifyTriggerType.TIMEOUT.getTrigger())) {
+                                            notifyAuditMessageStringBuilder.append(" 通知策略设置触发时机中排除了触发点").append(SlaNotifyTriggerType.TIMEOUT.getTrigger()).append("(").append(SlaNotifyTriggerType.TIMEOUT.getText()).append(")");
+                                        } else {
+                                            NotifyPolicyVo notifyPolicyVo = null;
+                                            if (invokeNotifyPolicyConfigVo.getIsCustom() == 1) {
+                                                notifyAuditMessageStringBuilder.append(" 设置通知策略ID为 ");
+                                                if (invokeNotifyPolicyConfigVo.getPolicyId() != null) {
+                                                    notifyAuditMessageStringBuilder.append(invokeNotifyPolicyConfigVo.getPolicyId());
+                                                    notifyPolicyVo = notifyMapper.getNotifyPolicyById(invokeNotifyPolicyConfigVo.getPolicyId());
+                                                    if (notifyPolicyVo == null) {
+                                                        notifyAuditMessageStringBuilder.append("，但是该通知策略不存在");
+                                                    } else {
+                                                        notifyAuditMessageStringBuilder.append("，找到默认通知策略").append(notifyPolicyVo.getName()).append("(").append(notifyPolicyVo.getId()).append(")");
+                                                    }
+                                                } else {
+                                                    notifyAuditMessageStringBuilder.append("null");
+                                                }
+                                            } else {
+                                                notifyAuditMessageStringBuilder.append(" 没有设置通知策略");
+                                                if (invokeNotifyPolicyConfigVo.getHandler() != null) {
+                                                    notifyAuditMessageStringBuilder.append(" 通过通知策略handler=").append(invokeNotifyPolicyConfigVo.getHandler());
+                                                    notifyPolicyVo = notifyMapper.getDefaultNotifyPolicyByHandler(invokeNotifyPolicyConfigVo.getHandler());
+                                                    if (notifyPolicyVo == null) {
+                                                        notifyAuditMessageStringBuilder.append(" ，找不到默认通知策略");
+                                                    } else {
+                                                        notifyAuditMessageStringBuilder.append(" ，找到默认通知策略 ").append(notifyPolicyVo.getName()).append("(").append(notifyPolicyVo.getId()).append(")");
+                                                    }
+                                                } else {
+                                                    notifyAuditMessageStringBuilder.append(" 由于通知策略handler为null，无法找到默认通知策略");
+                                                }
+                                            }
+                                            if (notifyPolicyVo != null) {
+                                                if (notifyPolicyVo.getConfig() != null) {
+                                                    List<ParamMappingVo> paramMappingList = invokeNotifyPolicyConfigVo.getParamMappingList();
+                                                    List<FileVo> fileList = processTaskMapper.getFileListByProcessTaskId(processTaskSlaVo.getProcessTaskId());
+                                                    if (CollectionUtils.isNotEmpty(fileList)) {
+                                                        fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
+                                                    }
+                                                    List<ProcessTaskStepVo> needNotifyStepList = new ArrayList<>();
+                                                    List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
+                                                    if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
+                                                        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
+                                                        if (CollectionUtils.isNotEmpty(processTaskStepList)) {
+                                                            for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+                                                                // 未处理、处理中和挂起的步骤才需要发送通知
+                                                                if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
+                                                                    if (processTaskStepVo.getStatus().equals(ProcessTaskStepStatus.PENDING.getValue())) {
+                                                                        needNotifyStepList.add(processTaskStepVo);
+                                                                    }
+                                                                    if (processTaskStepVo.getStatus().equals(ProcessTaskStepStatus.RUNNING.getValue())) {
+                                                                        needNotifyStepList.add(processTaskStepVo);
+                                                                    }
+                                                                    if (processTaskStepVo.getStatus().equals(ProcessTaskStepStatus.HANG.getValue())) {
+                                                                        needNotifyStepList.add(processTaskStepVo);
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                    /** 存在未完成步骤才发超时通知，否则清除通知作业 **/
+                                                    if (CollectionUtils.isNotEmpty(needNotifyStepList)) {
+                                                        flag = true;
+                                                        for (ProcessTaskStepVo processTaskStepVo : needNotifyStepList) {
+                                                            JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList()), processTaskStepVo);
+                                                            Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
+                                                            processTaskService.getReceiverMap(processTaskStepVo, receiverMap, SlaNotifyTriggerType.TIMEOUT);
+                                                            String notifyAuditMessage = notifyAuditMessageStringBuilder + " 步骤为 " + processTaskStepVo.getName() + "(" + processTaskStepVo.getId() + ")";
+                                                            NotifyPolicyUtil.execute(
+                                                                    notifyPolicyVo.getHandler(),
+                                                                    SlaNotifyTriggerType.TIMEOUT,
+                                                                    ProcessTaskMessageHandler.class,
+                                                                    notifyPolicyVo, paramMappingList,
+                                                                    conditionParamData,
+                                                                    receiverMap,
+                                                                    processTaskStepVo,
+                                                                    fileList,
+                                                                    notifyAuditMessage
+                                                            );
+                                                        }
+                                                        Date nextFireTime = context.getNextFireTime();
+                                                        if (nextFireTime != null) {
+                                                            processTaskSlaNotifyVo.setTriggerTime(nextFireTime);
+                                                            processTaskSlaMapper.updateProcessTaskSlaNotify(processTaskSlaNotifyVo);
+                                                        } else {
+                                                            schedulerManager.unloadJob(jobObject);
+                                                            // 删除通知记录
+                                                            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
+                                                        }
+                                                    } else {
+                                                        notifyAuditMessageStringBuilder.append(" 没有需要通知的步骤，不触发通知");
+                                                    }
+                                                } else {
+                                                    notifyAuditMessageStringBuilder.append(" 通知策略config为null，不触发通知");
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        notifyAuditMessageStringBuilder.append(" notifyPolicyConfig为null，不触发通知");
+                                    }
+                                } else {
+                                    notifyAuditMessageStringBuilder.append(" 设置超时前触发通知，当前时间已经超过了超时时间点，不触发通知");
+                                }
+                            } else {
+                                notifyAuditMessageStringBuilder.append(" 数据库表`processtask_sla_notify`中`id`=").append(slaId).append("的数据`config`为").append(policyObj).append("，不触发通知");
+                            }
+                        } else {
+                            notifyAuditMessageStringBuilder.append(" 数据库表`processtask`中没有`id`=").append(slaId).append("的数据，不触发通知");
+                        }
+                    } else {
+                        notifyAuditMessageStringBuilder.append(" 数据库表`processtask_sla_time`中没有`sla_id`=").append(slaId).append("的数据，不触发通知");
+                    }
+                } else {
+                    notifyAuditMessageStringBuilder.append(" 数据库表`processtask_sla`中没有`id`=").append(slaId).append("的数据，不触发通知");
                 }
-                if (processTaskStepVo.getStatus().equals(ProcessTaskStepStatus.RUNNING.getValue())) {
-                    needNotifyStepList.add(processTaskStepVo);
-                }
-                if (processTaskStepVo.getStatus().equals(ProcessTaskStepStatus.HANG.getValue())) {
-                    needNotifyStepList.add(processTaskStepVo);
-                }
+            } else {
+                notifyAuditMessageStringBuilder.append(" 数据库表`processtask_sla_notify`中没有`id`=").append(slaNotifyId).append("的数据，不触发通知");
             }
-        }
-        if (CollectionUtils.isEmpty(needNotifyStepList)) {
-            schedulerManager.unloadJob(jobObject);
-            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-            return;
-        }
-//            System.out.println("时效id=" + slaId);
-//            System.out.println("时效name=" + processTaskSlaVo.getName());
-        JSONObject notifyPolicyConfig = policyObj.getJSONObject("notifyPolicyConfig");
-        INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);
-        InvokeNotifyPolicyConfigVo invokeNotifyPolicyConfigVo = notifyServiceCrossoverService.regulateNotifyPolicyConfig(notifyPolicyConfig);
-        if (invokeNotifyPolicyConfigVo == null) {
-            schedulerManager.unloadJob(jobObject);
-            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-            return;
-        }
-        // 触发点被排除，不用发送邮件
-        List<String> excludeTriggerList = invokeNotifyPolicyConfigVo.getExcludeTriggerList();
-        if (CollectionUtils.isNotEmpty(excludeTriggerList) && excludeTriggerList.contains(SlaNotifyTriggerType.TIMEOUT.getTrigger())) {
-            schedulerManager.unloadJob(jobObject);
-            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-            return;
-        }
-        Long policyId = invokeNotifyPolicyConfigVo.getPolicyId();
-        if (policyId == null) {
-            return;
-        }
-        NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
-        if (notifyPolicyVo == null || notifyPolicyVo.getConfig() == null) {
-            schedulerManager.unloadJob(jobObject);
-            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-            return;
-        }
-        List<ParamMappingVo> paramMappingList = invokeNotifyPolicyConfigVo.getParamMappingList();
-
-        List<FileVo> fileList = processTaskMapper.getFileListByProcessTaskId(processTaskSlaVo.getProcessTaskId());
-        if (CollectionUtils.isNotEmpty(fileList)) {
-            fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
-        }
-        for (ProcessTaskStepVo processTaskStepVo : needNotifyStepList) {
-            JSONObject conditionParamData = ProcessTaskConditionFactory.getConditionParamData(Arrays.stream(ConditionProcessTaskOptions.values()).map(ConditionProcessTaskOptions::getValue).collect(Collectors.toList()), processTaskStepVo);
-            Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
-            processTaskService.getReceiverMap(processTaskStepVo, receiverMap, SlaNotifyTriggerType.TIMEOUT);
-
-            StringBuilder notifyAuditMessageStringBuilder = new StringBuilder();
-            notifyAuditMessageStringBuilder.append(processTaskSlaVo.getProcessTaskId());
-            notifyAuditMessageStringBuilder.append("-");
-            notifyAuditMessageStringBuilder.append(processTaskStepVo.getName());
-            notifyAuditMessageStringBuilder.append("(");
-            notifyAuditMessageStringBuilder.append(processTaskStepVo.getId());
-            notifyAuditMessageStringBuilder.append(")");
-            NotifyPolicyUtil.execute(notifyPolicyVo.getHandler(), SlaNotifyTriggerType.TIMEOUT, ProcessTaskMessageHandler.class, notifyPolicyVo, paramMappingList,
-                    conditionParamData, receiverMap, processTaskStepVo, fileList, notifyAuditMessageStringBuilder.toString());
-        }
-        Date nextFireTime = context.getNextFireTime();
-        if (nextFireTime != null) {
-            processTaskSlaNotifyVo.setTriggerTime(nextFireTime);
-            processTaskSlaMapper.updateProcessTaskSlaNotify(processTaskSlaNotifyVo);
-        } else {
-            // 删除通知记录
-            processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
-//                    System.out.println("由于不需要下次执行，删除processTaskSlaNotify");
+        } catch (Exception ex) {
+            logger.error(notifyAuditMessageStringBuilder + " 通知失败：{}", ex.getMessage(), ex);
+        } finally {
+            if (!flag) {
+                schedulerManager.unloadJob(jobObject);
+                processTaskSlaMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
+                Logger notifyAuditLogger = LoggerFactory.getLogger("notifyAudit");
+                notifyAuditLogger.info("\n" + notifyAuditMessageStringBuilder.toString());
+            }
         }
     }
 
