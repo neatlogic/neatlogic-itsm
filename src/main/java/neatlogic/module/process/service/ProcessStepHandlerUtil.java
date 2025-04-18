@@ -656,29 +656,37 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
     }
 
     @Override
-    public void checkContentIsRequired(ProcessTaskStepVo currentProcessTaskStepVo) {
+    public void checkContentIsRequired(ProcessTaskStepVo currentProcessTaskStepVo, IOperationType operationType) {
         if (Objects.equals(currentProcessTaskStepVo.getIsNeedContent(), 0)) {
             return;
         }
-        if (Objects.equals(currentProcessTaskStepVo.getIsRequired(), 1)) {
-            JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-            String content = paramObj.getString("content");
-            if (StringUtils.isBlank(content)) {
-                List<ProcessTaskStepContentVo> contentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(currentProcessTaskStepVo.getId());
-                if (CollectionUtils.isEmpty(contentList)) {
-                    throw new ProcessTaskStepContentIsEmptyException();
-                }
-                Date startTime = currentProcessTaskStepVo.getStartTime();
-                if (startTime != null) {
-                    for (ProcessTaskStepContentVo contentVo : contentList) {
-                        if (startTime.before(contentVo.getLcd())) {
-                            return;
-                        }
-                    }
-                    throw new ProcessTaskStepContentIsEmptyException();
-                }
+        JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+        String content = paramObj.getString("content");
+        if (StringUtils.isBlank(content)) {
+            if (operationType == ProcessTaskStepOperationType.STEP_BACK || Objects.equals(currentProcessTaskStepVo.getIsRequired(), 1)) {
+                throw new ProcessTaskStepContentIsEmptyException();
             }
         }
+
+//        if (Objects.equals(currentProcessTaskStepVo.getIsRequired(), 1)) {
+//            JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+//            String content = paramObj.getString("content");
+//            if (StringUtils.isBlank(content)) {
+//                List<ProcessTaskStepContentVo> contentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(currentProcessTaskStepVo.getId());
+//                if (CollectionUtils.isEmpty(contentList)) {
+//                    throw new ProcessTaskStepContentIsEmptyException();
+//                }
+//                Date startTime = currentProcessTaskStepVo.getStartTime();
+//                if (startTime != null) {
+//                    for (ProcessTaskStepContentVo contentVo : contentList) {
+//                        if (startTime.before(contentVo.getLcd())) {
+//                            return;
+//                        }
+//                    }
+//                    throw new ProcessTaskStepContentIsEmptyException();
+//                }
+//            }
+//        }
     }
 
     /**
