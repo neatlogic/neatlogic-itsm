@@ -16,9 +16,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.process.thread;
 
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskAutomaticService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -29,6 +31,8 @@ import javax.annotation.Resource;
  **/
 @Component
 public class ProcessTaskAutomaticThread extends NeatLogicThread {
+
+    private final static Logger logger = LoggerFactory.getLogger(ProcessTaskAutomaticThread.class);
 
     private static ProcessTaskAutomaticService processTaskAutomaticService;
     private static ProcessTaskMapper processTaskMapper;
@@ -57,7 +61,10 @@ public class ProcessTaskAutomaticThread extends NeatLogicThread {
     protected void execute() {
         try {
             processTaskAutomaticService.firstRequest(currentProcessTaskStepVo);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
         } finally {
+            processTaskMapper.deleteProcessTaskStepInOperationByProcessTaskIdAndProcessTaskStepIdAndOperationType(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), "request");
             processTaskMapper.deleteProcessTaskStepInOperationById(processTaskStepInOperationId);
         }
     }

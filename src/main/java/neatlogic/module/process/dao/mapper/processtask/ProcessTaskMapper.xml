@@ -4118,6 +4118,14 @@
         WHERE `processtask_id` = #{value}
     </delete>
 
+    <delete id="deleteProcessTaskStepInOperationByProcessTaskIdAndProcessTaskStepIdAndOperationType">
+        DELETE
+        FROM `processtask_step_in_operation`
+        WHERE `processtask_id` = #{processTaskId}
+        AND `processtask_step_id` = #{processTaskStepId}
+        AND `operation_type` = #{operationType}
+    </delete>
+
     <delete id="deleteProcessTaskStepInOperationByServerId" parameterType="java.lang.Long">
         DELETE
         FROM `processtask_step_in_operation`

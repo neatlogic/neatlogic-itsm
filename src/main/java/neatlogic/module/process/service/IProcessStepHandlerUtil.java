@@ -163,7 +163,7 @@ public interface IProcessStepHandlerUtil {
      * 流转操作时检查回复信息是否必填
      * @param currentProcessTaskStepVo
      */
-    void checkContentIsRequired(ProcessTaskStepVo currentProcessTaskStepVo);
+    void checkContentIsRequired(ProcessTaskStepVo currentProcessTaskStepVo, IOperationType operationType);
 
     /**
      * @Description: 保存标签列表
