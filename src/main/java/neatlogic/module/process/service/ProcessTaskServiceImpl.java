@@ -3324,4 +3324,32 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
         return true;
     }
+
+    @Override
+    public void saveProcessTaskRelation(Long processTaskId, Long channelTypeRelationId, List<Long> relationProcessTaskIdList, String source) {
+        for (Long target : relationProcessTaskIdList) {
+            ProcessTaskRelationVo processTaskRelationVo = new ProcessTaskRelationVo();
+            processTaskRelationVo.setSource(processTaskId);
+            processTaskRelationVo.setChannelTypeRelationId(channelTypeRelationId);
+            processTaskRelationVo.setTarget(target);
+
+            processTaskMapper.replaceProcessTaskRelation(processTaskRelationVo);
+            ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+            processTaskStepVo.setProcessTaskId(target);
+            processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CHANNELTYPERELATION.getParamName(),
+                    channelTypeRelationId);
+            processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
+                    JSON.toJSONString(Collections.singletonList(processTaskId)));
+            processTaskStepVo.getParamObj().put("source", source);
+            processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
+        }
+        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+        processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CHANNELTYPERELATION.getParamName(),
+                channelTypeRelationId);
+        processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
+                JSON.toJSONString(relationProcessTaskIdList));
+        processTaskStepVo.setProcessTaskId(processTaskId);
+        processTaskStepVo.getParamObj().put("source", source);
+        processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
+    }
 }
