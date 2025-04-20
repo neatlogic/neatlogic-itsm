@@ -1,35 +1,28 @@
 package neatlogic.module.process.api.processtask;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;
-import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.crossover.IProcessTaskRelationSaveApiCrossoverService;
-import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
-import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.framework.process.dto.ProcessTaskRelationVo;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -42,16 +35,10 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
     private ProcessTaskMapper processTaskMapper;
 
     @Autowired
-    private ChannelMapper channelMapper;
-
-    @Autowired
     private ChannelTypeMapper channelTypeMapper;
 
     @Autowired
     private ProcessTaskService processTaskService;
-
-    @Autowired
-    private IProcessStepHandlerUtil processStepHandlerUtil;
 
     @Override
     public String getToken() {
@@ -92,28 +79,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
             List<Long> processTaskIdList = processTaskMapper.checkProcessTaskIdListIsExists(relationProcessTaskIdList);
             if (CollectionUtils.isNotEmpty(processTaskIdList)) {
                 String source = jsonObj.getString("source");
-                for (Long target : processTaskIdList) {
-                    ProcessTaskRelationVo processTaskRelationVo = new ProcessTaskRelationVo();
-                    processTaskRelationVo.setSource(processTaskId);
-                    processTaskRelationVo.setChannelTypeRelationId(channelTypeRelationId);
-                    processTaskRelationVo.setTarget(target);
-
-                    processTaskMapper.replaceProcessTaskRelation(processTaskRelationVo);
-                    ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-                    processTaskStepVo.setProcessTaskId(target);
-                    processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CHANNELTYPERELATION.getParamName(),
-                        channelTypeRelationId);
-                    processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
-                        JSON.toJSONString(Arrays.asList(processTaskId)));
-                    processTaskStepVo.getParamObj().put("source", source);
-                    processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
-                }
-                jsonObj.put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
-                    JSON.toJSONString(processTaskIdList));
-                ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-                processTaskStepVo.setProcessTaskId(processTaskId);
-                processTaskStepVo.getParamObj().putAll(jsonObj);
-                processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
+                processTaskService.saveProcessTaskRelation(processTaskId, channelTypeRelationId, processTaskIdList, source);
             }
         }
         return null;

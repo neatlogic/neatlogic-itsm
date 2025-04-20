@@ -535,4 +535,11 @@ public interface ProcessTaskService {
      * @return 如果是无效步骤返回true，否则返回false
      */
     boolean checkStepIsInvalid(Long processTaskStepId);
+
+    void saveProcessTaskRelation(
+            Long processTaskId,
+            Long channelTypeRelationId,
+            List<Long> relationProcessTaskIdList,
+            String source
+    );
 }
