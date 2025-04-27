@@ -20,6 +20,7 @@ package neatlogic.module.process.dao.mapper.score;
 import neatlogic.framework.process.crossover.IProcessTaskScoreCrossoverMapper;
 import neatlogic.framework.process.dto.score.ProcessTaskAutoScoreVo;
 import neatlogic.framework.process.dto.score.ProcessTaskScoreVo;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -40,8 +41,10 @@ public interface ProcessTaskScoreMapper extends IProcessTaskScoreCrossoverMapper
     void insertProcessTaskScoreContent(ProcessTaskScoreVo vo);
     
     int insertProcessTaskAutoScore(ProcessTaskAutoScoreVo processTaskAutoScoreVo);
-    
+
     int updateProcessTaskAutoScoreByProcessTaskId(ProcessTaskAutoScoreVo processTaskAutoScoreVo);
+
+    int updateProcessTaskAutoScoreErrorByProcessTaskId(@Param("processTaskId") Long processTaskId, @Param("error") String error);
     
     int deleteProcessTaskByProcessTaskId(Long processTaskId);
 
