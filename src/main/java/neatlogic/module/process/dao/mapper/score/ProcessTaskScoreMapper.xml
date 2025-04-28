@@ -92,6 +92,10 @@
 	<update id="updateProcessTaskAutoScoreByProcessTaskId" parameterType="neatlogic.framework.process.dto.score.ProcessTaskAutoScoreVo">
 	UPDATE `processtask_auto_score` SET `trigger_time` = #{triggerTime} WHERE `processtask_id` = #{processTaskId}
 	</update>
+
+	<update id="updateProcessTaskAutoScoreErrorByProcessTaskId">
+		UPDATE `processtask_auto_score` SET `error` = #{error} WHERE `processtask_id` = #{processTaskId}
+	</update>
 	
 	<delete id="deleteProcessTaskByProcessTaskId" parameterType="java.lang.Long">
 		DELETE ps,psc,pst
