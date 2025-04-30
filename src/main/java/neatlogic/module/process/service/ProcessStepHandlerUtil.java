@@ -32,6 +32,7 @@ import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
+import neatlogic.framework.form.exception.FormAttributeDataException;
 import neatlogic.framework.form.exception.FormAttributeRequiredException;
 import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.audithandler.core.IProcessTaskAuditType;
@@ -1118,10 +1119,24 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
             processTaskMapper.insertProcessTaskFormAttributeList(needSaveProcessTaskFormAttributeDataList);
         }
         // 保存表单扩展组件值
-        List<AttributeDataVo> oldExtendAttributeDataList = processTaskMapper.getProcessTaskExtendFormAttributeDataListByProcessTaskId(processTaskId, null);
-        Map<String, AttributeDataVo> oldExtendAttributeDataMap = oldExtendAttributeDataList.stream().collect(Collectors.toMap(AttributeDataVo::getAttributeUuid, e -> e));
         JSONArray formExtendAttributeDataList = paramObj.getJSONArray("formExtendAttributeDataList");
         if (CollectionUtils.isNotEmpty(formExtendAttributeDataList)) {
+            Map<String, List<String>> tag2KeyListMap = new HashMap<>();
+            for (int j = 0; j < formExtendAttributeDataList.size(); j++) {
+                JSONObject formExtendAttributeDataObj = formExtendAttributeDataList.getJSONObject(j);
+                if (MapUtils.isEmpty(formExtendAttributeDataObj)) {
+                    continue;
+                }
+                String tag = formExtendAttributeDataObj.getString("tag");
+                String key = formExtendAttributeDataObj.getString("key");
+                List<String> keyList = tag2KeyListMap.computeIfAbsent(tag, k -> new ArrayList<>());
+                if (keyList.contains(key)) {
+                    throw new FormAttributeDataException("formExtendAttributeDataList", tag, key);
+                }
+                keyList.add(key);
+            }
+            List<AttributeDataVo> oldExtendAttributeDataList = processTaskMapper.getProcessTaskExtendFormAttributeDataListByProcessTaskId(processTaskId, null);
+            Map<String, AttributeDataVo> oldExtendAttributeDataMap = oldExtendAttributeDataList.stream().collect(Collectors.toMap(AttributeDataVo::getAttributeUuid, e -> e));
             List<ProcessTaskFormAttributeDataVo> needSaveProcessTaskFormExtendAttributeDataList = new ArrayList<>();
             for (int j = 0; j < formExtendAttributeDataList.size(); j++) {
                 JSONObject formExtendAttributeDataObj = formExtendAttributeDataList.getJSONObject(j);
