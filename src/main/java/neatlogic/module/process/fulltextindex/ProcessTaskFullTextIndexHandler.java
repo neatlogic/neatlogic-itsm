@@ -82,6 +82,8 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
         //fullTextIndexVo.addFieldContent("id", new FullTextIndexVo.WordVo(processTaskVo.getId().toString()));
         //表单
         List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataVoList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(fullTextIndexVo.getTargetId());
+        List<ProcessTaskFormAttributeDataVo> allProcessTaskFormExtendAttributeDataList = processTaskService.getAllProcessTaskFormExtendAttributeDataListByProcessTaskId(fullTextIndexVo.getTargetId());
+        processTaskFormAttributeDataVoList.addAll(allProcessTaskFormExtendAttributeDataList);
         if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataVoList)) {
             for (ProcessTaskFormAttributeDataVo attributeDataVo : processTaskFormAttributeDataVoList) {
                 if (StringUtils.isNotBlank(attributeDataVo.getData())) {

@@ -113,26 +113,51 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
             if (formVo == null) {
                 throw new FormNotFoundException(formUuid);
             }
+            String formVersionUuid = null;
             String conditionModel = jsonObj.getString("conditionModel");
-            List<FormAttributeVo> formAttributeList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
-            ListIterator<FormAttributeVo> formIterator = formAttributeList.listIterator();
-            while (formIterator.hasNext()) {
-                FormAttributeVo formAttributeVo = formIterator.next();
-                //如果是radio 则改为 checkbox，前端解决多选，取消选择问题
-                if (!Objects.equals("all", conditionModel) && Objects.equals(formAttributeVo.getHandler(), new RadioHandler().getHandler())) {
-                    formAttributeVo.setHandler(new CheckboxHandler().getHandler());
+            {
+                List<FormAttributeVo> formAttributeList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
+                ListIterator<FormAttributeVo> formIterator = formAttributeList.listIterator();
+                while (formIterator.hasNext()) {
+                    FormAttributeVo formAttributeVo = formIterator.next();
+                    //如果是radio 则改为 checkbox，前端解决多选，取消选择问题
+                    if (!Objects.equals("all", conditionModel) && Objects.equals(formAttributeVo.getHandler(), new RadioHandler().getHandler())) {
+                        formAttributeVo.setHandler(new CheckboxHandler().getHandler());
+                    }
+                    IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                    if (handler == null || (!Objects.equals("all", conditionModel) && !handler.isConditionable())) {
+                        formIterator.remove();
+                        continue;
+                    }
+                    formAttributeVo.setConditionModel(FormConditionModel.getFormConditionModel(conditionModel));
+                    formAttributeVo.setType("form");
+                    formAttributeVo.setChannelUuid(channel.getUuid());
+                    formAttributeVo.setIsUseFormConfig(handler.isUseFormConfig());
+                    formVersionUuid = formAttributeVo.getFormVersionUuid();
                 }
-                IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                if (handler == null || (!Objects.equals("all", conditionModel) && !handler.isConditionable())) {
-                    formIterator.remove();
-                    continue;
-                }
-                formAttributeVo.setConditionModel(FormConditionModel.getFormConditionModel(conditionModel));
-                formAttributeVo.setType("form");
-                formAttributeVo.setChannelUuid(channel.getUuid());
-                formAttributeVo.setIsUseFormConfig(handler.isUseFormConfig());
+                allFormAttributeList.addAll(formAttributeList);
             }
-            allFormAttributeList.addAll(formAttributeList);
+            if (formVersionUuid != null) {
+                List<FormAttributeVo> formExtendAttributeList = formMapper.getFormExtendAttributeListByFormUuidAndFormVersionUuid(formUuid, formVersionUuid);
+                ListIterator<FormAttributeVo> formIterator = formExtendAttributeList.listIterator();
+                while (formIterator.hasNext()) {
+                    FormAttributeVo formAttributeVo = formIterator.next();
+                    //如果是radio 则改为 checkbox，前端解决多选，取消选择问题
+                    if (!Objects.equals("all", conditionModel) && Objects.equals(formAttributeVo.getHandler(), new RadioHandler().getHandler())) {
+                        formAttributeVo.setHandler(new CheckboxHandler().getHandler());
+                    }
+                    IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                    if (handler == null || (!Objects.equals("all", conditionModel) && !handler.isConditionable())) {
+                        formIterator.remove();
+                        continue;
+                    }
+                    formAttributeVo.setConditionModel(FormConditionModel.getFormConditionModel(conditionModel));
+                    formAttributeVo.setType("form");
+                    formAttributeVo.setChannelUuid(channel.getUuid());
+                    formAttributeVo.setIsUseFormConfig(handler.isUseFormConfig());
+                }
+                allFormAttributeList.addAll(formExtendAttributeList);
+            }
         }
         return allFormAttributeList;
     }
