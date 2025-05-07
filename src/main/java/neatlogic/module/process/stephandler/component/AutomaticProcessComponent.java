@@ -113,6 +113,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
     @Override
     protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
         currentProcessTaskStepVo.setStatus(ProcessTaskStepStatus.RUNNING.getValue());
+        currentProcessTaskStepVo.setUpdateStartTime(1);
         try {
             AutomaticConfigVo automaticConfigVo = processTaskAutomaticService.getAutomaticConfigVoByProcessTaskStepId(currentProcessTaskStepVo.getId());
             JSONObject requestAudit = new JSONObject();

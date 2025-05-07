@@ -131,6 +131,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
     @Override
     protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
         currentProcessTaskStepVo.setStatus(ProcessTaskStepStatus.RUNNING.getValue());
+        currentProcessTaskStepVo.setUpdateStartTime(1);
         try {
         String configHash = currentProcessTaskStepVo.getConfigHash();
         String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(configHash);
