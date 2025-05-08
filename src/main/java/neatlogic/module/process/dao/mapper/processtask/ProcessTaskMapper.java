@@ -488,6 +488,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     int updateProcessTaskStepStatus(ProcessTaskStepVo processTaskStepVo);
 
+    int updateProcessTaskStepIsActive(ProcessTaskStepVo processTaskStepVo);
+
     int updateProcessTaskStatus(ProcessTaskVo processTaskVo);
 
     //    int updateProcessTaskStepRelIsHit(@Param("fromProcessTaskStepId") Long fromProcessTaskStepId, @Param("toProcessTaskStepId") Long toProcessTaskStepId, @Param("isHit") Integer isHit);

@@ -2937,6 +2937,14 @@
         WHERE `id` = #{id}
     </update>
 
+    <update id="updateProcessTaskStepIsActive" parameterType="neatlogic.framework.process.dto.ProcessTaskStepVo">
+        UPDATE
+        `processtask_step`
+        SET
+        `is_active` = #{isActive}
+        WHERE `id` = #{id}
+    </update>
+
     <insert id="insertProcessTaskStepAuditDetail"
             parameterType="neatlogic.framework.process.dto.ProcessTaskStepAuditDetailVo">
         INSERT INTO `processtask_step_audit_detail` (`audit_id`,
