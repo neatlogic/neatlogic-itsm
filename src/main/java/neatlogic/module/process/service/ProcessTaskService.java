@@ -506,6 +506,13 @@ public interface ProcessTaskService {
     List<ProcessTaskFormAttributeDataVo> getProcessTaskFormAttributeDataListByProcessTaskIdAndTagNew(Long processTaskId, String tag);
 
     /**
+     * 根据工单id获取所有扩展表单属性数据列表
+     * @param processTaskId 工单id
+     * @return
+     */
+    List<ProcessTaskFormAttributeDataVo> getAllProcessTaskFormExtendAttributeDataListByProcessTaskId(Long processTaskId);
+
+    /**
      * 根据工单id和表单属性uuid获取表单属性数据
      * @param processTaskId 工单id
      * @param attributeUuid 表单属性uuid

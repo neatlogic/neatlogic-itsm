@@ -2334,6 +2334,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     }
 
     @Override
+    public List<ProcessTaskFormAttributeDataVo> getAllProcessTaskFormExtendAttributeDataListByProcessTaskId(Long processTaskId) {
+        List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = new ArrayList<>();
+        List<AttributeDataVo> extendAttributeDataList = processTaskMapper.getProcessTaskExtendFormAttributeDataListByProcessTaskId(processTaskId, null);
+        for (AttributeDataVo attributeDataVo : extendAttributeDataList) {
+            processTaskFormAttributeDataList.add(new ProcessTaskFormAttributeDataVo(processTaskId, attributeDataVo));
+        }
+        return processTaskFormAttributeDataList;
+    }
+
+    @Override
     public ProcessTaskFormAttributeDataVo getProcessTaskFormAttributeDataByProcessTaskIdAndAttributeUuid(Long processTaskId, String attributeUuid) {
         List<Long> formAttributeDataIdList = processTaskMapper.getProcessTaskFormAttributeDataIdListByProcessTaskId(processTaskId);
         if (CollectionUtils.isEmpty(formAttributeDataIdList)) {
