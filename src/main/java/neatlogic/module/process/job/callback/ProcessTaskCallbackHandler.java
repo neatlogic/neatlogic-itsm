@@ -72,7 +72,7 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
         if (autoexecJobVo != null) {
             AutoexecJobVo autoexecJob = autoexecJobMapper.getJobInfo(autoexecJobVo.getId());
             if (AutoExecJobProcessSource.ITSM.getValue().equals(autoexecJob.getSource())) {
-                if (!JobStatus.PENDING.getValue().equals(autoexecJobVo.getStatus()) && !JobStatus.RUNNING.getValue().equals(autoexecJobVo.getStatus())) {
+                if (JobStatus.isCompletedStatus(autoexecJobVo.getStatus()) || JobStatus.isFailedStatus(autoexecJobVo.getStatus())) {
                     return true;
                 }
             }
@@ -96,12 +96,12 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
             if (CollectionUtils.isNotEmpty(jobIdList)) {
                 List<AutoexecJobVo> autoexecJobList = autoexecJobMapper.getJobListByIdList(jobIdList);
                 for (AutoexecJobVo jobVo : autoexecJobList) {
-                    if (JobStatus.isRunningStatus(jobVo.getStatus())) {
-                        return;
-                    } else if (JobStatus.isCompletedStatus(jobVo.getStatus())) {
+                    if (JobStatus.isCompletedStatus(jobVo.getStatus())) {
                         completed++;
                     } else if (JobStatus.isFailedStatus(jobVo.getStatus())) {
                         failed++;
+                    } else {
+                        return;
                     }
                 }
             }
@@ -129,14 +129,6 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
             } else {
                 processTaskStepComplete(processTaskStepVo);
             }
-//            if (JobStatus.COMPLETED.getValue().equals(autoexecJobVo.getStatus())) {
-//                processTaskStepComplete(processTaskStepVo, formAttributeDataList, hidecomponentList);
-//            } else {
-//                //暂停中、已暂停、中止中、已中止、已失败都属于异常，根据失败策略处理
-//                if (FailPolicy.KEEP_ON.getValue().equals(failPolicy)) {
-//                    processTaskStepComplete(processTaskStepVo, formAttributeDataList, hidecomponentList);
-//                }
-//            }
         }
     }
 
