@@ -30,6 +30,8 @@ import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.processtask.*;
+import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
+import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -147,9 +149,19 @@ public class UpdateProcessTaskStepStatusApi extends PrivateApiComponentBase {//
                     List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
                     // 需要处理人的步骤，不指定处理人时，旧处理人必须存在
                     if (processTaskStepUserList.isEmpty()) {
-                        throw new ProcessTaskStepUserUnAssignException();
+//                        throw new ProcessTaskStepUserUnAssignException();
+                        IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+                        if (processStepHandler != null) {
+                            try {
+                                processStepHandler.assign(processTaskStepVo);
+                            } catch (ProcessTaskException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        changeProcessTaskStepStatusToRunning(processTaskStepVo);
+                    } else {
+                        changeProcessTaskStepStatusToRunning(processTaskStepVo, new UserVo(processTaskStepUserList.get(0).getUserUuid(), processTaskStepUserList.get(0).getUserName()));
                     }
-                    changeProcessTaskStepStatusToRunning(processTaskStepVo, new UserVo(processTaskStepUserList.get(0).getUserUuid(), processTaskStepUserList.get(0).getUserName()));
                 } else {
                     processTaskMapper.deleteProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
                     processTaskMapper.insertProcessTaskStepUser(new ProcessTaskStepUserVo(
@@ -216,8 +228,13 @@ public class UpdateProcessTaskStepStatusApi extends PrivateApiComponentBase {//
             if (ProcessStepHandlerType.END.getHandler().equals(processTaskStepVo.getHandler())) {
                 processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.SUCCEED));
             } else if (nextStep != null) {
-                processTaskMapper.updateProcessTaskStepRelIsHit(new ProcessTaskStepRelVo(processTaskStepVo.getId(), nextStep.getId(), 1));
-                map.get(ProcessTaskStepStatus.SUCCEED.getValue()).accept(nextStep);
+                if (ProcessStepHandlerType.END.getHandler().equals(nextStep.getHandler())) {
+                    processTaskMapper.updateProcessTaskStepRelIsHit(new ProcessTaskStepRelVo(processTaskStepVo.getId(), nextStep.getId(), 1));
+                    map.get(ProcessTaskStepStatus.SUCCEED.getValue()).accept(nextStep);
+                } else {
+                    processTaskMapper.updateProcessTaskStepRelIsHit(new ProcessTaskStepRelVo(processTaskStepVo.getId(), nextStep.getId(), 1));
+                    map.get(ProcessTaskStepStatus.RUNNING.getValue()).accept(nextStep);
+                }
             }
         });
         map.put(ProcessTaskStepStatus.HANG.getValue(), processTaskStepVo -> {
