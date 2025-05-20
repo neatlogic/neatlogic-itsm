@@ -252,16 +252,21 @@ public class UpdateProcessTaskStepStatusApi extends PrivateApiComponentBase {//
     /**
      * 更改步骤状态为待处理
      *
-     * @param processTaskStepVo
+     * @param processTaskStep
      */
-    private void changeProcessTaskStepStatusToPending(ProcessTaskStepVo processTaskStepVo) {
-        if ("process".equals(processTaskStepVo.getType())) {
-            processTaskMapper.deleteProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
-            processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
-            processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId()
-                    , GroupSearch.USER.getValue(), processTaskStepVo.getOriginalUserVo().getUuid(), ProcessUserType.MAJOR.getValue()));
+    private void changeProcessTaskStepStatusToPending(ProcessTaskStepVo processTaskStep) {
+        if ("process".equals(processTaskStep.getType())) {
+            processTaskMapper.deleteProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStep.getId(), ProcessUserType.MAJOR.getValue()));
+            processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStep.getId(), ProcessUserType.MAJOR.getValue()));
+            processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStep.getProcessTaskId(), processTaskStep.getId()
+                    , GroupSearch.USER.getValue(), processTaskStep.getOriginalUserVo().getUuid(), ProcessUserType.MAJOR.getValue()));
         }
-        processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStepVo.getId(), ProcessTaskStepStatus.PENDING, 1));
+        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskStep.getId(), ProcessTaskStepStatus.PENDING, 1);
+        if (processTaskStep.getActiveTime() == null) {
+            processTaskStepVo.setUpdateActiveTime(1);
+        }
+        processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
+//        processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStepVo.getId(), ProcessTaskStepStatus.PENDING, 1));
         processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING));
     }
 
@@ -271,7 +276,13 @@ public class UpdateProcessTaskStepStatusApi extends PrivateApiComponentBase {//
      * @param processTaskStep 步骤
      */
     private void changeProcessTaskStepStatusToRunning(ProcessTaskStepVo processTaskStep) {
-        processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStep.getId(), ProcessTaskStepStatus.RUNNING, 1));
+        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskStep.getId(), ProcessTaskStepStatus.RUNNING, 1);
+        if (processTaskStep.getActiveTime() == null) {
+            processTaskStepVo.setUpdateActiveTime(1);
+        }
+        processTaskStepVo.setUpdateStartTime(1);
+        processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
+//        processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStep.getId(), ProcessTaskStepStatus.RUNNING, 1));
         processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStep.getProcessTaskId(), ProcessTaskStatus.RUNNING));
     }
 
