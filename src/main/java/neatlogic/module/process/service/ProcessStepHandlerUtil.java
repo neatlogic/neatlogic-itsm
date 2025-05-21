@@ -358,6 +358,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskIdAndProcessStepUuid(processTaskId, processStepUuid);
                         if (processTaskStepVo != null) {
                             processTaskStepId = processTaskStepVo.getId();
+                            assignWorker.put("processTaskStepId", processTaskStepId);
                         }
                     }
                 }
