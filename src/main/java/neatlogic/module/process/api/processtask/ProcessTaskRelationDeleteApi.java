@@ -55,7 +55,7 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskRelationId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskrelationid"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")
     })
     @Description(desc = "nmpap.processtaskrelationdeleteapi.getname")
     @Override

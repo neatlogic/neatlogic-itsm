@@ -46,7 +46,7 @@ public class ProcessTaskRetreatApi extends PrivateApiComponentBase implements IP
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content")
     })
     @Description(desc = "nmpap.processtaskretreatapi.getname")

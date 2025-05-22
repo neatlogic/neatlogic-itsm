@@ -81,7 +81,7 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
             @Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "term.itsm.formattributedatalist"),
             @Param(name = "formExtendAttributeDataList", type = ApiParamType.JSONARRAY, desc = "term.itsm.formextendattributedatalist"),
             @Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, desc = "term.itsm.hidecomponentlist"),

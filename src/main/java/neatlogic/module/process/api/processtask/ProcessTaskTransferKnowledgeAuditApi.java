@@ -51,7 +51,7 @@ public class ProcessTaskTransferKnowledgeAuditApi extends PrivateApiComponentBas
 
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
             @Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "common.title")
     })
     @Description(desc = "nmpap.processtasktransferknowledgeauditapi.getname")

@@ -59,7 +59,7 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
             @Param(name = "nextStepId", type = ApiParamType.LONG, desc = "term.itsm.processtasknextstepid", help = "如果有且仅有一个下一节点，则可以不传这个参数"),
             @Param(name = "action", type = ApiParamType.ENUM, rule = "complete,back", isRequired = true, desc = "common.actiontype"),
             @Param(name = "content", type = ApiParamType.STRING, desc = "common.content"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
             @Param(name = "assignWorkerList", type = ApiParamType.JSONARRAY, desc = "term.itsm.assignworkerlist", help = "格式为[{\"processTaskStepId\":1, \"workerList\":[\"user#xxx\",\"team#xxx\",\"role#xxx\"]}]")
     })
     @Description(desc = "nmpap.processtaskcompleteapi.getname")

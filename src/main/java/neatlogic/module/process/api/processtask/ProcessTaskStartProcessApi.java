@@ -42,7 +42,7 @@ public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
             @Param(name = "nextStepId", type = ApiParamType.LONG, desc = "term.itsm.processtasknextstepid", help = "如果有且仅有一个下一节点，则可以不传这个参数"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
             @Param(name = "assignWorkerList", type = ApiParamType.JSONARRAY, desc = "term.itsm.assignworkerlist", help = "格式[{\"processTaskStepId\":1, \"processStepUuid\":\"abc\", \"workerList\":[\"user#xxx\",\"team#xxx\",\"role#xxx\"]}]")
     })
     @Description(desc = "nmpap.processtaskstartprocessapi.getname")

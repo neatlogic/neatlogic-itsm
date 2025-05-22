@@ -59,7 +59,7 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
             @Param(name = "focusUserUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "term.itsm.focususeruuidlist")
     })
     @Description(desc = "nmpap.processtaskfocususerupdateapi.getname")

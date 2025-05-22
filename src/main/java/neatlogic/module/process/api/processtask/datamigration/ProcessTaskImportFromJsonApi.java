@@ -86,7 +86,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
     }
 
     @Input({
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok 前端没有使用该接口
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
     })
     @Output({
 

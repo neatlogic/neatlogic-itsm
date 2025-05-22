@@ -59,7 +59,7 @@ public class BatchUrgeProcessTaskApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1, desc = "term.itsm.processtaskidlist"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")
     })
     @Output({})
     @Description(desc = "nmpap.batchurgeprocesstaskapi.getname")

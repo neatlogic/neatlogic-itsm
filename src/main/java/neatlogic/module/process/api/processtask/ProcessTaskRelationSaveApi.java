@@ -59,7 +59,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
             @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.channeltyperelationid"),
             @Param(name = "relationProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "term.itsm.relationprocesstaskidlist"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
     })
     @Description(desc = "nmpap.processtaskrelationsaveapi.getname")
     @Override

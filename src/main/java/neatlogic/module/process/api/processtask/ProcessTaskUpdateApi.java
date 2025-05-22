@@ -98,7 +98,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
             @Param(name = "title", type = ApiParamType.STRING, maxLength = 200, desc = "common.title"),
             @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "common.priorityuuid"),
             @Param(name = "content", type = ApiParamType.STRING, desc = "common.content"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
             @Param(name = "tagList", type = ApiParamType.JSONARRAY, desc = "common.taglist"),
             @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "common.fileidlist")
     })

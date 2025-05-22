@@ -48,7 +48,7 @@ public class ProcessTaskStepStartIfNecessaryApi extends PrivateApiComponentBase 
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")
     })
     @Description(desc = "nmpap.processtaskstepstartifnecessaryapi.getname")
     @Override

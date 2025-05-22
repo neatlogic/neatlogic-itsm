@@ -60,7 +60,7 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "common.id"),
             @Param(name = "content", type = ApiParamType.STRING, desc = "common.content"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok 暂时没有用到这个接口
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
             @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "common.fileidlist")
     })
     @Output({

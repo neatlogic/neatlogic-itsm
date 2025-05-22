@@ -88,7 +88,7 @@ public class ProcessTaskStepTaskFileDeleteApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "term.rdm.issueid"),
             @Param(name = "fileId", isRequired = true, type = ApiParamType.LONG, desc = "common.fileid"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")
     })
     @Output({})
     @Description(desc = "nmpapt.processtasksteptaskfiledeleteapi.getname")

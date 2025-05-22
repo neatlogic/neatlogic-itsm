@@ -59,7 +59,7 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
             @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "term.rdm.issueid"),
             @Param(name = "button", type = ApiParamType.STRING, desc = "common.button"),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")
     })
     @Output({})
     @Description(desc = "nmpapt.processtasksteptaskcompleteapi.getname")

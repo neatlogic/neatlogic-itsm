@@ -79,7 +79,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskStepTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.rdm.issueid"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")
     })
     @Output({})
     @Description(desc = "nmrai.deleteissueapi.getname")

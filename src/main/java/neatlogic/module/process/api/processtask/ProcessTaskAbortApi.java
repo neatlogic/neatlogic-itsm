@@ -40,7 +40,7 @@ public class ProcessTaskAbortApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid", isRequired = true),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")
     })
     @Output({})
     @Description(desc = "nfpnc.processtasknotifytriggertype.text.abortprocesstask")

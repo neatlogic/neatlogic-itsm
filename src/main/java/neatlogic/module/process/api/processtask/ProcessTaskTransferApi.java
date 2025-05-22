@@ -45,7 +45,7 @@ public class ProcessTaskTransferApi extends PrivateApiComponentBase {
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
             @Param(name = "workerList", type = ApiParamType.NOAUTH, isRequired = true, desc = "nmpap.processtasktransferapi.input.param.desc.workerlist", help = "[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
             @Param(name = "isSaveData", type = ApiParamType.ENUM, rule = "0,1", desc = "nmpap.processtasktransferapi.input.param.desc.issavedata"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content")
     })
     @Output({})

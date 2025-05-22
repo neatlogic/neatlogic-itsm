@@ -40,7 +40,7 @@ public class ProcessTaskRecoverApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")
     })
     @Output({})
     @Description(desc = "nfpnc.processtasknotifytriggertype.text.recoverprocesstask")

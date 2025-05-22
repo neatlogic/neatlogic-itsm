@@ -50,7 +50,7 @@ public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
             @Param(name = "action", type = ApiParamType.ENUM, rule = "back,complete", isRequired = true, desc = "common.actiontype", help = "complete：流转,back：回退"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok 前端只调用该接口的帮助
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")
     })
     @Output({
             @Param(name = "Status", type = ApiParamType.STRING, desc = "common.status"),

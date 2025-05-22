@@ -77,7 +77,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
             @Param(name = "content", type = ApiParamType.STRING, desc = "common.content"),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
             @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "common.fileidlist"),
             @Param(name = "commentTemplateId", type = ApiParamType.LONG, desc = "common.templateid")})
     @Output({

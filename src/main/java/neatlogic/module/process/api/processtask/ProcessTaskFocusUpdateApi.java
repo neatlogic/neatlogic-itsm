@@ -47,7 +47,7 @@ public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
     @Override
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid", isRequired = true),
-            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
             @Param(name = "isFocus", type = ApiParamType.ENUM, desc = "term.itsm.isfocus", isRequired = true, rule = "0,1", help = "1：关注；0：取消关注")
     })
     @Output({
