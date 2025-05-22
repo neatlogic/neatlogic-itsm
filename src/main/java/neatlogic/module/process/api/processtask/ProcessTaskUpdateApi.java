@@ -84,7 +84,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "更新工单信息";
+        return "nmpap.processtaskupdateapi.getname";
     }
 
     @Override
@@ -92,15 +92,17 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id"),
-            @Param(name = "title", type = ApiParamType.STRING, maxLength = 200, desc = "标题"),
-            @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "优先级uuid"),
-            @Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-            @Param(name = "tagList", type = ApiParamType.JSONARRAY, desc = "标签列表"),
-            @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "附件id列表")})
-    @Description(desc = "更新工单信息")
+    @Input({
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "term.itsm.processtaskstepid"),
+            @Param(name = "title", type = ApiParamType.STRING, maxLength = 200, desc = "common.title"),
+            @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "common.priorityuuid"),
+            @Param(name = "content", type = ApiParamType.STRING, desc = "common.content"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "tagList", type = ApiParamType.JSONARRAY, desc = "common.taglist"),
+            @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "common.fileidlist")
+    })
+    @Description(desc = "nmpap.processtaskupdateapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");

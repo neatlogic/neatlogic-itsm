@@ -45,7 +45,7 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "删除工单关联";
+        return "nmpap.processtaskrelationdeleteapi.getname";
     }
 
     @Override
@@ -54,18 +54,18 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskRelationId", type = ApiParamType.LONG, isRequired = true, desc = "工单关联id"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "processTaskRelationId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskrelationid"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
     })
-    @Description(desc = "删除工单关联")
+    @Description(desc = "nmpap.processtaskrelationdeleteapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskRelationId = jsonObj.getLong("processTaskRelationId");
         ProcessTaskRelationVo processTaskRelationVo =
-            processTaskMapper.getProcessTaskRelationById(processTaskRelationId);
+                processTaskMapper.getProcessTaskRelationById(processTaskRelationId);
         if (processTaskRelationVo != null) {
             ProcessTaskVo processTaskVo =
-                processTaskMapper.getProcessTaskBaseInfoById(processTaskRelationVo.getSource());
+                    processTaskMapper.getProcessTaskBaseInfoById(processTaskRelationVo.getSource());
             new ProcessAuthManager.TaskOperationChecker(processTaskVo.getId(),
                     ProcessTaskOperationType.PROCESSTASK_TRANSFERREPORT).build().checkAndNoPermissionThrowException();
             processTaskMapper.deleteProcessTaskRelationById(processTaskRelationId);
@@ -73,18 +73,18 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
             ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
             processTaskStepVo.setProcessTaskId(processTaskRelationVo.getSource());
             processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CHANNELTYPERELATION.getParamName(),
-                processTaskRelationVo.getChannelTypeRelationId());
+                    processTaskRelationVo.getChannelTypeRelationId());
             processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
-                JSON.toJSONString(Arrays.asList(processTaskRelationVo.getTarget())));
+                    JSON.toJSONString(Arrays.asList(processTaskRelationVo.getTarget())));
             processTaskStepVo.getParamObj().put("source", jsonObj.getString("source"));
             processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETERELATION);
 
             ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
             processTaskStep.setProcessTaskId(processTaskRelationVo.getTarget());
             processTaskStep.getParamObj().put(ProcessTaskAuditDetailType.CHANNELTYPERELATION.getParamName(),
-                processTaskRelationVo.getChannelTypeRelationId());
+                    processTaskRelationVo.getChannelTypeRelationId());
             processTaskStep.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
-                JSON.toJSONString(Arrays.asList(processTaskRelationVo.getSource())));
+                    JSON.toJSONString(Arrays.asList(processTaskRelationVo.getSource())));
             processTaskStep.getParamObj().put("source", jsonObj.getString("source"));
             processStepHandlerUtil.audit(processTaskStep, ProcessTaskAuditType.DELETERELATION);
         }

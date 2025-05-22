@@ -42,10 +42,11 @@ public class BatchAbortProcessTaskApi extends PrivateApiComponentBase {
     public String getName() {
         return "nmpap.batchabortprocesstaskapi.getname";
     }
+
     @Input({
             @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1, desc = "term.itsm.processtaskidlist"),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
     })
     @Output({})
     @Description(desc = "nmpap.batchabortprocesstaskapi.getname")

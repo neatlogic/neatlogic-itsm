@@ -45,9 +45,10 @@ public class BatchHideProcessTaskApi extends PrivateApiComponentBase {
     public String getName() {
         return "nmpap.batchhideprocesstaskapi.getname";
     }
+
     @Input({
             @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1, desc = "term.itsm.processtaskidlist"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source")
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
     })
     @Output({})
     @Description(desc = "nmpap.batchhideprocesstaskapi.getname")

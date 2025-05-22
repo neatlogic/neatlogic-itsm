@@ -46,10 +46,11 @@ public class BatchPauseProcessTaskApi extends PrivateApiComponentBase {
     public String getName() {
         return "nmpap.batchpauseprocesstaskapi.getname";
     }
+
     @Input({
             @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1, desc = "term.itsm.processtaskidlist"),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source")
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
     })
     @Output({})
     @Description(desc = "nmpap.batchpauseprocesstaskapi.getname")
@@ -67,7 +68,7 @@ public class BatchPauseProcessTaskApi extends PrivateApiComponentBase {
             for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
                 if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())) {
                     IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
-                    if(handler == null) {
+                    if (handler == null) {
                         throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
                     }
                     processTaskStepVo.getParamObj().put("source", source);

@@ -52,7 +52,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "保存任务";
+        return "nmrai.saveissueapi.getname";
     }
 
     @Override
@@ -61,17 +61,17 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, desc = "任务id，如果不为空则是编辑，为空则新增"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-            @Param(name = "stepTaskUserVoList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "任务处理人列表"),
-            @Param(name = "taskConfigId", type = ApiParamType.LONG, isRequired = true, desc = "任务策略id"),
-            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "id", type = ApiParamType.LONG, desc = "term.rdm.issueid", help = "如果不为空则是编辑，为空则新增"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
+            @Param(name = "stepTaskUserVoList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "term.itsm.steptaskuserlist"),
+            @Param(name = "taskConfigId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.taskconfigid"),
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "common.content"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")
     })
     @Output({
-            @Param(name = "Return", type = ApiParamType.LONG, desc = "任务id")
+            @Param(name = "Return", type = ApiParamType.LONG, desc = "term.rdm.issueid")
     })
-    @Description(desc = "保存任务接口")
+    @Description(desc = "nmrai.saveissueapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");

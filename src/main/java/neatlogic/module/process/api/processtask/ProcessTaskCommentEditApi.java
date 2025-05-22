@@ -26,74 +26,75 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
 
-	@Autowired
-	private ProcessTaskMapper processTaskMapper;
-	
-	@Autowired
-	private ProcessTaskService processTaskService;
+    @Autowired
+    private ProcessTaskMapper processTaskMapper;
 
-	@Autowired
-	private IProcessStepHandlerUtil processStepHandlerUtil;
+    @Autowired
+    private ProcessTaskService processTaskService;
 
-	@Override
-	public String getToken() {
-		return "processtask/comment/edit";
-	}
+    @Autowired
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 
-	@Override
-	public String getName() {
-		return "工单回复编辑接口";
-	}
+    @Override
+    public String getToken() {
+        return "processtask/comment/edit";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
-	
-	@Input({
-		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "回复id"),
-		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
-		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-		@Param(name = "fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表")
-	})
-	@Output({
-		@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "当前步骤评论列表")
-	})
-	@Description(desc = "工单回复编辑接口")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String content = jsonObj.getString("content");
-		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
-		if(content == null && fileIdList == null){
-			return null;
-		}
-		Long id = jsonObj.getLong("id");
-		ProcessTaskStepContentVo processTaskStepContentVo= processTaskMapper.getProcessTaskStepContentById(id);
-        if(processTaskStepContentVo == null) {
+    @Override
+    public String getName() {
+        return "nmpap.processtaskcommenteditapi.getname";
+    }
+
+    @Override
+    public String getConfig() {
+        return null;
+    }
+
+    @Input({
+            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "common.id"),
+            @Param(name = "content", type = ApiParamType.STRING, desc = "common.content"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok 暂时没有用到这个接口
+            @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "common.fileidlist")
+    })
+    @Output({
+            @Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "common.tbodylist")
+    })
+    @Description(desc = "nmpap.processtaskcommenteditapi.getname")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        String content = jsonObj.getString("content");
+        List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
+        if (content == null && fileIdList == null) {
+            return null;
+        }
+        Long id = jsonObj.getLong("id");
+        ProcessTaskStepContentVo processTaskStepContentVo = processTaskMapper.getProcessTaskStepContentById(id);
+        if (processTaskStepContentVo == null) {
             throw new ProcessTaskStepCommentNotFoundException(id.toString());
         }
         ProcessTaskStepReplyVo oldReplyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
-		if(Objects.equals(oldReplyVo.getIsEditable(), 0)) {
+        if (Objects.equals(oldReplyVo.getIsEditable(), 0)) {
             //throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.EDITCOMMENT.getText());
-		    throw new PermissionDeniedException();
-		}
-		// 锁定当前流程
+            throw new PermissionDeniedException();
+        }
+        // 锁定当前流程
         processTaskMapper.getProcessTaskLockById(oldReplyVo.getProcessTaskId());
-        
+
         boolean isUpdate = processTaskService.saveProcessTaskStepReply(jsonObj, oldReplyVo);
-        if(isUpdate) {
+        if (isUpdate) {
             //生成活动
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(oldReplyVo.getProcessTaskStepId());
             processTaskStepVo.getParamObj().putAll(jsonObj);
-			processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.EDITCOMMENT);
+            processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.EDITCOMMENT);
         }
-        
+
         JSONObject resultObj = new JSONObject();
         List<String> typeList = new ArrayList<>();
         typeList.add(ProcessTaskStepOperationType.STEP_COMMENT.getValue());
@@ -101,9 +102,9 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
         typeList.add(ProcessTaskStepOperationType.STEP_BACK.getValue());
         typeList.add(ProcessTaskOperationType.PROCESSTASK_RETREAT.getValue());
         typeList.add(ProcessTaskOperationType.PROCESSTASK_TRANSFER.getValue());
-		typeList.add(ProcessTaskStepOperationType.STEP_REAPPROVAL.getValue());
-		typeList.add(ProcessTaskOperationType.PROCESSTASK_START.getValue());
+        typeList.add(ProcessTaskStepOperationType.STEP_REAPPROVAL.getValue());
+        typeList.add(ProcessTaskOperationType.PROCESSTASK_START.getValue());
         resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(oldReplyVo.getProcessTaskStepId(), typeList));
         return resultObj;
-	}
+    }
 }

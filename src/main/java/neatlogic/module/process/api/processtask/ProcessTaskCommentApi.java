@@ -65,7 +65,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
 
     @Override
     public String getName() {
-        return "工单回复接口";
+        return "nmpap.processtaskcommentapi.getname";
     }
 
     @Override
@@ -73,21 +73,24 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
         return null;
     }
 
-    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-        @Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
-        @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-        @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "附件id列表"),
-        @Param(name = "commentTemplateId", type = ApiParamType.LONG, desc = "回复模版ID")})
-    @Output({@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "当前步骤评论列表")})
-    @Description(desc = "工单回复接口")
+    @Input({
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
+            @Param(name = "content", type = ApiParamType.STRING, desc = "common.content"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "common.fileidlist"),
+            @Param(name = "commentTemplateId", type = ApiParamType.LONG, desc = "common.templateid")})
+    @Output({
+            @Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "common.tbodylist")
+    })
+    @Description(desc = "nmpap.processtaskcommentapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         Long commentTemplateId = jsonObj.getLong("commentTemplateId");
         ProcessTaskVo processTaskVo =
-            processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+                processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         processTaskMapper.getProcessTaskLockById(processTaskId);
         ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
         new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskStepOperationType.STEP_COMMENT)
@@ -100,7 +103,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
         processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
         processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
         ProcessTaskStepDataVo stepDraftSaveData =
-            processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+                processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
         if (stepDraftSaveData != null) {
             JSONObject dataObj = stepDraftSaveData.getData();
             if (MapUtils.isNotEmpty(dataObj)) {
@@ -152,7 +155,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
         /** 记录回复模版使用次数 */
         if (commentTemplateId != null) {
             ProcessCommentTemplateUseCountVo templateUseCount =
-                commentTemplateMapper.getTemplateUseCount(commentTemplateId, UserContext.get().getUserUuid());
+                    commentTemplateMapper.getTemplateUseCount(commentTemplateId, UserContext.get().getUserUuid());
             if (templateUseCount != null) {
                 commentTemplateMapper.updateTemplateUseCount(commentTemplateId, UserContext.get().getUserUuid());
             } else {
@@ -175,7 +178,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
         typeList.add(ProcessTaskStepOperationType.STEP_REAPPROVAL.getValue());
         typeList.add(ProcessTaskOperationType.PROCESSTASK_START.getValue());
         resultObj.put("commentList",
-            processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, typeList));
+                processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, typeList));
         return resultObj;
     }
 

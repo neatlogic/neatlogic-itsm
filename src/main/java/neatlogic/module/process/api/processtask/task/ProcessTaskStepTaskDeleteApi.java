@@ -69,7 +69,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "删除任务";
+        return "nmrai.deleteissueapi.getname";
     }
 
     @Override
@@ -78,11 +78,11 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskStepTaskId", type = ApiParamType.LONG, isRequired = true, desc = "任务id"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "processTaskStepTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.rdm.issueid"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
     })
     @Output({})
-    @Description(desc = "任务删除接口")
+    @Description(desc = "nmrai.deleteissueapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskStepTaskId = jsonObj.getLong("processTaskStepTaskId");

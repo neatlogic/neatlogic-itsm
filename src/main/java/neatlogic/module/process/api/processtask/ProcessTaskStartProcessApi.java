@@ -31,7 +31,7 @@ public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单上报提交接口";
+        return "nmpap.processtaskstartprocessapi.getname";
     }
 
     @Override
@@ -40,12 +40,12 @@ public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
-            @Param(name = "nextStepId", type = ApiParamType.LONG, desc = "激活下一步骤Id（如果有且仅有一个下一节点，则可以不传这个参数）"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-            @Param(name = "assignWorkerList", type = ApiParamType.JSONARRAY, desc = "分配步骤处理人信息列表，格式[{\"processTaskStepId\":1, \"processStepUuid\":\"abc\", \"workerList\":[\"user#xxx\",\"team#xxx\",\"role#xxx\"]}]")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+            @Param(name = "nextStepId", type = ApiParamType.LONG, desc = "term.itsm.processtasknextstepid", help = "如果有且仅有一个下一节点，则可以不传这个参数"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "assignWorkerList", type = ApiParamType.JSONARRAY, desc = "term.itsm.assignworkerlist", help = "格式[{\"processTaskStepId\":1, \"processStepUuid\":\"abc\", \"workerList\":[\"user#xxx\",\"team#xxx\",\"role#xxx\"]}]")
     })
-    @Description(desc = "工单上报提交接口")
+    @Description(desc = "nmpap.processtaskstartprocessapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
 //		Long processTaskId = jsonObj.getLong("processTaskId");

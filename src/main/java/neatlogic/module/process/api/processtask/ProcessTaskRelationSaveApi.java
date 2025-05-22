@@ -47,7 +47,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
 
     @Override
     public String getName() {
-        return "保存工单关联";
+        return "nmpap.processtaskrelationsaveapi.getname";
     }
 
     @Override
@@ -56,12 +56,12 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id"),
-            @Param(name = "relationProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "被关联的工单id列表"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.channeltyperelationid"),
+            @Param(name = "relationProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "term.itsm.relationprocesstaskidlist"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
     })
-    @Description(desc = "保存工单关联")
+    @Description(desc = "nmpap.processtaskrelationsaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
@@ -74,7 +74,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
             throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
         }
         List<Long> relationProcessTaskIdList =
-            JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("relationProcessTaskIdList")), Long.class);
+                JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("relationProcessTaskIdList")), Long.class);
         if (CollectionUtils.isNotEmpty(relationProcessTaskIdList)) {
             List<Long> processTaskIdList = processTaskMapper.checkProcessTaskIdListIsExists(relationProcessTaskIdList);
             if (CollectionUtils.isNotEmpty(processTaskIdList)) {

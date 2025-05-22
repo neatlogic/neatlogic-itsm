@@ -55,12 +55,12 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "当前步骤Id"),
-            @Param(name = "nextStepId", type = ApiParamType.LONG, desc = "激活下一步骤Id（如果有且仅有一个下一节点，则可以不传这个参数）"),
-            @Param(name = "action", type = ApiParamType.ENUM, rule = "complete,back", isRequired = true, desc = "操作类型"),
-            @Param(name = "content", type = ApiParamType.STRING, desc = "原因"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-            @Param(name = "assignWorkerList", type = ApiParamType.JSONARRAY, desc = "分配步骤处理人信息列表，格式[{\"processTaskStepId\":1, \"workerList\":[\"user#xxx\",\"team#xxx\",\"role#xxx\"]}]")
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
+            @Param(name = "nextStepId", type = ApiParamType.LONG, desc = "term.itsm.processtasknextstepid", help = "如果有且仅有一个下一节点，则可以不传这个参数"),
+            @Param(name = "action", type = ApiParamType.ENUM, rule = "complete,back", isRequired = true, desc = "common.actiontype"),
+            @Param(name = "content", type = ApiParamType.STRING, desc = "common.content"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "assignWorkerList", type = ApiParamType.JSONARRAY, desc = "term.itsm.assignworkerlist", help = "格式为[{\"processTaskStepId\":1, \"workerList\":[\"user#xxx\",\"team#xxx\",\"role#xxx\"]}]")
     })
     @Description(desc = "nmpap.processtaskcompleteapi.getname")
     @Override

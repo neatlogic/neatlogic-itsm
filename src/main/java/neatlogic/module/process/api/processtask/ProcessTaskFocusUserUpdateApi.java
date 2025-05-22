@@ -49,7 +49,7 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "更新工单关注人";
+        return "nmpap.processtaskfocususerupdateapi.getname";
     }
 
     @Override
@@ -58,11 +58,11 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-            @Param(name = "focusUserUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "工单关注人列表")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "focusUserUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "term.itsm.focususeruuidlist")
     })
-    @Description(desc = "更新工单关注人")
+    @Description(desc = "nmpap.processtaskfocususerupdateapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
@@ -73,9 +73,9 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
                 .checkAndNoPermissionThrowException();
         List<String> oldFocusUser = processTaskMapper.getFocusUserListByTaskId(processTaskId);
         JSONObject paramObj = new JSONObject();
-        paramObj.put("focusUserUuidList",focusUserUuidList);
+        paramObj.put("focusUserUuidList", focusUserUuidList);
         paramObj.put(ProcessTaskAuditDetailType.FOCUSUSER.getOldDataParamName(), JSON.toJSONString(oldFocusUser));
-        paramObj.put("source",jsonObj.getString("source"));
+        paramObj.put("source", jsonObj.getString("source"));
 
         ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
         processTaskStepVo.setProcessTaskId(processTaskVo.getId());

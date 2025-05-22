@@ -55,7 +55,7 @@ public class BatchDeleteProcessTaskApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1, desc = "term.itsm.processtaskidlist"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source")
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
     })
     @Output({})
     @Description(desc = "nmpap.batchdeleteprocesstaskapi.getname")
@@ -78,7 +78,7 @@ public class BatchDeleteProcessTaskApi extends PrivateApiComponentBase {
                 ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskId, null);
                 processStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
                 processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.DELETEPROCESSTASK);
-            }else{
+            } else {
                 withoutAuthTaskIdList.add(processTaskVo);
             }
         }

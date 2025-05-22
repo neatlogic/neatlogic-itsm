@@ -57,13 +57,13 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
 
     @Autowired
     private ChannelMapper channelMapper;
-    
+
     @Autowired
     private PriorityMapper priorityMapper;
-    
+
     @Autowired
     private WorktimeMapper worktimeMapper;
-    
+
     @Autowired
     private FileMapper fileMapper;
 
@@ -77,7 +77,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
 
     @Override
     public String getName() {
-        return "导入工单数据(通过固定格式json文件)";
+        return "nmpapd.processtaskimportfromjsonapi.getname";
     }
 
     @Override
@@ -86,12 +86,12 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
     }
 
     @Input({
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok 前端没有使用该接口
     })
     @Output({
 
     })
-    @Description(desc = "目前用于同步老工单数据到本系统")
+    @Description(desc = "nmpapd.processtaskimportfromjsonapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, JSONReader jsonReader) throws Exception {
         String source = paramObj.getString("source");
@@ -101,18 +101,18 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
         while (jsonReader.hasNext()) {
             ProcessTaskVo processTask = new ProcessTaskVo();
             Boolean isContinute = false;
-            Map<Long,String> stepIdUuidMap = new HashMap<Long,String>();
+            Map<Long, String> stepIdUuidMap = new HashMap<Long, String>();
             jsonReader.startObject();
             while (jsonReader.hasNext()) {
                 String taskKey = jsonReader.readString();
                 String taskValue = StringUtils.EMPTY;
-                if(isContinute) {
-                    taskValue =jsonReader.readObject().toString();
+                if (isContinute) {
+                    taskValue = jsonReader.readObject().toString();
                     continue;
                 }
-                if(!taskKey.equals("processTaskStepList")&&!taskKey.equals("processTaskStepRelList")&&!taskKey.equals("formAndPropList")) {
-                    taskValue =jsonReader.readObject().toString();
-                    if(taskValue.equals(StringUtils.EMPTY)) {
+                if (!taskKey.equals("processTaskStepList") && !taskKey.equals("processTaskStepRelList") && !taskKey.equals("formAndPropList")) {
+                    taskValue = jsonReader.readObject().toString();
+                    if (taskValue.equals(StringUtils.EMPTY)) {
                         continue;
                     }
                 }
@@ -125,9 +125,9 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         break;
                     case "processName":
                         ProcessVo process = processMapper.getProcessByName(taskValue);
-                        if(process == null) {
+                        if (process == null) {
                             isContinute = true;
-                            String errorTask = processTask.getId()+" 工单的 '"+taskValue+"' 流程不存在";
+                            String errorTask = processTask.getId() + " 工单的 '" + taskValue + "' 流程不存在";
                             logger.error(errorTask);
                             errorTaskList.add(errorTask);
                             break;
@@ -142,9 +142,9 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         break;
                     case "channelName":
                         ChannelVo channel = channelMapper.getChannelByName(taskValue);
-                        if(channel == null) {
+                        if (channel == null) {
                             isContinute = true;
-                            String errorTask = processTask.getId()+" 工单的 '"+taskValue+"' 服务不存在";
+                            String errorTask = processTask.getId() + " 工单的 '" + taskValue + "' 服务不存在";
                             logger.error(errorTask);
                             errorTaskList.add(errorTask);
                             break;
@@ -164,9 +164,9 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         break;
                     case "priorityName":
                         PriorityVo priority = priorityMapper.getPriorityByName(taskValue);
-                        if(priority == null) {
+                        if (priority == null) {
                             isContinute = true;
-                            String errorTask = processTask.getId()+" 工单的 '"+taskValue+"' 优先级不存在";
+                            String errorTask = processTask.getId() + " 工单的 '" + taskValue + "' 优先级不存在";
                             logger.error(errorTask);
                             errorTaskList.add(errorTask);
                             break;
@@ -196,14 +196,14 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         jsonReader.startArray();
                         List<ProcessStepVo> processStepList = processMapper.getProcessStepDetailByProcessUuid(processTask.getProcessUuid());
                         while (jsonReader.hasNext()) {
-                            ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo(); 
-                           
+                            ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
+
                             Boolean isSaveProcessStep = true;
                             jsonReader.startObject();
                             while (jsonReader.hasNext()) {
                                 String taskStepKey = jsonReader.readString();
-                                String taskStepValue = (!taskStepKey.equals("processTaskStepContentList"))? jsonReader.readObject().toString():StringUtils.EMPTY;
-                                if(!taskStepKey.equals("processTaskStepContentList")&&taskStepValue.equals(StringUtils.EMPTY)) {
+                                String taskStepValue = (!taskStepKey.equals("processTaskStepContentList")) ? jsonReader.readObject().toString() : StringUtils.EMPTY;
+                                if (!taskStepKey.equals("processTaskStepContentList") && taskStepValue.equals(StringUtils.EMPTY)) {
                                     continue;
                                 }
                                 processTaskStep.setProcessTaskId(processTask.getId());
@@ -214,16 +214,16 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                     case "name":
                                         processTaskStep.setName(taskStepValue);
                                         List<ProcessStepVo> processStep = null;
-                                        if("开始".equals(taskStepValue)) {
-                                            processStep = processStepList.stream().filter(o ->ProcessStepType.START.getValue().equals(o.getType())).collect(Collectors.toList()); 
+                                        if ("开始".equals(taskStepValue)) {
+                                            processStep = processStepList.stream().filter(o -> ProcessStepType.START.getValue().equals(o.getType())).collect(Collectors.toList());
                                             processTaskStep.setProcessStepUuid(processStep.get(0).getUuid());
                                             stepIdUuidMap.put(processTaskStep.getId(), processTaskStep.getProcessStepUuid());
-                                        }else {
-                                            processStep = processStepList.stream().filter(o ->o.getName().equals(taskStepValue)).collect(Collectors.toList()); 
-                                            if(CollectionUtils.isNotEmpty(processStep)) {
+                                        } else {
+                                            processStep = processStepList.stream().filter(o -> o.getName().equals(taskStepValue)).collect(Collectors.toList());
+                                            if (CollectionUtils.isNotEmpty(processStep)) {
                                                 processTaskStep.setProcessStepUuid(processStep.get(0).getUuid());
                                                 stepIdUuidMap.put(processTaskStep.getId(), processTaskStep.getProcessStepUuid());
-                                            }else {
+                                            } else {
                                                 isSaveProcessStep = false;
                                                 break;
                                             }
@@ -234,7 +234,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                         break;
                                     case "type":
                                         processTaskStep.setType(taskStepValue);
-                                        if(taskStepValue.equals(ProcessStepType.START.getValue())) {
+                                        if (taskStepValue.equals(ProcessStepType.START.getValue())) {
                                             processTask.setStartProcessTaskStep(processTaskStep);
                                         }
                                         break;
@@ -250,7 +250,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                     case "configHash":
                                         String configHash = DigestUtils.md5DigestAsHex(taskStepValue.getBytes());
                                         processTaskStep.setConfigHash(configHash);
-                                        processTaskMapper.insertIgnoreProcessTaskStepConfig(new ProcessTaskStepConfigVo(configHash,taskStepValue));
+                                        processTaskMapper.insertIgnoreProcessTaskStepConfig(new ProcessTaskStepConfigVo(configHash, taskStepValue));
                                         break;
                                     case "processTaskStepContentList":
                                         jsonReader.startArray();
@@ -260,9 +260,9 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                             while (jsonReader.hasNext()) {
                                                 String taskStepContentKey = jsonReader.readString();
                                                 String taskStepContentValue = StringUtils.EMPTY;
-                                                if(!taskStepContentKey.equals("fileList")) {
+                                                if (!taskStepContentKey.equals("fileList")) {
                                                     taskStepContentValue = jsonReader.readObject().toString();
-                                                    if(taskStepContentValue.equals(StringUtils.EMPTY)) {
+                                                    if (taskStepContentValue.equals(StringUtils.EMPTY)) {
                                                         continue;
                                                     }
                                                 }
@@ -271,7 +271,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                                         String content = StringEscapeUtils.unescapeHtml4(taskStepContentValue);
                                                         String hash = DigestUtils.md5DigestAsHex(content.getBytes());
                                                         processTaskStepContentVo.setContentHash(hash);
-                                                        processTaskMapper.insertIgnoreProcessTaskContent(new ProcessTaskContentVo(hash,content));
+                                                        processTaskMapper.insertIgnoreProcessTaskContent(new ProcessTaskContentVo(hash, content));
                                                         break;
                                                     case "fcu":
                                                         processTaskStepContentVo.setFcu(taskStepContentValue);
@@ -288,7 +288,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                                             while (jsonReader.hasNext()) {
                                                                 String taskStepFileKey = jsonReader.readString();
                                                                 String taskStepFileValue = jsonReader.readObject().toString();
-                                                                switch(taskStepFileKey) {
+                                                                switch (taskStepFileKey) {
                                                                     case "id":
                                                                         file.setId(Long.valueOf(taskStepFileValue));
                                                                         break;
@@ -305,7 +305,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                                                         //file.setUploadTime(taskStepFileValue);
                                                                         break;
                                                                     case "path":
-                                                                        file.setPath("file:"+taskStepFileValue);
+                                                                        file.setPath("file:" + taskStepFileValue);
                                                                         break;
                                                                     case "contentType":
                                                                         file.setContentType(taskStepFileValue);
@@ -341,7 +341,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                 }
                             }
                             jsonReader.endObject();
-                            if(isSaveProcessStep) {
+                            if (isSaveProcessStep) {
                                 processTaskMapper.replaceProcessTaskStep(processTaskStep);
                             }
                         }
@@ -407,7 +407,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                 }
             }
             jsonReader.endObject();
-            if(!isContinute) {
+            if (!isContinute) {
                 processTaskList.add(processTask);
                 processTaskMapper.replaceProcessTask(processTask);
             }

@@ -23,70 +23,71 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 
-	@Resource
-	private ProcessTaskMapper processTaskMapper;
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
-	@Override
-	public String getToken() {
-		return "processtask/automatic/complete";
-	}
+    @Override
+    public String getToken() {
+        return "processtask/automatic/complete";
+    }
 
-	@Override
-	public String getName() {
-		return "流转自动化处理步骤";
-	}
+    @Override
+    public String getName() {
+        return "nmpap.processtaskautomaticcompleteapi.getname";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
-	
-	@Input({
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "当前步骤Id"),
-		@Param(name = "action", type = ApiParamType.ENUM, rule = "back,complete", isRequired = true, desc = "操作类型，complete：流转,back：回退"),
-		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
-	})
-	@Output({
-		@Param(name = "Status", type = ApiParamType.STRING, desc = "状态"),
-		@Param(name = "Message", type = ApiParamType.STRING, desc = "异常信息"),
-	})
-	@Description(desc = "流转自动化处理步骤")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		String action = jsonObj.getString("action");
-		String flowDirection = ProcessFlowDirection.FORWARD.getValue();
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		if(processTaskStepVo == null) {
-			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
-		}
-		if(!ProcessStepHandlerType.AUTOMATIC.getHandler().equals(processTaskStepVo.getHandler())) {
-		    throw new ProcessTaskStepMustBeAutomaticException();
-		}
-		jsonObj.put("processTaskId", processTaskStepVo.getProcessTaskId());
-		if(action.equals(ProcessTaskStepOperationType.STEP_BACK.getValue())) {
-			flowDirection = ProcessFlowDirection.BACKWARD.getValue();
-		}
-		/* 不允许多个后续步骤 **/
-		List<Long> processTaskStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(processTaskStepId, flowDirection);
-		if(CollectionUtils.isEmpty(processTaskStepIdList)||(CollectionUtils.isNotEmpty(processTaskStepIdList) && processTaskStepIdList.size()>1)) {
-			throw new ProcessTaskAutomaticNotAllowNextStepsException();
-		}
-		
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
-		if(handler != null) {
-			jsonObj.put("nextStepId", processTaskStepIdList.get(0));
-			processTaskStepVo.getParamObj().putAll(jsonObj);
-			handler.autoComplete(processTaskStepVo);
-		}else {
-			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
-		}
-		return null;
-	}
-	
+    @Override
+    public String getConfig() {
+        return null;
+    }
+
+    @Input({
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
+            @Param(name = "action", type = ApiParamType.ENUM, rule = "back,complete", isRequired = true, desc = "common.actiontype", help = "complete：流转,back：回退"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok 前端只调用该接口的帮助
+    })
+    @Output({
+            @Param(name = "Status", type = ApiParamType.STRING, desc = "common.status"),
+            @Param(name = "Message", type = ApiParamType.STRING, desc = "common.errormsg"),
+    })
+    @Description(desc = "nmpap.processtaskautomaticcompleteapi.getname")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+        String action = jsonObj.getString("action");
+        String flowDirection = ProcessFlowDirection.FORWARD.getValue();
+        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+        if (processTaskStepVo == null) {
+            throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
+        }
+        if (!ProcessStepHandlerType.AUTOMATIC.getHandler().equals(processTaskStepVo.getHandler())) {
+            throw new ProcessTaskStepMustBeAutomaticException();
+        }
+        jsonObj.put("processTaskId", processTaskStepVo.getProcessTaskId());
+        if (action.equals(ProcessTaskStepOperationType.STEP_BACK.getValue())) {
+            flowDirection = ProcessFlowDirection.BACKWARD.getValue();
+        }
+        /* 不允许多个后续步骤 **/
+        List<Long> processTaskStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(processTaskStepId, flowDirection);
+        if (CollectionUtils.isEmpty(processTaskStepIdList) || (CollectionUtils.isNotEmpty(processTaskStepIdList) && processTaskStepIdList.size() > 1)) {
+            throw new ProcessTaskAutomaticNotAllowNextStepsException();
+        }
+
+        IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+        if (handler != null) {
+            jsonObj.put("nextStepId", processTaskStepIdList.get(0));
+            processTaskStepVo.getParamObj().putAll(jsonObj);
+            handler.autoComplete(processTaskStepVo);
+        } else {
+            throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+        }
+        return null;
+    }
+
 }

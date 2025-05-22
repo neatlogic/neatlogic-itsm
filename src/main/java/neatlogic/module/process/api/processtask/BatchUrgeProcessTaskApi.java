@@ -59,7 +59,7 @@ public class BatchUrgeProcessTaskApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1, desc = "term.itsm.processtaskidlist"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source")
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
     })
     @Output({})
     @Description(desc = "nmpap.batchurgeprocesstaskapi.getname")
@@ -84,7 +84,7 @@ public class BatchUrgeProcessTaskApi extends PrivateApiComponentBase {
             for (String userUuid : fromUserUUidList) {
                 processTaskStepList.addAll(processTaskService.getUrgeableStepList(processTaskVo, userUuid));
             }
-            for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+            for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
                 /** 触发通知 **/
                 processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepNotifyTriggerType.URGE);
                 processStepHandlerUtil.action(processTaskStepVo, ProcessTaskStepNotifyTriggerType.URGE);

@@ -82,7 +82,7 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
             @Param(name = "repeatProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "term.itsm.repeatprocesstaskidlist")
     })
     @Output({

@@ -18,6 +18,7 @@ import neatlogic.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_BASE.class)
@@ -33,29 +34,30 @@ public class ProcessTaskStepPauseApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "暂停工单步骤";
+        return "nmpap.processtasksteppauseapi.getname";
     }
 
     @Override
     public String getConfig() {
         return null;
     }
+
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤id"),
-            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
     })
-    @Description(desc ="暂停工单步骤")
+    @Description(desc = "nmpap.processtasksteppauseapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
-        Long processTaskStepId = jsonObj.getLong("processTaskStepId");        
+        Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         ProcessTaskStepVo currentProcessTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
         IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-        if(handler == null) {
-            throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());      
+        if (handler == null) {
+            throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
         }
         currentProcessTaskStepVo.getParamObj().put("source", jsonObj.getString("source"));
         currentProcessTaskStepVo.getParamObj().put("content", jsonObj.getString("content"));

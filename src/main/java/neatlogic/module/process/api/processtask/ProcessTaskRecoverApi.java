@@ -18,39 +18,39 @@ import org.springframework.stereotype.Service;
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskRecoverApi extends PrivateApiComponentBase {
 
-	@Autowired
-	private ProcessTaskService processTaskService;
+    @Autowired
+    private ProcessTaskService processTaskService;
 
-	@Override
-	public String getToken() {
-		return "processtask/recover";
-	}
+    @Override
+    public String getToken() {
+        return "processtask/recover";
+    }
 
-	@Override
-	public String getName() {
-		return "工单恢复接口";
-	}
+    @Override
+    public String getName() {
+        return "nfpnc.processtasknotifytriggertype.text.recoverprocesstask";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
 
-	@Override
-	@Input({
-			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
-			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述"),
-			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
-	})
-	@Output({})
-	@Description(desc = "工单恢复接口")
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-		processTaskVo.getParamObj().put("source", jsonObj.getString("source"));
-		processTaskVo.getParamObj().put("content", jsonObj.getString("content"));
-		ProcessStepHandlerFactory.getHandler().recoverProcessTask(processTaskVo);
-		return null;
-	}
+    @Override
+    @Input({
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
+    })
+    @Output({})
+    @Description(desc = "nfpnc.processtasknotifytriggertype.text.recoverprocesstask")
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        Long processTaskId = jsonObj.getLong("processTaskId");
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        processTaskVo.getParamObj().put("source", jsonObj.getString("source"));
+        processTaskVo.getParamObj().put("content", jsonObj.getString("content"));
+        ProcessStepHandlerFactory.getHandler().recoverProcessTask(processTaskVo);
+        return null;
+    }
 
 }

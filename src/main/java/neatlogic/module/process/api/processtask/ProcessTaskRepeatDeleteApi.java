@@ -72,7 +72,7 @@ public class ProcessTaskRepeatDeleteApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
             @Param(name = "repeatProcessTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.repeatprocesstaskid"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
     })
     @Description(desc = "nmpap.processtaskrepeatdeleteapi.getname")
     @Override

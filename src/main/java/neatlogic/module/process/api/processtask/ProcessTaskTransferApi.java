@@ -20,52 +20,52 @@ import java.util.List;
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskTransferApi extends PrivateApiComponentBase {
-    
+
     @Autowired
     private ProcessTaskService processTaskService;
-	
-	@Override
-	public String getToken() {
-		return "processtask/transfer";
-	}
 
-	@Override
-	public String getName() {
-		return "nmpap.processtasktransferapi.getname";
-	}
+    @Override
+    public String getToken() {
+        return "processtask/transfer";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getName() {
+        return "nmpap.processtasktransferapi.getname";
+    }
 
-	@Override
-	@Input({
-			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
-			@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
-			@Param(name = "workerList", type = ApiParamType.NOAUTH, isRequired = true, desc = "nmpap.processtasktransferapi.input.param.desc.workerlist", help = "[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
-			@Param(name = "isSaveData", type = ApiParamType.ENUM, rule = "0,1", desc = "nmpap.processtasktransferapi.input.param.desc.issavedata"),
-			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source"),
-			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content")
-	})
-	@Output({})
-	@Description(desc = "nmpap.processtasktransferapi.getname")
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		Long processTaskId = jsonObj.getLong("processTaskId");
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+    @Override
+    public String getConfig() {
+        return null;
+    }
 
-		List<String> workerList = new ArrayList<>();
-		Object workerListObj = jsonObj.get("workerList");
-		if(workerListObj instanceof JSONArray) {
-			workerList = JSON.parseArray(JSON.toJSONString(workerListObj), String.class);
-		}else if(workerListObj instanceof String) {
-			workerList.add((String)workerListObj);
-		}
-		Integer isSaveData = jsonObj.getInteger("isSaveData");
-		String source = jsonObj.getString("source");
-		String content = jsonObj.getString("content");
-		processTaskService.transferProcessTaskStep(processTaskId, processTaskStepId, workerList, isSaveData, content, source);
-		return null;
-	}
+    @Override
+    @Input({
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
+            @Param(name = "workerList", type = ApiParamType.NOAUTH, isRequired = true, desc = "nmpap.processtasktransferapi.input.param.desc.workerlist", help = "[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
+            @Param(name = "isSaveData", type = ApiParamType.ENUM, rule = "0,1", desc = "nmpap.processtasktransferapi.input.param.desc.issavedata"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content")
+    })
+    @Output({})
+    @Description(desc = "nmpap.processtasktransferapi.getname")
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        Long processTaskId = jsonObj.getLong("processTaskId");
+        Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+
+        List<String> workerList = new ArrayList<>();
+        Object workerListObj = jsonObj.get("workerList");
+        if (workerListObj instanceof JSONArray) {
+            workerList = JSON.parseArray(JSON.toJSONString(workerListObj), String.class);
+        } else if (workerListObj instanceof String) {
+            workerList.add((String) workerListObj);
+        }
+        Integer isSaveData = jsonObj.getInteger("isSaveData");
+        String source = jsonObj.getString("source");
+        String content = jsonObj.getString("content");
+        processTaskService.transferProcessTaskStep(processTaskId, processTaskStepId, workerList, isSaveData, content, source);
+        return null;
+    }
 
 }

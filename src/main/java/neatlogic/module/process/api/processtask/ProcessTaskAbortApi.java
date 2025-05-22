@@ -18,39 +18,39 @@ import org.springframework.stereotype.Service;
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskAbortApi extends PrivateApiComponentBase {
 
-	@Autowired
-	private ProcessTaskService processTaskService;
+    @Autowired
+    private ProcessTaskService processTaskService;
 
-	@Override
-	public String getToken() {
-		return "processtask/abort";
-	}
+    @Override
+    public String getToken() {
+        return "processtask/abort";
+    }
 
-	@Override
-	public String getName() {
-		return "工单取消接口";
-	}
+    @Override
+    public String getName() {
+        return "nfpnc.processtasknotifytriggertype.text.abortprocesstask";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
 
-	@Override
-	@Input({
-			@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true),
-			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述"),
-			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
-	})
-	@Output({})
-	@Description(desc = "工单取消接口")
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-		processTaskVo.getParamObj().put("source", jsonObj.getString("source"));
-		processTaskVo.getParamObj().put("content", jsonObj.getString("content"));
-		ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
-		return null;
-	}
+    @Override
+    @Input({
+            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid", isRequired = true),
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
+    })
+    @Output({})
+    @Description(desc = "nfpnc.processtasknotifytriggertype.text.abortprocesstask")
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        Long processTaskId = jsonObj.getLong("processTaskId");
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        processTaskVo.getParamObj().put("source", jsonObj.getString("source"));
+        processTaskVo.getParamObj().put("content", jsonObj.getString("content"));
+        ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
+        return null;
+    }
 
 }

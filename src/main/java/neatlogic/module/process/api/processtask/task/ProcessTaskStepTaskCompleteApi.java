@@ -47,7 +47,7 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "任务完成接口";
+        return "nmpapt.processtasksteptaskcompleteapi.getname";
     }
 
     @Override
@@ -56,13 +56,13 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "任务id"),
-            @Param(name = "button", type = ApiParamType.STRING, desc = "按钮"),
-            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "term.rdm.issueid"),
+            @Param(name = "button", type = ApiParamType.STRING, desc = "common.button"),
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "common.content"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok
     })
     @Output({})
-    @Description(desc = "任务完成接口")
+    @Description(desc = "nmpapt.processtasksteptaskcompleteapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");

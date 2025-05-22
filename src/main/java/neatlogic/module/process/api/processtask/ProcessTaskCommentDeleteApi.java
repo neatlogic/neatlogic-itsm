@@ -27,59 +27,60 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
 
-	@Autowired
-	private ProcessTaskMapper processTaskMapper;
-	
-	@Autowired
-	private ProcessTaskService processTaskService;
+    @Autowired
+    private ProcessTaskMapper processTaskMapper;
 
-	@Autowired
-	private IProcessStepHandlerUtil processStepHandlerUtil;
+    @Autowired
+    private ProcessTaskService processTaskService;
 
-	@Override
-	public String getToken() {
-		return "processtask/comment/delete";
-	}
+    @Autowired
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 
-	@Override
-	public String getName() {
-		return "工单回复删除接口";
-	}
+    @Override
+    public String getToken() {
+        return "processtask/comment/delete";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getName() {
+        return "nmpap.processtaskcommentdeleteapi.getname";
+    }
 
-	@Input({
-		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "回复id"),
-			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
-	})
-	@Output({
-		@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "当前步骤评论列表")
-	})
-	@Description(desc = "工单回复删除接口")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		Long id = jsonObj.getLong("id");
-		ProcessTaskStepContentVo processTaskStepContentVo= processTaskMapper.getProcessTaskStepContentById(id);
-		if(processTaskStepContentVo == null) {
-			throw new ProcessTaskStepCommentNotFoundException(id.toString());
-		}
-		ProcessTaskStepReplyVo replyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
-		if(Objects.equals(replyVo.getIsDeletable(), 0)) {
+    @Override
+    public String getConfig() {
+        return null;
+    }
+
+    @Input({
+            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "common.id"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source")// ok 暂时没有用到这个接口
+    })
+    @Output({
+            @Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "common.tbodylist")
+    })
+    @Description(desc = "nmpap.processtaskcommentdeleteapi.getname")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        Long id = jsonObj.getLong("id");
+        ProcessTaskStepContentVo processTaskStepContentVo = processTaskMapper.getProcessTaskStepContentById(id);
+        if (processTaskStepContentVo == null) {
+            throw new ProcessTaskStepCommentNotFoundException(id.toString());
+        }
+        ProcessTaskStepReplyVo replyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
+        if (Objects.equals(replyVo.getIsDeletable(), 0)) {
             // throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.DELETECOMMENT.getText());
-		    throw new PermissionDeniedException();
-		}
-		// 锁定当前流程
+            throw new PermissionDeniedException();
+        }
+        // 锁定当前流程
         processTaskMapper.getProcessTaskLockById(replyVo.getProcessTaskId());
-        
+
         processTaskService.parseProcessTaskStepReply(replyVo);
         jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), replyVo.getContent());
         jsonObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(replyVo.getFileIdList()));
@@ -87,10 +88,10 @@ public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
         processTaskMapper.deleteProcessTaskStepContentById(id);
         processTaskMapper.deleteProcessTaskStepFileByContentId(id);
         //生成活动
-        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(replyVo.getProcessTaskStepId());    
+        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(replyVo.getProcessTaskStepId());
         processTaskStepVo.getParamObj().putAll(jsonObj);
-		processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETECOMMENT);
-        
+        processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETECOMMENT);
+
         JSONObject resultObj = new JSONObject();
         List<String> typeList = new ArrayList<>();
         typeList.add(ProcessTaskStepOperationType.STEP_COMMENT.getValue());
@@ -98,10 +99,10 @@ public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
         typeList.add(ProcessTaskStepOperationType.STEP_BACK.getValue());
         typeList.add(ProcessTaskOperationType.PROCESSTASK_RETREAT.getValue());
         typeList.add(ProcessTaskOperationType.PROCESSTASK_TRANSFER.getValue());
-		typeList.add(ProcessTaskStepOperationType.STEP_REAPPROVAL.getValue());
-		typeList.add(ProcessTaskOperationType.PROCESSTASK_START.getValue());
+        typeList.add(ProcessTaskStepOperationType.STEP_REAPPROVAL.getValue());
+        typeList.add(ProcessTaskOperationType.PROCESSTASK_START.getValue());
         resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(replyVo.getProcessTaskStepId(), typeList));
         return resultObj;
-	}
+    }
 
 }

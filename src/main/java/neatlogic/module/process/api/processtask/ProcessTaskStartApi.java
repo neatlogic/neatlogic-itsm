@@ -42,7 +42,7 @@ public class ProcessTaskStartApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskstepid"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
             @Param(name = "action", type = ApiParamType.ENUM, rule = "accept,start", isRequired = true, desc = "common.actiontype")
     })
     @Description(desc = "nmpap.processtaskstartapi.getname")

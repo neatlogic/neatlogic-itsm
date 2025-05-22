@@ -23,58 +23,60 @@ import javax.annotation.Resource;
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 
-	@Resource
-	private ProcessTaskMapper processTaskMapper;
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
-	@Resource
-	private IProcessStepHandlerUtil processStepHandlerUtil;
+    @Resource
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 
-	@Override
-	public String getToken() {
-		return "processtask/focus/update";
-	}
+    @Override
+    public String getToken() {
+        return "processtask/focus/update";
+    }
 
-	@Override
-	public String getName() {
-		return "切换工单关注状态";
-	}
+    @Override
+    public String getName() {
+        return "nmpap.processtaskfocusupdateapi.getname";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
 
-	@Override
-	@Input({
-			@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true),
-			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-			@Param(name = "isFocus", type = ApiParamType.ENUM, desc = "是否关注工单(1：关注；0：取消关注)", isRequired = true,rule = "0,1")
-	})
-	@Output({@Param(name="isFocus", type = ApiParamType.INTEGER, desc="是否关注工单")})
-	@Description(desc = "切换工单关注状态")
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		Long processTaskId = jsonObj.getLong("processTaskId");
-		int isFocus = jsonObj.getIntValue("isFocus");
-		String userUuid = UserContext.get().getUserUuid();
-		if(processTaskMapper.getProcessTaskById(processTaskId) == null){
-			throw new ProcessTaskNotFoundException(processTaskId);
-		}
-		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-		processTaskStepVo.setProcessTaskId(processTaskId);
-		processTaskStepVo.getParamObj().put("source", jsonObj.getString("source"));
-		if(isFocus == 1){
-			if(processTaskMapper.checkProcessTaskFocusExists(processTaskId,userUuid) > 0){
-				throw new ProcessTaskFocusRepeatException(processTaskId);
-			}
-			processTaskMapper.insertProcessTaskFocus(processTaskId,userUuid);
-			processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.FOCUSTASK);
-		}else{
-			processTaskMapper.deleteProcessTaskFocus(processTaskId,userUuid);
-			processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UNDOFOCUSTASK);
-		}
-		JSONObject result = new JSONObject();
-		result.put("isFocus",isFocus);
-		return result;
-	}
+    @Override
+    @Input({
+            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid", isRequired = true),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),// ok
+            @Param(name = "isFocus", type = ApiParamType.ENUM, desc = "term.itsm.isfocus", isRequired = true, rule = "0,1", help = "1：关注；0：取消关注")
+    })
+    @Output({
+            @Param(name = "isFocus", type = ApiParamType.INTEGER, desc = "term.itsm.isfocus")
+    })
+    @Description(desc = "nmpap.processtaskfocusupdateapi.getname")
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        Long processTaskId = jsonObj.getLong("processTaskId");
+        int isFocus = jsonObj.getIntValue("isFocus");
+        String userUuid = UserContext.get().getUserUuid();
+        if (processTaskMapper.getProcessTaskById(processTaskId) == null) {
+            throw new ProcessTaskNotFoundException(processTaskId);
+        }
+        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+        processTaskStepVo.setProcessTaskId(processTaskId);
+        processTaskStepVo.getParamObj().put("source", jsonObj.getString("source"));
+        if (isFocus == 1) {
+            if (processTaskMapper.checkProcessTaskFocusExists(processTaskId, userUuid) > 0) {
+                throw new ProcessTaskFocusRepeatException(processTaskId);
+            }
+            processTaskMapper.insertProcessTaskFocus(processTaskId, userUuid);
+            processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.FOCUSTASK);
+        } else {
+            processTaskMapper.deleteProcessTaskFocus(processTaskId, userUuid);
+            processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UNDOFOCUSTASK);
+        }
+        JSONObject result = new JSONObject();
+        result.put("isFocus", isFocus);
+        return result;
+    }
 
 }
