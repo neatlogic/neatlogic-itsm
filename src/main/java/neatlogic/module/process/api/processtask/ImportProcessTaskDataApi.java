@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -67,6 +68,7 @@ public class ImportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
     @Description(desc = "导入工单相关表数据")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        Map<String, List<Integer>> resultObj = new HashMap<>();
         Long fileId = paramObj.getLong("fileId");
         FileVo fileVo = fileMapper.getFileById(fileId);
         if (fileVo == null) {
@@ -102,7 +104,8 @@ public class ImportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
                                             columnNameList.add(entry1.getKey());
                                             columnValueList.add(entry1.getValue());
                                         }
-                                        processTaskDataMapper.insertOne(tableName, columnNameList, columnValueList);
+                                        int count = processTaskDataMapper.replaceOne(tableName, columnNameList, columnValueList);
+                                        resultObj.computeIfAbsent(tableName, k -> new ArrayList<>()).add(count);
                                     }
                                 } else if (value instanceof JSONArray) {
                                     JSONArray valueArray = (JSONArray) value;
@@ -115,7 +118,8 @@ public class ImportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
                                                 columnNameList.add(entry1.getKey());
                                                 columnValueList.add(entry1.getValue());
                                             }
-                                            processTaskDataMapper.insertOne(tableName, columnNameList, columnValueList);
+                                            int count = processTaskDataMapper.replaceOne(tableName, columnNameList, columnValueList);
+                                            resultObj.computeIfAbsent(tableName, k -> new ArrayList<>()).add(count);
                                         }
                                     }
                                 }
@@ -127,6 +131,6 @@ public class ImportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
-        return null;
+        return resultObj;
     }
 }
