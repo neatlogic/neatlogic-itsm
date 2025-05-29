@@ -65,15 +65,24 @@ public class AssignWorkerListAuditHandler implements IProcessTaskStepAuditDetail
 
     @Override
     public int handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+        int result = 0;
         String oldContent = processTaskStepAuditDetailVo.getOldContent();
         if(StringUtils.isNotBlank(oldContent)) {
-            processTaskStepAuditDetailVo.setOldContent(parse(oldContent));
+            String parse = parse(oldContent);
+            if (StringUtils.isNotBlank(parse)) {
+                processTaskStepAuditDetailVo.setOldContent(parse(oldContent));
+                result = 1;
+            }
         }
         String newContent = processTaskStepAuditDetailVo.getNewContent();
         if(StringUtils.isNotBlank(newContent)) {
-            processTaskStepAuditDetailVo.setNewContent(parse(newContent));
+            String parse = parse(newContent);
+            if (StringUtils.isNotBlank(parse)) {
+                processTaskStepAuditDetailVo.setNewContent(parse);
+                result = 1;
+            }
         }
-        return 1;
+        return result;
     }
 
     private String parse(String content) {
@@ -83,15 +92,14 @@ public class AssignWorkerListAuditHandler implements IProcessTaskStepAuditDetail
             for (int i = 0; i < assignWorkerArray.size(); i++) {
                 JSONObject assignWorkerObj = assignWorkerArray.getJSONObject(i);
                 if (MapUtils.isNotEmpty(assignWorkerObj)) {
-                    JSONObject assignWorker = new JSONObject();
-                    Long processTaskStepId = assignWorkerObj.getLong("processTaskStepId");
-                    ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-                    if (processTaskStepVo != null) {
-                        assignWorker.put("processTaskStepName", processTaskStepVo.getName());
-                    }
-//                    String processStepUuid = assignWorkerObj.getString("processStepUuid");
                     JSONArray workerArray = assignWorkerObj.getJSONArray("workerList");
                     if (CollectionUtils.isNotEmpty(workerArray)) {
+                        JSONObject assignWorker = new JSONObject();
+                        Long processTaskStepId = assignWorkerObj.getLong("processTaskStepId");
+                        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+                        if (processTaskStepVo != null) {
+                            assignWorker.put("processTaskStepName", processTaskStepVo.getName());
+                        }
                         List<Map<String, String>> workerList = new ArrayList<>();
                         for(int j = 0; j < workerArray.size(); j++) {
                             String worker = workerArray.getString(j);
@@ -126,8 +134,8 @@ public class AssignWorkerListAuditHandler implements IProcessTaskStepAuditDetail
                             }
                         }
                         assignWorker.put("workerList", workerList);
+                        assignWorkerList.add(assignWorker);
                     }
-                    assignWorkerList.add(assignWorker);
                 }
             }
         }
