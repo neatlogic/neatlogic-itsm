@@ -38,4 +38,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
             #{columnValue}
         </foreach>
     </insert>
+
+    <insert id="replaceOne">
+        replace into ${tableName}
+        <foreach collection="columnNameList" item="columnName" open="(" separator="," close=")">
+            `${columnName}`
+        </foreach>
+        values
+        <foreach collection="columnValueList" item="columnValue" open="(" separator="," close=")">
+            #{columnValue}
+        </foreach>
+    </insert>
 </mapper>

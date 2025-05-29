@@ -360,6 +360,11 @@
             #{realTimeCost},
             #{isTimeout}
         )
+        ON DUPLICATE KEY UPDATE
+            `time_sum` = #{timeSum},
+            `time_cost` = #{timeCost},
+            `realtime_cost` = #{realTimeCost},
+            `is_timeout` = #{isTimeout}
     </insert>
 
     <insert id="insertProcessTaskStepSlaDelay" parameterType="neatlogic.framework.process.dto.ProcessTaskStepSlaDelayVo">

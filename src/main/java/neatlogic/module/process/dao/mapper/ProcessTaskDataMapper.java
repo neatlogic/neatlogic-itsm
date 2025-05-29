@@ -13,4 +13,6 @@ public interface ProcessTaskDataMapper {
     Long getLong(String sql);
 
     int insertOne(@Param("tableName") String tableName, @Param("columnNameList") List<String> columnNameList, @Param("columnValueList") List<Object> columnValueList);
+
+    int replaceOne(@Param("tableName") String tableName, @Param("columnNameList") List<String> columnNameList, @Param("columnValueList") List<Object> columnValueList);
 }
