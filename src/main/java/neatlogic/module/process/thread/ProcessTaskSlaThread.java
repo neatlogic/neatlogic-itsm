@@ -157,7 +157,8 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
                         ConditionConfigVo conditionConfigVo = new ConditionConfigVo(policyObj);
                         String script = conditionConfigVo.buildScript();
                         // ((false || true) || (true && false) || (true || false))
-                        isHit = Boolean.parseBoolean(JavascriptUtil.runScript(new JSONObject(), "return " + script).toString());
+                        Object returnValue = JavascriptUtil.runScript(new JSONObject(), "return " + script);
+                        isHit = Boolean.parseBoolean(returnValue != null ? returnValue.toString() : "false");
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     } finally {
