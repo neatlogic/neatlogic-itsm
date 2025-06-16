@@ -35,8 +35,8 @@ import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.transaction.util.TransactionUtil;
-import neatlogic.framework.util.RunScriptUtil;
 import neatlogic.framework.util.WorkTimeUtil;
+import neatlogic.framework.util.javascript.JavascriptUtil;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
 import neatlogic.module.process.schedule.plugin.ProcessTaskSlaNotifyJob;
@@ -157,7 +157,7 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
                         ConditionConfigVo conditionConfigVo = new ConditionConfigVo(policyObj);
                         String script = conditionConfigVo.buildScript();
                         // ((false || true) || (true && false) || (true || false))
-                        isHit = RunScriptUtil.runScript(script);
+                        isHit = Boolean.parseBoolean(JavascriptUtil.runScript(new JSONObject(), "return " + script).toString());
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     } finally {
