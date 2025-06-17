@@ -166,7 +166,8 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                             /* 将参数名称、表达式、值的value翻译成对应text，目前条件步骤生成活动时用到**/
                                             translate(conditionConfigVo, currentProcessTaskStepVo.getProcessTaskId(), formTag);
                                             // ((false || true) || (true && false) || (true || false))
-                                            canRun = Boolean.parseBoolean(JavascriptUtil.runScript(new JSONObject(), "return " + script).toString());
+                                            Object returnValue = JavascriptUtil.runScript(new JSONObject(), "return " + script);
+                                            canRun = Boolean.parseBoolean(returnValue != null ? returnValue.toString() : "false");
                                             ruleObj.put("result", canRun);
                                         } catch (Exception e) {
                                             logger.error(e.getMessage(), e);
