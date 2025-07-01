@@ -60,6 +60,46 @@
         LIMIT 1
     </select>
 
+    <select id="getProcessTaskStepDataById" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepDataVo">
+        SELECT
+        `id`,
+        `processtask_id` as processTaskId,
+        `processtask_step_id` as processTaskStepId,
+        `data`,
+        `type`,
+        `fcu`
+        FROM `processtask_step_data`
+        WHERE `id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepDataId" parameterType="neatlogic.framework.process.dto.ProcessTaskStepDataVo"
+            resultType="java.lang.Long">
+        SELECT
+            `id`
+        FROM `processtask_step_data`
+        <where>
+            <if test="processTaskId != null">
+                AND `processtask_id` = #{processTaskId}
+            </if>
+            <if test="processTaskStepId != null">
+                AND `processtask_step_id` = #{processTaskStepId}
+            </if>
+            <if test="type != null and type != ''">
+                AND `type` = #{type}
+            </if>
+            <if test="fcu != null and fcu != ''">
+                AND `fcu` = #{fcu}
+            </if>
+        </where>
+        ORDER BY `id` DESC
+        LIMIT 1
+    </select>
+
+    <select id="checkProcessTaskStepDataIdIsExists" parameterType="java.lang.Long" resultType="int">
+        SELECT COUNT(1) FROM `processtask_step_data` WHERE `id` = #{value}
+    </select>
+
     <select id="searchProcessTaskStepData" parameterType="neatlogic.framework.process.dto.ProcessTaskStepDataVo"
             resultType="neatlogic.framework.process.dto.ProcessTaskStepDataVo">
         SELECT

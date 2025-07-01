@@ -30,6 +30,8 @@ import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.processtask.*;
+import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
+import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -147,9 +149,19 @@ public class UpdateProcessTaskStepStatusApi extends PrivateApiComponentBase {//
                     List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
                     // 需要处理人的步骤，不指定处理人时，旧处理人必须存在
                     if (processTaskStepUserList.isEmpty()) {
-                        throw new ProcessTaskStepUserUnAssignException();
+//                        throw new ProcessTaskStepUserUnAssignException();
+                        IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+                        if (processStepHandler != null) {
+                            try {
+                                processStepHandler.assign(processTaskStepVo);
+                            } catch (ProcessTaskException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        changeProcessTaskStepStatusToRunning(processTaskStepVo);
+                    } else {
+                        changeProcessTaskStepStatusToRunning(processTaskStepVo, new UserVo(processTaskStepUserList.get(0).getUserUuid(), processTaskStepUserList.get(0).getUserName()));
                     }
-                    changeProcessTaskStepStatusToRunning(processTaskStepVo, new UserVo(processTaskStepUserList.get(0).getUserUuid(), processTaskStepUserList.get(0).getUserName()));
                 } else {
                     processTaskMapper.deleteProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
                     processTaskMapper.insertProcessTaskStepUser(new ProcessTaskStepUserVo(
@@ -216,8 +228,13 @@ public class UpdateProcessTaskStepStatusApi extends PrivateApiComponentBase {//
             if (ProcessStepHandlerType.END.getHandler().equals(processTaskStepVo.getHandler())) {
                 processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.SUCCEED));
             } else if (nextStep != null) {
-                processTaskMapper.updateProcessTaskStepRelIsHit(new ProcessTaskStepRelVo(processTaskStepVo.getId(), nextStep.getId(), 1));
-                map.get(ProcessTaskStepStatus.SUCCEED.getValue()).accept(nextStep);
+                if (ProcessStepHandlerType.END.getHandler().equals(nextStep.getHandler())) {
+                    processTaskMapper.updateProcessTaskStepRelIsHit(new ProcessTaskStepRelVo(processTaskStepVo.getId(), nextStep.getId(), 1));
+                    map.get(ProcessTaskStepStatus.SUCCEED.getValue()).accept(nextStep);
+                } else {
+                    processTaskMapper.updateProcessTaskStepRelIsHit(new ProcessTaskStepRelVo(processTaskStepVo.getId(), nextStep.getId(), 1));
+                    map.get(ProcessTaskStepStatus.RUNNING.getValue()).accept(nextStep);
+                }
             }
         });
         map.put(ProcessTaskStepStatus.HANG.getValue(), processTaskStepVo -> {
@@ -235,16 +252,21 @@ public class UpdateProcessTaskStepStatusApi extends PrivateApiComponentBase {//
     /**
      * 更改步骤状态为待处理
      *
-     * @param processTaskStepVo
+     * @param processTaskStep
      */
-    private void changeProcessTaskStepStatusToPending(ProcessTaskStepVo processTaskStepVo) {
-        if ("process".equals(processTaskStepVo.getType())) {
-            processTaskMapper.deleteProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
-            processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
-            processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId()
-                    , GroupSearch.USER.getValue(), processTaskStepVo.getOriginalUserVo().getUuid(), ProcessUserType.MAJOR.getValue()));
+    private void changeProcessTaskStepStatusToPending(ProcessTaskStepVo processTaskStep) {
+        if ("process".equals(processTaskStep.getType())) {
+            processTaskMapper.deleteProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStep.getId(), ProcessUserType.MAJOR.getValue()));
+            processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStep.getId(), ProcessUserType.MAJOR.getValue()));
+            processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStep.getProcessTaskId(), processTaskStep.getId()
+                    , GroupSearch.USER.getValue(), processTaskStep.getOriginalUserVo().getUuid(), ProcessUserType.MAJOR.getValue()));
         }
-        processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStepVo.getId(), ProcessTaskStepStatus.PENDING, 1));
+        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskStep.getId(), ProcessTaskStepStatus.PENDING, 1);
+        if (processTaskStep.getActiveTime() == null) {
+            processTaskStepVo.setUpdateActiveTime(1);
+        }
+        processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
+//        processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStepVo.getId(), ProcessTaskStepStatus.PENDING, 1));
         processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStepVo.getProcessTaskId(), ProcessTaskStatus.RUNNING));
     }
 
@@ -254,7 +276,13 @@ public class UpdateProcessTaskStepStatusApi extends PrivateApiComponentBase {//
      * @param processTaskStep 步骤
      */
     private void changeProcessTaskStepStatusToRunning(ProcessTaskStepVo processTaskStep) {
-        processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStep.getId(), ProcessTaskStepStatus.RUNNING, 1));
+        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processTaskStep.getId(), ProcessTaskStepStatus.RUNNING, 1);
+        if (processTaskStep.getActiveTime() == null) {
+            processTaskStepVo.setUpdateActiveTime(1);
+        }
+        processTaskStepVo.setUpdateStartTime(1);
+        processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
+//        processTaskMapper.updateProcessTaskStepStatusByStepId(new ProcessTaskStepVo(processTaskStep.getId(), ProcessTaskStepStatus.RUNNING, 1));
         processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(processTaskStep.getProcessTaskId(), ProcessTaskStatus.RUNNING));
     }
 

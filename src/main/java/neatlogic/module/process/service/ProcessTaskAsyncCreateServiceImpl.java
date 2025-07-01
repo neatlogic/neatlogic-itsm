@@ -64,7 +64,6 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
     @PostConstruct
     public void init() {
         // 启动服务器时加载数据库中`processtask_async_create`表status为doing，server_id为Config.SCHEDULE_SERVER_ID的数据到blockingQueue中
-        TenantContext.get().setUseMasterDatabase(true);
         List<TenantVo> tenantList = tenantMapper.getAllActiveTenant();
         for (TenantVo tenantVo : tenantList) {
             TenantContext.get().switchTenant(tenantVo.getUuid());
@@ -101,11 +100,10 @@ public class ProcessTaskAsyncCreateServiceImpl implements ProcessTaskAsyncCreate
             for (Long id : doingIdList) {
                 boolean offer = blockingQueue.offer(id);
                 if (!offer && logger.isDebugEnabled()) {
-                    logger.debug("异步创建工单数据加入队列失败, id: " + id);
+                    logger.debug("异步创建工单数据加入队列失败, id: {}", id);
                 }
             }
         }
-        TenantContext.get().setUseMasterDatabase(true);
 
         Thread t = new Thread(new NeatLogicThread("ASYNC-CREATE-PROCESSTASK-MANAGER") {
             @Override

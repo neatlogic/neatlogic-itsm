@@ -283,64 +283,71 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
         JSONObject resultObj = new JSONObject();
         List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskIdAngTagNew(processTaskStepVo.getProcessTaskId(), formTag);
         if (CollectionUtils.isNotEmpty(formAttributeList)) {
-            Map<String, FormAttributeVo> formAttributeMap = formAttributeList.stream().collect(Collectors.toMap(FormAttributeVo::getUuid, e -> e));
+            Map<String, FormAttributeVo> formAttributeMap = new HashMap<>();
+            for (FormAttributeVo formAttributeVo : formAttributeList) {
+                if (!formAttributeMap.containsKey(formAttributeVo.getUuid())) {
+                    formAttributeMap.put(formAttributeVo.getUuid(), formAttributeVo);
+                }
+            }
             List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskIdAndTagNew(processTaskStepVo.getProcessTaskId(), formTag);
             for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
                 FormAttributeVo formAttributeVo = formAttributeMap.get(processTaskFormAttributeDataVo.getAttributeUuid());
-                if (formAttributeVo == null) {
-                    continue;
-                }
                 Object dataObj = processTaskFormAttributeDataVo.getDataObj();
-                JSONObject componentObj = new JSONObject();
-                componentObj.put("handler", formAttributeVo.getHandler());
-                componentObj.put("uuid", formAttributeVo.getUuid());
-                componentObj.put("label", formAttributeVo.getLabel());
-                componentObj.put("config", formAttributeVo.getConfig());
-                componentObj.put("type", formAttributeVo.getType());
-                List<FormAttributeVo> downwardFormAttributeList = FormUtil.getFormAttributeList(componentObj, null);
-                if (downwardFormAttributeList.size() > 1 && dataObj instanceof JSONArray) {
-                    // 表格组件
-                    JSONArray dataList = new JSONArray();
-                    JSONArray dataArray = JSONArray.parseArray(((JSONArray) dataObj).toJSONString());
-                    for (int i = 0; i < dataArray.size(); i++) {
-                        JSONObject newRowObj = new JSONObject();
-                        JSONObject rowObj = dataArray.getJSONObject(i);
-                        for (FormAttributeVo downwardFormAttribute : downwardFormAttributeList) {
-                            Object value = rowObj.get(downwardFormAttribute.getUuid());
-                            if (value != null) {
-                                IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(downwardFormAttribute.getHandler());
-                                if (handler != null) {
-                                    Object simpleValue = handler.getSimpleValue(value);
-                                    newRowObj.put(downwardFormAttribute.getUuid(), simpleValue);
-                                    newRowObj.put(downwardFormAttribute.getKey(), simpleValue);
-                                    newRowObj.put(downwardFormAttribute.getLabel(), simpleValue);
-                                } else {
-                                    newRowObj.put(downwardFormAttribute.getUuid(), value);
-                                    newRowObj.put(downwardFormAttribute.getKey(), value);
-                                    newRowObj.put(downwardFormAttribute.getLabel(), value);
-                                }
-                            }
-                        }
-                        dataList.add(newRowObj);
-                    }
-                    resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
-                } else {
-                    // 非表格组件
+                if (dataObj != null && formAttributeVo != null) {
                     IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo.getHandler());
                     if (handler != null) {
-                        Object simpleValue = handler.getSimpleValue(dataObj);
-                        resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), simpleValue);
+                        Object enhanceReadabilityValue = handler.getEnhanceReadabilityValue(dataObj, formAttributeVo);
+                        resultObj.put(formAttributeVo.getUuid(), enhanceReadabilityValue);
+                        resultObj.put(formAttributeVo.getKey(), enhanceReadabilityValue);
+                        resultObj.put(formAttributeVo.getLabel(), enhanceReadabilityValue);
                     } else {
                         resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataObj);
+                        resultObj.put(processTaskFormAttributeDataVo.getAttributeKey(), dataObj);
+                        resultObj.put(processTaskFormAttributeDataVo.getAttributeLabel(), dataObj);
                     }
                 }
-//                if (Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMRADIO.getHandler())
-//                        || Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMCHECKBOX.getHandler())
-//                        || Objects.equals(processTaskFormAttributeDataVo.getHandler(), FormHandler.FORMSELECT.getHandler())) {
-//                    Object value = FormUtil.getFormSelectAttributeValueByOriginalValue(processTaskFormAttributeDataVo.getDataObj());
-//                    resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), value);
+//                JSONObject componentObj = new JSONObject();
+//                componentObj.put("handler", formAttributeVo.getHandler());
+//                componentObj.put("uuid", formAttributeVo.getUuid());
+//                componentObj.put("label", formAttributeVo.getLabel());
+//                componentObj.put("config", formAttributeVo.getConfig());
+//                componentObj.put("type", formAttributeVo.getType());
+//                List<FormAttributeVo> downwardFormAttributeList = FormUtil.getFormAttributeList(componentObj, null);
+//                if (downwardFormAttributeList.size() > 1 && dataObj instanceof JSONArray) {
+//                    // 表格组件
+//                    JSONArray dataList = new JSONArray();
+//                    JSONArray dataArray = JSONArray.parseArray(((JSONArray) dataObj).toJSONString());
+//                    for (int i = 0; i < dataArray.size(); i++) {
+//                        JSONObject newRowObj = new JSONObject();
+//                        JSONObject rowObj = dataArray.getJSONObject(i);
+//                        for (FormAttributeVo downwardFormAttribute : downwardFormAttributeList) {
+//                            Object value = rowObj.get(downwardFormAttribute.getUuid());
+//                            if (value != null) {
+//                                IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(downwardFormAttribute.getHandler());
+//                                if (handler != null) {
+//                                    Object simpleValue = handler.getSimpleValue(value);
+//                                    newRowObj.put(downwardFormAttribute.getUuid(), simpleValue);
+//                                    newRowObj.put(downwardFormAttribute.getKey(), simpleValue);
+//                                    newRowObj.put(downwardFormAttribute.getLabel(), simpleValue);
+//                                } else {
+//                                    newRowObj.put(downwardFormAttribute.getUuid(), value);
+//                                    newRowObj.put(downwardFormAttribute.getKey(), value);
+//                                    newRowObj.put(downwardFormAttribute.getLabel(), value);
+//                                }
+//                            }
+//                        }
+//                        dataList.add(newRowObj);
+//                    }
+//                    resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
 //                } else {
-//                    resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+//                    // 非表格组件
+//                    IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(formAttributeVo.getHandler());
+//                    if (handler != null) {
+//                        Object simpleValue = handler.getSimpleValue(dataObj);
+//                        resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), simpleValue);
+//                    } else {
+//                        resultObj.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataObj);
+//                    }
 //                }
             }
         }

@@ -20,11 +20,19 @@ package neatlogic.module.process.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import neatlogic.framework.common.constvalue.GroupSearch;
+import neatlogic.framework.common.constvalue.systemuser.SystemUserFactory;
 import neatlogic.framework.config.ConfigManager;
+import neatlogic.framework.dao.mapper.RoleMapper;
+import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.RoleTeamVo;
+import neatlogic.framework.dto.RoleVo;
+import neatlogic.framework.dto.TeamVo;
+import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeDataConversionHandler;
@@ -42,6 +50,8 @@ import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.processtask.*;
 import neatlogic.framework.process.operationauth.core.IOperationType;
 import neatlogic.framework.process.stepremind.core.IProcessTaskStepRemindType;
+import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
+import neatlogic.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import neatlogic.framework.util.FormUtil;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
@@ -53,6 +63,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -61,6 +73,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcessStepHandlerCrossoverUtil {
+    private final Logger logger = LoggerFactory.getLogger(ProcessStepHandlerUtil.class);
     @Resource
     private ProcessTaskStepTimeAuditMapper processTaskStepTimeAuditMapper;
     @Resource
@@ -69,6 +82,10 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
     private SelectContentByHashMapper selectContentByHashMapper;
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private TeamMapper teamMapper;
+    @Resource
+    private RoleMapper roleMapper;
     @Resource
     private ChannelMapper channelMapper;
     @Resource
@@ -358,6 +375,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskIdAndProcessStepUuid(processTaskId, processStepUuid);
                         if (processTaskStepVo != null) {
                             processTaskStepId = processTaskStepVo.getId();
+                            assignWorker.put("processTaskStepId", processTaskStepId);
                         }
                     }
                 }
@@ -1187,5 +1205,209 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 processTaskMapper.insertProcessTaskExtendFormAttributeList(needSaveProcessTaskFormExtendAttributeDataList);
             }
         }
+    }
+
+    @Override
+    public ProcessTaskStepAssignVo analysisAssignConfig(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        ProcessTaskStepAssignVo processTaskStepAssignVo = new ProcessTaskStepAssignVo();
+        List<ProcessTaskStepWorkerVo> stepWorkerList = new ArrayList<>();
+        /* 获取步骤配置信息 **/
+        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+        String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+        Integer autoStart = (Integer) JSONPath.read(stepConfig, "autoStart");
+        autoStart = autoStart != null ? autoStart : 1;
+        processTaskStepAssignVo.setAutoStart(autoStart);
+        /* 如果已经存在过处理人，分配策略设置只分配一次，则继续使用旧处理人，否则启用分派 **/
+        List<ProcessTaskStepUserVo> oldUserList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
+        if (CollectionUtils.isNotEmpty(oldUserList)) {
+            ProcessTaskStepUserVo oldUserVo = oldUserList.get(0);
+            processTaskStepAssignVo.setOldStepUser(oldUserVo);
+            int isOnlyOnceExecute = Integer.parseInt(ConfigManager.getConfig(ItsmTenantConfig.PROCESSTASK_WORKERPOLICY_ISONLYONCEEXECUTE));
+            processTaskStepAssignVo.setIsOnlyOnceExecute(isOnlyOnceExecute);
+            if (Objects.equals(isOnlyOnceExecute, 1)) {
+                ProcessTaskStepWorkerVo processTaskStepWorkerVo = new ProcessTaskStepWorkerVo(
+                        currentProcessTaskStepVo.getProcessTaskId(),
+                        currentProcessTaskStepVo.getId(),
+                        GroupSearch.USER.getValue(),
+                        oldUserVo.getUserUuid(),
+                        ProcessUserType.MAJOR.getValue()
+                );
+                stepWorkerList.add(processTaskStepWorkerVo);
+            }
+        }
+        try {
+            // 如果没有或不用旧处理人，启用分派
+            if (CollectionUtils.isEmpty(stepWorkerList)) {
+                /* 分配处理人 **/
+                ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
+                processTaskStepWorkerPolicyVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+                List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicy(processTaskStepWorkerPolicyVo);
+                if (CollectionUtils.isNotEmpty(workerPolicyList)) {
+                    String executeMode = (String) JSONPath.read(stepConfig, "workerPolicyConfig.executeMode");
+                    for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
+                        IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
+                        if (workerPolicyHandler != null) {
+                            List<ProcessTaskStepWorkerVo> tmpWorkerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
+                            if (CollectionUtils.isNotEmpty(tmpWorkerList)) {
+                                /* 删除不存在的用户、组、角色 **/
+                                Iterator<ProcessTaskStepWorkerVo> iterator = tmpWorkerList.iterator();
+                                while (iterator.hasNext()) {
+                                    ProcessTaskStepWorkerVo workerVo = iterator.next();
+                                    if (Objects.equals(workerVo.getType(), GroupSearch.USER.getValue())) {
+                                        UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
+                                        if (userVo == null || userVo.getIsActive() == 0) {
+                                            iterator.remove();
+                                        }
+                                    } else if (Objects.equals(workerVo.getType(), GroupSearch.TEAM.getValue())) {
+                                        if (teamMapper.checkTeamIsExists(workerVo.getUuid()) == 0) {
+                                            iterator.remove();
+                                        }
+                                    } else if (Objects.equals(workerVo.getType(), GroupSearch.ROLE.getValue())) {
+                                        if (roleMapper.checkRoleIsExists(workerVo.getUuid()) == 0) {
+                                            iterator.remove();
+                                        }
+                                    }
+                                }
+                            }
+                            if (CollectionUtils.isNotEmpty(tmpWorkerList)) {
+                                /* 顺序分配处理人 **/
+                                if ("sort".equals(executeMode)) {
+                                    // 找到处理人，则退出
+                                    stepWorkerList.addAll(tmpWorkerList);
+                                    break;
+                                } else if ("batch".equals(executeMode)) {
+                                    stepWorkerList.addAll(tmpWorkerList);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            processTaskStepAssignVo.setMessage(e.getMessage());
+        }
+
+        // 如果分派器没有得到处理人，找到默认处理人
+        if (CollectionUtils.isEmpty(stepWorkerList)) {
+            processTaskStepAssignVo.setIsAssignException(true);
+            String defaultWorker = (String) JSONPath.read(stepConfig, "workerPolicyConfig.defaultWorker");
+            String[] split = defaultWorker.split("#");
+            ProcessTaskStepWorkerVo processTaskStepWorkerVo = new ProcessTaskStepWorkerVo(
+                    currentProcessTaskStepVo.getProcessTaskId(),
+                    currentProcessTaskStepVo.getId(),
+                    split[0],
+                    split[1],
+                    ProcessUserType.MAJOR.getValue()
+            );
+            stepWorkerList.add(processTaskStepWorkerVo);
+            String defaultWorkerName = StringUtils.EMPTY;
+            if (Objects.equals(split[0], GroupSearch.USER.getValue())) {
+                UserVo userVo = userMapper.getUserBaseInfoByUuid(split[1]);
+                if (userVo != null) {
+                    defaultWorkerName = userVo.getUserName();
+                }
+            } else if (Objects.equals(split[0], GroupSearch.TEAM.getValue())) {
+                TeamVo teamVo = teamMapper.getTeamByUuid(split[1]);
+                if (teamVo != null) {
+                    defaultWorkerName = teamVo.getName();
+                }
+            } else if (Objects.equals(split[0], GroupSearch.ROLE.getValue())) {
+                RoleVo roleVo = roleMapper.getRoleByUuid(split[1]);
+                if (roleVo != null) {
+                    defaultWorkerName = roleVo.getName();
+                }
+            }
+            processTaskStepAssignVo.setDefaultWorkerName(defaultWorkerName);
+        } else {
+            processTaskStepAssignVo.setIsAssignException(false);
+        }
+        List<ProcessTaskStepWorkerVo> finalStepWorkerList = new ArrayList<>();
+        /* 当只分配到一个用户时，自动设置为处理人，不需要抢单 **/
+        if (Objects.equals(autoStart, 1)) {
+            if (CollectionUtils.isNotEmpty(stepWorkerList)) {
+                Set<String> userUuidSet = new HashSet<>();
+                for (ProcessTaskStepWorkerVo workerVo : stepWorkerList) {
+                    if (GroupSearch.TEAM.getValue().equals(workerVo.getType())) {
+                        List<String> userUuidList = userMapper.getUserUuidListByTeamUuid(workerVo.getUuid());
+                        userUuidSet.addAll(userUuidList);
+                    } else if (GroupSearch.ROLE.getValue().equals(workerVo.getType())) {
+                        List<String> userUuidList = userMapper.getUserUuidListByRoleUuid(workerVo.getUuid());
+                        userUuidSet.addAll(userUuidList);
+                        List<RoleTeamVo> roleTeamList = roleMapper.getRoleTeamListByRoleUuid(workerVo.getUuid());
+                        if (CollectionUtils.isNotEmpty(roleTeamList)) {
+                            List<String> checkedChildrenteamUuidList = new ArrayList<>();
+                            List<String> teamUuidList = new ArrayList<>();
+                            for (RoleTeamVo roleTeamVo : roleTeamList) {
+                                if (Objects.equals(roleTeamVo.getCheckedChildren(), 1)) {
+                                    checkedChildrenteamUuidList.add(roleTeamVo.getTeamUuid());
+                                } else {
+                                    teamUuidList.add(roleTeamVo.getTeamUuid());
+                                }
+                            }
+                            if (CollectionUtils.isNotEmpty(checkedChildrenteamUuidList)) {
+                                List<TeamVo> teamList = teamMapper.getTeamByUuidList(checkedChildrenteamUuidList);
+                                teamList.sort(Comparator.comparing(TeamVo::getLft));
+                                for (TeamVo teamVo : teamList) {
+                                    if (!teamUuidList.contains(teamVo.getUuid())) {
+                                        teamUuidList.add(teamVo.getUuid());
+                                        List<String> childrenUuidList = teamMapper.getChildrenUuidListByLeftRightCode(teamVo.getLft(), teamVo.getRht());
+                                        teamUuidList.addAll(childrenUuidList);
+                                    }
+                                }
+                            }
+                            userUuidSet.addAll(userMapper.getUserUuidListByTeamUuidListLimitTwo(teamUuidList));
+                        }
+                    } else if (GroupSearch.USER.getValue().equals(workerVo.getType())) {
+                        userUuidSet.add(workerVo.getUuid());
+                    }
+                }
+                if (CollectionUtils.isNotEmpty(userUuidSet)) {
+                    List<String> allUserUuidList = new ArrayList<>();
+                    Iterator<String> iterator = userUuidSet.iterator();
+                    while (iterator.hasNext()) {
+                        String userUuid = iterator.next();
+                        UserVo userVo = SystemUserFactory.getUserVoByUser(userUuid);
+                        if (userVo != null) {
+                            allUserUuidList.add(userUuid);
+                            iterator.remove();
+                        }
+                    }
+                    List<String> userUuidList = userMapper.getUserUuidListByUuidListAndIsActive(new ArrayList<>(userUuidSet), 1);
+                    allUserUuidList.addAll(userUuidList);
+                    if (allUserUuidList.size() == 1) {
+                        processTaskStepAssignVo.setStepStatus(ProcessTaskStepStatus.RUNNING.getValue());
+                        ProcessTaskStepUserVo processTaskStepUser = new ProcessTaskStepUserVo(
+                                currentProcessTaskStepVo.getProcessTaskId(),
+                                currentProcessTaskStepVo.getId(),
+                                allUserUuidList.get(0),
+                                ProcessUserType.MAJOR.getValue()
+                        );
+                        processTaskStepAssignVo.setStepUser(processTaskStepUser);
+                        ProcessTaskStepWorkerVo worker = new ProcessTaskStepWorkerVo(
+                                currentProcessTaskStepVo.getProcessTaskId(),
+                                currentProcessTaskStepVo.getId(),
+                                GroupSearch.USER.getValue(),
+                                allUserUuidList.get(0),
+                                ProcessUserType.MAJOR.getValue()
+                        );
+                        finalStepWorkerList.add(worker);
+                    }
+                }
+            }
+        }
+        if (CollectionUtils.isEmpty(finalStepWorkerList)) {
+            Set<String> uuidSet = new HashSet<>();
+            for (ProcessTaskStepWorkerVo processTaskStepWorkerVo : stepWorkerList) {
+                if (uuidSet.contains(processTaskStepWorkerVo.getUuid())) {
+                    continue;
+                }
+                finalStepWorkerList.add(processTaskStepWorkerVo);
+                uuidSet.add(processTaskStepWorkerVo.getUuid());
+            }
+        }
+        processTaskStepAssignVo.setStepWorkerList(stepWorkerList);
+        processTaskStepAssignVo.setFinalStepWorkerList(finalStepWorkerList);
+        return processTaskStepAssignVo;
     }
 }
