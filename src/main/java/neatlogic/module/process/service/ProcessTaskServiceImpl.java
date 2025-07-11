@@ -3362,4 +3362,52 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         processTaskStepVo.getParamObj().put("source", source);
         processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
     }
+
+    @Override
+    public void getProcessTaskStepDetail(ProcessTaskStepVo processTaskStepVo) {
+        // 处理人列表
+        setProcessTaskStepUser(processTaskStepVo);
+
+        /** 当前步骤特有步骤信息 **/
+        IProcessStepInternalHandler processStepUtilHandler =
+                ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
+        if (processStepUtilHandler == null) {
+            throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+        }
+        processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getNonStartStepInfo(processTaskStepVo));
+        // 步骤评论列表
+        List<String> typeList = new ArrayList<>();
+        typeList.add(ProcessTaskStepOperationType.STEP_COMMENT.getValue());
+        typeList.add(ProcessTaskStepOperationType.STEP_COMPLETE.getValue());
+        typeList.add(ProcessTaskStepOperationType.STEP_BACK.getValue());
+        typeList.add(ProcessTaskOperationType.PROCESSTASK_RETREAT.getValue());
+        typeList.add(ProcessTaskOperationType.PROCESSTASK_TRANSFER.getValue());
+        typeList.add(ProcessTaskStepOperationType.STEP_REAPPROVAL.getValue());
+        typeList.add(ProcessTaskOperationType.PROCESSTASK_START.getValue());
+        typeList.add(ProcessTaskStepOperationType.STEP_TRANSFER.getValue());
+        processTaskStepVo.setCommentList(
+                getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepVo.getId(), typeList));
+        processTaskStepVo.setActionList(getProcessTaskActionListByProcessTaskStepId(processTaskStepVo.getId()));
+        //任务列表
+        processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
+        List<TaskConfigVo> taskConfigList = processTaskStepTaskService.getTaskConfigList(processTaskStepVo);
+        processTaskStepVo.setTaskConfigList(taskConfigList);
+        // 时效列表
+        processTaskStepVo.setSlaTimeList(getSlaTimeListByProcessTaskStepId(processTaskStepVo.getId()));
+        // automatic processtaskStepData
+        ProcessTaskStepDataVo stepDataVo = processTaskStepDataMapper
+                .getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),
+                        processTaskStepVo.getId(), processTaskStepVo.getHandler(), SystemUser.SYSTEM.getUserUuid()));
+        if (stepDataVo != null) {
+            JSONObject stepDataJson = stepDataVo.getData();
+            stepDataJson.put("isStepUser",
+                    processTaskMapper
+                            .checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(),
+                                    processTaskStepVo.getId(), UserContext.get().getUserUuid())) > 0 ? 1 : 0);
+            processTaskStepVo.setProcessTaskStepData(stepDataJson);
+        }
+        processTaskStepVo.setReplaceableTextList(getReplaceableTextList(processTaskStepVo));
+        processTaskStepVo.setCustomStatusList(getCustomStatusList(processTaskStepVo));
+        processTaskStepVo.setCustomButtonList(getCustomButtonList(processTaskStepVo));
+    }
 }
