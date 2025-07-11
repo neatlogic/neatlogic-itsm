@@ -549,4 +549,10 @@ public interface ProcessTaskService {
             List<Long> relationProcessTaskIdList,
             String source
     );
+
+    /**
+     * 获取步骤列表中步骤信息
+     * @param processTaskStepVo
+     */
+    void getProcessTaskStepDetail(ProcessTaskStepVo processTaskStepVo);
 }
