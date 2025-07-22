@@ -225,6 +225,7 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
                     processTaskStepVo.setSlaTimeList(null);
                     processTaskStepVo.setUserList(null);
                     processTaskStepVo.setWorkerPolicyList(null);
+                    processTaskStepVo.setConfig(null);
                 }
             }
             List<ProcessTaskStepRelVo> processTaskStepRelVoList = processTaskMapper.getProcessTaskStepRelByProcessTaskId(processTaskId);
