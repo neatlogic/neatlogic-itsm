@@ -18,7 +18,7 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="neatlogic.module.process.dao.mapper.SelectContentByHashMapper">
-	<cache type="neatlogic.framework.dao.cache.NeatLogicCache" flushInterval="60000" size="100"></cache>
+	<cache type="neatlogic.framework.dao.cache.NeatLogicConcurrentSafeCache" flushInterval="300000" size="1000"></cache>
 
 	<select id="getProcessTaskConfigStringByHash" parameterType="java.lang.String" resultType="java.lang.String">
 		SELECT `config` FROM `processtask_config` WHERE `hash` = #{value}
@@ -38,6 +38,18 @@
 		FROM
 		`processtask_step_config`
 		WHERE `hash` = #{value}
+	</select>
+
+	<select id="getProcessTaskStepConfigListByHashList" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.ProcessTaskStepConfigVo">
+		SELECT
+			`hash`,
+			`config`
+		FROM
+			`processtask_step_config`
+		WHERE `hash` IN
+		<foreach collection="list" item="hash" open="(" separator="," close=")">
+			#{hash}
+		</foreach>
 	</select>
 
 	<select id="getProcessTaskContentByHash" parameterType="java.lang.String" resultType="neatlogic.framework.process.dto.ProcessTaskContentVo">

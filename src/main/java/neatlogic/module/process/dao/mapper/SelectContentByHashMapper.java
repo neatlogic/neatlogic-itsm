@@ -20,12 +20,15 @@ package neatlogic.module.process.dao.mapper;
 import neatlogic.framework.process.crossover.ISelectContentByHashCrossoverMapper;
 import neatlogic.framework.process.dto.ProcessTaskConfigVo;
 import neatlogic.framework.process.dto.ProcessTaskContentVo;
+import neatlogic.framework.process.dto.ProcessTaskStepConfigVo;
 
 import java.util.List;
 
 public interface SelectContentByHashMapper extends ISelectContentByHashCrossoverMapper {
 
     String getProcessTaskStepConfigByHash(String hash);
+
+    List<ProcessTaskStepConfigVo> getProcessTaskStepConfigListByHashList(List<String> hashList);
 
     ProcessTaskContentVo getProcessTaskContentByHash(String hash);
 

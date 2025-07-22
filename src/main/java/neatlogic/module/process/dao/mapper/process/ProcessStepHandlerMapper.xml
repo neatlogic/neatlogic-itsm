@@ -18,7 +18,7 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="neatlogic.module.process.dao.mapper.process.ProcessStepHandlerMapper">
-	<cache type="neatlogic.framework.dao.cache.NeatLogicCache" flushInterval="30000" size="10"></cache>
+	<cache type="neatlogic.framework.dao.cache.NeatLogicConcurrentSafeCache" flushInterval="300000" size="50"></cache>
 	<select id="getProcessStepHandlerConfig" resultType="neatlogic.framework.process.dto.ProcessStepHandlerVo">
 		SELECT
 		`handler`,
