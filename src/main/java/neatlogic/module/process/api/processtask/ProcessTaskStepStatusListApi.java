@@ -18,6 +18,7 @@ import java.util.List;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
+@Deprecated
 public class ProcessTaskStepStatusListApi extends PrivateApiComponentBase {
 
 	@Autowired

@@ -971,6 +971,33 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     }
 
     @Override
+    public void setProcessTaskStepUser(ProcessTaskStepVo processTaskStepVo, List<ProcessTaskStepUserVo> processTaskStepUserList, List<ProcessTaskStepWorkerVo> processTaskStepWorkerList) {
+        List<ProcessTaskStepUserVo> majorUserList = new ArrayList<>();
+        List<ProcessTaskStepUserVo> minorUserList = new ArrayList<>();
+        for (ProcessTaskStepUserVo stepUserVo : processTaskStepUserList) {
+            if (Objects.equals(stepUserVo.getProcessTaskStepId(), processTaskStepVo.getId())) {
+                if (stepUserVo.getUserType().equals(ProcessUserType.MAJOR.getValue())) {
+                    majorUserList.add(stepUserVo);
+                } else if (stepUserVo.getUserType().equals(ProcessUserType.MINOR.getValue())) {
+                    minorUserList.add(stepUserVo);
+                }
+            }
+        }
+        if (CollectionUtils.isNotEmpty(majorUserList)) {
+            processTaskStepVo.setMajorUser(majorUserList.get(0));
+        } else {
+            List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
+            for (ProcessTaskStepWorkerVo workerVo : processTaskStepWorkerList) {
+                if (Objects.equals(workerVo.getProcessTaskStepId(), processTaskStepVo.getId())) {
+                    workerList.add(workerVo);
+                }
+            }
+            processTaskStepVo.setWorkerList(workerList);
+        }
+        processTaskStepVo.setMinorUserList(minorUserList);
+    }
+
+    @Override
     public boolean saveProcessTaskStepReply(JSONObject jsonObj, ProcessTaskStepReplyVo oldReplyVo) {
         if (oldReplyVo == null) {
             return false;
@@ -1825,9 +1852,18 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public JSONArray getReplaceableTextList(ProcessTaskStepVo processTaskStepVo) {
-        String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+        JSONObject stepConfigObj = processTaskStepVo.getConfig();
+        if (stepConfigObj == null) {
+            String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+            if (StringUtils.isNotBlank(config)) {
+                stepConfigObj = JSONObject.parseObject(config);
+            } else {
+                stepConfigObj = new JSONObject();
+            }
+            processTaskStepVo.setConfig(stepConfigObj);
+        }
         boolean stepLevelTakesEffect = false;
-        JSONArray replaceableTextList = (JSONArray) JSONPath.read(config, "replaceableTextList");
+        JSONArray replaceableTextList = stepConfigObj.getJSONArray("replaceableTextList");
         if (CollectionUtils.isNotEmpty(replaceableTextList)) {
             for (int i = 0; i < replaceableTextList.size(); i++) {
                 JSONObject replaceableText = replaceableTextList.getJSONObject(i);
@@ -1864,9 +1900,18 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public JSONArray getCustomButtonList(ProcessTaskStepVo processTaskStepVo) {
-        String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+        JSONObject stepConfigObj = processTaskStepVo.getConfig();
+        if (stepConfigObj == null) {
+            String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+            if (StringUtils.isNotBlank(config)) {
+                stepConfigObj = JSONObject.parseObject(config);
+            } else {
+                stepConfigObj = new JSONObject();
+            }
+            processTaskStepVo.setConfig(stepConfigObj);
+        }
         boolean stepLevelTakesEffect = false;
-        JSONArray customButtonList = (JSONArray) JSONPath.read(config, "customButtonList");
+        JSONArray customButtonList = stepConfigObj.getJSONArray("customButtonList");
         if (CollectionUtils.isNotEmpty(customButtonList)) {
             for (int i = 0; i < customButtonList.size(); i++) {
                 JSONObject customButton = customButtonList.getJSONObject(i);
@@ -1893,9 +1938,18 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public JSONArray getCustomStatusList(ProcessTaskStepVo processTaskStepVo) {
-        String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+        JSONObject stepConfigObj = processTaskStepVo.getConfig();
+        if (stepConfigObj == null) {
+            String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+            if (StringUtils.isNotBlank(config)) {
+                stepConfigObj = JSONObject.parseObject(config);
+            } else {
+                stepConfigObj = new JSONObject();
+            }
+            processTaskStepVo.setConfig(stepConfigObj);
+        }
         boolean stepLevelTakesEffect = false;
-        JSONArray customStatusList = (JSONArray) JSONPath.read(config, "customStatusList");
+        JSONArray customStatusList = stepConfigObj.getJSONArray("customStatusList");
         if (CollectionUtils.isNotEmpty(customStatusList)) {
             for (int i = 0; i < customStatusList.size(); i++) {
                 JSONObject customStatus = customStatusList.getJSONObject(i);
