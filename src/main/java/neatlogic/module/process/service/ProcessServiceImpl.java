@@ -168,7 +168,7 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
                             //关联的多个步骤各用一个时效
                             for (int p = 0; p < processStepUuidList.size(); p++) {
                                 String stepUuid = processStepUuidList.getString(p);
-                                processSlaVo.setUuid(UuidUtil.randomUuid());
+                                processSlaVo.setUuid(UuidUtil.getCustomUUID(processSlaVo.getName() + "&" + stepUuid));
                                 processMapper.insertProcessSla(processSlaVo);
                                 processMapper.insertProcessStepSla(stepUuid, processSlaVo.getUuid());
                                 slaUuidList.add(processSlaVo.getUuid());
@@ -288,6 +288,9 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
                         relObj.put("uuid", newUuid);
                     }
                     ProcessStepRelVo processStepRelVo = relObj.toJavaObject(ProcessStepRelVo.class);
+                    if (Objects.equals(processStepRelVo.getFromStepUuid(), virtualStartStepUuid)) {
+                        continue;
+                    }
                     processStepRelVo.setProcessUuid(processVo.getUuid());
                     String type = processStepRelVo.getType();
                     if (!ProcessFlowDirection.BACKWARD.getValue().equals(type)) {

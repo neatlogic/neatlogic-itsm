@@ -150,6 +150,10 @@
 		SELECT `uuid` FROM `process_step` WHERE `process_uuid` = #{value}
 	</select>
 
+	<select id="getAllProcessUuidList" resultType="java.lang.String">
+		SELECT `uuid` FROM `process`
+	</select>
+
 	<resultMap id="processDetailMap" type="neatlogic.framework.process.dto.ProcessVo">
 		<id column="uuid" property="uuid" />
 		<result column="name" property="name" />
