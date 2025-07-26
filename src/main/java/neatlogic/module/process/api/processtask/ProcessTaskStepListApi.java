@@ -50,7 +50,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "processtask/step/list";
+        return "processtask/step/list/old";
     }
 
     @Override
