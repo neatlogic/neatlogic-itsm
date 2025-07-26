@@ -136,6 +136,24 @@
         where pst.`processtask_step_id` = #{value}
     </select>
 
+    <select id="getStepTaskByProcessTaskId"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepTaskVo" useCache="false">
+        SELECT pst.`processtask_id`      as processTaskId,
+               pst.`processtask_step_id` as processTaskStepId,
+               pst.`id`,
+               pst.`owner`,
+               pst.`create_time`         as createTime,
+               pst.`end_time`            as endTime,
+               pst.`task_config_id`      as taskConfigId,
+               pc.`content`,
+               tc.`policy`               as taskConfigPolicy,
+               tc.`name`                 as taskConfigName
+        FROM `processtask_step_task` pst
+                 left join `task_config` tc on pst.`task_config_id` = tc.`id`
+                 left join `processtask_content` pc on pst.`content_hash` = pc.hash
+        WHERE pst.`processtask_id` = #{value}
+    </select>
+
     <select id="getStepTaskByProcessTaskStepId"
             resultType="neatlogic.framework.process.dto.ProcessTaskStepTaskVo" useCache="false">
         SELECT pst.`processtask_id`      as processTaskId,

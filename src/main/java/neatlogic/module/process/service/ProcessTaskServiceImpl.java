@@ -744,6 +744,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public List<ProcessTaskSlaTimeVo> getSlaTimeListBySlaIdList(List<Long> slaIdList) {
+        if (CollectionUtils.isEmpty(slaIdList)) {
+            return new ArrayList<>();
+        }
         List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskSlaMapper.getProcessTaskSlaTimeListBySlaIdList(slaIdList);
         if (CollectionUtils.isEmpty(processTaskSlaTimeList)) {
             return processTaskSlaTimeList;

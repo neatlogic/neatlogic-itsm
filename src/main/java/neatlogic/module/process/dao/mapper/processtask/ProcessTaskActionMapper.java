@@ -25,5 +25,7 @@ public interface ProcessTaskActionMapper {
 
     List<ProcessTaskActionVo> getProcessTaskActionListByProcessTaskStepId(Long processTaskStepId);
 
+    List<ProcessTaskActionVo> getProcessTaskActionListByProcessTaskId(Long processTaskId);
+
     int insertProcessTaskAction(ProcessTaskActionVo processTaskActionVo);
 }
