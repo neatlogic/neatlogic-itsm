@@ -627,7 +627,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                         continue;
                     }
                     for (String uuid : uuidList) {
-                        if (uuid.contains(processTaskStepReplyVo.getLcu())) {
+                        if (processTaskStepReplyVo.getLcu() != null && uuid.contains(processTaskStepReplyVo.getLcu())) {
                             operatorProcessUserTypeList.add(entry.getKey());
                             break;
                         }
@@ -2069,7 +2069,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
         //任务列表
         if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStepStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-            processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
+//            processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
             List<TaskConfigVo> taskConfigList = processTaskStepTaskService.getTaskConfigList(processTaskStepVo);
             processTaskStepVo.setTaskConfigList(taskConfigList);
         }
@@ -2166,7 +2166,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public Map<ProcessUserType, List<String>> getProcessTaskStepProcessUserTypeData(ProcessTaskStepVo processTaskStepVo, List<ProcessUserType> processUserTypeList) {
-        Map<ProcessUserType, List<String>> resultMap = new HashMap<>();
+        Map<ProcessUserType, List<String>> resultMap = new LinkedHashMap<>();
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoByIdIncludeIsDeleted(processTaskStepVo.getProcessTaskId());
         if (processTaskVo != null) {
             /* 上报人 **/
@@ -3446,7 +3446,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepVo.getId(), typeList));
         processTaskStepVo.setActionList(getProcessTaskActionListByProcessTaskStepId(processTaskStepVo.getId()));
         //任务列表
-        processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
+//        processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
         List<TaskConfigVo> taskConfigList = processTaskStepTaskService.getTaskConfigList(processTaskStepVo);
         processTaskStepVo.setTaskConfigList(taskConfigList);
         // 时效列表
