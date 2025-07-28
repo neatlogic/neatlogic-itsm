@@ -664,6 +664,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
      * @param processTaskStepVo 步骤vo
      */
     @Override
+    @Deprecated
     public void getProcessTaskStepTask(ProcessTaskStepVo processTaskStepVo) {
         //任务列表
         Map<String, List<ProcessTaskStepTaskVo>> stepTaskVoMap = new HashMap<>();
