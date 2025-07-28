@@ -193,9 +193,10 @@
         <result column="status" property="status"/>
         <result column="isDelete" property="isDelete"/>
         <association property="userVo" javaType="neatlogic.framework.dto.UserVo">
+            <result property="id" column="userId"/>
             <result property="uuid" column="userUuid"/>
             <result property="userName" column="userName"/>
-            <result property="userId" column="userId"/>
+            <result property="userId" column="UserUserId"/>
             <result property="userInfo" column="userInfo"/>
             <result property="vipLevel" column="userVipLevel"/>
             <result property="pinyin" column="userPinyin"/>
@@ -205,12 +206,13 @@
     <select id="getStepTaskUserByStepTaskIdList" resultMap="stepTaskUserMap" useCache="false">
         SELECT pstu.`id`,
         pstu.`processtask_step_task_id` as processTaskStepTaskId,
-        pstu.`user_uuid` as userUuid,
+        u.id as userId,
         u.pinyin as pinyin,
         u.user_info as userInfo,
         u.vip_level as userLevel,
         u.user_name as userName,
-        u.user_id as userId,
+        u.user_id as UserUserId,
+        u.uuid as userUuid,
         pstu.`end_time` as endTime,
         pstu.`status`,
         pstu.`is_delete` as isDelete

@@ -1055,6 +1055,7 @@
         `active_time`,
         `start_time`,
         `end_time`,
+        `error`,
         `expire_time`,
         `config_hash`
         FROM `processtask_step`
@@ -1344,7 +1345,7 @@
 
     <select id="getTargetListByContentIdList" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskStepContentTargetVo">
         SELECT
-            `content_id`,
+            `content_id` AS contentId,
             `type`,
             `uuid`
         FROM `processtask_step_content_target`

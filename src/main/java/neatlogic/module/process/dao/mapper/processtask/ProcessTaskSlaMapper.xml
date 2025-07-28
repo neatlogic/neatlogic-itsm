@@ -190,6 +190,17 @@
         SELECT `sla_id` FROM `processtask_step_sla` WHERE `processtask_step_id` = #{value}
     </select>
 
+    <select id="getProcessTaskStepSlaListByProcessTaskStepIdList" parameterType="java.lang.Long" resultType="java.util.HashMap">
+        SELECT
+            `processtask_step_id` AS processTaskStepId,
+            `sla_id` AS slaId
+        FROM `processtask_step_sla`
+        WHERE `processtask_step_id` IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
     <select id="getProcessTaskStepIdListBySlaId" parameterType="java.lang.Long" resultType="java.lang.Long">
         SELECT `processtask_step_id` FROM `processtask_step_sla` WHERE `sla_id` = #{value}
     </select>
