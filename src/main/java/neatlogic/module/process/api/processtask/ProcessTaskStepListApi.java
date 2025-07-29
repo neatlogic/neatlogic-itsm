@@ -149,7 +149,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         startProcessTaskStepVo.setCommentList(
                 processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(startProcessTaskStepVo.getId(), typeList));
         //任务列表
-        processTaskStepTaskService.getProcessTaskStepTask(startProcessTaskStepVo);
+//        processTaskStepTaskService.getProcessTaskStepTask(startProcessTaskStepVo);
         startProcessTaskStepVo.setIsView(1);
         return startProcessTaskStepVo;
     }
