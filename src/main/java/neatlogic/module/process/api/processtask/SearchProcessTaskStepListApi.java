@@ -126,8 +126,10 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
         for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-            if (Objects.equals(processTaskStepVo.getType(), ProcessStepType.PROCESS.getValue())
-                    || Objects.equals(processTaskStepVo.getType(), ProcessStepType.START.getValue())) {
+            if (Objects.equals(processTaskStepVo.getType(), ProcessStepType.START.getValue())) {
+                resultList.add(processTaskStepVo);
+                processTaskStepIdList.add(processTaskStepVo.getId());
+            } else if (Objects.equals(processTaskStepVo.getType(), ProcessStepType.PROCESS.getValue())) {
                 if (processTaskStepVo.getActiveTime() != null) {
                     resultList.add(processTaskStepVo);
                     processTaskStepIdList.add(processTaskStepVo.getId());
@@ -163,33 +165,34 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
                     processTaskStepVo.setIsView(0);
                 }
             }
-        }
-        getProcessTaskStepDetailList(processTaskVo, resultList);
-        for (ProcessTaskStepVo processTaskStepVo : resultList) {
-            processTaskStepVo.setIsInTheCurrentStepTab(0);
-            if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
-                if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.PENDING.getValue())
-                        || Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())
-                        || Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.HANG.getValue())) {
-                    processTaskStepVo.setIsInTheCurrentStepTab(1);
+            getProcessTaskStepDetailList(processTaskVo, resultList);
+            for (ProcessTaskStepVo processTaskStepVo : resultList) {
+                processTaskStepVo.setIsInTheCurrentStepTab(0);
+                if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
+                    if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.PENDING.getValue())
+                            || Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())
+                            || Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.HANG.getValue())) {
+                        processTaskStepVo.setIsInTheCurrentStepTab(1);
+                    }
                 }
             }
-        }
-        resultList.sort(new Comparator<ProcessTaskStepVo>() {
-            @Override
-            public int compare(ProcessTaskStepVo o1, ProcessTaskStepVo o2) {
-                int i = o1.getActiveTime().compareTo(o2.getActiveTime());
-                if (i == 0) {
-                    return o1.getId().compareTo(o2.getId());
+            resultList.sort((o1, o2) -> {
+                if (o1.getActiveTime() != null && o2.getActiveTime() != null) {
+                    int i = o1.getActiveTime().compareTo(o2.getActiveTime());
+                    if (i == 0) {
+                        return o1.getId().compareTo(o2.getId());
+                    } else {
+                        return i;
+                    }
                 } else {
-                    return i;
+                    return -1;
                 }
-            }
-        });
+            });
+        }
         return resultList;
     }
 
-    private List<ProcessTaskStepVo> getProcessTaskStepDetailList(ProcessTaskVo processTaskVo, List<ProcessTaskStepVo> processTaskStepList) {
+    private void getProcessTaskStepDetailList(ProcessTaskVo processTaskVo, List<ProcessTaskStepVo> processTaskStepList) {
         Long processTaskId = processTaskVo.getId();
         List<Long> processTaskStepIdList = processTaskStepList.stream().map(ProcessTaskStepVo::getId).collect(Collectors.toList());
         ProcessTaskStepUserVo searchStepUserVo = new ProcessTaskStepUserVo();
@@ -376,7 +379,6 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
             }
             processTaskStepVo.setConfig(null);
         }
-        return processTaskStepList;
     }
 
 
@@ -431,7 +433,6 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
                     }
                     List<Long> fileIdList = processTaskStepFileList.stream().filter(processTaskStepFileVo -> Objects.equals(processTaskStepFileVo.getContentId(), processTaskStepReplyVo.getId())).map(ProcessTaskStepFileVo::getFileId).collect(Collectors.toList());
                     if (CollectionUtils.isNotEmpty(fileIdList)) {
-                        processTaskStepReplyVo.setFileIdList(fileIdList);
                         List<FileVo> fileList = new ArrayList<>();
                         for (Long fileId : fileIdList) {
                             FileVo fileVo = fileMap.get(fileId);
@@ -439,7 +440,10 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
                                 fileList.add(fileVo);
                             }
                         }
-                        processTaskStepReplyVo.setFileList(fileList);
+                        if (CollectionUtils.isNotEmpty(fileList)) {
+                            processTaskStepReplyVo.setFileList(fileList);
+                            processTaskStepReplyVo.setFileIdList(fileList.stream().map(FileVo::getId).collect(Collectors.toList()));
+                        }
                     }
                     List<WorkAssignmentUnitVo> targetList = new ArrayList<>();
                     for (ProcessTaskStepContentTargetVo processTaskStepContentTargetVo : processTaskStepContentTargetList) {
@@ -650,7 +654,6 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
      * 获取步骤的任务策略列表及其任务列表
      *
      * @param processTaskStepVo 步骤信息
-     * @return
      */
 
     public List<TaskConfigVo> getTaskConfigList(ProcessTaskStepVo processTaskStepVo, List<ProcessTaskStepTaskVo> processTaskStepTaskList, List<TaskConfigVo> allTaskConfigList) {
@@ -726,12 +729,12 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(stepTaskUserList)) {
             List<Long> stepTaskUserIdList = stepTaskUserList.stream().map(ProcessTaskStepTaskUserVo::getId).collect(Collectors.toList());
             List<ProcessTaskStepTaskUserAgentVo> stepTaskUserAgentList = processTaskStepTaskMapper.getProcessTaskStepTaskUserAgentListByStepTaskUserIdList(stepTaskUserIdList);
-            Map<Long, String> stepTaskUserAgentMap = stepTaskUserAgentList.stream().collect(Collectors.toMap(e -> e.getProcessTaskStepTaskUserId(), e -> e.getUserUuid()));
+            Map<Long, String> stepTaskUserAgentMap = stepTaskUserAgentList.stream().collect(Collectors.toMap(ProcessTaskStepTaskUserAgentVo::getProcessTaskStepTaskUserId, ProcessTaskStepTaskUserAgentVo::getUserUuid));
             Map<String, UserVo> userMap = new HashMap<>();
             List<String> userUuidList = new ArrayList<>(stepTaskUserAgentMap.values());
             if (CollectionUtils.isNotEmpty(userUuidList)) {
                 List<UserVo> userList = userMapper.getUserByUserUuidList(userUuidList);
-                userMap = userList.stream().collect(Collectors.toMap(e -> e.getUuid(), e -> e));
+                userMap = userList.stream().collect(Collectors.toMap(UserVo::getUuid, e -> e));
             }
             List<ProcessTaskStepTaskUserContentVo> stepTaskUserContentList = processTaskStepTaskMapper.getStepTaskUserContentByStepTaskUserIdList(stepTaskUserIdList);
             Map<Long, ProcessTaskStepTaskUserContentVo> stepTaskUserContentMap = new HashMap<>();

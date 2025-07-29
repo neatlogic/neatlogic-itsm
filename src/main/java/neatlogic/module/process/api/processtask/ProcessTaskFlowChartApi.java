@@ -156,12 +156,12 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
                 }
                 List<String> teamUuidList = teamUuidSet.stream().filter(Objects::nonNull).collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(teamUuidList)) {
-                    List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
+                    List<TeamVo> teamList = teamMapper.getTeamListContainsDeletedByUuidList(teamUuidList);
                     teamMap = teamList.stream().collect(Collectors.toMap(TeamVo::getUuid, e -> e));
                 }
                 List<String> roleUuidList = roleUuidSet.stream().filter(Objects::nonNull).collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(roleUuidList)) {
-                    List<RoleVo> roleList = roleMapper.getRoleByUuidList(roleUuidList);
+                    List<RoleVo> roleList = roleMapper.getRoleListContainsDeletedByUuidList(roleUuidList);
                     roleMap = roleList.stream().collect(Collectors.toMap(RoleVo::getUuid, e -> e));
                 }
                 for (ProcessTaskStepUserVo stepUserVo : processTaskStepUserList) {
