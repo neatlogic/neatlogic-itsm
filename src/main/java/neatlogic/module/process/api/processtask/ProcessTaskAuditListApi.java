@@ -117,7 +117,7 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
             if (StringUtils.isNotBlank(stepConfig)) {
                 JSONObject configObj = JSONObject.parseObject(stepConfig);
                 String formSceneUuid = configObj.getString("formSceneUuid");
-                processTaskStepVo.setFormSceneUuid(formSceneUuid != null ? formSceneUuid : StringUtils.EMPTY);
+                processTaskStepVo.setFormSceneUuid(formSceneUuid);
             }
         }
         Set<String> contentHashSet = new HashSet<>();
