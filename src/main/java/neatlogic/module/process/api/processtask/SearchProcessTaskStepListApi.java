@@ -112,10 +112,10 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid")
     })
     @Output({
-            @Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表")
+            @Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "common.tbodylist")
     })
     @Description(desc = "工单步骤列表接口")
     @Override
