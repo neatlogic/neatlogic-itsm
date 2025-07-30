@@ -627,7 +627,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                         continue;
                     }
                     for (String uuid : uuidList) {
-                        if (uuid.contains(processTaskStepReplyVo.getLcu())) {
+                        if (processTaskStepReplyVo.getLcu() != null && uuid.contains(processTaskStepReplyVo.getLcu())) {
                             operatorProcessUserTypeList.add(entry.getKey());
                             break;
                         }
@@ -744,6 +744,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public List<ProcessTaskSlaTimeVo> getSlaTimeListBySlaIdList(List<Long> slaIdList) {
+        if (CollectionUtils.isEmpty(slaIdList)) {
+            return new ArrayList<>();
+        }
         List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskSlaMapper.getProcessTaskSlaTimeListBySlaIdList(slaIdList);
         if (CollectionUtils.isEmpty(processTaskSlaTimeList)) {
             return processTaskSlaTimeList;
@@ -967,6 +970,33 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
 //        processTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(),
 //                ProcessUserType.MINOR.getValue()));
+        processTaskStepVo.setMinorUserList(minorUserList);
+    }
+
+    @Override
+    public void setProcessTaskStepUser(ProcessTaskStepVo processTaskStepVo, List<ProcessTaskStepUserVo> processTaskStepUserList, List<ProcessTaskStepWorkerVo> processTaskStepWorkerList) {
+        List<ProcessTaskStepUserVo> majorUserList = new ArrayList<>();
+        List<ProcessTaskStepUserVo> minorUserList = new ArrayList<>();
+        for (ProcessTaskStepUserVo stepUserVo : processTaskStepUserList) {
+            if (Objects.equals(stepUserVo.getProcessTaskStepId(), processTaskStepVo.getId())) {
+                if (stepUserVo.getUserType().equals(ProcessUserType.MAJOR.getValue())) {
+                    majorUserList.add(stepUserVo);
+                } else if (stepUserVo.getUserType().equals(ProcessUserType.MINOR.getValue())) {
+                    minorUserList.add(stepUserVo);
+                }
+            }
+        }
+        if (CollectionUtils.isNotEmpty(majorUserList)) {
+            processTaskStepVo.setMajorUser(majorUserList.get(0));
+        } else {
+            List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
+            for (ProcessTaskStepWorkerVo workerVo : processTaskStepWorkerList) {
+                if (Objects.equals(workerVo.getProcessTaskStepId(), processTaskStepVo.getId())) {
+                    workerList.add(workerVo);
+                }
+            }
+            processTaskStepVo.setWorkerList(workerList);
+        }
         processTaskStepVo.setMinorUserList(minorUserList);
     }
 
@@ -1825,9 +1855,18 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public JSONArray getReplaceableTextList(ProcessTaskStepVo processTaskStepVo) {
-        String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+        JSONObject stepConfigObj = processTaskStepVo.getConfig();
+        if (stepConfigObj == null) {
+            String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+            if (StringUtils.isNotBlank(config)) {
+                stepConfigObj = JSONObject.parseObject(config);
+            } else {
+                stepConfigObj = new JSONObject();
+            }
+            processTaskStepVo.setConfig(stepConfigObj);
+        }
         boolean stepLevelTakesEffect = false;
-        JSONArray replaceableTextList = (JSONArray) JSONPath.read(config, "replaceableTextList");
+        JSONArray replaceableTextList = stepConfigObj.getJSONArray("replaceableTextList");
         if (CollectionUtils.isNotEmpty(replaceableTextList)) {
             for (int i = 0; i < replaceableTextList.size(); i++) {
                 JSONObject replaceableText = replaceableTextList.getJSONObject(i);
@@ -1864,9 +1903,18 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public JSONArray getCustomButtonList(ProcessTaskStepVo processTaskStepVo) {
-        String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+        JSONObject stepConfigObj = processTaskStepVo.getConfig();
+        if (stepConfigObj == null) {
+            String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+            if (StringUtils.isNotBlank(config)) {
+                stepConfigObj = JSONObject.parseObject(config);
+            } else {
+                stepConfigObj = new JSONObject();
+            }
+            processTaskStepVo.setConfig(stepConfigObj);
+        }
         boolean stepLevelTakesEffect = false;
-        JSONArray customButtonList = (JSONArray) JSONPath.read(config, "customButtonList");
+        JSONArray customButtonList = stepConfigObj.getJSONArray("customButtonList");
         if (CollectionUtils.isNotEmpty(customButtonList)) {
             for (int i = 0; i < customButtonList.size(); i++) {
                 JSONObject customButton = customButtonList.getJSONObject(i);
@@ -1893,9 +1941,18 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public JSONArray getCustomStatusList(ProcessTaskStepVo processTaskStepVo) {
-        String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+        JSONObject stepConfigObj = processTaskStepVo.getConfig();
+        if (stepConfigObj == null) {
+            String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+            if (StringUtils.isNotBlank(config)) {
+                stepConfigObj = JSONObject.parseObject(config);
+            } else {
+                stepConfigObj = new JSONObject();
+            }
+            processTaskStepVo.setConfig(stepConfigObj);
+        }
         boolean stepLevelTakesEffect = false;
-        JSONArray customStatusList = (JSONArray) JSONPath.read(config, "customStatusList");
+        JSONArray customStatusList = stepConfigObj.getJSONArray("customStatusList");
         if (CollectionUtils.isNotEmpty(customStatusList)) {
             for (int i = 0; i < customStatusList.size(); i++) {
                 JSONObject customStatus = customStatusList.getJSONObject(i);
@@ -2012,7 +2069,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
         //任务列表
         if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStepStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-            processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
+//            processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
             List<TaskConfigVo> taskConfigList = processTaskStepTaskService.getTaskConfigList(processTaskStepVo);
             processTaskStepVo.setTaskConfigList(taskConfigList);
         }
@@ -2109,7 +2166,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public Map<ProcessUserType, List<String>> getProcessTaskStepProcessUserTypeData(ProcessTaskStepVo processTaskStepVo, List<ProcessUserType> processUserTypeList) {
-        Map<ProcessUserType, List<String>> resultMap = new HashMap<>();
+        Map<ProcessUserType, List<String>> resultMap = new LinkedHashMap<>();
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoByIdIncludeIsDeleted(processTaskStepVo.getProcessTaskId());
         if (processTaskVo != null) {
             /* 上报人 **/
@@ -3389,7 +3446,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepVo.getId(), typeList));
         processTaskStepVo.setActionList(getProcessTaskActionListByProcessTaskStepId(processTaskStepVo.getId()));
         //任务列表
-        processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
+//        processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
         List<TaskConfigVo> taskConfigList = processTaskStepTaskService.getTaskConfigList(processTaskStepVo);
         processTaskStepVo.setTaskConfigList(taskConfigList);
         // 时效列表

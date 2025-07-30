@@ -41,6 +41,8 @@ public interface ProcessTaskStepTaskMapper extends IProcessTaskStepTaskCrossover
 
     ProcessTaskStepTaskUserVo getStepTaskUserById(Long id);
 
+    List<ProcessTaskStepTaskVo> getStepTaskByProcessTaskId(Long processTaskId);
+
     List<ProcessTaskStepTaskVo> getStepTaskByProcessTaskStepId(Long processTaskStepId);
 
     List<ProcessTaskStepTaskVo> getStepTaskListByProcessTaskStepId(Long processTaskStepId);

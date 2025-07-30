@@ -22,6 +22,7 @@ import neatlogic.framework.process.dto.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author linbq
@@ -56,6 +57,8 @@ public interface ProcessTaskSlaMapper extends IProcessTaskSlaCrossoverMapper {
     ProcessTaskSlaTimeVo getProcessTaskSlaTimeBySlaId(Long slaId);
 
     List<Long> getSlaIdListByProcessTaskStepId(Long processTaskStepId);
+
+    List<Map<String, Long>> getProcessTaskStepSlaListByProcessTaskStepIdList(List<Long> processTaskStepIdList);
 
     List<Long> getProcessTaskStepIdListBySlaId(Long slaId);
 

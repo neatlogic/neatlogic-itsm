@@ -201,6 +201,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     List<WorkAssignmentUnitVo> getTargetListByContentId(Long contentId);
 
+    List<ProcessTaskStepContentTargetVo> getTargetListByContentIdList(List<Long> contentIdList);
+
     ProcessTaskStepContentVo getProcessTaskStepContentById(Long id);
 
     List<ProcessTaskStepUserVo> getProcessTaskStepUserList(ProcessTaskStepUserVo processTaskStepUserVo);

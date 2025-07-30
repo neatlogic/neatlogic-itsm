@@ -63,6 +63,7 @@ public interface ProcessTaskStepTaskService {
      * 获取工单任务信息
      * @param processTaskStepVo 步骤vo
      */
+    @Deprecated
     void getProcessTaskStepTask(ProcessTaskStepVo processTaskStepVo);
 
     /**

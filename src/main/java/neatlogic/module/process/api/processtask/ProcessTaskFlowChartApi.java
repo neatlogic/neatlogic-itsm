@@ -1,18 +1,24 @@
 package neatlogic.module.process.api.processtask;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.GroupSearch;
+import neatlogic.framework.dao.mapper.RoleMapper;
+import neatlogic.framework.dao.mapper.TeamMapper;
+import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.RoleVo;
+import neatlogic.framework.dto.TeamVo;
+import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.dto.WorkAssignmentUnitVo;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.constvalue.ProcessTaskStepUserStatus;
 import neatlogic.framework.process.constvalue.ProcessUserType;
-import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTaskMapper;
-import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
-import neatlogic.module.process.dao.mapper.task.TaskMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
 import neatlogic.framework.process.exception.process.ProcessNotFoundException;
@@ -21,11 +27,13 @@ import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTaskMapper;
+import neatlogic.module.process.dao.mapper.task.TaskMapper;
 import neatlogic.module.process.service.ProcessTaskService;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -61,6 +69,15 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
     @Resource
     private ProcessTaskStepTaskMapper processTaskStepTaskMapper;
 
+    @Resource
+    private UserMapper userMapper;
+
+    @Resource
+    private TeamMapper teamMapper;
+
+    @Resource
+    private RoleMapper roleMapper;
+
     @Override
     public String getToken() {
         return "processtask/flowchart";
@@ -74,6 +91,11 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
     @Override
     public String getConfig() {
         return null;
+    }
+
+    @Override
+    public boolean disableReturnCircularReferenceDetect() {
+        return true;
     }
 
     @Input({
@@ -105,8 +127,86 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
             }
             List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
             if (CollectionUtils.isNotEmpty(processTaskStepList)) {
+                Set<String> userUuidSet = new HashSet<>();
+                Set<String> teamUuidSet = new HashSet<>();
+                Set<String> roleUuidSet = new HashSet<>();
+                ProcessTaskStepUserVo searchStepUserVo = new ProcessTaskStepUserVo();
+                searchStepUserVo.setProcessTaskId(processTaskId);
+                List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserList(searchStepUserVo);
+                for (ProcessTaskStepUserVo stepUserVo : processTaskStepUserList) {
+                    userUuidSet.add(stepUserVo.getUserUuid());
+                }
+                List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(processTaskId, null);
+                for (ProcessTaskStepWorkerVo workerVo : processTaskStepWorkerList) {
+                    if (workerVo.getType().equals(GroupSearch.USER.getValue())) {
+                        userUuidSet.add(workerVo.getUuid());
+                    } else if (workerVo.getType().equals(GroupSearch.TEAM.getValue())) {
+                        teamUuidSet.add(workerVo.getUuid());
+                    } else if (workerVo.getType().equals(GroupSearch.ROLE.getValue())) {
+                        roleUuidSet.add(workerVo.getUuid());
+                    }
+                }
+                Map<String, UserVo> userMap = new HashMap<>();
+                Map<String, TeamVo> teamMap = new HashMap<>();
+                Map<String, RoleVo> roleMap = new HashMap<>();
+                List<String> userUuidList = userUuidSet.stream().filter(Objects::nonNull).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(userUuidList)) {
+                    List<UserVo> userList = userMapper.getUserByUserUuidList(userUuidList);
+                    userMap = userList.stream().collect(Collectors.toMap(UserVo::getUuid, e -> e));
+                }
+                List<String> teamUuidList = teamUuidSet.stream().filter(Objects::nonNull).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(teamUuidList)) {
+                    List<TeamVo> teamList = teamMapper.getTeamListContainsDeletedByUuidList(teamUuidList);
+                    teamMap = teamList.stream().collect(Collectors.toMap(TeamVo::getUuid, e -> e));
+                }
+                List<String> roleUuidList = roleUuidSet.stream().filter(Objects::nonNull).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(roleUuidList)) {
+                    List<RoleVo> roleList = roleMapper.getRoleListContainsDeletedByUuidList(roleUuidList);
+                    roleMap = roleList.stream().collect(Collectors.toMap(RoleVo::getUuid, e -> e));
+                }
+                for (ProcessTaskStepUserVo stepUserVo : processTaskStepUserList) {
+                    UserVo userVo = userMap.get(stepUserVo.getUserUuid());
+                    if (userVo != null) {
+                        stepUserVo.setUserName(userVo.getUserName());
+                    }
+                }
+                for (ProcessTaskStepWorkerVo workerVo : processTaskStepWorkerList) {
+                    if (workerVo.getType().equals(GroupSearch.USER.getValue())) {
+                        UserVo userVo = userMap.get(workerVo.getUuid());
+                        if (userVo != null) {
+                            workerVo.setWorker(new WorkAssignmentUnitVo(userVo));
+                            workerVo.setName(userVo.getUserName());
+                        }
+                    } else if (workerVo.getType().equals(GroupSearch.TEAM.getValue())) {
+                        TeamVo teamVo = teamMap.get(workerVo.getUuid());
+                        if (teamVo != null) {
+                            workerVo.setWorker(new WorkAssignmentUnitVo(teamVo));
+                            workerVo.setName(teamVo.getName());
+                        }
+                    } else if (workerVo.getType().equals(GroupSearch.ROLE.getValue())) {
+                        RoleVo roleVo = roleMap.get(workerVo.getUuid());
+                        if (roleVo != null) {
+                            workerVo.setWorker(new WorkAssignmentUnitVo(roleVo));
+                            workerVo.setName(roleVo.getName());
+                        }
+                    }
+                }
+                Map<String, String> hash2ConfigMap = new HashMap<>();
+                List<String> configHashList = processTaskStepList.stream().map(ProcessTaskStepVo::getConfigHash).filter(Objects::nonNull).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(configHashList)) {
+                    List<ProcessTaskStepConfigVo> configList = selectContentByHashMapper.getProcessTaskStepConfigListByHashList(configHashList);
+                    for (ProcessTaskStepConfigVo processTaskStepConfigVo : configList) {
+                        hash2ConfigMap.put(processTaskStepConfigVo.getHash(), processTaskStepConfigVo.getConfig());
+                    }
+                }
                 for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-                    processTaskService.setProcessTaskStepUser(processTaskStepVo);
+                    String stepConfig = hash2ConfigMap.get(processTaskStepVo.getConfigHash());
+                    if (StringUtils.isNotBlank(stepConfig)) {
+                        processTaskStepVo.setConfig(JSON.parseObject(stepConfig));
+                    } else {
+                        processTaskStepVo.setConfig(new JSONObject());
+                    }
+                    processTaskService.setProcessTaskStepUser(processTaskStepVo, processTaskStepUserList, processTaskStepWorkerList);
                     List<ProcessTaskStepUserVo> minorUserList = processTaskStepVo.getMinorUserList();
                     if (CollectionUtils.isNotEmpty(minorUserList)) {
                         setMinorUserTaskType(processTaskStepVo, minorUserList);
@@ -125,6 +225,7 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
                     processTaskStepVo.setSlaTimeList(null);
                     processTaskStepVo.setUserList(null);
                     processTaskStepVo.setWorkerPolicyList(null);
+                    processTaskStepVo.setConfig(null);
                 }
             }
             List<ProcessTaskStepRelVo> processTaskStepRelVoList = processTaskMapper.getProcessTaskStepRelByProcessTaskId(processTaskId);
@@ -199,8 +300,17 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
      */
     private void setMinorUserTaskType(ProcessTaskStepVo processTaskStepVo, List<ProcessTaskStepUserVo> minorUserList) {
         Map<String, Set<String>> userUuidTaskConfigNameMap = new HashMap<>();
-        String stepConfigStr = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-        JSONObject taskConfig = (JSONObject) JSONPath.read(stepConfigStr, "taskConfig");
+        JSONObject stepConfigObj = processTaskStepVo.getConfig();
+        if (stepConfigObj == null) {
+            String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+            if (StringUtils.isNotBlank(config)) {
+                stepConfigObj = JSONObject.parseObject(config);
+            } else {
+                stepConfigObj = new JSONObject();
+            }
+            processTaskStepVo.setConfig(stepConfigObj);
+        }
+        JSONObject taskConfig = stepConfigObj.getJSONObject("taskConfig");
         if (MapUtils.isNotEmpty(taskConfig)) {
             JSONArray idArray = taskConfig.getJSONArray("idList");
             if (CollectionUtils.isNotEmpty(idArray)) {

@@ -15,19 +15,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.api.processtask.task;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.framework.process.dto.ProcessTaskStepVo;
-import neatlogic.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskStepTaskService;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
@@ -35,7 +31,7 @@ import javax.annotation.Resource;
  * @author lvzk
  * @since 2021/8/31 11:03
  **/
-@Service
+//@Service
 @OperationType(type = OperationTypeEnum.OPERATE)
 @AuthAction(action = PROCESS_BASE.class)
 @Deprecated
@@ -68,14 +64,15 @@ public class ProcessTaskStepTaskGetApi extends PrivateApiComponentBase {
     @Description(desc = "获取工单步骤任务接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        Long processTaskStepId = jsonObj.getLong("id");
-        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-        if(processTaskStepVo == null){
-            throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
-        }
-        if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStepStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-            processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
-        }
-        return processTaskStepVo.getProcessTaskStepTask();
+//        Long processTaskStepId = jsonObj.getLong("id");
+//        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+//        if(processTaskStepVo == null){
+//            throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
+//        }
+//        if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStepStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+//            processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
+//        }
+//        return processTaskStepVo.getProcessTaskStepTask();
+        return null;
     }
 }

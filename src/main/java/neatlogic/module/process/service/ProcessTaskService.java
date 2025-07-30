@@ -147,6 +147,12 @@ public interface ProcessTaskService {
     public void setProcessTaskStepUser(ProcessTaskStepVo processTaskStepVo);
 
     /**
+     * @param processTaskStepVo
+     * @Description: 设置步骤处理人、协助处理人、待办人等
+     */
+    void setProcessTaskStepUser(ProcessTaskStepVo processTaskStepVo, List<ProcessTaskStepUserVo> processTaskStepUserList, List<ProcessTaskStepWorkerVo> processTaskStepWorkerList);
+
+    /**
      * @param jsonObj
      * @param processTaskStepReplyVo 旧的回复数据
      * @return boolean 如果保存成功返回true，否则返回false

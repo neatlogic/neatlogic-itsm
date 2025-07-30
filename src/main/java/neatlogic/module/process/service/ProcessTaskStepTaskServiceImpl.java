@@ -255,10 +255,12 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             for (ProcessTaskStepTaskUserVo processTaskStepTaskUserVo : processTaskStepTaskUserList) {
                 workerList.add(GroupSearch.USER.getValuePlugin() + processTaskStepTaskUserVo.getUserUuid());
             }
+            JSONArray workerArray = new JSONArray();
+            workerArray.addAll(workerList);
             JSONObject paramObj = new JSONObject();
             paramObj.put("replaceable_task", taskConfigVo.getName());
             paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskStepTaskVo.getContent());
-            paramObj.put(ProcessTaskAuditDetailType.WORKERLIST.getParamName(), JSONObject.toJSONString(workerList));
+            paramObj.put(ProcessTaskAuditDetailType.WORKERLIST.getParamName(), workerArray.toJSONString());
             paramObj.put("source", source);
             processTaskStepVo.getParamObj().putAll(paramObj);
             processStepHandlerUtil.audit(processTaskStepVo, auditType);
@@ -664,6 +666,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
      * @param processTaskStepVo 步骤vo
      */
     @Override
+    @Deprecated
     public void getProcessTaskStepTask(ProcessTaskStepVo processTaskStepVo) {
         //任务列表
         Map<String, List<ProcessTaskStepTaskVo>> stepTaskVoMap = new HashMap<>();

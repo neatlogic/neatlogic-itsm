@@ -1,5 +1,8 @@
 package neatlogic.module.process.audithandler.handler;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
 import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeDataConversionHandler;
@@ -8,23 +11,19 @@ import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskAuditFormAttributeDataVo;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import neatlogic.framework.process.dto.ProcessTaskFormVo;
 import neatlogic.framework.process.dto.ProcessTaskStepAuditDetailVo;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.util.FormUtil;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStaticDataMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,10 +32,8 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 
     private final static Logger logger = LoggerFactory.getLogger(FormAuditHandler.class);
 
-    @Autowired
-    private ProcessTaskMapper processTaskMapper;
-    @Autowired
-    private SelectContentByHashMapper selectContentByHashMapper;
+    @Resource
+    private ProcessTaskStaticDataMapper processTaskStaticDataMapper;
 
     @Override
     public String getType() {
@@ -79,7 +76,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
             return 0;
         }
         Long processTaskId = processTaskFormAttributeDataList.get(0).getProcessTaskId();
-        ProcessTaskFormVo processTaskForm = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
+        ProcessTaskFormVo processTaskForm = processTaskStaticDataMapper.getProcessTaskFormByProcessTaskId(processTaskId);
         if (processTaskForm == null || StringUtils.isBlank(processTaskForm.getFormContent())) {
             return 0;
         }

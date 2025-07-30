@@ -34,6 +34,21 @@
         WHERE `processtask_step_id` = #{value}
     </select>
 
+    <select id="getProcessTaskActionListByProcessTaskId" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskActionVo">
+        SELECT
+            `id`,
+            `processtask_id` AS processTaskId,
+            `processtask_step_id` AS processTaskStepId,
+            `trigger`,
+            `integration_uuid` AS integrationUuid,
+            `trigger_time` AS triggerTime,
+            `status`,
+            `error`,
+            `config` AS configStr
+        FROM `processtask_action`
+        WHERE `processtask_id` = #{value}
+    </select>
+
     <insert id="insertProcessTaskAction" parameterType="neatlogic.framework.process.dto.ProcessTaskActionVo">
         INSERT INTO `processtask_action` (
             `id`,

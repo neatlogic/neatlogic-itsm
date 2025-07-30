@@ -1013,6 +1013,7 @@
         <result column="type" property="type"/>
         <result column="handler" property="handler"/>
         <result column="is_active" property="isActive"/>
+        <result column="active_time" property="activeTime"/>
         <result column="start_time" property="startTime"/>
         <result column="end_time" property="endTime"/>
         <result column="error" property="error"/>
@@ -1054,6 +1055,7 @@
         `active_time`,
         `start_time`,
         `end_time`,
+        `error`,
         `expire_time`,
         `config_hash`
         FROM `processtask_step`
@@ -1339,6 +1341,18 @@
             `uuid`
         FROM `processtask_step_content_target`
         WHERE `content_id` = #{value}
+    </select>
+
+    <select id="getTargetListByContentIdList" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskStepContentTargetVo">
+        SELECT
+            `content_id` AS contentId,
+            `type`,
+            `uuid`
+        FROM `processtask_step_content_target`
+        WHERE `content_id` IN
+        <foreach collection="list" item="contentId" open="(" separator="," close=")">
+            #{contentId}
+        </foreach>
     </select>
 
     <select id="getProcessTaskStepContentById" parameterType="java.lang.Long"

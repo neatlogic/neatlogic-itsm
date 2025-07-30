@@ -136,6 +136,24 @@
         where pst.`processtask_step_id` = #{value}
     </select>
 
+    <select id="getStepTaskByProcessTaskId"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepTaskVo" useCache="false">
+        SELECT pst.`processtask_id`      as processTaskId,
+               pst.`processtask_step_id` as processTaskStepId,
+               pst.`id`,
+               pst.`owner`,
+               pst.`create_time`         as createTime,
+               pst.`end_time`            as endTime,
+               pst.`task_config_id`      as taskConfigId,
+               pc.`content`,
+               tc.`policy`               as taskConfigPolicy,
+               tc.`name`                 as taskConfigName
+        FROM `processtask_step_task` pst
+                 left join `task_config` tc on pst.`task_config_id` = tc.`id`
+                 left join `processtask_content` pc on pst.`content_hash` = pc.hash
+        WHERE pst.`processtask_id` = #{value}
+    </select>
+
     <select id="getStepTaskByProcessTaskStepId"
             resultType="neatlogic.framework.process.dto.ProcessTaskStepTaskVo" useCache="false">
         SELECT pst.`processtask_id`      as processTaskId,
@@ -175,9 +193,10 @@
         <result column="status" property="status"/>
         <result column="isDelete" property="isDelete"/>
         <association property="userVo" javaType="neatlogic.framework.dto.UserVo">
+            <result property="id" column="userId"/>
             <result property="uuid" column="userUuid"/>
             <result property="userName" column="userName"/>
-            <result property="userId" column="userId"/>
+            <result property="userId" column="UserUserId"/>
             <result property="userInfo" column="userInfo"/>
             <result property="vipLevel" column="userVipLevel"/>
             <result property="pinyin" column="userPinyin"/>
@@ -187,12 +206,13 @@
     <select id="getStepTaskUserByStepTaskIdList" resultMap="stepTaskUserMap" useCache="false">
         SELECT pstu.`id`,
         pstu.`processtask_step_task_id` as processTaskStepTaskId,
-        pstu.`user_uuid` as userUuid,
+        u.id as userId,
         u.pinyin as pinyin,
         u.user_info as userInfo,
         u.vip_level as userLevel,
         u.user_name as userName,
-        u.user_id as userId,
+        u.user_id as UserUserId,
+        u.uuid as userUuid,
         pstu.`end_time` as endTime,
         pstu.`status`,
         pstu.`is_delete` as isDelete

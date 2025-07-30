@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+ * Copyright (C) 2025  深圳极向量科技有限公司 All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,15 +17,8 @@
 
 package neatlogic.module.process.dao.mapper.processtask;
 
-import neatlogic.framework.process.dto.ProcessTaskActionVo;
+import neatlogic.framework.process.dto.ProcessTaskFormVo;
 
-import java.util.List;
-
-public interface ProcessTaskActionMapper {
-
-    List<ProcessTaskActionVo> getProcessTaskActionListByProcessTaskStepId(Long processTaskStepId);
-
-    List<ProcessTaskActionVo> getProcessTaskActionListByProcessTaskId(Long processTaskId);
-
-    int insertProcessTaskAction(ProcessTaskActionVo processTaskActionVo);
+public interface ProcessTaskStaticDataMapper {
+    ProcessTaskFormVo getProcessTaskFormByProcessTaskId(Long processTaskId);
 }

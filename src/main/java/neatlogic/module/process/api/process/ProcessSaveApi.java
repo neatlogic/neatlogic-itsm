@@ -59,6 +59,7 @@ public class ProcessSaveApi extends PrivateApiComponentBase {
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "流程uuid")
     })
     @Description(desc = "保存流程")
+    @ResubmitInterval(value = 2)
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessVo processVo = JSON.toJavaObject(jsonObj, ProcessVo.class);
         ProcessMessageManager.setOperationType(OperationTypeEnum.UPDATE);
