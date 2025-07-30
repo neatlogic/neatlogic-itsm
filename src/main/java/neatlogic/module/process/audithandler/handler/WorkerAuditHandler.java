@@ -1,18 +1,6 @@
 package neatlogic.module.process.audithandler.handler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import neatlogic.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
-
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
@@ -20,8 +8,18 @@ import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.RoleVo;
 import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;
 import neatlogic.framework.process.dto.ProcessTaskStepAuditDetailVo;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 @Service
 public class WorkerAuditHandler implements IProcessTaskStepAuditDetailHandler {
 	
@@ -43,7 +41,21 @@ public class WorkerAuditHandler implements IProcessTaskStepAuditDetailHandler {
 		List<Map<String, String>> resultList = new ArrayList<>();
 		List<String> workerList = new ArrayList<>();
 		if(content.startsWith("[") && content.endsWith("]")) {
-		    workerList = JSON.parseArray(content, String.class);
+			if (content.length() > 2) {
+				if(content.startsWith("[\"") && content.endsWith("\"]")) {
+					workerList = JSON.parseArray(content, String.class);
+				} else {
+					String subStr = content.substring(1, content.length() - 1);
+					if (subStr.contains(",")) {
+						String[] split = subStr.split(",");
+						for (String str : split) {
+							workerList.add(str.trim());
+						}
+					} else {
+						workerList.add(subStr.trim());
+					}
+				}
+			}
 		}else {
 		    workerList.add(content);
 		}
