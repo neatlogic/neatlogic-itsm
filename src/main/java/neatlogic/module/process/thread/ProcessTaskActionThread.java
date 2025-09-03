@@ -247,7 +247,7 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                         processTaskActionMapper.insertProcessTaskAction(actionVo);
                         currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.RESTFULACTION.getParamName(), JSON.toJSONString(actionVo));
                         ProcessTaskAuditThread.audit(currentProcessTaskStepVo, ProcessTaskAuditType.RESTFULACTION);
-                        break;
+//                        break;
                     }
                 }
             }
