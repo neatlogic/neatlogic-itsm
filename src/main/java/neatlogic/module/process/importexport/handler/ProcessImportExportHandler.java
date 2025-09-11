@@ -388,8 +388,8 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
                             }
                         }
                     }
-                } else if (Objects.equals(handler, "autoexec")) {
-                    JSONObject autoexecConfig = stepConfig.getJSONObject("autoexecConfig");
+                } else if (Objects.equals(handler, "createjob")) {
+                    JSONObject autoexecConfig = stepConfig.getJSONObject("createJobConfig");
                     if (MapUtils.isNotEmpty(autoexecConfig)) {
                         JSONArray configList = autoexecConfig.getJSONArray("configList");
                         if (CollectionUtils.isNotEmpty(configList)) {
@@ -398,17 +398,20 @@ public class ProcessImportExportHandler extends ImportExportHandlerBase {
                                 if (MapUtils.isEmpty(configObj)) {
                                     continue;
                                 }
-                                Long autoexecCombopId = configObj.getLong("autoexecCombopId");
-                                if (autoexecCombopId == null) {
-                                    continue;
-                                }
-                                if (action == IMPORT) {
-                                    Object newPrimaryKey = getNewPrimaryKey(FrameworkImportExportHandlerType.AUTOEXEC_COMBOP, autoexecCombopId, primaryChangeList);
-                                    if (newPrimaryKey != null) {
-                                        configObj.put("autoexecCombopId", newPrimaryKey);
+                                String type = configObj.getString("type");
+                                if (Objects.equals(type, "combop")) {
+                                    Long autoexecCombopId = configObj.getLong("combopId");
+                                    if (autoexecCombopId == null) {
+                                        continue;
                                     }
-                                } else if (action == EXPORT) {
-                                    doExportData(FrameworkImportExportHandlerType.AUTOEXEC_COMBOP, autoexecCombopId, dependencyList, zipOutputStream);
+                                    if (action == IMPORT) {
+                                        Object newPrimaryKey = getNewPrimaryKey(FrameworkImportExportHandlerType.AUTOEXEC_COMBOP, autoexecCombopId, primaryChangeList);
+                                        if (newPrimaryKey != null) {
+                                            configObj.put("combopId", newPrimaryKey);
+                                        }
+                                    } else if (action == EXPORT) {
+                                        doExportData(FrameworkImportExportHandlerType.AUTOEXEC_COMBOP, autoexecCombopId, dependencyList, zipOutputStream);
+                                    }
                                 }
                             }
                         }
