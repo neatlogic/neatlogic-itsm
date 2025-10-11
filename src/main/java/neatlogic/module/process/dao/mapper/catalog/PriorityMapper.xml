@@ -18,7 +18,13 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="neatlogic.module.process.dao.mapper.catalog.PriorityMapper">
-	<cache type="neatlogic.framework.dao.cache.NeatLogicCache" flushInterval="30000" size="100"></cache>
+    <cache type="neatlogic.framework.dao.cache.NeatLogicCache" flushInterval="30000" size="100">
+        <!-- 二选一：TTI 或 TTL（都配的话以 TTL 为准，见下方实现） -->
+        <property name="timeToIdleSeconds" value="300"/>
+        <!-- <property name="timeToLiveSeconds" value="300"/> -->
+        <!-- Ehcache 堆内条目数 -->
+        <property name="heapEntries" value="100"/>
+    </cache>
 	<select id="searchPriorityCount" parameterType="neatlogic.framework.process.dto.PriorityVo" resultType="int" useCache="false">
 		SELECT
 		COUNT(p.`uuid`)
