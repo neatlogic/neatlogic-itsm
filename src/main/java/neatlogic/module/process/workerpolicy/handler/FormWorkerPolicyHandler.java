@@ -6,10 +6,13 @@ import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.RoleVo;
+import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeDataConversionHandler;
 import neatlogic.framework.form.constvalue.FormHandler;
+import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.process.constvalue.ProcessUserType;
 import neatlogic.framework.process.constvalue.WorkerPolicy;
@@ -18,14 +21,13 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import neatlogic.framework.process.dto.ProcessTaskStepWorkerVo;
 import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,18 +52,15 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
         return 0;
     }
 
-    @Autowired
-    private ProcessTaskMapper processTaskMapper;
-
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
-    @Autowired
+    @Resource
     private TeamMapper teamMapper;
 
-    @Autowired
+    @Resource
     private RoleMapper roleMapper;
-    @Autowired
+    @Resource
     private ProcessTaskService processTaskService;
 
     @Override
@@ -69,13 +68,13 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                                                  ProcessTaskStepVo currentProcessTaskStepVo) {
         List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = new ArrayList<>();
         if (MapUtils.isNotEmpty(workerPolicyVo.getConfigObj())) {
-            /** 选择的表单属性uuid **/
+            /* 选择的表单属性uuid */
             JSONArray attributeUuidArray = workerPolicyVo.getConfigObj().getJSONArray("attributeUuidList");
             if (CollectionUtils.isNotEmpty(attributeUuidArray)) {
                 List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-                Map<String, ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
+                Map<String, ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(AttributeDataVo::getAttributeUuid, e -> e));
                 List<FormAttributeVo> formAttributeList = processTaskService.getFormAttributeListByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-                Map<String, FormAttributeVo> formAttributeMap = formAttributeList.stream().collect(Collectors.toMap(e -> e.getUuid(), e -> e));
+                Map<String, FormAttributeVo> formAttributeMap = formAttributeList.stream().collect(Collectors.toMap(FormAttributeVo::getUuid, e -> e));
                 List<String> attributeUuidList = attributeUuidArray.toJavaList(String.class);
                 for (String attributeUuid : attributeUuidList) {
                     FormAttributeVo formAttributeVo = formAttributeMap.get(attributeUuid);
@@ -90,7 +89,7 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                     if (dataObj == null) {
                         continue;
                     }
-                    /** 只有表单属性类型为用户选择器才生效 **/
+                    /* 只有表单属性类型为用户选择器才生效 */
                     if (FormHandler.FORMUSERSELECT.getHandler().equals(processTaskFormAttributeData.getHandler())) {
                         IFormAttributeDataConversionHandler handler = FormAttributeDataConversionHandlerFactory.getHandler(FormHandler.FORMUSERSELECT.getHandler());
                         if (handler != null) {
@@ -99,28 +98,11 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                             if (CollectionUtils.isNotEmpty(valueList)) {
                                 List<String> dataList = valueList.toJavaList(String.class);
                                 for (String value : dataList) {
-                                    /** 校验属性值是否合法，只有是当前存在的用户、组、角色才合法 **/
+                                    /* 校验属性值是否合法，只有是当前存在的用户、组、角色才合法 */
                                     if (value.contains("#")) {
                                         String[] split = value.split("#");
-                                        if (GroupSearch.USER.getValue().equals(split[0])) {
-                                            if (userMapper.checkUserIsExists(split[1]) == 0) {
-                                                continue;
-                                            }
-                                        } else if (GroupSearch.TEAM.getValue().equals(split[0])) {
-                                            if (teamMapper.checkTeamIsExists(split[1]) == 0) {
-                                                continue;
-                                            }
-                                        } else if (GroupSearch.ROLE.getValue().equals(split[0])) {
-                                            if (roleMapper.checkRoleIsExists(split[1]) == 0) {
-                                                continue;
-                                            }
-                                        } else {
-                                            continue;
-                                        }
-                                        processTaskStepWorkerList.add(
-                                                new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
-                                                        currentProcessTaskStepVo.getId(), split[0], split[1],
-                                                        ProcessUserType.MAJOR.getValue()));
+                                        List<ProcessTaskStepWorkerVo> list = generateProcessTaskStepWorkerVo(split[1], split[0], currentProcessTaskStepVo);
+                                        processTaskStepWorkerList.addAll(list);
                                     }
                                 }
                             }
@@ -134,38 +116,141 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                                 List<String> dataList = valueList.toJavaList(String.class);
                                 for (String value : dataList) {
                                     if (StringUtils.isNotBlank(value)) {
-                                        if (userMapper.checkUserIsExists(value) > 0) {
-                                            processTaskStepWorkerList.add(
-                                                    new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
-                                                            currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(),
-                                                            value, ProcessUserType.MAJOR.getValue()));
-                                        } else if (teamMapper.checkTeamIsExists(value) > 0) {
-                                            processTaskStepWorkerList.add(
-                                                    new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
-                                                            currentProcessTaskStepVo.getId(), GroupSearch.TEAM.getValue(),
-                                                            value, ProcessUserType.MAJOR.getValue()));
-                                        } else if (roleMapper.checkRoleIsExists(value) > 0) {
-                                            processTaskStepWorkerList.add(
-                                                    new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
-                                                            currentProcessTaskStepVo.getId(), GroupSearch.ROLE.getValue(),
-                                                            value, ProcessUserType.MAJOR.getValue()));
-                                        } else {
-                                            UserVo user = userMapper.getUserByUserId(value);
-                                            if (user != null && Objects.equals(user.getIsActive(), 1)) {
-                                                processTaskStepWorkerList.add(
-                                                        new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
-                                                                currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(),
-                                                                user.getUuid(), ProcessUserType.MAJOR.getValue()));
-                                            }
-                                        }
+                                        List<ProcessTaskStepWorkerVo> list = generateProcessTaskStepWorkerVo(value, null, currentProcessTaskStepVo);
+                                        processTaskStepWorkerList.addAll(list);
                                     }
                                 }
                             }
                         }
+                    } else if (Objects.equals(formAttributeVo.getHandler(), FormHandler.FORMTEXT.getHandler())) {
+                        List<ProcessTaskStepWorkerVo> list = generateProcessTaskStepWorkerVo(dataObj.toString(), null, currentProcessTaskStepVo);
+                        processTaskStepWorkerList.addAll(list);
                     }
                 }
             }
         }
         return processTaskStepWorkerList;
+    }
+
+    private List<ProcessTaskStepWorkerVo> generateProcessTaskStepWorkerVo(String value, String type, ProcessTaskStepVo currentProcessTaskStepVo) {
+        List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = new ArrayList<>();
+        if (StringUtils.isNotBlank(type)) {
+            if (Objects.equals(type, GroupSearch.USER.getValue())) {
+                List<UserVo> userList = searchUserList(value);
+                for (UserVo user : userList) {
+                    processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(
+                            currentProcessTaskStepVo.getProcessTaskId(),
+                            currentProcessTaskStepVo.getId(),
+                            GroupSearch.USER.getValue(),
+                            user.getUuid(),
+                            ProcessUserType.MAJOR.getValue())
+                    );
+                }
+            } else if (Objects.equals(type, GroupSearch.TEAM.getValue())) {
+                List<TeamVo> teamList = searchTeamList(value);
+                for (TeamVo teamVo : teamList) {
+                    processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
+                            currentProcessTaskStepVo.getId(), GroupSearch.TEAM.getValue(),
+                            teamVo.getUuid(), ProcessUserType.MAJOR.getValue()));
+                }
+            } else if (Objects.equals(type, GroupSearch.ROLE.getValue())) {
+                RoleVo roleVo = searchRole(value);
+                if (roleVo != null) {
+                    processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(
+                            currentProcessTaskStepVo.getProcessTaskId(),
+                            currentProcessTaskStepVo.getId(),
+                            GroupSearch.ROLE.getValue(),
+                            roleVo.getUuid(),
+                            ProcessUserType.MAJOR.getValue()
+                    ));
+                }
+            }
+        } else {
+            List<UserVo> userList = searchUserList(value);
+            if (CollectionUtils.isNotEmpty(userList)) {
+                for (UserVo user : userList) {
+                    processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(
+                            currentProcessTaskStepVo.getProcessTaskId(),
+                            currentProcessTaskStepVo.getId(),
+                            GroupSearch.USER.getValue(),
+                            user.getUuid(),
+                            ProcessUserType.MAJOR.getValue())
+                    );
+                }
+            } else {
+                List<TeamVo> teamList = searchTeamList(value);
+                if (CollectionUtils.isNotEmpty(teamList)) {
+                    for (TeamVo teamVo : teamList) {
+                        processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),
+                                currentProcessTaskStepVo.getId(), GroupSearch.TEAM.getValue(),
+                                teamVo.getUuid(), ProcessUserType.MAJOR.getValue()));
+                    }
+                } else {
+                    RoleVo roleVo = searchRole(value);
+                    if (roleVo != null) {
+                        processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(
+                                currentProcessTaskStepVo.getProcessTaskId(),
+                                currentProcessTaskStepVo.getId(),
+                                GroupSearch.ROLE.getValue(),
+                                roleVo.getUuid(),
+                                ProcessUserType.MAJOR.getValue()
+                        ));
+                    }
+                }
+            }
+        }
+        return processTaskStepWorkerList;
+    }
+
+    private List<UserVo> searchUserList(String value) {
+        List<UserVo> userList = new ArrayList<>();
+        UserVo userVo = userMapper.getUserByUser(value);
+        if (userVo != null) {
+            if (Objects.equals(userVo.getIsActive(), 1)) {
+                userList.add(userVo);
+            }
+        } else {
+            List<String> userUuidList = userMapper.getUserUuidListByUserName(value);
+            if (CollectionUtils.isNotEmpty(userUuidList)) {
+                List<UserVo> list = userMapper.getUserByUserUuidList(userUuidList);
+                if (CollectionUtils.isNotEmpty(list)) {
+                    for (UserVo user : list) {
+                        if (user != null && Objects.equals(user.getIsActive(), 1)) {
+                            userList.add(user);
+
+                        }
+                    }
+                }
+            }
+        }
+        return userList;
+    }
+
+    private List<TeamVo> searchTeamList(String value) {
+        List<TeamVo> teamList = new ArrayList<>();
+        TeamVo teamVo = teamMapper.getTeamByUuid(value);
+        if (teamVo != null) {
+            teamList.add(teamVo);
+        } else {
+            List<String> teamUuidList = teamMapper.getTeamUuidByName(value);
+            if (CollectionUtils.isNotEmpty(teamUuidList)) {
+                List<TeamVo> list = teamMapper.getTeamByUuidList(teamUuidList);
+                teamList.addAll(list);
+            }
+        }
+        return teamList;
+    }
+
+    private RoleVo searchRole(String value) {
+        RoleVo roleVo = roleMapper.getRoleSimpleInfoByUuid(value);
+        if (roleVo != null && Objects.equals(roleVo.getIsDelete(), 0)) {
+            return roleVo;
+        } else {
+            RoleVo role = roleMapper.getRoleByName(value);
+            if (role != null && Objects.equals(role.getIsDelete(), 0)) {
+                return role;
+            }
+        }
+        return null;
     }
 }
