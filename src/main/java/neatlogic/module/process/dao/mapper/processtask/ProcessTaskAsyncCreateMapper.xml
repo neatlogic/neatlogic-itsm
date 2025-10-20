@@ -102,7 +102,7 @@
                 #{processTaskId},
                 #{title},
                 #{status},
-                #{configStr},
+                #{configStr, typeHandler=CompressHandler},
                 0,
                 #{serverId},
                 #{fcu},
@@ -114,7 +114,7 @@
         UPDATE `processtask_async_create`
         SET
             `status` = #{status},
-            `error` = #{error},
+            `error` = #{error, typeHandler=CompressHandler},
             `try_count` = `try_count` + 1,
             `lcd` = NOW(3)
         WHERE `id` = #{id}
@@ -143,7 +143,7 @@
             `server_id` = #{serverId},
         </if>
         <if test="configStr != null and configStr != ''">
-            `config` = #{configStr},
+            `config` = #{configStr, typeHandler=CompressHandler},
         </if>
             `lcd` = NOW(3)
         WHERE `id` = #{id}

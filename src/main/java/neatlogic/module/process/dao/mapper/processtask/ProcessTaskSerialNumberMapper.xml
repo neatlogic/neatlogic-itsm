@@ -68,7 +68,7 @@
 		(
 		#{channelTypeUuid},
 		#{handler},
-		#{configStr},
+		#{configStr, typeHandler=CompressHandler},
 		#{serialNumberSeed}
 		)
 	</insert>
@@ -81,7 +81,7 @@
 		UPDATE `processtask_serial_number_policy`
 		SET
 		`handler` = #{handler},
-		`config` = #{configStr}
+		`config` = #{configStr, typeHandler=CompressHandler}
 		WHERE `channel_type_uuid` = #{channelTypeUuid}
 	</update>
 

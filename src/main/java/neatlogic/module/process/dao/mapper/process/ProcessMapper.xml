@@ -549,7 +549,7 @@
 		#{type},
 		#{handler},
 		#{config, typeHandler=CompressHandler},
-		#{description}
+		#{description, typeHandler=CompressHandler}
 		)
 	</insert>
 
@@ -572,7 +572,7 @@
 				#{item.type},
 				#{item.handler},
 				#{item.config, typeHandler=CompressHandler},
-				#{item.description}
+				#{item.description, typeHandler=CompressHandler}
 			)
 		</foreach>
 	</insert>
@@ -591,7 +591,7 @@
 		#{processStepUuid},
 		#{policy},
 		#{sort},
-		#{config}
+		#{config, typeHandler=CompressHandler}
 		)
 	</insert>
 
