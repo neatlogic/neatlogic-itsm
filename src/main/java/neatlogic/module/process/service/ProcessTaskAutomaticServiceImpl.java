@@ -789,7 +789,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
         } else {
             // 人工处理
             try {
-                processHandler.assign(currentProcessTaskStepVo);
+                processHandler.assignAndUpdateStatus(currentProcessTaskStepVo);
             } catch (ProcessTaskException e) {
                 logger.error(e.getMessage(), e);
             }
