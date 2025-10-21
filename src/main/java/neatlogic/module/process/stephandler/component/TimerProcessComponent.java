@@ -253,7 +253,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                     IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
                     if (processStepHandler != null) {
                         try {
-                            processStepHandler.assign(currentProcessTaskStepVo);
+                            processStepHandler.assignAndUpdateStatus(currentProcessTaskStepVo);
                         } catch (ProcessTaskException e) {
                             logger.error(e.getMessage(), e);
                         }

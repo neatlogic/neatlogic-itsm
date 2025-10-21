@@ -120,7 +120,7 @@ public class ProcessTaskCallbackHandler extends AutoexecJobCallbackBase {
                     IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
                     if (processStepHandler != null) {
                         try {
-                            processStepHandler.assign(processTaskStepVo);
+                            processStepHandler.assignAndUpdateStatus(processTaskStepVo);
                         } catch (ProcessTaskException e) {
                             logger.error(e.getMessage(), e);
                         }
