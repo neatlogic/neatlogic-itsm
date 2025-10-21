@@ -757,7 +757,7 @@
                 #{contentHelp},
                 #{channelTypeUuid},
                 #{support},
-                #{configStr})
+                #{configStr, typeHandler=CompressHandler})
     </insert>
 
     <insert id="replaceChannelUser">
@@ -849,7 +849,7 @@
 
     <update id="updateChannelConfig" parameterType="neatlogic.framework.process.dto.ChannelVo">
         UPDATE `channel`
-        SET `config` = #{configStr}
+        SET `config` = #{configStr, typeHandler=CompressHandler}
         WHERE `uuid` = #{uuid}
     </update>
 

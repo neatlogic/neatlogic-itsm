@@ -91,7 +91,7 @@
 	VALUES
 	  (
 	    #{processTaskId},
-	    #{config}
+	    #{config, typeHandler=CompressHandler}
 	  ) 
 	</insert>
 	
@@ -100,7 +100,7 @@
 	</update>
 
 	<update id="updateProcessTaskAutoScoreErrorByProcessTaskId">
-		UPDATE `processtask_auto_score` SET `error` = #{error} WHERE `processtask_id` = #{processTaskId}
+		UPDATE `processtask_auto_score` SET `error` = #{error, typeHandler=CompressHandler} WHERE `processtask_id` = #{processTaskId}
 	</update>
 	
 	<delete id="deleteProcessTaskByProcessTaskId" parameterType="java.lang.Long">

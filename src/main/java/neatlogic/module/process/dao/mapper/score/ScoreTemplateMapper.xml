@@ -234,7 +234,7 @@
 		#{scoreTemplateId},
 		#{processUuid},
 		#{isAuto},
-		#{config}
+		#{config, typeHandler=CompressHandler}
 		)
 	</insert>
 
