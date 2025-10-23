@@ -3626,7 +3626,7 @@
 
     <insert id="insertProcessTaskScoreTemplateConfig"
             parameterType="neatlogic.framework.process.dto.ProcessTaskScoreTemplateConfigVo">
-        INSERT INTO `processtask_score_template_config` (`hash`, `config`)
+        INSERT IGNORE INTO `processtask_score_template_config` (`hash`, `config`)
         VALUES (#{hash}, #{config})
     </insert>
 
