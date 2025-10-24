@@ -612,7 +612,7 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
     }
 
     private List<TaskConfigVo> getAllTaskConfigList(List<ProcessTaskStepVo> processTaskStepList) {
-        JSONArray idList = new JSONArray();
+        Set<Long> idSet = new HashSet<>();
         for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
             JSONObject config = processTaskStepVo.getConfig();
             JSONObject taskConfig = config.getJSONObject("taskConfig");
@@ -621,15 +621,15 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
                 if (CollectionUtils.isNotEmpty(idArray)) {
                     for (int i = 0; i < idArray.size(); i++) {
                         Long id = idArray.getLong(i);
-                        if (id != null && !idList.contains(id)) {
-                            idList.add(id);
+                        if (id != null) {
+                            idSet.add(id);
                         }
                     }
                 }
             }
         }
-        if (CollectionUtils.isNotEmpty(idList)) {
-            return taskMapper.getTaskConfigByIdList(idList);
+        if (CollectionUtils.isNotEmpty(idSet)) {
+            return taskMapper.getTaskConfigByIdList(new ArrayList<>(idSet));
         }
         return new ArrayList<>();
     }

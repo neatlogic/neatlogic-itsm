@@ -677,9 +677,10 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         //默认存在所有task 的tab
         JSONObject taskConfig = getTaskConfig(processTaskStepVo.getConfigHash());
         if (MapUtils.isNotEmpty(taskConfig)) {
-            List<Long> taskConfigIdList = taskConfig.getJSONArray("idList").toJavaList(Long.class);
-            if (CollectionUtils.isNotEmpty(taskConfigIdList)) {
-                List<TaskConfigVo> taskConfigVoList = taskMapper.getTaskConfigByIdList(JSONArray.parseArray(JSON.toJSONString(taskConfigIdList)));
+            JSONArray idArray = taskConfig.getJSONArray("idList");
+            if (CollectionUtils.isNotEmpty(idArray)) {
+                List<Long> taskConfigIdList = idArray.toJavaList(Long.class);
+                List<TaskConfigVo> taskConfigVoList = taskMapper.getTaskConfigByIdList(taskConfigIdList);
                 for (TaskConfigVo taskConfigVo : taskConfigVoList) {
                     stepTaskVoMap.put(taskConfigVo.getName(), new ArrayList<>());
                 }
@@ -720,8 +721,9 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                     JSONObject stepConfigJson = JSONObject.parseObject(stepConfig);
                     JSONObject stepTaskConfigJson = stepConfigJson.getJSONObject("taskConfig");
                     if (MapUtils.isNotEmpty(stepTaskConfigJson)) {
-                        JSONArray stepTaskIdList = stepTaskConfigJson.getJSONArray("idList");
-                        if (CollectionUtils.isNotEmpty(stepTaskIdList)) {
+                        JSONArray idArray = stepTaskConfigJson.getJSONArray("idList");
+                        if (CollectionUtils.isNotEmpty(idArray)) {
+                            List<Long> stepTaskIdList = idArray.toJavaList(Long.class);
                             List<TaskConfigVo> taskConfigVoList = taskMapper.getTaskConfigByIdList(stepTaskIdList);
                             if (taskConfigVoList.size() != stepTaskIdList.size()) {
                                 throw new TaskConfigException(processTaskStepVo.getName());
@@ -755,7 +757,8 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         if (CollectionUtils.isEmpty(idArray)) {
             return null;
         }
-        List<TaskConfigVo> taskConfigList = taskMapper.getTaskConfigByIdList(idArray);
+        List<Long> idList = idArray.toJavaList(Long.class);
+        List<TaskConfigVo> taskConfigList = taskMapper.getTaskConfigByIdList(idList);
         if (CollectionUtils.isEmpty(taskConfigList)) {
             return null;
         }
