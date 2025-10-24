@@ -29,9 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -125,7 +123,19 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
                     }
                 }
             }
-            List<TaskConfigVo> configVoList = taskMapper.getTaskConfigByIdList(JSON.parseArray(JSON.toJSONString(valueList.stream().map(v -> v.replace(getHeader(), "")).collect(Collectors.toList()))));
+            Set<Long> idSet = new HashSet<>();
+            for (String value : valueList) {
+                String str = value.replace(getHeader(), "");
+                if (StringUtils.isNotBlank(str)) {
+                    try {
+                        long id = Long.parseLong(str);
+                        idSet.add(id);
+                    } catch (NumberFormatException e) {
+                        // ignore
+                    }
+                }
+            }
+            List<TaskConfigVo> configVoList = taskMapper.getTaskConfigByIdList(new ArrayList<>(idSet));
             if (CollectionUtils.isNotEmpty(configVoList)) {
                 configVoList.forEach(o -> {
                     GroupSearchOptionVo groupSearchOptionVo = new GroupSearchOptionVo();

@@ -41,7 +41,7 @@ public interface TaskMapper extends ITaskCrossoverMapper {
 
     TaskConfigVo getTaskConfigByName(String name);
 
-    List<TaskConfigVo> getTaskConfigByIdList(JSONArray stepTaskIdList);
+    List<TaskConfigVo> getTaskConfigByIdList(List<Long> stepTaskIdList);
 
     List<Map<String,Long>> getTaskConfigReferenceCountMap(List<Long> idList);
 

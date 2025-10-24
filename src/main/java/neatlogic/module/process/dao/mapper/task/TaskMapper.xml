@@ -92,7 +92,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
         FROM `task_config`
         WHERE `name` = #{value}
     </select>
-    <select id="getTaskConfigByIdList" resultType="neatlogic.framework.process.dto.TaskConfigVo" useCache="false">
+    <select id="getTaskConfigByIdList" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.TaskConfigVo" useCache="false">
         SELECT
         `id`,
         `name`,
