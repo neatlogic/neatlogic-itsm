@@ -135,14 +135,16 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
                     }
                 }
             }
-            List<TaskConfigVo> configVoList = taskMapper.getTaskConfigByIdList(new ArrayList<>(idSet));
-            if (CollectionUtils.isNotEmpty(configVoList)) {
-                configVoList.forEach(o -> {
-                    GroupSearchOptionVo groupSearchOptionVo = new GroupSearchOptionVo();
-                    groupSearchOptionVo.setValue(getHeader() + o.getId().toString());
-                    groupSearchOptionVo.setText(o.getName() + $.t("common.worker"));
-                    userTypeList.add(groupSearchOptionVo);
-                });
+            if (CollectionUtils.isNotEmpty(idSet)) {
+                List<TaskConfigVo> configVoList = taskMapper.getTaskConfigByIdList(new ArrayList<>(idSet));
+                if (CollectionUtils.isNotEmpty(configVoList)) {
+                    configVoList.forEach(o -> {
+                        GroupSearchOptionVo groupSearchOptionVo = new GroupSearchOptionVo();
+                        groupSearchOptionVo.setValue(getHeader() + o.getId().toString());
+                        groupSearchOptionVo.setText(o.getName() + $.t("common.worker"));
+                        userTypeList.add(groupSearchOptionVo);
+                    });
+                }
             }
         }
         return userTypeList;
