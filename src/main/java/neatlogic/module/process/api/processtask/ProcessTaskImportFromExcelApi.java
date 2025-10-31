@@ -19,7 +19,6 @@ import neatlogic.framework.process.exception.process.ProcessNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import neatlogic.framework.util.ExcelUtil;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
@@ -327,7 +326,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             for (int i = 0; i < channelRow.getPhysicalNumberOfCells(); i++) {
                 Cell cell = channelRow.getCell(i);
                 if (cell != null) {
-                    String content = ExcelUtil.getCellContent(cell);
+                    String content = getCellContent(cell);
                     if (StringUtils.isNotBlank(content)) {
                         channelData.add(content);
                     }
@@ -343,7 +342,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             while (cellIterator.hasNext()) {
                 Cell cell = cellIterator.next();
                 if (cell != null) {
-                    String content = ExcelUtil.getCellContent(cell);
+                    String content = getCellContent(cell);
                     if (StringUtils.isNotBlank(content)) {
                         headerList.add(content);
                         cellIndex.add(cell.getColumnIndex());
@@ -360,7 +359,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                     for (int ci = 0; ci < cellIndex.size(); ci++) {
                         Cell cell = row.getCell(cellIndex.get(ci));
                         if (cell != null) {
-                            String content = ExcelUtil.getCellContent(cell);
+                            String content = getCellContent(cell);
                             contentMap.put(headerList.get(ci), content);
                         } else {
                             contentMap.put(headerList.get(ci), null);
@@ -379,5 +378,32 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             }
         }
         return resultMap;
+    }
+
+    private String getCellContent(Cell cell) {
+        String cellContent = "";
+        switch (cell.getCellType()) {
+            case NUMERIC:
+                cellContent = (int) cell.getNumericCellValue() + "";
+                break;
+            case STRING:
+                cellContent = cell.getStringCellValue() + "";
+                break;
+            case BOOLEAN:
+                cellContent = cell.getBooleanCellValue() + "";
+                break;
+            case BLANK:
+                cellContent = "blank";
+                break;
+            case FORMULA:
+                cellContent = cell.getCellFormula() + "";
+                break;
+            case ERROR:
+                cellContent = "error";
+                break;
+            default:
+                break;
+        }
+        return cellContent;
     }
 }

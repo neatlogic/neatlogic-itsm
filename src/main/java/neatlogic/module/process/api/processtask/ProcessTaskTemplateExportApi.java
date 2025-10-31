@@ -11,6 +11,9 @@ import neatlogic.framework.form.dto.FormVo;
 import neatlogic.framework.form.exception.FormActiveVersionNotFoundExcepiton;
 import neatlogic.framework.form.exception.FormNotFoundException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.util.FileUtil;
+import neatlogic.framework.util.excel.ExcelBuilder;
+import neatlogic.framework.util.excel.SheetBuilder;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
@@ -19,15 +22,15 @@ import neatlogic.framework.process.util.ProcessConfigUtil;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import neatlogic.framework.util.ExcelUtil;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -35,9 +38,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @SuppressWarnings("deprecation")
@@ -150,50 +152,46 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
         channelData.add("服务UUID(禁止修改)：");
         channelData.add(channelUuid);
         channelData.add("注意：不支持导入静态列表与动态列表，多个值之间用英文逗号\",\"隔开；单元格格式统一为文本");
-        OutputStream os = null;
-        Workbook workbook = new XSSFWorkbook();
-        try {
-            exportProcessTaskTemplate(workbook, headerList, null, null, channelData, 25);
-            String fileNameEncode = channel.getName() + "-上报模版.xlsx";
-            Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-            if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-                fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
-            } else {
-                fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+
+        String fileNameEncode = channel.getName() + "-上报模版.xlsx";
+        fileNameEncode = FileUtil.getEncodedFileName(fileNameEncode);
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
+
+        ExcelBuilder builder = new ExcelBuilder(SXSSFWorkbook.class);
+        SheetBuilder sheetBuilder = builder.withBorderColor(HSSFColor.HSSFColorPredefined.GREY_40_PERCENT)
+                .withHeadFontColor(HSSFColor.HSSFColorPredefined.WHITE)
+                .withHeadBgColor(HSSFColor.HSSFColorPredefined.DARK_BLUE)
+                .withColumnWidth(30)
+                .addSheet("sheet")
+                ;
+
+        try (Workbook workbook = builder.build();
+             OutputStream os = response.getOutputStream()) {
+            Sheet sheet = workbook.getSheet("sheet");
+            /** 生成服务信息行 */
+            Row channelRow = sheet.createRow(0);
+            for (int i = 0; i < channelData.size(); i++) {
+                Cell cell = channelRow.createCell(i);
+                cell.setCellValue(channelData.get(i));
             }
-            response.setContentType("application/vnd.ms-excel;charset=utf-8");
-            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
-            os = response.getOutputStream();
+            int columnWidth = 25;
+            //生成标题行
+            Row headerRow = sheet.createRow(1);
+            if (CollectionUtils.isNotEmpty(headerList)) {
+                int i = 0;
+                for (String header : headerList) {
+                    //设置列宽
+                    sheet.setColumnWidth(i, columnWidth * 256);
+                    Cell cell = headerRow.createCell(i);
+                    cell.setCellValue(header);
+                    i++;
+                }
+            }
             workbook.write(os);
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-        } finally {
-            if (os != null) {
-                os.flush();
-                os.close();
-            }
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
         }
-
         return null;
-    }
-
-    private Workbook exportProcessTaskTemplate(Workbook workbook, List<String> headerList, List<String> columnList, List<Map<String, Object>> dataMapList, List<String> channelData, Integer columnWidth) throws Exception {
-        // 生成一个表格
-        Sheet sheet = workbook.createSheet();
-        // 设置sheet名字
-        workbook.setSheetName(0, "sheet");
-        Map<String, CellStyle> cellStyle = ExcelUtil.getRowCellStyle(workbook);
-        CellStyle firstRowcellStyle = cellStyle.get("firstRowcellStyle");
-        CellStyle rowcellStyle = cellStyle.get("rowcellStyle");
-
-        /** 生成服务信息行 */
-        Row channelRow = sheet.createRow(0);
-        for (int i = 0; i < channelData.size(); i++) {
-            Cell cell = channelRow.createCell(i);
-            cell.setCellValue(channelData.get(i));
-        }
-
-        ExcelUtil.createRows(headerList, columnList, dataMapList, columnWidth, sheet, firstRowcellStyle, rowcellStyle, 1);
-        return workbook;
     }
 }
