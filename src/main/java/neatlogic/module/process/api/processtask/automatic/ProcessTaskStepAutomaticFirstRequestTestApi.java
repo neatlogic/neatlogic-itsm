@@ -17,6 +17,7 @@ package neatlogic.module.process.api.processtask.automatic;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.ApiAnonymousAccessSupportEnum;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
  * @since 2021/12/17 9:54
  **/
 @Service
+@AuthUser(SystemUser.ANONYMOUS)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskStepAutomaticFirstRequestTestApi extends PrivateApiComponentBase {
 
