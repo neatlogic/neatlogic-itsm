@@ -19,7 +19,9 @@ package neatlogic.module.process.api.processtask;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
@@ -52,6 +54,7 @@ import java.util.Objects;
 
 @Service
 @Transactional
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 //@AuthAction(action = PROCESSTASK_MODIFY.class)
 public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {

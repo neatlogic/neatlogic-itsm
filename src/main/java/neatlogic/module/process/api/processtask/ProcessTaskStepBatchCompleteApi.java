@@ -17,6 +17,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.process.api.processtask;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
@@ -32,6 +34,7 @@ import javax.annotation.Resource;
 
 @Service
 @Transactional
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class ProcessTaskStepBatchCompleteApi extends PrivateApiComponentBase {
 
