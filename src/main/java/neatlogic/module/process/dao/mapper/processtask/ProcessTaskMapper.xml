@@ -3642,19 +3642,22 @@
 
     <insert id="insertProcessTaskStepInOperation"
             parameterType="neatlogic.framework.process.dto.ProcessTaskStepInOperationVo">
-        <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
-            select LAST_INSERT_ID() as id
-        </selectKey>
-        INSERT IGNORE INTO `processtask_step_in_operation` (`processtask_id`,
+        INSERT IGNORE INTO `processtask_step_in_operation` (
+        `id`,
+        `processtask_id`,
         `processtask_step_id`,
         `operation_type`,
         `operation_time`,
-        `expire_time`)
-        VALUES (#{processTaskId},
+        `expire_time`,
+        `server_id`)
+        VALUES (
+        #{id},
+        #{processTaskId},
         #{processTaskStepId},
         #{operationType},
         NOW(3),
-        #{expireTime})
+        #{expireTime},
+        #{serverId})
     </insert>
 
     <insert id="insertProcessTaskStepTag" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTagVo">
@@ -4130,7 +4133,9 @@
         FROM `processtask_step_in_operation`
         WHERE `processtask_id` = #{processTaskId}
         AND `processtask_step_id` = #{processTaskStepId}
-        AND `operation_type` = #{operationType}
+        <if test="operationType != null and operationType != ''">
+            AND `operation_type` = #{operationType}
+        </if>
     </delete>
 
     <delete id="deleteProcessTaskStepInOperationByServerId" parameterType="java.lang.Long">
