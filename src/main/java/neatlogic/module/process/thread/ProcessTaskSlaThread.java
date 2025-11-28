@@ -314,6 +314,7 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
             for (int i = 0; i < transferPolicyList.size(); i++) {
                 JSONObject transferPolicyObj = transferPolicyList.getJSONObject(i);
                 ProcessTaskSlaTransferVo processTaskSlaTransferVo = new ProcessTaskSlaTransferVo();
+                processTaskSlaTransferVo.setId(SnowflakeUtil.uniqueLong());
                 processTaskSlaTransferVo.setSlaId(slaId);
                 processTaskSlaTransferVo.setConfig(transferPolicyObj.toJSONString());
                 // 需要转交时写入数据，执行完毕后清除
