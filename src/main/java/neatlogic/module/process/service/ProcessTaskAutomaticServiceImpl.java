@@ -47,6 +47,7 @@ import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.util.ConditionUtil;
 import neatlogic.framework.util.FreemarkerUtil;
+import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
@@ -471,6 +472,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                             throw new ScheduleHandlerNotFoundException(ProcessTaskAutomaticJob.class.getName());
                         }
                         ProcessTaskStepAutomaticRequestVo processTaskStepAutomaticRequestVo = new ProcessTaskStepAutomaticRequestVo();
+                        processTaskStepAutomaticRequestVo.setId(SnowflakeUtil.uniqueLong());
                         processTaskStepAutomaticRequestVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
                         processTaskStepAutomaticRequestVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
                         processTaskStepAutomaticRequestVo.setType("callback");

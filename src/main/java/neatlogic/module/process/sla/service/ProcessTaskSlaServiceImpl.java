@@ -23,6 +23,7 @@ import neatlogic.framework.scheduler.core.IJob;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
+import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.framework.util.WorkTimeUtil;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
 import neatlogic.module.process.schedule.plugin.ProcessTaskSlaNotifyJob;
@@ -90,6 +91,7 @@ public class ProcessTaskSlaServiceImpl implements ProcessTaskSlaService {
             for (int i = 0; i < notifyPolicyList.size(); i++) {
                 JSONObject notifyPolicyObj = notifyPolicyList.getJSONObject(i);
                 ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = new ProcessTaskSlaNotifyVo();
+                processTaskSlaNotifyVo.setId(SnowflakeUtil.uniqueLong());
                 processTaskSlaNotifyVo.setSlaId(slaId);
                 processTaskSlaNotifyVo.setConfig(notifyPolicyObj.toJSONString());
                 // 需要发通知时写入数据，执行完毕后清除
