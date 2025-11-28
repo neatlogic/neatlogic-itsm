@@ -70,9 +70,6 @@
 	</select>
 
 	<insert id="insertProcessTaskStepTimeAudit" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTimeAuditVo">
-		<!--<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
-			select LAST_INSERT_ID() as id
-		</selectKey>-->
 		INSERT INTO `processtask_step_timeaudit` (
 		`id`,
 		`processtask_step_id`

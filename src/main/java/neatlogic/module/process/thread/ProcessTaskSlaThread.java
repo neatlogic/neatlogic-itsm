@@ -434,10 +434,10 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
      */
     private List<Long> slaIsInvalid(Long processTaskId) {
         List<Long> resultList = new ArrayList<>();
-        ProcessTaskSlaVo processTaskSlaVo = new ProcessTaskSlaVo();
         ProcessTaskStepVo startProcessTaskStep = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
         List<Long> allSlaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskId(processTaskId);
         for (Long slaId : allSlaIdList) {
+            ProcessTaskSlaVo processTaskSlaVo = new ProcessTaskSlaVo();
             processTaskSlaVo.setId(slaId);
             boolean isActive = false;
             List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);

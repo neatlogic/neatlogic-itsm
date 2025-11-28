@@ -3709,9 +3709,6 @@
 
     <insert id="insertProcessTaskStepAutomaticRequest"
             parameterType="neatlogic.framework.process.dto.automatic.ProcessTaskStepAutomaticRequestVo">
-        <!--<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
-            select LAST_INSERT_ID() as id
-        </selectKey>-->
         INSERT INTO `processtask_step_automatic_request` (
         `id`,
         `processtask_id`,
