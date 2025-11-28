@@ -41,6 +41,7 @@ import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @DisallowConcurrentExecution
@@ -112,7 +113,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 			requestVo.setTriggerTime(nextFireTime);
 		} else {
 //			System.out.println("定时回调");
-			newJobObjectBuilder.withBeginTime(new Date())
+			newJobObjectBuilder.withBeginTime(new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10)))
 					.withIntervalInSeconds(automaticConfigVo.getCallbackInterval()*60);
 			Date nextFireTime = schedulerManager.loadJob(newJobObjectBuilder.build());
 			JSONObject callbackAudit = data.getJSONObject("callbackAudit");

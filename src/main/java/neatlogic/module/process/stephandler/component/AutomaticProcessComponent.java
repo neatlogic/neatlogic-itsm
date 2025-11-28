@@ -34,6 +34,7 @@ import neatlogic.framework.scheduler.core.IJob;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
+import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
@@ -175,6 +176,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
                     throw new ScheduleHandlerNotFoundException(ProcessTaskAutomaticJob.class.getName());
                 }
                 ProcessTaskStepAutomaticRequestVo processTaskStepAutomaticRequestVo = new ProcessTaskStepAutomaticRequestVo();
+                processTaskStepAutomaticRequestVo.setId(SnowflakeUtil.uniqueLong());
                 processTaskStepAutomaticRequestVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
                 processTaskStepAutomaticRequestVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
                 processTaskStepAutomaticRequestVo.setType("request");

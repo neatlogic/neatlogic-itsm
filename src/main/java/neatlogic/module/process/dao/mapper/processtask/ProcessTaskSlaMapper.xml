@@ -250,10 +250,8 @@
     </select>
 
     <insert id="insertProcessTaskSlaNotify" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaNotifyVo">
-        <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
-            select LAST_INSERT_ID() as id
-        </selectKey>
         INSERT INTO `processtask_sla_notify` (
+        `id`,
         `sla_id`,
         `hash`,
         `trigger_time`,
@@ -261,6 +259,7 @@
         )
         VALUES
         (
+        #{id},
         #{slaId},
         #{hash},
         #{triggerTime},
@@ -269,10 +268,8 @@
     </insert>
 
     <insert id="insertProcessTaskSlaTransfer" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaTransferVo">
-        <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
-            select LAST_INSERT_ID() as id
-        </selectKey>
         INSERT INTO `processtask_sla_transfer` (
+        `id`,
         `sla_id`,
         `hash`,
         `trigger_time`,
@@ -280,6 +277,7 @@
         )
         VALUES
         (
+        #{id},
         #{slaId},
         #{hash},
         #{triggerTime},
@@ -288,10 +286,8 @@
     </insert>
 
     <insert id="insertProcessTaskSla" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaVo">
-        <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
-            select LAST_INSERT_ID() as id
-        </selectKey>
         INSERT INTO `processtask_sla` (
+        `id`,
         `processtask_id`,
         `name`,
         `is_active`,
@@ -299,6 +295,7 @@
         )
         VALUES
         (
+        #{id},
         #{processTaskId},
         #{name},
         #{isActive},
