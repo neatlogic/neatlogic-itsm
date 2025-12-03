@@ -18,6 +18,7 @@ package neatlogic.module.process.sla.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
+import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
 import neatlogic.framework.process.dto.ProcessTaskSlaNotifyVo;
 import neatlogic.framework.process.dto.ProcessTaskSlaTimeCostVo;
@@ -93,6 +94,7 @@ public class ProcessTaskSlaServiceImpl implements ProcessTaskSlaService {
             for (int i = 0; i < notifyPolicyList.size(); i++) {
                 JSONObject notifyPolicyObj = notifyPolicyList.getJSONObject(i);
                 ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = new ProcessTaskSlaNotifyVo();
+                processTaskSlaNotifyVo.setId(SnowflakeUtil.uniqueLong());
                 processTaskSlaNotifyVo.setSlaId(slaId);
                 processTaskSlaNotifyVo.setConfig(notifyPolicyObj.toJSONString());
                 // 需要发通知时写入数据，执行完毕后清除
@@ -123,6 +125,7 @@ public class ProcessTaskSlaServiceImpl implements ProcessTaskSlaService {
             for (int i = 0; i < transferPolicyList.size(); i++) {
                 JSONObject transferPolicyObj = transferPolicyList.getJSONObject(i);
                 ProcessTaskSlaTransferVo processTaskSlaTransferVo = new ProcessTaskSlaTransferVo();
+                processTaskSlaTransferVo.setId(SnowflakeUtil.uniqueLong());
                 processTaskSlaTransferVo.setSlaId(slaId);
                 processTaskSlaTransferVo.setConfig(transferPolicyObj.toJSONString());
                 // 需要转交时写入数据，执行完毕后清除

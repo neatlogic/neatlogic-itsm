@@ -53,6 +53,7 @@ import neatlogic.framework.process.stepremind.core.IProcessTaskStepRemindType;
 import neatlogic.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import neatlogic.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import neatlogic.framework.util.FormUtil;
+import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessTagMapper;
@@ -173,6 +174,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         ProcessTaskStepTimeAuditVo lastTimeAuditVo = processTaskStepTimeAuditMapper
                 .getLastProcessTaskStepTimeAuditByStepId(currentProcessTaskStepVo.getId());
         ProcessTaskStepTimeAuditVo newAuditVo = new ProcessTaskStepTimeAuditVo();
+        newAuditVo.setId(SnowflakeUtil.uniqueLong());
         newAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
         if (action == ProcessTaskStepOperationType.STEP_ACTIVE) {
             newAuditVo.setActiveTime("now");
