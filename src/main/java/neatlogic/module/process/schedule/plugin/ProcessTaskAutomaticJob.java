@@ -22,9 +22,6 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.process.constvalue.ProcessTaskStepDataType;
 import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
-import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepDataVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.automatic.AutomaticConfigVo;
@@ -32,6 +29,9 @@ import neatlogic.framework.process.dto.automatic.ProcessTaskStepAutomaticRequest
 import neatlogic.framework.scheduler.core.JobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.util.TimeUtil;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper;
 import neatlogic.module.process.service.ProcessTaskAutomaticService;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -115,7 +115,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 			requestVo.setTriggerTime(nextFireTime);
 		} else {
 //			System.out.println("定时回调");
-			newJobObjectBuilder.withBeginTime(new Date())
+			newJobObjectBuilder.withBeginTime(new Date(System.currentTimeMillis() + automaticConfigVo.getCallbackInterval()*60))
 					.withIntervalInSeconds(automaticConfigVo.getCallbackInterval()*60);
 			Date nextFireTime = schedulerManager.loadJob(newJobObjectBuilder.build());
 			JSONObject callbackAudit = data.getJSONObject("callbackAudit");
