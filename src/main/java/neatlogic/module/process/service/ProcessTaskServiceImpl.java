@@ -1007,7 +1007,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
         String content = jsonObj.getString("content");
         JSONArray fileIdArray = jsonObj.getJSONArray("fileIdList");
-//        List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
         if (content == null && fileIdArray == null) {
             return false;
         }
