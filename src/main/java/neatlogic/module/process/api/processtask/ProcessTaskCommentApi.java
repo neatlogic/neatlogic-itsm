@@ -1,6 +1,6 @@
 package neatlogic.module.process.api.processtask;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
@@ -32,7 +32,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -115,8 +117,8 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
         }
 
         String content = jsonObj.getString("content");
-        List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
-        if (StringUtils.isBlank(content) && CollectionUtils.isEmpty(fileIdList)) {
+        JSONArray fileIdArray = jsonObj.getJSONArray("fileIdList");
+        if (StringUtils.isBlank(content) && CollectionUtils.isEmpty(fileIdArray)) {
             return null;
         }
 
@@ -136,12 +138,14 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
         processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
 
         /** 保存附件uuid **/
-        if (CollectionUtils.isNotEmpty(fileIdList)) {
+        if (CollectionUtils.isNotEmpty(fileIdArray)) {
             ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();
             processTaskStepFileVo.setProcessTaskId(processTaskId);
             processTaskStepFileVo.setProcessTaskStepId(processTaskStepId);
             processTaskStepFileVo.setContentId(processTaskStepContentVo.getId());
-            for (Long fileId : fileIdList) {
+            List<Long> fileIdList = fileIdArray.toJavaList(Long.class);
+            Set<Long> fileIdSet = new HashSet<>(fileIdList);
+            for (Long fileId : fileIdSet) {
                 if (fileMapper.getFileById(fileId) == null) {
                     throw new FileNotFoundException(fileId);
                 }

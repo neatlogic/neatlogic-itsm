@@ -604,10 +604,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
     public void saveContentAndFile(ProcessTaskStepVo currentProcessTaskStepVo, IOperationType action) {
         JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
         String content = paramObj.getString("content");
-        List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(paramObj.getJSONArray("fileIdList")), Long.class);
-//        if (StringUtils.isBlank(content) && CollectionUtils.isEmpty(fileIdList)) {
-//            return;
-//        }
+        JSONArray fileIdArray = paramObj.getJSONArray("fileIdList");
         if (content == null) {
             content = "";
         } else if (StringUtils.isBlank(content)) {
@@ -627,12 +624,14 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
 
         /* 保存附件uuid **/
-        if (CollectionUtils.isNotEmpty(fileIdList)) {
+        if (CollectionUtils.isNotEmpty(fileIdArray)) {
             ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();
             processTaskStepFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
             processTaskStepFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
             processTaskStepFileVo.setContentId(processTaskStepContentVo.getId());
-            for (Long fileId : fileIdList) {
+            List<Long> fileIdList = fileIdArray.toJavaList(Long.class);
+            Set<Long> fileIdSet = new HashSet<>(fileIdList);
+            for (Long fileId : fileIdSet) {
                 processTaskStepFileVo.setFileId(fileId);
                 processTaskMapper.insertProcessTaskStepFile(processTaskStepFileVo);
             }
