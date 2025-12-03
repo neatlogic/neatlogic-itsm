@@ -35,6 +35,7 @@ import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.transaction.util.TransactionUtil;
+import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.framework.util.WorkTimeUtil;
 import neatlogic.framework.util.javascript.JavascriptUtil;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
@@ -288,6 +289,7 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
             for (int i = 0; i < notifyPolicyList.size(); i++) {
                 JSONObject notifyPolicyObj = notifyPolicyList.getJSONObject(i);
                 ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = new ProcessTaskSlaNotifyVo();
+                processTaskSlaNotifyVo.setId(SnowflakeUtil.uniqueLong());
                 processTaskSlaNotifyVo.setSlaId(slaId);
                 processTaskSlaNotifyVo.setConfig(notifyPolicyObj.toJSONString());
                 // 需要发通知时写入数据，执行完毕后清除
@@ -315,6 +317,7 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
             for (int i = 0; i < transferPolicyList.size(); i++) {
                 JSONObject transferPolicyObj = transferPolicyList.getJSONObject(i);
                 ProcessTaskSlaTransferVo processTaskSlaTransferVo = new ProcessTaskSlaTransferVo();
+                processTaskSlaTransferVo.setId(SnowflakeUtil.uniqueLong());
                 processTaskSlaTransferVo.setSlaId(slaId);
                 processTaskSlaTransferVo.setConfig(transferPolicyObj.toJSONString());
                 // 需要转交时写入数据，执行完毕后清除
@@ -434,10 +437,10 @@ public class ProcessTaskSlaThread extends NeatLogicThread {
      */
     private List<Long> slaIsInvalid(Long processTaskId) {
         List<Long> resultList = new ArrayList<>();
-        ProcessTaskSlaVo processTaskSlaVo = new ProcessTaskSlaVo();
         ProcessTaskStepVo startProcessTaskStep = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
         List<Long> allSlaIdList = processTaskSlaMapper.getSlaIdListByProcessTaskId(processTaskId);
         for (Long slaId : allSlaIdList) {
+            ProcessTaskSlaVo processTaskSlaVo = new ProcessTaskSlaVo();
             processTaskSlaVo.setId(slaId);
             boolean isActive = false;
             List<Long> processTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(slaId);
