@@ -1006,8 +1006,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             return false;
         }
         String content = jsonObj.getString("content");
-        List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
-        if (content == null && fileIdList == null) {
+        JSONArray fileIdArray = jsonObj.getJSONArray("fileIdList");
+        if (content == null && fileIdArray == null) {
             return false;
         }
         Long processTaskId = oldReplyVo.getProcessTaskId();
@@ -1080,6 +1080,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
 
         /* 保存新附件uuid **/
+        List<Long> fileIdList = fileIdArray.toJavaList(Long.class);
         if (CollectionUtils.isNotEmpty(fileIdList) && CollectionUtils.isNotEmpty(oldFileIdList)) {
             if (Objects.equals(oldFileIdList, fileIdList)) {
                 jsonObj.remove("fileIdList");
@@ -1099,7 +1100,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 processTaskStepFileVo.setProcessTaskId(processTaskId);
                 processTaskStepFileVo.setProcessTaskStepId(processTaskStepId);
                 processTaskStepFileVo.setContentId(oldContentId);
-                for (Long fileId : fileIdList) {
+                Set<Long> fileIdSet = new HashSet<>(fileIdList);
+                for (Long fileId : fileIdSet) {
                     if (fileMapper.getFileById(fileId) == null) {
                         throw new FileNotFoundException(fileId);
                     }
@@ -1121,7 +1123,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             processTaskStepFileVo.setProcessTaskId(processTaskId);
             processTaskStepFileVo.setProcessTaskStepId(processTaskStepId);
             processTaskStepFileVo.setContentId(oldContentId);
-            for (Long fileId : fileIdList) {
+            Set<Long> fileIdSet = new HashSet<>(fileIdList);
+            for (Long fileId : fileIdSet) {
                 if (fileMapper.getFileById(fileId) == null) {
                     throw new FileNotFoundException(fileId);
                 }
