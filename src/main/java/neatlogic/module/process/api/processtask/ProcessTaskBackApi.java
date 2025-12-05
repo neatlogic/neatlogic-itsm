@@ -15,7 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Deprecated
-@Service
+//@Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class ProcessTaskBackApi extends PrivateApiComponentBase {

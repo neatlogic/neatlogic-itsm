@@ -26,6 +26,7 @@ import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.process.dto.ProcessFormVo;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
@@ -169,11 +170,24 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                         if (Objects.equals(taskVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())) {
                             taskVo.setStepList(processTaskMapper.getProcessTaskCurrentStepByProcessTaskId(taskVo.getId()));
                         }
-                        String channelUuid = taskVo.getChannelVo().getUuid();
+//                        String channelUuid = taskVo.getChannelVo().getUuid();
+                        String channelUuid = null;
+                        String channelName = null;
+                        ChannelVo channelVo = taskVo.getChannelVo();
+                        if (channelVo != null) {
+                            channelUuid = channelVo.getUuid();
+                            channelName = channelVo.getName();
+                        } else {
+                            channelUuid = taskVo.getChannelUuid();
+                            channelName = taskVo.getTitle();
+                        }
+                        if (channelUuid == null) {
+                            channelUuid = taskVo.getId().toString();
+                        }
                         Sheet sheet = sheetMap.get(channelUuid);
                         if (sheet == null) {
                             // 创建sheet并填充表头
-                            sheet = workbook.createSheet(taskVo.getChannelVo().getName());
+                            sheet = workbook.createSheet(channelName);
                             List<String> formLabelList = null;
                             Map<String, Integer> formLabelCellRangeMap = null; // 记录每个表单属性需要占据的单元格长度
                             String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
