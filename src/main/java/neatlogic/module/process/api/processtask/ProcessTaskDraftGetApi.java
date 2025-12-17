@@ -27,6 +27,7 @@ import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
+import neatlogic.framework.process.constvalue.ProcessTaskTitleTemplateVariable;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.channel.ChannelNotFoundEditTargetException;
 import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
@@ -42,6 +43,7 @@ import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFa
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.FreemarkerUtil;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
@@ -53,6 +55,8 @@ import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -63,6 +67,8 @@ import java.util.stream.Collectors;
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
+
+    private final Logger logger = LoggerFactory.getLogger(ProcessTaskDraftGetApi.class);
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
@@ -448,6 +454,22 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         }
 
         ProcessTaskVo processTaskVo = new ProcessTaskVo();
+        JSONObject config = channel.getConfig();
+        if (MapUtils.isNotEmpty(config)) {
+            String titleTemplate = config.getString("titleTemplate");
+            if (StringUtils.isNotBlank(titleTemplate)) {
+                try {
+                    JSONObject data = new JSONObject();
+                    data.put(ProcessTaskTitleTemplateVariable.USER_ID.getValue(), UserContext.get().getUserId());
+                    data.put(ProcessTaskTitleTemplateVariable.USER_NAME.getValue(), UserContext.get().getUserName());
+                    String title = FreemarkerUtil.transform(data, titleTemplate);
+                    processTaskVo.setTitle(title);
+                } catch (Exception e) {
+                    processTaskVo.setTitle(titleTemplate);
+                    logger.error(e.getMessage(), e);
+                }
+            }
+        }
         processTaskVo.setProcessDispatcherList(getProcessDispatcherList(processVo.getConfig()));
         processTaskVo.setIsAutoGenerateId(false);
         try {
