@@ -560,4 +560,10 @@ public interface ProcessTaskService {
      * @param processTaskStepVo
      */
     void getProcessTaskStepDetail(ProcessTaskStepVo processTaskStepVo);
+
+    /**
+     * 上报前检查工单依赖各个功能是否正常，例如服务时间排班设置，表单，组合工具等
+     * @param channelVo 服务信息
+     */
+    void checkDependenciesBeforeReport(ChannelVo channelVo);
 }
