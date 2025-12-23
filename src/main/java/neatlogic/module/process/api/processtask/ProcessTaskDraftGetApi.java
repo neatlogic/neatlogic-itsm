@@ -20,6 +20,8 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.GroupSearch;
+import neatlogic.framework.dao.mapper.region.RegionMapper;
+import neatlogic.framework.dto.region.RegionVo;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.form.dto.FormAttributeVo;
@@ -43,8 +45,8 @@ import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFa
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.service.RegionService;
 import neatlogic.framework.util.FreemarkerUtil;
-import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
@@ -60,6 +62,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -89,10 +93,13 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
     private ProcessTaskService processTaskService;
 
     @Resource
-    private SelectContentByHashMapper selectContentByHashMapper;
+    private CatalogService catalogService;
 
     @Resource
-    private CatalogService catalogService;
+    private RegionService regionService;
+
+    @Resource
+    private RegionMapper regionMapper;
 
     @Override
     public String getToken() {
@@ -462,6 +469,15 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                     JSONObject data = new JSONObject();
                     data.put(ProcessTaskTitleTemplateVariable.USER_ID.getValue(), UserContext.get().getUserId());
                     data.put(ProcessTaskTitleTemplateVariable.USER_NAME.getValue(), UserContext.get().getUserName());
+                    data.put(ProcessTaskTitleTemplateVariable.YYYYMMDD.getValue(), LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+                    List<Long> regionIdList = regionService.getRegionIdListByUserUuid(UserContext.get().getUserUuid());
+                    if (CollectionUtils.isNotEmpty(regionIdList)) {
+                        List<RegionVo> regionList = regionMapper.getRegionListByIdList(regionIdList);
+                        if (CollectionUtils.isNotEmpty(regionList)) {
+                            regionList.sort(Comparator.comparing(RegionVo::getLft));
+                            data.put(ProcessTaskTitleTemplateVariable.REGION_NAME.getValue(), regionList.get(regionList.size() - 1).getName());
+                        }
+                    }
                     String title = FreemarkerUtil.transform(data, titleTemplate);
                     processTaskVo.setTitle(title);
                 } catch (Exception e) {
