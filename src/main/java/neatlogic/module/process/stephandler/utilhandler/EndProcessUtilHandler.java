@@ -1,11 +1,27 @@
 package neatlogic.module.process.stephandler.utilhandler;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
+import neatlogic.framework.process.stephandler.core.ProcessMessageManager;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
+import neatlogic.framework.util.TimeUtil;
+import neatlogic.framework.worktime.dto.WorktimeRangeVo;
+import neatlogic.framework.worktime.dto.WorktimeVo;
+import neatlogic.framework.worktime.exception.WorktimeRangeNotFoundException;
 import neatlogic.module.process.notify.handler.TaskNotifyPolicyHandler;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
@@ -38,6 +54,80 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
     @Override
     public String[] getRegulateKeyList() {
         return new String[]{"processConfig", "formConfig", "scoreConfig", "slaList"};
+    }
+
+    @Override
+    protected void myCheckDependenciesBeforeReport(JSONObject configObj) {
+        JSONArray slaList = configObj.getJSONArray("slaList");
+        checkSla(slaList);
+    }
+
+    private void checkSla(JSONArray slaList) {
+        if (CollectionUtils.isNotEmpty(slaList)) {
+            long max = 0;
+            for (int i = 0; i < slaList.size(); i++) {
+                JSONObject slaObj = slaList.getJSONObject(i);
+                if (MapUtils.isNotEmpty(slaObj)) {
+                    JSONArray calculatePolicyList = slaObj.getJSONArray("calculatePolicyList");
+                    if (CollectionUtils.isNotEmpty(calculatePolicyList)) {
+                        for (int j = 0; j < calculatePolicyList.size(); j++) {
+                            JSONObject calculatePolicyObj = calculatePolicyList.getJSONObject(j);
+                            if (MapUtils.isNotEmpty(calculatePolicyObj)) {
+                                Integer enablePriority = calculatePolicyObj.getInteger("enablePriority");
+                                if (Objects.equals(enablePriority, 1)) {
+                                    JSONArray priorityList = calculatePolicyObj.getJSONArray("priorityList");
+                                    if (CollectionUtils.isNotEmpty(priorityList)) {
+                                        for (int k = 0; k < priorityList.size(); k++) {
+                                            JSONObject priorityObj = priorityList.getJSONObject(k);
+                                            if (MapUtils.isNotEmpty(priorityObj)) {
+                                                Integer time = priorityObj.getInteger("time");
+                                                String unit = priorityObj.getString("unit");
+                                                if (time != null && StringUtils.isNotBlank(unit)) {
+                                                    if (unit.equalsIgnoreCase("day")) {
+                                                        long millis = TimeUnit.DAYS.toMillis(time);
+                                                        max = Math.max(millis, max);
+                                                    } else if (unit.equalsIgnoreCase("hour")) {
+                                                        long millis = TimeUnit.HOURS.toMillis(time);
+                                                        max = Math.max(millis, max);
+                                                    } else {
+                                                        long millis = TimeUnit.MINUTES.toMillis(time);
+                                                        max = Math.max(millis, max);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    Integer time = calculatePolicyObj.getInteger("time");
+                                    String unit = calculatePolicyObj.getString("unit");
+                                    if (time != null && StringUtils.isNotBlank(unit)) {
+                                        if (unit.equalsIgnoreCase("day")) {
+                                            long millis = TimeUnit.DAYS.toMillis(time);
+                                            max = Math.max(millis, max);
+                                        } else if (unit.equalsIgnoreCase("hour")) {
+                                            long millis = TimeUnit.HOURS.toMillis(time);
+                                            max = Math.max(millis, max);
+                                        } else {
+                                            long millis = TimeUnit.MINUTES.toMillis(time);
+                                            max = Math.max(millis, max);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (max > 0) {
+                WorktimeRangeVo lastWorktimeRange = ProcessMessageManager.getLastWorktimeRange();
+                if (lastWorktimeRange.getEndTime() < (System.currentTimeMillis() + max)) {
+                    WorktimeVo worktime = ProcessMessageManager.getWorktime();
+                    String format = Instant.ofEpochMilli(lastWorktimeRange.getEndTime()).atZone(ZoneId.systemDefault())
+                            .format(DateTimeFormatter.ofPattern(TimeUtil.YYYY_MM_DD_HH_MM));
+                    throw new WorktimeRangeNotFoundException(worktime.getName(), lastWorktimeRange.getYear(), format);
+                }
+            }
+        }
     }
 
 //    @Override
