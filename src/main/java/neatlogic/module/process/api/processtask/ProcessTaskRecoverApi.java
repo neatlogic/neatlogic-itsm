@@ -44,6 +44,7 @@ public class ProcessTaskRecoverApi extends PrivateApiComponentBase {
 	})
 	@Output({})
 	@Description(desc = "工单恢复接口")
+	@ResubmitInterval(3)
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);

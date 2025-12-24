@@ -67,6 +67,7 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
     @Output({})
     @Description(desc = "nmpap.processtaskstepdraftsaveapi.getname")
     @Override
+    @ResubmitInterval(3)
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");

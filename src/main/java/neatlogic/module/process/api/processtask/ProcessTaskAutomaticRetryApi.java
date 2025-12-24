@@ -61,6 +61,7 @@ public class ProcessTaskAutomaticRetryApi extends PrivateApiComponentBase {
 	})
 	@Output({})
 	@Description(desc = "工单automatic步骤重试接口")
+	@ResubmitInterval(3)
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		ProcessTaskStepVo  processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);

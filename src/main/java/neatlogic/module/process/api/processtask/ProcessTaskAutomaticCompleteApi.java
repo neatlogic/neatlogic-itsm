@@ -56,6 +56,7 @@ public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 		@Param(name = "Message", type = ApiParamType.STRING, desc = "异常信息"),
 	})
 	@Description(desc = "流转自动化处理步骤")
+	@ResubmitInterval(3)
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");

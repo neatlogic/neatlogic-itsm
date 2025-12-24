@@ -70,6 +70,7 @@ public class ProcessTaskCreateApi extends PrivateApiComponentBase {
     @Example(example = "{\"title\":\"test上报2\",\"channel\":\"linbq_1206_1119\",\"owner\":\"admin\",\"priority\":\"普通\",\"formAttributeDataList\":[{\"label\":\"下拉框_1\",\"dataList\":[\"ezproxy\",\"balantflow\"]},{\"label\":\"下拉框_2\",\"dataList\":[\"a2\",\"a1\"]},{\"label\":\"下拉框_3\",\"dataList\":[\"子系统描述_1\",\"子系统描述_2\",\"子系统描述_3\"]},{\"label\":\"下拉框_4\",\"dataList\":[\"闫雅\",\"陈宁\",\"蒋琪\"]}]}")
     @Description(desc = "nmpap.processtaskcreateapi.getname")
     @Override
+    @ResubmitInterval(3)
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
         ProcessTaskCreateVo processTaskCreateVo = jsonObj.toJavaObject(ProcessTaskCreateVo.class);

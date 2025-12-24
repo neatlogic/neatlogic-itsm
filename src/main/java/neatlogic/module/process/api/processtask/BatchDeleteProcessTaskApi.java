@@ -56,6 +56,7 @@ public class BatchDeleteProcessTaskApi extends PrivateApiComponentBase {
     })
     @Output({})
     @Description(desc = "nmpap.batchdeleteprocesstaskapi.getname")
+    @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         List<Long> processTaskIdList = paramObj.getJSONArray("processTaskIdList").toJavaList(Long.class);

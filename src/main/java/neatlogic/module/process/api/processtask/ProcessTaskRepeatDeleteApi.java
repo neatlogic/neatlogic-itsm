@@ -19,10 +19,7 @@ import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
@@ -73,6 +70,7 @@ public class ProcessTaskRepeatDeleteApi extends PrivateApiComponentBase {
     })
     @Description(desc = "nmpap.processtaskrepeatdeleteapi.getname")
     @Override
+    @ResubmitInterval(3)
     public Object myDoService(JSONObject paramObj) throws Exception {
         String source = paramObj.getString("source");
         Long processTaskId = paramObj.getLong("processTaskId");

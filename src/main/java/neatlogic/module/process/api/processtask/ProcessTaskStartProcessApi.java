@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.service.ProcessTaskService;
@@ -47,6 +44,7 @@ public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
     })
     @Description(desc = "工单上报提交接口")
     @Override
+    @ResubmitInterval(3)
     public Object myDoService(JSONObject jsonObj) throws Exception {
 //		Long processTaskId = jsonObj.getLong("processTaskId");
 //        Long nextStepId = jsonObj.getLong("nextStepId");

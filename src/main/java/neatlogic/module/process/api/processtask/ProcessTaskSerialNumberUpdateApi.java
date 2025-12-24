@@ -23,10 +23,7 @@ import neatlogic.framework.process.exception.processtaskserialnumberpolicy.Proce
 import neatlogic.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberUpdateInProcessException;
 import neatlogic.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import neatlogic.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyHandlerFactory;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSerialNumberMapper;
@@ -66,6 +63,7 @@ public class ProcessTaskSerialNumberUpdateApi extends PrivateApiComponentBase {
 
     @Input(@Param(name = "channelTypeUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务类型uuid"))
     @Description(desc = "更新历史工单的工单号")
+    @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String channelTypeUuid = jsonObj.getString("channelTypeUuid");

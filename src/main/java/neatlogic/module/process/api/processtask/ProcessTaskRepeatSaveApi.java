@@ -87,6 +87,7 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
     })
     @Description(desc = "nmpap.processtaskrepeatsaveapi.getname")
     @Override
+    @ResubmitInterval(3)
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long processTaskId = paramObj.getLong("processTaskId");
         ProcessTaskVo processTask = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);

@@ -50,6 +50,7 @@ public class ProcessTaskTransferApi extends PrivateApiComponentBase {
 	})
 	@Output({})
 	@Description(desc = "nmpap.processtasktransferapi.getname")
+	@ResubmitInterval(3)
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");

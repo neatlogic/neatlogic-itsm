@@ -69,6 +69,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
             @Param(name = "Return", type = ApiParamType.LONG, desc = "任务id")
     })
     @Description(desc = "保存任务接口")
+    @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");

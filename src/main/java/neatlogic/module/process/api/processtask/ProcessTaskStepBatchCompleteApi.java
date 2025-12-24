@@ -17,10 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.service.ProcessTaskService;
@@ -60,6 +57,7 @@ public class ProcessTaskStepBatchCompleteApi extends PrivateApiComponentBase {
             @Param(name = "userId", type = ApiParamType.STRING, isRequired = true, desc = "处理人userId"),
     })
     @Description(desc = "批量完成工单步骤")
+    @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         return processTaskService.batchCompleteProcessTaskStep(jsonObj);
