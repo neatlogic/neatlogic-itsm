@@ -60,6 +60,7 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
     })
     @Output({})
     @Description(desc = "任务完成接口")
+    @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");

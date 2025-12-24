@@ -2,6 +2,7 @@ package neatlogic.module.process.api.processtask;
 
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
+import neatlogic.framework.restful.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,10 +14,6 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 
@@ -51,6 +48,7 @@ public class ProcessTaskShowHideApi extends PrivateApiComponentBase {
     })
     @Description(desc = "隐藏显示工单")
     @Override
+    @ResubmitInterval(3)
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Integer isShow = jsonObj.getInteger("isShow");

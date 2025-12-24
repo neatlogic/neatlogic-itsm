@@ -52,6 +52,7 @@ public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 	})
 	@Output({@Param(name="isFocus", type = ApiParamType.INTEGER, desc="是否关注工单")})
 	@Description(desc = "切换工单关注状态")
+	@ResubmitInterval(3)
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		int isFocus = jsonObj.getIntValue("isFocus");

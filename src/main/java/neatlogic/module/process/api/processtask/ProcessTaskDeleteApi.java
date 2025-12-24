@@ -25,10 +25,7 @@ import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
@@ -86,6 +83,7 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
     @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id", isRequired = true)})
     @Description(desc = "删除工单")
     @Override
+    @ResubmitInterval(3)
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         // 锁住当前工单

@@ -80,6 +80,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
     })
     @Output({})
     @Description(desc = "任务删除接口")
+    @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskStepTaskId = jsonObj.getLong("processTaskStepTaskId");

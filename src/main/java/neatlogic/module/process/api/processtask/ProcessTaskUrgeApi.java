@@ -6,6 +6,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
@@ -13,10 +14,6 @@ import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyTrigge
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.module.process.service.ProcessTaskAgentService;
 import neatlogic.module.process.service.IProcessStepHandlerUtil;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.service.ProcessTaskService;
@@ -60,6 +57,7 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
 	})
 	@Description(desc = "催办工单")
+	@ResubmitInterval(3)
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");

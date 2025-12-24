@@ -82,6 +82,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
     @Output({@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "当前步骤评论列表")})
     @Description(desc = "工单回复接口")
     @Override
+    @ResubmitInterval(3)
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");

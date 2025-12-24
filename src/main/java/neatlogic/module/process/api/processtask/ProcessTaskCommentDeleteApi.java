@@ -66,6 +66,7 @@ public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
 	})
 	@Description(desc = "工单回复删除接口")
 	@Override
+	@ResubmitInterval(3)
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long id = jsonObj.getLong("id");
 		ProcessTaskStepContentVo processTaskStepContentVo= processTaskMapper.getProcessTaskStepContentById(id);

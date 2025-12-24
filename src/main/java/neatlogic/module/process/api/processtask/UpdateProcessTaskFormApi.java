@@ -27,10 +27,7 @@ import neatlogic.framework.process.constvalue.ProcessTaskStepDataType;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
@@ -87,6 +84,7 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
             @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "common.priorityuuid"),
     })
     @Description(desc = "nmpap.updateprocesstaskformapi.getname")
+    @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long processTaskId = paramObj.getLong("processTaskId");
