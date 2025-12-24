@@ -398,6 +398,7 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
         typeList.add(ProcessTaskStepOperationType.STEP_REAPPROVAL.getValue());
         typeList.add(ProcessTaskOperationType.PROCESSTASK_START.getValue());
         typeList.add(ProcessTaskStepOperationType.STEP_TRANSFER.getValue());
+        typeList.add(ProcessTaskStepOperationType.STEP_REDO.getValue());
         List<ProcessTaskStepReplyVo> processTaskStepReplyList = new ArrayList<>();
         {
             List<Long> stepContentIdList = new ArrayList<>();

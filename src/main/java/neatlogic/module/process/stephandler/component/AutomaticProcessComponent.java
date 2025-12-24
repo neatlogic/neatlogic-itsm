@@ -285,8 +285,8 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
     }
 
     @Override
-    protected int myRedo(ProcessTaskStepVo currentProcessTaskStepVo) {
-        return 0;
+    protected int myRedo(ProcessTaskStepVo currentProcessTaskStepVo)  throws ProcessTaskException {
+        return myActive(currentProcessTaskStepVo);
     }
 
     @Override
