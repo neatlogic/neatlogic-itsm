@@ -50,6 +50,7 @@ public class BatchPauseProcessTaskApi extends PrivateApiComponentBase {
     })
     @Output({})
     @Description(desc = "nmpap.batchpauseprocesstaskapi.getname")
+    @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String source = paramObj.getString("source");

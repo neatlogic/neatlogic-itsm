@@ -89,6 +89,7 @@ public class ProcessTaskStepTaskFileSaveApi extends PrivateApiComponentBase {
     })
     @Output({})
     @Description(desc = "任务上传附件接口")
+    @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");

@@ -26,10 +26,7 @@ import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.priority.PriorityNotFoundException;
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
@@ -98,6 +95,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
             @Param(name = "tagList", type = ApiParamType.JSONARRAY, desc = "标签列表"),
             @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "附件id列表")})
     @Description(desc = "更新工单信息")
+    @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");

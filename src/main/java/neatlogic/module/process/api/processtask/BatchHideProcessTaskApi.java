@@ -48,6 +48,7 @@ public class BatchHideProcessTaskApi extends PrivateApiComponentBase {
     })
     @Output({})
     @Description(desc = "nmpap.batchhideprocesstaskapi.getname")
+    @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         List<Long> processTaskIdList = paramObj.getJSONArray("processTaskIdList").toJavaList(Long.class);

@@ -22,6 +22,7 @@ import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.UserType;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.config.ConfigManager;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
@@ -29,6 +30,7 @@ import neatlogic.framework.dao.mapper.region.RegionMapper;
 import neatlogic.framework.dto.*;
 import neatlogic.framework.dto.region.RegionVo;
 import neatlogic.framework.event.constvalue.EventProcessStepHandlerType;
+import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.file.FileNotFoundException;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.exception.type.PermissionDeniedException;
@@ -50,6 +52,7 @@ import neatlogic.framework.notify.dto.NotifyReceiverVo;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
 import neatlogic.framework.process.constvalue.*;
+import neatlogic.framework.process.crossover.IChannelCrossoverMapper;
 import neatlogic.framework.process.crossover.IProcessTaskCrossoverService;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
@@ -66,11 +69,17 @@ import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.stephandler.core.*;
 import neatlogic.framework.process.stepremind.core.ProcessTaskStepRemindTypeFactory;
 import neatlogic.framework.process.task.TaskConfigManager;
+import neatlogic.framework.process.util.ProcessConfigUtil;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.framework.util.$;
 import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
+import neatlogic.framework.worktime.dto.WorktimeRangeVo;
+import neatlogic.framework.worktime.dto.WorktimeVo;
+import neatlogic.framework.worktime.exception.WorktimeNotFoundException;
+import neatlogic.framework.worktime.exception.WorktimeRangeNotFoundException;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
@@ -88,7 +97,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -2670,6 +2681,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         if (channelVo == null) {
             throw new ChannelNotFoundException(channelUuid);
         }
+        checkDependenciesBeforeReport(channelVo);
         String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
         if (processMapper.checkProcessIsExists(processUuid) == 0) {
             throw new ProcessNotFoundException(processUuid);
@@ -3463,5 +3475,74 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         processTaskStepVo.setReplaceableTextList(getReplaceableTextList(processTaskStepVo));
         processTaskStepVo.setCustomStatusList(getCustomStatusList(processTaskStepVo));
         processTaskStepVo.setCustomButtonList(getCustomButtonList(processTaskStepVo));
+    }
+
+    /**
+     * 上报前检查工单依赖各个功能是否正常，例如服务时间排班设置，表单，组合工具等
+     *
+     * @param channelVo 服务信息
+     */
+    @Override
+    public void checkDependenciesBeforeReport(ChannelVo channelVo) {
+        try {
+            ProcessMessageManager.setOperationType(OperationTypeEnum.SEARCH);
+            String worktimeUuid = channelMapper.getWorktimeUuidByChannelUuid(channelVo.getUuid());
+            WorktimeVo worktimeVo = worktimeMapper.getWorktimeByUuid(worktimeUuid);
+            if (worktimeVo == null) {
+                throw new WorktimeNotFoundException(worktimeUuid);
+            }
+            ProcessMessageManager.setWorktime(worktimeVo);
+            WorktimeRangeVo worktimeRangeVo = new WorktimeRangeVo();
+            worktimeRangeVo.setWorktimeUuid(worktimeUuid);
+            worktimeRangeVo.setStartTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(366));
+            WorktimeRangeVo lastWorktimeRangeVo = worktimeMapper.getRecentWorktimeRangeBackward(worktimeRangeVo);
+            if (lastWorktimeRangeVo == null) {
+                throw new WorktimeRangeNotFoundException(worktimeVo.getName());
+            }
+            int currentYear = LocalDateTime.now().getYear();
+            if (!Objects.equals(lastWorktimeRangeVo.getYear(), currentYear)) {
+                List<Integer> yearList = worktimeMapper.getYearListByWorktimeUuid(worktimeUuid);
+                if (!yearList.contains(currentYear)) {
+                    throw new WorktimeRangeNotFoundException(worktimeVo.getName(), currentYear);
+                }
+            }
+            ProcessMessageManager.setLastWorktimeRange(lastWorktimeRangeVo);
+            String processUuid = channelMapper.getProcessUuidByChannelUuid(channelVo.getUuid());
+            ProcessVo processVo = processMapper.getProcessByUuid(processUuid);
+            if (processVo == null) {
+                throw new ProcessNotFoundException(processUuid);
+            }
+            JSONObject configObj = processVo.getConfig();
+            if (configObj.isEmpty()) {
+                return;
+            }
+            JSONObject process = configObj.getJSONObject("process");
+            if (MapUtils.isEmpty(process)) {
+                return;
+            }
+            IProcessStepInternalHandler processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(ProcessStepHandlerType.END.getHandler());
+            if (processStepInternalHandler == null) {
+                throw new ProcessStepUtilHandlerNotFoundException(ProcessStepHandlerType.END.getHandler());
+            }
+            processStepInternalHandler.checkDependenciesBeforeReport(process);
+            JSONArray stepList = process.getJSONArray("stepList");
+            if (CollectionUtils.isNotEmpty(stepList)) {
+                stepList.removeIf(Objects::isNull);
+                for (int i = stepList.size() - 1; i >= 0; i--) {
+                    JSONObject step = stepList.getJSONObject(i);
+                    String handler = step.getString("handler");
+                    if (!Objects.equals(handler, ProcessStepHandlerType.END.getHandler())) {
+                        processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(handler);
+                        if (processStepInternalHandler == null) {
+                            throw new ProcessStepUtilHandlerNotFoundException(handler);
+                        }
+                        JSONObject stepConfig = step.getJSONObject("stepConfig");
+                        processStepInternalHandler.checkDependenciesBeforeReport(stepConfig);
+                    }
+                }
+            }
+        } finally {
+            ProcessMessageManager.release();
+        }
     }
 }

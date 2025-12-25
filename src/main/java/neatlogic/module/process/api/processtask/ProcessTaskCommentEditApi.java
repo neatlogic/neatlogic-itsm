@@ -67,6 +67,7 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
 	})
 	@Description(desc = "工单回复编辑接口")
 	@Override
+	@ResubmitInterval(3)
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String content = jsonObj.getString("content");
 		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);

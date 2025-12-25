@@ -65,6 +65,7 @@ public class DelayProcessTaskStepSlaApi extends PrivateApiComponentBase {
     })
     @Output({})
     @Description(desc = "nmpap.delayprocesstaskstepslaapi.getname")
+    @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         System.out.println("paramObj = " + paramObj);

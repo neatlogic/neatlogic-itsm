@@ -9,10 +9,7 @@ import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.crossover.IProcessTaskRelationSaveApiCrossoverService;
 import neatlogic.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
@@ -62,6 +59,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
             @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
     })
     @Description(desc = "保存工单关联")
+    @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
