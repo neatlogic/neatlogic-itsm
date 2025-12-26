@@ -465,25 +465,27 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         if (MapUtils.isNotEmpty(config)) {
             String titleTemplate = config.getString("titleTemplate");
             if (StringUtils.isNotBlank(titleTemplate)) {
-                try {
-                    JSONObject data = new JSONObject();
-                    data.put(ProcessTaskTitleTemplateVariable.USER_ID.getValue(), UserContext.get().getUserId());
-                    data.put(ProcessTaskTitleTemplateVariable.USER_NAME.getValue(), UserContext.get().getUserName());
-                    data.put(ProcessTaskTitleTemplateVariable.YYYYMMDD.getValue(), LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+                if (titleTemplate.contains(ProcessTaskTitleTemplateVariable.USER_ID.getExpression())) {
+                    titleTemplate = titleTemplate.replace(ProcessTaskTitleTemplateVariable.USER_ID.getExpression(), UserContext.get().getUserId());
+                }
+                if (titleTemplate.contains(ProcessTaskTitleTemplateVariable.USER_NAME.getExpression())) {
+                    titleTemplate = titleTemplate.replace(ProcessTaskTitleTemplateVariable.USER_NAME.getExpression(), UserContext.get().getUserName());
+                }
+                if (titleTemplate.contains(ProcessTaskTitleTemplateVariable.YYYYMMDD.getExpression())) {
+                    titleTemplate = titleTemplate.replace(ProcessTaskTitleTemplateVariable.YYYYMMDD.getExpression(), LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+                }
+                if (titleTemplate.contains(ProcessTaskTitleTemplateVariable.REGION_NAME.getExpression())) {
                     List<Long> regionIdList = regionService.getRegionIdListByUserUuid(UserContext.get().getUserUuid());
                     if (CollectionUtils.isNotEmpty(regionIdList)) {
                         List<RegionVo> regionList = regionMapper.getRegionListByIdList(regionIdList);
                         if (CollectionUtils.isNotEmpty(regionList)) {
                             regionList.sort(Comparator.comparing(RegionVo::getLft));
-                            data.put(ProcessTaskTitleTemplateVariable.REGION_NAME.getValue(), regionList.get(regionList.size() - 1).getName());
+                            String regionName = regionList.get(regionList.size() - 1).getName();
+                            titleTemplate = titleTemplate.replace(ProcessTaskTitleTemplateVariable.REGION_NAME.getExpression(), regionName);
                         }
                     }
-                    String title = FreemarkerUtil.transform(data, titleTemplate);
-                    processTaskVo.setTitle(title);
-                } catch (Exception e) {
-                    processTaskVo.setTitle(titleTemplate);
-                    logger.error(e.getMessage(), e);
                 }
+                processTaskVo.setTitle(titleTemplate);
             }
         }
         processTaskVo.setProcessDispatcherList(getProcessDispatcherList(processVo.getConfig()));
