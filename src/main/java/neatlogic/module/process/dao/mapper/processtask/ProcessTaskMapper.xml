@@ -2145,6 +2145,10 @@
                 <result column="calculationTime" property="calculationTime"/>
             </association>
         </collection>
+        <collection property="tagVoList" ofType="neatlogic.framework.process.dto.ProcessTagVo">
+            <result property="id" column="tagId"/>
+            <result property="name" column="tagName"/>
+        </collection>
     </resultMap>
 
     <select id="getProcessTaskBySql" parameterType="java.lang.String" resultMap="workcenterProcessTaskMap">

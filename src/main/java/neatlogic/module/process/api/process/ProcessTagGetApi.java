@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -59,28 +60,68 @@ public class ProcessTagGetApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
         ProcessTagVo processTagVo = JSON.toJavaObject(jsonObj, ProcessTagVo.class);
-		JSONArray defaultValue = processTagVo.getDefaultValue();
-		if (CollectionUtils.isNotEmpty(defaultValue)) {
-			List<String> tagNameList = defaultValue.toJavaList(String.class);
-			List<ValueTextVo> valueTextList = new ArrayList<>();
-			for (String tagName : tagNameList) {
-				valueTextList.add(new ValueTextVo(tagName, tagName));
-			}
-			resultObj.put("list", valueTextList);
-		} else {
-			int rowNum = processTagMapper.getProcessTagCount(processTagVo);
-			processTagVo.setRowNum(rowNum);
-			resultObj.put("rowNum", rowNum);
-			resultObj.put("pageSize", processTagVo.getPageSize());
-			resultObj.put("currentPage", processTagVo.getCurrentPage());
-			resultObj.put("pageCount", processTagVo.getPageCount());
-			if (rowNum > 0) {
-				resultObj.put("list", processTagMapper.getProcessTagForSelect(processTagVo));
-			} else {
-				resultObj.put("list", new ArrayList<>());
-			}
-		}
+        JSONArray defaultValue = processTagVo.getDefaultValue();
+        if (CollectionUtils.isNotEmpty(defaultValue)) {
+            resultObj.put("list", getDefaultValueResult(defaultValue));
+        } else {
+            int rowNum = processTagMapper.getProcessTagCount(processTagVo);
+            processTagVo.setRowNum(rowNum);
+            resultObj.put("rowNum", rowNum);
+            resultObj.put("pageSize", processTagVo.getPageSize());
+            resultObj.put("currentPage", processTagVo.getCurrentPage());
+            resultObj.put("pageCount", processTagVo.getPageCount());
+            if (rowNum > 0) {
+                resultObj.put("list", processTagMapper.getProcessTagForSelect(processTagVo));
+            } else {
+                resultObj.put("list", new ArrayList<>());
+            }
+        }
         return resultObj;
+    }
+
+    /**
+     * 处理默认值
+     *
+     * @param defaultValue 默认值
+     */
+    private List<?> getDefaultValueResult(JSONArray defaultValue) {
+        List<ValueTextVo> valueTextList = new ArrayList<>();
+        if (defaultValue == null || defaultValue.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Object first = null;
+        for (Object o : defaultValue) {
+            if (o != null) {
+                first = o;
+                break;
+            }
+        }
+
+        if (first == null) {
+            return Collections.emptyList();
+        }
+
+        if (first instanceof String) {
+            List<String> tagNameList = defaultValue.toJavaList(String.class);
+
+            for (String tagName : tagNameList) {
+                valueTextList.add(new ValueTextVo(tagName, tagName));
+            }
+        }
+
+        if (first instanceof Number) {
+            List<Long> tagIdList = defaultValue.toJavaList(Long.class);
+            List<ProcessTagVo> tagVos = processTagMapper.getProcessTagByIdList(tagIdList);
+            if (CollectionUtils.isNotEmpty(tagVos)) {
+                for (ProcessTagVo tagVo : tagVos) {
+                    valueTextList.add(new ValueTextVo(tagVo.getId(), tagVo.getName()));
+                }
+
+            }
+        }
+
+        return valueTextList;
     }
 
 }
