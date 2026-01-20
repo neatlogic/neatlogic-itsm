@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.dao.mapper.UserExportFileMapper;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeDataConversionHandler;
 import neatlogic.framework.form.dao.mapper.FormMapper;
@@ -26,6 +27,7 @@ import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
+import neatlogic.framework.process.constvalue.ProcessUserExportFileType;
 import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.process.dto.ProcessFormVo;
 import neatlogic.framework.process.dto.ProcessTaskFormAttributeDataVo;
@@ -36,8 +38,9 @@ import neatlogic.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnu
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import neatlogic.framework.userexportfile.dto.UserExportFileVo;
 import neatlogic.framework.util.$;
-import neatlogic.framework.util.FileUtil;
+import neatlogic.framework.util.UserExportFileUtil;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
@@ -64,8 +67,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -97,6 +98,9 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 
     @Resource
     private ProcessTaskService processTaskService;
+
+    @Resource
+    private UserExportFileMapper userExportFileMapper;
 
     @Override
     public String getToken() {
@@ -142,6 +146,8 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                     .sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
             workcenterVo.setTheadVoList(theadList);
         }
+        UserExportFileVo userExportFileVo = new UserExportFileVo(ProcessUserExportFileType.WORKCENTER_DATA, "工单数据", ".xlsx", "application/vnd.ms-excel;charset=utf-8");
+        userExportFileMapper.insertUserExportFile(userExportFileVo);
         // 以服务为单位创建不同的sheet；
         // 不同的服务有着不同的表单，故每个sheet的表头也不同；
         // 循环每一批工单，判断是否存在该服务的sheet，不存在则创建，存在则追加数据
@@ -433,15 +439,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                 }
             }
         }
-        String fileNameEncode = FileUtil.getEncodedFileName("工单数据" + ".xlsx");
-        response.setContentType("application/vnd.ms-excel;charset=utf-8");
-        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
-        try (OutputStream os = response.getOutputStream()) {
-            workbook.write(os);
-            ((SXSSFWorkbook) workbook).dispose();
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        }
+        UserExportFileUtil.saveWorkbook(workbook, userExportFileVo, response);
         return null;
     }
 
