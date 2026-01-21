@@ -16,7 +16,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.UserExportFileMapper;
+import neatlogic.framework.common.constvalue.MimeType;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeDataConversionHandler;
 import neatlogic.framework.form.dao.mapper.FormMapper;
@@ -38,9 +38,10 @@ import neatlogic.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnu
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import neatlogic.framework.userexportfile.dto.UserExportFileVo;
+import neatlogic.framework.userexportfile.core.ExportFileManager;
+import neatlogic.framework.userexportfile.exception.UserExportTimeCostTooLongException;
 import neatlogic.framework.util.$;
-import neatlogic.framework.util.UserExportFileUtil;
+import neatlogic.framework.util.FileUtil;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
@@ -52,6 +53,8 @@ import neatlogic.module.process.workcenter.column.handler.ProcessTaskCurrentStep
 import neatlogic.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.DeferredFileOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -67,7 +70,9 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -99,9 +104,6 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
     @Resource
     private ProcessTaskService processTaskService;
 
-    @Resource
-    private UserExportFileMapper userExportFileMapper;
-
     @Override
     public String getToken() {
         return "workcenter/export";
@@ -125,6 +127,12 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
     @Description(desc = "导出工单中心数据")
     @Override
     public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        ExportFileManager exportFileManager = new ExportFileManager(ProcessUserExportFileType.WORKCENTER_DATA)
+                .withName("工单数据.xlsx")
+                .withMimeType(MimeType.XLS)
+//                .withUniqueKey(RequestContext.get().getUrl())
+                ;
+        exportFileManager.generateData((outputStream) -> {
         String uuid = jsonObj.getString("uuid");
         WorkcenterVo workcenterVo = JSONObject.toJavaObject(jsonObj, WorkcenterVo.class);
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
@@ -146,8 +154,6 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                     .sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
             workcenterVo.setTheadVoList(theadList);
         }
-        UserExportFileVo userExportFileVo = new UserExportFileVo(ProcessUserExportFileType.WORKCENTER_DATA, "工单数据", ".xlsx", "application/vnd.ms-excel;charset=utf-8");
-        userExportFileMapper.insertUserExportFile(userExportFileVo);
         // 以服务为单位创建不同的sheet；
         // 不同的服务有着不同的表单，故每个sheet的表头也不同；
         // 循环每一批工单，判断是否存在该服务的sheet，不存在则创建，存在则追加数据
@@ -439,7 +445,36 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                 }
             }
         }
-        UserExportFileUtil.saveWorkbook(workbook, userExportFileVo, response);
+            workbook.write(outputStream);
+        });
+
+        try (DeferredFileOutputStream deferredFileOutputStream = exportFileManager.export(5, TimeUnit.SECONDS)) {
+            if (deferredFileOutputStream != null) {
+                try (OutputStream os = response.getOutputStream()) {
+                    response.setContentType(exportFileManager.getMimeType().getValue());
+                    String filename = FileUtil.getEncodedFileName(exportFileManager.getName());
+                    response.setHeader("Content-Disposition", " attachment; filename=\"" + filename + "\"");
+                    if (deferredFileOutputStream.isInMemory()) {
+                        try (InputStream inputStream = new ByteArrayInputStream(deferredFileOutputStream.getData())) {
+                            IOUtils.copyLarge(inputStream, os);
+                        }
+                    } else {
+                        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(deferredFileOutputStream.getFile()))) {
+                            IOUtils.copyLarge(inputStream, os);
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.warn(e.getMessage(), e);
+                } finally {
+                    File tempFile = deferredFileOutputStream.getFile();
+                    if (tempFile.exists()) {
+                        boolean delete = tempFile.delete();
+                    }
+                }
+            } else {
+                throw new UserExportTimeCostTooLongException();
+            }
+        }
         return null;
     }
 
