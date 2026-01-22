@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.MimeType;
+import neatlogic.framework.common.constvalue.ResponseCode;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeDataConversionHandler;
 import neatlogic.framework.form.dao.mapper.FormMapper;
@@ -39,7 +40,6 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.userexportfile.core.ExportFileManager;
-import neatlogic.framework.userexportfile.exception.UserExportTimeCostTooLongException;
 import neatlogic.framework.util.$;
 import neatlogic.framework.util.FileUtil;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
@@ -472,7 +472,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                     }
                 }
             } else {
-                throw new UserExportTimeCostTooLongException();
+                response.setStatus(ResponseCode.EXPORT_TIMEOUT.getCode());
             }
         }
         return null;
