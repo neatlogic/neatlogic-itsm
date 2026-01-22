@@ -130,6 +130,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
         ExportFileManager exportFileManager = new ExportFileManager(ProcessUserExportFileType.WORKCENTER_DATA)
                 .withName("工单数据.xlsx")
                 .withMimeType(MimeType.XLS)
+                .withAwait(5, TimeUnit.SECONDS)
 //                .withUniqueKey(RequestContext.get().getUrl())
                 ;
         exportFileManager.generateData((outputStream) -> {
@@ -448,7 +449,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
             workbook.write(outputStream);
         });
 
-        try (DeferredFileOutputStream deferredFileOutputStream = exportFileManager.export(5, TimeUnit.SECONDS)) {
+        try (DeferredFileOutputStream deferredFileOutputStream = exportFileManager.export()) {
             if (deferredFileOutputStream != null) {
                 try (OutputStream os = response.getOutputStream()) {
                     response.setContentType(exportFileManager.getMimeType().getValue());
