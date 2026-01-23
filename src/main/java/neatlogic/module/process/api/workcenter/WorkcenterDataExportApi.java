@@ -452,6 +452,8 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
             if (!exportFileManager.exportTo(os)) {
                 response.setStatus(ResponseCode.EXPORT_TIMEOUT.getCode());
             }
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
         }
         return null;
     }
