@@ -22,6 +22,7 @@ import neatlogic.framework.process.exception.process.ProcessNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskService;
@@ -32,10 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,6 +49,9 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private SelectContentByHashMapper selectContentByHashMapper;
 
     @Override
     public String getName() {
@@ -75,36 +76,48 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
         if (processVo == null) {
             throw new ProcessNotFoundException(processUuid);
         }
-        String configStr = processVo.getConfigStr();
-        String configHash = DigestUtils.md5DigestAsHex(configStr.getBytes());
-        ProcessTaskConfigVo processTaskConfigVo = new ProcessTaskConfigVo();
-        processTaskConfigVo.setConfig(configStr);
-        processTaskConfigVo.setHash(configHash);
-        processTaskMapper.insertIgnoreProcessTaskConfig(processTaskConfigVo);
-        processTaskMapper.updateProcessTaskConfigHashById(processTaskId, configHash);
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
-        Map<String, ProcessTaskStepVo> processTaskStepMap = processTaskStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getProcessStepUuid, e -> e));
-        JSONObject config = JSONObject.parseObject(configStr);
-        JSONObject process = config.getJSONObject("process");
-        JSONArray stepList = process.getJSONArray("stepList");
-        if (CollectionUtils.isNotEmpty(stepList)) {
+        String oldConfigStr = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+        JSONObject oldConfig = JSONObject.parseObject(oldConfigStr);
+        JSONObject oldProcess = oldConfig.getJSONObject("process");
+        JSONArray oldStepList = oldProcess.getJSONArray("stepList");
+
+        if (CollectionUtils.isNotEmpty(oldStepList)) {
+            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
+            Map<String, ProcessTaskStepVo> processTaskStepMap = processTaskStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getProcessStepUuid, e -> e));
+            String configStr = processVo.getConfigStr();
+            JSONObject config = JSONObject.parseObject(configStr);
+            JSONObject process = config.getJSONObject("process");
+            JSONArray stepList = process.getJSONArray("stepList");
+            Map<String, JSONObject> stepMap = new HashMap<>();
             for (int i = 0; i < stepList.size(); i++) {
                 JSONObject stepObj = stepList.getJSONObject(i);
-                if (MapUtils.isNotEmpty(stepObj)) {
-                    String uuid = stepObj.getString("uuid");
-                    ProcessTaskStepVo processTaskStepVo = processTaskStepMap.get(uuid);
-                    if (processTaskStepVo == null) {
+                String uuid = stepObj.getString("uuid");
+                stepMap.put(uuid, stepObj);
+            }
+            for (int i = 0; i < oldStepList.size(); i++) {
+                JSONObject oldStepObj = oldStepList.getJSONObject(i);
+                if (MapUtils.isNotEmpty(oldStepObj)) {
+                    String uuid = oldStepObj.getString("uuid");
+                    ProcessTaskStepVo oldProcessTaskStepVo = processTaskStepMap.get(uuid);
+                    if (oldProcessTaskStepVo == null) {
                         continue;
                     }
-                    Long processTaskStepId = processTaskStepVo.getId();
+                    JSONObject stepObj = stepMap.get(uuid);
+                    if (stepObj == null) {
+                        continue;
+                    }
                     String name = stepObj.getString("name");
                     JSONObject stepConfigObj = stepObj.getJSONObject("stepConfig");
                     String stepConfig = stepConfigObj.toJSONString();
                     String stepConfigHash = DigestUtils.md5DigestAsHex(stepConfig.getBytes());
-                    if (Objects.equals(name, processTaskStepVo.getName()) && Objects.equals(stepConfigHash, processTaskStepVo.getConfigHash())) {
+                    Long processTaskStepId = oldProcessTaskStepVo.getId();
+                    String oldName = oldStepObj.getString("name");
+                    JSONObject oldStepConfigObj = oldStepObj.getJSONObject("stepConfig");
+                    String oldStepConfig = oldStepConfigObj.toJSONString();
+                    if (Objects.equals(oldName, name) && Objects.equals(oldStepConfig, stepConfig)) {
                         continue;
                     }
-                    if (!Objects.equals(stepConfigHash, processTaskStepVo.getConfigHash())) {
+                    if (!Objects.equals(oldStepConfig, stepConfig)) {
                         processTaskMapper.insertIgnoreProcessTaskStepConfig(new ProcessTaskStepConfigVo(stepConfigHash, stepConfig));
                         processTaskMapper.deleteProcessTaskStepWorkerPolicyByProcessTaskStepId(processTaskStepId);
                         JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
@@ -133,58 +146,69 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
                         }
                     }
                     processTaskMapper.updateProcessTaskStepNameAndConfigHashByProcessTaskIdAndProcessStepUuid(processTaskId, uuid, name, stepConfigHash);
+                    oldStepObj.put("name", name);
+                    oldStepObj.put("stepConfig", stepConfigObj);
                 }
             }
         }
-        JSONArray connectionList = process.getJSONArray("connectionList");
-        if (CollectionUtils.isNotEmpty(connectionList)) {
-            List<ProcessTaskStepRelVo> processTaskStepRelList = new ArrayList<>();
-            List<ProcessTaskStepRelVo> oldProcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByProcessTaskId(processTaskId);
-            for (int i = 0; i < connectionList.size(); i++) {
-                JSONObject connectionObj = connectionList.getJSONObject(i);
-                if (MapUtils.isNotEmpty(connectionObj)) {
-                    String fromStepUuid = connectionObj.getString("fromStepUuid");
-                    String toStepUuid = connectionObj.getString("toStepUuid");
-                    String name = connectionObj.getString("name");
-                    String type = connectionObj.getString("type");
-                    String uuid = connectionObj.getString("uuid");
-                    String conditionConfig = connectionObj.getString("conditionConfig");
-                    ProcessTaskStepVo fromProcessTaskStepVo = processTaskStepMap.get(fromStepUuid);
-                    if (fromProcessTaskStepVo == null) {
-                        continue;
-                    }
-                    ProcessTaskStepVo toProcessTaskStepVo = processTaskStepMap.get(toStepUuid);
-                    if (toProcessTaskStepVo == null) {
-                        continue;
-                    }
-                    ProcessTaskStepRelVo processTaskStepRelVo = new ProcessTaskStepRelVo();
-                    processTaskStepRelVo.setProcessTaskId(processTaskId);
-                    processTaskStepRelVo.setFromProcessStepUuid(fromStepUuid);
-                    processTaskStepRelVo.setToProcessStepUuid(toStepUuid);
-                    processTaskStepRelVo.setFromProcessTaskStepId(fromProcessTaskStepVo.getId());
-                    processTaskStepRelVo.setToProcessTaskStepId(toProcessTaskStepVo.getId());
-                    processTaskStepRelVo.setCondition(conditionConfig);
-                    processTaskStepRelVo.setProcessStepRelUuid(uuid);
-                    processTaskStepRelVo.setName(name);
-                    processTaskStepRelVo.setType(type);
-                    processTaskStepRelVo.setIsHit(0);
-                    for (ProcessTaskStepRelVo oldProcessTaskStepRelVo : oldProcessTaskStepRelList) {
-                        if (Objects.equals(oldProcessTaskStepRelVo.getFromProcessStepUuid(), processTaskStepRelVo.getFromProcessStepUuid())
-                                && Objects.equals(oldProcessTaskStepRelVo.getToProcessStepUuid(), processTaskStepRelVo.getToProcessStepUuid())
-                                && Objects.equals(oldProcessTaskStepRelVo.getFromProcessTaskStepId(), processTaskStepRelVo.getFromProcessTaskStepId())
-                                && Objects.equals(oldProcessTaskStepRelVo.getToProcessTaskStepId(), processTaskStepRelVo.getToProcessTaskStepId())
-                        ) {
-                            processTaskStepRelVo.setIsHit(oldProcessTaskStepRelVo.getIsHit());
-                        }
-                    }
-                    processTaskStepRelList.add(processTaskStepRelVo);
-                }
-            }
-            if (CollectionUtils.isNotEmpty(processTaskStepRelList)) {
-                processTaskMapper.deleteProcessTaskStepRelByProcessTaskId(processTaskId);
-                processTaskMapper.insertProcessTaskStepRelList(processTaskStepRelList);
-            }
+        String newConfigStr = oldConfig.toJSONString();
+        if (!Objects.equals(newConfigStr, oldConfigStr)) {
+            String configHash = DigestUtils.md5DigestAsHex(newConfigStr.getBytes());
+            ProcessTaskConfigVo processTaskConfigVo = new ProcessTaskConfigVo();
+            processTaskConfigVo.setConfig(newConfigStr);
+            processTaskConfigVo.setHash(configHash);
+            processTaskMapper.insertIgnoreProcessTaskConfig(processTaskConfigVo);
+            processTaskMapper.updateProcessTaskConfigHashById(processTaskId, configHash);
         }
+//        JSONArray connectionList = process.getJSONArray("connectionList");
+//        if (CollectionUtils.isNotEmpty(connectionList)) {
+//            List<ProcessTaskStepRelVo> processTaskStepRelList = new ArrayList<>();
+//            List<ProcessTaskStepRelVo> oldProcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByProcessTaskId(processTaskId);
+//            for (int i = 0; i < connectionList.size(); i++) {
+//                JSONObject connectionObj = connectionList.getJSONObject(i);
+//                if (MapUtils.isNotEmpty(connectionObj)) {
+//                    String fromStepUuid = connectionObj.getString("fromStepUuid");
+//                    String toStepUuid = connectionObj.getString("toStepUuid");
+//                    String name = connectionObj.getString("name");
+//                    String type = connectionObj.getString("type");
+//                    String uuid = connectionObj.getString("uuid");
+//                    String conditionConfig = connectionObj.getString("conditionConfig");
+//                    ProcessTaskStepVo fromProcessTaskStepVo = processTaskStepMap.get(fromStepUuid);
+//                    if (fromProcessTaskStepVo == null) {
+//                        continue;
+//                    }
+//                    ProcessTaskStepVo toProcessTaskStepVo = processTaskStepMap.get(toStepUuid);
+//                    if (toProcessTaskStepVo == null) {
+//                        continue;
+//                    }
+//                    ProcessTaskStepRelVo processTaskStepRelVo = new ProcessTaskStepRelVo();
+//                    processTaskStepRelVo.setProcessTaskId(processTaskId);
+//                    processTaskStepRelVo.setFromProcessStepUuid(fromStepUuid);
+//                    processTaskStepRelVo.setToProcessStepUuid(toStepUuid);
+//                    processTaskStepRelVo.setFromProcessTaskStepId(fromProcessTaskStepVo.getId());
+//                    processTaskStepRelVo.setToProcessTaskStepId(toProcessTaskStepVo.getId());
+//                    processTaskStepRelVo.setCondition(conditionConfig);
+//                    processTaskStepRelVo.setProcessStepRelUuid(uuid);
+//                    processTaskStepRelVo.setName(name);
+//                    processTaskStepRelVo.setType(type);
+//                    processTaskStepRelVo.setIsHit(0);
+//                    for (ProcessTaskStepRelVo oldProcessTaskStepRelVo : oldProcessTaskStepRelList) {
+//                        if (Objects.equals(oldProcessTaskStepRelVo.getFromProcessStepUuid(), processTaskStepRelVo.getFromProcessStepUuid())
+//                                && Objects.equals(oldProcessTaskStepRelVo.getToProcessStepUuid(), processTaskStepRelVo.getToProcessStepUuid())
+//                                && Objects.equals(oldProcessTaskStepRelVo.getFromProcessTaskStepId(), processTaskStepRelVo.getFromProcessTaskStepId())
+//                                && Objects.equals(oldProcessTaskStepRelVo.getToProcessTaskStepId(), processTaskStepRelVo.getToProcessTaskStepId())
+//                        ) {
+//                            processTaskStepRelVo.setIsHit(oldProcessTaskStepRelVo.getIsHit());
+//                        }
+//                    }
+//                    processTaskStepRelList.add(processTaskStepRelVo);
+//                }
+//            }
+//            if (CollectionUtils.isNotEmpty(processTaskStepRelList)) {
+//                processTaskMapper.deleteProcessTaskStepRelByProcessTaskId(processTaskId);
+//                processTaskMapper.insertProcessTaskStepRelList(processTaskStepRelList);
+//            }
+//        }
         return null;
     }
 
