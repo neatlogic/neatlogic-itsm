@@ -27,11 +27,16 @@ import neatlogic.framework.process.condition.core.IProcessTaskCondition;
 import neatlogic.framework.process.condition.core.ProcessTaskConditionBase;
 import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
+import neatlogic.framework.process.constvalue.ProcessUserType;
+import neatlogic.framework.process.dto.ProcessTaskStepUserVo;
+import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.SqlDecoratorVo;
 import neatlogic.framework.process.workcenter.dto.JoinTableColumnVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskStepUserSqlTable;
 import neatlogic.framework.process.workcenter.table.util.SqlTableUtil;
 import neatlogic.framework.service.AuthenticationInfoService;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -40,6 +45,10 @@ import java.util.List;
 
 @Component
 public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
+
     @Resource
     UserMapper userMapper;
 
@@ -190,5 +199,16 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
     @Override
     public List<JoinTableColumnVo> getMyJoinTableColumnList(SqlDecoratorVo sqlDecoratorVo) {
         return SqlTableUtil.getStepUserJoinTableSql();
+    }
+
+    @Override
+    public Object getConditionParamData(ProcessTaskStepVo processTaskStepVo){
+        if (processTaskStepVo.getId() != null) {
+            List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
+            if (CollectionUtils.isNotEmpty(processTaskStepUserList)) {
+                return processTaskStepUserList.get(0).getUserUuid();
+            }
+        }
+        return null;
     }
 }
