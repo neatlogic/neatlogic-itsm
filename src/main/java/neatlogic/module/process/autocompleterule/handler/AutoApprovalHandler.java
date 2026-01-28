@@ -21,11 +21,11 @@ import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.process.autocompleterule.core.IAutoCompleteRuleHandler;
 import neatlogic.framework.process.constvalue.*;
 import neatlogic.framework.process.dto.*;
-import neatlogic.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import neatlogic.framework.process.stephandler.core.*;
 import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskAgentService;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +43,9 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @Resource
     private UserMapper userMapper;
@@ -130,12 +133,8 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
                         currentProcessTaskStepVo.getId(),
                         ProcessTaskStepOperationType.STEP_COMPLETE.getValue()
                 );
-                IProcessStepInternalHandler processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-                if (processStepInternalHandler == null) {
-                    throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
-                }
-                processStepInternalHandler.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
-                thread.setSupplier(() -> processTaskMapper.deleteProcessTaskStepInOperationById(processTaskStepInOperationVo.getId()));
+                processTaskService.saveProcessTaskStepInOperation(processTaskStepInOperationVo);
+                thread.setSupplier(() -> processTaskService.deleteProcessTaskStepInOperationById(processTaskStepInOperationVo.getId()));
                 TransactionSynchronizationPool.execute(thread);
                 return true;
             }

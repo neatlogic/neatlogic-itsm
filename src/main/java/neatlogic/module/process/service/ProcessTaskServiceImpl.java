@@ -16,14 +16,15 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.change.constvalue.ChangeProcessStepHandlerType;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.UserType;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.config.ConfigManager;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dao.mapper.RoleMapper;
+import neatlogic.framework.dao.mapper.SchemaMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dao.mapper.region.RegionMapper;
@@ -93,8 +94,11 @@ import neatlogic.module.process.dao.mapper.processtask.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -109,7 +113,7 @@ import static java.util.stream.Collectors.toCollection;
 @Service
 public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskCrossoverService {
 
-    // private static final Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
+     private final Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
 
     private final Pattern pattern_html = Pattern.compile("<[^>]+>", Pattern.CASE_INSENSITIVE);
 
@@ -187,6 +191,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     private ProcessTaskActionMapper processTaskActionMapper;
     @Resource
     private IntegrationMapper integrationMapper;
+    @Resource
+    private SchemaMapper schemaMapper;
 //    @Override
 //    public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo,
 //                                                  Map<String, String> formAttributeActionMap, int mode) {
@@ -3543,6 +3549,94 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         } finally {
             ProcessMessageManager.release();
+        }
+    }
+
+    @Override
+    public List<ProcessTaskStepInOperationVo> getProcessTaskStepInOperationListByProcessTaskId(Long processTaskId) {
+        List<ProcessTaskStepInOperationVo> processTaskStepInOperationList = processTaskMapper.getProcessTaskStepInOperationListByProcessTaskId(processTaskId);
+        if (CollectionUtils.isNotEmpty(processTaskStepInOperationList)) {
+            List<ProcessTaskStepInOperationVo> list = new ArrayList<>();
+            for (ProcessTaskStepInOperationVo processTaskStepInOperationVo : processTaskStepInOperationList) {
+                Date expireTime = processTaskStepInOperationVo.getExpireTime();
+                if (expireTime == null || expireTime.getTime() - System.currentTimeMillis() < 0) {
+                    list.add(processTaskStepInOperationVo);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(list)) {
+                String value = ConfigManager.getConfig(ItsmTenantConfig.PROCESSTASK_STEP_IN_OPERATION_AUDIT_ENABLED);
+                if (Objects.equals(value, "1")) {
+                    String serverUuid = null;
+                    String hostName = null;
+                    try {
+                        Map<String, String> map = schemaMapper.getServerUuidAndHostName();
+                        serverUuid = map.get("serverUuid");
+                        hostName = map.get("hostName");
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                    } finally {
+                        Logger specifyLogger = LoggerFactory.getLogger("processTaskStepInOperationAudit");
+                        specifyLogger.error("select processTaskId = {}, count = {}, serverUuid = {}, hostName = {}, list = {}", processTaskId, list.size(), serverUuid, hostName, JSON.toJSONString(list, SerializerFeature.WriteDateUseDateFormat));
+                    }
+                }
+            }
+        }
+        return processTaskStepInOperationList;
+    }
+
+    @Override
+    @Transactional
+    public void saveProcessTaskStepInOperation(ProcessTaskStepInOperationVo processTaskStepInOperationVo) {
+        String serverUuid = null;
+        String hostName = null;
+        int count = -1;
+        Long id = processTaskStepInOperationVo.getId();
+        String value = ConfigManager.getConfig(ItsmTenantConfig.PROCESSTASK_STEP_IN_OPERATION_AUDIT_ENABLED);
+        if (Objects.equals(value, "1")) {
+            try {
+                Map<String, String> map = schemaMapper.getServerUuidAndHostName();
+                serverUuid = map.get("serverUuid");
+                hostName = map.get("hostName");
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        try {
+            count = processTaskMapper.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
+        } finally {
+            if (Objects.equals(value, "1")) {
+                Logger specifyLogger = LoggerFactory.getLogger("processTaskStepInOperationAudit");
+                specifyLogger.error("insert id = {}, count = {}, serverUuid = {}, hostName = {}, vo = {}", id, count, serverUuid, hostName, JSON.toJSONString(processTaskStepInOperationVo, SerializerFeature.WriteDateUseDateFormat));
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public int deleteProcessTaskStepInOperationById(Long id) {
+        String serverUuid = null;
+        String hostName = null;
+        ProcessTaskStepInOperationVo processTaskStepInOperationVo = null;
+        int count = -1;
+        String value = ConfigManager.getConfig(ItsmTenantConfig.PROCESSTASK_STEP_IN_OPERATION_AUDIT_ENABLED);
+        if (Objects.equals(value, "1")) {
+            try {
+                Map<String, String> map = schemaMapper.getServerUuidAndHostName();
+                serverUuid = map.get("serverUuid");
+                hostName = map.get("hostName");
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        try {
+            processTaskStepInOperationVo = processTaskMapper.getProcessTaskStepInOperationById(id);
+            count = processTaskMapper.deleteProcessTaskStepInOperationById(id);
+            return count;
+        } finally {
+            if (Objects.equals(value, "1")) {
+                Logger specifyLogger = LoggerFactory.getLogger("processTaskStepInOperationAudit");
+                specifyLogger.error("delete id = {}, count = {}, serverUuid = {}, hostName = {}, idIsExists = {}", id, count, serverUuid, hostName, processTaskStepInOperationVo != null);
+            }
         }
     }
 }
