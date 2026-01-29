@@ -255,6 +255,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     List<ProcessTaskStepInOperationVo> getProcessTaskStepInOperationListByProcessTaskId(Long processTaskId);
 
+    ProcessTaskStepInOperationVo getProcessTaskStepInOperationById(Long id);
+
     int getProcessTaskCountByChannelTypeUuidAndStartTime(ProcessTaskVo processTaskVo);
 
     List<ProcessTaskVo> getProcessTaskListByChannelTypeUuidAndStartTime(ProcessTaskVo processTaskVo);

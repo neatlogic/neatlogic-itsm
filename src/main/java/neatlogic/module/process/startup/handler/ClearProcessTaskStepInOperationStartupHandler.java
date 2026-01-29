@@ -12,18 +12,13 @@
 
 package neatlogic.module.process.startup.handler;
 
-import neatlogic.framework.common.config.Config;
 import neatlogic.framework.startup.StartupBase;
-import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-
-@Component
+//@Component
 public class ClearProcessTaskStepInOperationStartupHandler extends StartupBase {
 
-    @Resource
-    private ProcessTaskMapper processTaskMapper;
+//    @Resource
+//    private ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getName() {
@@ -32,7 +27,8 @@ public class ClearProcessTaskStepInOperationStartupHandler extends StartupBase {
 
     @Override
     public int executeForCurrentTenant() {
-        return processTaskMapper.deleteProcessTaskStepInOperationByServerId((long) Config.SCHEDULE_SERVER_ID);
+//        return processTaskMapper.deleteProcessTaskStepInOperationByServerId((long) Config.SCHEDULE_SERVER_ID);
+        return 0;
     }
 
     @Override

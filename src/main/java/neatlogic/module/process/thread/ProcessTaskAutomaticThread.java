@@ -16,6 +16,7 @@ import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskAutomaticService;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,7 @@ public class ProcessTaskAutomaticThread extends NeatLogicThread {
 
     private static ProcessTaskAutomaticService processTaskAutomaticService;
     private static ProcessTaskMapper processTaskMapper;
+    private static ProcessTaskService processTaskService;
     private Long processTaskStepInOperationId;
 
     @Resource
@@ -42,6 +44,10 @@ public class ProcessTaskAutomaticThread extends NeatLogicThread {
     @Resource
     private void setProcessTaskMapper(ProcessTaskMapper _processTaskMapper) {
         processTaskMapper = _processTaskMapper;
+    }
+    @Resource
+    private void setProcessTaskService(ProcessTaskService _processTaskService) {
+        processTaskService = _processTaskService;
     }
     private ProcessTaskStepVo currentProcessTaskStepVo;
 
@@ -61,8 +67,7 @@ public class ProcessTaskAutomaticThread extends NeatLogicThread {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         } finally {
-            processTaskMapper.deleteProcessTaskStepInOperationByProcessTaskIdAndProcessTaskStepIdAndOperationType(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), "request");
-            processTaskMapper.deleteProcessTaskStepInOperationById(processTaskStepInOperationId);
+            processTaskService.deleteProcessTaskStepInOperationById(processTaskStepInOperationId);
         }
     }
 }

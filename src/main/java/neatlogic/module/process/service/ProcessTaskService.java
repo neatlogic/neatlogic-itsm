@@ -566,4 +566,10 @@ public interface ProcessTaskService {
      * @param channelVo 服务信息
      */
     void checkDependenciesBeforeReport(ChannelVo channelVo);
+
+    List<ProcessTaskStepInOperationVo> getProcessTaskStepInOperationListByProcessTaskId(Long processTaskId);
+
+    void saveProcessTaskStepInOperation(ProcessTaskStepInOperationVo processTaskStepInOperationVo);
+
+    int deleteProcessTaskStepInOperationById(Long id);
 }

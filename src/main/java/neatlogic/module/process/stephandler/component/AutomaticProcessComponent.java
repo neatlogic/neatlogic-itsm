@@ -41,6 +41,7 @@ import neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepDataMapper
 import neatlogic.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.module.process.service.ProcessTaskAutomaticService;
+import neatlogic.module.process.service.ProcessTaskService;
 import neatlogic.module.process.thread.ProcessTaskAutomaticThread;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +50,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -67,6 +67,9 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @Resource
     private IProcessStepHandlerUtil processStepHandlerUtil;
@@ -156,18 +159,13 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
             UserContext.init(SystemUser.SYSTEM);
             if (Objects.equals(isTimeToRun, 0)) {
 //            System.out.println("在时间窗口内，直接发送请求");
-                IProcessStepInternalHandler processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-                if (processStepInternalHandler == null) {
-                    throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
-                }
                 ProcessTaskStepInOperationVo processTaskStepInOperationVo = new ProcessTaskStepInOperationVo(
                         currentProcessTaskStepVo.getProcessTaskId(),
                         currentProcessTaskStepVo.getId(),
-                        "request",
-                        new Date(System.currentTimeMillis() + EXPIRETIME)
+                        "request"
                 );
                 // 后台异步操作步骤前，在`processtask_step_in_operation`表中插入一条数据，标识该步骤正在后台处理中，异步处理完删除
-                processStepInternalHandler.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
+                processTaskService.saveProcessTaskStepInOperation(processTaskStepInOperationVo);
                 TransactionSynchronizationPool.execute(new ProcessTaskAutomaticThread(currentProcessTaskStepVo, processTaskStepInOperationVo.getId()));
             } else {
 //            System.out.println("不在时间窗口内，加载定时作业，定时发送请求");

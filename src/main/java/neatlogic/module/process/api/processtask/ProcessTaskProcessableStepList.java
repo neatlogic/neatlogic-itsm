@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.dto.ProcessTaskStepInOperationVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.process.exception.processtask.ProcessTaskNotFoundEditTargetException;
@@ -12,9 +13,11 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -66,11 +69,23 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 //			resultObj.put("status", "running");
 //			return resultObj;
 //		}
-		int count = processTaskMapper.getProcessTaskStepInOperationCountByProcessTaskId(processTaskId);
-		if (count > 0) {
-			resultObj.put("status", "running");
-			return resultObj;
+//		int count = processTaskMapper.getProcessTaskStepInOperationCountByProcessTaskId(processTaskId);
+//		if (count > 0) {
+//			resultObj.put("status", "running");
+//			return resultObj;
+//		}
+
+		List<ProcessTaskStepInOperationVo> processTaskStepInOperationList = processTaskService.getProcessTaskStepInOperationListByProcessTaskId(processTaskId);
+		if (CollectionUtils.isNotEmpty(processTaskStepInOperationList)) {
+			for (ProcessTaskStepInOperationVo processTaskStepInOperationVo : processTaskStepInOperationList) {
+				Date expireTime = processTaskStepInOperationVo.getExpireTime();
+				if (expireTime != null && expireTime.getTime() - System.currentTimeMillis() > 0) {
+					resultObj.put("status", "running");
+					return resultObj;
+				}
+			}
 		}
+
 //		List<ProcessTaskStepInOperationVo> processTaskStepInOperationList = processTaskMapper.getProcessTaskStepInOperationListByProcessTaskId(processTaskId);
 //		System.out.println("processTaskStepInOperationList = " + JSONObject.toJSONString(processTaskStepInOperationList));
 //		if (CollectionUtils.isNotEmpty(processTaskStepInOperationList)) {

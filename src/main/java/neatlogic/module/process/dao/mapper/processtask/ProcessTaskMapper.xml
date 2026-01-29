@@ -1882,13 +1882,28 @@
 
     <select id="getProcessTaskStepInOperationListByProcessTaskId" parameterType="java.lang.Long"
             resultType="neatlogic.framework.process.dto.ProcessTaskStepInOperationVo">
-        SELECT `processtask_id`      AS processTaskId,
+        SELECT `id`,
+               `processtask_id`      AS processTaskId,
                `processtask_step_id` AS processTaskStepId,
                `operation_type`      AS operationType,
                `operation_time`      AS operationTime,
-               `expire_time`         AS expireTime
+               `expire_time`         AS expireTime,
+               `server_id`           AS serverId
         FROM `processtask_step_in_operation`
         WHERE `processtask_id` = #{value}
+    </select>
+
+    <select id="getProcessTaskStepInOperationById" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskStepInOperationVo">
+        SELECT `id`,
+               `processtask_id`      AS processTaskId,
+               `processtask_step_id` AS processTaskStepId,
+               `operation_type`      AS operationType,
+               `operation_time`      AS operationTime,
+               `expire_time`         AS expireTime,
+               `server_id`           AS serverId
+        FROM `processtask_step_in_operation`
+        WHERE `id` = #{value}
     </select>
 
     <select id="getProcessTaskCountByChannelTypeUuidAndStartTime"
@@ -3953,7 +3968,7 @@
 
     <delete id="deleteProcessTaskExtendFormAttributeByProcessTaskId" parameterType="java.lang.Long">
         DELETE
-        FROM `processtask_Extend_formattribute`
+        FROM `processtask_extend_formattribute`
         WHERE `processtask_id` = #{value}
     </delete>
 
