@@ -46,6 +46,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
      */
     ProcessTaskVo getProcessTaskBaseInfoByIdIncludeIsDeleted(Long processTaskId);
 
+    ProcessTaskVo getProcessTaskById(Long id);
+
     List<ProcessTaskVo> getTaskListByIdList(List<Long> idList);
 
     /**
@@ -150,8 +152,6 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
             @Param("isActive") Integer isActive);
 
     ProcessTaskStepVo getProcessTaskStepBaseInfoById(Long processTaskStepId);
-
-    ProcessTaskVo getProcessTaskById(Long id);
 
     List<ProcessTaskVo> getProcessTaskByIdStrList(List<String> idList);
 
@@ -300,6 +300,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
     List<Long> getSameTagIdListByProcessTaskStepIdList(List<Long> processTaskStepIdList);
 
     List<Long> getTagIdListByProcessTaskStepId(Long processTaskStepId);
+
+    List<ProcessTaskStepTagVo> getProcessTaskStepTagListByProcessTaskId(Long processTaskId);
 
     int getProcessTaskCountByOwner(ProcessTaskVo vo);
 
@@ -610,5 +612,11 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     int deleteProcessTaskStepWorkerPolicyByProcessTaskStepId(Long processTaskStepId);
 
+    int deleteProcessTaskStepWorkerPolicy(ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo);
+
     int deleteProcessTaskStepRelByProcessTaskId(Long processTaskId);
+
+    int deleteProcessTaskScoreTemplateByProcessTaskId(Long processTaskId);
+
+    int deleteProcessTaskStepTag(ProcessTaskStepTagVo processTaskStepTagVo);
 }
