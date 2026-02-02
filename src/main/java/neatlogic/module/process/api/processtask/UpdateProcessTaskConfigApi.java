@@ -28,6 +28,8 @@ import neatlogic.framework.util.UuidUtil;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
+import neatlogic.module.process.service.IProcessStepHandlerUtil;
 import neatlogic.module.process.service.ProcessService;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
@@ -55,10 +57,16 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
     private ProcessTaskMapper processTaskMapper;
 
     @Resource
+    private ProcessTaskSlaMapper processTaskSlaMapper;
+
+    @Resource
     private ProcessMapper processMapper;
 
     @Resource
     private ProcessService processService;
+
+    @Resource
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 
     @Override
     public String getName() {
@@ -78,6 +86,7 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
         JSONObject resultObj = new JSONObject();
         Long processTaskId = paramObj.getLong("processTaskId");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        List<ProcessTaskSlaVo> oldProcessTaskSlaList = processTaskSlaMapper.getProcessTaskSlaListByProcessTaskId(processTaskId);
         JSONObject newConfig = paramObj.getJSONObject("config");
         try {
             ProcessMessageManager.setOperationType(OperationTypeEnum.UPDATE);
@@ -98,6 +107,7 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
         }
         ProcessVo oldProcessVo = processMapper.getProcessByUuid(processTaskVo.getProcessUuid());
         processService.saveOrDeleteProcessDependency(oldProcessVo, "delete");
+
         JSONObject config = mergeConfig(oldConfig, newConfig);
         ProcessVo processVo = new ProcessVo();
         processVo.setUuid(processUuid);
@@ -108,8 +118,17 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
         processTaskMapper.insertProcessTaskHistoryConfigHash(processTaskId, configHash, UserContext.get().getUserUuid());
         processService.saveOrDeleteProcessDependency(processVo, "delete");
         processMapper.deleteProcessByUuid(processUuid);
+
         processService.saveOrDeleteProcessDependency(oldProcessVo, "save");
         resultObj.put("message", "已修改工单流程图快照");
+
+        List<ProcessTaskSlaVo> newProcessTaskSlaList = processTaskSlaMapper.getProcessTaskSlaListByProcessTaskId(processTaskId);
+        if (oldProcessTaskSlaList.size() != newProcessTaskSlaList.size()
+                || Objects.equals(JSON.toJSONString(oldProcessTaskSlaList, SerializerFeature.SortField, SerializerFeature.MapSortField), JSON.toJSONString(oldProcessTaskSlaList, SerializerFeature.SortField, SerializerFeature.MapSortField))
+        ) {
+            // 重新计算时效
+            processStepHandlerUtil.calculateSla(new ProcessTaskVo(processTaskId), false);
+        }
         return resultObj;
     }
 
