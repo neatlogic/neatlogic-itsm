@@ -62,8 +62,12 @@ public class ProcessSaveApi extends PrivateApiComponentBase {
     @ResubmitInterval(value = 2)
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessVo processVo = JSON.toJavaObject(jsonObj, ProcessVo.class);
-        ProcessMessageManager.setOperationType(OperationTypeEnum.UPDATE);
-        ProcessConfigUtil.regulateProcessConfig(processVo.getConfig());
+        try {
+            ProcessMessageManager.setOperationType(OperationTypeEnum.UPDATE);
+            ProcessConfigUtil.regulateProcessConfig(processVo.getConfig());
+        } finally {
+            ProcessMessageManager.release();
+        }
         processService.saveProcess(processVo);
         return processVo.getUuid();
     }

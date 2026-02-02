@@ -75,8 +75,12 @@ public class ProcessGetApi extends PrivateApiComponentBase {
                 processVo.setName(processVo.getName() + "【工单：" + processTaskVo.getTitle()+ "】");
                 JSONObject config = JSON.parseObject(configStr);
 //                processVo.setConfig(configStr);
-                ProcessMessageManager.setOperationType(OperationTypeEnum.SEARCH);
-                config = ProcessConfigUtil.regulateProcessConfig(config);
+                try {
+                    ProcessMessageManager.setOperationType(OperationTypeEnum.SEARCH);
+                    config = ProcessConfigUtil.regulateProcessConfig(config);
+                } finally {
+                    ProcessMessageManager.release();
+                }
                 processVo.setConfig(config);
                 processVo.setReferenceCount(1);
                 return processVo;
@@ -88,8 +92,12 @@ public class ProcessGetApi extends PrivateApiComponentBase {
                 if (processVo == null) {
                     throw new ProcessNotFoundEditTargetException(uuid);
                 }
-                ProcessMessageManager.setOperationType(OperationTypeEnum.SEARCH);
-                processVo.setConfig(ProcessConfigUtil.regulateProcessConfig(processVo.getConfig()));
+                try {
+                    ProcessMessageManager.setOperationType(OperationTypeEnum.SEARCH);
+                    processVo.setConfig(ProcessConfigUtil.regulateProcessConfig(processVo.getConfig()));
+                } finally {
+                    ProcessMessageManager.release();
+                }
                 int count = processMapper.getProcessReferenceCount(uuid);
                 processVo.setReferenceCount(count);
                 return processVo;

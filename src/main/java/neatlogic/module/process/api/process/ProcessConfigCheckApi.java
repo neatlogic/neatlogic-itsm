@@ -190,7 +190,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                     processSlaVo.setProcessUuid(processUuid);
                     processSlaVo.setName(slaObj.getString("name"));
                     processSlaVo.setCalculateHandler(calculateHandler);
-                    processSlaVo.setConfig(slaObj.toJSONString());
+                    processSlaVo.setConfig(JSON.toJSONString(slaObj, SerializerFeature.MapSortField));
 
                     if (Objects.equals(slaCalculateHandler.isSum(), 1)) {
                         //关联的多个步骤共用一个时效
@@ -275,7 +275,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                 }
                 ProcessStepVo processStepVo = new ProcessStepVo();
                 processStepVo.setProcessUuid(processUuid);
-                processStepVo.setConfig(stepObj.getString("stepConfig"));
+                processStepVo.setConfig(JSON.toJSONString(stepObj.getJSONObject("stepConfig"), SerializerFeature.MapSortField));
 
                 String uuid = stepObj.getString("uuid");
                 if (StringUtils.isNotBlank(uuid)) {
@@ -495,7 +495,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                     continue;
                 }
                 ProcessStepVo processStepVo = new ProcessStepVo();
-                processStepVo.setConfig(stepObj.getString("stepConfig"));
+                processStepVo.setConfig(JSON.toJSONString(stepObj.getJSONObject("stepConfig"), SerializerFeature.MapSortField));
 
                 String uuid = stepObj.getString("uuid");
                 if (StringUtils.isNotBlank(uuid)) {
@@ -681,7 +681,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                 JSONObject newConfigObj = new JSONObject();
                 newConfigObj.put("autoTimeType", configObj.getString("autoTimeType"));
                 newConfigObj.put("autoTime", configObj.getInteger("autoTime"));
-                processScoreTemplateVo.setConfig(newConfigObj.toJSONString());
+                processScoreTemplateVo.setConfig(JSON.toJSONString(newConfigObj, SerializerFeature.MapSortField));
             }
             return processScoreTemplateVo;
         }
