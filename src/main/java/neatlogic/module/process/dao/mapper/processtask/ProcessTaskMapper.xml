@@ -3358,6 +3358,9 @@
         #{source},
         #{regionId}
         )
+        ON DUPLICATE KEY UPDATE
+        `config_hash` = VALUES(`config_hash`),
+        `need_score` = VALUES(`need_score`)
     </insert>
 
     <insert id="replaceProcessTask" parameterType="neatlogic.framework.process.dto.ProcessTaskVo">
@@ -3786,7 +3789,12 @@
     </insert>
     <insert id="insertProcessTaskInvoke">
         INSERT INTO `processtask_invoke` (`processtask_id`, `source`, `type`, `invoke_id`)
-        VALUES (#{processTaskId}, #{source}, #{sourceType}, #{invokeId});
+        VALUES (#{processTaskId}, #{source}, #{sourceType}, #{invokeId})
+    </insert>
+
+    <insert id="insertProcessTaskHistoryConfigHash">
+        INSERT ignore INTO `processtask_history_confighash` (`processtask_id`, `config_hash`, `fcu`, `fcd`)
+        VALUES (#{processTaskId}, #{configHash}, #{fcu}, NOW(3))
     </insert>
 
     <update id="updateProcessTaskStepUserStatus" parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">

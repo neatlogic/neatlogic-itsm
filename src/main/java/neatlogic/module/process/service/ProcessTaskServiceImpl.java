@@ -31,7 +31,6 @@ import neatlogic.framework.dao.mapper.region.RegionMapper;
 import neatlogic.framework.dto.*;
 import neatlogic.framework.dto.region.RegionVo;
 import neatlogic.framework.event.constvalue.EventProcessStepHandlerType;
-import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.file.FileNotFoundException;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.exception.type.PermissionDeniedException;
@@ -53,9 +52,10 @@ import neatlogic.framework.notify.dto.NotifyReceiverVo;
 import neatlogic.framework.process.column.core.IProcessTaskColumn;
 import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
 import neatlogic.framework.process.constvalue.*;
-import neatlogic.framework.process.crossover.IChannelCrossoverMapper;
 import neatlogic.framework.process.crossover.IProcessTaskCrossoverService;
 import neatlogic.framework.process.dto.*;
+import neatlogic.framework.process.dto.score.ProcessScoreTemplateVo;
+import neatlogic.framework.process.dto.score.ScoreTemplateDimensionVo;
 import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
 import neatlogic.framework.process.exception.file.ProcessTaskFileDownloadException;
 import neatlogic.framework.process.exception.operationauth.*;
@@ -70,11 +70,11 @@ import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.process.stephandler.core.*;
 import neatlogic.framework.process.stepremind.core.ProcessTaskStepRemindTypeFactory;
 import neatlogic.framework.process.task.TaskConfigManager;
-import neatlogic.framework.process.util.ProcessConfigUtil;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.framework.util.$;
 import neatlogic.framework.util.FormUtil;
+import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.framework.worktime.dto.WorktimeRangeVo;
@@ -91,7 +91,9 @@ import neatlogic.module.process.dao.mapper.process.ProcessMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessStepHandlerMapper;
 import neatlogic.module.process.dao.mapper.process.ProcessTagMapper;
 import neatlogic.module.process.dao.mapper.processtask.*;
+import neatlogic.module.process.dao.mapper.score.ScoreTemplateMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -99,6 +101,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -193,6 +196,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     private IntegrationMapper integrationMapper;
     @Resource
     private SchemaMapper schemaMapper;
+
+    @Resource
+    private ScoreTemplateMapper scoreTemplateMapper;
 //    @Override
 //    public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo,
 //                                                  Map<String, String> formAttributeActionMap, int mode) {
@@ -3638,5 +3644,285 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 specifyLogger.error("delete id = {}, count = {}, serverUuid = {}, hostName = {}, idIsExists = {}", id, count, serverUuid, hostName, processTaskStepInOperationVo != null);
             }
         }
+    }
+
+    @Override
+    public Long saveProcessTask(ProcessTaskVo processTaskVo, String processUuid) {
+        Long processTaskId = processTaskVo.getId();
+        ProcessVo processVo = processMapper.getProcessByUuid(processUuid);
+        JSONObject config = processVo.getConfig();
+        if (MapUtils.isNotEmpty(config)) {
+            JSONObject process = config.getJSONObject("process");
+            JSONObject scoreConfig = process.getJSONObject("scoreConfig");
+            if (MapUtils.isNotEmpty(scoreConfig)) {
+                Integer isActive = scoreConfig.getInteger("isActive");
+                if (Objects.equals(isActive, 1)) {
+                    processTaskVo.setNeedScore(1);
+                } else {
+                    processTaskVo.setNeedScore(0);
+                }
+            }
+            String configStr = JSON.toJSONString(config, SerializerFeature.MapSortField);
+            String hash = DigestUtils.md5DigestAsHex(configStr.getBytes());
+            processTaskVo.setConfigHash(hash);
+            processTaskMapper.insertIgnoreProcessTaskConfig(new ProcessTaskConfigVo(hash, configStr));
+        }
+        processTaskMapper.insertProcessTask(processTaskVo);
+        String formUuid = processVo.getFormUuid();
+        Long startProcessTaskStepId = null;
+        String oldFormUuid = null;
+        ProcessTaskFormVo oldProcessTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
+        if (oldProcessTaskFormVo != null) {
+            oldFormUuid = oldProcessTaskFormVo.getFormUuid();
+        }
+        if (!Objects.equals(oldFormUuid, formUuid)) {
+            processTaskMapper.deleteProcessTaskFormByProcessTaskId(processTaskId);
+            /* 写入表单信息 **/
+            if (StringUtils.isNotBlank(formUuid)) {
+                FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(formUuid);
+                if (formVersionVo != null && MapUtils.isNotEmpty(formVersionVo.getFormConfig())) {
+                    ProcessTaskFormVo processTaskFormVo = new ProcessTaskFormVo();
+                    processTaskFormVo.setFormContent(JSON.toJSONString(formVersionVo.getFormConfig(), SerializerFeature.MapSortField));
+                    processTaskFormVo.setProcessTaskId(processTaskId);
+                    processTaskFormVo.setFormUuid(formVersionVo.getFormUuid());
+                    processTaskFormVo.setFormName(formVersionVo.getFormName());
+                    processTaskMapper.insertProcessTaskForm(processTaskFormVo);
+                    processTaskMapper.insertIgnoreProcessTaskFormContent(processTaskFormVo);
+                }
+            }
+        }
+        ProcessTaskScoreTemplateVo oldProcessTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskId);
+        ProcessScoreTemplateVo processScoreTemplateVo = processMapper.getProcessScoreTemplateByProcessUuid(processUuid);
+        if (processScoreTemplateVo != null) {
+            ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = new ProcessTaskScoreTemplateVo(processScoreTemplateVo);
+            JSONObject processTaskScoreTemplateConfig = processTaskScoreTemplateVo.getConfig();
+            if (processTaskScoreTemplateConfig != null) {
+                List<ScoreTemplateDimensionVo> scoreTemplateDimensionList = scoreTemplateMapper.getScoreTemplateDimensionListByScoreTemplateId(processTaskScoreTemplateVo.getScoreTemplateId());
+                processTaskScoreTemplateConfig.put("scoreTemplateDimensionList", scoreTemplateDimensionList);
+                ProcessTaskScoreTemplateConfigVo processTaskScoreTemplateConfigVo = new ProcessTaskScoreTemplateConfigVo(processTaskScoreTemplateConfig.toJSONString());
+                processTaskScoreTemplateVo.setConfigHash(processTaskScoreTemplateConfigVo.getHash());
+                if (oldProcessTaskScoreTemplateVo == null
+                        || !Objects.equals(oldProcessTaskScoreTemplateVo.getConfigHash(), processTaskScoreTemplateVo.getConfigHash())) {
+                    processTaskMapper.insertProcessTaskScoreTemplateConfig(processTaskScoreTemplateConfigVo);
+                }
+            }
+            if (oldProcessTaskScoreTemplateVo == null
+                    || !Objects.equals(oldProcessTaskScoreTemplateVo.getIsAuto(), processTaskScoreTemplateVo.getIsAuto())
+                    || !Objects.equals(oldProcessTaskScoreTemplateVo.getScoreTemplateId(), processTaskScoreTemplateVo.getScoreTemplateId())
+                    || !Objects.equals(oldProcessTaskScoreTemplateVo.getConfigHash(), processTaskScoreTemplateVo.getConfigHash())
+            ) {
+                processTaskScoreTemplateVo.setProcessTaskId(processTaskId);
+                processTaskMapper.insertProcessTaskScoreTemplate(processTaskScoreTemplateVo);
+            }
+        } else {
+            if (oldProcessTaskScoreTemplateVo != null) {
+                processTaskMapper.deleteProcessTaskScoreTemplateByProcessTaskId(processTaskId);
+            }
+        }
+
+        List<ProcessTaskStepVo> oldProcessTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
+        Map<String, ProcessTaskStepVo> oldProcessTaskStepMap = oldProcessTaskStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getProcessStepUuid, e -> e));
+        List<ProcessTaskStepTagVo> oldProcessTaskStepTagList = processTaskMapper.getProcessTaskStepTagListByProcessTaskId(processTaskId);
+        Map<String, List<ProcessTaskStepWorkerPolicyVo>> oldProcessTaskStepWorkerPolicyListMap = new HashMap<>();
+        ProcessTaskStepWorkerPolicyVo searchWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
+        searchWorkerPolicyVo.setProcessTaskId(processTaskId);
+        List<ProcessTaskStepWorkerPolicyVo> oldProcessTaskStepWorkerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicy(searchWorkerPolicyVo);
+        for (ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo : oldProcessTaskStepWorkerPolicyList) {
+            oldProcessTaskStepWorkerPolicyListMap.computeIfAbsent(processTaskStepWorkerPolicyVo.getProcessStepUuid(), key -> new ArrayList<>()).add(processTaskStepWorkerPolicyVo);
+        }
+        Map<String, Long> stepIdMap = new HashMap<>();
+        List<ProcessTaskStepVo> processTaskStepList = new ArrayList<>();
+        List<ProcessTaskStepConfigVo> processTaskStepConfigList = new ArrayList<>();
+        List<ProcessTaskStepWorkerPolicyVo> processTaskStepWorkerPolicyList = new ArrayList<>();
+        List<ProcessTaskStepTagVo> processTaskStepTagList = new ArrayList<>();
+        /* 写入所有步骤信息 **/
+        List<ProcessStepTagVo> processStepTagList = processMapper.getProcessStepTagListByProcessUuid(processUuid);
+        List<ProcessStepVo> processStepList = processMapper.getProcessStepDetailByProcessUuid(processUuid);
+        for (ProcessStepVo stepVo : processStepList) {
+            ProcessTaskStepVo ptStepVo = new ProcessTaskStepVo(stepVo);
+            ptStepVo.setStatus(ProcessTaskStepStatus.PENDING.getValue());
+            ptStepVo.setProcessTaskId(processTaskId);
+            String stepConfig = stepVo.getConfig();
+            if (StringUtils.isNotBlank(stepConfig)) {
+                /* 对步骤配置进行散列处理 **/
+                String hash = DigestUtils.md5DigestAsHex(stepConfig.getBytes());
+                ptStepVo.setConfigHash(hash);
+                processTaskStepConfigList.add(new ProcessTaskStepConfigVo(hash, stepConfig));
+            }
+            ProcessTaskStepVo oldPtStepVo = oldProcessTaskStepMap.get(ptStepVo.getProcessStepUuid());
+            if (oldPtStepVo != null) {
+                ptStepVo.setId(oldPtStepVo.getId());
+                if (!Objects.equals(oldPtStepVo.getName(), ptStepVo.getName())
+                        || !Objects.equals(oldPtStepVo.getConfigHash(), ptStepVo.getConfigHash())) {
+                    processTaskStepList.add(ptStepVo);
+                }
+            } else {
+                ptStepVo.setId(SnowflakeUtil.uniqueLong());
+                processTaskStepList.add(ptStepVo);
+            }
+
+            stepIdMap.put(ptStepVo.getProcessStepUuid(), ptStepVo.getId());
+            /* 找到开始节点 **/
+            if (ptStepVo.getType().equals(ProcessStepType.START.getValue())) {
+                startProcessTaskStepId = ptStepVo.getId();
+            }
+
+            {
+                Map<String, ProcessTaskStepWorkerPolicyVo> oldWorkerPolicyMap = new HashMap<>();
+                List<ProcessTaskStepWorkerPolicyVo> oldWorkerPolicyList = oldProcessTaskStepWorkerPolicyListMap.get(ptStepVo.getProcessStepUuid());
+                if (CollectionUtils.isNotEmpty(oldWorkerPolicyList)) {
+                    oldWorkerPolicyMap = oldWorkerPolicyList.stream().collect(Collectors.toMap(ProcessTaskStepWorkerPolicyVo::getPolicy, e -> e));
+                }
+                /* 写入用户分配策略信息 **/
+                if (CollectionUtils.isNotEmpty(ptStepVo.getWorkerPolicyList())) {
+                    for (ProcessTaskStepWorkerPolicyVo policyVo : ptStepVo.getWorkerPolicyList()) {
+                        ProcessTaskStepWorkerPolicyVo oldWorkerPolicyVo = oldWorkerPolicyMap.remove(policyVo.getPolicy());
+                        if (oldWorkerPolicyVo == null
+                                || !Objects.equals(oldWorkerPolicyVo.getSort(), policyVo.getSort())
+                                || !Objects.equals(oldWorkerPolicyVo.getConfig(), policyVo.getConfig())) {
+                            policyVo.setProcessTaskId(processTaskId);
+                            policyVo.setProcessTaskStepId(ptStepVo.getId());
+                            processTaskStepWorkerPolicyList.add(policyVo);
+                        }
+                    }
+                }
+                if (MapUtils.isNotEmpty(oldWorkerPolicyMap)) {
+                    for (Map.Entry<String, ProcessTaskStepWorkerPolicyVo> entry : oldWorkerPolicyMap.entrySet()) {
+                        processTaskMapper.deleteProcessTaskStepWorkerPolicy(entry.getValue());
+                    }
+                }
+            }
+
+            {
+                List<Long> oldTagIdList = new ArrayList<>();
+                for (ProcessTaskStepTagVo processTaskStepTagVo : oldProcessTaskStepTagList) {
+                    if (Objects.equals(processTaskStepTagVo.getProcessTaskStepId(), ptStepVo.getId())) {
+                        oldTagIdList.add(processTaskStepTagVo.getTagId());
+                    }
+                }
+                List<Long> tagIdList = new ArrayList<>();
+                for (ProcessStepTagVo processStepTagVo : processStepTagList) {
+                    if (Objects.equals(processStepTagVo.getProcessStepUuid(), ptStepVo.getProcessStepUuid())) {
+                        tagIdList.add(processStepTagVo.getTagId());
+                    }
+                }
+                oldTagIdList.sort(Long::compareTo);
+                tagIdList.sort(Long::compareTo);
+                if (!ListUtils.isEqualList(oldTagIdList, tagIdList)) {
+                    for (Long oldTagId : oldTagIdList) {
+                        if (!tagIdList.contains(oldTagId)) {
+                            ProcessTaskStepTagVo tagVo = new ProcessTaskStepTagVo();
+                            tagVo.setProcessTaskId(processTaskId);
+                            tagVo.setProcessTaskStepId(ptStepVo.getId());
+                            tagVo.setTagId(oldTagId);
+                            processTaskMapper.deleteProcessTaskStepTag(tagVo);
+                        }
+                    }
+                    if (CollectionUtils.isNotEmpty(tagIdList)) {
+                        for (Long tagId : tagIdList) {
+                            if (!oldTagIdList.contains(tagId)) {
+                                ProcessTaskStepTagVo processTaskStepTagVo = new ProcessTaskStepTagVo();
+                                processTaskStepTagVo.setProcessTaskId(processTaskId);
+                                processTaskStepTagVo.setProcessTaskStepId(ptStepVo.getId());
+                                processTaskStepTagVo.setTagId(tagId);
+                                processTaskStepTagList.add(processTaskStepTagVo);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (CollectionUtils.isNotEmpty(processTaskStepList)) {
+            processTaskMapper.insertProcessTaskStepList(processTaskStepList);
+        }
+        if (CollectionUtils.isNotEmpty(processTaskStepConfigList)) {
+            processTaskMapper.insertIgnoreProcessTaskStepConfigList(processTaskStepConfigList);
+        }
+        if (CollectionUtils.isNotEmpty(processTaskStepWorkerPolicyList)) {
+            processTaskMapper.insertProcessTaskStepWorkerPolicyList(processTaskStepWorkerPolicyList);
+        }
+        if (CollectionUtils.isNotEmpty(processTaskStepTagList)) {
+            processTaskMapper.insertProcessTaskStepTagList(processTaskStepTagList);
+        }
+        List<ProcessTaskStepRelVo> oldProcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByProcessTaskId(processTaskId);
+        if (CollectionUtils.isNotEmpty(oldProcessTaskStepRelList)) {
+            /* 写入关系信息 **/
+            List<ProcessTaskStepRelVo> processTaskStepRelList = new ArrayList<>();
+            List<ProcessStepRelVo> processStepRelList = processMapper.getProcessStepRelByProcessUuid(processUuid);
+            for (ProcessStepRelVo relVo : processStepRelList) {
+                ProcessTaskStepRelVo processTaskStepRelVo = new ProcessTaskStepRelVo(relVo);
+                processTaskStepRelVo.setProcessTaskId(processTaskId);
+                processTaskStepRelVo.setFromProcessTaskStepId(stepIdMap.get(processTaskStepRelVo.getFromProcessStepUuid()));
+                processTaskStepRelVo.setToProcessTaskStepId(stepIdMap.get(processTaskStepRelVo.getToProcessStepUuid()));
+                /* 同时找到from step id 和to step id 时才写入，其他数据舍弃 **/
+                if (processTaskStepRelVo.getFromProcessTaskStepId() != null && processTaskStepRelVo.getToProcessTaskStepId() != null) {
+                    processTaskStepRelList.add(processTaskStepRelVo);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(processTaskStepRelList)) {
+                processTaskMapper.insertProcessTaskStepRelList(processTaskStepRelList);
+            }
+        }
+
+        Map<String, ProcessTaskSlaVo> oldProcessTaskSlaMap = new HashMap<>();
+        List<ProcessTaskSlaVo> oldProcessTaskSlaList = processTaskSlaMapper.getProcessTaskSlaListByProcessTaskId(processTaskId);
+        for (ProcessTaskSlaVo oldProcessTaskSlaVo : oldProcessTaskSlaList) {
+            String uuid = null;
+            JSONObject configObj = oldProcessTaskSlaVo.getConfigObj();
+            if (MapUtils.isNotEmpty(configObj)) {
+                uuid = configObj.getString("uuid");
+            }
+            if (StringUtils.isNotBlank(uuid)) {
+                oldProcessTaskSlaMap.put(uuid, oldProcessTaskSlaVo);
+            }
+        }
+        /* 写入sla信息 **/
+        List<ProcessSlaVo> processSlaList = processMapper.getProcessSlaByProcessUuid(processUuid);
+        for (ProcessSlaVo slaVo : processSlaList) {
+            ProcessTaskSlaVo oldProcessTaskSlaVo = oldProcessTaskSlaMap.get(slaVo.getUuid());
+            List<String> slaStepUuidList = processMapper.getProcessStepUuidBySlaUuid(slaVo.getUuid());
+            if (CollectionUtils.isNotEmpty(slaStepUuidList)) {
+                List<Long> oldProcessTaskStepIdList = new ArrayList<>();
+                ProcessTaskSlaVo processTaskSlaVo = new ProcessTaskSlaVo(slaVo);
+                processTaskSlaVo.setProcessTaskId(processTaskId);
+                processTaskSlaVo.setIsActive(1);
+                if (oldProcessTaskSlaVo != null) {
+                    processTaskSlaVo.setId(oldProcessTaskSlaVo.getId());
+                    oldProcessTaskStepIdList = processTaskSlaMapper.getProcessTaskStepIdListBySlaId(oldProcessTaskSlaVo.getId());
+                } else {
+                    processTaskSlaVo.setId(SnowflakeUtil.uniqueLong());
+                }
+                if (oldProcessTaskSlaVo == null || !Objects.equals(oldProcessTaskSlaVo.getConfig(), processTaskSlaVo.getConfig())) {
+                    processTaskSlaMapper.insertProcessTaskSla(processTaskSlaVo);
+                }
+                List<Long> stepIdList = new ArrayList<>();
+                for (String suuid : slaStepUuidList) {
+                    Long stepId = stepIdMap.get(suuid);
+                    if (stepId != null) {
+                        stepIdList.add(stepId);
+                    }
+                }
+                oldProcessTaskStepIdList.sort(Long::compareTo);
+                stepIdList.sort(Long::compareTo);
+                if (!ListUtils.isEqualList(oldProcessTaskStepIdList, stepIdList)) {
+                    for (Long oldStepId : oldProcessTaskStepIdList) {
+                        if (!stepIdList.contains(oldStepId)) {
+                            processTaskSlaMapper.deleteProcessTaskStepSla(oldStepId, processTaskSlaVo.getId());
+                        }
+                    }
+                    for (Long stepId : stepIdList) {
+                        if (!oldProcessTaskStepIdList.contains(stepId)) {
+                            processTaskSlaMapper.insertProcessTaskStepSla(stepId, processTaskSlaVo.getId());
+                        }
+                    }
+                }
+            } else {
+                if (oldProcessTaskSlaVo != null) {
+                    processTaskSlaMapper.deleteProcessTaskSlaById(oldProcessTaskSlaVo.getId());
+                    processTaskSlaMapper.deleteProcessTaskStepSlaBySlaId(oldProcessTaskSlaVo.getId());
+                }
+            }
+        }
+        return startProcessTaskStepId;
     }
 }

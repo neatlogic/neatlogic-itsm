@@ -487,6 +487,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     int insertProcessTaskInvoke(@Param("processTaskId") Long processTaskId, @Param("source") String invoke, @Param("sourceType") String invokeType, @Param("invokeId") Long invokeId);
 
+    int insertProcessTaskHistoryConfigHash(@Param("processTaskId") Long processTaskId, @Param("configHash") String configHash, @Param("fcu") String fcu);
+
     int updateProcessTaskStepStatus(ProcessTaskStepVo processTaskStepVo);
 
     int updateProcessTaskStepIsActive(ProcessTaskStepVo processTaskStepVo);
