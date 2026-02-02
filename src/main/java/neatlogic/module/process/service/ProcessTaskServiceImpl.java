@@ -3699,7 +3699,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             if (processTaskScoreTemplateConfig != null) {
                 List<ScoreTemplateDimensionVo> scoreTemplateDimensionList = scoreTemplateMapper.getScoreTemplateDimensionListByScoreTemplateId(processTaskScoreTemplateVo.getScoreTemplateId());
                 processTaskScoreTemplateConfig.put("scoreTemplateDimensionList", scoreTemplateDimensionList);
-                ProcessTaskScoreTemplateConfigVo processTaskScoreTemplateConfigVo = new ProcessTaskScoreTemplateConfigVo(processTaskScoreTemplateConfig.toJSONString());
+                ProcessTaskScoreTemplateConfigVo processTaskScoreTemplateConfigVo = new ProcessTaskScoreTemplateConfigVo(JSON.toJSONString(processTaskScoreTemplateConfig, SerializerFeature.MapSortField));
                 processTaskScoreTemplateVo.setConfigHash(processTaskScoreTemplateConfigVo.getHash());
                 if (oldProcessTaskScoreTemplateVo == null
                         || !Objects.equals(oldProcessTaskScoreTemplateVo.getConfigHash(), processTaskScoreTemplateVo.getConfigHash())) {
@@ -3845,7 +3845,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             processTaskMapper.insertProcessTaskStepTagList(processTaskStepTagList);
         }
         List<ProcessTaskStepRelVo> oldProcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByProcessTaskId(processTaskId);
-        if (CollectionUtils.isNotEmpty(oldProcessTaskStepRelList)) {
+        if (CollectionUtils.isEmpty(oldProcessTaskStepRelList)) {
             /* 写入关系信息 **/
             List<ProcessTaskStepRelVo> processTaskStepRelList = new ArrayList<>();
             List<ProcessStepRelVo> processStepRelList = processMapper.getProcessStepRelByProcessUuid(processUuid);

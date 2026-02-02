@@ -311,6 +311,10 @@
         #{isActive},
         #{config, typeHandler=CompressHandler}
         )
+        ON DUPLICATE KEY UPDATE
+            `name` = VALUES(`name`),
+            `is_active` = VALUES(`is_active`),
+            `config` = VALUES(`config`)
     </insert>
 
     <insert id="insertProcessTaskSlaTime" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaTimeVo">

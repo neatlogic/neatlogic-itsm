@@ -88,21 +88,27 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
         String configHash = processTaskVo.getConfigHash();
         String oldConfigStr = selectContentByHashMapper.getProcessTaskConfigStringByHash(configHash);
         JSONObject oldConfig = JSONObject.parseObject(oldConfigStr);
+        String processUuid = UuidUtil.randomUuid();
+        String processName = "为了修改工单" + processTaskId + "流程图快照临时创建的流程图";
+        setProcessUuidAndName(oldConfig, processUuid, processName);
+        setProcessUuidAndName(newConfig, processUuid, processName);
         if (Objects.equals(JSON.toJSONString(oldConfig, SerializerFeature.MapSortField), JSON.toJSONString(newConfig, SerializerFeature.MapSortField))) {
             resultObj.put("message", "没有修改工单流程图快照");
             return resultObj;
         }
+        ProcessVo oldProcessVo = processMapper.getProcessByUuid(processTaskVo.getProcessUuid());
+        processService.saveOrDeleteProcessDependency(oldProcessVo, "delete");
         JSONObject config = mergeConfig(oldConfig, newConfig);
-        String processUuid = UuidUtil.randomUuid();
         ProcessVo processVo = new ProcessVo();
         processVo.setUuid(processUuid);
-        processVo.setName("为了修改工单" + processTaskId + "流程图快照临时创建的流程图");
+        processVo.setName(processName);
         processVo.setConfig(config);
         processService.saveProcess(processVo);
         processTaskService.saveProcessTask(processTaskVo, processUuid);
         processTaskMapper.insertProcessTaskHistoryConfigHash(processTaskId, configHash, UserContext.get().getUserUuid());
         processService.saveOrDeleteProcessDependency(processVo, "delete");
         processMapper.deleteProcessByUuid(processUuid);
+        processService.saveOrDeleteProcessDependency(oldProcessVo, "save");
         resultObj.put("message", "已修改工单流程图快照");
         return resultObj;
     }
@@ -110,6 +116,17 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
     @Override
     public String getToken() {
         return "processtask/config/update";
+    }
+
+    private void setProcessUuidAndName(JSONObject config, String uuid, String name) {
+        JSONObject process = config.getJSONObject("process");
+        if (MapUtils.isNotEmpty(process)) {
+            JSONObject processConfig = process.getJSONObject("processConfig");
+            if (MapUtils.isNotEmpty(processConfig)) {
+                processConfig.put("uuid", uuid);
+                processConfig.put("name", name);
+            }
+        }
     }
 
     private JSONObject mergeConfig(JSONObject oldConfig, JSONObject newConfig) {
@@ -120,6 +137,8 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
                 && !Objects.equals(JSON.toJSONString(oldProcess, SerializerFeature.MapSortField), JSON.toJSONString(newProcess, SerializerFeature.MapSortField))) {
             JSONObject process = mergeProcess(oldProcess, newProcess);
             config.put("process", process);
+        } else {
+            config.put("process", oldProcess);
         }
         JSONObject oldTopo = oldConfig.getJSONObject("topo");
         JSONObject newTopo = newConfig.getJSONObject("topo");
@@ -127,6 +146,8 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
                 && !Objects.equals(JSON.toJSONString(oldTopo, SerializerFeature.MapSortField), JSON.toJSONString(newTopo, SerializerFeature.MapSortField))) {
             JSONObject topo = mergeTopo(oldTopo, newTopo);
             config.put("topo", topo);
+        } else {
+            config.put("topo", oldTopo);
         }
         return config;
     }

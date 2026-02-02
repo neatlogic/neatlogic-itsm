@@ -2388,12 +2388,10 @@
 
     <select id="getProcessTaskStepTagListByProcessTaskId" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskStepTagVo">
         SELECT
-            a.`processtask_id`,
-            a.`processtask_step_id`,
-            a.`tag_id`,
-            b.`name` AS tagName
-        FROM `processtask_step_tag` a
-        LEFT JOIN `process_tag` b ON b.`id` = a.`tag_id`
+            `processtask_id` AS processTaskId,
+            `processtask_step_id` AS processTaskStepId,
+            `tag_id` AS tagId
+        FROM `processtask_step_tag`
         WHERE `processtask_id` = #{value}
     </select>
 
@@ -3284,6 +3282,9 @@
         #{item.configHash}
         )
         </foreach>
+        ON DUPLICATE KEY UPDATE
+            `name` = VALUES(`name`),
+            `config_hash` = VALUES(`config_hash`)
     </insert>
 
     <insert id="replaceProcessTaskStep" parameterType="neatlogic.framework.process.dto.ProcessTaskStepVo">

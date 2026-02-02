@@ -15,6 +15,7 @@ package neatlogic.module.process.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dependency.core.DependencyManager;
@@ -150,7 +151,7 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
                         processSlaVo.setProcessUuid(processVo.getUuid());
                         processSlaVo.setName(slaObj.getString("name"));
                         processSlaVo.setCalculateHandler(calculateHandler);
-                        processSlaVo.setConfig(slaObj.toJSONString());
+                        processSlaVo.setConfig(JSON.toJSONString(slaObj, SerializerFeature.MapSortField));
 
                         if (Objects.equals(slaCalculateHandler.isSum(), 1)) {
                             //关联的多个步骤共用一个时效
@@ -208,7 +209,7 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
                 }
                 ProcessStepVo processStepVo = new ProcessStepVo();
                 processStepVo.setProcessUuid(processVo.getUuid());
-                processStepVo.setConfig(stepObj.getString("stepConfig"));
+                processStepVo.setConfig(JSON.toJSONString(stepObj.getJSONObject("stepConfig"), SerializerFeature.MapSortField));
 
                 String uuid = stepObj.getString("uuid");
                 if (StringUtils.isNotBlank(uuid)) {
@@ -314,7 +315,10 @@ public class ProcessServiceImpl implements ProcessService, IProcessCrossoverServ
             Integer isActive = scoreConfig.getInteger("isActive");
             if (Objects.equals(isActive, 1)) {
                 if (Objects.equals(action, "save")) {
-                    ProcessScoreTemplateVo processScoreTemplateVo = JSON.toJavaObject(scoreConfig, ProcessScoreTemplateVo.class);
+                    ProcessScoreTemplateVo processScoreTemplateVo = new ProcessScoreTemplateVo();
+                    processScoreTemplateVo.setScoreTemplateId(scoreConfig.getLong("scoreTemplateId"));
+                    processScoreTemplateVo.setIsAuto(scoreConfig.getInteger("isAuto"));
+                    processScoreTemplateVo.setConfig(JSON.toJSONString(scoreConfig.getJSONObject("config"), SerializerFeature.MapSortField));
                     processScoreTemplateVo.setProcessUuid(processVo.getUuid());
                     scoreTemplateMapper.insertProcessScoreTemplate(processScoreTemplateVo);
                 } else if (Objects.equals(action, "delete")) {
