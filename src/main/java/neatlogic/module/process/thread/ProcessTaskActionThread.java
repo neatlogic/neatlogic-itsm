@@ -157,7 +157,7 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                                     if (processFieldValue != null) {
                                         integrationParam.put(paramMappingVo.getName(), processFieldValue);
                                     } else {
-                                        logger.error("没有找到参数'" + paramMappingVo.getValue() + "'信息");
+                                        logger.debug("没有找到参数'" + paramMappingVo.getValue() + "'信息");
                                     }
                                 }
                             }

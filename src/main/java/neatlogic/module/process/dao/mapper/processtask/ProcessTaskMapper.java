@@ -46,6 +46,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
      */
     ProcessTaskVo getProcessTaskBaseInfoByIdIncludeIsDeleted(Long processTaskId);
 
+    ProcessTaskVo getProcessTaskById(Long id);
+
     List<ProcessTaskVo> getTaskListByIdList(List<Long> idList);
 
     /**
@@ -150,8 +152,6 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
             @Param("isActive") Integer isActive);
 
     ProcessTaskStepVo getProcessTaskStepBaseInfoById(Long processTaskStepId);
-
-    ProcessTaskVo getProcessTaskById(Long id);
 
     List<ProcessTaskVo> getProcessTaskByIdStrList(List<String> idList);
 
@@ -300,6 +300,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
     List<Long> getSameTagIdListByProcessTaskStepIdList(List<Long> processTaskStepIdList);
 
     List<Long> getTagIdListByProcessTaskStepId(Long processTaskStepId);
+
+    List<ProcessTaskStepTagVo> getProcessTaskStepTagListByProcessTaskId(Long processTaskId);
 
     int getProcessTaskCountByOwner(ProcessTaskVo vo);
 
@@ -485,6 +487,8 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     int insertProcessTaskInvoke(@Param("processTaskId") Long processTaskId, @Param("source") String invoke, @Param("sourceType") String invokeType, @Param("invokeId") Long invokeId);
 
+    int insertProcessTaskHistoryConfigHash(@Param("processTaskId") Long processTaskId, @Param("configHash") String configHash, @Param("fcu") String fcu);
+
     int updateProcessTaskStepStatus(ProcessTaskStepVo processTaskStepVo);
 
     int updateProcessTaskStepIsActive(ProcessTaskStepVo processTaskStepVo);
@@ -610,5 +614,11 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     int deleteProcessTaskStepWorkerPolicyByProcessTaskStepId(Long processTaskStepId);
 
+    int deleteProcessTaskStepWorkerPolicy(ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo);
+
     int deleteProcessTaskStepRelByProcessTaskId(Long processTaskId);
+
+    int deleteProcessTaskScoreTemplateByProcessTaskId(Long processTaskId);
+
+    int deleteProcessTaskStepTag(ProcessTaskStepTagVo processTaskStepTagVo);
 }

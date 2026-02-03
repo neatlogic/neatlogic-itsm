@@ -37,6 +37,8 @@ public interface ProcessTaskSlaMapper extends IProcessTaskSlaCrossoverMapper {
 
     List<ProcessTaskSlaNotifyVo> getProcessTaskSlaNotifyBySlaId(Long slaId);
 
+    List<ProcessTaskSlaVo> getProcessTaskSlaListByProcessTaskId(Long processTaskId);
+
     ProcessTaskSlaVo getProcessTaskSlaById(Long id);
 
     List<Long> getSlaIdListByProcessTaskId(Long processTaskId);
@@ -100,4 +102,10 @@ public interface ProcessTaskSlaMapper extends IProcessTaskSlaCrossoverMapper {
     int deleteProcessTaskStepSlaTimeBySlaId(Long slaId);
 
     int deleteProcessTaskStepSlaDelayByTargetProcessTaskStepId(Long targetProcessTaskStepId);
+
+    int deleteProcessTaskSlaById(Long id);
+
+    int deleteProcessTaskStepSlaBySlaId(Long slaId);
+
+    void deleteProcessTaskStepSla(@Param("processTaskStepId") Long processTaskStepId, @Param("slaId") Long slaId);
 }

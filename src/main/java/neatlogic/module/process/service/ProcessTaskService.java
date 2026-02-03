@@ -572,4 +572,6 @@ public interface ProcessTaskService {
     void saveProcessTaskStepInOperation(ProcessTaskStepInOperationVo processTaskStepInOperationVo);
 
     int deleteProcessTaskStepInOperationById(Long id);
+
+    Long saveProcessTask(ProcessTaskVo processTaskVo, String processUuid);
 }

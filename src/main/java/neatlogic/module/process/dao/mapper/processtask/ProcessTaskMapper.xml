@@ -138,6 +138,32 @@
         WHERE `id` = #{value}
     </select>
 
+    <select id="getProcessTaskById" parameterType="java.lang.Long"
+            resultType="neatlogic.framework.process.dto.ProcessTaskVo">
+        SELECT `id`,
+               `title`,
+               `process_uuid`  AS processUuid,
+               `channel_uuid`  AS channelUuid,
+               `config_hash`   AS configHash,
+               `priority_uuid` AS priorityUuid,
+               `status`,
+               `start_time`    AS startTime,
+               `end_time`      AS endTime,
+               `owner`,
+               `reporter`,
+               `expire_time`   AS expireTime,
+               `worktime_uuid` AS worktimeUuid,
+               `error`,
+               `is_show`       as isShow,
+               `serial_number` AS serialNumber,
+               `need_score`    AS needScore,
+               `source`,
+               `region_id` AS regionId,
+               `is_deleted` AS isDeleted
+        FROM `processtask`
+        WHERE `id` = #{id}
+    </select>
+
     <sql id="getProcessingTaskByConditionSql">
         FROM
         processtask pt
@@ -915,31 +941,6 @@
                `error`
         FROM `processtask_step`
         WHERE `processtask_id` = #{value}
-    </select>
-
-    <select id="getProcessTaskById" parameterType="java.lang.Long"
-            resultType="neatlogic.framework.process.dto.ProcessTaskVo">
-        SELECT `id`,
-               `title`,
-               `process_uuid`  AS processUuid,
-               `channel_uuid`  AS channelUuid,
-               `config_hash`   AS configHash,
-               `priority_uuid` AS priorityUuid,
-               `status`,
-               `start_time`    AS startTime,
-               `end_time`      AS endTime,
-               `owner`,
-               `reporter`,
-               `expire_time`   AS expireTime,
-               `worktime_uuid` AS worktimeUuid,
-               `error`,
-               `is_show`       as isShow,
-               `serial_number` AS serialNumber,
-               `need_score`    AS needScore,
-               `source`,
-               `region_id` AS regionId
-        FROM `processtask`
-        WHERE `id` = #{id}
     </select>
 
     <resultMap type="neatlogic.framework.process.dto.ProcessTaskStepAuditVo" id="processTaskStepAuditMap">
@@ -2385,6 +2386,15 @@
         WHERE `processtask_step_id` = #{value}
     </select>
 
+    <select id="getProcessTaskStepTagListByProcessTaskId" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskStepTagVo">
+        SELECT
+            `processtask_id` AS processTaskId,
+            `processtask_step_id` AS processTaskStepId,
+            `tag_id` AS tagId
+        FROM `processtask_step_tag`
+        WHERE `processtask_id` = #{value}
+    </select>
+
     <sql id="getProcessTaskListByOwnerCondition">
         WHERE `owner` = #{owner}
         <if test="status != null and status !=''">
@@ -3272,6 +3282,9 @@
         #{item.configHash}
         )
         </foreach>
+        ON DUPLICATE KEY UPDATE
+            `name` = VALUES(`name`),
+            `config_hash` = VALUES(`config_hash`)
     </insert>
 
     <insert id="replaceProcessTaskStep" parameterType="neatlogic.framework.process.dto.ProcessTaskStepVo">
@@ -3346,6 +3359,9 @@
         #{source},
         #{regionId}
         )
+        ON DUPLICATE KEY UPDATE
+        `config_hash` = VALUES(`config_hash`),
+        `need_score` = VALUES(`need_score`)
     </insert>
 
     <insert id="replaceProcessTask" parameterType="neatlogic.framework.process.dto.ProcessTaskVo">
@@ -3626,6 +3642,10 @@
                 #{scoreTemplateId},
                 #{isAuto},
                 #{configHash})
+        ON DUPLICATE KEY UPDATE
+            `score_template_id` = #{scoreTemplateId},
+            `is_auto` = #{isAuto},
+            `config_hash` = #{configHash}
     </insert>
 
     <insert id="insertProcessTaskScoreTemplateConfig"
@@ -3770,7 +3790,12 @@
     </insert>
     <insert id="insertProcessTaskInvoke">
         INSERT INTO `processtask_invoke` (`processtask_id`, `source`, `type`, `invoke_id`)
-        VALUES (#{processTaskId}, #{source}, #{sourceType}, #{invokeId});
+        VALUES (#{processTaskId}, #{source}, #{sourceType}, #{invokeId})
+    </insert>
+
+    <insert id="insertProcessTaskHistoryConfigHash">
+        INSERT ignore INTO `processtask_history_confighash` (`processtask_id`, `config_hash`, `fcu`, `fcd`)
+        VALUES (#{processTaskId}, #{configHash}, #{fcu}, NOW(3))
     </insert>
 
     <update id="updateProcessTaskStepUserStatus" parameterType="neatlogic.framework.process.dto.ProcessTaskStepUserVo">
@@ -4224,9 +4249,29 @@
         WHERE `processtask_step_id` = #{value}
     </delete>
 
+    <delete id="deleteProcessTaskStepWorkerPolicy" parameterType="neatlogic.framework.process.dto.ProcessTaskStepWorkerPolicyVo">
+        DELETE
+        FROM `processtask_step_worker_policy`
+        WHERE `processtask_id` = #{processTaskId}
+          AND `processtask_step_id` = #{processTaskStepId}
+          AND `policy` = #{policy}
+    </delete>
+
     <delete id="deleteProcessTaskStepRelByProcessTaskId" parameterType="java.lang.Long">
         DELETE
         FROM `processtask_step_rel`
         WHERE `processtask_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskScoreTemplateByProcessTaskId" parameterType="java.lang.Long">
+        DELETE
+        FROM `processtask_score_template`
+        WHERE `processtask_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepTag" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTagVo">
+        DELETE FROM `processtask_step_tag`
+        WHERE `processtask_step_id` = #{processTaskStepId}
+          AND `tag_id` = #{tagId}
     </delete>
 </mapper>

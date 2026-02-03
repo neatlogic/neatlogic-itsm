@@ -64,6 +64,16 @@
         WHERE `sla_id` = #{value}
     </select>
 
+    <select id="getProcessTaskSlaListByProcessTaskId" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskSlaVo">
+        SELECT `processtask_id` AS processTaskId,
+               `id`,
+               `name`,
+               `is_active` AS isActive,
+               `config`
+        FROM `processtask_sla`
+        WHERE `processtask_id` = #{value}
+    </select>
+
     <select id="getProcessTaskSlaById" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskSlaVo">
         SELECT `processtask_id` AS processTaskId,
                `id`,
@@ -301,6 +311,10 @@
         #{isActive},
         #{config, typeHandler=CompressHandler}
         )
+        ON DUPLICATE KEY UPDATE
+            `name` = VALUES(`name`),
+            `is_active` = VALUES(`is_active`),
+            `config` = VALUES(`config`)
     </insert>
 
     <insert id="insertProcessTaskSlaTime" parameterType="neatlogic.framework.process.dto.ProcessTaskSlaTimeVo">
@@ -439,5 +453,19 @@
 
     <delete id="deleteProcessTaskStepSlaDelayByTargetProcessTaskStepId" parameterType="java.lang.Long">
         DELETE FROM `processtask_step_sla_delay` WHERE `target_processtask_step_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskSlaById" parameterType="java.lang.Long">
+        DELETE FROM `processtask_sla` WHERE `id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepSlaBySlaId" parameterType="java.lang.Long">
+        DELETE FROM `processtask_step_sla` WHERE `sla_id` = #{value}
+    </delete>
+
+    <delete id="deleteProcessTaskStepSla">
+        DELETE FROM `processtask_step_sla`
+        WHERE `processtask_step_id` = #{processTaskStepId}
+          AND `sla_id` = #{slaId}
     </delete>
 </mapper>

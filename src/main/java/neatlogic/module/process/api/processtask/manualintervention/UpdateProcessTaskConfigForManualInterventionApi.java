@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESSTASK_MODIFY.class)
-public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
+public class UpdateProcessTaskConfigForManualInterventionApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskService processTaskService;
