@@ -3767,66 +3767,62 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 startProcessTaskStepId = ptStepVo.getId();
             }
 
-            {
-                Map<String, ProcessTaskStepWorkerPolicyVo> oldWorkerPolicyMap = new HashMap<>();
-                List<ProcessTaskStepWorkerPolicyVo> oldWorkerPolicyList = oldProcessTaskStepWorkerPolicyListMap.get(ptStepVo.getProcessStepUuid());
-                if (CollectionUtils.isNotEmpty(oldWorkerPolicyList)) {
-                    oldWorkerPolicyMap = oldWorkerPolicyList.stream().collect(Collectors.toMap(ProcessTaskStepWorkerPolicyVo::getPolicy, e -> e));
-                }
-                /* 写入用户分配策略信息 **/
-                if (CollectionUtils.isNotEmpty(ptStepVo.getWorkerPolicyList())) {
-                    for (ProcessTaskStepWorkerPolicyVo policyVo : ptStepVo.getWorkerPolicyList()) {
-                        ProcessTaskStepWorkerPolicyVo oldWorkerPolicyVo = oldWorkerPolicyMap.remove(policyVo.getPolicy());
-                        if (oldWorkerPolicyVo == null
-                                || !Objects.equals(oldWorkerPolicyVo.getSort(), policyVo.getSort())
-                                || !Objects.equals(oldWorkerPolicyVo.getConfig(), policyVo.getConfig())) {
-                            policyVo.setProcessTaskId(processTaskId);
-                            policyVo.setProcessTaskStepId(ptStepVo.getId());
-                            processTaskStepWorkerPolicyList.add(policyVo);
-                        }
-                    }
-                }
-                if (MapUtils.isNotEmpty(oldWorkerPolicyMap)) {
-                    for (Map.Entry<String, ProcessTaskStepWorkerPolicyVo> entry : oldWorkerPolicyMap.entrySet()) {
-                        processTaskMapper.deleteProcessTaskStepWorkerPolicy(entry.getValue());
+            Map<String, ProcessTaskStepWorkerPolicyVo> oldWorkerPolicyMap = new HashMap<>();
+            List<ProcessTaskStepWorkerPolicyVo> oldWorkerPolicyList = oldProcessTaskStepWorkerPolicyListMap.get(ptStepVo.getProcessStepUuid());
+            if (CollectionUtils.isNotEmpty(oldWorkerPolicyList)) {
+                oldWorkerPolicyMap = oldWorkerPolicyList.stream().collect(Collectors.toMap(ProcessTaskStepWorkerPolicyVo::getPolicy, e -> e));
+            }
+            /* 写入用户分配策略信息 **/
+            if (CollectionUtils.isNotEmpty(ptStepVo.getWorkerPolicyList())) {
+                for (ProcessTaskStepWorkerPolicyVo policyVo : ptStepVo.getWorkerPolicyList()) {
+                    ProcessTaskStepWorkerPolicyVo oldWorkerPolicyVo = oldWorkerPolicyMap.remove(policyVo.getPolicy());
+                    if (oldWorkerPolicyVo == null
+                            || !Objects.equals(oldWorkerPolicyVo.getSort(), policyVo.getSort())
+                            || !Objects.equals(oldWorkerPolicyVo.getConfig(), policyVo.getConfig())) {
+                        policyVo.setProcessTaskId(processTaskId);
+                        policyVo.setProcessTaskStepId(ptStepVo.getId());
+                        processTaskStepWorkerPolicyList.add(policyVo);
                     }
                 }
             }
+            if (MapUtils.isNotEmpty(oldWorkerPolicyMap)) {
+                for (Map.Entry<String, ProcessTaskStepWorkerPolicyVo> entry : oldWorkerPolicyMap.entrySet()) {
+                    processTaskMapper.deleteProcessTaskStepWorkerPolicy(entry.getValue());
+                }
+            }
 
-            {
-                List<Long> oldTagIdList = new ArrayList<>();
-                for (ProcessTaskStepTagVo processTaskStepTagVo : oldProcessTaskStepTagList) {
-                    if (Objects.equals(processTaskStepTagVo.getProcessTaskStepId(), ptStepVo.getId())) {
-                        oldTagIdList.add(processTaskStepTagVo.getTagId());
+            List<Long> oldTagIdList = new ArrayList<>();
+            for (ProcessTaskStepTagVo processTaskStepTagVo : oldProcessTaskStepTagList) {
+                if (Objects.equals(processTaskStepTagVo.getProcessTaskStepId(), ptStepVo.getId())) {
+                    oldTagIdList.add(processTaskStepTagVo.getTagId());
+                }
+            }
+            List<Long> tagIdList = new ArrayList<>();
+            for (ProcessStepTagVo processStepTagVo : processStepTagList) {
+                if (Objects.equals(processStepTagVo.getProcessStepUuid(), ptStepVo.getProcessStepUuid())) {
+                    tagIdList.add(processStepTagVo.getTagId());
+                }
+            }
+            oldTagIdList.sort(Long::compareTo);
+            tagIdList.sort(Long::compareTo);
+            if (!ListUtils.isEqualList(oldTagIdList, tagIdList)) {
+                for (Long oldTagId : oldTagIdList) {
+                    if (!tagIdList.contains(oldTagId)) {
+                        ProcessTaskStepTagVo tagVo = new ProcessTaskStepTagVo();
+                        tagVo.setProcessTaskId(processTaskId);
+                        tagVo.setProcessTaskStepId(ptStepVo.getId());
+                        tagVo.setTagId(oldTagId);
+                        processTaskMapper.deleteProcessTaskStepTag(tagVo);
                     }
                 }
-                List<Long> tagIdList = new ArrayList<>();
-                for (ProcessStepTagVo processStepTagVo : processStepTagList) {
-                    if (Objects.equals(processStepTagVo.getProcessStepUuid(), ptStepVo.getProcessStepUuid())) {
-                        tagIdList.add(processStepTagVo.getTagId());
-                    }
-                }
-                oldTagIdList.sort(Long::compareTo);
-                tagIdList.sort(Long::compareTo);
-                if (!ListUtils.isEqualList(oldTagIdList, tagIdList)) {
-                    for (Long oldTagId : oldTagIdList) {
-                        if (!tagIdList.contains(oldTagId)) {
-                            ProcessTaskStepTagVo tagVo = new ProcessTaskStepTagVo();
-                            tagVo.setProcessTaskId(processTaskId);
-                            tagVo.setProcessTaskStepId(ptStepVo.getId());
-                            tagVo.setTagId(oldTagId);
-                            processTaskMapper.deleteProcessTaskStepTag(tagVo);
-                        }
-                    }
-                    if (CollectionUtils.isNotEmpty(tagIdList)) {
-                        for (Long tagId : tagIdList) {
-                            if (!oldTagIdList.contains(tagId)) {
-                                ProcessTaskStepTagVo processTaskStepTagVo = new ProcessTaskStepTagVo();
-                                processTaskStepTagVo.setProcessTaskId(processTaskId);
-                                processTaskStepTagVo.setProcessTaskStepId(ptStepVo.getId());
-                                processTaskStepTagVo.setTagId(tagId);
-                                processTaskStepTagList.add(processTaskStepTagVo);
-                            }
+                if (CollectionUtils.isNotEmpty(tagIdList)) {
+                    for (Long tagId : tagIdList) {
+                        if (!oldTagIdList.contains(tagId)) {
+                            ProcessTaskStepTagVo processTaskStepTagVo = new ProcessTaskStepTagVo();
+                            processTaskStepTagVo.setProcessTaskId(processTaskId);
+                            processTaskStepTagVo.setProcessTaskStepId(ptStepVo.getId());
+                            processTaskStepTagVo.setTagId(tagId);
+                            processTaskStepTagList.add(processTaskStepTagVo);
                         }
                     }
                 }
