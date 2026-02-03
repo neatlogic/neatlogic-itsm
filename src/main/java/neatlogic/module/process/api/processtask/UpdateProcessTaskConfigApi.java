@@ -75,11 +75,9 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
-            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "流程配置内容", minSize = 1, isRequired = true)
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "common.config", minSize = 1, isRequired = true)
     })
-    @Output({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "流程uuid")
-    })
+    @Output({})
     @Description(desc = "nmpapm.updateprocesstaskconfigapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
