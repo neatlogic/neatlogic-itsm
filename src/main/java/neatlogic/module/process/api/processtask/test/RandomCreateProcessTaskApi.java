@@ -12,6 +12,7 @@
 
 package neatlogic.module.process.api.processtask.test;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
@@ -220,7 +221,7 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
                     paramJson.put("readcomponentList", new JSONArray());
 
                     ProcessTaskDraftSaveApi draftSaveApi = (ProcessTaskDraftSaveApi) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
-                    JSONObject saveResultObj = JSONObject.parseObject(draftSaveApi.doService(PrivateApiComponentFactory.getApiByToken(draftSaveApi.getToken()), paramJson, null).toString());
+                    JSONObject saveResultObj = JSON.parseObject(draftSaveApi.doService(PrivateApiComponentFactory.getApiByToken(draftSaveApi.getToken()), paramJson, null).toString());
                     saveResultObj.put("action", "start");
                     //查询可执行下一步骤
                     List<Long> nextStepIdList = processtaskMapper.getToProcessTaskStepIdListByFromIdAndType(saveResultObj.getLong("processTaskStepId"), null);
