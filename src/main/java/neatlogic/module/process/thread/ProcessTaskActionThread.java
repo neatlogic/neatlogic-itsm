@@ -97,6 +97,8 @@ public class ProcessTaskActionThread extends NeatLogicThread {
 
     @Override
     protected void execute() {
+        System.out.println("currentProcessTaskStepVo = " + JSON.toJSONString(currentProcessTaskStepVo));
+        System.out.println("triggerType = " + triggerType.getTrigger());
         try {
             JSONArray actionList = null;
             if (triggerType instanceof ProcessTaskNotifyTriggerType) {
@@ -106,8 +108,11 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                 actionList = (JSONArray) JSONPath.read(config, "process.processConfig.actionConfig.actionList");
             } else {
                 /* 获取步骤配置信息 **/
+                System.out.println("currentProcessTaskStepVo.getId() = " + currentProcessTaskStepVo.getId());
                 ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+                System.out.println("stepVo.getName() = " + stepVo.getName());
                 String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
+                System.out.println("stepConfig = " + stepConfig);
                 actionList = (JSONArray) JSONPath.read(stepConfig, "actionConfig.actionList");
 
                 currentProcessTaskStepVo.setProcessTaskId(stepVo.getProcessTaskId());
