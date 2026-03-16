@@ -107,6 +107,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
         paramObj.put("fileIdList", processTaskCreateVo.getFileIdList());//
         paramObj.put("handlerStepInfo", processTaskCreateVo.getHandlerStepInfo());
         paramObj.put("source", processTaskCreateVo.getSource());
+        paramObj.put("focusUserUuidList", processTaskCreateVo.getFocusUserUuidList());
         //上报人，支持上报人uuid和上报人id入参
         String owner = processTaskCreateVo.getOwner();
         UserVo userVo = userMapper.getUserByUuid(owner);
