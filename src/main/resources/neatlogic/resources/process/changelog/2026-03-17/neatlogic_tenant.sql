@@ -1,0 +1,2 @@
+ALTER TABLE `process_workcenter`
+MODIFY COLUMN `type` enum('factory','system','custom') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'factory:默认出厂  system：系统分类  custom：自定义分类' AFTER `name`;
