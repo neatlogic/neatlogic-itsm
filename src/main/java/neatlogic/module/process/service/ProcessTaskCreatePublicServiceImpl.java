@@ -3,6 +3,7 @@ package neatlogic.module.process.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dao.mapper.region.RegionMapper;
@@ -45,10 +46,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePublicService, IProcessTaskCreatePublicCrossoverService {
@@ -107,6 +105,18 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
         paramObj.put("fileIdList", processTaskCreateVo.getFileIdList());//
         paramObj.put("handlerStepInfo", processTaskCreateVo.getHandlerStepInfo());
         paramObj.put("source", processTaskCreateVo.getSource());
+        if (CollectionUtils.isNotEmpty(processTaskCreateVo.getFocusUserIdList())) {
+            List<String> userIdList = processTaskCreateVo.getFocusUserIdList().toJavaList(String.class);
+            List<UserVo> userList = userMapper.getUserByUserIdList(userIdList);
+            if (CollectionUtils.isNotEmpty(userList)) {
+                List<String> focusUserUuidList = new ArrayList<>();
+                for (UserVo userVo : userList) {
+                    focusUserUuidList.add(GroupSearch.USER.addPrefix(userVo.getUuid()));
+                }
+                paramObj.put("focusUserUuidList", focusUserUuidList);
+            }
+        }
+
         //上报人，支持上报人uuid和上报人id入参
         String owner = processTaskCreateVo.getOwner();
         UserVo userVo = userMapper.getUserByUuid(owner);
