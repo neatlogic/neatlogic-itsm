@@ -2473,6 +2473,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                     }
                 }
                 if (Objects.equals(processTaskActionVo.getStatus(), "succeed")) {
+                    processTaskActionVo.setSucceed(true);
                     processTaskActionVo.setStatusText("已成功");
                 } else {
                     processTaskActionVo.setStatusText("已失败");
