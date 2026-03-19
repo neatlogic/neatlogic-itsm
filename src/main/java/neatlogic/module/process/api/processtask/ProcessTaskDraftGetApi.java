@@ -24,6 +24,8 @@ import neatlogic.framework.dao.mapper.region.RegionMapper;
 import neatlogic.framework.dto.region.RegionVo;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.exception.type.PermissionDeniedException;
+import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
+import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.process.auth.PROCESS_BASE;
@@ -211,37 +213,48 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         if (MapUtils.isEmpty(toProcessTaskFormConfig)) {
             return resultObj;
         }
-        JSONObject fromProcessTaskFormAttrDataMap = getFromFormAttributeDataMap(fromProcessTaskId);
-        JSONObject labelUuidMap = fromProcessTaskFormAttrDataMap.getJSONObject("labelUuidMap");
-        JSONObject labelHandlerMap = fromProcessTaskFormAttrDataMap.getJSONObject("labelHandlerMap");
-        JSONObject keyUuidMap = fromProcessTaskFormAttrDataMap.getJSONObject("keyUuidMap");
-        JSONObject keyHandlerMap = fromProcessTaskFormAttrDataMap.getJSONObject("keyHandlerMap");
-        JSONObject formAttributeDataMap = fromProcessTaskFormAttrDataMap.getJSONObject("formAttributeDataMap");
+        Map<String, Object> formAttributeDataMap = new HashMap<>();
+        Map<String, FormAttributeVo> label2FormAttributeVoMap = new HashMap<>();
+        Map<String, FormAttributeVo> key2FormAttributeVoMap = new HashMap<>();
+        List<FormAttributeVo> fromProcessTaskFormAttributeList = processTaskService.getFormAttributeListByProcessTaskId(fromProcessTaskId);
+        if (CollectionUtils.isNotEmpty(fromProcessTaskFormAttributeList)) {
+            for (FormAttributeVo formAttributeVo : fromProcessTaskFormAttributeList) {
+                label2FormAttributeVoMap.put(formAttributeVo.getLabel(), formAttributeVo);
+                if (StringUtils.isNotBlank(formAttributeVo.getKey())) {
+                    key2FormAttributeVoMap.put(formAttributeVo.getKey(), formAttributeVo);
+                }
+            }
+            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(fromProcessTaskId);
+            for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+                formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+            }
+        }
         //获取目标表单值
         FormVersionVo toFormVersion = new FormVersionVo();
         toFormVersion.setFormConfig(toProcessTaskFormConfig);
         String mainSceneUuid = toProcessTaskFormConfig.getString("uuid");
         toFormVersion.setSceneUuid(mainSceneUuid);
         for (FormAttributeVo formAttributeVo : toFormVersion.getFormAttributeList()) {
-            String fromFormAttributeHandler = keyHandlerMap.getString(formAttributeVo.getKey());
-            if (Objects.equals(fromFormAttributeHandler, formAttributeVo.getHandler())) {
-                String fromFormAttributeUuid = keyUuidMap.getString(formAttributeVo.getKey());
-                if (StringUtils.isNotBlank(fromFormAttributeUuid)) {
-                    Object data = formAttributeDataMap.get(fromFormAttributeUuid);
-                    if (data != null) {
-                        resultObj.put(formAttributeVo.getUuid(), data);
-                    }
+            String fromProcessTaskFormAttributeUuid = null;
+            FormAttributeVo fromProcessTaskFormAttributeVo = key2FormAttributeVoMap.get(formAttributeVo.getKey());
+            if (fromProcessTaskFormAttributeVo != null && Objects.equals(fromProcessTaskFormAttributeVo.getHandler(), formAttributeVo.getHandler())) {
+                IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                if (formAttributeHandler == null || formAttributeHandler.checkWhetherTwoAttributeCanBeAssignedToEachOther(fromProcessTaskFormAttributeVo, formAttributeVo)) {
+                    fromProcessTaskFormAttributeUuid = fromProcessTaskFormAttributeVo.getUuid();
                 }
             } else {
-                fromFormAttributeHandler = labelHandlerMap.getString(formAttributeVo.getLabel());
-                if (Objects.equals(fromFormAttributeHandler, formAttributeVo.getHandler())) {
-                    String fromFormAttributeUuid = labelUuidMap.getString(formAttributeVo.getLabel());
-                    if (StringUtils.isNotBlank(fromFormAttributeUuid)) {
-                        Object data = formAttributeDataMap.get(fromFormAttributeUuid);
-                        if (data != null) {
-                            resultObj.put(formAttributeVo.getUuid(), data);
-                        }
+                fromProcessTaskFormAttributeVo = label2FormAttributeVoMap.get(formAttributeVo.getLabel());
+                if (fromProcessTaskFormAttributeVo != null && Objects.equals(fromProcessTaskFormAttributeVo.getHandler(), formAttributeVo.getHandler())) {
+                    IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                    if (formAttributeHandler == null || formAttributeHandler.checkWhetherTwoAttributeCanBeAssignedToEachOther(fromProcessTaskFormAttributeVo, formAttributeVo)) {
+                        fromProcessTaskFormAttributeUuid = fromProcessTaskFormAttributeVo.getUuid();
                     }
+                }
+            }
+            if (StringUtils.isNotBlank(fromProcessTaskFormAttributeUuid)) {
+                Object data = formAttributeDataMap.get(fromProcessTaskFormAttributeVo.getUuid());
+                if (data != null) {
+                    resultObj.put(formAttributeVo.getUuid(), data);
                 }
             }
         }
@@ -251,51 +264,6 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             }
         }
 
-        return resultObj;
-    }
-
-    /**
-     * 获取来源工单的表单值映射
-     *
-     * @param fromProcessTaskId 来源工单id
-     */
-    private JSONObject getFromFormAttributeDataMap(Long fromProcessTaskId) {
-        JSONObject resultObj = new JSONObject();
-        Map<String, String> labelUuidMap = new HashMap<>();
-        Map<String, String> labelHandlerMap = new HashMap<>();
-        Map<String, String> keyUuidMap = new HashMap<>();
-        Map<String, String> keyHandlerMap = new HashMap<>();
-        Map<String, Object> formAttributeDataMap = new HashMap<>();
-        // 获取旧工单表单信息
-        ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(fromProcessTaskId);
-        if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContent())) {
-//            String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-//            if (StringUtils.isNotBlank(formContent)) {
-                JSONObject formConfig = JSON.parseObject(processTaskFormVo.getFormContent());
-                FormVersionVo fromFormVersion = new FormVersionVo();
-                fromFormVersion.setFormConfig(formConfig);
-                String mainSceneUuid = formConfig.getString("uuid");
-                fromFormVersion.setSceneUuid(mainSceneUuid);
-                List<FormAttributeVo> fromFormAttributeList = fromFormVersion.getFormAttributeList();
-                for (FormAttributeVo formAttributeVo : fromFormAttributeList) {
-                    labelUuidMap.put(formAttributeVo.getLabel(), formAttributeVo.getUuid());
-                    labelHandlerMap.put(formAttributeVo.getLabel(), formAttributeVo.getHandler());
-                    if (StringUtils.isNotBlank(formAttributeVo.getKey())) {
-                        keyUuidMap.put(formAttributeVo.getKey(), formAttributeVo.getUuid());
-                        keyHandlerMap.put(formAttributeVo.getKey(), formAttributeVo.getHandler());
-                    }
-                }
-                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId(fromProcessTaskId);
-                for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-                    formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
-                }
-//            }
-        }
-        resultObj.put("labelUuidMap", labelUuidMap);
-        resultObj.put("labelHandlerMap", labelHandlerMap);
-        resultObj.put("keyUuidMap", keyUuidMap);
-        resultObj.put("keyHandlerMap", keyHandlerMap);
-        resultObj.put("formAttributeDataMap", formAttributeDataMap);
         return resultObj;
     }
 
@@ -329,46 +297,49 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         ProcessTaskStepVo parentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(parentProcessTaskStepId);
         processTaskService.checkProcessTaskParamsIsLegal(parentProcessTaskStepVo.getProcessTaskId(), parentProcessTaskStepId);
         ProcessTaskVo processTaskVo = getProcessTaskVoByChannelUuid(channelUuid);
-        JSONObject fromProcessTaskFormAttrDataMap = getFromFormAttributeDataMap(parentProcessTaskStepVo.getProcessTaskId());
-        JSONObject labelUuidMap = fromProcessTaskFormAttrDataMap.getJSONObject("labelUuidMap");
-        JSONObject labelHandlerMap = fromProcessTaskFormAttrDataMap.getJSONObject("labelHandlerMap");
-        JSONObject formAttributeDataMap = fromProcessTaskFormAttrDataMap.getJSONObject("formAttributeDataMap");
-        if (MapUtils.isNotEmpty(labelUuidMap) && MapUtils.isNotEmpty(labelHandlerMap) && MapUtils.isNotEmpty(formAttributeDataMap)) {
-            //获取父流程步骤配置信息
-            IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(parentProcessTaskStepVo.getHandler());
-            if (processStepUtilHandler == null) {
-                throw new ProcessStepUtilHandlerNotFoundException(parentProcessTaskStepVo.getHandler());
-            }
-            Object parenStepInfoObj = processStepUtilHandler.getNonStartStepInfo(parentProcessTaskStepVo);
-            if (parenStepInfoObj != null) {
-                JSONObject parenStepInfo = (JSONObject) parenStepInfoObj;
-                JSONObject parentStepChannelFormMapping = parenStepInfo.getJSONObject("formMapping");
-                if (MapUtils.isNotEmpty(parentStepChannelFormMapping)) {
-                    JSONObject parentSubProcessTaskStepConfigFormMapping = parentStepChannelFormMapping.getJSONObject(channelUuid);
-                    if (MapUtils.isNotEmpty(parentSubProcessTaskStepConfigFormMapping)) {
-                        //获取目标表单值
-                        Map<String, Object> resultObj = new HashMap<>();
-                        FormVersionVo toFormVersion = new FormVersionVo();
-                        toFormVersion.setFormConfig(processTaskVo.getFormConfig());
-                        String mainSceneUuid = processTaskVo.getFormConfig().getString("uuid");
-                        toFormVersion.setSceneUuid(mainSceneUuid);
-                        for (FormAttributeVo formAttributeVo : toFormVersion.getFormAttributeList()) {
-                            String parentFormLabel = parentSubProcessTaskStepConfigFormMapping.getString(formAttributeVo.getLabel());
-                            if (StringUtils.isNotBlank(parentFormLabel)) {
-                                String fromFormAttributeHandler = labelHandlerMap.getString(parentFormLabel);
-                                if (Objects.equals(fromFormAttributeHandler, formAttributeVo.getHandler())) {
-                                    String fromFormAttributeUuid = labelUuidMap.getString(parentFormLabel);
-                                    if (StringUtils.isNotBlank(fromFormAttributeUuid)) {
-                                        Object data = formAttributeDataMap.get(fromFormAttributeUuid);
-                                        if (data != null) {
-                                            resultObj.put(formAttributeVo.getUuid(), data);
-                                        }
-                                    }
+        //获取父流程步骤配置信息
+        IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(parentProcessTaskStepVo.getHandler());
+        if (processStepUtilHandler == null) {
+            throw new ProcessStepUtilHandlerNotFoundException(parentProcessTaskStepVo.getHandler());
+        }
+        Object parenStepInfoObj = processStepUtilHandler.getNonStartStepInfo(parentProcessTaskStepVo);
+        if (parenStepInfoObj != null) {
+            JSONObject parenStepInfo = (JSONObject) parenStepInfoObj;
+            JSONObject parentStepChannelFormMapping = parenStepInfo.getJSONObject("formMapping");
+            if (MapUtils.isNotEmpty(parentStepChannelFormMapping)) {
+                JSONObject parentSubProcessTaskStepConfigFormMapping = parentStepChannelFormMapping.getJSONObject(channelUuid);
+                if (MapUtils.isNotEmpty(parentSubProcessTaskStepConfigFormMapping)) {
+                    Map<String, Object> formAttributeDataMap = new HashMap<>();
+                    Map<String, FormAttributeVo> label2FormAttributeVoMap = new HashMap<>();
+                    List<FormAttributeVo> fromProcessTaskFormAttributeList = processTaskService.getFormAttributeListByProcessTaskId((parentProcessTaskStepVo.getProcessTaskId()));
+                    if (CollectionUtils.isNotEmpty(fromProcessTaskFormAttributeList)) {
+                        for (FormAttributeVo formAttributeVo : fromProcessTaskFormAttributeList) {
+                            label2FormAttributeVoMap.put(formAttributeVo.getLabel(), formAttributeVo);
+                        }
+                        List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskService.getProcessTaskFormAttributeDataListByProcessTaskId((parentProcessTaskStepVo.getProcessTaskId()));
+                        for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+                            formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+                        }
+                    }
+                    //获取目标表单值
+                    Map<String, Object> resultObj = new HashMap<>();
+                    FormVersionVo toFormVersion = new FormVersionVo();
+                    toFormVersion.setFormConfig(processTaskVo.getFormConfig());
+                    String mainSceneUuid = processTaskVo.getFormConfig().getString("uuid");
+                    toFormVersion.setSceneUuid(mainSceneUuid);
+                    for (FormAttributeVo formAttributeVo : toFormVersion.getFormAttributeList()) {
+                        FormAttributeVo fromProcessTaskFormAttributeVo = label2FormAttributeVoMap.get(formAttributeVo.getLabel());
+                        if (fromProcessTaskFormAttributeVo != null && Objects.equals(fromProcessTaskFormAttributeVo.getHandler(), formAttributeVo.getHandler())) {
+                            IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                            if (formAttributeHandler == null || formAttributeHandler.checkWhetherTwoAttributeCanBeAssignedToEachOther(fromProcessTaskFormAttributeVo, formAttributeVo)) {
+                                Object data = formAttributeDataMap.get(fromProcessTaskFormAttributeVo.getUuid());
+                                if (data != null) {
+                                    resultObj.put(formAttributeVo.getUuid(), data);
                                 }
                             }
                         }
-                        processTaskVo.setFormAttributeDataMap(resultObj);
                     }
+                    processTaskVo.setFormAttributeDataMap(resultObj);
                 }
             }
         }
