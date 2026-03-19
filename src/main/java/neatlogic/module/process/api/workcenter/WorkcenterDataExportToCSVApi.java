@@ -25,7 +25,7 @@ import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
 import neatlogic.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.$;
 import neatlogic.framework.util.FileUtil;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
