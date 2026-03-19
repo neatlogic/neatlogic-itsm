@@ -17,7 +17,7 @@ import neatlogic.framework.process.processtaskserialnumberpolicy.core.IProcessTa
 import neatlogic.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyHandlerFactory;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.core.privateapi.PrivateJsonStreamApiComponentBase;
+import neatlogic.framework.restful.core.privateapi.jsonstream.PrivateJsonStreamApiComponentBase;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.framework.worktime.dto.WorktimeVo;
