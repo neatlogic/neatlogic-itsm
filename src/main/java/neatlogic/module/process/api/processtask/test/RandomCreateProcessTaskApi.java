@@ -12,7 +12,6 @@
 
 package neatlogic.module.process.api.processtask.test;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
@@ -31,17 +30,14 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentFactory;
-import neatlogic.module.process.api.processtask.ProcessTaskCompleteApi;
-import neatlogic.module.process.api.processtask.ProcessTaskDraftSaveApi;
-import neatlogic.module.process.api.processtask.ProcessTaskStartProcessApi;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,17 +60,20 @@ import java.util.stream.Collectors;
 class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
     private final Map<String, Action<JSONObject>> actionMap = new HashMap<>();
     CountDownLatch latch = null;
-    @Autowired
+    @Resource
     ProcessTaskMapper processtaskMapper;
 
-    @Autowired
+    @Resource
     ChannelMapper channelMapper;
 
-    @Autowired
+    @Resource
     UserMapper userMapper;
 
-    @Autowired
+    @Resource
     PriorityMapper priorityMapper;
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @PostConstruct
     public void actionDispatcherInit() {
@@ -123,7 +122,6 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
             List<Long> taskIdList = processTaskVoList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList());
             List<ProcessTaskStepUserVo> stepUserVoList = processtaskMapper.getProcessTaskStepUserListByProcessTaskIdListAndStatusList(taskIdList, Collections.singletonList(ProcessTaskStepUserStatus.DOING.getValue()));
             List<Long> stepIdList = stepUserVoList.stream().map(ProcessTaskStepUserVo::getProcessTaskStepId).collect(Collectors.toList());
-            ProcessTaskCompleteApi completeProcessApi = (ProcessTaskCompleteApi) PrivateApiComponentFactory.getInstance(ProcessTaskCompleteApi.class.getName());
             Map<String, Long> processTaskNextStepMap = new HashMap<>();
             List<ProcessTaskStepRelVo> stepRelVoList = processtaskMapper.getProcessTaskStepRelListByFromIdList(stepIdList);
             for (ProcessTaskStepRelVo stepRelVo : stepRelVoList) {
@@ -135,7 +133,7 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
                 completeJson.put("processTaskStepId", stepUserVo.getProcessTaskStepId());
                 completeJson.put("action", "complete");
                 completeJson.put("nextStepId", processTaskNextStepMap.get(String.format("%s_%s", stepUserVo.getProcessTaskId(), stepUserVo.getProcessTaskStepId())));
-                completeProcessApi.doService(PrivateApiComponentFactory.getApiByToken(completeProcessApi.getToken()), completeJson, null);
+                processTaskService.completeProcessTaskStep(completeJson);
             }
         });
     }
@@ -220,15 +218,13 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
                     paramJson.put("hidecomponentList", new JSONArray());
                     paramJson.put("readcomponentList", new JSONArray());
 
-                    ProcessTaskDraftSaveApi draftSaveApi = (ProcessTaskDraftSaveApi) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
-                    JSONObject saveResultObj = JSON.parseObject(draftSaveApi.doService(PrivateApiComponentFactory.getApiByToken(draftSaveApi.getToken()), paramJson, null).toString());
+                    JSONObject saveResultObj = processTaskService.saveProcessTaskDraft(paramJson, null);
                     saveResultObj.put("action", "start");
                     //查询可执行下一步骤
                     List<Long> nextStepIdList = processtaskMapper.getToProcessTaskStepIdListByFromIdAndType(saveResultObj.getLong("processTaskStepId"), null);
                     saveResultObj.put("nextStepId", nextStepIdList.get((int) Math.round(Math.random() * (nextStepIdList.size() - 1))));
                     //流转
-                    ProcessTaskStartProcessApi startProcessApi = (ProcessTaskStartProcessApi) PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
-                    startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()), saveResultObj, null);
+                    processTaskService.startProcessProcessTask(saveResultObj);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
