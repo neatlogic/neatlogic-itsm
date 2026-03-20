@@ -30,8 +30,10 @@ import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.IApiComponent;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import neatlogic.framework.restful.enums.ApiType;
 import neatlogic.module.process.api.processtask.ProcessTaskCompleteApi;
 import neatlogic.module.process.api.processtask.ProcessTaskDraftSaveApi;
 import neatlogic.module.process.api.processtask.ProcessTaskStartProcessApi;
@@ -123,7 +125,7 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
             List<Long> taskIdList = processTaskVoList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList());
             List<ProcessTaskStepUserVo> stepUserVoList = processtaskMapper.getProcessTaskStepUserListByProcessTaskIdListAndStatusList(taskIdList, Collections.singletonList(ProcessTaskStepUserStatus.DOING.getValue()));
             List<Long> stepIdList = stepUserVoList.stream().map(ProcessTaskStepUserVo::getProcessTaskStepId).collect(Collectors.toList());
-            ProcessTaskCompleteApi completeProcessApi = (ProcessTaskCompleteApi) PrivateApiComponentFactory.getInstance(ProcessTaskCompleteApi.class.getName());
+            ProcessTaskCompleteApi completeProcessApi = (ProcessTaskCompleteApi) PrivateApiComponentFactory.getComponent(ProcessTaskCompleteApi.class.getName(), ApiType.OBJECT,  IApiComponent.class);
             Map<String, Long> processTaskNextStepMap = new HashMap<>();
             List<ProcessTaskStepRelVo> stepRelVoList = processtaskMapper.getProcessTaskStepRelListByFromIdList(stepIdList);
             for (ProcessTaskStepRelVo stepRelVo : stepRelVoList) {
@@ -220,14 +222,14 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
                     paramJson.put("hidecomponentList", new JSONArray());
                     paramJson.put("readcomponentList", new JSONArray());
 
-                    ProcessTaskDraftSaveApi draftSaveApi = (ProcessTaskDraftSaveApi) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
+                    ProcessTaskDraftSaveApi draftSaveApi = (ProcessTaskDraftSaveApi) PrivateApiComponentFactory.getComponent(ProcessTaskDraftSaveApi.class.getName(), ApiType.OBJECT,  IApiComponent.class);
                     JSONObject saveResultObj = JSON.parseObject(draftSaveApi.doService(PrivateApiComponentFactory.getApiByToken(draftSaveApi.getToken()), paramJson, null).toString());
                     saveResultObj.put("action", "start");
                     //查询可执行下一步骤
                     List<Long> nextStepIdList = processtaskMapper.getToProcessTaskStepIdListByFromIdAndType(saveResultObj.getLong("processTaskStepId"), null);
                     saveResultObj.put("nextStepId", nextStepIdList.get((int) Math.round(Math.random() * (nextStepIdList.size() - 1))));
                     //流转
-                    ProcessTaskStartProcessApi startProcessApi = (ProcessTaskStartProcessApi) PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
+                    ProcessTaskStartProcessApi startProcessApi = (ProcessTaskStartProcessApi) PrivateApiComponentFactory.getComponent(ProcessTaskStartProcessApi.class.getName(), ApiType.OBJECT,  IApiComponent.class);
                     startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()), saveResultObj, null);
                 } catch (Exception e) {
                     e.printStackTrace();
