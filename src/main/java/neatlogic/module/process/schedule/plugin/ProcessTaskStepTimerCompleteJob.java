@@ -37,6 +37,11 @@ import java.util.Objects;
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskStepTimerCompleteJob extends JobBase {
+    @Override
+    public String getName() {
+        return "工单步骤定时完成";
+    }
+
 
     @Resource
     ProcessTaskMapper processTaskMapper;

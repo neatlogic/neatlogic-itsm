@@ -78,6 +78,10 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
     @Component
     @DisallowConcurrentExecution
     private static class ProcessTaskSerialNumberSeedResetJob extends JobBase {
+        @Override
+        public String getName() {
+            return "工单每日流水号重置";
+        }
 
         private String cron = "0 0 0 * * ?";
 

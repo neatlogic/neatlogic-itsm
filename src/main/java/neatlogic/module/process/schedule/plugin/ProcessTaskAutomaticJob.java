@@ -46,6 +46,11 @@ import java.util.concurrent.TimeUnit;
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskAutomaticJob extends JobBase {
+	@Override
+	public String getName() {
+		return "工单自动处理回调";
+	}
+
 
 	@Resource
 	ProcessTaskAutomaticService processTaskAutomaticService;

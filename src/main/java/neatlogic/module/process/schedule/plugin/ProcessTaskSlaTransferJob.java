@@ -50,6 +50,11 @@ import java.util.List;
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskSlaTransferJob extends JobBase {
+    @Override
+    public String getName() {
+        return "工单SLA定时转交";
+    }
+
     static Logger logger = LoggerFactory.getLogger(ProcessTaskSlaTransferJob.class);
 
     private static final Integer INTERVAL_IN_SECONDS = 60 * 60;

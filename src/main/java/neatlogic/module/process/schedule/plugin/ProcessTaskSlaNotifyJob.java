@@ -49,6 +49,11 @@ import java.util.stream.Collectors;
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskSlaNotifyJob extends JobBase {
+    @Override
+    public String getName() {
+        return "工单SLA定时通知";
+    }
+
 
     private static final Logger logger = LoggerFactory.getLogger(ProcessTaskSlaNotifyJob.class);
 

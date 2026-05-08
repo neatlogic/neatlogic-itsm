@@ -49,6 +49,11 @@ import java.util.concurrent.TimeUnit;
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskAutoScoreJob extends JobBase {
+	@Override
+	public String getName() {
+		return "工单自动评分";
+	}
+
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
