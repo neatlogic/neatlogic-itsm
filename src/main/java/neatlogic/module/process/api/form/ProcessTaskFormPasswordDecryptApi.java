@@ -95,7 +95,9 @@ public class ProcessTaskFormPasswordDecryptApi extends PrivateApiComponentBase {
             if (StringUtils.isNotBlank(rowUuid)) {
                 if (processTaskFormAttributeData.getData().contains(rowUuid)) {
                     if (Objects.equals(processTaskFormAttributeData.getHandler(), FormHandler.FORMTABLEINPUTER.getHandler())
-                            || Objects.equals(processTaskFormAttributeData.getHandler(), FormHandler.FORMSUBASSEMBLY.getHandler())) {
+                            || Objects.equals(processTaskFormAttributeData.getHandler(), FormHandler.FORMTABLESELECTOR.getHandler())
+                            || Objects.equals(processTaskFormAttributeData.getHandler(), FormHandler.FORMSUBASSEMBLY.getHandler())
+                    ) {
                         passwordDecryptionObj = formAttributeDataConversionHandler.passwordDecryption(processTaskFormAttributeData.getDataObj(), formAttributeUuid, otherParamConfig);
                         if (MapUtils.isNotEmpty(passwordDecryptionObj)) {
                             JSONArray parentUuidList = passwordDecryptionObj.getJSONArray("parentUuidList");
