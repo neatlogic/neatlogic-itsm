@@ -57,7 +57,7 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
         List<String> valuelist = new ArrayList<>();
         List<GroupSearchOptionVo> userTypeList = new ArrayList<>();
         for (ProcessUserType s : ProcessUserType.values()) {
-            if (s.getIsShow() && s.getText().contains(groupSearchVo.getKeyword())) {
+            if (s.getIsShow() && (StringUtils.isBlank(groupSearchVo.getKeyword()) || s.getText().contains(groupSearchVo.getKeyword()))) {
                 String value = getHeader() + s.getValue();
                 if (!valuelist.contains(value)) {
                     valuelist.add(value);
@@ -98,6 +98,8 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
                 }
             }
         }
+        groupSearchVo.setPageSize(userTypeList.size());
+        groupSearchVo.setRowNum(userTypeList.size());
         return userTypeList;
     }
 
