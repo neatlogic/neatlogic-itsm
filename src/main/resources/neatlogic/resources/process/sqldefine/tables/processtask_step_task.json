@@ -1,0 +1,85 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_task",
+  "label": "processtask_step_task",
+  "description": "processtask_step_task 可用于流程相关的状态跟踪、时间维度统计、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "任务id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单id，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "步骤id，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "owner",
+      "type": "char(32)",
+      "description": "创建者。"
+    },
+    {
+      "name": "status",
+      "type": "enum('succeed','aborted','pending')",
+      "description": "状态。"
+    },
+    {
+      "name": "create_time",
+      "type": "timestamp(3)",
+      "description": "创建时间。"
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "结束时间。"
+    },
+    {
+      "name": "task_config_id",
+      "type": "bigint",
+      "description": "任务配置id。"
+    },
+    {
+      "name": "content_hash",
+      "type": "char(32)",
+      "description": "创建内容。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_processtask_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "普通索引，覆盖 processtask_id 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_processtask_step_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "普通索引，覆盖 processtask_step_id 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

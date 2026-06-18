@@ -1,0 +1,36 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_content_target",
+  "label": "工单步骤回复目标对象表",
+  "description": "工单步骤回复目标对象表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "content_id",
+      "type": "bigint",
+      "description": "工单步骤回复内容ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "type",
+      "type": "enum('user','team','role')",
+      "description": "对象类型。"
+    },
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "对象UUID，作为当前表记录的主键或唯一定位字段。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "content_id",
+        "uuid"
+      ],
+      "description": "主键索引，覆盖 content_id、uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

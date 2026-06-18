@@ -1,0 +1,60 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_template",
+  "label": "流程processtask_collection_template表",
+  "description": "流程processtask_collection_template表，属于流程模块的数据表。 可用于流程相关的启用状态筛选、时间维度统计等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "主键ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "name",
+      "type": "varchar(255)",
+      "description": "唯一标识。"
+    },
+    {
+      "name": "template",
+      "type": "longtext",
+      "description": "流程processtask_collection_template表的template字段。"
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "创建人。"
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp",
+      "description": "创建时间。"
+    },
+    {
+      "name": "lcu",
+      "type": "char(32)",
+      "description": "修改人。"
+    },
+    {
+      "name": "lcd",
+      "type": "timestamp",
+      "description": "修改时间。"
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint(1)",
+      "description": "是否激活。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

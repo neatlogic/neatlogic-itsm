@@ -1,0 +1,82 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_sla_delay",
+  "label": "工单时效延迟表",
+  "description": "工单时效延迟表 可用于流程相关的时间维度统计、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID。"
+    },
+    {
+      "name": "target_processtask_id",
+      "type": "bigint",
+      "description": "目标工单ID。"
+    },
+    {
+      "name": "target_processtask_step_id",
+      "type": "bigint",
+      "description": "目标步骤ID，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "sla_id",
+      "type": "bigint",
+      "description": "时效ID，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "time",
+      "type": "bigint",
+      "description": "追加时间。"
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "创建人。"
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "创建时间。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_sla_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "sla_id"
+      ],
+      "description": "普通索引，覆盖 sla_id 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_unique",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "target_processtask_step_id",
+        "sla_id",
+        "processtask_id"
+      ],
+      "description": "唯一索引，覆盖 target_processtask_step_id、sla_id、processtask_id 字段，适合用于精确检索、唯一性判断和去重查询。"
+    }
+  ]
+}

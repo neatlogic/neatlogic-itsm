@@ -1,0 +1,71 @@
+{
+  "moduleId": "process",
+  "name": "process_comment_template",
+  "label": "系统回复模版表",
+  "description": "系统回复模版表 可用于流程相关的时间维度统计等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "主键，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "name",
+      "type": "varchar(50)",
+      "description": "名称，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "content",
+      "type": "text",
+      "description": "回复内容。"
+    },
+    {
+      "name": "type",
+      "type": "enum('system','custom')",
+      "description": "system:系统模版；custom:自定义模版。"
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "创建时间。"
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "创建人。"
+    },
+    {
+      "name": "lcd",
+      "type": "timestamp(3)",
+      "description": "修改时间。"
+    },
+    {
+      "name": "lcu",
+      "type": "char(32)",
+      "description": "修改人。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "uk_name_fcu",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "name",
+        "fcd"
+      ],
+      "description": "唯一索引，覆盖 name、fcd 字段，适合用于精确检索、唯一性判断和去重查询。"
+    }
+  ]
+}

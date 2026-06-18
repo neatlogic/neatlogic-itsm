@@ -1,0 +1,45 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_change_handle",
+  "label": "工单步骤与变更处理关系表",
+  "description": "工单步骤与变更处理关系表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单id。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "步骤id，数据库中要求唯一，适合用于精确查询和去重判断。"
+    },
+    {
+      "name": "change_id",
+      "type": "bigint",
+      "description": "变更id，作为当前表记录的主键或唯一定位字段。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "change_id"
+      ],
+      "description": "主键索引，覆盖 change_id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_processtask_step_id",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "唯一索引，覆盖 processtask_step_id 字段，适合用于精确检索、唯一性判断和去重查询。"
+    }
+  ]
+}

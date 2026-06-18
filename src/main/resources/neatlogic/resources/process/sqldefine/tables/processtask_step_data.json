@@ -1,0 +1,63 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_data",
+  "label": "工单步骤数据表",
+  "description": "工单步骤数据表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "唯一标识，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单id，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "工单步骤id。"
+    },
+    {
+      "name": "data",
+      "type": "longtext",
+      "description": "数据。"
+    },
+    {
+      "name": "type",
+      "type": "varchar(50)",
+      "description": "功能类型。"
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "创建人。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "task_step_type_fcu_idx",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id",
+        "type",
+        "fcu"
+      ],
+      "description": "唯一索引，覆盖 processtask_id、processtask_step_id、type、fcu 字段，适合用于精确检索、唯一性判断和去重查询。"
+    }
+  ]
+}

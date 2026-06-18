@@ -1,0 +1,58 @@
+{
+  "moduleId": "process",
+  "name": "process_workcenter_authority",
+  "label": "工单中心分类授权表",
+  "description": "工单中心分类授权表 可用于流程相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "workcenter_uuid",
+      "type": "char(32)",
+      "description": "工单分类uuid，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "type",
+      "type": "enum('common','user','role','team')",
+      "description": "类型，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "uuid",
+      "type": "varchar(32)",
+      "description": "uuid，作为当前表记录的主键或唯一定位字段。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "workcenter_uuid",
+        "type",
+        "uuid"
+      ],
+      "description": "主键索引，覆盖 workcenter_uuid、type、uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "index_role",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "uuid"
+      ],
+      "description": "普通索引，覆盖 uuid 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "index_user",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "type",
+        "uuid"
+      ],
+      "description": "普通索引，覆盖 type、uuid 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "moduleId": "process",
+  "name": "process_step_rel",
+  "label": "流程步骤之间连线表",
+  "description": "流程步骤之间连线表 可用于流程相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "process_uuid",
+      "type": "char(32)",
+      "description": "流程uuid，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "全局唯一id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "from_step_uuid",
+      "type": "char(32)",
+      "description": "源步骤uuid。"
+    },
+    {
+      "name": "to_step_uuid",
+      "type": "char(32)",
+      "description": "目标步骤uuid。"
+    },
+    {
+      "name": "condition",
+      "type": "varchar(500)",
+      "description": "条件。"
+    },
+    {
+      "name": "name",
+      "type": "varchar(50)",
+      "description": "名称。"
+    },
+    {
+      "name": "type",
+      "type": "enum('forward','backward')",
+      "description": "类型。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "uuid"
+      ],
+      "description": "主键索引，覆盖 uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_process_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "process_uuid"
+      ],
+      "description": "普通索引，覆盖 process_uuid 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

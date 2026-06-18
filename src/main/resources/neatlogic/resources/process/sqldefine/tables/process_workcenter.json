@@ -1,0 +1,120 @@
+{
+  "moduleId": "process",
+  "name": "process_workcenter",
+  "label": "工单中心分类表",
+  "description": "工单中心分类表 可用于流程相关的启用状态筛选、时间维度统计、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "分类唯一标识，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "name",
+      "type": "varchar(100)",
+      "description": "分类名。"
+    },
+    {
+      "name": "type",
+      "type": "enum('factory','system','custom')",
+      "description": "factory:默认出厂 system：系统分类 custom：自定义分类，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "sort",
+      "type": "int",
+      "description": "分类排序，越小越靠前，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "condition_config",
+      "type": "mediumtext",
+      "description": "分类条件配置。"
+    },
+    {
+      "name": "support",
+      "type": "enum('all','mobile','pc')",
+      "description": "使用显示范围，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "catalog_id",
+      "type": "bigint",
+      "description": "菜单id。"
+    },
+    {
+      "name": "is_show_total",
+      "type": "tinyint(1)",
+      "description": "是否显示总数,默认显示待办数。"
+    },
+    {
+      "name": "thead_config_hash",
+      "type": "char(32)",
+      "description": "默认表头配置hash，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "创建时间。"
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "创建人。"
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint(1)",
+      "description": "是否禁用。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "uuid"
+      ],
+      "description": "主键索引，覆盖 uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_sort",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "sort"
+      ],
+      "description": "普通索引，覆盖 sort 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_support",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "support"
+      ],
+      "description": "普通索引，覆盖 support 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_thead_config_hash",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "thead_config_hash"
+      ],
+      "description": "普通索引，覆盖 thead_config_hash 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_type",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "type"
+      ],
+      "description": "普通索引，覆盖 type 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

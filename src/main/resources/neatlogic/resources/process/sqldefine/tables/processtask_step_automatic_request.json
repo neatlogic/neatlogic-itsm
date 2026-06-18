@@ -1,0 +1,45 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_automatic_request",
+  "label": "工单步骤自动节点请求",
+  "description": "工单步骤自动节点请求 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "主键id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单id。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "步骤id。"
+    },
+    {
+      "name": "type",
+      "type": "varchar(50)",
+      "description": "请求或回调。"
+    },
+    {
+      "name": "trigger_time",
+      "type": "timestamp",
+      "description": "下次触发时间。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

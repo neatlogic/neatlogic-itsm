@@ -1,0 +1,56 @@
+{
+  "moduleId": "process",
+  "name": "process_step_tag",
+  "label": "流程步骤打标签表",
+  "description": "流程步骤打标签表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "process_uuid",
+      "type": "char(32)",
+      "description": "流程uuid，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "process_step_uuid",
+      "type": "char(32)",
+      "description": "步骤uuid，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "tag_id",
+      "type": "bigint",
+      "description": "标签id，作为当前表记录的主键或唯一定位字段。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "process_step_uuid",
+        "tag_id"
+      ],
+      "description": "主键索引，覆盖 process_step_uuid、tag_id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_process_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "process_uuid"
+      ],
+      "description": "普通索引，覆盖 process_uuid 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_tag_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "tag_id"
+      ],
+      "description": "普通索引，覆盖 tag_id 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

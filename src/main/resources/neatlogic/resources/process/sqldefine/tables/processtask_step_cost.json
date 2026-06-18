@@ -1,0 +1,128 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_cost",
+  "label": "工单步骤操作耗时表",
+  "description": "工单步骤操作耗时表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单id，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "步骤id，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "start_operate",
+      "type": "varchar(100)",
+      "description": "开始操作类型，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "start_status",
+      "type": "varchar(100)",
+      "description": "开始操作状态。"
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp(3)",
+      "description": "开始操作时间。"
+    },
+    {
+      "name": "start_user_uuid",
+      "type": "char(32)",
+      "description": "开始操作人。"
+    },
+    {
+      "name": "end_operate",
+      "type": "varchar(100)",
+      "description": "结束操作类型，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "end_status",
+      "type": "varchar(100)",
+      "description": "结束操作状态。"
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "结束操作时间。"
+    },
+    {
+      "name": "end_user_uuid",
+      "type": "char(32)",
+      "description": "结束操作人。"
+    },
+    {
+      "name": "time_cost",
+      "type": "bigint",
+      "description": "工作时间耗时。"
+    },
+    {
+      "name": "realtime_cost",
+      "type": "bigint",
+      "description": "自然时间耗时。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_endoperateuser",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "end_operate",
+        "end_user_uuid"
+      ],
+      "description": "普通索引，覆盖 end_operate、end_user_uuid 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_processtask_id_processtask_step_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id"
+      ],
+      "description": "普通索引，覆盖 processtask_id、processtask_step_id 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_processtask_step_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "普通索引，覆盖 processtask_step_id 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_startoperateuser",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "start_operate",
+        "start_user_uuid"
+      ],
+      "description": "普通索引，覆盖 start_operate、start_user_uuid 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

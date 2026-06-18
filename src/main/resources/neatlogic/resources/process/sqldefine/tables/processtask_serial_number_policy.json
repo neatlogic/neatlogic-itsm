@@ -1,0 +1,50 @@
+{
+  "moduleId": "process",
+  "name": "processtask_serial_number_policy",
+  "label": "工单号生成策略表",
+  "description": "工单号生成策略表 可用于流程相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "channel_type_uuid",
+      "type": "char(32)",
+      "description": "服务类型uuid，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "handler",
+      "type": "varchar(200)",
+      "description": "工单号生成策略类名。"
+    },
+    {
+      "name": "config",
+      "type": "text",
+      "description": "配置信息。"
+    },
+    {
+      "name": "serial_number_seed",
+      "type": "bigint",
+      "description": "serial_number_seed。"
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp(3)",
+      "description": "最后一次更新工单号开始时间。"
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "最后一次更新工单号结束时间。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "channel_type_uuid"
+      ],
+      "description": "主键索引，覆盖 channel_type_uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

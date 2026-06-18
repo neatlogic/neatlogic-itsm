@@ -1,0 +1,85 @@
+{
+  "moduleId": "process",
+  "name": "processtask_async_create",
+  "label": "异步创建工单表",
+  "description": "异步创建工单表 可用于流程相关的状态跟踪、时间维度统计、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "主键ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID，数据库中要求唯一，适合用于精确查询和去重判断。"
+    },
+    {
+      "name": "title",
+      "type": "varchar(255)",
+      "description": "标题。"
+    },
+    {
+      "name": "status",
+      "type": "enum('doing','done','failed','aborted','redo')",
+      "description": "状态。"
+    },
+    {
+      "name": "config",
+      "type": "longtext",
+      "description": "配置信息。"
+    },
+    {
+      "name": "error",
+      "type": "longtext",
+      "description": "异常信息。"
+    },
+    {
+      "name": "try_count",
+      "type": "int",
+      "description": "尝试次数。"
+    },
+    {
+      "name": "server_id",
+      "type": "int",
+      "description": "服务器ID。"
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "创建人。"
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "创建时间。"
+    },
+    {
+      "name": "lcd",
+      "type": "timestamp(3)",
+      "description": "修改时间。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_processtask_id",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "唯一索引，覆盖 processtask_id 字段，适合用于精确检索、唯一性判断和去重查询。"
+    }
+  ]
+}

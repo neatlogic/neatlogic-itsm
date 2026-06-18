@@ -1,0 +1,71 @@
+{
+  "moduleId": "process",
+  "name": "processtask_agent",
+  "label": "工单代理",
+  "description": "工单代理 可用于流程相关的启用状态筛选等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "主键ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "from_user_uuid",
+      "type": "char(32)",
+      "description": "来源用户uuid，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "to_user_uuid",
+      "type": "char(32)",
+      "description": "目标用户uuid，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "begin_time",
+      "type": "timestamp(3)",
+      "description": "开始时间。"
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "结束时间。"
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint(1)",
+      "description": "启用。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_from_to_user_uuid",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "from_user_uuid",
+        "to_user_uuid"
+      ],
+      "description": "唯一索引，覆盖 from_user_uuid、to_user_uuid 字段，适合用于精确检索、唯一性判断和去重查询。"
+    },
+    {
+      "name": "idx_to_user_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "to_user_uuid"
+      ],
+      "description": "普通索引，覆盖 to_user_uuid 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

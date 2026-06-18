@@ -1,0 +1,117 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_diagram",
+  "label": "工单与架构图关系",
+  "description": "工单与架构图关系 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "工单步骤id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "catalog_id",
+      "type": "bigint",
+      "description": "目录id。"
+    },
+    {
+      "name": "template_id",
+      "type": "bigint",
+      "description": "模板id。"
+    },
+    {
+      "name": "cientity_id",
+      "type": "bigint",
+      "description": "配置项id，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "diagram_id",
+      "type": "bigint",
+      "description": "架构图id，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "diagram_version_id",
+      "type": "bigint",
+      "description": "架构图版本id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "request",
+      "type": "varchar(200)",
+      "description": "关联需求，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "system",
+      "type": "varchar(200)",
+      "description": "应用系统，已建立普通索引，适合用于过滤、关联或排序查询。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id",
+        "diagram_version_id"
+      ],
+      "description": "主键索引，覆盖 processtask_id、processtask_step_id、diagram_version_id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_cientity_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "cientity_id"
+      ],
+      "description": "普通索引，覆盖 cientity_id 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_diagram_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "diagram_id"
+      ],
+      "description": "普通索引，覆盖 diagram_id 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_request",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "request"
+      ],
+      "description": "普通索引，覆盖 request 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_system",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "system"
+      ],
+      "description": "普通索引，覆盖 system 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_version_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "diagram_version_id"
+      ],
+      "description": "普通索引，覆盖 diagram_version_id 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "moduleId": "process",
+  "name": "process_score_template",
+  "label": "评分模版-流程关联表",
+  "description": "评分模版-流程关联表 可用于流程相关的启用状态筛选、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "score_template_id",
+      "type": "bigint",
+      "description": "评分模版ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "process_uuid",
+      "type": "char(32)",
+      "description": "流程UUID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint",
+      "description": "是否启用评分（0：否，1：是）。"
+    },
+    {
+      "name": "is_auto",
+      "type": "tinyint(1)",
+      "description": "是否自动评分。"
+    },
+    {
+      "name": "config",
+      "type": "longtext",
+      "description": "评分设置。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "score_template_id",
+        "process_uuid"
+      ],
+      "description": "主键索引，覆盖 score_template_id、process_uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

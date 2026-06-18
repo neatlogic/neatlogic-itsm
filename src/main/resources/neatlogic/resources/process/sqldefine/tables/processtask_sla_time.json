@@ -1,0 +1,60 @@
+{
+  "moduleId": "process",
+  "name": "processtask_sla_time",
+  "label": "sla时间表",
+  "description": "sla时间表 可用于流程相关的状态跟踪、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "sla_id",
+      "type": "bigint",
+      "description": "id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "time_sum",
+      "type": "bigint",
+      "description": "总耗时，毫秒。"
+    },
+    {
+      "name": "expire_time",
+      "type": "timestamp(3)",
+      "description": "超时时间（根据工作日历计算）。"
+    },
+    {
+      "name": "realexpire_time",
+      "type": "timestamp(3)",
+      "description": "超时时间（直接计算）。"
+    },
+    {
+      "name": "time_left",
+      "type": "bigint",
+      "description": "剩余时间，毫秒，根据工作日历计算。"
+    },
+    {
+      "name": "realtime_left",
+      "type": "bigint",
+      "description": "剩余时间，毫秒，直接计算。"
+    },
+    {
+      "name": "status",
+      "type": "enum('doing','pause','done')",
+      "description": "状态。"
+    },
+    {
+      "name": "calculation_time",
+      "type": "timestamp(3)",
+      "description": "上次耗时计算时间点。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "sla_id"
+      ],
+      "description": "主键索引，覆盖 sla_id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

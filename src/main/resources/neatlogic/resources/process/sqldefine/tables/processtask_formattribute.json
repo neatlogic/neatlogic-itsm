@@ -1,0 +1,31 @@
+{
+  "moduleId": "process",
+  "name": "processtask_formattribute",
+  "label": "工单与表单属性值关系表",
+  "description": "工单与表单属性值关系表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "form_attribute_data_id",
+      "type": "bigint",
+      "description": "表单属性值id，作为当前表记录的主键或唯一定位字段。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "form_attribute_data_id"
+      ],
+      "description": "主键索引，覆盖 processtask_id、form_attribute_data_id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

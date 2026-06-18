@@ -1,0 +1,56 @@
+{
+  "moduleId": "process",
+  "name": "process_step_worker_policy",
+  "label": "流程步骤分配策略表",
+  "description": "流程步骤分配策略表 可用于流程相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "process_uuid",
+      "type": "char(32)",
+      "description": "流程uuid，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "process_step_uuid",
+      "type": "char(32)",
+      "description": "步骤uuid，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "policy",
+      "type": "enum('manual','automatic','assign','copy','fromer','form','attribute','prestepassign')",
+      "description": "策略，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "sort",
+      "type": "int",
+      "description": "排序。"
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "策略配置，一段json。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "process_step_uuid",
+        "policy"
+      ],
+      "description": "主键索引，覆盖 process_step_uuid、policy 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_process_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "process_uuid"
+      ],
+      "description": "普通索引，覆盖 process_uuid 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

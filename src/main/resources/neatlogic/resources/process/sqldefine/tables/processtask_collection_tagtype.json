@@ -1,0 +1,45 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_tagtype",
+  "label": "流程processtask_collection_tagtype表",
+  "description": "流程processtask_collection_tagtype表，属于流程模块的数据表。 可用于流程相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "主键ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "name",
+      "type": "varchar(50)",
+      "description": "唯一标识，数据库中要求唯一，适合用于精确查询和去重判断。"
+    },
+    {
+      "name": "label",
+      "type": "varchar(255)",
+      "description": "名称。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "uk_name",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "name"
+      ],
+      "description": "唯一索引，覆盖 name 字段，适合用于精确检索、唯一性判断和去重查询。"
+    }
+  ]
+}

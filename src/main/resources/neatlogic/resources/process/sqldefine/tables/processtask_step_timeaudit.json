@@ -1,0 +1,70 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_timeaudit",
+  "label": "工单步骤操作时间审计表",
+  "description": "工单步骤操作时间审计表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "工单ID，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "active_time",
+      "type": "timestamp(3)",
+      "description": "激活时间。"
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp(3)",
+      "description": "开始时间。"
+    },
+    {
+      "name": "abort_time",
+      "type": "timestamp(3)",
+      "description": "放弃时间。"
+    },
+    {
+      "name": "complete_time",
+      "type": "timestamp(3)",
+      "description": "包含成功或失败。"
+    },
+    {
+      "name": "back_time",
+      "type": "timestamp(3)",
+      "description": "回退时间。"
+    },
+    {
+      "name": "pause_time",
+      "type": "timestamp(3)",
+      "description": "挂起时间。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_processtask_step_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "普通索引，覆盖 processtask_step_id 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_in_operation",
+  "label": "工单步骤正在后台执行操作记录表",
+  "description": "工单步骤正在后台执行操作记录表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "主键id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "步骤ID。"
+    },
+    {
+      "name": "operation_type",
+      "type": "varchar(50)",
+      "description": "操作类型。"
+    },
+    {
+      "name": "operation_time",
+      "type": "timestamp(3)",
+      "description": "操作时间。"
+    },
+    {
+      "name": "expire_time",
+      "type": "timestamp(3)",
+      "description": "过期时间。"
+    },
+    {
+      "name": "server_id",
+      "type": "bigint",
+      "description": "服务器ID。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_processtask_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "普通索引，覆盖 processtask_id 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

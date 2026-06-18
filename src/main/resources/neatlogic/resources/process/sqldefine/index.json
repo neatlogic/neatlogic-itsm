@@ -1,0 +1,620 @@
+{
+  "moduleId": "process",
+  "tables": [
+    {
+      "name": "process",
+      "label": "流程信息表",
+      "description": "流程信息表 可用于流程相关的启用状态筛选、时间维度统计等报表查询场景。"
+    },
+    {
+      "name": "process_comment_template",
+      "label": "系统回复模版表",
+      "description": "系统回复模版表 可用于流程相关的时间维度统计等报表查询场景。"
+    },
+    {
+      "name": "process_comment_template_authority",
+      "label": "系统回复模版授权表",
+      "description": "系统回复模版授权表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "process_comment_template_usecount",
+      "label": "回复模版使用次数表",
+      "description": "回复模版使用次数表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "process_draft",
+      "label": "流程草稿信息表",
+      "description": "流程草稿信息表 可用于流程相关的时间维度统计等报表查询场景。"
+    },
+    {
+      "name": "process_form",
+      "label": "流程表单",
+      "description": "流程表单 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_integration",
+      "label": "流程设置引用集成表",
+      "description": "流程设置引用集成表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_notify_policy",
+      "label": "流程设置引用通知策略表",
+      "description": "流程设置引用通知策略表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "process_score_template",
+      "label": "评分模版-流程关联表",
+      "description": "评分模版-流程关联表 可用于流程相关的启用状态筛选、关联查询等报表查询场景。"
+    },
+    {
+      "name": "process_sla",
+      "label": "流程时效表",
+      "description": "流程时效表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_sla_notify_policy",
+      "label": "流程时效引用通知策略表",
+      "description": "流程时效引用通知策略表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "process_step",
+      "label": "流程步骤信息表",
+      "description": "流程步骤信息表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_step_comment_template",
+      "label": "流程步骤-回复模版关联表",
+      "description": "流程步骤-回复模版关联表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "process_step_handler",
+      "label": "流程组件全局配置信息表",
+      "description": "流程组件全局配置信息表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_step_handler_integration",
+      "label": "流程组件引用集成表",
+      "description": "流程组件引用集成表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_step_handler_notify_policy",
+      "label": "流程组件引用通知策略表",
+      "description": "流程组件引用通知策略表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "process_step_integration",
+      "label": "流程步骤引用集成表",
+      "description": "流程步骤引用集成表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_step_notify_policy",
+      "label": "流程步骤引用通知策略表",
+      "description": "流程步骤引用通知策略表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "process_step_rel",
+      "label": "流程步骤之间连线表",
+      "description": "流程步骤之间连线表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_step_sla",
+      "label": "流程步骤时效表",
+      "description": "流程步骤时效表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_step_tag",
+      "label": "流程步骤打标签表",
+      "description": "流程步骤打标签表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "process_step_task_config",
+      "label": "流程步骤子任务表",
+      "description": "流程步骤子任务表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "process_step_worker_dispatcher",
+      "label": "流程步骤分派器表",
+      "description": "流程步骤分派器表 可用于流程相关的启用状态筛选等报表查询场景。"
+    },
+    {
+      "name": "process_step_worker_policy",
+      "label": "流程步骤分配策略表",
+      "description": "流程步骤分配策略表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_tag",
+      "label": "ITSM模块标签表",
+      "description": "ITSM模块标签表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_workcenter",
+      "label": "工单中心分类表",
+      "description": "工单中心分类表 可用于流程相关的启用状态筛选、时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "process_workcenter_authority",
+      "label": "工单中心分类授权表",
+      "description": "工单中心分类授权表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_workcenter_catalog",
+      "label": "工单中心菜单类型表",
+      "description": "工单中心菜单类型表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_workcenter_owner",
+      "label": "工单中心分类所属人表",
+      "description": "工单中心分类所属人表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_workcenter_thead",
+      "label": "用户自定义thead",
+      "description": "用户自定义thead 显示排序 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_workcenter_thead_config",
+      "label": "流程workcenter_thead_config表",
+      "description": "流程workcenter_thead_config表，属于流程模块的数据表。 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "process_workcenter_user_profile",
+      "label": "流程workcenter_user_profile表",
+      "description": "process_workcenter_user_profile 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "processtask",
+      "label": "工单信息表",
+      "description": "工单信息表 可用于流程相关的状态跟踪、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_action",
+      "label": "工单动作表",
+      "description": "工单动作表 可用于流程相关的状态跟踪、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_agent",
+      "label": "工单代理",
+      "description": "工单代理 可用于流程相关的启用状态筛选等报表查询场景。"
+    },
+    {
+      "name": "processtask_agent_target",
+      "label": "工单代理目标",
+      "description": "工单代理目标 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_assignworker",
+      "label": "工单指派处理人表",
+      "description": "工单指派处理人表 可用于流程相关的时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_async_create",
+      "label": "异步创建工单表",
+      "description": "异步创建工单表 可用于流程相关的状态跟踪、时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_auto_score",
+      "label": "工单自动评分表",
+      "description": "工单自动评分表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection",
+      "label": "流程processtask_collection表",
+      "description": "流程processtask_collection表，属于流程模块的数据表。 可用于流程相关的状态跟踪、启用状态筛选、时间维度统计等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_auth",
+      "label": "流程processtask_collection_auth表",
+      "description": "流程processtask_collection_auth表，属于流程模块的数据表。 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_definition",
+      "label": "工单集合节点对工单集合的定义数据",
+      "description": "工单集合节点对工单集合的定义数据 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_definition_tag",
+      "label": "流程processtask_collection_definition_tag表",
+      "description": "流程processtask_collection_definition_tag表，属于流程模块的数据表。 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_form",
+      "label": "工单关联的表单",
+      "description": "工单关联的表单 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_form_content",
+      "label": "工单表单内容表",
+      "description": "工单表单内容表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "processtask_collection_formattribute",
+      "label": "工单与表单属性值关系表",
+      "description": "工单与表单属性值关系表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_integration_audit",
+      "label": "流程processtask_collection_integration_audit表",
+      "description": "流程processtask_collection_integration_audit表，属于流程模块的数据表。 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_phase",
+      "label": "流程processtask_collection_phase表",
+      "description": "流程processtask_collection_phase表，属于流程模块的数据表。 可用于流程相关的状态跟踪、启用状态筛选、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_phase_channel",
+      "label": "当条件不匹配无法创建对应服务的工单时",
+      "description": "当条件不匹配无法创建对应服务的工单时，记录失败的通道信息 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_phase_preparation",
+      "label": "流程processtask_collection_phase_preparation表",
+      "description": "流程processtask_collection_phase_preparation表，属于流程模块的数据表。 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_phase_task",
+      "label": "流程processtask_collection_phase_task表",
+      "description": "流程processtask_collection_phase_task表，属于流程模块的数据表。 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_preparation",
+      "label": "流程processtask_collection_preparation表",
+      "description": "流程processtask_collection_preparation表，属于流程模块的数据表。 可用于流程相关的启用状态筛选等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_preparation_channel",
+      "label": "流程processtask_collection_preparation_channel表",
+      "description": "流程processtask_collection_preparation_channel表，属于流程模块的数据表。 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_tag",
+      "label": "流程processtask_collection_tag表",
+      "description": "流程processtask_collection_tag表，属于流程模块的数据表。 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_collection_tagtype",
+      "label": "流程processtask_collection_tagtype表",
+      "description": "流程processtask_collection_tagtype表，属于流程模块的数据表。 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "processtask_collection_template",
+      "label": "流程processtask_collection_template表",
+      "description": "流程processtask_collection_template表，属于流程模块的数据表。 可用于流程相关的启用状态筛选、时间维度统计等报表查询场景。"
+    },
+    {
+      "name": "processtask_config",
+      "label": "工单配置信息压缩表",
+      "description": "工单配置信息压缩表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "processtask_content",
+      "label": "工单活动内容表",
+      "description": "工单活动内容表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "processtask_converge",
+      "label": "工单步骤汇合表",
+      "description": "工单步骤汇合表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_extend_formattribute",
+      "label": "工单与表单扩展属性值关系表",
+      "description": "工单与表单扩展属性值关系表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_file",
+      "label": "工单文件表",
+      "description": "工单文件表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_focus",
+      "label": "工单关注人表",
+      "description": "工单关注人表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_form",
+      "label": "工单关联的表单",
+      "description": "工单关联的表单 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_form_content",
+      "label": "工单表单内容表",
+      "description": "工单表单内容表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "processtask_formattribute",
+      "label": "工单与表单属性值关系表",
+      "description": "工单与表单属性值关系表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_history_confighash",
+      "label": "工单流程图配置历史数据",
+      "description": "工单流程图配置历史数据 可用于流程相关的时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_import_audit",
+      "label": "工单批量导入审计表",
+      "description": "工单批量导入审计表 可用于流程相关的状态跟踪、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_invoke",
+      "label": "工单来源",
+      "description": "工单来源 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_old_form_prop",
+      "label": "processtask_old_form_prop",
+      "description": "processtask_old_form_prop 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_operation_content",
+      "label": "工单操作内容表",
+      "description": "工单操作内容表 可用于流程相关的时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_relation",
+      "label": "工单关联关系表",
+      "description": "工单关联关系表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_repeat",
+      "label": "重复工单表",
+      "description": "重复工单表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_score",
+      "label": "工单评分表",
+      "description": "工单评分表 可用于流程相关的时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_score_content",
+      "label": "工单评价内容表",
+      "description": "工单评价内容表 可用于流程相关的时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_score_template",
+      "label": "工单评分模版表",
+      "description": "工单评分模版表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_score_template_config",
+      "label": "工单评分模版配置表",
+      "description": "工单评分模版配置表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "processtask_serial_number",
+      "label": "工单号表",
+      "description": "工单号表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_serial_number_policy",
+      "label": "工单号生成策略表",
+      "description": "工单号生成策略表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "processtask_sla",
+      "label": "工单sla表",
+      "description": "工单sla表 可用于流程相关的启用状态筛选、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_sla_notify",
+      "label": "sla通知表",
+      "description": "sla通知表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_sla_time",
+      "label": "sla时间表",
+      "description": "sla时间表 可用于流程相关的状态跟踪、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_sla_transfer",
+      "label": "工单步骤时效转交设置表",
+      "description": "工单步骤时效转交设置表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step",
+      "label": "工单步骤表",
+      "description": "工单步骤表 可用于流程相关的状态跟踪、启用状态筛选、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_agent",
+      "label": "工单步骤代理表",
+      "description": "工单步骤代理表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_audit",
+      "label": "工单步骤审计表",
+      "description": "工单步骤审计表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_audit_detail",
+      "label": "工单步骤活动详细表",
+      "description": "工单步骤活动详细表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_automatic_request",
+      "label": "工单步骤自动节点请求",
+      "description": "工单步骤自动节点请求 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_change_create",
+      "label": "工单步骤与变更创建关系表",
+      "description": "工单步骤与变更创建关系表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_change_handle",
+      "label": "工单步骤与变更处理关系表",
+      "description": "工单步骤与变更处理关系表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_config",
+      "label": "工单配置表",
+      "description": "工单配置表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "processtask_step_content",
+      "label": "工单步骤内容表",
+      "description": "工单步骤内容表 可用于流程相关的时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_content_target",
+      "label": "工单步骤回复目标对象表",
+      "description": "工单步骤回复目标对象表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_cost",
+      "label": "工单步骤操作耗时表",
+      "description": "工单步骤操作耗时表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_cost_worker",
+      "label": "工单步骤操作耗时处理人表",
+      "description": "工单步骤操作耗时处理人表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_data",
+      "label": "工单步骤数据表",
+      "description": "工单步骤数据表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_diagram",
+      "label": "工单与架构图关系",
+      "description": "工单与架构图关系 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_doing_dataconversion",
+      "label": "正在进行中数据转换步骤记录",
+      "description": "正在进行中数据转换步骤记录 可用于流程相关的时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_eoa",
+      "label": "工单步骤与eoa关系表",
+      "description": "工单步骤与eoa关系表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_event",
+      "label": "工单步骤-事件关联表",
+      "description": "工单步骤-事件关联表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_in_operation",
+      "label": "工单步骤正在后台执行操作记录表",
+      "description": "工单步骤正在后台执行操作记录表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_notify_policy",
+      "label": "工单步骤通知策略表",
+      "description": "工单步骤通知策略表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_notify_policy_config",
+      "label": "工单步骤通知策略配置表",
+      "description": "工单步骤通知策略配置表 可用于流程相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "processtask_step_reapproval_restore_backup",
+      "label": "工单步骤审批恢复备份",
+      "description": "工单步骤审批恢复备份 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_rel",
+      "label": "工单步骤之间的连线表",
+      "description": "工单步骤之间的连线表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_remind",
+      "label": "工单步骤特殊提醒信息表",
+      "description": "工单步骤特殊提醒信息表 可用于流程相关的时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_sla",
+      "label": "工单步骤时效表",
+      "description": "工单步骤时效表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_sla_delay",
+      "label": "工单时效延迟表",
+      "description": "工单时效延迟表 可用于流程相关的时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_sla_time",
+      "label": "步骤sla耗时表",
+      "description": "步骤sla耗时表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_tag",
+      "label": "工单步骤标签表",
+      "description": "工单步骤标签表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_task",
+      "label": "processtask_step_task",
+      "description": "processtask_step_task 可用于流程相关的状态跟踪、时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_task_user",
+      "label": "processtask_step_task_user",
+      "description": "processtask_step_task_user 可用于流程相关的状态跟踪、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_task_user_agent",
+      "label": "工单步骤任务代理表",
+      "description": "工单步骤任务代理表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_task_user_content",
+      "label": "流程processtask_step_task_user_content表",
+      "description": "processtask_step_task_user_content 可用于流程相关的时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_task_user_file",
+      "label": "流程processtask_step_task_user_file表",
+      "description": "processtask_step_task_user_content 可用于流程相关的时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_timeaudit",
+      "label": "工单步骤操作时间审计表",
+      "description": "工单步骤操作时间审计表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_timer",
+      "label": "工单步骤定时",
+      "description": "工单步骤定时 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_user",
+      "label": "工单步骤处理人表",
+      "description": "工单步骤处理人表 可用于流程相关的状态跟踪、关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_worker",
+      "label": "记录当前流程谁可以处理",
+      "description": "记录当前流程谁可以处理 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_step_worker_policy",
+      "label": "工单步骤分配策略表",
+      "description": "工单步骤分配策略表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_tag",
+      "label": "工单打标签表",
+      "description": "工单打标签表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_time_cost",
+      "label": "工单耗时表",
+      "description": "工单耗时表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_tranfer_report",
+      "label": "工单转报关系表",
+      "description": "工单转报关系表 可用于流程相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "processtask_urge",
+      "label": "流程processtask_urge表",
+      "description": "流程processtask_urge表，属于流程模块的数据表。 可用于流程相关的时间维度统计、关联查询等报表查询场景。"
+    }
+  ]
+}

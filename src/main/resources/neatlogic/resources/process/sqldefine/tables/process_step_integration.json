@@ -1,0 +1,41 @@
+{
+  "moduleId": "process",
+  "name": "process_step_integration",
+  "label": "流程步骤引用集成表",
+  "description": "流程步骤引用集成表 可用于流程相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "process_step_uuid",
+      "type": "char(32)",
+      "description": "步骤uuid，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "integration_uuid",
+      "type": "char(32)",
+      "description": "集成配置uuid，作为当前表记录的主键或唯一定位字段。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "process_step_uuid",
+        "integration_uuid"
+      ],
+      "description": "主键索引，覆盖 process_step_uuid、integration_uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_integration_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "integration_uuid"
+      ],
+      "description": "普通索引，覆盖 integration_uuid 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

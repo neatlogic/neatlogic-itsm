@@ -1,0 +1,40 @@
+{
+  "moduleId": "process",
+  "name": "process_workcenter_owner",
+  "label": "工单中心分类所属人表",
+  "description": "工单中心分类所属人表 可用于流程相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "workcenter_uuid",
+      "type": "char(32)",
+      "description": "分类唯一标识uuid，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "user_uuid",
+      "type": "char(32)",
+      "description": "如果属于私人分类，分类所属人，已建立普通索引，适合用于过滤、关联或排序查询。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "workcenter_uuid"
+      ],
+      "description": "主键索引，覆盖 workcenter_uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_user_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "user_uuid"
+      ],
+      "description": "普通索引，覆盖 user_uuid 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

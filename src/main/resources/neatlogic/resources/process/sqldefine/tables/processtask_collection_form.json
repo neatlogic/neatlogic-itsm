@@ -1,0 +1,56 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_form",
+  "label": "工单关联的表单",
+  "description": "工单关联的表单 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "collection_id",
+      "type": "bigint",
+      "description": "工单集合id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "form_uuid",
+      "type": "char(32)",
+      "description": "工单绑定的表单uuid，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "form_scene_uuid",
+      "type": "char(32)",
+      "description": "表单场景uuid。"
+    },
+    {
+      "name": "form_name",
+      "type": "varchar(100)",
+      "description": "工单绑定的表单名。"
+    },
+    {
+      "name": "form_content_hash",
+      "type": "char(32)",
+      "description": "工单绑定的表单配置，已建立普通索引，适合用于过滤、关联或排序查询。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "collection_id",
+        "form_uuid"
+      ],
+      "description": "主键索引，覆盖 collection_id、form_uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_hash",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "form_content_hash"
+      ],
+      "description": "普通索引，覆盖 form_content_hash 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

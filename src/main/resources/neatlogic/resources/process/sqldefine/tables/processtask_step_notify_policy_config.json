@@ -1,0 +1,30 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_notify_policy_config",
+  "label": "工单步骤通知策略配置表",
+  "description": "工单步骤通知策略配置表 可用于流程相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "hash",
+      "type": "char(32)",
+      "description": "hash，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "config。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "hash"
+      ],
+      "description": "主键索引，覆盖 hash 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

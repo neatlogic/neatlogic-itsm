@@ -1,0 +1,56 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_integration_audit",
+  "label": "流程processtask_collection_integration_audit表",
+  "description": "流程processtask_collection_integration_audit表，属于流程模块的数据表。 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "collection_id",
+      "type": "bigint",
+      "description": "集合id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "audit_id",
+      "type": "bigint",
+      "description": "审计id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "action_uuid",
+      "type": "char(32)",
+      "description": "动作的uuid，已建立普通索引，适合用于过滤、关联或排序查询。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "collection_id",
+        "audit_id"
+      ],
+      "description": "主键索引，覆盖 collection_id、audit_id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_audit_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "audit_id"
+      ],
+      "description": "普通索引，覆盖 audit_id 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_integration_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "action_uuid"
+      ],
+      "description": "普通索引，覆盖 action_uuid 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "moduleId": "process",
+  "name": "processtask_relation",
+  "label": "工单关联关系表",
+  "description": "工单关联关系表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "唯一标识，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "channel_type_relation_id",
+      "type": "bigint",
+      "description": "关系类型，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "source",
+      "type": "bigint",
+      "description": "来源工单id，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "target",
+      "type": "bigint",
+      "description": "目标工单id，已建立普通索引，适合用于过滤、关联或排序查询。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_channel_type_relation_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "channel_type_relation_id"
+      ],
+      "description": "普通索引，覆盖 channel_type_relation_id 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_source",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "source"
+      ],
+      "description": "普通索引，覆盖 source 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_target",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "target"
+      ],
+      "description": "普通索引，覆盖 target 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

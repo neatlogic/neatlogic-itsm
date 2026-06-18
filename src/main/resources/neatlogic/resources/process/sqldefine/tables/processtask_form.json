@@ -1,0 +1,41 @@
+{
+  "moduleId": "process",
+  "name": "processtask_form",
+  "label": "工单关联的表单",
+  "description": "工单关联的表单 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "form_uuid",
+      "type": "char(32)",
+      "description": "工单绑定的表单uuid，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "form_name",
+      "type": "varchar(100)",
+      "description": "工单绑定的表单名。"
+    },
+    {
+      "name": "form_content_hash",
+      "type": "char(32)",
+      "description": "工单绑定的表单配置。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "form_uuid"
+      ],
+      "description": "主键索引，覆盖 processtask_id、form_uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

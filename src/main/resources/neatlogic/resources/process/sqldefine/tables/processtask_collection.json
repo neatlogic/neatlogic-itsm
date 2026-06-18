@@ -1,0 +1,80 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection",
+  "label": "流程processtask_collection表",
+  "description": "流程processtask_collection表，属于流程模块的数据表。 可用于流程相关的状态跟踪、启用状态筛选、时间维度统计等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "title",
+      "type": "varchar(255)",
+      "description": "标题。"
+    },
+    {
+      "name": "status",
+      "type": "enum('pending','doing','done')",
+      "description": "状态。"
+    },
+    {
+      "name": "create_user",
+      "type": "char(32)",
+      "description": "创建者。"
+    },
+    {
+      "name": "create_time",
+      "type": "timestamp",
+      "description": "创建事件。"
+    },
+    {
+      "name": "content",
+      "type": "longtext",
+      "description": "内容。"
+    },
+    {
+      "name": "config",
+      "type": "longtext",
+      "description": "临时保存的内容，正式启动后清空数据。"
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint",
+      "description": "是否激活。"
+    },
+    {
+      "name": "start_user",
+      "type": "char(32)",
+      "description": "激活用户。"
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp",
+      "description": "激活时间。"
+    },
+    {
+      "name": "error",
+      "type": "longtext",
+      "description": "异常。"
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp",
+      "description": "结束时间。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

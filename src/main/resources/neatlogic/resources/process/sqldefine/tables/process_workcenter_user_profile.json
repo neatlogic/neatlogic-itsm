@@ -1,0 +1,30 @@
+{
+  "moduleId": "process",
+  "name": "process_workcenter_user_profile",
+  "label": "流程workcenter_user_profile表",
+  "description": "process_workcenter_user_profile 可用于流程相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "user_uuid",
+      "type": "char(32)",
+      "description": "用户uuid，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "用户个性化配置，如排序等。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "user_uuid"
+      ],
+      "description": "主键索引，覆盖 user_uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

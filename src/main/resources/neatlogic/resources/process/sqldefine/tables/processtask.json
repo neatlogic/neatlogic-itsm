@@ -1,0 +1,220 @@
+{
+  "moduleId": "process",
+  "name": "processtask",
+  "label": "工单信息表",
+  "description": "工单信息表 可用于流程相关的状态跟踪、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "工单id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "title",
+      "type": "varchar(255)",
+      "description": "标题。"
+    },
+    {
+      "name": "process_uuid",
+      "type": "char(32)",
+      "description": "流程uuid，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "channel_uuid",
+      "type": "char(32)",
+      "description": "服务uuid，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "config_hash",
+      "type": "char(32)",
+      "description": "流程配置md5散列值。"
+    },
+    {
+      "name": "priority_uuid",
+      "type": "char(32)",
+      "description": "优先级uid，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "status",
+      "type": "enum('pending','draft','running','aborted','succeed','failed','hang','scored')",
+      "description": "工单状态，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp(3)",
+      "description": "上报时间，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "关单时间。"
+    },
+    {
+      "name": "owner",
+      "type": "varchar(50)",
+      "description": "上报人，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "reporter",
+      "type": "varchar(50)",
+      "description": "代报人，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "expire_time",
+      "type": "timestamp(3)",
+      "description": "超时时间。"
+    },
+    {
+      "name": "worktime_uuid",
+      "type": "varchar(32)",
+      "description": "工作时间窗口uuid，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "error",
+      "type": "mediumtext",
+      "description": "流程级异常。"
+    },
+    {
+      "name": "is_show",
+      "type": "tinyint(1)",
+      "description": "是否显示 1：显示；0：隐藏，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "serial_number",
+      "type": "varchar(100)",
+      "description": "工单序列号，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "source",
+      "type": "varchar(50)",
+      "description": "来源。"
+    },
+    {
+      "name": "is_deleted",
+      "type": "tinyint(1)",
+      "description": "是否已删除。"
+    },
+    {
+      "name": "need_score",
+      "type": "tinyint(1)",
+      "description": "是否启用评分。"
+    },
+    {
+      "name": "region_id",
+      "type": "bigint",
+      "description": "地域id。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_channel",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "channel_uuid"
+      ],
+      "description": "普通索引，覆盖 channel_uuid 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_isshow",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "is_show"
+      ],
+      "description": "普通索引，覆盖 is_show 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_owner",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "owner"
+      ],
+      "description": "普通索引，覆盖 owner 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_priority",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "priority_uuid"
+      ],
+      "description": "普通索引，覆盖 priority_uuid 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_processuuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "process_uuid"
+      ],
+      "description": "普通索引，覆盖 process_uuid 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_reporter",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "reporter"
+      ],
+      "description": "普通索引，覆盖 reporter 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_serialnum",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "serial_number"
+      ],
+      "description": "普通索引，覆盖 serial_number 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_starttime",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "start_time"
+      ],
+      "description": "普通索引，覆盖 start_time 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_status",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "status"
+      ],
+      "description": "普通索引，覆盖 status 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_worktime",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "worktime_uuid"
+      ],
+      "description": "普通索引，覆盖 worktime_uuid 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

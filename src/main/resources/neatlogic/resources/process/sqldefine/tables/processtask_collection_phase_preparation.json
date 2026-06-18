@@ -1,0 +1,46 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_phase_preparation",
+  "label": "流程processtask_collection_phase_preparation表",
+  "description": "流程processtask_collection_phase_preparation表，属于流程模块的数据表。 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "phase_id",
+      "type": "bigint",
+      "description": "阶段id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "preparation_id",
+      "type": "bigint",
+      "description": "预案id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "form_data",
+      "type": "text",
+      "description": "表单数据。"
+    },
+    {
+      "name": "form_uuid",
+      "type": "char(32)",
+      "description": "表单uuid。"
+    },
+    {
+      "name": "scene_uuid",
+      "type": "char(32)",
+      "description": "场景uuid。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "phase_id",
+        "preparation_id"
+      ],
+      "description": "主键索引，覆盖 phase_id、preparation_id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_task_user",
+  "label": "processtask_step_task_user",
+  "description": "processtask_step_task_user 可用于流程相关的状态跟踪、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_step_task_id",
+      "type": "bigint",
+      "description": "任务id。"
+    },
+    {
+      "name": "user_uuid",
+      "type": "char(32)",
+      "description": "任务用户。"
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "任务完成时间。"
+    },
+    {
+      "name": "status",
+      "type": "char(20)",
+      "description": "完成状态。"
+    },
+    {
+      "name": "is_delete",
+      "type": "tinyint(1)",
+      "description": "是否已删除。"
+    },
+    {
+      "name": "button",
+      "type": "varchar(100)",
+      "description": "操作按钮。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "moduleId": "process",
+  "name": "processtask_focus",
+  "label": "工单关注人表",
+  "description": "工单关注人表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "user_uuid",
+      "type": "char(32)",
+      "description": "用户UUID，作为当前表记录的主键或唯一定位字段。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "user_uuid"
+      ],
+      "description": "主键索引，覆盖 processtask_id、user_uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

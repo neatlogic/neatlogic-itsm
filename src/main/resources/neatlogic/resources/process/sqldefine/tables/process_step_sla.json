@@ -1,0 +1,31 @@
+{
+  "moduleId": "process",
+  "name": "process_step_sla",
+  "label": "流程步骤时效表",
+  "description": "流程步骤时效表 可用于流程相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "sla_uuid",
+      "type": "char(32)",
+      "description": "sla uuid，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "step_uuid",
+      "type": "char(32)",
+      "description": "步骤uuid，作为当前表记录的主键或唯一定位字段。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "sla_uuid",
+        "step_uuid"
+      ],
+      "description": "主键索引，覆盖 sla_uuid、step_uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_audit_detail",
+  "label": "工单步骤活动详细表",
+  "description": "工单步骤活动详细表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "audit_id",
+      "type": "bigint",
+      "description": "id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "type",
+      "type": "varchar(50)",
+      "description": "类型，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "old_content",
+      "type": "mediumtext",
+      "description": "old content。"
+    },
+    {
+      "name": "new_content",
+      "type": "mediumtext",
+      "description": "new content。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "audit_id",
+        "type"
+      ],
+      "description": "主键索引，覆盖 audit_id、type 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

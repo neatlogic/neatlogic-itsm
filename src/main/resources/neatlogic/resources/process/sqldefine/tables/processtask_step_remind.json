@@ -1,0 +1,66 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_remind",
+  "label": "工单步骤特殊提醒信息表",
+  "description": "工单步骤特殊提醒信息表 可用于流程相关的时间维度统计、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "步骤ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "action",
+      "type": "varchar(50)",
+      "description": "动作，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "title",
+      "type": "varchar(100)",
+      "description": "标题。"
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "创建人。"
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "创建时间。"
+    },
+    {
+      "name": "content_hash",
+      "type": "char(32)",
+      "description": "内容hash。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_step_id",
+        "action"
+      ],
+      "description": "主键索引，覆盖 processtask_step_id、action 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_processtask_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "普通索引，覆盖 processtask_id 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

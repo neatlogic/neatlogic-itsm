@@ -1,0 +1,127 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step",
+  "label": "工单步骤表",
+  "description": "工单步骤表 可用于流程相关的状态跟踪、启用状态筛选、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "name",
+      "type": "varchar(50)",
+      "description": "步骤名称。"
+    },
+    {
+      "name": "process_step_uuid",
+      "type": "char(32)",
+      "description": "步骤uuid。"
+    },
+    {
+      "name": "status",
+      "type": "enum('pending','running','succeed','failed','back','hang','draft')",
+      "description": "状态。"
+    },
+    {
+      "name": "result",
+      "type": "varchar(100)",
+      "description": "处理结果。"
+    },
+    {
+      "name": "type",
+      "type": "enum('start','process','end','converge','timer')",
+      "description": "节点类型，不同类型节点有不同的流转行为。"
+    },
+    {
+      "name": "handler",
+      "type": "varchar(50)",
+      "description": "处理器。"
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint",
+      "description": "是否激活，终止：-1,未处理过：0，正在处理：1，处理完毕：2。"
+    },
+    {
+      "name": "active_time",
+      "type": "timestamp(3)",
+      "description": "激活时间，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp(3)",
+      "description": "开始时间。"
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "结束时间。"
+    },
+    {
+      "name": "error",
+      "type": "mediumtext",
+      "description": "错误内容。"
+    },
+    {
+      "name": "expire_time",
+      "type": "timestamp(3)",
+      "description": "超时时间。"
+    },
+    {
+      "name": "config_hash",
+      "type": "char(32)",
+      "description": "配置散列值。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_active_time",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "active_time"
+      ],
+      "description": "普通索引，覆盖 active_time 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_processtask_id_active",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id",
+        "is_active"
+      ],
+      "description": "普通索引，覆盖 processtask_id、is_active 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_processtask_id_status",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id",
+        "status"
+      ],
+      "description": "普通索引，覆盖 processtask_id、status 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

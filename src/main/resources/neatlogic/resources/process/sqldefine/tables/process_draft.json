@@ -1,0 +1,55 @@
+{
+  "moduleId": "process",
+  "name": "process_draft",
+  "label": "流程草稿信息表",
+  "description": "流程草稿信息表 可用于流程相关的时间维度统计等报表查询场景。",
+  "fields": [
+    {
+      "name": "uuid",
+      "type": "varchar(50)",
+      "description": "全局唯一id，跨环境导入用，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "process_uuid",
+      "type": "varchar(50)",
+      "description": "流程uuid。"
+    },
+    {
+      "name": "name",
+      "type": "varchar(100)",
+      "description": "名称。"
+    },
+    {
+      "name": "config",
+      "type": "longtext",
+      "description": "流程图配置。"
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "创建时间。"
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "创建用户。"
+    },
+    {
+      "name": "md5",
+      "type": "varchar(100)",
+      "description": "md5。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "uuid"
+      ],
+      "description": "主键索引，覆盖 uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

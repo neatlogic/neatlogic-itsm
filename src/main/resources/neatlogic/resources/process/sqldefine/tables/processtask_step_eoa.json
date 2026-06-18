@@ -1,0 +1,57 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_eoa",
+  "label": "工单步骤与eoa关系表",
+  "description": "工单步骤与eoa关系表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单的id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "工单步骤的id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "eoa_id",
+      "type": "bigint",
+      "description": "eoa的id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "template_id",
+      "type": "bigint",
+      "description": "eoa模板的id。"
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "配置信息。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id",
+        "eoa_id"
+      ],
+      "description": "主键索引，覆盖 processtask_id、processtask_step_id、eoa_id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_eoa_id",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "eoa_id"
+      ],
+      "description": "唯一索引，覆盖 eoa_id 字段，适合用于精确检索、唯一性判断和去重查询。"
+    }
+  ]
+}

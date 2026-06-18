@@ -1,0 +1,40 @@
+{
+  "moduleId": "process",
+  "name": "process_sla",
+  "label": "流程时效表",
+  "description": "流程时效表 可用于流程相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "uuid，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "process_uuid",
+      "type": "char(32)",
+      "description": "流程uuid。"
+    },
+    {
+      "name": "name",
+      "type": "varchar(100)",
+      "description": "名称。"
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "配置规则,json格式。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "uuid"
+      ],
+      "description": "主键索引，覆盖 uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

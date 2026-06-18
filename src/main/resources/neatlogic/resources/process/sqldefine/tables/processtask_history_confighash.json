@@ -1,0 +1,41 @@
+{
+  "moduleId": "process",
+  "name": "processtask_history_confighash",
+  "label": "工单流程图配置历史数据",
+  "description": "工单流程图配置历史数据 可用于流程相关的时间维度统计、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "config_hash",
+      "type": "char(32)",
+      "description": "流程配置md5散列值，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "创建人。"
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "创建时间。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "config_hash"
+      ],
+      "description": "主键索引，覆盖 processtask_id、config_hash 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

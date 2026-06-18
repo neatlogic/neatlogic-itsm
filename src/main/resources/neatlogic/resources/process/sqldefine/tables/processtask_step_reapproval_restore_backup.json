@@ -1,0 +1,46 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_reapproval_restore_backup",
+  "label": "工单步骤审批恢复备份",
+  "description": "工单步骤审批恢复备份 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单id。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "步骤id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "backup_step_id",
+      "type": "bigint",
+      "description": "备份步骤id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "config",
+      "type": "text",
+      "description": "备份信息。"
+    },
+    {
+      "name": "sort",
+      "type": "int",
+      "description": "顺序。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "backup_step_id",
+        "processtask_step_id"
+      ],
+      "description": "主键索引，覆盖 backup_step_id、processtask_step_id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

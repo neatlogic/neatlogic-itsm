@@ -1,0 +1,37 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_tag",
+  "label": "流程processtask_collection_tag表",
+  "description": "流程processtask_collection_tag表，属于流程模块的数据表。 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "collection_id",
+      "type": "bigint",
+      "description": "集合id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "tag_name",
+      "type": "varchar(255)",
+      "description": "标签名称，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "tag_value",
+      "type": "varchar(255)",
+      "description": "标签值，作为当前表记录的主键或唯一定位字段。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "collection_id",
+        "tag_name",
+        "tag_value"
+      ],
+      "description": "主键索引，覆盖 collection_id、tag_name、tag_value 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

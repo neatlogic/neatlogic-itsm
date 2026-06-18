@@ -1,0 +1,37 @@
+{
+  "moduleId": "process",
+  "name": "processtask_urge",
+  "label": "流程processtask_urge表",
+  "description": "流程processtask_urge表，属于流程模块的数据表。 可用于流程相关的时间维度统计、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "lcu",
+      "type": "char(32)",
+      "description": "催办用户，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "lcd",
+      "type": "timestamp(3)",
+      "description": "催办时间，作为当前表记录的主键或唯一定位字段。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "lcu",
+        "lcd"
+      ],
+      "description": "主键索引，覆盖 processtask_id、lcu、lcd 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "moduleId": "process",
+  "name": "process_step_worker_dispatcher",
+  "label": "流程步骤分派器表",
+  "description": "流程步骤分派器表 可用于流程相关的启用状态筛选等报表查询场景。",
+  "fields": [
+    {
+      "name": "name",
+      "type": "varchar(50)",
+      "description": "名称，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "handler",
+      "type": "varchar(255)",
+      "description": "处理器。"
+    },
+    {
+      "name": "config",
+      "type": "varchar(255)",
+      "description": "配置。"
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint(1)",
+      "description": "是否激活。"
+    },
+    {
+      "name": "help",
+      "type": "mediumtext",
+      "description": "帮助。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "name"
+      ],
+      "description": "主键索引，覆盖 name 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

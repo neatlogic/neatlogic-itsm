@@ -1,0 +1,55 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_cost_worker",
+  "label": "工单步骤操作耗时处理人表",
+  "description": "工单步骤操作耗时处理人表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "operate_type",
+      "type": "enum('start','end')",
+      "description": "起止操作。"
+    },
+    {
+      "name": "cost_id",
+      "type": "bigint",
+      "description": "耗时id，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "type",
+      "type": "enum('user','team','role')",
+      "description": "类型。"
+    },
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "UUID。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_cost_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "cost_id"
+      ],
+      "description": "普通索引，覆盖 cost_id 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_rel",
+  "label": "工单步骤之间的连线表",
+  "description": "工单步骤之间的连线表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "from_process_step_uuid",
+      "type": "char(32)",
+      "description": "源步骤uuid，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "to_process_step_uuid",
+      "type": "char(32)",
+      "description": "目标步骤uuid，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "from_processtask_step_id",
+      "type": "bigint",
+      "description": "源步骤ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "to_processtask_step_id",
+      "type": "bigint",
+      "description": "目标步骤ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "condition",
+      "type": "varchar(500)",
+      "description": "条件。"
+    },
+    {
+      "name": "is_hit",
+      "type": "tinyint",
+      "description": "0：没有触发流转，-1：触发了流转但条件不满足，1：触发了流转条件满足。"
+    },
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "uuid。"
+    },
+    {
+      "name": "name",
+      "type": "varchar(50)",
+      "description": "名称。"
+    },
+    {
+      "name": "type",
+      "type": "enum('forward','backward')",
+      "description": "类型。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "from_processtask_step_id",
+        "to_processtask_step_id"
+      ],
+      "description": "主键索引，覆盖 from_processtask_step_id、to_processtask_step_id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_from_process_step_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "from_process_step_uuid"
+      ],
+      "description": "普通索引，覆盖 from_process_step_uuid 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_process_task_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "普通索引，覆盖 processtask_id 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_to_process_step_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "to_process_step_uuid"
+      ],
+      "description": "普通索引，覆盖 to_process_step_uuid 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_to_processtask_step_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "to_processtask_step_id"
+      ],
+      "description": "普通索引，覆盖 to_processtask_step_id 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "moduleId": "process",
+  "name": "process_step_handler",
+  "label": "流程组件全局配置信息表",
+  "description": "流程组件全局配置信息表 可用于流程相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "handler",
+      "type": "varchar(50)",
+      "description": "节点组件，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "组件配置信息。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "handler"
+      ],
+      "description": "主键索引，覆盖 handler 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

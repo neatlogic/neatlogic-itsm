@@ -1,0 +1,40 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_doing_dataconversion",
+  "label": "正在进行中数据转换步骤记录",
+  "description": "正在进行中数据转换步骤记录 可用于流程相关的时间维度统计、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "步骤ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "server_id",
+      "type": "int",
+      "description": "服务器ID。"
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "创建时间。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "主键索引，覆盖 processtask_step_id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

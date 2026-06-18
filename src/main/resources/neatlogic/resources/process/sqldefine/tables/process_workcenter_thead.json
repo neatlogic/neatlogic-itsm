@@ -1,0 +1,46 @@
+{
+  "moduleId": "process",
+  "name": "process_workcenter_thead",
+  "label": "用户自定义thead",
+  "description": "用户自定义thead 显示排序 可用于流程相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "workcenter_uuid",
+      "type": "char(32)",
+      "description": "分类唯一标识，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "user_uuid",
+      "type": "char(32)",
+      "description": "所属用户，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "config_hash",
+      "type": "char(32)",
+      "description": "用户自定义thead的config_hash字段，已建立普通索引，适合用于过滤、关联或排序查询。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "workcenter_uuid",
+        "user_uuid"
+      ],
+      "description": "主键索引，覆盖 workcenter_uuid、user_uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_hash",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "config_hash"
+      ],
+      "description": "普通索引，覆盖 config_hash 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

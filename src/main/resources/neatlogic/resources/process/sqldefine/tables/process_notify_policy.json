@@ -1,0 +1,40 @@
+{
+  "moduleId": "process",
+  "name": "process_notify_policy",
+  "label": "流程设置引用通知策略表",
+  "description": "流程设置引用通知策略表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "process_uuid",
+      "type": "char(32)",
+      "description": "流程uuid，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "notify_policy_id",
+      "type": "bigint",
+      "description": "通知策略id，已建立普通索引，适合用于过滤、关联或排序查询。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "process_uuid"
+      ],
+      "description": "主键索引，覆盖 process_uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_notify_policy_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "notify_policy_id"
+      ],
+      "description": "普通索引，覆盖 notify_policy_id 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

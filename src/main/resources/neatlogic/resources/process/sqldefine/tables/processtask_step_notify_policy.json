@@ -1,0 +1,46 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_notify_policy",
+  "label": "工单步骤通知策略表",
+  "description": "工单步骤通知策略表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "步骤ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "policy_id",
+      "type": "bigint",
+      "description": "通知策略ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "policy_name",
+      "type": "varchar(100)",
+      "description": "通知策略名称。"
+    },
+    {
+      "name": "policy_config_hash",
+      "type": "char(32)",
+      "description": "通知策略配置hash。"
+    },
+    {
+      "name": "policy_handler",
+      "type": "varchar(100)",
+      "description": "通知策略处理器。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_step_id",
+        "policy_id"
+      ],
+      "description": "主键索引，覆盖 processtask_step_id、policy_id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

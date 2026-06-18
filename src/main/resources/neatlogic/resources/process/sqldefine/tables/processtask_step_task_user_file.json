@@ -1,0 +1,51 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_task_user_file",
+  "label": "流程processtask_step_task_user_file表",
+  "description": "processtask_step_task_user_content 可用于流程相关的时间维度统计、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_step_task_id",
+      "type": "bigint",
+      "description": "步骤任务id。"
+    },
+    {
+      "name": "processtask_step_task_user_id",
+      "type": "bigint",
+      "description": "步骤任务用户id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "file_id",
+      "type": "bigint",
+      "description": "附件id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp",
+      "description": "上传时间。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_step_task_user_id",
+        "file_id"
+      ],
+      "description": "主键索引，覆盖 processtask_step_task_user_id、file_id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_file_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "file_id"
+      ],
+      "description": "普通索引，覆盖 file_id 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

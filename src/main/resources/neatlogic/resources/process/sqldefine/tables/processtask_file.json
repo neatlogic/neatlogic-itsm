@@ -1,0 +1,73 @@
+{
+  "moduleId": "process",
+  "name": "processtask_file",
+  "label": "工单文件表",
+  "description": "工单文件表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "步骤ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "file_id",
+      "type": "bigint",
+      "description": "文件ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "content_id",
+      "type": "bigint",
+      "description": "内容ID，作为当前表记录的主键或唯一定位字段。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id",
+        "file_id",
+        "content_id"
+      ],
+      "description": "主键索引，覆盖 processtask_id、processtask_step_id、file_id、content_id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_content_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "content_id"
+      ],
+      "description": "普通索引，覆盖 content_id 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_file_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "file_id"
+      ],
+      "description": "普通索引，覆盖 file_id 字段，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "idx_processtask_step_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "普通索引，覆盖 processtask_step_id 字段，适合用于过滤、关联或排序查询。"
+    }
+  ]
+}

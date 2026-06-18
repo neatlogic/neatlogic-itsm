@@ -1,0 +1,63 @@
+{
+  "moduleId": "process",
+  "name": "processtask_assignworker",
+  "label": "工单指派处理人表",
+  "description": "工单指派处理人表 可用于流程相关的时间维度统计、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "被指派步骤id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "from_processtask_step_id",
+      "type": "bigint",
+      "description": "指派步骤id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "from_process_step_uuid",
+      "type": "char(32)",
+      "description": "指派步骤流程步骤uuid。"
+    },
+    {
+      "name": "type",
+      "type": "enum('user','team','role')",
+      "description": "指派对象类型。"
+    },
+    {
+      "name": "uuid",
+      "type": "varchar(50)",
+      "description": "指派对象，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "创建人。"
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "创建时间。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id",
+        "from_processtask_step_id",
+        "uuid"
+      ],
+      "description": "主键索引，覆盖 processtask_id、processtask_step_id、from_processtask_step_id、uuid 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

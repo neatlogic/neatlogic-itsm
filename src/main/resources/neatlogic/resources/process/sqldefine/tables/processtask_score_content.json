@@ -1,0 +1,41 @@
+{
+  "moduleId": "process",
+  "name": "processtask_score_content",
+  "label": "工单评价内容表",
+  "description": "工单评价内容表 可用于流程相关的时间维度统计、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "content_hash",
+      "type": "char(32)",
+      "description": "评价内容hash，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "评价人。"
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "评价时间。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "content_hash"
+      ],
+      "description": "主键索引，覆盖 processtask_id、content_hash 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

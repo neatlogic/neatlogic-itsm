@@ -1,0 +1,60 @@
+{
+  "moduleId": "process",
+  "name": "processtask_import_audit",
+  "label": "工单批量导入审计表",
+  "description": "工单批量导入审计表 可用于流程相关的状态跟踪、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "主键，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID。"
+    },
+    {
+      "name": "title",
+      "type": "varchar(255)",
+      "description": "工单标题。"
+    },
+    {
+      "name": "channel_uuid",
+      "type": "varchar(50)",
+      "description": "服务UUID。"
+    },
+    {
+      "name": "status",
+      "type": "tinyint",
+      "description": "是否上报成功（是：1，否：0）。"
+    },
+    {
+      "name": "error_reason",
+      "type": "text",
+      "description": "上报失败原因。"
+    },
+    {
+      "name": "owner",
+      "type": "varchar(50)",
+      "description": "上报人。"
+    },
+    {
+      "name": "import_time",
+      "type": "timestamp(3)",
+      "description": "导入时间。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

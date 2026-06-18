@@ -1,0 +1,40 @@
+{
+  "moduleId": "process",
+  "name": "processtask_auto_score",
+  "label": "工单自动评分表",
+  "description": "工单自动评分表 可用于流程相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "工单ID，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "trigger_time",
+      "type": "timestamp",
+      "description": "自动评分时间。"
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "配置。"
+    },
+    {
+      "name": "error",
+      "type": "text",
+      "description": "错误日志。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "主键索引，覆盖 processtask_id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}
