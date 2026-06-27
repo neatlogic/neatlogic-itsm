@@ -208,7 +208,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
      * @param fromProcessTaskId       来源工单id
      * @param toProcessTaskFormConfig 目标工单表单配置
      **/
-    private Map<String, Object> getFromFormAttributeDataMap(Long fromProcessTaskId, Long fromProcessTaskStepId, JSONObject toProcessTaskFormConfig) {
+    private Map<String, Object> getFromFormAttributeDataMap(Long fromProcessTaskId, Long fromProcessTaskStepId, JSONObject toProcessTaskFormConfig, String toFormSceneUuid) {
         Map<String, Object> resultObj = new HashMap<>();
         if (MapUtils.isEmpty(toProcessTaskFormConfig)) {
             return resultObj;
@@ -233,7 +233,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         FormVersionVo toFormVersion = new FormVersionVo();
         toFormVersion.setFormConfig(toProcessTaskFormConfig);
         String mainSceneUuid = toProcessTaskFormConfig.getString("uuid");
-        toFormVersion.setSceneUuid(mainSceneUuid);
+        toFormVersion.setSceneUuid(StringUtils.isNotBlank(toFormSceneUuid) ? toFormSceneUuid : mainSceneUuid);
         for (FormAttributeVo formAttributeVo : toFormVersion.getFormAttributeList()) {
             String fromProcessTaskFormAttributeUuid = null;
             FormAttributeVo fromProcessTaskFormAttributeVo = key2FormAttributeVoMap.get(formAttributeVo.getKey());
@@ -408,7 +408,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getNonStartStepInfo(oldStartProcessTaskStepVo));
         }
         if (list.contains("form")) {
-            processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(copyProcessTaskId, null, processTaskVo.getFormConfig()));
+            ProcessTaskStepVo startProcessTaskStepVo = processTaskVo.getStartProcessTaskStep();
+            String formSceneUuid = startProcessTaskStepVo == null ? null : startProcessTaskStepVo.getFormSceneUuid();
+            processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(copyProcessTaskId, null, processTaskVo.getFormConfig(), formSceneUuid));
         }
         // 标签列表
         if (list.contains("tag")) {
@@ -525,7 +527,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             }
             processTaskVo.getTranferReportProcessTaskList().add(fromProcessTaskVo);
             if (MapUtils.isNotEmpty(processTaskVo.getFormConfig())) {
-                processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(fromProcessTaskId, fromProcessTaskStepId, processTaskVo.getFormConfig()));
+                ProcessTaskStepVo startProcessTaskStepVo = processTaskVo.getStartProcessTaskStep();
+                String formSceneUuid = startProcessTaskStepVo == null ? null : startProcessTaskStepVo.getFormSceneUuid();
+                processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(fromProcessTaskId, fromProcessTaskStepId, processTaskVo.getFormConfig(), formSceneUuid));
             }
             copyProcessTaskInfo(processTaskVo, fromProcessTaskId, Arrays.asList("title", "contentAndUploadFile"));
         }
