@@ -19,6 +19,7 @@ import neatlogic.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import neatlogic.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import neatlogic.framework.scheduler.core.JobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.module.process.service.ProcessTaskSerialNumberService;
 import org.quartz.CronExpression;
 import org.quartz.DisallowConcurrentExecution;
@@ -99,7 +100,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
         }
 
         @Override
-        public void reloadJob(JobObject jobObject) {
+        public void reloadJob(JobObject jobObject, JobLoadTriggerType triggerType) {
             String tenantUuid = jobObject.getTenantUuid();
             TenantContext.get().switchTenant(tenantUuid);
             if (CronExpression.isValidExpression(cron)) {
@@ -107,7 +108,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
                         new JobObject.Builder(jobObject.getJobName(), this.getGroupName(), this.getClassName(),
                                 TenantContext.get().getTenantUuid()).withCron(cron);
                 JobObject newJobObject = newJobObjectBuilder.build();
-                schedulerManager.loadJob(newJobObject);
+                schedulerManager.loadJob(newJobObject, triggerType);
             }
         }
 
@@ -119,7 +120,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
                     this.getClassName(),
                     TenantContext.get().getTenantUuid());
             JobObject jobObject = jobObjectBuilder.build();
-            this.reloadJob(jobObject);
+            this.reloadJob(jobObject, JobLoadTriggerType.SERVER_RESTART);
         }
 
         @Override

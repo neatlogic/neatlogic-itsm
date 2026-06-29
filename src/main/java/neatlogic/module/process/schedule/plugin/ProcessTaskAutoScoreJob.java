@@ -26,6 +26,7 @@ import neatlogic.framework.process.dto.score.ScoreTemplateVo;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.scheduler.core.JobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.framework.util.I18n;
 import neatlogic.framework.util.WorkTimeUtil;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
@@ -79,7 +80,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
     }
 
 	@Override
-	public void reloadJob(JobObject jobObject) {
+	public void reloadJob(JobObject jobObject, JobLoadTriggerType triggerType) {
 		String tenantUuid = jobObject.getTenantUuid();
 		TenantContext.get().switchTenant(tenantUuid);
 		Long processTaskId = Long.valueOf(jobObject.getJobName());
@@ -134,7 +135,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 				.withIntervalInSeconds(60 * 60)
 				.withRepeatCount(0);
 		JobObject newJobObject = newJobObjectBuilder.build();
-		schedulerManager.loadJob(newJobObject);
+		schedulerManager.loadJob(newJobObject, triggerType);
 	}
 
 	@Override
@@ -143,7 +144,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 	    for(Long processTaskId : processTaskIdList) {
 	        JobObject.Builder jobObjectBuilder = new JobObject.Builder(processTaskId.toString(), this.getGroupName(), this.getClassName(), TenantContext.get().getTenantUuid());
             JobObject jobObject = jobObjectBuilder.build();
-            this.reloadJob(jobObject);
+            this.reloadJob(jobObject, JobLoadTriggerType.SERVER_RESTART);
 	    }
 	}
 

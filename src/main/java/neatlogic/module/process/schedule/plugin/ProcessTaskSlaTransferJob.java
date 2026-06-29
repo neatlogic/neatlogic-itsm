@@ -29,6 +29,7 @@ import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.scheduler.core.JobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -82,7 +83,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
     }
 
     @Override
-    public void reloadJob(JobObject jobObject) {
+    public void reloadJob(JobObject jobObject, JobLoadTriggerType triggerType) {
         String tenantUuid = jobObject.getTenantUuid();
         TenantContext.get().switchTenant(tenantUuid);
         Long slaTransferId = Long.valueOf(jobObject.getJobName());
@@ -128,7 +129,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
                 ).withBeginTime(transferDate.getTime())
                         .withIntervalInSeconds(INTERVAL_IN_SECONDS);
                 JobObject newJobObject = newJobObjectBuilder.build();
-                Date triggerDate = schedulerManager.loadJob(newJobObject);
+                Date triggerDate = schedulerManager.loadJob(newJobObject, triggerType);
                 if (triggerDate != null) {
                     // 更新通知记录时间
                     processTaskSlaTransferVo.setTriggerTime(triggerDate);
@@ -153,7 +154,7 @@ public class ProcessTaskSlaTransferJob extends JobBase {
                     TenantContext.get().getTenantUuid()
             );
             JobObject jobObject = jobObjectBuilder.build();
-            this.reloadJob(jobObject);
+            this.reloadJob(jobObject, JobLoadTriggerType.SERVER_RESTART);
         }
     }
 

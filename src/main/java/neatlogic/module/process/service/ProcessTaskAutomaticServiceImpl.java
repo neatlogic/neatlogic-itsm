@@ -44,6 +44,7 @@ import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.scheduler.core.IJob;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.util.ConditionUtil;
 import neatlogic.framework.util.FreemarkerUtil;
@@ -484,7 +485,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                                 TenantContext.get().getTenantUuid()
                         );
                         JobObject jobObject = jobObjectBuilder.build();
-                        jobHandler.reloadJob(jobObject);
+                        jobHandler.reloadJob(jobObject, JobLoadTriggerType.INITIAL_CREATE);
                     }
                 } else { //流转到下一步
 //                    System.out.println("不需要回调");

@@ -27,6 +27,7 @@ import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.scheduler.core.JobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.framework.util.NotifyPolicyUtil;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
@@ -81,7 +82,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
     }
 
     @Override
-    public void reloadJob(JobObject jobObject) {
+    public void reloadJob(JobObject jobObject, JobLoadTriggerType triggerType) {
 //        System.out.println("开始加载sla通知策略job");
         Long slaNotifyId = Long.valueOf(jobObject.getJobName());
 //        System.out.println("slaNotifyId=" + slaNotifyId);
@@ -149,7 +150,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                                 .withIntervalInSeconds(intervalTime)
                                 .withRepeatCount(repeatCount);
                         JobObject newJobObject = newJobObjectBuilder.build();
-                        Date triggerDate = schedulerManager.loadJob(newJobObject);
+                        Date triggerDate = schedulerManager.loadJob(newJobObject, triggerType);
                         if (triggerDate != null) {
                             // 更新通知记录时间
                             processTaskSlaNotifyVo.setTriggerTime(triggerDate);
@@ -181,7 +182,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
             );
             JobObject jobObject = jobObjectBuilder.build();
 //            System.out.println("initJob....");
-            this.reloadJob(jobObject);
+            this.reloadJob(jobObject, JobLoadTriggerType.SERVER_RESTART);
         }
     }
 

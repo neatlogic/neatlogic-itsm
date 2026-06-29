@@ -29,6 +29,7 @@ import neatlogic.framework.process.stephandler.core.*;
 import neatlogic.framework.scheduler.core.IJob;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
@@ -222,7 +223,7 @@ public class TimerProcessComponent extends ProcessStepHandlerBase {
                                 TenantContext.get().getTenantUuid()
                         );
                         JobObject jobObject = jobObjectBuilder.build();
-                        jobHandler.reloadJob(jobObject);
+                        jobHandler.reloadJob(jobObject, JobLoadTriggerType.INITIAL_CREATE);
                     } else {
                         ProcessTaskStepInOperationVo processTaskStepInOperationVo = new ProcessTaskStepInOperationVo(
                                 currentProcessTaskStepVo.getProcessTaskId(),

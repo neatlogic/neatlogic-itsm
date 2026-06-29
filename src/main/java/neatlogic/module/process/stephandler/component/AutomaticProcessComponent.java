@@ -33,6 +33,7 @@ import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFa
 import neatlogic.framework.scheduler.core.IJob;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.framework.util.TimeUtil;
@@ -186,7 +187,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
                         TenantContext.get().getTenantUuid()
                 );
                 JobObject jobObject = jobObjectBuilder.build();
-                jobHandler.reloadJob(jobObject);
+                jobHandler.reloadJob(jobObject, JobLoadTriggerType.INITIAL_CREATE);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

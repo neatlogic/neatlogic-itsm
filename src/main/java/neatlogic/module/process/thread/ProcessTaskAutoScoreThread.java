@@ -20,6 +20,7 @@ import neatlogic.framework.process.dto.score.ProcessTaskAutoScoreVo;
 import neatlogic.framework.scheduler.core.IJob;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
@@ -83,7 +84,7 @@ public class ProcessTaskAutoScoreThread extends NeatLogicThread {
                             new JobObject.Builder(currentProcessTaskVo.getId().toString(), jobHandler.getGroupName(),
                                     jobHandler.getClassName(), TenantContext.get().getTenantUuid());
                     JobObject jobObject = jobObjectBuilder.build();
-                    jobHandler.reloadJob(jobObject);
+                    jobHandler.reloadJob(jobObject, JobLoadTriggerType.INITIAL_CREATE);
                 } else {
                     throw new ScheduleHandlerNotFoundException(ProcessTaskAutoScoreJob.class.getName());
                 }

@@ -25,6 +25,7 @@ import neatlogic.framework.process.dto.automatic.AutomaticConfigVo;
 import neatlogic.framework.process.dto.automatic.ProcessTaskStepAutomaticRequestVo;
 import neatlogic.framework.scheduler.core.JobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
@@ -75,7 +76,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
     }
 
 	@Override
-	public void reloadJob(JobObject jobObject) {
+	public void reloadJob(JobObject jobObject, JobLoadTriggerType triggerType) {
 		Long requestId = Long.valueOf(jobObject.getJobName());
 		ProcessTaskStepAutomaticRequestVo requestVo = processTaskMapper.getProcessTaskStepAutomaticRequestById(requestId);
 		if (requestVo == null) {
@@ -113,14 +114,14 @@ public class ProcessTaskAutomaticJob extends JobBase {
 			newJobObjectBuilder.withBeginTime(requestAudit.getDate("startTime"))
 					.withIntervalInSeconds(5)
 					.withRepeatCount(0);
-			Date nextFireTime = schedulerManager.loadJob(newJobObjectBuilder.build());
+			Date nextFireTime = schedulerManager.loadJob(newJobObjectBuilder.build(), triggerType);
 			requestAudit.put("nextFireTime",nextFireTime);
 			requestVo.setTriggerTime(nextFireTime);
 		} else {
 //			System.out.println("定时回调");
 			newJobObjectBuilder.withBeginTime(new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10)))
 					.withIntervalInSeconds(automaticConfigVo.getCallbackInterval()*60);
-			Date nextFireTime = schedulerManager.loadJob(newJobObjectBuilder.build());
+			Date nextFireTime = schedulerManager.loadJob(newJobObjectBuilder.build(), triggerType);
 			JSONObject callbackAudit = data.getJSONObject("callbackAudit");
 			callbackAudit.put("nextFireTime",nextFireTime);
 			requestVo.setTriggerTime(nextFireTime);
@@ -139,7 +140,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 					TenantContext.get().getTenantUuid()
 			);
 			JobObject jobObject = jobObjectBuilder.build();
-			this.reloadJob(jobObject);
+			this.reloadJob(jobObject, JobLoadTriggerType.SERVER_RESTART);
 		}
 	}
 
