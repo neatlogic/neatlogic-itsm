@@ -20,6 +20,7 @@ import neatlogic.framework.process.stephandler.core.IProcessStepHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import neatlogic.framework.scheduler.core.JobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
@@ -62,7 +63,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
     }
 
     @Override
-    public void reloadJob(JobObject jobObject) {
+    public void reloadJob(JobObject jobObject, JobLoadTriggerType triggerType) {
         Long id = Long.valueOf(jobObject.getJobName());
         ProcessTaskStepTimerVo processTaskStepTimerVo = processTaskMapper.getProcessTaskStepTimerByProcessTaskStepId(id);
         if (processTaskStepTimerVo == null) {
@@ -81,7 +82,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
         ).withBeginTime(beginTime)
                 .withIntervalInSeconds(5)
                 .withRepeatCount(0);
-        Date nextFireTime = schedulerManager.loadJob(jobObjectBuilder.build());
+        Date nextFireTime = schedulerManager.loadJob(jobObjectBuilder.build(), triggerType);
         processTaskStepTimerVo.setTriggerTime(nextFireTime);
         processTaskMapper.updateProcessTaskStepTimerTriggerTimeById(processTaskStepTimerVo);
     }
@@ -97,7 +98,7 @@ public class ProcessTaskStepTimerCompleteJob extends JobBase {
                     TenantContext.get().getTenantUuid()
             );
             JobObject jobObject = jobObjectBuilder.build();
-            this.reloadJob(jobObject);
+            this.reloadJob(jobObject, JobLoadTriggerType.SERVER_RESTART);
         }
     }
 

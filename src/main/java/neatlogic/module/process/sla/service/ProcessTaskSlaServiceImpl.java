@@ -22,6 +22,7 @@ import neatlogic.framework.process.dto.ProcessTaskSlaTransferVo;
 import neatlogic.framework.scheduler.core.IJob;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.util.SnowflakeUtil;
 import neatlogic.framework.util.WorkTimeUtil;
@@ -106,7 +107,7 @@ public class ProcessTaskSlaServiceImpl implements ProcessTaskSlaService {
                                     TenantContext.get().getTenantUuid()
                             );
                     JobObject jobObject = jobObjectBuilder.build();
-                    jobHandler.reloadJob(jobObject);
+                    jobHandler.reloadJob(jobObject, JobLoadTriggerType.INITIAL_CREATE);
                 } else {
                     throw new ScheduleHandlerNotFoundException(ProcessTaskSlaNotifyJob.class.getName());
                 }
@@ -137,7 +138,7 @@ public class ProcessTaskSlaServiceImpl implements ProcessTaskSlaService {
                                     TenantContext.get().getTenantUuid()
                             );
                     JobObject jobObject = jobObjectBuilder.build();
-                    jobHandler.reloadJob(jobObject);
+                    jobHandler.reloadJob(jobObject, JobLoadTriggerType.INITIAL_CREATE);
                 } else {
                     throw new ScheduleHandlerNotFoundException(ProcessTaskSlaTransferVo.class.getName());
                 }
