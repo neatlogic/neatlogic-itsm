@@ -143,7 +143,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 						this.put("name","toList");
 						this.put("type", FormHandlerType.SELECT.toString());
 						this.put("placeholder","工单内容对应的处理人");
-						this.put("value","工单内容对应的处理人");
+						this.put("value",new JSONArray().fluentAdd("工单内容对应的处理人"));
 						this.put("dataList", Collections.singletonList(new ValueTextVo("工单内容对应的处理人", "工单内容对应的处理人")));
 						this.put("disabled",true);
 					}
@@ -177,7 +177,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 						this.put("name","toList");
 						this.put("type", FormHandlerType.SELECT.toString());
 						this.put("placeholder","工单内容对应的处理人");
-						this.put("value","工单内容对应的处理人");
+						this.put("value",new JSONArray().fluentAdd("工单内容对应的处理人"));
 						this.put("dataList", Collections.singletonList(new ValueTextVo("工单内容对应的处理人", "工单内容对应的处理人")));
 						this.put("disabled",true);
 					}
