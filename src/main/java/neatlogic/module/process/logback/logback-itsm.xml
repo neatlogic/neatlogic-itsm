@@ -1,0 +1,63 @@
+<!-- Logback configuration. See http://logback.qos.ch/manual/index.html -->
+<included>
+    <appender name="processTaskStepInOperationAuditAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${log4j.home}/processTaskStepInOperationAudit.log</File>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <FileNamePattern>${log4j.home}/processTaskStepInOperationAudit.log.%i</FileNamePattern>
+            <MinIndex>1</MinIndex>
+            <MaxIndex>5</MaxIndex>
+        </rollingPolicy>
+        <triggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>100MB</MaxFileSize>
+        </triggeringPolicy>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>[%-5level]%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %logger{36}[%line] [%tenant] %requestUrl- %n%msg%n
+            </Pattern>
+        </layout>
+    </appender>
+
+    <!--异步输出 -->
+    <appender name="processTaskStepInOperationAuditAsyncAppender" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>50</queueSize>
+        <appender-ref ref="processTaskStepInOperationAuditAppender"/>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+    <logger name="processTaskStepInOperationAudit" level="DEBUG" additivity="false">
+        <appender-ref ref="processTaskStepInOperationAuditAsyncAppender"/>
+    </logger>
+
+    <!--方法执行时间日志-->
+    <appender name="MethodTimingAspectAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${log4j.home}/methodTimingAspect.log</File>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <FileNamePattern>${log4j.home}/methodTimingAspect.log.%i</FileNamePattern>
+            <MinIndex>1</MinIndex>
+            <MaxIndex>5</MaxIndex>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>100MB</MaxFileSize>
+        </triggeringPolicy>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %requestUrl - %msg%n
+            </Pattern>
+        </layout>
+    </appender>
+
+    <!--异步输出 -->
+    <appender name="MethodTimingAspectAsyncAppender" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>50</queueSize>
+        <appender-ref ref="MethodTimingAspectAppender"/>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+    <logger name="neatlogic.module.process.aop.MethodTimingAspect" level="ERROR" additivity="false">
+        <appender-ref ref="MethodTimingAspectAsyncAppender"/>
+    </logger>
+</included>
