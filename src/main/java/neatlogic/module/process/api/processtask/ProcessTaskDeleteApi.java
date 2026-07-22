@@ -153,4 +153,8 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         }
     }
 
+    @Override
+    public int needAudit() {
+        return 1;
+    }
 }
