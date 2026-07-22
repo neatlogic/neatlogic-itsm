@@ -87,4 +87,9 @@ public class BatchDeleteProcessTaskApi extends PrivateApiComponentBase {
     public String getToken() {
         return "processtask/batch/delete";
     }
+
+    @Override
+    public int needAudit() {
+        return 1;
+    }
 }

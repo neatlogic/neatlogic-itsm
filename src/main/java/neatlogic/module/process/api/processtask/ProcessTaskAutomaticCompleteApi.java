@@ -1,8 +1,10 @@
 package neatlogic.module.process.api.processtask;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessFlowDirection;
 import neatlogic.framework.process.constvalue.ProcessStepHandlerType;
@@ -38,7 +40,7 @@ public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "流转自动化处理步骤";
+		return "流转外部调用步骤接口";
 	}
 
 	@Override
@@ -55,7 +57,7 @@ public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 		@Param(name = "Status", type = ApiParamType.STRING, desc = "状态"),
 		@Param(name = "Message", type = ApiParamType.STRING, desc = "异常信息"),
 	})
-	@Description(desc = "流转自动化处理步骤")
+	@Description(desc = "流转外部调用步骤接口")
 	@ResubmitInterval(3)
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -83,7 +85,15 @@ public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 		if(handler != null) {
 			jsonObj.put("nextStepId", processTaskStepIdList.get(0));
 			processTaskStepVo.getParamObj().putAll(jsonObj);
+			UserContext copyUserContext = null;
+			if (UserContext.get() != null) {
+				copyUserContext = UserContext.get().copy();
+			}
+			UserContext.init(SystemUser.SYSTEM);
 			handler.autoComplete(processTaskStepVo);
+			if (copyUserContext != null) {
+				UserContext.init(copyUserContext);
+			}
 		}else {
 			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
