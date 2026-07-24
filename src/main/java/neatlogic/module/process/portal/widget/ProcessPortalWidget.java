@@ -14,11 +14,11 @@ import neatlogic.framework.portal.widget.core.IPortalWidget;
 import neatlogic.framework.portal.widget.core.IPortalWidgetGroup;
 
 public enum ProcessPortalWidget implements IPortalWidget {
-    allProcessTask("allProcessTask", "所有工单", 1),
-    processingOfMineProcessTask("processingOfMineProcessTask", "我的待办", 2),
-    doneOfMineProcessTask("doneOfMineProcessTask", "我的已办", 3),
-    draftProcessTask("draftProcessTask", "我的草稿", 4),
-    favoritedServices("favoritedServices", "收藏服务", 5),
+    allProcessTask("allProcessTask", "所有工单", 1, ProcessPortalWidgetGroup.group4),
+    processingOfMineProcessTask("processingOfMineProcessTask", "我的待办", 2, ProcessPortalWidgetGroup.group4),
+    doneOfMineProcessTask("doneOfMineProcessTask", "我的已办", 3, ProcessPortalWidgetGroup.group4),
+    draftProcessTask("draftProcessTask", "我的草稿", 4, ProcessPortalWidgetGroup.group4),
+    favoritedServices("favoritedServices", "收藏服务", 5, ProcessPortalWidgetGroup.group4),
     testPortalWidget1("testPortalWidget1", "测试小部件1", 1, ProcessPortalWidgetGroup.group1),
     testPortalWidget2("testPortalWidget2", "测试小部件2", 2, ProcessPortalWidgetGroup.group1),
     testPortalWidget3("testPortalWidget3", "测试小部件3", 3, ProcessPortalWidgetGroup.group1),
@@ -52,17 +52,17 @@ public enum ProcessPortalWidget implements IPortalWidget {
 
     private final String value;
     private final String text;
-    private Integer sort;
-    private IPortalWidgetGroup group;
-    ProcessPortalWidget(String value, String text) {
-        this.value = value;
-        this.text = text;
-    }
-    ProcessPortalWidget(String value, String text, Integer sort) {
-        this.value = value;
-        this.text = text;
-        this.sort = sort;
-    }
+    private final Integer sort;
+    private final IPortalWidgetGroup group;
+//    ProcessPortalWidget(String value, String text) {
+//        this.value = value;
+//        this.text = text;
+//    }
+//    ProcessPortalWidget(String value, String text, Integer sort) {
+//        this.value = value;
+//        this.text = text;
+//        this.sort = sort;
+//    }
     ProcessPortalWidget(String value, String text, Integer sort, IPortalWidgetGroup group) {
         this.value = value;
         this.text = text;
