@@ -18,6 +18,7 @@ public enum ProcessPortalWidget implements IPortalWidget {
     processingOfMineProcessTask("processingOfMineProcessTask", "我的待办", 2),
     doneOfMineProcessTask("doneOfMineProcessTask", "我的已办", 3),
     draftProcessTask("draftProcessTask", "我的草稿", 4),
+    favoritedServices("favoritedServices", "收藏服务", 5),
     testPortalWidget1("testPortalWidget1", "测试小部件1", 1, ProcessPortalWidgetGroup.group1),
     testPortalWidget2("testPortalWidget2", "测试小部件2", 2, ProcessPortalWidgetGroup.group1),
     testPortalWidget3("testPortalWidget3", "测试小部件3", 3, ProcessPortalWidgetGroup.group1),
