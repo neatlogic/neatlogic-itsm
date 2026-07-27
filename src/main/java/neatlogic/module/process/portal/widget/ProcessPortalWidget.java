@@ -19,6 +19,33 @@ public enum ProcessPortalWidget implements IPortalWidget {
     doneOfMineProcessTask("doneOfMineProcessTask", "我的已办", 3, ProcessPortalWidgetGroup.group4),
     draftProcessTask("draftProcessTask", "我的草稿", 4, ProcessPortalWidgetGroup.group4),
     favoritedServices("favoritedServices", "收藏服务", 5, ProcessPortalWidgetGroup.group4),
+    recentTaskList("recentTaskList", "最近工单", 6),
+    approvalTodoList("approvalTodoList", "审批待办", 7),
+    focusTaskList("focusTaskList", "我的关注", 8),
+    recentOperationList("recentOperationList", "最近操作", 9),
+    quickMyTodo("quickMyTodo", "我的待办入口", 10),
+    trendPanel("trendPanel", "工单趋势", 11),
+    workbenchTable("workbenchTable", "服务概览", 12),
+    taskTypeDistribution("taskTypeDistribution", "工单类型分布", 13),
+    slaRiskList("slaRiskList", "SLA 风险", 14),
+    efficiencyPanel("efficiencyPanel", "处理效率", 15),
+    metricFavorite("metricFavorite", "服务收藏", 16),
+    serviceDistribution("serviceDistribution", "服务分布", 17),
+    quickActionGrid("quickActionGrid", "快捷操作", 18),
+    serviceCatalogEntry("serviceCatalogEntry", "服务目录入口", 19),
+    healthRing("healthRing", "健康状态", 20),
+    teamLoad("teamLoad", "团队负载", 21),
+    changeCalendar("changeCalendar", "变更日历", 22),
+    systemNoticeList("systemNoticeList", "系统通知", 23),
+    knowledgeHelp("knowledgeHelp", "知识帮助", 24),
+    announcementPanel("announcementPanel", "公告栏", 25),
+    supportPanel("supportPanel", "帮助支持", 26),
+    faqList("faqList", "常见问题", 27),
+    heroBanner("heroBanner", "首页横幅", 28),
+    metricTodo("metricTodo", "待办指标", 29),
+    metricOverdue("metricOverdue", "超时指标", 30),
+    metricDone("metricDone", "今日完成", 31),
+    metricSatisfaction("metricSatisfaction", "满意度", 32),
     testPortalWidget1("testPortalWidget1", "测试小部件1", 1, ProcessPortalWidgetGroup.group1),
     testPortalWidget2("testPortalWidget2", "测试小部件2", 2, ProcessPortalWidgetGroup.group1),
     testPortalWidget3("testPortalWidget3", "测试小部件3", 3, ProcessPortalWidgetGroup.group1),
@@ -58,11 +85,12 @@ public enum ProcessPortalWidget implements IPortalWidget {
 //        this.value = value;
 //        this.text = text;
 //    }
-//    ProcessPortalWidget(String value, String text, Integer sort) {
-//        this.value = value;
-//        this.text = text;
-//        this.sort = sort;
-//    }
+    ProcessPortalWidget(String value, String text, Integer sort) {
+        this.value = value;
+        this.text = text;
+        this.sort = sort;
+        this.group = null;
+    }
     ProcessPortalWidget(String value, String text, Integer sort, IPortalWidgetGroup group) {
         this.value = value;
         this.text = text;
