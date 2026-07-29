@@ -10,9 +10,11 @@
 
 package neatlogic.module.process.portal.widget.handler;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.portal.widgetdata.core.PortalWidgetDataHandlerBase;
+import neatlogic.framework.process.column.core.IProcessTaskColumn;
+import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
+import neatlogic.framework.process.workcenter.dto.WorkcenterTheadVo;
 import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
 import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.module.process.service.NewWorkcenterService;
@@ -20,6 +22,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 门户“我的待办”小组件数据处理器。
@@ -30,9 +34,9 @@ import java.util.ArrayList;
 @Component
 public class ProcessingOfMineProcessTaskPortalWidgetDataHandler extends PortalWidgetDataHandlerBase {
 
-    private static final String WORKCENTER_UUID = "processingOfMineProcessTask";
-    private static final int DEFAULT_LIMIT = 5;
-    private static final int MAX_LIMIT = 10;
+//    private static final String WORKCENTER_UUID = "processingOfMineProcessTask";
+//    private static final int DEFAULT_LIMIT = 5;
+//    private static final int MAX_LIMIT = 10;
 
     @Resource
     private WorkcenterMapper workcenterMapper;
@@ -53,71 +57,73 @@ public class ProcessingOfMineProcessTaskPortalWidgetDataHandler extends PortalWi
         JSONObject result = new JSONObject();
         result.put("tbodyList", new ArrayList<>());
 
-        WorkcenterVo workcenterVo = workcenterMapper.getWorkcenterByUuid(WORKCENTER_UUID);
-        if (workcenterVo == null) {
-            return result;
-        }
+//        WorkcenterVo workcenterVo = workcenterMapper.getWorkcenterByUuid(WORKCENTER_UUID);
+//        System.out.println("workcenterVo = " + JSONObject.toJSONString(workcenterVo));
+        JSONObject conditionConfig = new JSONObject();
+        conditionConfig.put("handlerType", "simple");
+        conditionConfig.put("isProcessingOfMine", 1);
+        conditionConfig.put("startTimeCondition", new JSONObject().fluentPut("timeRange", "1").fluentPut("timeUnit", "year"));
+        WorkcenterVo workcenterVo2 = new WorkcenterVo();
+        workcenterVo2.setConditionConfig(conditionConfig);
+        List<WorkcenterTheadVo> theadList = getTheadList();
+        workcenterVo2.setTheadList(theadList);
+        System.out.println("workcenterVo2 = " + JSONObject.toJSONString(workcenterVo2));
+//        if (workcenterVo == null) {
+//            return result;
+//        }
 
-        boolean needPage = Boolean.TRUE.equals(paramObj.getBoolean("needPage"));
-        int pageSize = getPageSize(paramObj, needPage);
-        workcenterVo.setCurrentPage(needPage ? paramObj.getInteger("currentPage") : 1);
-        workcenterVo.setPageSize(pageSize);
-        workcenterVo.setExpectOffsetRowNum(pageSize);
+        Integer pageSize = paramObj.getInteger("pageSize");
+        Integer currentPage = paramObj.getInteger("currentPage");
+//        workcenterVo.setCurrentPage(currentPage);
+//        workcenterVo.setPageSize(pageSize);
+//        workcenterVo.setExpectOffsetRowNum(pageSize);
+        workcenterVo2.setCurrentPage(currentPage);
+        workcenterVo2.setPageSize(pageSize);
+        workcenterVo2.setExpectOffsetRowNum(pageSize);
 
-        JSONObject workcenterResult = newWorkcenterService.doSearch(workcenterVo);
-        if (workcenterResult == null) {
-            return result;
-        }
-
-        normalizeTbodyList(workcenterResult.getJSONArray("tbodyList"));
-        if (!needPage) {
-            JSONArray tbodyList = workcenterResult.getJSONArray("tbodyList");
-            if (tbodyList == null) {
-                return result;
-            }
-            if (tbodyList.size() > pageSize) {
-                tbodyList = new JSONArray(tbodyList.subList(0, pageSize));
-            }
-            result.put("tbodyList", tbodyList);
-            return result;
-        }
-
+        JSONObject workcenterResult = newWorkcenterService.doSearch(workcenterVo2);
+        System.out.println("workcenterResult = " + workcenterResult);
         return workcenterResult;
+//        if (workcenterResult == null) {
+//            return result;
+//        }
+//
+//        JSONArray tbodyList = workcenterResult.getJSONArray("tbodyList");
+//        System.out.println("tbodyList = " + tbodyList);
+//        if (tbodyList == null) {
+//            return result;
+//        }
+////        normalizeTbodyList(tbodyList);
+//        if (tbodyList.size() > workcenterVo2.getPageSize()) {
+//            tbodyList = new JSONArray(tbodyList.subList(0, pageSize));
+//        }
+//        result.put("tbodyList", tbodyList);
+//        return result;
     }
 
-    private int getPageSize(JSONObject paramObj, boolean needPage) {
-        Integer pageSize = needPage ? paramObj.getInteger("pageSize") : paramObj.getInteger("limit");
-        if (pageSize == null || pageSize < 1) {
-            return DEFAULT_LIMIT;
-        }
-        return Math.min(pageSize, MAX_LIMIT);
-    }
-
-    private void normalizeTbodyList(JSONArray tbodyList) {
-        if (tbodyList == null) {
-            return;
-        }
-        for (Object item : tbodyList) {
-            if (item instanceof JSONObject) {
-                JSONObject task = (JSONObject) item;
-                copyIfAbsent(task, "id", "taskid");
-                copyIfAbsent(task, "serialNumber", "serialnumber");
-                copyIfAbsent(task, "name", "title");
-                copyIfAbsent(task, "statusName", "status");
-                copyIfAbsent(task, "channelName", "channel");
-                copyIfAbsent(task, "catalogName", "catalog");
-                copyIfAbsent(task, "currentStepName", "currentstepname");
-                copyIfAbsent(task, "currentStepName", "currentstep");
-                copyIfAbsent(task, "startTime", "starttime");
-                copyIfAbsent(task, "createTime", "starttime");
-                copyIfAbsent(task, "expireTime", "expiretime");
+    private List<WorkcenterTheadVo> getTheadList() {
+        List<String> list = new ArrayList<>();
+        list.add("title");
+        list.add("currentstepworker");
+        list.add("currentstep");
+        list.add("status");
+        list.add("expiretime");
+        list.add("owner");
+        list.add("serialnumber");
+        list.add("priority");
+        list.add("id");
+        List<WorkcenterTheadVo> theadList = new ArrayList<>();
+        Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+        for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
+            IProcessTaskColumn column = entry.getValue();
+            WorkcenterTheadVo theadVo = new WorkcenterTheadVo(column);
+            if (list.contains(theadVo.getName())) {
+                theadVo.setIsShow(1);
+            } else {
+                theadVo.setIsShow(0);
             }
+            theadList.add(theadVo);
         }
-    }
-
-    private void copyIfAbsent(JSONObject jsonObj, String targetKey, String sourceKey) {
-        if (!jsonObj.containsKey(targetKey) && jsonObj.containsKey(sourceKey)) {
-            jsonObj.put(targetKey, jsonObj.get(sourceKey));
-        }
+        return theadList;
     }
 }
