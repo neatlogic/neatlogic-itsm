@@ -54,7 +54,7 @@ public abstract class WorkcenterProcessSqlBase extends ProcessSqlBase<Workcenter
     protected void buildJoinTableOfConditionSql(StringBuilder sb, WorkcenterVo workcenterVo) {
         List<JoinTableColumnVo> joinTableColumnList = getJoinTableOfCondition(sb, workcenterVo);
         //我的待办 条件
-        if (workcenterVo.getConditionConfig().getIntValue("isProcessingOfMine") == 1) {
+        if (Objects.equals(workcenterVo.getConditionConfig().getInteger("isProcessingOfMine"), 1)) {
             List<JoinTableColumnVo> handlerJoinTableColumnList = SqlTableUtil.getProcessingOfMineJoinTableSql();
             joinTableColumnList.addAll(handlerJoinTableColumnList);
         }

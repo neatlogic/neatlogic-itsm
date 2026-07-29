@@ -15,6 +15,7 @@ import neatlogic.framework.portal.widget.core.IPortalWidgetGroup;
 
 public enum ProcessPortalWidget implements IPortalWidget {
     allProcessTask("allProcessTask", "所有工单", 1, ProcessPortalWidgetGroup.MY_WORK),
+    processTaskSearch("processTaskSearch", "工单查询", 2, ProcessPortalWidgetGroup.MY_WORK),
     processingOfMineProcessTask("processingOfMineProcessTask", "我的待办", 2, ProcessPortalWidgetGroup.MY_WORK),
     doneOfMineProcessTask("doneOfMineProcessTask", "我的已办", 3, ProcessPortalWidgetGroup.MY_WORK),
     draftProcessTask("draftProcessTask", "我的草稿", 4, ProcessPortalWidgetGroup.MY_WORK),
