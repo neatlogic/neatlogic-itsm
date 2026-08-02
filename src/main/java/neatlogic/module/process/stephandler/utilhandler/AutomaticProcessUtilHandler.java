@@ -95,7 +95,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 
     @Override
     public String[] getRegulateKeyList() {
-        return new String[]{"authorityList", "notifyPolicyConfig", "customButtonList", "customStatusList", "replaceableTextList", "workerPolicyConfig", "formSceneUuid", "formSceneName", "tagList", "automaticConfig", "formTag"};
+        return new String[]{"authorityList", "notifyPolicyConfig", "customButtonList", "customStatusList", "replaceableTextList", "workerPolicyConfig", "formSceneUuid", "formSceneName", "tagList", "automaticConfig", "formTag", "isAllowProcessOnMobile"};
     }
 
 }
