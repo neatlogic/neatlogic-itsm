@@ -45,12 +45,13 @@ public class ProcessingOfMineProcessTaskPortalWidgetDataHandler extends PortalWi
     @Override
     protected JSONObject getMyData(JSONObject paramObj) {
         WorkcenterVo workcenterVo = paramObj.toJavaObject(WorkcenterVo.class);
+        System.out.println("aaworkcenterVo = " + JSONObject.toJSONString(workcenterVo));
         JSONObject conditionConfig = new JSONObject();
         conditionConfig.put("handlerType", "simple");
         conditionConfig.put("isProcessingOfMine", 1);
         conditionConfig.put("startTimeCondition", new JSONObject().fluentPut("timeRange", "1").fluentPut("timeUnit", "year"));
         workcenterVo.setConditionConfig(conditionConfig);
-        System.out.println("workcenterVo = " + JSONObject.toJSONString(workcenterVo));
+        System.out.println("bbworkcenterVo = " + JSONObject.toJSONString(workcenterVo));
 //        Integer pageSize = paramObj.getInteger("pageSize");
 //        Integer currentPage = paramObj.getInteger("currentPage");
 //        workcenterVo.setCurrentPage(currentPage);

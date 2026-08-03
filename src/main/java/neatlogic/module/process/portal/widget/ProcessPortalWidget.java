@@ -13,7 +13,7 @@ package neatlogic.module.process.portal.widget;
 import neatlogic.framework.portal.widget.core.IPortalWidget;
 
 public enum ProcessPortalWidget implements IPortalWidget {
-    processMyTodo("processMyTodo", "我的待办", 1),
+    processingOfMineProcessTask("processingOfMineProcessTask", "我的待办", 1),
     processTaskSearch("processTaskSearch", "工单列表", 2),
     processSlaRisk("processSlaRisk", "SLA 风险", 3),
     processFavoriteService("processFavoriteService", "收藏服务", 4),
