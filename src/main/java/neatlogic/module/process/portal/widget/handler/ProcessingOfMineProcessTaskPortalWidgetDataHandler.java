@@ -34,13 +34,6 @@ import java.util.Map;
 @Component
 public class ProcessingOfMineProcessTaskPortalWidgetDataHandler extends PortalWidgetDataHandlerBase {
 
-//    private static final String WORKCENTER_UUID = "processingOfMineProcessTask";
-//    private static final int DEFAULT_LIMIT = 5;
-//    private static final int MAX_LIMIT = 10;
-
-    @Resource
-    private WorkcenterMapper workcenterMapper;
-
     @Resource
     private NewWorkcenterService newWorkcenterService;
 
@@ -51,79 +44,20 @@ public class ProcessingOfMineProcessTaskPortalWidgetDataHandler extends PortalWi
 
     @Override
     protected JSONObject getMyData(JSONObject paramObj) {
-        if (paramObj == null) {
-            paramObj = new JSONObject();
-        }
-        JSONObject result = new JSONObject();
-        result.put("tbodyList", new ArrayList<>());
-
-//        WorkcenterVo workcenterVo = workcenterMapper.getWorkcenterByUuid(WORKCENTER_UUID);
-//        System.out.println("workcenterVo = " + JSONObject.toJSONString(workcenterVo));
+        WorkcenterVo workcenterVo = paramObj.toJavaObject(WorkcenterVo.class);
         JSONObject conditionConfig = new JSONObject();
         conditionConfig.put("handlerType", "simple");
         conditionConfig.put("isProcessingOfMine", 1);
         conditionConfig.put("startTimeCondition", new JSONObject().fluentPut("timeRange", "1").fluentPut("timeUnit", "year"));
-        WorkcenterVo workcenterVo2 = new WorkcenterVo();
-        workcenterVo2.setConditionConfig(conditionConfig);
-        List<WorkcenterTheadVo> theadList = getTheadList();
-        workcenterVo2.setTheadList(theadList);
-        System.out.println("workcenterVo2 = " + JSONObject.toJSONString(workcenterVo2));
-//        if (workcenterVo == null) {
-//            return result;
-//        }
-
-        Integer pageSize = paramObj.getInteger("pageSize");
-        Integer currentPage = paramObj.getInteger("currentPage");
+        workcenterVo.setConditionConfig(conditionConfig);
+        System.out.println("workcenterVo = " + JSONObject.toJSONString(workcenterVo));
+//        Integer pageSize = paramObj.getInteger("pageSize");
+//        Integer currentPage = paramObj.getInteger("currentPage");
 //        workcenterVo.setCurrentPage(currentPage);
 //        workcenterVo.setPageSize(pageSize);
 //        workcenterVo.setExpectOffsetRowNum(pageSize);
-        workcenterVo2.setCurrentPage(currentPage);
-        workcenterVo2.setPageSize(pageSize);
-        workcenterVo2.setExpectOffsetRowNum(pageSize);
-
-        JSONObject workcenterResult = newWorkcenterService.doSearch(workcenterVo2);
+        JSONObject workcenterResult = newWorkcenterService.doSearch(workcenterVo);
         System.out.println("workcenterResult = " + workcenterResult);
         return workcenterResult;
-//        if (workcenterResult == null) {
-//            return result;
-//        }
-//
-//        JSONArray tbodyList = workcenterResult.getJSONArray("tbodyList");
-//        System.out.println("tbodyList = " + tbodyList);
-//        if (tbodyList == null) {
-//            return result;
-//        }
-////        normalizeTbodyList(tbodyList);
-//        if (tbodyList.size() > workcenterVo2.getPageSize()) {
-//            tbodyList = new JSONArray(tbodyList.subList(0, pageSize));
-//        }
-//        result.put("tbodyList", tbodyList);
-//        return result;
-    }
-
-    private List<WorkcenterTheadVo> getTheadList() {
-        List<String> list = new ArrayList<>();
-        list.add("title");
-        list.add("currentstepworker");
-        list.add("currentstep");
-        list.add("status");
-        list.add("expiretime");
-        list.add("owner");
-        list.add("serialnumber");
-        list.add("priority");
-        list.add("id");
-        List<WorkcenterTheadVo> theadList = new ArrayList<>();
-        Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
-        for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
-            IProcessTaskColumn column = entry.getValue();
-            WorkcenterTheadVo theadVo = new WorkcenterTheadVo(column);
-            if (list.contains(theadVo.getName())) {
-                theadVo.setIsShow(1);
-            } else {
-                theadVo.setIsShow(0);
-            }
-            theadList.add(theadVo);
-        }
-        return theadList;
     }
 }
