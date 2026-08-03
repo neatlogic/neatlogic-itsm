@@ -12,18 +12,12 @@ package neatlogic.module.process.portal.widget.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.portal.widgetdata.core.PortalWidgetDataHandlerBase;
-import neatlogic.framework.process.column.core.IProcessTaskColumn;
-import neatlogic.framework.process.column.core.ProcessTaskColumnFactory;
-import neatlogic.framework.process.workcenter.dto.WorkcenterTheadVo;
 import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
-import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import neatlogic.module.process.service.NewWorkcenterService;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 门户“我的待办”小组件数据处理器。
@@ -45,20 +39,21 @@ public class ProcessingOfMineProcessTaskPortalWidgetDataHandler extends PortalWi
     @Override
     protected JSONObject getMyData(JSONObject paramObj) {
         WorkcenterVo workcenterVo = paramObj.toJavaObject(WorkcenterVo.class);
-        System.out.println("aaworkcenterVo = " + JSONObject.toJSONString(workcenterVo));
+//        System.out.println("aaworkcenterVo = " + JSONObject.toJSONString(workcenterVo));
+        JSONObject startTimeCondition = null;
+        if (MapUtils.isNotEmpty(workcenterVo.getConditionConfig())) {
+            startTimeCondition = workcenterVo.getConditionConfig().getJSONObject("startTimeCondition");
+        } else {
+            startTimeCondition = new JSONObject().fluentPut("timeRange", "1").fluentPut("timeUnit", "year");
+        }
         JSONObject conditionConfig = new JSONObject();
         conditionConfig.put("handlerType", "simple");
         conditionConfig.put("isProcessingOfMine", 1);
-        conditionConfig.put("startTimeCondition", new JSONObject().fluentPut("timeRange", "1").fluentPut("timeUnit", "year"));
+        conditionConfig.put("startTimeCondition", startTimeCondition);
         workcenterVo.setConditionConfig(conditionConfig);
-        System.out.println("bbworkcenterVo = " + JSONObject.toJSONString(workcenterVo));
-//        Integer pageSize = paramObj.getInteger("pageSize");
-//        Integer currentPage = paramObj.getInteger("currentPage");
-//        workcenterVo.setCurrentPage(currentPage);
-//        workcenterVo.setPageSize(pageSize);
-//        workcenterVo.setExpectOffsetRowNum(pageSize);
+//        System.out.println("bbworkcenterVo = " + JSONObject.toJSONString(workcenterVo));
         JSONObject workcenterResult = newWorkcenterService.doSearch(workcenterVo);
-        System.out.println("workcenterResult = " + workcenterResult);
+//        System.out.println("workcenterResult = " + workcenterResult);
         return workcenterResult;
     }
 }
