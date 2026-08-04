@@ -26,11 +26,17 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
     protected JSONObject getMyData(JSONObject paramObj) {
         Integer timeRange = paramObj.getInteger("timeRange");
         String timeUnit = paramObj.getString("timeUnit");
+        JSONObject resultObj = new JSONObject();
         // 我的待办
+        resultObj.put("myTask", 6);
         // 可抢单
+        resultObj.put("todo", 1);
         // 处理中
+        resultObj.put("doing", 2);
         // 已超时
+        resultObj.put("risk", 3);
         // 已完成
-        return null;
+        resultObj.put("done", 4);
+        return resultObj;
     }
 }
