@@ -18,7 +18,7 @@ public enum ProcessPortalWidget implements IPortalWidget {
     processSlaRisk("processSlaRisk", "SLA 风险", 3),
     processTaskSearch("processTaskSearch", "工单列表", 4),
     processFavoriteService("processFavoriteService", "收藏服务", 5),
-    processTaskOverview("processTaskOverview", "工单状态概览", 6),
+    personalProcessTaskOverview("personalProcessTaskOverview", "个人工单状态概览", 6),
     ;
 
     private final String value;
