@@ -68,7 +68,11 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
         {
             AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
 //            long startTimeA = System.currentTimeMillis();
-            List<Long> allProcessTaskStepIdList = processTaskMapper.getProcessTaskWorkerProcessTaskStepIdListByAuthenticationInfoVo(authenticationInfoVo);
+            List<Long> allProcessTaskStepIdList = processTaskMapper.getProcessTaskWorkerProcessTaskStepIdListByAuthenticationInfoVoAndStartTimeAndEndTime(
+                    authenticationInfoVo,
+                    startTime,
+                    endTime
+            );
 //            System.out.println("costTimeA = " + (System.currentTimeMillis() - startTimeA));
 //            System.out.println("processTaskStepIdList.size() = " + processTaskStepIdList.size());
             if (CollectionUtils.isNotEmpty(allProcessTaskStepIdList)) {

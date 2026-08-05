@@ -172,7 +172,11 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     Set<Long> getProcessTaskIdSetByChannelUuidListAndAuthenticationInfo(@Param("channelUuidList") List<String> channelUuidList, @Param("authenticationInfoVo") AuthenticationInfoVo authenticationInfoVo);
 
-    List<Long> getProcessTaskWorkerProcessTaskStepIdListByAuthenticationInfoVo(AuthenticationInfoVo authenticationInfoVo);
+    List<Long> getProcessTaskWorkerProcessTaskStepIdListByAuthenticationInfoVoAndStartTimeAndEndTime(
+            @Param("authenticationInfoVo") AuthenticationInfoVo authenticationInfoVo,
+            @Param("startTime") Date startTime,
+            @Param("endTime") Date endTime
+    );
 
     int checkIsWorker(@Param("processTaskId") Long processTaskId,
                       @Param("processTaskStepId") Long processTaskStepId, @Param("userType") String userType,
