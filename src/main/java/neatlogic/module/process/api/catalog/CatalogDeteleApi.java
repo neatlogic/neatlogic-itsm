@@ -44,7 +44,7 @@ public class CatalogDeteleApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "服务目录删除接口";
+		return "nmpac.catalogdeteleapi.getname";
 	}
 
 	@Override
@@ -53,9 +53,9 @@ public class CatalogDeteleApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "服务目录uuid")
+		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "nmpac.catalogdeteleapi.input.param.desc.uuid")
 		})
-	@Description(desc = "服务目录删除接口")
+	@Description(desc = "nmpac.catalogdeteleapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");

@@ -48,7 +48,7 @@ public class CatalogChannelTreeApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "查询服务目录及通道树";
+		return "nmpacr.catalogchanneltreeapi.getname";
 	}
 
 	@Override
@@ -57,12 +57,12 @@ public class CatalogChannelTreeApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-	    @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id")
+	    @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "nmpacr.catalogchanneltreeapi.input.param.desc.channeltyperelationid")
 	})
 	@Output({
-		@Param(name="Return",explode = CatalogVo[].class,desc="服务目录及通道树")
+		@Param(name="Return",explode = CatalogVo[].class,desc="nmpacr.catalogchanneltreeapi.output.param.desc.return.name")
 	})
-	@Description(desc = "查询服务目录及通道树")
+	@Description(desc = "nmpacr.catalogchanneltreeapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");

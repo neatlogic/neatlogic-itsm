@@ -36,7 +36,7 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "下一可流转步骤列表接口";
+        return "nmpap.processtasknextsteplistapi.getname";
     }
 
     @Override
@@ -49,11 +49,11 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
-        @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "当前步骤Id"),
-        @Param(name = "action", type = ApiParamType.ENUM, rule = "complete,back", desc = "操作类型"),})
-    @Output({@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "下一可流转步骤列表")})
-    @Description(desc = "下一可流转步骤列表接口")
+    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtasknextsteplistapi.input.param.desc.processtaskid"),
+        @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtasknextsteplistapi.input.param.desc.processtaskstepid"),
+        @Param(name = "action", type = ApiParamType.ENUM, rule = "complete,back", desc = "nmpap.processtasknextsteplistapi.input.param.desc.action"),})
+    @Output({@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "nmpap.processtasknextsteplistapi.output.param.desc.return.name")})
+    @Description(desc = "nmpap.processtasknextsteplistapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");

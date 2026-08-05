@@ -44,7 +44,7 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "任务完成接口";
+        return "nmpapt.processtasksteptaskcompleteapi.getname";
     }
 
     @Override
@@ -53,13 +53,13 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "任务id"),
-            @Param(name = "button", type = ApiParamType.STRING, desc = "按钮"),
-            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "nmpapt.processtasksteptaskcompleteapi.input.param.desc.id"),
+            @Param(name = "button", type = ApiParamType.STRING, desc = "nmpapt.processtasksteptaskcompleteapi.input.param.desc.button"),
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "nmpapt.processtasksteptaskcompleteapi.input.param.desc.content"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpapt.processtasksteptaskcompleteapi.input.param.desc.source")
     })
     @Output({})
-    @Description(desc = "任务完成接口")
+    @Description(desc = "nmpapt.processtasksteptaskcompleteapi.getname")
     @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

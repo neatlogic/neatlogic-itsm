@@ -49,7 +49,7 @@ public class ListProcessTaskSlaTimeApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单时效列表";
+        return "nmpap.listprocesstaskslatimeapi.getname";
     }
 
     @Override
@@ -58,10 +58,10 @@ public class ListProcessTaskSlaTimeApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "slaIdList", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1, desc = "时效ID列表")
+            @Param(name = "slaIdList", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1, desc = "nmpap.listprocesstaskslatimeapi.input.param.desc.slaidlist")
     })
     @Output({
-            @Param(name = "tbodyList", explode = ProcessTaskSlaTimeVo[].class, desc = "时效列表")
+            @Param(name = "tbodyList", explode = ProcessTaskSlaTimeVo[].class, desc = "nmpap.listprocesstaskslatimeapi.output.param.desc.tbodylist")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {

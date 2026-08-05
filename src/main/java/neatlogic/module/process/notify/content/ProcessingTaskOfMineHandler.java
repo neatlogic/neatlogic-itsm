@@ -67,7 +67,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
     protected ProcessTaskService processTaskService;
 
 	public enum ConditionOptions{
-		STEPTEAM("stepteam","处理组",Expression.INCLUDE.getExpression());
+		STEPTEAM("stepteam","nmpnc.processingtaskofminehandler.text.stepteam",Expression.INCLUDE.getExpression());
 
 		private String value;
 		private String text;
@@ -120,7 +120,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			{
 				this.add(new JSONObject(){
 					{
-						this.put("label","标题");
+						this.put("label",$.t("nmpnc.processingtaskofminehandler.runtime.label.1"));
 						this.put("name","title");
 						this.put("type", "text");
 						this.put("validateList", new JSONArray(){
@@ -132,19 +132,19 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				});
 				this.add(new JSONObject(){
 					{
-						this.put("label","内容");
+						this.put("label",$.t("nmpnc.processingtaskofminehandler.runtime.label.2"));
 						this.put("name","content");
 						this.put("type", FormHandlerType.TEXTAREA.toString());
 					}
 				});
 				this.add(new JSONObject(){
 					{
-						this.put("label","接收人");
+						this.put("label",$.t("nmpnc.processingtaskofminehandler.runtime.label.3"));
 						this.put("name","toList");
 						this.put("type", FormHandlerType.SELECT.toString());
 						this.put("placeholder","工单内容对应的处理人");
 						this.put("value",new JSONArray().fluentAdd("工单内容对应的处理人"));
-						this.put("dataList", Collections.singletonList(new ValueTextVo("工单内容对应的处理人", "工单内容对应的处理人")));
+						this.put("dataList", Collections.singletonList(new ValueTextVo("工单内容对应的处理人", $.t("nmpnc.processingtaskofminehandler.runtime.label.7"))));
 						this.put("disabled",true);
 					}
 				});
@@ -154,7 +154,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			{
 				this.add(new JSONObject(){
 					{
-						this.put("label","标题");
+						this.put("label",$.t("nmpnc.processingtaskofminehandler.runtime.label.4"));
 						this.put("name","title");
 						this.put("type", "text");
 						this.put("validateList", new JSONArray(){
@@ -166,19 +166,19 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				});
 				this.add(new JSONObject(){
 					{
-						this.put("label","内容");
+						this.put("label",$.t("nmpnc.processingtaskofminehandler.runtime.label.5"));
 						this.put("name","content");
 						this.put("type", FormHandlerType.TEXTAREA.toString());
 					}
 				});
 				this.add(new JSONObject(){
 					{
-						this.put("label","接收人");
+						this.put("label",$.t("nmpnc.processingtaskofminehandler.runtime.label.6"));
 						this.put("name","toList");
 						this.put("type", FormHandlerType.SELECT.toString());
 						this.put("placeholder","工单内容对应的处理人");
 						this.put("value",new JSONArray().fluentAdd("工单内容对应的处理人"));
-						this.put("dataList", Collections.singletonList(new ValueTextVo("工单内容对应的处理人", "工单内容对应的处理人")));
+						this.put("dataList", Collections.singletonList(new ValueTextVo("工单内容对应的处理人", $.t("nmpnc.processingtaskofminehandler.runtime.label.8"))));
 						this.put("disabled",true);
 					}
 				});
@@ -204,23 +204,23 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				List<Map<String, String>> dataList = new ArrayList<>();
 				for(int i = 0;i < 12;i++){
 					Map<String, String> map = new HashMap<>();
-					map.put("标题","机房进出申请-202101080000" + i);
-					map.put("工单id",(1363740810797056L + i) + "");
-					map.put("工单号","202101080000" + i);
-					map.put("上报人","admin");
-					map.put("优先级","P3");
-					map.put("代报人","admin");
-					map.put("当前步骤处理对象","张三");
-					map.put("当前步骤名","机房监督");
-					map.put("工单状态","处理中");
-					map.put("服务目录","机房");
-					map.put("服务类型","事件");
-					map.put("服务","机房进出申请");
-					map.put("地域","广东省/深圳市");
-					map.put("上报时间","2021-01-08 10:10:57");
-					map.put("时间窗口","工作日");
-					map.put("结束时间","2021-01-12 15:18:23");
-					map.put("剩余时间","距离超时：3天");
+					map.put($.t("nmpwch.processtasktitlecolumn.getdisplayname"), $.t("nmpnc.processingtaskofminehandler.sample.title") + i);
+					map.put($.t("nmpwch.processtaskidcolumn.getdisplayname"),(1363740810797056L + i) + "");
+					map.put($.t("nmpwch.processtaskserialnumbercolumn.getdisplayname"),"202101080000" + i);
+					map.put($.t("nmpwch.processtaskownercolumn.getdisplayname"),"admin");
+					map.put($.t("nmpwch.processtaskprioritycolumn.getdisplayname"),"P3");
+					map.put($.t("nmpwch.processtaskreportercolumn.getdisplayname"),"admin");
+					map.put($.t("nmpwch.processtaskcurrentstepworkercolumn.getdisplayname"), $.t("nmpnc.processingtaskofminehandler.sample.assignee"));
+					map.put($.t("nmpwch.processtaskcurrentstepnamecolumn.getdisplayname"), $.t("nmpnc.processingtaskofminehandler.sample.stepname"));
+					map.put($.t("nmpwch.processtaskstatuscolumn.getdisplayname"), $.t("common.doing"));
+					map.put($.t("nmpwch.processtaskcatalogcolumn.getdisplayname"), $.t("nmpnc.processingtaskofminehandler.sample.catalog"));
+					map.put($.t("nmpwch.processtaskchanneltypecolumn.getdisplayname"), $.t("nmpnc.processingtaskofminehandler.sample.servicetype"));
+					map.put($.t("nmpwch.processtaskchannelcolumn.getdisplayname"), $.t("nmpnc.processingtaskofminehandler.sample.service"));
+					map.put($.t("nmpwch.processtaskregioncolumn.getdisplayname"), $.t("nmpnc.processingtaskofminehandler.sample.region"));
+					map.put($.t("nmpwch.processtaskstarttimecolumn.getdisplayname"),"2021-01-08 10:10:57");
+					map.put($.t("nmpwch.processtaskworktimecolumn.getdisplayname"), $.t("nmpnc.processingtaskofminehandler.sample.worktime"));
+					map.put($.t("nmpwch.processtaskendtimecolumn.getdisplayname"),"2021-01-12 15:18:23");
+					map.put($.t("nmpwch.processtaskexpiredtimecolumn.getdisplayname"), $.t("nmpnc.processingtaskofminehandler.sample.remainingtime"));
 					dataList.add(map);
 				}
 
@@ -387,12 +387,9 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			public String getPreviewContent(JSONObject config) {
 				if(StringUtils.isNotBlank(homeUrl)){
 					String taskOverviewUrl = homeUrl + TenantContext.get().getTenantUuid() + File.separator + allProcessTaskUrl;
-					return "您有 <span style=\"color:red\">"
-							+ "5</span> 条待处理工单，请前往<a href=\"" + taskOverviewUrl
-							+ "\" target=\"_blank\">【工单中心】</a>，点击【我的待办】按钮查看";
+					return $.t("nmpnc.processingtaskofminehandler.preview.withurl", taskOverviewUrl);
 				}else{
-					return "您有 <span style=\"color:red\">5</span> 条待处理工单，" +
-							"请前往【IT服务->工单中心->所有】，点击【我的待办】按钮查看";
+					return $.t("nmpnc.processingtaskofminehandler.preview.withouturl");
 				}
 			}
 
@@ -427,13 +424,9 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 								contentSb.append(content + "</br>");
 							}
 							if(StringUtils.isNotBlank(taskOverviewUrl)){
-								contentSb.append("您有 <span style=\"color:red\">"
-										+ entry.getValue() + "</span> 条待处理工单，请前往<a href=\""
-										+ taskOverviewUrl + "\" target=\"_blank\">【工单中心】</a>，点击【我的待办】按钮查看");
+								contentSb.append($.t("nmpnc.processingtaskofminehandler.content.withurl", entry.getValue(), taskOverviewUrl));
 							}else{
-								contentSb.append("您有 <span style=\"color:red\">"
-										+ entry.getValue()
-										+ "</span> 条待处理工单，请前往【IT服务->工单中心->所有】，点击【我的待办】按钮查看");
+								contentSb.append($.t("nmpnc.processingtaskofminehandler.content.withouturl", entry.getValue()));
 							}
 
 							notifyBuilder.withContentTemplate(contentSb.toString());
@@ -485,7 +478,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 
 	@Override
 	public String getName() {
-		return "待我处理的工单";
+		return $.t("nmpnc.processingtaskofminehandler.getname");
 	}
 
 	@Override

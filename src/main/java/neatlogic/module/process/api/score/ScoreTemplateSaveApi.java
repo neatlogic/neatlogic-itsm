@@ -56,7 +56,7 @@ public class ScoreTemplateSaveApi extends PrivateApiComponentBase {
             @Param(name = "name", type = ApiParamType.REGEX, maxLength = 50, rule = RegexUtils.NAME, desc = "common.name", isRequired = true, xss = true),
             @Param(name = "description", type = ApiParamType.STRING, maxLength = 50, desc = "common.description"),
             @Param(name = "isActive", type = ApiParamType.INTEGER, desc = "common.isactive"),
-            @Param(name = "dimensionArray", type = ApiParamType.JSONARRAY, isRequired = true, desc = "term.itsm.scoretemplatedimensionlist", help = "格式:[{\"name\":\"t1\",\"description\":\"d1\"},{\"name\":\"t2\",\"description\":\"d2\"}]")
+            @Param(name = "dimensionArray", type = ApiParamType.JSONARRAY, isRequired = true, desc = "term.itsm.scoretemplatedimensionlist", help = "nmpas.scoretemplatesaveapi.input.param.help.dimensionarray")
     })
     @Output({
             @Param(name = "scoreTemplate", explode = ScoreTemplateVo.class, desc = "common.tbodylist")

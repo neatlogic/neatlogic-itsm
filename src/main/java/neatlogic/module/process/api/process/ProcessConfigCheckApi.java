@@ -12,6 +12,8 @@
 
 package neatlogic.module.process.api.process;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -73,18 +75,18 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
     private ScoreTemplateMapper scoreTemplateMapper;
     @Override
     public String getName() {
-        return "检查流程图config与表(process_为前缀)数据是否一致";
+        return "nmpap.processconfigcheckapi.getname";
     }
 
     @Input({
             @Param(name = "processUuidList", type = ApiParamType.JSONARRAY, desc = "term.itsm.processuuid"),
             @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, desc = "term.itsm.processtaskid"),
-            @Param(name = "allProcess", type = ApiParamType.BOOLEAN, desc = "所有流程")
+            @Param(name = "allProcess", type = ApiParamType.BOOLEAN, desc = "nmpap.processconfigcheckapi.input.param.desc.allprocess")
     })
     @Output({
             @Param(explode = ProcessVo.class)
     })
-    @Description(desc = "检查流程图config与表(process_为前缀)数据是否一致")
+    @Description(desc = "nmpap.processconfigcheckapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONObject resultObj = new JSONObject();
@@ -160,12 +162,12 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                 ProcessFormVo oldProcessFormVo = processMapper.getProcessFormByProcessUuid(processUuid);
                 if (oldProcessFormVo == null) {
                     JSONObject jsonObj = new JSONObject();
-                    jsonObj.put("message", "`process_form`表缺少数据");
+                    jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.processformmissing"));
                     jsonObj.put("newProcessFormVo", newProcessFormVo);
                     list.add(jsonObj);
                 } else if (!Objects.equals(oldProcessFormVo.getFormUuid(), formUuid)) {
                     JSONObject jsonObj = new JSONObject();
-                    jsonObj.put("message", "`process_form`表`form_uuid`字段值不相等");
+                    jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.processformuuidmismatch"));
                     jsonObj.put("newProcessFormVo", newProcessFormVo);
                     jsonObj.put("oldProcessFormVo", oldProcessFormVo);
                     list.add(jsonObj);
@@ -199,7 +201,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                         if (oldProcessSla == null) {
                             JSONObject jsonObj = new JSONObject();
                             jsonObj.put("isSum", 1);
-                            jsonObj.put("message", "`process_sla`表缺少数据");
+                            jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.processslamissing"));
                             jsonObj.put("newProcessSlaVo", processSlaVo);
                             list.add(jsonObj);
                         } else {
@@ -208,7 +210,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                             if (!Objects.equals(oldProcessSlaStr, processSlaStr)) {
                                 JSONObject jsonObj = new JSONObject();
                                 jsonObj.put("isSum", 1);
-                                jsonObj.put("message", "`process_sla`表数据不对");
+                                jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.processslainvalid"));
                                 jsonObj.put("newProcessSlaVo", processSlaVo);
                                 jsonObj.put("oldProcessSlaVo", oldProcessSla);
                                 list.add(jsonObj);
@@ -218,7 +220,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                         if (!CollectionUtils.isEqualCollection(slaStepUuidList, processStepUuidList)) {
                             JSONObject jsonObj = new JSONObject();
                             jsonObj.put("isSum", 1);
-                            jsonObj.put("message", "`process_step_sla`表`sla_uuid`值为" + processSlaVo.getUuid() + "时数据不对");
+                            jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.processstepslainvalid", processSlaVo.getUuid()));
                             jsonObj.put("newStepUuidList", processStepUuidList);
                             jsonObj.put("oldStepUuidList", slaStepUuidList);
                             list.add(jsonObj);
@@ -232,7 +234,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                             if (oldProcessSla == null) {
                                 JSONObject jsonObj = new JSONObject();
                                 jsonObj.put("isSum", 0);
-                                jsonObj.put("message", "`process_sla`表缺少数据");
+                                jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.processslamissing"));
                                 jsonObj.put("newProcessSlaVo", processSlaVo);
                                 list.add(jsonObj);
                             } else {
@@ -241,7 +243,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                                 if (!Objects.equals(oldProcessSlaStr, processSlaStr)) {
                                     JSONObject jsonObj = new JSONObject();
                                     jsonObj.put("isSum", 0);
-                                    jsonObj.put("message", "`process_sla`表数据不对");
+                                    jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.processslainvalid"));
                                     jsonObj.put("newProcessSlaVo", processSlaVo);
                                     jsonObj.put("oldProcessSlaVo", oldProcessSla);
                                     list.add(jsonObj);
@@ -252,7 +254,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                             if (slaStepUuidList.size() != 1 && slaStepUuidList.contains(stepUuid)) {
                                 JSONObject jsonObj = new JSONObject();
                                 jsonObj.put("isSum", 0);
-                                jsonObj.put("message", "`process_step_sla`表`sla_uuid`值为" + processSlaVo.getUuid() + "时数据不对");
+                                jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.processstepslainvalid", processSlaVo.getUuid()));
                                 jsonObj.put("newStepUuidList", Collections.singletonList(stepUuid));
                                 jsonObj.put("oldStepUuidList", slaStepUuidList);
                                 list.add(jsonObj);
@@ -325,7 +327,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
             oldProcessStepList.sort(Comparator.comparing(ProcessStepVo::getUuid));
             if (!Objects.equals(processStepList.size(), oldProcessStepList.size())) {
                 JSONObject jsonObj = new JSONObject();
-                jsonObj.put("message", "流程步骤数量不一致");
+                jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.stepcountmismatch"));
                 jsonObj.put("newStepSize", processStepList.size());
                 jsonObj.put("oldStepSize", oldProcessStepList.size());
                 list.add(jsonObj);
@@ -339,7 +341,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                         String processStepStr = processStepVoToString(processStepVo);
                         if (!Objects.equals(oldProcessStepStr, processStepStr)) {
                             JSONObject jsonObj = new JSONObject();
-                            jsonObj.put("message", "步骤数据不一致");
+                            jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.stepdatamismatch"));
                             jsonObj.put("newProcessStepVo", processStepVo);
                             jsonObj.put("oldProcessStepVo", oldProcessStepVo);
                             list.add(jsonObj);
@@ -352,7 +354,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
             }
             if (CollectionUtils.isNotEmpty(processStepList) || CollectionUtils.isNotEmpty(oldProcessStepList)) {
                 JSONObject jsonObj = new JSONObject();
-                jsonObj.put("message", "对比后剩下步骤数据");
+                jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.remainingstepdata"));
                 jsonObj.put("newProcessStepList", processStepList);
                 jsonObj.put("oldProcessStepList", oldProcessStepList);
                 list.add(jsonObj);
@@ -387,7 +389,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
             oldProcessStepRelList.sort(Comparator.comparing(ProcessStepRelVo::getUuid));
             if (!Objects.equals(processStepRelList.size(), oldProcessStepRelList.size())) {
                 JSONObject jsonObj = new JSONObject();
-                jsonObj.put("message", "流程步骤连线数量不一致");
+                jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.connectioncountmismatch"));
                 jsonObj.put("newStepRelSize", processStepRelList.size());
                 jsonObj.put("oldStepRelSize", oldProcessStepRelList.size());
                 list.add(jsonObj);
@@ -401,7 +403,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                         String processStepRelStr = processStepRelVoToString(processStepRelVo);
                         if (!Objects.equals(oldProcessStepRelStr, processStepRelStr)) {
                             JSONObject jsonObj = new JSONObject();
-                            jsonObj.put("message", "步骤连线数据不一致");
+                            jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.connectiondatamismatch"));
                             jsonObj.put("newProcessStepRelVo", processStepRelVo);
                             jsonObj.put("oldProcessStepRelVo", oldProcessStepRelVo);
                             list.add(jsonObj);
@@ -414,7 +416,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
             }
             if (CollectionUtils.isNotEmpty(processStepRelList) || CollectionUtils.isNotEmpty(oldProcessStepRelList)) {
                 JSONObject jsonObj = new JSONObject();
-                jsonObj.put("message", "对比后剩下步骤连线数据");
+                jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.remainingconnectiondata"));
                 jsonObj.put("newProcessStepRelList", processStepRelList);
                 jsonObj.put("oldProcessStepRelList", oldProcessStepRelList);
                 list.add(jsonObj);
@@ -431,7 +433,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                 ProcessScoreTemplateVo oldProcessScoreTemplateVo = scoreTemplateMapper.getProcessScoreTemplateByProcessUuid(processUuid);
                 if (oldProcessScoreTemplateVo == null) {
                     JSONObject jsonObj = new JSONObject();
-                    jsonObj.put("message", "`process_score_template`表缺少数据");
+                    jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.processscoretemplatemissing"));
                     jsonObj.put("newProcessScoreTemplateVo", processScoreTemplateVo);
                     list.add(jsonObj);
                 } else {
@@ -439,7 +441,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                     String processScoreTemplateStr = processScoreTemplateVoToString(processScoreTemplateVo);
                     if (!Objects.equals(oldProcessScoreTemplateStr, processScoreTemplateStr)) {
                         JSONObject jsonObj = new JSONObject();
-                        jsonObj.put("message", "评分设置数据不一致");
+                        jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.scoresettingmismatch"));
                         jsonObj.put("newProcessScoreTemplateVo", processScoreTemplateVo);
                         jsonObj.put("oldProcessScoreTemplateVo", oldProcessScoreTemplateVo);
                         list.add(jsonObj);
@@ -470,12 +472,12 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                 ProcessTaskFormVo oldProcessTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
                 if (oldProcessTaskFormVo == null) {
                     JSONObject jsonObj = new JSONObject();
-                    jsonObj.put("message", "`processtask_form`表缺少数据");
+                    jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.processtaskformmissing"));
                     jsonObj.put("formUuid", formUuid);
                     list.add(jsonObj);
                 } else if (!Objects.equals(oldProcessTaskFormVo.getFormUuid(), formUuid)) {
                     JSONObject jsonObj = new JSONObject();
-                    jsonObj.put("message", "`processtask_form`表`form_uuid`字段值不相等");
+                    jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.processtaskformuuidmismatch"));
                     jsonObj.put("formUuid", formUuid);
                     jsonObj.put("oldProcessTaskFormVo", oldProcessTaskFormVo);
                     list.add(jsonObj);
@@ -543,7 +545,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
             oldProcessStepList.sort(Comparator.comparing(ProcessStepVo::getUuid));
             if (!Objects.equals(processStepList.size(), oldProcessStepList.size())) {
                 JSONObject jsonObj = new JSONObject();
-                jsonObj.put("message", "流程步骤数量不一致");
+                jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.stepcountmismatch"));
                 jsonObj.put("newStepSize", processStepList.size());
                 jsonObj.put("oldStepSize", oldProcessStepList.size());
                 list.add(jsonObj);
@@ -557,7 +559,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                         String processStepStr = processStepVoToString(processStepVo);
                         if (!Objects.equals(oldProcessStepStr, processStepStr)) {
                             JSONObject jsonObj = new JSONObject();
-                            jsonObj.put("message", "步骤数据不一致");
+                            jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.stepdatamismatch"));
                             jsonObj.put("newProcessStepVo", processStepVo);
                             jsonObj.put("oldProcessStepVo", oldProcessStepVo);
                             list.add(jsonObj);
@@ -570,7 +572,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
             }
             if (CollectionUtils.isNotEmpty(processStepList) || CollectionUtils.isNotEmpty(oldProcessStepList)) {
                 JSONObject jsonObj = new JSONObject();
-                jsonObj.put("message", "对比后剩下步骤数据");
+                jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.remainingstepdata"));
                 jsonObj.put("newProcessStepList", processStepList);
                 jsonObj.put("oldProcessStepList", oldProcessStepList);
                 list.add(jsonObj);
@@ -604,7 +606,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
             oldProcessStepRelList.sort(Comparator.comparing(ProcessStepRelVo::getUuid));
             if (!Objects.equals(processStepRelList.size(), oldProcessStepRelList.size())) {
                 JSONObject jsonObj = new JSONObject();
-                jsonObj.put("message", "流程步骤连线数量不一致");
+                jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.connectioncountmismatch"));
                 jsonObj.put("newStepRelSize", processStepRelList.size());
                 jsonObj.put("oldStepRelSize", oldProcessStepRelList.size());
                 list.add(jsonObj);
@@ -618,7 +620,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                         String processStepRelStr = processStepRelVoToString(processStepRelVo);
                         if (!Objects.equals(oldProcessStepRelStr, processStepRelStr)) {
                             JSONObject jsonObj = new JSONObject();
-                            jsonObj.put("message", "步骤连线数据不一致");
+                            jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.connectiondatamismatch"));
                             jsonObj.put("newProcessStepRelVo", processStepRelVo);
                             jsonObj.put("oldProcessStepRelVo", oldProcessStepRelVo);
                             list.add(jsonObj);
@@ -631,7 +633,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
             }
             if (CollectionUtils.isNotEmpty(processStepRelList) || CollectionUtils.isNotEmpty(oldProcessStepRelList)) {
                 JSONObject jsonObj = new JSONObject();
-                jsonObj.put("message", "对比后剩下步骤连线数据");
+                jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.remainingconnectiondata"));
                 jsonObj.put("newProcessStepRelList", processStepRelList);
                 jsonObj.put("oldProcessStepRelList", oldProcessStepRelList);
                 list.add(jsonObj);
@@ -647,7 +649,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                 ProcessScoreTemplateVo oldProcessScoreTemplateVo = getProcessScoreTemplateVoByProcessTaskId(processTaskId);
                 if (oldProcessScoreTemplateVo == null) {
                     JSONObject jsonObj = new JSONObject();
-                    jsonObj.put("message", "`processtask_score_template`表缺少数据");
+                    jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.processtaskscoretemplatemissing"));
                     jsonObj.put("newProcessScoreTemplateVo", processScoreTemplateVo);
                     list.add(jsonObj);
                 } else {
@@ -655,7 +657,7 @@ public class ProcessConfigCheckApi extends PrivateApiComponentBase {
                     String processScoreTemplateStr = processScoreTemplateVoToString(processScoreTemplateVo);
                     if (!Objects.equals(oldProcessScoreTemplateStr, processScoreTemplateStr)) {
                         JSONObject jsonObj = new JSONObject();
-                        jsonObj.put("message", "评分设置数据不一致");
+                        jsonObj.put("message", $.t("nmpap.processconfigcheckapi.message.scoresettingmismatch"));
                         jsonObj.put("newProcessScoreTemplateVo", processScoreTemplateVo);
                         jsonObj.put("oldProcessScoreTemplateVo", oldProcessScoreTemplateVo);
                         list.add(jsonObj);

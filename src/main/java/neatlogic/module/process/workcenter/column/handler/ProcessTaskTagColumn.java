@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskTagColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
 
@@ -41,7 +42,7 @@ public class ProcessTaskTagColumn extends ProcessTaskColumnBase implements IProc
 
     @Override
     public String getDisplayName() {
-        return "标签";
+        return $.t("nmpwch.processtasktagcolumn.getdisplayname");
     }
 
     @Override

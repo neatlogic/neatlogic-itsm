@@ -62,7 +62,7 @@ public class ProcessTaskReapprovalApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单步骤重审接口";
+        return "nmpap.processtaskreapprovalapi.getname";
     }
 
     @Override
@@ -71,11 +71,11 @@ public class ProcessTaskReapprovalApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskreapprovalapi.input.param.desc.processtaskid"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskreapprovalapi.input.param.desc.processtaskstepid"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskreapprovalapi.input.param.desc.source")
     })
-    @Description(desc = "工单步骤重审接口")
+    @Description(desc = "nmpap.processtaskreapprovalapi.getname")
     @Override
     @ResubmitInterval(3)
     public Object myDoService(JSONObject paramObj) throws Exception {

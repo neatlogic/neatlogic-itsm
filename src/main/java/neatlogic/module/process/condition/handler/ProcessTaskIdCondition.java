@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     @Override
@@ -23,7 +24,7 @@ public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements 
 
     @Override
     public String getDisplayName() {
-        return "工单id";
+        return $.t("nmpch.processtaskidcondition.getdisplayname");
     }
 
 	@Override

@@ -35,7 +35,7 @@ public class ProcessTaskShowHideApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "隐藏显示工单";
+        return "nmpap.processtaskshowhideapi.getname";
     }
 
     @Override
@@ -43,10 +43,10 @@ public class ProcessTaskShowHideApi extends PrivateApiComponentBase {
         return null;
     }
     @Input({
-        @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id", isRequired = true),
-        @Param(name = "isShow", type = ApiParamType.INTEGER, desc = "是否 1显示/0隐藏", isRequired = true)
+        @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "nmpap.processtaskshowhideapi.input.param.desc.processtaskid", isRequired = true),
+        @Param(name = "isShow", type = ApiParamType.INTEGER, desc = "nmpap.processtaskshowhideapi.input.param.desc.isshow", isRequired = true)
     })
-    @Description(desc = "隐藏显示工单")
+    @Description(desc = "nmpap.processtaskshowhideapi.getname")
     @Override
     @ResubmitInterval(3)
     public Object myDoService(JSONObject jsonObj) throws Exception {

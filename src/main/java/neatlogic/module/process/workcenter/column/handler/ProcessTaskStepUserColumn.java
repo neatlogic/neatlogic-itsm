@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
     @Autowired
@@ -41,7 +42,7 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 
     @Override
     public String getDisplayName() {
-        return "步骤处理人";
+        return $.t("nmpwch.processtaskstepusercolumn.getdisplayname");
     }
 
     @Override

@@ -41,7 +41,7 @@ public class ProcessTaskTransferableStepListApi extends PrivateApiComponentBase 
 
 	@Override
 	public String getName() {
-		return "当前用户可转交的步骤列表接口";
+		return "nmpap.processtasktransferablesteplistapi.getname";
 	}
 
 	@Override
@@ -49,12 +49,12 @@ public class ProcessTaskTransferableStepListApi extends PrivateApiComponentBase 
 		return null;
 	}
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true)
+		@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "nmpap.processtasktransferablesteplistapi.input.param.desc.processtaskid", isRequired = true)
 	})
 	@Output({
-		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表")
+		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "nmpap.processtasktransferablesteplistapi.output.param.desc.return.name")
 	})
-	@Description(desc = "当前用户可转交的步骤列表接口")
+	@Description(desc = "nmpap.processtasktransferablesteplistapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");

@@ -27,7 +27,7 @@ public class WorkcenterOperationListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "搜索工单中心操作";
+        return "nmpaw.workcenteroperationlistapi.getname";
     }
 
     @Override
@@ -36,11 +36,11 @@ public class WorkcenterOperationListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "工单id列表"),
+            @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "nmpaw.workcenteroperationlistapi.input.param.desc.processtaskidlist"),
     })
     @Output({
     })
-    @Description(desc = "工单中心操作搜索接口")
+    @Description(desc = "nmpaw.workcenteroperationlistapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<Long> processTaskIdList = jsonObj.getJSONArray("processTaskIdList").toJavaList(Long.class);

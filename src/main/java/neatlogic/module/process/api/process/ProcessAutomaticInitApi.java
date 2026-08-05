@@ -26,7 +26,7 @@ public class ProcessAutomaticInitApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "获取automatic初始化数据接口";
+		return "nmpap.processautomaticinitapi.getname";
 	}
 
 	@Override
@@ -36,12 +36,12 @@ public class ProcessAutomaticInitApi extends PrivateApiComponentBase {
 
 	@Input({})
 	@Output({
-		@Param(name = "failPolicyList[].value", type = ApiParamType.STRING, isRequired = true, desc = "失败策略"),
-		@Param(name = "failPolicyList[].text", type = ApiParamType.STRING, isRequired = true, desc = "失败策略名"),
-		@Param(name = "callbackList[].value", type = ApiParamType.STRING, isRequired = true, desc = "回调类型"),
-		@Param(name = "callbackList[].text", type = ApiParamType.STRING, isRequired = true, desc = "回调类型名"),
+		@Param(name = "failPolicyList[].value", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processautomaticinitapi.output.param.desc.failpolicylist.value"),
+		@Param(name = "failPolicyList[].text", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processautomaticinitapi.output.param.desc.failpolicylist.text"),
+		@Param(name = "callbackList[].value", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processautomaticinitapi.output.param.desc.callbacklist.value"),
+		@Param(name = "callbackList[].text", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processautomaticinitapi.output.param.desc.callbacklist.text"),
 	})
-	@Description(desc="获取automatic初始化数据接口")
+	@Description(desc="nmpap.processautomaticinitapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultJson = new JSONObject();

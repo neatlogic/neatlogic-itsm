@@ -39,7 +39,7 @@ public class PriorityDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "优先级信息删除";
+        return "nmpap.prioritydeleteapi.getname";
     }
 
     @Override
@@ -48,9 +48,9 @@ public class PriorityDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "优先级uuid")
+            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.prioritydeleteapi.input.param.desc.uuid")
     })
-    @Description(desc = "优先级信息删除")
+    @Description(desc = "nmpap.prioritydeleteapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");

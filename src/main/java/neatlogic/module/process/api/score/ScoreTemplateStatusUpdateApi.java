@@ -34,7 +34,7 @@ public class ScoreTemplateStatusUpdateApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "修改评分模版激活状态";
+        return "nmpas.scoretemplatestatusupdateapi.getname";
     }
 
     @Override
@@ -42,8 +42,8 @@ public class ScoreTemplateStatusUpdateApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({ @Param( name = "id", type = ApiParamType.LONG,isRequired = true,desc = "评分模版ID"),
-             @Param( name = "isActive", type = ApiParamType.INTEGER,isRequired = true,desc = "是否激活")
+    @Input({ @Param( name = "id", type = ApiParamType.LONG,isRequired = true,desc = "nmpas.scoretemplatestatusupdateapi.input.param.desc.id"),
+             @Param( name = "isActive", type = ApiParamType.INTEGER,isRequired = true,desc = "nmpas.scoretemplatestatusupdateapi.input.param.desc.isactive")
     })
     @Output({})
     @Override

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMatrixPrivateDataSourceHandler {
 
@@ -24,7 +25,7 @@ public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMat
         JSONArray attributeDefinedList = new JSONArray();
         {
             JSONObject jsonObj = new JSONObject();
-            jsonObj.put("name", "状态码");
+            jsonObj.put("name", $.t("nmpmh.processtaskstepstatusmatrixprivatedatasourcehandler.runtime.label.1"));
             jsonObj.put("label", "status");
             jsonObj.put("isPrimaryKey", 1);
             jsonObj.put("isSearchable", 1);
@@ -32,7 +33,7 @@ public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMat
         }
         {
             JSONObject jsonObj = new JSONObject();
-            jsonObj.put("name", "状态名称");
+            jsonObj.put("name", $.t("nmpmh.processtaskstepstatusmatrixprivatedatasourcehandler.runtime.label.2"));
             jsonObj.put("label", "statusText");
             jsonObj.put("isPrimaryKey", 0);
             jsonObj.put("isSearchable", 1);
@@ -50,7 +51,7 @@ public class ProcessTaskStepStatusMatrixPrivateDataSourceHandler implements IMat
 
     @Override
     public String getName() {
-        return "流程步骤状态";
+        return $.t("nmpmh.processtaskstepstatusmatrixprivatedatasourcehandler.getname");
     }
 
     @Override

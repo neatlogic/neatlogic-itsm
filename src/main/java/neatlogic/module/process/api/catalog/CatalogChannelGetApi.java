@@ -39,7 +39,7 @@ public class CatalogChannelGetApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "查看子目录及服务列表";
+		return "nmpac.catalogchannelgetapi.getname";
 	}
 
 	@Override
@@ -48,16 +48,16 @@ public class CatalogChannelGetApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
-		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+		@Param(name = "keyword", type = ApiParamType.STRING, desc = "nmpac.catalogchannelgetapi.input.param.desc.keyword"),
+		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpac.catalogchannelgetapi.input.param.desc.needpage"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpac.catalogchannelgetapi.input.param.desc.pagesize"),
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpac.catalogchannelgetapi.input.param.desc.currentpage")
 		})
 	@Output({
 		@Param(explode=BasePageVo.class),
-		@Param(name="treeList",explode=CatalogVo[].class,desc="目录及服务列表")
+		@Param(name="treeList",explode=CatalogVo[].class,desc="nmpac.catalogchannelgetapi.output.param.desc.treelist")
 	})
-	@Description(desc = "查看子目录及服务列表")
+	@Description(desc = "nmpac.catalogchannelgetapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();

@@ -74,7 +74,7 @@ public class ProcessTaskStepTaskFileSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "任务上传附件接口";
+        return "nmpapt.processtasksteptaskfilesaveapi.getname";
     }
 
     @Override
@@ -83,12 +83,12 @@ public class ProcessTaskStepTaskFileSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "任务id"),
-            @Param(name = "fileId", isRequired = true, type = ApiParamType.LONG, desc = "附件id"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "nmpapt.processtasksteptaskfilesaveapi.input.param.desc.id"),
+            @Param(name = "fileId", isRequired = true, type = ApiParamType.LONG, desc = "nmpapt.processtasksteptaskfilesaveapi.input.param.desc.fileid"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpapt.processtasksteptaskfilesaveapi.input.param.desc.source")
     })
     @Output({})
-    @Description(desc = "任务上传附件接口")
+    @Description(desc = "nmpapt.processtasksteptaskfilesaveapi.getname")
     @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

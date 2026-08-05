@@ -36,7 +36,7 @@ public class ChannelTypeGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "服务类型信息获取";
+        return "nmpac.channeltypegetapi.getname";
     }
 
     @Override
@@ -44,9 +44,9 @@ public class ChannelTypeGetApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "服务类型uuid")})
-    @Output({@Param(name = "Return", explode = ChannelTypeVo.class, desc = "服务类型信息")})
-    @Description(desc = "服务类型信息获取")
+    @Input({@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpac.channeltypegetapi.input.param.desc.uuid")})
+    @Output({@Param(name = "Return", explode = ChannelTypeVo.class, desc = "nmpac.channeltypegetapi.output.param.desc.return.name")})
+    @Description(desc = "nmpac.channeltypegetapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");

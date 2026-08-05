@@ -48,7 +48,7 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "工单回复编辑接口";
+		return "nmpap.processtaskcommenteditapi.getname";
 	}
 
 	@Override
@@ -57,15 +57,15 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "回复id"),
-		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
-		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-		@Param(name = "fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表")
+		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskcommenteditapi.input.param.desc.id"),
+		@Param(name = "content", type = ApiParamType.STRING, desc = "nmpap.processtaskcommenteditapi.input.param.desc.content"),
+		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskcommenteditapi.input.param.desc.source"),
+		@Param(name = "fileIdList", type=ApiParamType.JSONARRAY, desc = "nmpap.processtaskcommenteditapi.input.param.desc.fileidlist")
 	})
 	@Output({
-		@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "当前步骤评论列表")
+		@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "nmpap.processtaskcommenteditapi.output.param.desc.commentlist")
 	})
-	@Description(desc = "工单回复编辑接口")
+	@Description(desc = "nmpap.processtaskcommenteditapi.getname")
 	@Override
 	@ResubmitInterval(3)
 	public Object myDoService(JSONObject jsonObj) throws Exception {

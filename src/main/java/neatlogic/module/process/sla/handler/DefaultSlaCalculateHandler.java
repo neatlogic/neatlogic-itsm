@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+import neatlogic.framework.util.$;
 /**
  * @author linbq
  * @since 2021/11/22 14:59
@@ -32,7 +33,7 @@ import java.util.*;
 public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
     @Override
     public String getName() {
-        return "处理时效计算规则（出厂默认）";
+        return $.t("nmpsh.defaultslacalculatehandler.getname");
     }
 
     @Override
@@ -42,11 +43,7 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
 
     @Override
     public String getDescription() {
-        return "耗时计算规则如下：<br>" +
-                "1.正常一个步骤的处理耗时是完成时间减去激活时间。<br>" +
-                "2.如果一个步骤处理过程有暂停操作，则从暂停到恢复之间的时间段不算耗时。<br>" +
-                "3.如果一个步骤被多次重新激活，则每次处理时间段都累计为耗时。<br>" +
-                "4.如果两个或两个以上步骤的处理时间段有重合部分的话，则重合部分去重，只取一份时间。";
+        return $.t("nmpsh.defaultslacalculatehandler.description");
     }
 
     @Override

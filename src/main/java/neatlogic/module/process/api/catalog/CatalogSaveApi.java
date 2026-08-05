@@ -58,8 +58,8 @@ public class CatalogSaveApi extends PrivateApiComponentBase {
 			@Param(name = "icon", type = ApiParamType.STRING, isRequired= false, desc = "common.icon"),
 			@Param(name = "color", type = ApiParamType.STRING, isRequired= false, desc = "common.color"),
 			@Param(name = "desc", type = ApiParamType.STRING, isRequired= false, desc = "common.description", maxLength = 200, xss = true),
-			@Param(name = "reportAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.reportauthoritylist", help = "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
-			@Param(name = "viewAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.viewauthoritylist", help = "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]")
+			@Param(name = "reportAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.reportauthoritylist", help = "nmpac.catalogsaveapi.input.param.help.reportauthoritylist"),
+			@Param(name = "viewAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.viewauthoritylist", help = "nmpac.catalogsaveapi.input.param.help.viewauthoritylist")
 	})
 	@Output({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "common.uuid")

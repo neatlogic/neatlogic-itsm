@@ -119,13 +119,13 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid", help = "从工单中心进入上报页时，传processTaskId"),
-            @Param(name = "copyProcessTaskId", type = ApiParamType.LONG, desc = "term.itsm.copyprocesstaskid", help = "从复制上报进入上报页时，传copyProcessTaskId"),
-            @Param(name = "channelUuid", type = ApiParamType.STRING, desc = "term.itsm.channeluuid", help = "从服务目录进入上报页时，传channelUuid"),
-            @Param(name = "fromProcessTaskId", type = ApiParamType.LONG, desc = "term.itsm.fromprocesstaskid", help = "从转报进入上报页时，传fromProcessTaskId"),
-            @Param(name = "fromProcessTaskStepId", type = ApiParamType.LONG, desc = "term.itsm.fromprocesstaskstepid", help = "从转报进入上报页时，传fromProcessTaskStepId"),
-            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "term.itsm.channeltyperelationid", help = "从转报进入上报页时，传channelTypeRelationId"),
-            @Param(name = "parentProcessTaskStepId", type = ApiParamType.LONG, desc = "nmpap.processtaskdraftgetapi.input.param.desc.parentprocesstaskstepid", help = "创建子流程时，传parentProcessTaskStepId")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid", help = "nmpap.processtaskdraftgetapi.input.param.help.processtaskid"),
+            @Param(name = "copyProcessTaskId", type = ApiParamType.LONG, desc = "term.itsm.copyprocesstaskid", help = "nmpap.processtaskdraftgetapi.input.param.help.copyprocesstaskid"),
+            @Param(name = "channelUuid", type = ApiParamType.STRING, desc = "term.itsm.channeluuid", help = "nmpap.processtaskdraftgetapi.input.param.help.channeluuid"),
+            @Param(name = "fromProcessTaskId", type = ApiParamType.LONG, desc = "term.itsm.fromprocesstaskid", help = "nmpap.processtaskdraftgetapi.input.param.help.fromprocesstaskid"),
+            @Param(name = "fromProcessTaskStepId", type = ApiParamType.LONG, desc = "term.itsm.fromprocesstaskstepid", help = "nmpap.processtaskdraftgetapi.input.param.help.fromprocesstaskstepid"),
+            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "term.itsm.channeltyperelationid", help = "nmpap.processtaskdraftgetapi.input.param.help.channeltyperelationid"),
+            @Param(name = "parentProcessTaskStepId", type = ApiParamType.LONG, desc = "nmpap.processtaskdraftgetapi.input.param.desc.parentprocesstaskstepid", help = "nmpap.processtaskdraftgetapi.input.param.help.parentprocesstaskstepid")
     })
     @Output({
             @Param(explode = ProcessTaskVo.class, desc = "term.itsm.processtaskinfo")

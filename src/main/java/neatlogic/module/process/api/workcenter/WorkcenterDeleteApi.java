@@ -38,7 +38,7 @@ public class WorkcenterDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单中心分类删除接口";
+        return "nmpaw.workcenterdeleteapi.getname";
     }
 
     @Override
@@ -47,12 +47,12 @@ public class WorkcenterDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = true)
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpaw.workcenterdeleteapi.input.param.desc.uuid", isRequired = true)
     })
     @Output({
 
     })
-    @Description(desc = "工单中心分类删除接口")
+    @Description(desc = "nmpaw.workcenterdeleteapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");

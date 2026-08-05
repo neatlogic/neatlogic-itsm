@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
 
@@ -27,7 +28,7 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
 
     @Override
     public String getDisplayName() {
-        return "工单状态";
+        return $.t("nmpwch.processtaskstatuscolumn.getdisplayname");
     }
 
     @Override

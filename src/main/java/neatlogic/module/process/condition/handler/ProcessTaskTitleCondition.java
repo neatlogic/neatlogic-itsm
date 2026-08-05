@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -32,7 +33,7 @@ public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implemen
 
     @Override
     public String getDisplayName() {
-        return "标题";
+        return $.t("nmpch.processtasktitlecondition.getdisplayname");
     }
 
     @Override

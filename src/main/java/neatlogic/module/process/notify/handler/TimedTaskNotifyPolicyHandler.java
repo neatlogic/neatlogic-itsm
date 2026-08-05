@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 /**
  * 定时任务通知策略处理器
  * @author: linbq
@@ -31,7 +32,7 @@ import java.util.List;
 public class TimedTaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     @Override
     public String getName() {
-        return "定时任务";
+        return $.t("nmpnh.timedtasknotifypolicyhandler.getname");
     }
 
     @Override

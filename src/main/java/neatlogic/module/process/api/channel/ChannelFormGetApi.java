@@ -65,7 +65,7 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "服务绑定的表单属性信息获取接口";
+        return "nmpac.channelformgetapi.getname";
     }
 
     @Override
@@ -74,12 +74,12 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "channelUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "服务uuidList"),
+            @Param(name = "channelUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "nmpac.channelformgetapi.input.param.desc.channeluuidlist"),
             @Param(name = "conditionModel", type = ApiParamType.ENUM, rule = "simple,custom,all", isRequired = true,
-                    desc = "条件模型 simple|custom|all  ,  simple:目前用于用于工单中心条件过滤简单模式, custom:目前用于用于工单中心条件过自定义模式、条件分流和sla条件;默认custom")
+                    desc = "nmpac.channelformgetapi.input.param.desc.conditionmodel")
     })
-    @Output({@Param(name = "Return", explode = FormAttributeVo[].class, desc = "表单属性列表")})
-    @Description(desc = "服务绑定的表单属性信息获取接口")
+    @Output({@Param(name = "Return", explode = FormAttributeVo[].class, desc = "nmpac.channelformgetapi.output.param.desc.return.name")})
+    @Description(desc = "nmpac.channelformgetapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<String> channelUuidList =

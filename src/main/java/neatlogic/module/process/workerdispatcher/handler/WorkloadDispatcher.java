@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class WorkloadDispatcher extends WorkerDispatcherBase {
 	
@@ -94,7 +95,7 @@ public class WorkloadDispatcher extends WorkerDispatcherBase {
 
 	@Override
 	public String getHelp() {
-		return "在选择的组中，找出工作量最少（只看待处理和处理中的任务数量）的用户作为当前步骤的处理人";
+		return $.t("nmpwh.workloaddispatcher.gethelp");
 	}
 
 	@Override
@@ -104,7 +105,7 @@ public class WorkloadDispatcher extends WorkerDispatcherBase {
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put("type", "userselect");
 		jsonObj.put("name", "team");
-		jsonObj.put("label", "处理组");
+		jsonObj.put("label", $.t("nmpwh.workloaddispatcher.runtime.label.1"));
 		jsonObj.put("validateList", Arrays.asList("required"));
 		jsonObj.put("multiple", false);
 		jsonObj.put("value", "");

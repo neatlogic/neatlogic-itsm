@@ -37,7 +37,7 @@ public class PrioritySaveApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "优先级信息保存接口";
+		return "nmpap.prioritysaveapi.getname";
 	}
 
 	@Override
@@ -46,16 +46,16 @@ public class PrioritySaveApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, desc = "优先级uuid"),
-		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "名称"),
-		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired=true, desc = "状态"),
-		@Param(name = "color", type = ApiParamType.STRING, isRequired = true, desc = "颜色"),
-		@Param(name = "desc", type = ApiParamType.STRING, xss = true, desc = "描述"),
+		@Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpap.prioritysaveapi.input.param.desc.uuid"),
+		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.prioritysaveapi.input.param.desc.name"),
+		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired=true, desc = "nmpap.prioritysaveapi.input.param.desc.isactive"),
+		@Param(name = "color", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.prioritysaveapi.input.param.desc.color"),
+		@Param(name = "desc", type = ApiParamType.STRING, xss = true, desc = "nmpap.prioritysaveapi.input.param.desc.desc"),
 	})
 	@Output({
-		@Param(name="Return", type = ApiParamType.STRING, desc="优先级uuid")
+		@Param(name="Return", type = ApiParamType.STRING, desc="nmpap.prioritysaveapi.output.param.desc.return.name")
 	})
-	@Description(desc = "优先级信息保存接口")
+	@Description(desc = "nmpap.prioritysaveapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		PriorityVo priorityVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<PriorityVo>() {});

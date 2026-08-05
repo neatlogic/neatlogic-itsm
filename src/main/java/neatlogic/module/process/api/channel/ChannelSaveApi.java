@@ -72,12 +72,12 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
             @Param(name = "sla", type = ApiParamType.INTEGER, desc = "common.sla"),
             @Param(name = "contentHelp", type = ApiParamType.STRING, desc = "term.itsm.contenthelp"),
 //            @Param(name = "isNeedPriority", type = ApiParamType.INTEGER, isRequired = true, desc = "common.isneedpriority"),
-            @Param(name = "isActivePriority", type = ApiParamType.INTEGER, isRequired = true, desc = "是否启用优先级"),
-            @Param(name = "isDisplayPriority", type = ApiParamType.INTEGER, isRequired = true, desc = "是否显示优先级"),
+            @Param(name = "isActivePriority", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpac.channelsaveapi.input.param.desc.isactivepriority"),
+            @Param(name = "isDisplayPriority", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpac.channelsaveapi.input.param.desc.isdisplaypriority"),
             @Param(name = "defaultPriorityUuid", type = ApiParamType.STRING, desc = "common.defaultpriorityuuid"),
             @Param(name = "priorityUuidList", type = ApiParamType.JSONARRAY, desc = "nmrap.updateprioritysortapi.input.param.desc.prioritylist"),
-            @Param(name = "reportAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.reportauthoritylist", help = "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
-            @Param(name = "viewAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.viewauthoritylist", help = "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
+            @Param(name = "reportAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.reportauthoritylist", help = "nmpac.channelsaveapi.input.param.help.reportauthoritylist"),
+            @Param(name = "viewAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.viewauthoritylist", help = "nmpac.channelsaveapi.input.param.help.viewauthoritylist"),
             @Param(name = "channelTypeUuid", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.channeltypeuuid"),
             @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "common.config")
     })

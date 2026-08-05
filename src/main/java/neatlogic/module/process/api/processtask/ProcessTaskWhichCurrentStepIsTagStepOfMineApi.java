@@ -39,7 +39,7 @@ public class ProcessTaskWhichCurrentStepIsTagStepOfMineApi extends PrivateApiCom
 
     @Override
     public String getName() {
-        return "我的待办的工单中当前处理节点是打了某个标签的节点的工单列表";
+        return "nmpap.processtaskwhichcurrentstepistagstepofmineapi.getname";
     }
 
     @Override
@@ -48,22 +48,22 @@ public class ProcessTaskWhichCurrentStepIsTagStepOfMineApi extends PrivateApiCom
     }
 
     @Input({
-            @Param(name = "userId", type = ApiParamType.STRING, isRequired = true, desc = "用户ID"),
-            @Param(name = "tag", type = ApiParamType.STRING, isRequired = true, desc = "标签名称"),
+            @Param(name = "userId", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processtaskwhichcurrentstepistagstepofmineapi.input.param.desc.userid"),
+            @Param(name = "tag", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processtaskwhichcurrentstepistagstepofmineapi.input.param.desc.tag"),
     })
     @Output({
-            @Param(name = "id", type = ApiParamType.LONG, desc = "工单ID"),
-            @Param(name = "title", type = ApiParamType.STRING, desc = "工单标题"),
-            @Param(name = "channelName", type = ApiParamType.STRING, desc = "服务名称"),
-            @Param(name = "status", type = ApiParamType.STRING, desc = "工单状态"),
-            @Param(name = "stepName", type = ApiParamType.STRING, desc = "当前步骤"),
-            @Param(name = "stepStatus", type = ApiParamType.STRING, desc = "当前步骤状态"),
-            @Param(name = "userId", type = ApiParamType.STRING, desc = "当前步骤处理人id"),
-            @Param(name = "userName", type = ApiParamType.STRING, desc = "当前步骤处理人名称"),
-            @Param(name = "teamName", type = ApiParamType.STRING, desc = "当前步骤处理组"),
-            @Param(name = "roleName", type = ApiParamType.STRING, desc = "当前步骤处理角色"),
+            @Param(name = "id", type = ApiParamType.LONG, desc = "nmpap.processtaskwhichcurrentstepistagstepofmineapi.output.param.desc.id"),
+            @Param(name = "title", type = ApiParamType.STRING, desc = "nmpap.processtaskwhichcurrentstepistagstepofmineapi.output.param.desc.title"),
+            @Param(name = "channelName", type = ApiParamType.STRING, desc = "nmpap.processtaskwhichcurrentstepistagstepofmineapi.output.param.desc.channelname"),
+            @Param(name = "status", type = ApiParamType.STRING, desc = "nmpap.processtaskwhichcurrentstepistagstepofmineapi.output.param.desc.status"),
+            @Param(name = "stepName", type = ApiParamType.STRING, desc = "nmpap.processtaskwhichcurrentstepistagstepofmineapi.output.param.desc.stepname"),
+            @Param(name = "stepStatus", type = ApiParamType.STRING, desc = "nmpap.processtaskwhichcurrentstepistagstepofmineapi.output.param.desc.stepstatus"),
+            @Param(name = "userId", type = ApiParamType.STRING, desc = "nmpap.processtaskwhichcurrentstepistagstepofmineapi.output.param.desc.userid"),
+            @Param(name = "userName", type = ApiParamType.STRING, desc = "nmpap.processtaskwhichcurrentstepistagstepofmineapi.output.param.desc.username"),
+            @Param(name = "teamName", type = ApiParamType.STRING, desc = "nmpap.processtaskwhichcurrentstepistagstepofmineapi.output.param.desc.teamname"),
+            @Param(name = "roleName", type = ApiParamType.STRING, desc = "nmpap.processtaskwhichcurrentstepistagstepofmineapi.output.param.desc.rolename"),
     })
-    @Description(desc = "我的待办的工单中当前处理节点是打了某个标签的节点的工单列表")
+    @Description(desc = "nmpap.processtaskwhichcurrentstepistagstepofmineapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         return processTaskService.getProcessTaskListWhichIsProcessingByUserAndTag(jsonObj);

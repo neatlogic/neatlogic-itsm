@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Service
 public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
 
@@ -50,7 +51,7 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
         jsonObj.put("name", "teamUserTitle");
         jsonObj.put("search", true);
         jsonObj.put("dynamicUrl", "api/rest/user/title/search");
-        jsonObj.put("label", "职务");
+        jsonObj.put("label", $.t("nmpwh.ownerleaderdispatcher.runtime.label.1"));
         jsonObj.put("validateList", Collections.singletonList("required"));
         jsonObj.put("multiple", false);
         jsonObj.put("textName", "name");
@@ -64,7 +65,7 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
 
     @Override
     public String getHelp() {
-        return "在上报人所在的组及父组中，找出与选择头衔相同的用户作为当前步骤的处理人";
+        return $.t("nmpwh.ownerleaderdispatcher.gethelp");
     }
 
     @Override

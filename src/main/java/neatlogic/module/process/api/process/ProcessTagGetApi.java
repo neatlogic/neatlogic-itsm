@@ -36,7 +36,7 @@ public class ProcessTagGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取标签_下拉";
+        return "nmpap.processtaggetapi.getname";
     }
 
     @Override
@@ -45,17 +45,17 @@ public class ProcessTagGetApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
-            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "默认值列表"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "nmpap.processtaggetapi.input.param.desc.keyword"),
+            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "nmpap.processtaggetapi.input.param.desc.defaultvalue"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpap.processtaggetapi.input.param.desc.needpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpap.processtaggetapi.input.param.desc.pagesize"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpap.processtaggetapi.input.param.desc.currentpage")
     })
     @Output({
             @Param(explode = BasePageVo.class),
-            @Param(name = "list", explode = ValueTextVo[].class, desc = "流程列表")
+            @Param(name = "list", explode = ValueTextVo[].class, desc = "nmpap.processtaggetapi.output.param.desc.list")
     })
-    @Description(desc = "获取标签_下拉")
+    @Description(desc = "nmpap.processtaggetapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();

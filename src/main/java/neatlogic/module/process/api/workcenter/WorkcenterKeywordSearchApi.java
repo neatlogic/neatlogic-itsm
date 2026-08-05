@@ -52,7 +52,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "搜索工单中心关键字提示";
+        return "nmpaw.workcenterkeywordsearchapi.getname";
     }
 
     @Override
@@ -60,11 +60,11 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "keyword", type = ApiParamType.STRING, maxLength = 500, desc = "关键字"),
-            @Param(name = "pageSize", type = ApiParamType.STRING, desc = "选项显示数量"),
-            @Param(name = "isCombine", type = ApiParamType.INTEGER, desc = "分开：1（pc端）；融合：0（移动端）；  默认1；")})
-    @Output({@Param(name = "dataList", type = ApiParamType.JSONARRAY, desc = "展示的值")})
-    @Description(desc = "工单中心关键字搜索提示接口，用于输入框输入关键字后，获取提示选项")
+    @Input({@Param(name = "keyword", type = ApiParamType.STRING, maxLength = 500, desc = "nmpaw.workcenterkeywordsearchapi.input.param.desc.keyword"),
+            @Param(name = "pageSize", type = ApiParamType.STRING, desc = "nmpaw.workcenterkeywordsearchapi.input.param.desc.pagesize"),
+            @Param(name = "isCombine", type = ApiParamType.INTEGER, desc = "nmpaw.workcenterkeywordsearchapi.input.param.desc.iscombine")})
+    @Output({@Param(name = "dataList", type = ApiParamType.JSONARRAY, desc = "nmpaw.workcenterkeywordsearchapi.output.param.desc.datalist")})
+    @Description(desc = "nmpaw.workcenterkeywordsearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String keyword = jsonObj.getString("keyword");

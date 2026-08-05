@@ -61,7 +61,7 @@ public class DelayProcessTaskStepSlaApi extends PrivateApiComponentBase {
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
             @Param(name = "targetProcessTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.targetprocesstaskstepid"),
             @Param(name = "time", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.delaytime"),
-            @Param(name = "unit", type = ApiParamType.ENUM, rule = "day,hour,minute", defaultValue = "minute", desc = "common.timeunit", help = "day:天,hour:小时,minute:分钟，默认为minute"),
+            @Param(name = "unit", type = ApiParamType.ENUM, rule = "day,hour,minute", defaultValue = "minute", desc = "common.timeunit", help = "nmpap.delayprocesstaskstepslaapi.input.param.help.unit"),
     })
     @Output({})
     @Description(desc = "nmpap.delayprocesstaskstepslaapi.getname")

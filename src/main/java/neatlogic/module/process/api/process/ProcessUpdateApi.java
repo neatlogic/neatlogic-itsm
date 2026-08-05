@@ -37,7 +37,7 @@ public class ProcessUpdateApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "流程基本信息更新接口";
+		return "nmpap.processupdateapi.getname";
 	}
 
 	@Override
@@ -45,13 +45,13 @@ public class ProcessUpdateApi extends PrivateApiComponentBase {
 		return null;
 	}
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "流程uuid"),
-		@Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired= true, maxLength = 50, desc = "流程名称")
+		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processupdateapi.input.param.desc.uuid"),
+		@Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired= true, maxLength = 50, desc = "nmpap.processupdateapi.input.param.desc.name")
 	})
 	@Output({
-		@Param(name = "uuid", type = ApiParamType.STRING, desc = "流程uuid")
+		@Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpap.processupdateapi.output.param.desc.uuid")
 	})
-	@Description(desc = "流程基本信息更新接口")
+	@Description(desc = "nmpap.processupdateapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessVo processVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessVo>() {});

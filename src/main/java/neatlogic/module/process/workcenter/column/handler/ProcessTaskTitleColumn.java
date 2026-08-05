@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 
@@ -24,7 +25,7 @@ public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IPr
 
 	@Override
 	public String getDisplayName() {
-		return "标题";
+		return $.t("nmpwch.processtasktitlecolumn.getdisplayname");
 	}
 
 	/*@Override

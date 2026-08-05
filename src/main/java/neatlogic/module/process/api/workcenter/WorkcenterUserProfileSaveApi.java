@@ -33,7 +33,7 @@ public class WorkcenterUserProfileSaveApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "工单中心分类用户设置保存接口";
+		return "nmpaw.workcenteruserprofilesaveapi.getname";
 	}
 
 	@Override
@@ -42,14 +42,14 @@ public class WorkcenterUserProfileSaveApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name="viewType", type = ApiParamType.STRING, desc="数据展示类型：table|card"),
-		@Param(name="workcenterList[0].uuid", type = ApiParamType.STRING, desc="分类uuid"),
-		@Param(name="workcenterList[0].sort", type = ApiParamType.INTEGER, desc="分类排序")
+		@Param(name="viewType", type = ApiParamType.STRING, desc="nmpaw.workcenteruserprofilesaveapi.input.param.desc.viewtype"),
+		@Param(name="workcenterList[0].uuid", type = ApiParamType.STRING, desc="nmpaw.workcenteruserprofilesaveapi.input.param.desc.workcenterlist.0.uuid"),
+		@Param(name="workcenterList[0].sort", type = ApiParamType.INTEGER, desc="nmpaw.workcenteruserprofilesaveapi.input.param.desc.workcenterlist.0.sort")
 	})
 	@Output({
 		
 	})
-	@Description(desc = "工单中心分类用户设置保存接口,如分类排序，数据展示类型")
+	@Description(desc = "nmpaw.workcenteruserprofilesaveapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		if(jsonObj.isEmpty()) {

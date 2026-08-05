@@ -1,5 +1,7 @@
 package neatlogic.module.process.api.channeltype;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -46,7 +48,7 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "服务类型信息保存";
+        return "nmpac.channeltypesaveapi.getname";
     }
 
     @Override
@@ -54,15 +56,15 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "uuid", type = ApiParamType.STRING, desc = "服务类型uuid"),
-            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "名称"),
-            @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "状态"),
-            @Param(name = "prefix", type = ApiParamType.STRING, isRequired = true, desc = "工单号前缀"),
-            @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "工单号策略"),
-            @Param(name = "color", type = ApiParamType.STRING, isRequired = true, desc = "颜色"),
-            @Param(name = "description", type = ApiParamType.STRING, xss = true, desc = "描述")})
-    @Output({@Param(name = "Return", type = ApiParamType.STRING, desc = "服务类型uuid")})
-    @Description(desc = "服务类型信息保存")
+    @Input({@Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpac.channeltypesaveapi.input.param.desc.uuid"),
+            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "nmpac.channeltypesaveapi.input.param.desc.name"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "nmpac.channeltypesaveapi.input.param.desc.isactive"),
+            @Param(name = "prefix", type = ApiParamType.STRING, isRequired = true, desc = "nmpac.channeltypesaveapi.input.param.desc.prefix"),
+            @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "nmpac.channeltypesaveapi.input.param.desc.handler"),
+            @Param(name = "color", type = ApiParamType.STRING, isRequired = true, desc = "nmpac.channeltypesaveapi.input.param.desc.color"),
+            @Param(name = "description", type = ApiParamType.STRING, xss = true, desc = "nmpac.channeltypesaveapi.input.param.desc.description")})
+    @Output({@Param(name = "Return", type = ApiParamType.STRING, desc = "nmpac.channeltypesaveapi.output.param.desc.return.name")})
+    @Description(desc = "nmpac.channeltypesaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ChannelTypeVo channelTypeVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelTypeVo>() {
@@ -84,7 +86,7 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
             }
             if (channelTypeMapper.checkChannelTypeHasReference(uuid) > 0
                     && Objects.equals(channelTypeVo.getIsActive(), 0)) {
-                throw new ChannelTypeHasReferenceException(channelTypeVo.getName(), "禁用");
+                throw new ChannelTypeHasReferenceException(channelTypeVo.getName(), $.t("nmpac.channeltypesaveapi.operation.disable"));
             }
             channelTypeMapper.updateChannelTypeByUuid(channelTypeVo);
         } else {

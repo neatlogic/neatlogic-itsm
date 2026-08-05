@@ -12,6 +12,8 @@
 
 package neatlogic.module.process.dependency.handler;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
@@ -91,7 +93,7 @@ public class WorktimeChannelDependencyHandler extends CustomDependencyHandlerBas
                 dependencyInfoConfig.put("channelUuid", channelVo.getUuid());
 //                dependencyInfoConfig.put("channelName", channelVo.getName());
                 List<String> pathList = new ArrayList<>();
-                pathList.add("服务目录管理");
+        pathList.add($.t("nmpdh.path.servicecatalogmanagement"));
                 String lastName = channelVo.getName();
 //                String pathFormat = "服务目录管理-${DATA.channelName}";
                 String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/catalog-manage?uuid=${DATA.channelUuid}";

@@ -85,7 +85,7 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单流程图";
+        return "nmpap.processtaskflowchartapi.getname";
     }
 
     @Override
@@ -99,15 +99,15 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id"),
-            @Param(name = "channelUuid", type = ApiParamType.STRING, desc = "工单id")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "nmpap.processtaskflowchartapi.input.param.desc.processtaskid"),
+            @Param(name = "channelUuid", type = ApiParamType.STRING, desc = "nmpap.processtaskflowchartapi.input.param.desc.channeluuid")
     })
     @Output({
-            @Param(name = "config", explode = ProcessTaskStepVo[].class, desc = "流程图信息"),
-            @Param(name = "processTaskStepList", explode = ProcessTaskStepVo[].class, desc = "步骤状态列表"),
-            @Param(name = "processTaskStepRelList", explode = ProcessTaskStepVo[].class, desc = "连线状态列表")
+            @Param(name = "config", explode = ProcessTaskStepVo[].class, desc = "nmpap.processtaskflowchartapi.output.param.desc.config"),
+            @Param(name = "processTaskStepList", explode = ProcessTaskStepVo[].class, desc = "nmpap.processtaskflowchartapi.output.param.desc.processtasksteplist"),
+            @Param(name = "processTaskStepRelList", explode = ProcessTaskStepVo[].class, desc = "nmpap.processtaskflowchartapi.output.param.desc.processtasksteprellist")
     })
-    @Description(desc = "工单流程图")
+    @Description(desc = "nmpap.processtaskflowchartapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");

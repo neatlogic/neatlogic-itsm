@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.process.service;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -523,7 +525,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                             if (value == null) {
                                 value = StringUtils.EMPTY;
                             }
-                            failedReason = String.format("不满足成功条件：%s%s%s", name, expressionName, value);
+                            failedReason = $.t("nmps.processtaskautomaticserviceimpl.successconditionnotmet", name, expressionName, value);
                         }
                     }
                 }
@@ -648,7 +650,7 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                             if (value == null) {
                                 value = StringUtils.EMPTY;
                             }
-                            failedReason = String.format("满足失败条件：%s%s%s", name, expressionName, value);
+                            failedReason = $.t("nmps.processtaskautomaticserviceimpl.failureconditionmet", name, expressionName, value);
                         }
                     }
                 }
@@ -735,8 +737,8 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
     private JSONObject getCallbackAudit(AutomaticConfigVo automaticConfigVo) {
         JSONObject failConfig = new JSONObject();
         JSONObject successConfig = new JSONObject();
-        failConfig.put("default", "默认按状态码判断，4xx和5xx表示失败");
-        successConfig.put("default", "默认按状态码判断，2xx和3xx表示成功");
+        failConfig.put("default", $.t("nmps.processtaskautomaticserviceimpl.defaultfailurecondition"));
+        successConfig.put("default", $.t("nmps.processtaskautomaticserviceimpl.defaultsuccesscondition"));
         JSONObject callbackAudit = new JSONObject();
         callbackAudit.put("integrationUuid", automaticConfigVo.getCallbackIntegrationUuid());
         callbackAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());

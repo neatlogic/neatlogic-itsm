@@ -45,7 +45,7 @@ public class CatalogChannelTreeSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "服务目录及通道树查询接口";
+        return "nmpac.catalogchanneltreesearchapi.getname";
     }
 
     @Override
@@ -55,9 +55,9 @@ public class CatalogChannelTreeSearchApi extends PrivateApiComponentBase {
 
     @Input({})
     @Output({
-            @Param(name = "Return", explode = CatalogVo[].class, desc = "服务目录及通道树")
+            @Param(name = "Return", explode = CatalogVo[].class, desc = "nmpac.catalogchanneltreesearchapi.output.param.desc.return.name")
     })
-    @Description(desc = "服务目录及通道树查询接口")
+    @Description(desc = "nmpac.catalogchanneltreesearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
 

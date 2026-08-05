@@ -47,7 +47,7 @@ public class TaskReferenceListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取子任务被引用的流程列表";
+        return "nmpat.taskreferencelistapi.getname";
     }
 
     @Override
@@ -56,19 +56,19 @@ public class TaskReferenceListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", isRequired = true, type = ApiParamType.STRING, desc = "子任务策略id"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+            @Param(name = "id", isRequired = true, type = ApiParamType.STRING, desc = "nmpat.taskreferencelistapi.input.param.desc.id"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpat.taskreferencelistapi.input.param.desc.needpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpat.taskreferencelistapi.input.param.desc.pagesize"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpat.taskreferencelistapi.input.param.desc.currentpage")
     })
     @Output({
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "当前页码"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = true, desc = "页大小"),
-            @Param(name = "pageCount", type = ApiParamType.INTEGER, isRequired = true, desc = "总页数"),
-            @Param(name = "rowNum", type = ApiParamType.INTEGER, isRequired = true, desc = "总行数"),
-            @Param(name = "tbodyList", explode = ValueTextVo[].class, desc = "流程列表")
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpat.taskreferencelistapi.output.param.desc.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpat.taskreferencelistapi.output.param.desc.pagesize"),
+            @Param(name = "pageCount", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpat.taskreferencelistapi.output.param.desc.pagecount"),
+            @Param(name = "rowNum", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpat.taskreferencelistapi.output.param.desc.rownum"),
+            @Param(name = "tbodyList", explode = ValueTextVo[].class, desc = "nmpat.taskreferencelistapi.output.param.desc.tbodylist")
     })
-    @Description(desc = "获取子任务被引用的流程列表接口")
+    @Description(desc = "nmpat.taskreferencelistapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");

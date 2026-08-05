@@ -30,7 +30,7 @@ public class ProcessTaskStepPauseApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "暂停工单步骤";
+        return "nmpap.processtasksteppauseapi.getname";
     }
 
     @Override
@@ -38,12 +38,12 @@ public class ProcessTaskStepPauseApi extends PrivateApiComponentBase {
         return null;
     }
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤id"),
-            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtasksteppauseapi.input.param.desc.processtaskid"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtasksteppauseapi.input.param.desc.processtaskstepid"),
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processtasksteppauseapi.input.param.desc.content"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtasksteppauseapi.input.param.desc.source")
     })
-    @Description(desc ="暂停工单步骤")
+    @Description(desc ="nmpap.processtasksteppauseapi.getname")
     @Override
     @ResubmitInterval(3)
     public Object myDoService(JSONObject jsonObj) throws Exception {

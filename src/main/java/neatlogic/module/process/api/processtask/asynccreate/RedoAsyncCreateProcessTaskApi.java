@@ -52,7 +52,7 @@ public class RedoAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, desc = "id"),
+            @Param(name = "id", type = ApiParamType.LONG, desc = "nmpapa.redoasynccreateprocesstaskapi.input.param.desc.id"),
             @Param(name = "serverId", type = ApiParamType.INTEGER, desc = "term.framework.serverid"),
     })
     @Output({

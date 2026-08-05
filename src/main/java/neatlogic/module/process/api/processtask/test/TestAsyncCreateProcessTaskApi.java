@@ -43,9 +43,9 @@ public class TestAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "channel", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.channel", help = "支持channelUuid和channelName入参"),
+            @Param(name = "channel", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.channel", help = "nmpapt.testasynccreateprocesstaskapi.input.param.help.channel"),
             @Param(name = "title", type = ApiParamType.STRING, isRequired = true, maxLength = 80, desc = "common.title"),
-            @Param(name = "owner", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.owner", help = "上报人uuid和上报人id入参"),
+            @Param(name = "owner", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.owner", help = "nmpapt.testasynccreateprocesstaskapi.input.param.help.owner"),
             @Param(name = "reporter", type = ApiParamType.STRING, desc = "term.itsm.reporter"),
             @Param(name = "priority", type = ApiParamType.STRING, isRequired = true, desc = "common.priority"),
             @Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "term.itsm.formattributedatalist"),
@@ -57,8 +57,8 @@ public class TestAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
             @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "common.fileidlist"),
             @Param(name = "handlerStepInfo", type = ApiParamType.JSONOBJECT, desc = "term.itsm.handlerstepinfo"),
             @Param(name = "source", type = ApiParamType.STRING, desc = "common.source"),
-//            @Param(name = "newProcessTaskId", type = ApiParamType.LONG, desc = "指定工单id，则会使用该id作为工单id"),
-            @Param(name = "region", type = ApiParamType.STRING, desc = "common.region", help = "全路径or地域id"),
+//            @Param(name = "newProcessTaskId", type = ApiParamType.LONG, desc = "nmpapt.testasynccreateprocesstaskapi.input.param.desc.newprocesstaskid"),
+            @Param(name = "region", type = ApiParamType.STRING, desc = "common.region", help = "nmpapt.testasynccreateprocesstaskapi.input.param.help.region"),
             @Param(name = "count", type = ApiParamType.INTEGER, isRequired = true, desc = "common.count")
     })
     @Output({

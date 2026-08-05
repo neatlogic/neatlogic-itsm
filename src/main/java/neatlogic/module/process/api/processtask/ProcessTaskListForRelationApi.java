@@ -60,7 +60,7 @@ public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询工单列表(关联工单专用)";
+        return "nmpap.processtasklistforrelationapi.getname";
     }
 
     @Override
@@ -69,19 +69,19 @@ public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
     }
 
     @Input({
-        @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "模糊匹配，支持标题"),
-        @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id"),        
-//        @Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务uuid"),
-        @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-        @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-        @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+        @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "nmpap.processtasklistforrelationapi.input.param.desc.keyword"),
+        @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtasklistforrelationapi.input.param.desc.channeltyperelationid"),
+//        @Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processtasklistforrelationapi.input.param.desc.channeluuid"),
+        @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtasklistforrelationapi.input.param.desc.processtaskid"),
+        @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpap.processtasklistforrelationapi.input.param.desc.needpage"),
+        @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpap.processtasklistforrelationapi.input.param.desc.pagesize"),
+        @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpap.processtasklistforrelationapi.input.param.desc.currentpage")
     })
     @Output({
-        @Param(name = "tbodyList", explode = ProcessTaskVo[].class, desc = "工单列表"),
+        @Param(name = "tbodyList", explode = ProcessTaskVo[].class, desc = "nmpap.processtasklistforrelationapi.output.param.desc.tbodylist"),
         @Param(explode = BasePageVo.class)
     })
-    @Description(desc = "查询工单列表(关联工单专用)")
+    @Description(desc = "nmpap.processtasklistforrelationapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();

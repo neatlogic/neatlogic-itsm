@@ -44,7 +44,7 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "催办工单";
+		return "nmpap.processtaskurgeapi.getname";
 	}
 
 	@Override
@@ -53,10 +53,10 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
-		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskurgeapi.input.param.desc.processtaskid"),
+		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskurgeapi.input.param.desc.source")
 	})
-	@Description(desc = "催办工单")
+	@Description(desc = "nmpap.processtaskurgeapi.getname")
 	@ResubmitInterval(3)
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

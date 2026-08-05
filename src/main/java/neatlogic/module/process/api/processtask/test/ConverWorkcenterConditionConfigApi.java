@@ -46,7 +46,7 @@ class ConverWorkcenterConditionConfigApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "转换工单中心配置数据";
+        return "nmpapt.converworkcenterconditionconfigapi.getname";
     }
 
     @Override
@@ -55,7 +55,7 @@ class ConverWorkcenterConditionConfigApi extends PrivateApiComponentBase {
     }
 
     @Override
-    @Description(desc = "转换工单中心配置数据（发版后使用，可以重复执行）")
+    @Description(desc = "nmpapt.converworkcenterconditionconfigapi.getname")
     public Object myDoService(JSONObject paramJson) throws Exception {
         List<WorkcenterVo> workcenterList = workcenterMapper.getAllWorkcenterConditionConfig();
         if (CollectionUtils.isNotEmpty(workcenterList)) {

@@ -11,6 +11,7 @@ import neatlogic.framework.process.constvalue.ConditionConfigType;
 import neatlogic.framework.process.constvalue.ProcessFieldType;
 import org.springframework.stereotype.Component;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskProcessingOfMineCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -21,7 +22,7 @@ public class ProcessTaskProcessingOfMineCondition extends ProcessTaskConditionBa
 
     @Override
     public String getDisplayName() {
-        return "我的待办";
+        return $.t("nmpch.processtaskprocessingofminecondition.getdisplayname");
     }
 
     @Override

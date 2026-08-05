@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStepNameCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     @Resource
@@ -37,7 +38,7 @@ public class ProcessTaskStepNameCondition extends ProcessTaskConditionBase imple
 
     @Override
     public String getDisplayName() {
-        return "步骤名";
+        return $.t("nmpch.processtaskstepnamecondition.getdisplayname");
     }
 
     @Override

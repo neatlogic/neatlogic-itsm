@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
     @Autowired
@@ -32,7 +33,7 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 
     @Override
     public String getDisplayName() {
-        return "上报人";
+        return $.t("nmpwch.processtaskownercolumn.getdisplayname");
     }
 
     @Override

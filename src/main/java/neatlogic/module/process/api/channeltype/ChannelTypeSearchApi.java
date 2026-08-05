@@ -32,7 +32,7 @@ public class ChannelTypeSearchApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "服务类型列表搜索";
+		return "nmpac.channeltypesearchapi.getname";
 	}
 
 	@Override
@@ -41,20 +41,20 @@ public class ChannelTypeSearchApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
-		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
-		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+		@Param(name = "keyword", type = ApiParamType.STRING, desc = "nmpac.channeltypesearchapi.input.param.desc.keyword"),
+		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "nmpac.channeltypesearchapi.input.param.desc.isactive", rule = "0,1"),
+		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpac.channeltypesearchapi.input.param.desc.needpage"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpac.channeltypesearchapi.input.param.desc.pagesize"),
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpac.channeltypesearchapi.input.param.desc.currentpage")
 	})
 	@Output({
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "当前页码"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = true, desc = "页大小"),
-		@Param(name = "pageCount", type = ApiParamType.INTEGER, isRequired =true, desc = "总页数"),
-		@Param(name = "rowNum", type = ApiParamType.INTEGER, isRequired = true, desc = "总行数"),
-		@Param(name = "tbodyList", explode = ChannelTypeVo[].class, desc = "服务类型列表")
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpac.channeltypesearchapi.output.param.desc.currentpage"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpac.channeltypesearchapi.output.param.desc.pagesize"),
+		@Param(name = "pageCount", type = ApiParamType.INTEGER, isRequired =true, desc = "nmpac.channeltypesearchapi.output.param.desc.pagecount"),
+		@Param(name = "rowNum", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpac.channeltypesearchapi.output.param.desc.rownum"),
+		@Param(name = "tbodyList", explode = ChannelTypeVo[].class, desc = "nmpac.channeltypesearchapi.output.param.desc.tbodylist")
 	})
-	@Description(desc = "服务类型列表搜索")
+	@Description(desc = "nmpac.channeltypesearchapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ChannelTypeVo channelTypeVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelTypeVo>() {});

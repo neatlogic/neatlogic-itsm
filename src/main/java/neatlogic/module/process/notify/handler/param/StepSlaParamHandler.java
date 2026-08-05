@@ -12,6 +12,8 @@
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.notify.core.INotifyTriggerType;

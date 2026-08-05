@@ -54,7 +54,7 @@ public class WorkcenterSaveAuthApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "修改工单中心分类授权";
+        return "nmpaw.workcentersaveauthapi.getname";
     }
 
     @Override
@@ -63,13 +63,13 @@ public class WorkcenterSaveAuthApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = true),
-            @Param(name = "type", type = ApiParamType.STRING, desc = "分类类型，system|custom 默认custom", isRequired = true),
-            @Param(name = "support", type = ApiParamType.ENUM, rule = "all,mobile,pc", desc = "使用范围，all|pc|mobile，默认值是：all", isRequired = true),
-            @Param(name = "authList", type = ApiParamType.JSONARRAY, desc = "授权列表，如果type是system,则必填")
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpaw.workcentersaveauthapi.input.param.desc.uuid", isRequired = true),
+            @Param(name = "type", type = ApiParamType.STRING, desc = "nmpaw.workcentersaveauthapi.input.param.desc.type", isRequired = true),
+            @Param(name = "support", type = ApiParamType.ENUM, rule = "all,mobile,pc", desc = "nmpaw.workcentersaveauthapi.input.param.desc.support", isRequired = true),
+            @Param(name = "authList", type = ApiParamType.JSONARRAY, desc = "nmpaw.workcentersaveauthapi.input.param.desc.authlist")
     })
-    @Output({@Param(type = ApiParamType.STRING, desc = "分类uuid")})
-    @Description(desc = "修改工单中心分类授权接口")
+    @Output({@Param(type = ApiParamType.STRING, desc = "nmpaw.workcentersaveauthapi.output.param.desc.return")})
+    @Description(desc = "nmpaw.workcentersaveauthapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         WorkcenterVo workcenterVo = JSONObject.toJavaObject(jsonObj, WorkcenterVo.class);

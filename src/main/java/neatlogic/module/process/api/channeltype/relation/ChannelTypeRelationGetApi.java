@@ -33,7 +33,7 @@ public class ChannelTypeRelationGetApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "查询服务类型关系";
+		return "nmpacr.channeltyperelationgetapi.getname";
 	}
 
 	@Override
@@ -42,12 +42,12 @@ public class ChannelTypeRelationGetApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id")
+		@Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "nmpacr.channeltyperelationgetapi.input.param.desc.channeltyperelationid")
 	})
 	@Output({
-		@Param(name = "Return", explode = ChannelTypeRelationVo.class, desc = "服务类型关系信息")
+		@Param(name = "Return", explode = ChannelTypeRelationVo.class, desc = "nmpacr.channeltyperelationgetapi.output.param.desc.return.name")
 	})
-	@Description(desc = "查询服务类型关系")
+	@Description(desc = "nmpacr.channeltyperelationgetapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");

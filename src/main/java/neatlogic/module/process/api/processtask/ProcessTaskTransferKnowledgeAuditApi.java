@@ -38,7 +38,7 @@ public class ProcessTaskTransferKnowledgeAuditApi extends PrivateApiComponentBas
 
     @Override
     public String getName() {
-        return "记录工单转知识活动";
+        return "nmpap.processtasktransferknowledgeauditapi.getname";
     }
 
     @Override
@@ -47,11 +47,11 @@ public class ProcessTaskTransferKnowledgeAuditApi extends PrivateApiComponentBas
     }
 
     @Input({
-        @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-        @Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "知识标题")
+        @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtasktransferknowledgeauditapi.input.param.desc.processtaskid"),
+        @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtasktransferknowledgeauditapi.input.param.desc.source"),
+        @Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processtasktransferknowledgeauditapi.input.param.desc.title")
     })
-    @Description(desc = "记录工单转知识活动")
+    @Description(desc = "nmpap.processtasktransferknowledgeauditapi.getname")
     @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

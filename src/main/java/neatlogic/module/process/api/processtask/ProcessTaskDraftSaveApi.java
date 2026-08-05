@@ -62,7 +62,7 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
             @Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.channeluuid"),
             @Param(name = "title", type = ApiParamType.STRING, isRequired = true, maxLength = 200, desc = "common.title"),
             @Param(name = "owner", type = ApiParamType.STRING, desc = "term.itsm.owner"),
-            @Param(name = "reporter", type = ApiParamType.STRING, desc = "term.itsm.reporter", help = "如果当前登录人和owner不一样则需要额外传reporter。没有代报人，则数据库对应reporter直接null"),
+            @Param(name = "reporter", type = ApiParamType.STRING, desc = "term.itsm.reporter", help = "nmpap.processtaskdraftsaveapi.input.param.help.reporter"),
             @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "common.priorityuuid"),
             @Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "term.itsm.formattributedatalist"),
             @Param(name = "formExtendAttributeDataList", type = ApiParamType.JSONARRAY, desc = "term.itsm.formextendattributedatalist"),
@@ -73,11 +73,11 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
             @Param(name = "tagList", type = ApiParamType.JSONARRAY, desc = "common.taglist"),
             @Param(name = "focusUserUuidList", type = ApiParamType.JSONARRAY, desc = "term.itsm.focususeruuidlist"),
             @Param(name = "handlerStepInfo", type = ApiParamType.JSONOBJECT, desc = "term.itsm.handlerstepinfo"),
-            @Param(name = "fromProcessTaskId", type = ApiParamType.LONG, desc = "term.itsm.fromprocesstaskid", help = "从转报进入上报页时，传fromProcessTaskId"),
-            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "term.itsm.channeltyperelationid", help = "从转报进入上报页时，传channelTypeRelationId"),
+            @Param(name = "fromProcessTaskId", type = ApiParamType.LONG, desc = "term.itsm.fromprocesstaskid", help = "nmpap.processtaskdraftsaveapi.input.param.help.fromprocesstaskid"),
+            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "term.itsm.channeltyperelationid", help = "nmpap.processtaskdraftsaveapi.input.param.help.channeltyperelationid"),
             @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "common.source"),
-            @Param(name = "parentProcessTaskStepId", type = ApiParamType.LONG, desc = "nmpap.processtaskdraftgetapi.input.param.desc.parentprocesstaskstepid", help = "创建子流程时，传parentProcessTaskStepId"),
-            @Param(name = "invoke", type = ApiParamType.STRING, desc = "nmpap.processtaskdraftsaveapi.input.param.desc.invoke", help = "subprocess :子流程"),
+            @Param(name = "parentProcessTaskStepId", type = ApiParamType.LONG, desc = "nmpap.processtaskdraftgetapi.input.param.desc.parentprocesstaskstepid", help = "nmpap.processtaskdraftsaveapi.input.param.help.parentprocesstaskstepid"),
+            @Param(name = "invoke", type = ApiParamType.STRING, desc = "nmpap.processtaskdraftsaveapi.input.param.desc.invoke", help = "nmpap.processtaskdraftsaveapi.input.param.help.invoke"),
             @Param(name = "regionId", type = ApiParamType.LONG, desc = "nmtar.searchregionteamapi.input.param.desc.regionid")
     })
     @Output({

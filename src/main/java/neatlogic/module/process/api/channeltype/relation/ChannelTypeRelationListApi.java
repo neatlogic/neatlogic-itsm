@@ -1,5 +1,7 @@
 package neatlogic.module.process.api.channeltype.relation;
 
+import neatlogic.framework.util.$;
+
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
@@ -43,7 +45,7 @@ public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "查询服务类型关系列表";
+		return "nmpacr.channeltyperelationlistapi.getname";
 	}
 
 	@Override
@@ -52,17 +54,17 @@ public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关系名称，关键字搜索"),
-        @Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
-        @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-        @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-        @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "nmpacr.channeltyperelationlistapi.input.param.desc.keyword"),
+        @Param(name = "isActive", type = ApiParamType.ENUM, desc = "nmpacr.channeltyperelationlistapi.input.param.desc.isactive", rule = "0,1"),
+        @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpacr.channeltyperelationlistapi.input.param.desc.needpage"),
+        @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpacr.channeltyperelationlistapi.input.param.desc.pagesize"),
+        @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpacr.channeltyperelationlistapi.input.param.desc.currentpage")
 	})
 	@Output({
-		@Param(name = "tbodyList", explode = ChannelTypeRelationVo[].class, desc = "服务类型关系列表"),
+		@Param(name = "tbodyList", explode = ChannelTypeRelationVo[].class, desc = "nmpacr.channeltyperelationlistapi.output.param.desc.tbodylist"),
 		@Param(explode = BasePageVo.class)
 	})
-	@Description(desc = "查询服务类型关系列表")
+	@Description(desc = "nmpacr.channeltyperelationlistapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 	    JSONObject resultObj = new JSONObject();
@@ -94,7 +96,7 @@ public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
  	        Map<String, ChannelTypeVo> channelTypeMap = new HashMap<>();
  	        ChannelTypeVo all = new ChannelTypeVo();
  	        all.setUuid("all");
- 	        all.setName("所有");
+	        all.setName($.t("nmpacr.channeltyperelationlistapi.all"));
  	        channelTypeMap.put("all", all);
  	        ChannelTypeVo channelTypeVo = new ChannelTypeVo();
  	        channelTypeVo.setPageSize(1000);

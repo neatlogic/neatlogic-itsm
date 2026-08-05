@@ -51,7 +51,7 @@ public class ListProcessStepApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取流程步骤列表";
+        return "nmpap.listprocessstepapi.getname";
     }
 
     @Override
@@ -60,14 +60,14 @@ public class ListProcessStepApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "channelUuid", type = ApiParamType.STRING, desc = "服务uuid，优先使用服务内定义的流程"),
-            @Param(name = "processUuid", type = ApiParamType.STRING, desc = "流程uuid"),
-            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "选中值")
+            @Param(name = "channelUuid", type = ApiParamType.STRING, desc = "nmpap.listprocessstepapi.input.param.desc.channeluuid"),
+            @Param(name = "processUuid", type = ApiParamType.STRING, desc = "nmpap.listprocessstepapi.input.param.desc.processuuid"),
+            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "nmpap.listprocessstepapi.input.param.desc.defaultvalue")
     })
     @Output({
-            @Param(explode = ProcessStepVo[].class, desc = "流程节点列表")
+            @Param(explode = ProcessStepVo[].class, desc = "nmpap.listprocessstepapi.output.param.desc.processstepvo")
     })
-    @Description(desc = "流程节点组件检索接口")
+    @Description(desc = "nmpap.listprocessstepapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray defaultValue = jsonObj.getJSONArray("defaultValue");

@@ -1,5 +1,7 @@
 package neatlogic.module.process.api.form;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
@@ -56,7 +58,7 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "表单属性值校验接口";
+        return "nmpaf.formattributecheckapi.getname";
     }
 
     @Override
@@ -65,14 +67,14 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "attributeUuid", type = ApiParamType.STRING, isRequired = true, desc = "表单属性uuid"),
-            @Param(name = "data", type = ApiParamType.STRING, isRequired = true, desc = "属性值"),
-            @Param(name = "config", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "校验用到的相关数据")
+            @Param(name = "attributeUuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpaf.formattributecheckapi.input.param.desc.attributeuuid"),
+            @Param(name = "data", type = ApiParamType.STRING, isRequired = true, desc = "nmpaf.formattributecheckapi.input.param.desc.data"),
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "nmpaf.formattributecheckapi.input.param.desc.config")
     })
     @Output({
-            @Param(name = "Return", type = ApiParamType.BOOLEAN, desc = "校验结果")
+            @Param(name = "Return", type = ApiParamType.BOOLEAN, desc = "nmpaf.formattributecheckapi.output.param.desc.return.name")
     })
-    @Description(desc = "表单属性值校验接口")
+    @Description(desc = "nmpaf.formattributecheckapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject config = jsonObj.getJSONObject("config");
@@ -115,7 +117,7 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
                 throw new FormActiveVersionNotFoundExcepiton(processFormVo.getFormUuid());
             }
         } else {
-            throw new ParamIrregularException("config", "config参数中必须包含'processTaskId'或'channelUuid'");
+            throw new ParamIrregularException("config", $.t("nmpaf.formattributecheckapi.configinvalid"));
         }
         String attributeUuid = jsonObj.getString("attributeUuid");
         String mainSceneUuid = formVersionVo.getFormConfig().getString("uuid");

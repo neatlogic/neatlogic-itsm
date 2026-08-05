@@ -43,7 +43,7 @@ public class SearchAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, desc = "id"),
+            @Param(name = "id", type = ApiParamType.LONG, desc = "nmpapa.searchasynccreateprocesstaskapi.input.param.desc.id"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),

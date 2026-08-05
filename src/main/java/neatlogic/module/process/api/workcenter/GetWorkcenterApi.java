@@ -64,7 +64,7 @@ public class GetWorkcenterApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取工单中心分类接口";
+        return "nmpaw.getworkcenterapi.getname";
     }
 
     @Override
@@ -103,12 +103,12 @@ public class GetWorkcenterApi extends PrivateApiComponentBase {
 
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = true)
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpaw.getworkcenterapi.input.param.desc.uuid", isRequired = true)
     })
     @Output({
-            @Param(name = "workcenter", explode = WorkcenterVo.class, desc = "分类信息")
+            @Param(name = "workcenter", explode = WorkcenterVo.class, desc = "nmpaw.getworkcenterapi.output.param.desc.workcenter")
     })
-    @Description(desc = "获取工单中心分类接口")
+    @Description(desc = "nmpaw.getworkcenterapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");

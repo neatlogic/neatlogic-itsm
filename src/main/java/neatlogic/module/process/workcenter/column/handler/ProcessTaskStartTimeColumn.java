@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
 
@@ -27,7 +28,7 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
 
     @Override
     public String getDisplayName() {
-        return "上报时间";
+        return $.t("nmpwch.processtaskstarttimecolumn.getdisplayname");
     }
 
     @Override

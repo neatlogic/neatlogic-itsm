@@ -37,7 +37,7 @@ public class ProcessCommentTemplateDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "删除回复模版";
+        return "nmpac.processcommenttemplatedeleteapi.getname";
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ProcessCommentTemplateDeleteApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param( name = "id", type = ApiParamType.LONG, isRequired = true,desc = "回复模版ID")})
+    @Input({@Param( name = "id", type = ApiParamType.LONG, isRequired = true,desc = "nmpac.processcommenttemplatedeleteapi.input.param.desc.id")})
     @Output({})
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

@@ -53,7 +53,7 @@ public class ProcessTaskSerialNumberUpdateApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "更新历史工单的工单号";
+        return "nmpap.processtaskserialnumberupdateapi.getname";
     }
 
     @Override
@@ -61,8 +61,8 @@ public class ProcessTaskSerialNumberUpdateApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input(@Param(name = "channelTypeUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务类型uuid"))
-    @Description(desc = "更新历史工单的工单号")
+    @Input(@Param(name = "channelTypeUuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processtaskserialnumberupdateapi.input.param.desc.channeltypeuuid"))
+    @Description(desc = "nmpap.processtaskserialnumberupdateapi.getname")
     @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

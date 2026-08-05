@@ -49,7 +49,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "保存任务";
+        return "nmpapt.processtasksteptasksaveapi.getname";
     }
 
     @Override
@@ -58,17 +58,17 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, desc = "任务id，如果不为空则是编辑，为空则新增"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-            @Param(name = "stepTaskUserVoList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "任务处理人列表"),
-            @Param(name = "taskConfigId", type = ApiParamType.LONG, isRequired = true, desc = "任务策略id"),
-            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "id", type = ApiParamType.LONG, desc = "nmpapt.processtasksteptasksaveapi.input.param.desc.id"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "nmpapt.processtasksteptasksaveapi.input.param.desc.processtaskstepid"),
+            @Param(name = "stepTaskUserVoList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "nmpapt.processtasksteptasksaveapi.input.param.desc.steptaskuservolist"),
+            @Param(name = "taskConfigId", type = ApiParamType.LONG, isRequired = true, desc = "nmpapt.processtasksteptasksaveapi.input.param.desc.taskconfigid"),
+            @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "nmpapt.processtasksteptasksaveapi.input.param.desc.content"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpapt.processtasksteptasksaveapi.input.param.desc.source")
     })
     @Output({
-            @Param(name = "Return", type = ApiParamType.LONG, desc = "任务id")
+            @Param(name = "Return", type = ApiParamType.LONG, desc = "nmpapt.processtasksteptasksaveapi.output.param.desc.return.name")
     })
-    @Description(desc = "保存任务接口")
+    @Description(desc = "nmpapt.processtasksteptasksaveapi.getname")
     @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

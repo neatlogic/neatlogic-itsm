@@ -50,7 +50,7 @@ public class TaskSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "新增|更新子任务";
+        return "nmpat.tasksaveapi.getname";
     }
 
     @Override
@@ -59,17 +59,17 @@ public class TaskSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, desc = "任务id,存在则修改，否则新增"),
-            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "关键字，匹配名称"),
-            @Param(name = "num", type = ApiParamType.INTEGER, isRequired = true, desc = "参与人数。-1：不做限制"),
-            @Param(name = "policy", type = ApiParamType.ENUM, isRequired = true, desc = "其中一个人完成即可：any,所有人完成：all", rule = "any,all"),
-            @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "是否激活,激活：1，禁用：0", rule = "0,1"),
-            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "配置信息")
+            @Param(name = "id", type = ApiParamType.LONG, desc = "nmpat.tasksaveapi.input.param.desc.id"),
+            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "nmpat.tasksaveapi.input.param.desc.name"),
+            @Param(name = "num", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpat.tasksaveapi.input.param.desc.num"),
+            @Param(name = "policy", type = ApiParamType.ENUM, isRequired = true, desc = "nmpat.tasksaveapi.input.param.desc.policy", rule = "any,all"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "nmpat.tasksaveapi.input.param.desc.isactive", rule = "0,1"),
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "nmpat.tasksaveapi.input.param.desc.config")
     })
     @Output({
 
     })
-    @Description(desc = "新增|更新子任务接口")
+    @Description(desc = "nmpat.tasksaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long taskId = jsonObj.getLong("id");

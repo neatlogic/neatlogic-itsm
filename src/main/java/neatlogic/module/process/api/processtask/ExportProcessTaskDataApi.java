@@ -41,7 +41,7 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
 
     @Override
     public String getName() {
-        return "工单相关表数据导出";
+        return "nmpap.exportprocesstaskdataapi.getname";
     }
 
     @Override
@@ -50,10 +50,10 @@ public class ExportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单ID")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.exportprocesstaskdataapi.input.param.desc.processtaskid")
     })
     @Output({})
-    @Description(desc = "工单相关表数据导出")
+    @Description(desc = "nmpap.exportprocesstaskdataapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Long processTaskId = paramObj.getLong("processTaskId");

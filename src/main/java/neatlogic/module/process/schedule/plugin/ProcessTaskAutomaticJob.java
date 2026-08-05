@@ -44,12 +44,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import neatlogic.framework.util.$;
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskAutomaticJob extends JobBase {
 	@Override
 	public String getName() {
-		return "工单自动处理回调";
+		return $.t("nmpsp.processtaskautomaticjob.getname");
 	}
 
 

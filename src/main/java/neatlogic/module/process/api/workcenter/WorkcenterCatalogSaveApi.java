@@ -31,7 +31,7 @@ public class WorkcenterCatalogSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "保存工单中心菜单类型";
+        return "nmpaw.workcentercatalogsaveapi.getname";
     }
 
     @Override
@@ -45,13 +45,13 @@ public class WorkcenterCatalogSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, desc = "类型id"),
-            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "类型名")
+            @Param(name = "id", type = ApiParamType.LONG, desc = "nmpaw.workcentercatalogsaveapi.input.param.desc.id"),
+            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "nmpaw.workcentercatalogsaveapi.input.param.desc.name")
     })
     @Output({
-            @Param(explode = WorkcenterCatalogVo.class,desc = "工单中心菜单类型")
+            @Param(explode = WorkcenterCatalogVo.class,desc = "nmpaw.workcentercatalogsaveapi.output.param.desc.workcentercatalogvo")
     })
-    @Description(desc = "保存工单中心菜单类型接口")
+    @Description(desc = "nmpaw.workcentercatalogsaveapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");

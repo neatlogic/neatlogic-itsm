@@ -39,7 +39,7 @@ public class UserAgentSaveApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "保存用户授权代理";
+		return "nmpaa.useragentsaveapi.getname";
 	}
 
 	@Override
@@ -48,10 +48,10 @@ public class UserAgentSaveApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "agentUuid", type = ApiParamType.STRING, isRequired = true,desc = "代理人uuid")
+		@Param(name = "agentUuid", type = ApiParamType.STRING, isRequired = true,desc = "nmpaa.useragentsaveapi.input.param.desc.agentuuid")
 	})
 	@Output({})
-	@Description(desc = "保存用户授权代理")
+	@Description(desc = "nmpaa.useragentsaveapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 //		UserAgentVo userAgentVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserAgentVo>() {});

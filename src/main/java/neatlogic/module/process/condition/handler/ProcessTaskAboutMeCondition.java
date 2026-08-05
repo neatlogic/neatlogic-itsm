@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     private String formHandlerType = FormHandlerType.SELECT.toString();
@@ -118,7 +119,7 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 
     @Override
     public String getDisplayName() {
-        return "与我相关";
+        return $.t("nmpch.processtaskaboutmecondition.getdisplayname");
     }
 
     @Override
@@ -139,11 +140,11 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
     @Override
     public JSONObject getConfig(ConditionConfigType type) {
         JSONArray dataList = new JSONArray();
-        dataList.add(new ValueTextVo("doneOfMine", "已办"));
-        dataList.add(new ValueTextVo("focusOfMine", "已关注"));
-        dataList.add(new ValueTextVo("needScoreOfMine", "待评分"));
-        dataList.add(new ValueTextVo("scoredOfMine", "已评分"));
-        dataList.add(new ValueTextVo("transferredOfMine", "已转交"));
+        dataList.add(new ValueTextVo("doneOfMine", $.t("nmpch.processtaskaboutmecondition.runtime.label.1")));
+        dataList.add(new ValueTextVo("focusOfMine", $.t("nmpch.processtaskaboutmecondition.runtime.label.2")));
+        dataList.add(new ValueTextVo("needScoreOfMine", $.t("nmpch.processtaskaboutmecondition.runtime.label.3")));
+        dataList.add(new ValueTextVo("scoredOfMine", $.t("nmpch.processtaskaboutmecondition.runtime.label.4")));
+        dataList.add(new ValueTextVo("transferredOfMine", $.t("nmpch.processtaskaboutmecondition.runtime.label.5")));
 
         JSONObject config = new JSONObject();
         config.put("type", formHandlerType);
@@ -173,15 +174,15 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
         if (value instanceof String) {
             String v = value.toString();
             if (v.equalsIgnoreCase("doneOfMine")) {
-                return "已办";
+                return $.t("nmpch.processtaskaboutmecondition.text.doneofmine");
             } else if (v.equalsIgnoreCase("focusOfMine")) {
-                return "已关注";
+                return $.t("nmpch.processtaskaboutmecondition.text.focusofmine");
             } else if (v.equalsIgnoreCase("needScoreOfMine")) {
-                return "待评分";
+                return $.t("nmpch.processtaskaboutmecondition.text.needscoreofmine");
             } else if (v.equalsIgnoreCase("scoredOfMine")) {
-                return "已评分";
+                return $.t("nmpch.processtaskaboutmecondition.text.scoredofmine");
             } else if (v.equalsIgnoreCase("transferredOfMine")) {
-                return "已转交";
+                return $.t("nmpch.processtaskaboutmecondition.text.transferredofmine");
             }
         } else if (value instanceof JSONArray) {
             List<String> textList = new ArrayList<>();
@@ -189,15 +190,15 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
             for (int i = 0; i < vList.size(); i++) {
                 String v = vList.getString(i);
                 if (v.equalsIgnoreCase("doneOfMine")) {
-                    textList.add("已办");
+                    textList.add($.t("nmpch.processtaskaboutmecondition.text.doneofmine"));
                 } else if (v.equalsIgnoreCase("focusOfMine")) {
-                    textList.add("已关注");
+                    textList.add($.t("nmpch.processtaskaboutmecondition.text.focusofmine"));
                 } else if (v.equalsIgnoreCase("needScoreOfMine")) {
-                    textList.add("待评分");
+                    textList.add($.t("nmpch.processtaskaboutmecondition.text.needscoreofmine"));
                 } else if (v.equalsIgnoreCase("scoredOfMine")) {
-                    textList.add("已评分");
+                    textList.add($.t("nmpch.processtaskaboutmecondition.text.scoredofmine"));
                 } else if (v.equalsIgnoreCase("transferredOfMine")) {
-                    textList.add("已转交");
+                    textList.add($.t("nmpch.processtaskaboutmecondition.text.transferredofmine"));
                 }
             }
             return String.join("、", textList);

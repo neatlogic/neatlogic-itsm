@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskRegionColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 
@@ -38,7 +39,7 @@ public class ProcessTaskRegionColumn extends ProcessTaskColumnBase implements IP
 
 	@Override
 	public String getDisplayName() {
-		return "地域";
+		return $.t("nmpwch.processtaskregioncolumn.getdisplayname");
 	}
 
 	@Override

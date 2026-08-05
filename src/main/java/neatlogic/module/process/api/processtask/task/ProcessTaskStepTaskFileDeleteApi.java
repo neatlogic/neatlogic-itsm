@@ -74,7 +74,7 @@ public class ProcessTaskStepTaskFileDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "任务删除附件接口";
+        return "nmpapt.processtasksteptaskfiledeleteapi.getname";
     }
 
     @Override
@@ -83,12 +83,12 @@ public class ProcessTaskStepTaskFileDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "任务id"),
-            @Param(name = "fileId", isRequired = true, type = ApiParamType.LONG, desc = "附件id"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "nmpapt.processtasksteptaskfiledeleteapi.input.param.desc.id"),
+            @Param(name = "fileId", isRequired = true, type = ApiParamType.LONG, desc = "nmpapt.processtasksteptaskfiledeleteapi.input.param.desc.fileid"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpapt.processtasksteptaskfiledeleteapi.input.param.desc.source")
     })
     @Output({})
-    @Description(desc = "任务删除附件接口")
+    @Description(desc = "nmpapt.processtasksteptaskfiledeleteapi.getname")
     @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

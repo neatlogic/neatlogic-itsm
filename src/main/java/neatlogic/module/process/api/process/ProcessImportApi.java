@@ -1,5 +1,7 @@
 package neatlogic.module.process.api.process;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
@@ -43,7 +45,7 @@ public class ProcessImportApi extends PrivateBinaryStreamApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "导入流程";
+		return "nmpap.processimportapi.getname";
 	}
 
 	@Override
@@ -51,7 +53,7 @@ public class ProcessImportApi extends PrivateBinaryStreamApiComponentBase {
 		return null;
 	}
 
-	@Description(desc = "导入流程")
+	@Description(desc = "nmpap.processimportapi.getname")
 	@Override
 	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -90,9 +92,9 @@ public class ProcessImportApi extends PrivateBinaryStreamApiComponentBase {
 					processVo.setName(oldName + "_" + index);
 				}
 				if(processMapper.checkProcessIsExists(processVo.getUuid()) == 0) {
-					result = "新建流程：'" + processVo.getName() +"'";
+					result = $.t("nmpap.processimportapi.result.created", processVo.getName());
 				}else {
-					result = "更新流程：'" + processVo.getName() +"'";
+					result = $.t("nmpap.processimportapi.result.updated", processVo.getName());
 				}
 				processVo.setFcu(UserContext.get().getUserUuid(true));
 				processService.saveProcess(processVo);

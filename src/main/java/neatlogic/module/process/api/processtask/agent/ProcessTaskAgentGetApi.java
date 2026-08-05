@@ -47,7 +47,7 @@ public class ProcessTaskAgentGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取用户任务授权信息";
+        return "nmpapa.processtaskagentgetapi.getname";
     }
 
     @Override
@@ -57,9 +57,9 @@ public class ProcessTaskAgentGetApi extends PrivateApiComponentBase {
 
     @Input({})
     @Output({
-            @Param(explode = ProcessTaskAgentInfoVo.class, desc = "任务授权信息")
+            @Param(explode = ProcessTaskAgentInfoVo.class, desc = "nmpapa.processtaskagentgetapi.output.param.desc.processtaskagentinfovo")
     })
-    @Description(desc = "获取用户任务授权信息")
+    @Description(desc = "nmpapa.processtaskagentgetapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String fromUserUuid = UserContext.get().getUserUuid(true);

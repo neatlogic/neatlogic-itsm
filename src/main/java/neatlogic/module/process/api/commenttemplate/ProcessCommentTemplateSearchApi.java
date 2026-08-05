@@ -42,7 +42,7 @@ public class ProcessCommentTemplateSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询回复模版列表";
+        return "nmpac.processcommenttemplatesearchapi.getname";
     }
 
     @Override
@@ -50,15 +50,15 @@ public class ProcessCommentTemplateSearchApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
-            @Param(name = "type", type = ApiParamType.ENUM, rule = "system,custom", desc = "类型"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+    @Input({@Param(name = "keyword", type = ApiParamType.STRING, desc = "nmpac.processcommenttemplatesearchapi.input.param.desc.keyword"),
+            @Param(name = "type", type = ApiParamType.ENUM, rule = "system,custom", desc = "nmpac.processcommenttemplatesearchapi.input.param.desc.type"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpac.processcommenttemplatesearchapi.input.param.desc.needpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpac.processcommenttemplatesearchapi.input.param.desc.pagesize"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpac.processcommenttemplatesearchapi.input.param.desc.currentpage")
     })
     @Output({
             @Param(explode = BasePageVo.class),
-            @Param(name = "tbodyList", explode = ProcessCommentTemplateVo.class, desc = "回复模版集合")
+            @Param(name = "tbodyList", explode = ProcessCommentTemplateVo.class, desc = "nmpac.processcommenttemplatesearchapi.output.param.desc.tbodylist")
     })
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

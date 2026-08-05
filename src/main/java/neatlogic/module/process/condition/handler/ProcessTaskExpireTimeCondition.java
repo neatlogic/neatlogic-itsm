@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -39,7 +40,7 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
 
     @Override
     public String getDisplayName() {
-        return "是否超时";
+        return $.t("nmpch.processtaskexpiretimecondition.getdisplayname");
     }
 
     @Override
@@ -60,7 +61,7 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
     @Override
     public JSONObject getConfig(ConditionConfigType type) {
         JSONArray dataList = new JSONArray();
-        dataList.add(new ValueTextVo("1", "是"));
+        dataList.add(new ValueTextVo("1", $.t("nmpch.processtaskexpiretimecondition.runtime.label.1")));
 
         JSONObject config = new JSONObject();
         config.put("type", formHandlerType);

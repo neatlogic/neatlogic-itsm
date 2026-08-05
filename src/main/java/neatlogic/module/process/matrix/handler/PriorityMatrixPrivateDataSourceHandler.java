@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import neatlogic.framework.util.$;
 @Component
 public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDataSourceHandler {
 
@@ -54,7 +55,7 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
         }
         {
             JSONObject jsonObj = new JSONObject();
-            jsonObj.put("name", "名称");
+            jsonObj.put("name", $.t("nmpmh.prioritymatrixprivatedatasourcehandler.runtime.label.1"));
             jsonObj.put("label", "name");
             jsonObj.put("isPrimaryKey", 0);
             jsonObj.put("isSearchable", 1);
@@ -75,7 +76,7 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
 
     @Override
     public String getName() {
-        return "优先级";
+        return $.t("nmpmh.prioritymatrixprivatedatasourcehandler.getname");
     }
 
     @Override

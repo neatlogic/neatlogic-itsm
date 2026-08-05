@@ -12,6 +12,8 @@
 
 package neatlogic.module.process.dependency.handler;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
@@ -94,7 +96,7 @@ public class IntegrationProcessStepDependencyHandler extends CustomDependencyHan
 //                    dependencyInfoConfig.put("processName", processVo.getName());
 //                    dependencyInfoConfig.put("processStepName", processStepVo.getName());
                     List<String> pathList = new ArrayList<>();
-                    pathList.add("流程管理");
+        pathList.add($.t("nmpdh.path.workflowmanagement"));
                     pathList.add(processVo.getName());
                     String lastName = processStepVo.getName();
 //                    String pathFormat = "流程-${DATA.processName}-${DATA.processStepName}";

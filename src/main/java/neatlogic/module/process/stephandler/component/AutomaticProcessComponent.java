@@ -12,6 +12,8 @@
 
 package neatlogic.module.process.stephandler.component;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
@@ -128,7 +130,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
                 requestAudit.put("successConfig", baseSuccessConfig);
             } else {
                 JSONObject successConfig = new JSONObject();
-                successConfig.put("default", "默认按状态码判断，2xx和3xx表示成功");
+                successConfig.put("default", $.t("nmpasc.automaticprocesscomponent.defaultsuccesscondition"));
                 requestAudit.put("successConfig", successConfig);
             }
 

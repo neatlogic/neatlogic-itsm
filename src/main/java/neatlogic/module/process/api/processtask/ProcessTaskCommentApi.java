@@ -65,7 +65,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
 
     @Override
     public String getName() {
-        return "工单回复接口";
+        return "nmpap.processtaskcommentapi.getname";
     }
 
     @Override
@@ -73,14 +73,14 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase implements IP
         return null;
     }
 
-    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-        @Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
-        @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-        @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "附件id列表"),
-        @Param(name = "commentTemplateId", type = ApiParamType.LONG, desc = "回复模版ID")})
-    @Output({@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "当前步骤评论列表")})
-    @Description(desc = "工单回复接口")
+    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskcommentapi.input.param.desc.processtaskid"),
+        @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskcommentapi.input.param.desc.processtaskstepid"),
+        @Param(name = "content", type = ApiParamType.STRING, desc = "nmpap.processtaskcommentapi.input.param.desc.content"),
+        @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskcommentapi.input.param.desc.source"),
+        @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "nmpap.processtaskcommentapi.input.param.desc.fileidlist"),
+        @Param(name = "commentTemplateId", type = ApiParamType.LONG, desc = "nmpap.processtaskcommentapi.input.param.desc.commenttemplateid")})
+    @Output({@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "nmpap.processtaskcommentapi.output.param.desc.commentlist")})
+    @Description(desc = "nmpap.processtaskcommentapi.getname")
     @Override
     @ResubmitInterval(3)
     public Object myDoService(JSONObject jsonObj) throws Exception {

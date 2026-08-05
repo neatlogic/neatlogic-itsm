@@ -32,7 +32,7 @@ public class ScoreTemplateDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "删除评分模版";
+        return "nmpas.scoretemplatedeleteapi.getname";
     }
 
     @Override
@@ -40,7 +40,7 @@ public class ScoreTemplateDeleteApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({ @Param( name = "id", type = ApiParamType.LONG, desc = "评分模版ID" ,isRequired = true)
+    @Input({ @Param( name = "id", type = ApiParamType.LONG, desc = "nmpas.scoretemplatedeleteapi.input.param.desc.id" ,isRequired = true)
     })
     @Output({})
     @Override

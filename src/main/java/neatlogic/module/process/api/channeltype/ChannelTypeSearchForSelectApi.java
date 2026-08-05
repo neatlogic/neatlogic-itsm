@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -34,7 +35,7 @@ public class ChannelTypeSearchForSelectApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "查询服务类型列表_下拉框";
+		return "nmpac.channeltypesearchforselectapi.getname";
 	}
 
 	@Override
@@ -43,21 +44,21 @@ public class ChannelTypeSearchForSelectApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
-		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
-		@Param(name = "needAllOption", type = ApiParamType.ENUM, desc = "是否需要“所有”选项", rule = "0,1"),
-		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+		@Param(name = "keyword", type = ApiParamType.STRING, desc = "nmpac.channeltypesearchforselectapi.input.param.desc.keyword"),
+		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "nmpac.channeltypesearchforselectapi.input.param.desc.isactive", rule = "0,1"),
+		@Param(name = "needAllOption", type = ApiParamType.ENUM, desc = "nmpac.channeltypesearchforselectapi.input.param.desc.needalloption", rule = "0,1"),
+		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpac.channeltypesearchforselectapi.input.param.desc.needpage"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpac.channeltypesearchforselectapi.input.param.desc.pagesize"),
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpac.channeltypesearchforselectapi.input.param.desc.currentpage")
 	})
 	@Output({
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "当前页码"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = true, desc = "页大小"),
-		@Param(name = "pageCount", type = ApiParamType.INTEGER, isRequired =true, desc = "总页数"),
-		@Param(name = "rowNum", type = ApiParamType.INTEGER, isRequired = true, desc = "总行数"),
-		@Param(name = "list", explode = ValueTextVo[].class, desc = "服务类型列表")
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpac.channeltypesearchforselectapi.output.param.desc.currentpage"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpac.channeltypesearchforselectapi.output.param.desc.pagesize"),
+		@Param(name = "pageCount", type = ApiParamType.INTEGER, isRequired =true, desc = "nmpac.channeltypesearchforselectapi.output.param.desc.pagecount"),
+		@Param(name = "rowNum", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpac.channeltypesearchforselectapi.output.param.desc.rownum"),
+		@Param(name = "list", explode = ValueTextVo[].class, desc = "nmpac.channeltypesearchforselectapi.output.param.desc.list")
 	})
-	@Description(desc = "查询服务类型列表_下拉框")
+	@Description(desc = "nmpac.channeltypesearchforselectapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ChannelTypeVo channelTypeVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelTypeVo>() {});
@@ -76,7 +77,7 @@ public class ChannelTypeSearchForSelectApi extends PrivateApiComponentBase {
 		List<ValueTextVo> channelTypeList = channelTypeMapper.searchChannelTypeListForSelect(channelTypeVo);
 		Integer needAllOption = jsonObj.getInteger("needAllOption");
 		if(Objects.equal(needAllOption, 1)) {
-		    channelTypeList.add(0, new ValueTextVo("all", "所有"));
+		    channelTypeList.add(0, new ValueTextVo("all", $.t("nmpac.channeltypesearchforselectapi.runtime.label.1")));
 		}
 		resultObj.put("list", channelTypeList);
 		return resultObj;

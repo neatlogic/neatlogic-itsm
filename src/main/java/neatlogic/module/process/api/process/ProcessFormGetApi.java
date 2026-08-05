@@ -54,7 +54,7 @@ public class ProcessFormGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取表单信息";
+        return "nmpap.processformgetapi.getname";
     }
 
     @Override
@@ -65,11 +65,11 @@ public class ProcessFormGetApi extends PrivateApiComponentBase {
     @Override
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.STRING, desc = "term.itsm.processtaskid"),
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid"),
-            @Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "选择表单版本uuid"),
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpap.processformgetapi.input.param.desc.uuid"),
+            @Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "nmpap.processformgetapi.input.param.desc.currentversionuuid"),
     })
     @Output({@Param(explode = FormVo.class)})
-    @Description(desc = "获取表单信息")
+    @Description(desc = "nmpap.processformgetapi.getname")
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         if (processTaskId != null) {

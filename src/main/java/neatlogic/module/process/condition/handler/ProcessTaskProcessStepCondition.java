@@ -38,6 +38,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskProcessStepCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -51,12 +52,12 @@ public class ProcessTaskProcessStepCondition extends ProcessTaskConditionBase im
 
     @Override
     public String getDisplayName() {
-        return "流程步骤";
+        return $.t("nmpch.processtaskprocessstepcondition.getdisplayname");
     }
 
     @Override
     public String getDesc() {
-        return "过滤已激活的步骤";
+        return $.t("nmpch.processtaskprocessstepcondition.getdesc");
     }
 
     @Override
@@ -120,7 +121,7 @@ public class ProcessTaskProcessStepCondition extends ProcessTaskConditionBase im
         }
         ConditionVo channelCondition = new ConditionVo();
         channelCondition.setName("channel");
-        channelCondition.setLabel("服务");
+        channelCondition.setLabel($.t("term.itsm.channel"));
         channelCondition.setType("common");
         channelCondition.setExpression(Expression.INCLUDE.getExpression());
         channelCondition.setValueList(channelUuidList);

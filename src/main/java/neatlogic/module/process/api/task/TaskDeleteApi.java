@@ -44,7 +44,7 @@ public class TaskDeleteApi extends PrivateApiComponentBase{
 
 	@Override
 	public String getName() {
-		return "删除子任务";
+		return "nmpat.taskdeleteapi.getname";
 	}
 
 	@Override
@@ -53,12 +53,12 @@ public class TaskDeleteApi extends PrivateApiComponentBase{
 	}
 
 	@Input({
-			@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "任务id"),
+			@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "nmpat.taskdeleteapi.input.param.desc.id"),
 	})
 	@Output({
 
 	})
-	@Description(desc = "删除子任务接口")
+	@Description(desc = "nmpat.taskdeleteapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long taskId = jsonObj.getLong("id");

@@ -53,7 +53,7 @@ public class ImportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
 
     @Override
     public String getName() {
-        return "导入工单相关表数据";
+        return "nmpap.importprocesstaskdataapi.getname";
     }
 
     @Override
@@ -65,7 +65,7 @@ public class ImportProcessTaskDataApi extends PrivateBinaryStreamApiComponentBas
             @Param(name = "fileId", type = ApiParamType.LONG, isRequired = true, desc = "common.fileid")
     })
     @Output({})
-    @Description(desc = "导入工单相关表数据")
+    @Description(desc = "nmpap.importprocesstaskdataapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Map<String, List<Integer>> resultObj = new HashMap<>();

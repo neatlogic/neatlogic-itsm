@@ -32,7 +32,7 @@ public class RebuidLeftRightCodeApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "用户组重建左右编码接口";
+		return "nmpac.rebuidleftrightcodeapi.getname";
 	}
 
 	@Override

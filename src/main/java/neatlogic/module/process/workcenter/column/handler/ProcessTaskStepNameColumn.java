@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStepNameColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 	@Autowired
@@ -35,7 +36,7 @@ public class ProcessTaskStepNameColumn extends ProcessTaskColumnBase implements 
 
 	@Override
 	public String getDisplayName() {
-		return "步骤名";
+		return $.t("nmpwch.processtaskstepnamecolumn.getdisplayname");
 	}
 
 	@Override

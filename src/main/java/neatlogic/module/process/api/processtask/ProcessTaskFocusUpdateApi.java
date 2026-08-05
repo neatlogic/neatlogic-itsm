@@ -36,7 +36,7 @@ public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "切换工单关注状态";
+		return "nmpap.processtaskfocusupdateapi.getname";
 	}
 
 	@Override
@@ -46,12 +46,12 @@ public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 
 	@Override
 	@Input({
-			@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true),
-			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-			@Param(name = "isFocus", type = ApiParamType.ENUM, desc = "是否关注工单(1：关注；0：取消关注)", isRequired = true,rule = "0,1")
+			@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "nmpap.processtaskfocusupdateapi.input.param.desc.processtaskid", isRequired = true),
+			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskfocusupdateapi.input.param.desc.source"),
+			@Param(name = "isFocus", type = ApiParamType.ENUM, desc = "nmpap.processtaskfocusupdateapi.input.param.desc.isfocus", isRequired = true,rule = "0,1")
 	})
-	@Output({@Param(name="isFocus", type = ApiParamType.INTEGER, desc="是否关注工单")})
-	@Description(desc = "切换工单关注状态")
+	@Output({@Param(name="isFocus", type = ApiParamType.INTEGER, desc="nmpap.processtaskfocusupdateapi.output.param.desc.isfocus")})
+	@Description(desc = "nmpap.processtaskfocusupdateapi.getname")
 	@ResubmitInterval(3)
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");

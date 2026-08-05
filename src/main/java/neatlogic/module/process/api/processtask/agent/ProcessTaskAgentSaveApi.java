@@ -63,7 +63,7 @@ public class ProcessTaskAgentSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "保存用户任务授权信息";
+        return "nmpapa.processtaskagentsaveapi.getname";
     }
 
     @Override
@@ -72,13 +72,13 @@ public class ProcessTaskAgentSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "beginTime", type = ApiParamType.LONG, isRequired = true, desc = "开始时间"),
-            @Param(name = "endTime", type = ApiParamType.LONG, isRequired = true, desc = "结束时间"),
-            @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "启用"),
-            @Param(name = "compobList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "授权对象列表")
+            @Param(name = "beginTime", type = ApiParamType.LONG, isRequired = true, desc = "nmpapa.processtaskagentsaveapi.input.param.desc.begintime"),
+            @Param(name = "endTime", type = ApiParamType.LONG, isRequired = true, desc = "nmpapa.processtaskagentsaveapi.input.param.desc.endtime"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "nmpapa.processtaskagentsaveapi.input.param.desc.isactive"),
+            @Param(name = "compobList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "nmpapa.processtaskagentsaveapi.input.param.desc.compoblist")
     })
     @Output({})
-    @Description(desc = "保存用户任务授权信息")
+    @Description(desc = "nmpapa.processtaskagentsaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessTaskAgentInfoVo processTaskAgentInfoVo = JSONObject.toJavaObject(jsonObj, ProcessTaskAgentInfoVo.class);

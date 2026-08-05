@@ -44,7 +44,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
 
     @Override
     public String getName() {
-        return "保存工单关联";
+        return "nmpap.processtaskrelationsaveapi.getname";
     }
 
     @Override
@@ -53,12 +53,12 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase implemen
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id"),
-            @Param(name = "relationProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "被关联的工单id列表"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskrelationsaveapi.input.param.desc.processtaskid"),
+            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskrelationsaveapi.input.param.desc.channeltyperelationid"),
+            @Param(name = "relationProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "nmpap.processtaskrelationsaveapi.input.param.desc.relationprocesstaskidlist"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskrelationsaveapi.input.param.desc.source"),
     })
-    @Description(desc = "保存工单关联")
+    @Description(desc = "nmpap.processtaskrelationsaveapi.getname")
     @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

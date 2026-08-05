@@ -43,7 +43,7 @@ public class UpdateAsyncCreateProcessTaskApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "id"),
+            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "nmpapa.updateasynccreateprocesstaskapi.input.param.desc.id"),
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid"),
             @Param(name = "title", type = ApiParamType.STRING, desc = "common.title"),
             @Param(name = "status", type = ApiParamType.ENUM, rule = "failed,redo", desc = "common.status"),

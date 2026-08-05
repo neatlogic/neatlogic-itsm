@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import java.util.Comparator;
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 public class WorkcenterOperateBuilder {
 
     private JSONArray operateArray = new JSONArray();
@@ -28,7 +29,7 @@ public class WorkcenterOperateBuilder {
         }
         JSONObject operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskStepOperationType.STEP_WORK).setSort(1)
                 .setIsEnable(isEnable).setHandleArray(handleArray).build();
-        operateJson.put("text", "处理");
+        operateJson.put("text", $.t("nmpwo.workcenteroperatebuilder.runtime.label.1"));
         operateArray.add(operateJson);
         return this;
     }

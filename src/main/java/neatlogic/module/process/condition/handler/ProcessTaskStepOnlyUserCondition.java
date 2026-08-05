@@ -36,6 +36,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStepOnlyUserCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     @Resource
@@ -48,12 +49,12 @@ public class ProcessTaskStepOnlyUserCondition extends ProcessTaskConditionBase i
 
     @Override
     public String getDisplayName() {
-        return "步骤处理人";
+        return $.t("nmpch.processtasksteponlyusercondition.getdisplayname");
     }
 
     @Override
     public String getDesc() {
-        return "过滤出分派到该用户和该用户正在处理的工单（不包含分派到该用户所以在组或者角色抢单的工单）";
+        return $.t("nmpch.processtasksteponlyusercondition.getdesc");
     }
 
     @Override

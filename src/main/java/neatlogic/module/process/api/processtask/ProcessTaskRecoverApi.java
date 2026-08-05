@@ -28,7 +28,7 @@ public class ProcessTaskRecoverApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "工单恢复接口";
+		return "nmpap.processtaskrecoverapi.getname";
 	}
 
 	@Override
@@ -38,12 +38,12 @@ public class ProcessTaskRecoverApi extends PrivateApiComponentBase {
 
 	@Override
 	@Input({
-			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
-			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述"),
-			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskrecoverapi.input.param.desc.processtaskid"),
+			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processtaskrecoverapi.input.param.desc.content"),
+			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskrecoverapi.input.param.desc.source")
 	})
 	@Output({})
-	@Description(desc = "工单恢复接口")
+	@Description(desc = "nmpap.processtaskrecoverapi.getname")
 	@ResubmitInterval(3)
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");

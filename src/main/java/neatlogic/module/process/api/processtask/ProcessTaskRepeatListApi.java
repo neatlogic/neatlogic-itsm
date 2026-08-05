@@ -62,7 +62,7 @@ public class ProcessTaskRepeatListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询重复工单列表";
+        return "nmpap.processtaskrepeatlistapi.getname";
     }
 
     @Override
@@ -76,12 +76,12 @@ public class ProcessTaskRepeatListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskrepeatlistapi.input.param.desc.processtaskid")
     })
     @Output({
-            @Param(name = "tbodyList", explode = ProcessTaskVo[].class, desc = "重复工单列表")
+            @Param(name = "tbodyList", explode = ProcessTaskVo[].class, desc = "nmpap.processtaskrepeatlistapi.output.param.desc.tbodylist")
     })
-    @Description(desc = "查询重复工单列表")
+    @Description(desc = "nmpap.processtaskrepeatlistapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONObject resultObj = new JSONObject();

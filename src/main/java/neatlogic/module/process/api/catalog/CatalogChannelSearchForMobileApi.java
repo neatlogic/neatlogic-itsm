@@ -42,7 +42,7 @@ public class CatalogChannelSearchForMobileApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "查看目录及服务列表(移动端)";
+		return "nmpac.catalogchannelsearchformobileapi.getname";
 	}
 
 	@Override
@@ -51,13 +51,13 @@ public class CatalogChannelSearchForMobileApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "catalogUuid", type = ApiParamType.STRING, desc = "服务目录uuid,0：所有" , isRequired = true)
+		@Param(name = "catalogUuid", type = ApiParamType.STRING, desc = "nmpac.catalogchannelsearchformobileapi.input.param.desc.cataloguuid" , isRequired = true)
 	})
 	@Output({
 		@Param(explode=BasePageVo.class),
-		@Param(name="treeList",explode=CatalogVo[].class,desc="目录及服务列表")
+		@Param(name="treeList",explode=CatalogVo[].class,desc="nmpac.catalogchannelsearchformobileapi.output.param.desc.treelist")
 	})
-	@Description(desc = "查看目录及服务列表(移动端)")
+	@Description(desc = "nmpac.catalogchannelsearchformobileapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();

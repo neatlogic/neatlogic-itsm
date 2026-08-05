@@ -76,9 +76,9 @@ public class UpdateProcessTaskStepStatusApi extends PrivateApiComponentBase {//
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "term.itsm.processtaskid"),
             @Param(name = "processTaskStepName", type = ApiParamType.STRING, desc = "term.itsm.processtaskstepname"),
-            @Param(name = "processTaskNextStepName", type = ApiParamType.STRING, desc = "term.itsm.processtasknextstepname", help = "更改步骤状态为succeed时需要填此参数"),
-            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "term.itsm.processtaskstepid", help = "待更改状态的步骤名称重复时需要填此参数。此参数存在时，无需填processTaskId与processTaskStepName"),
-            @Param(name = "processTaskNextStepId", type = ApiParamType.LONG, desc = "term.itsm.processtasknextstepid", help = "待激活的下一步骤名称重复时需要填此参数。此参数存在时，无需填processTaskNextStepName"),
+            @Param(name = "processTaskNextStepName", type = ApiParamType.STRING, desc = "term.itsm.processtasknextstepname", help = "nmpapm.updateprocesstaskstepstatusapi.input.param.help.processtasknextstepname"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "term.itsm.processtaskstepid", help = "nmpapm.updateprocesstaskstepstatusapi.input.param.help.processtaskstepid"),
+            @Param(name = "processTaskNextStepId", type = ApiParamType.LONG, desc = "term.itsm.processtasknextstepid", help = "nmpapm.updateprocesstaskstepstatusapi.input.param.help.processtasknextstepid"),
             @Param(name = "status", type = ApiParamType.ENUM, rule = "pending,running,succeed,hang", isRequired = true, desc = "common.status"),
             @Param(name = "userId", type = ApiParamType.STRING, desc = "common.userid"),
     })

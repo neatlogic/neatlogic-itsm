@@ -54,7 +54,7 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "流程节点组件配置保存接口";
+        return "nmpap.processstephandleconfigsaveapi.getname";
     }
 
     @Override
@@ -63,9 +63,9 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-    	@Param(name = "processStepHandlerList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "流程节点组件配置信息列表")
+        @Param(name = "processStepHandlerList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "nmpap.processstephandleconfigsaveapi.input.param.desc.processstephandlerlist")
     })
-    @Description(desc = "流程节点组件配置保存接口")
+    @Description(desc = "nmpap.processstephandleconfigsaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         INotifyServiceCrossoverService notifyServiceCrossoverService = CrossoverServiceFactory.getApi(INotifyServiceCrossoverService.class);

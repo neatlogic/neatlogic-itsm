@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStepUserIdCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -36,7 +37,7 @@ public class ProcessTaskStepUserIdCondition extends ProcessTaskConditionBase imp
 
     @Override
     public String getDisplayName() {
-        return "步骤处理人用户ID";
+        return $.t("nmpch.processtaskstepuseridcondition.getdisplayname");
     }
 
 	@Override

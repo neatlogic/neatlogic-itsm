@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskContentCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     @Resource
@@ -32,7 +33,7 @@ public class ProcessTaskContentCondition extends ProcessTaskConditionBase implem
 
     @Override
     public String getDisplayName() {
-        return "上报内容";
+        return $.t("nmpch.processtaskcontentcondition.getdisplayname");
     }
 
 	@Override

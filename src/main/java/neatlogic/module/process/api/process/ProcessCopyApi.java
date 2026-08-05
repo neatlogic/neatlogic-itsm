@@ -45,7 +45,7 @@ public class ProcessCopyApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "流程复制";
+        return "nmpap.processcopyapi.getname";
     }
 
     @Override
@@ -54,13 +54,13 @@ public class ProcessCopyApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "被复制流程的uuid"),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "新流程名称")
+            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processcopyapi.input.param.desc.uuid"),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "nmpap.processcopyapi.input.param.desc.name")
     })
     @Output({
-            @Param(name = "Return", explode = ProcessVo.class, desc = "新流程信息")
+            @Param(name = "Return", explode = ProcessVo.class, desc = "nmpap.processcopyapi.output.param.desc.return.name")
     })
-    @Description(desc = "流程复制")
+    @Description(desc = "nmpap.processcopyapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
