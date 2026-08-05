@@ -12,11 +12,12 @@ package neatlogic.module.process.portal.widget.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.portal.widgetdata.core.PortalWidgetDataHandlerBase;
+import neatlogic.framework.process.constvalue.ItsmTenantConfig;
 import neatlogic.framework.process.constvalue.ProcessTaskStatus;
 import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
-import neatlogic.framework.process.dto.ProcessTaskSlaTimeVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.util.TimeUtil;
@@ -78,6 +79,7 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
 //                Map<Long, ProcessTaskVo> processTaskMap = new HashMap<>();
 //                List<Long> allHasSlaProcessTaskStepIdList = new ArrayList<>();
 //                List<ProcessTaskStepVo> allProcessTaskStepList = new ArrayList<>();
+            String slaTimeDisplayMode = ConfigManager.getConfig(ItsmTenantConfig.SLA_TIME_DISPLAY_MODE);
             int pageSize = 1000;
             for (int fromIndex = 0; fromIndex < doingProcessTaskStepIdList.size(); fromIndex += pageSize) {
 //                    long startTimeB = System.currentTimeMillis();
@@ -92,7 +94,8 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
                 List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
 //                    System.out.println("costTimeC = " + (System.currentTimeMillis() - startTimeC));
                 Map<Long, ProcessTaskVo> processTaskMap = processTaskList.stream().collect(Collectors.toMap(ProcessTaskVo::getId, e -> e));
-                List<Long> hasSlaProcessTaskStepIdList = processTaskSlaMapper.getHasSlaProcessTaskStepIdListByProcessTaskStepIdList(processTaskStepIdList);
+//                List<Long> hasSlaProcessTaskStepIdList = processTaskSlaMapper.getHasSlaProcessTaskStepIdListByProcessTaskStepIdList(processTaskStepIdList);
+                List<Long> timeoutProcessTaskStepIdList = processTaskSlaMapper.getTimeoutProcessTaskStepIdListByProcessTaskStepIdListAndSlaTimeDisplayMode(processTaskStepIdList, slaTimeDisplayMode);
 //                    allHasSlaProcessTaskStepIdList.addAll(hasSlaProcessTaskStepIdList);
 
                 for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
@@ -105,24 +108,25 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
                             } else if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())) {
                                 doingCount++;
                             }
-                            if (hasSlaProcessTaskStepIdList.contains(processTaskStepVo.getId())) {
-//                            long startTimeD = System.currentTimeMillis();
-                                List<ProcessTaskSlaTimeVo> slaTimeList = processTaskService.getSlaTimeListByProcessTaskStepId(processTaskStepVo.getId());
-//                            System.out.println("costTimeD = " + (System.currentTimeMillis() - startTimeD));
-                                if (CollectionUtils.isNotEmpty(slaTimeList)) {
-                                    for (ProcessTaskSlaTimeVo processTaskSlaTimeVo : slaTimeList) {
-                                        if (Objects.equals(processTaskSlaTimeVo.getSlaTimeDisplayMode(), "naturalTime")) {
-                                            if (processTaskSlaTimeVo.getRealTimeLeft() < 0) {
-                                                riskCount++;
-                                            }
-                                        } else if (Objects.equals(processTaskSlaTimeVo.getSlaTimeDisplayMode(), "naturalTime")) {
-                                            if (processTaskSlaTimeVo.getTimeLeft() < 0) {
-                                                riskCount++;
-                                            }
-                                        }
-                                    }
-                                }
+                            if (timeoutProcessTaskStepIdList.contains(processTaskStepVo.getId())) {
+                                riskCount++;
                             }
+//                            if (hasSlaProcessTaskStepIdList.contains(processTaskStepVo.getId())) {
+//                                List<ProcessTaskSlaTimeVo> slaTimeList = processTaskService.getSlaTimeListByProcessTaskStepId(processTaskStepVo.getId());
+//                                if (CollectionUtils.isNotEmpty(slaTimeList)) {
+//                                    for (ProcessTaskSlaTimeVo processTaskSlaTimeVo : slaTimeList) {
+//                                        if (Objects.equals(processTaskSlaTimeVo.getSlaTimeDisplayMode(), "naturalTime")) {
+//                                            if (processTaskSlaTimeVo.getRealTimeLeft() < 0) {
+//                                                riskCount++;
+//                                            }
+//                                        } else if (Objects.equals(processTaskSlaTimeVo.getSlaTimeDisplayMode(), "naturalTime")) {
+//                                            if (processTaskSlaTimeVo.getTimeLeft() < 0) {
+//                                                riskCount++;
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
                         }
                     }
                 }
