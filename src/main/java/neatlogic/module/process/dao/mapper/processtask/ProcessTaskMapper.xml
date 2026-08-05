@@ -1114,6 +1114,27 @@
         </if>
     </select>
 
+    <select id="getProcessTaskWorkerProcessTaskStepIdListByAuthenticationInfoVo" parameterType="neatlogic.framework.dto.AuthenticationInfoVo" resultType="java.lang.Long">
+        SELECT
+            DISTINCT `processtask_step_id`
+        FROM `processtask_step_worker`
+        WHERE (`type` = 'user' AND `uuid` = #{userUuid})
+        <if test="teamUuidList != null and teamUuidList.size() > 0">
+            OR (`type` = 'team' AND `uuid` IN
+            <foreach collection="teamUuidList" item="teamUuid" open="(" separator="," close=")">
+                #{teamUuid}
+            </foreach>
+            )
+        </if>
+        <if test="roleUuidList != null and roleUuidList.size() > 0">
+            OR (`type` = 'role' AND `uuid` IN
+            <foreach collection="roleUuidList" item="roleUuid" open="(" separator="," close=")">
+                #{roleUuid}
+            </foreach>
+            )
+        </if>
+    </select>
+
     <select id="checkIsWorker" resultType="int">
         SELECT
         COUNT(1)
@@ -1415,6 +1436,24 @@
         <foreach collection="statusList" item="status" open="(" separator="," close=")">
             #{status}
         </foreach>
+    </select>
+
+    <select id="getProcessTaskStepUserProcessTaskStepIdListByUserUuidAndStatusAndStartTimeAndEndTime"
+            resultType="java.lang.Long">
+        SELECT
+            DISTINCT `processtask_step_id`
+        FROM `processtask_step_user`
+        WHERE `user_uuid` = #{userUuid}
+        AND `user_type` IN
+        <foreach collection="userTypeList" item="userType" open="(" separator="," close=")">
+            #{userType}
+        </foreach>
+        AND `status` IN
+        <foreach collection="statusList" item="status" open="(" separator="," close=")">
+            #{status}
+        </foreach>
+        AND `active_time` &gt;= #{startTime}
+        AND `active_time` &lt;= #{endTime}
     </select>
 
     <select id="getProcessTaskScoreInfoById" parameterType="java.lang.Long" resultType="java.lang.String">
