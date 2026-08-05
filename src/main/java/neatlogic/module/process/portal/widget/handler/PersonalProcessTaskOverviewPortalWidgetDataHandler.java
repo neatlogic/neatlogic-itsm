@@ -65,42 +65,37 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
         int doingCount = 0;
         int riskCount = 0;
         int doneCount = 0;
-        {
-            AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
+        AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
 //            long startTimeA = System.currentTimeMillis();
-            List<Long> allProcessTaskStepIdList = processTaskMapper.getProcessTaskWorkerProcessTaskStepIdListByAuthenticationInfoVoAndStartTimeAndEndTime(
-                    authenticationInfoVo,
-                    startTime,
-                    endTime
-            );
+        List<Long> doingProcessTaskStepIdList = processTaskMapper.getProcessTaskWorkerProcessTaskStepIdListByAuthenticationInfoVoAndStartTimeAndEndTime(
+                authenticationInfoVo,
+                startTime,
+                endTime
+        );
 //            System.out.println("costTimeA = " + (System.currentTimeMillis() - startTimeA));
 //            System.out.println("processTaskStepIdList.size() = " + processTaskStepIdList.size());
-            if (CollectionUtils.isNotEmpty(allProcessTaskStepIdList)) {
-                int count = 0;
-                Map<Long, ProcessTaskVo> processTaskMap = new HashMap<>();
-                List<Long> allHasSlaProcessTaskStepIdList = new ArrayList<>();
-                List<ProcessTaskStepVo> allProcessTaskStepList = new ArrayList<>();
-                int pageSize = 1000;
-                for (int fromIndex = 0; fromIndex < allProcessTaskStepIdList.size(); fromIndex += pageSize) {
+        if (CollectionUtils.isNotEmpty(doingProcessTaskStepIdList)) {
+//                Map<Long, ProcessTaskVo> processTaskMap = new HashMap<>();
+//                List<Long> allHasSlaProcessTaskStepIdList = new ArrayList<>();
+//                List<ProcessTaskStepVo> allProcessTaskStepList = new ArrayList<>();
+            int pageSize = 1000;
+            for (int fromIndex = 0; fromIndex < doingProcessTaskStepIdList.size(); fromIndex += pageSize) {
 //                    long startTimeB = System.currentTimeMillis();
-                    int toIndex = fromIndex + pageSize;
-                    List<Long> processTaskStepIdList = allProcessTaskStepIdList.subList(fromIndex, Math.min(toIndex, allProcessTaskStepIdList.size()));
-                    List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
-                    allProcessTaskStepList.addAll(processTaskStepList);
+                int toIndex = fromIndex + pageSize;
+                List<Long> processTaskStepIdList = doingProcessTaskStepIdList.subList(fromIndex, Math.min(toIndex, doingProcessTaskStepIdList.size()));
+                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
+//                    allProcessTaskStepList.addAll(processTaskStepList);
 //                    System.out.println("costTimeB = " + (System.currentTimeMillis() - startTimeB));
 //                    System.out.println("processTaskStepList.size() = " + processTaskStepList.size());
-                    Set<Long> processTaskIdSet = processTaskStepList.stream().map(ProcessTaskStepVo::getProcessTaskId).collect(Collectors.toSet());
+                Set<Long> processTaskIdSet = processTaskStepList.stream().map(ProcessTaskStepVo::getProcessTaskId).collect(Collectors.toSet());
 //                    long startTimeC = System.currentTimeMillis();
-                    List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
+                List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
 //                    System.out.println("costTimeC = " + (System.currentTimeMillis() - startTimeC));
-                    for (ProcessTaskVo processTaskVo : processTaskList) {
-                        processTaskMap.put(processTaskVo.getId(), processTaskVo);
-                    }
-                    List<Long> hasSlaProcessTaskStepIdList = processTaskSlaMapper.getHasSlaProcessTaskStepIdListByProcessTaskStepIdList(processTaskStepIdList);
-                    allHasSlaProcessTaskStepIdList.addAll(hasSlaProcessTaskStepIdList);
-                }
+                Map<Long, ProcessTaskVo> processTaskMap = processTaskList.stream().collect(Collectors.toMap(ProcessTaskVo::getId, e -> e));
+                List<Long> hasSlaProcessTaskStepIdList = processTaskSlaMapper.getHasSlaProcessTaskStepIdListByProcessTaskStepIdList(processTaskStepIdList);
+//                    allHasSlaProcessTaskStepIdList.addAll(hasSlaProcessTaskStepIdList);
 
-                for (ProcessTaskStepVo processTaskStepVo : allProcessTaskStepList) {
+                for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
                     ProcessTaskVo processTaskVo = processTaskMap.get(processTaskStepVo.getProcessTaskId());
                     if (processTaskVo != null && Objects.equals(processTaskVo.getIsDeleted(), 0) && Objects.equals(processTaskVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())) {
                         if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
@@ -110,11 +105,7 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
                             } else if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())) {
                                 doingCount++;
                             }
-                            if (count > 100) {
-                                continue;
-                            }
-                            count++;
-                            if (allHasSlaProcessTaskStepIdList.contains(processTaskStepVo.getId())) {
+                            if (hasSlaProcessTaskStepIdList.contains(processTaskStepVo.getId())) {
 //                            long startTimeD = System.currentTimeMillis();
                                 List<ProcessTaskSlaTimeVo> slaTimeList = processTaskService.getSlaTimeListByProcessTaskStepId(processTaskStepVo.getId());
 //                            System.out.println("costTimeD = " + (System.currentTimeMillis() - startTimeD));
@@ -137,17 +128,21 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
                 }
             }
         }
-        {
 //            long startTimeE = System.currentTimeMillis();
-            List<Long> processTaskStepIdList = processTaskMapper.getProcessTaskStepUserProcessTaskStepIdListByUserUuidAndStatusAndStartTimeAndEndTime(
-                    UserContext.get().getUserUuid(),
-                    List.of("major", "minor"),
-                    List.of("done"),
-                    startTime,
-                    endTime
-            );
+        List<Long> doneProcessTaskStepIdList = processTaskMapper.getProcessTaskStepUserProcessTaskStepIdListByUserUuidAndStatusAndStartTimeAndEndTime(
+                UserContext.get().getUserUuid(),
+                List.of("major", "minor"),
+                List.of("done"),
+                startTime,
+                endTime
+        );
 //            System.out.println("costTimeE = " + (System.currentTimeMillis() - startTimeE));
-            if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
+        if (CollectionUtils.isNotEmpty(doneProcessTaskStepIdList)) {
+            int pageSize = 1000;
+            for (int fromIndex = 0; fromIndex < doneProcessTaskStepIdList.size(); fromIndex += pageSize) {
+//                    long startTimeB = System.currentTimeMillis();
+                int toIndex = fromIndex + pageSize;
+                List<Long> processTaskStepIdList = doneProcessTaskStepIdList.subList(fromIndex, Math.min(toIndex, doneProcessTaskStepIdList.size()));
 //                long startTimeF = System.currentTimeMillis();
                 List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
 //                System.out.println("costTimeF = " + (System.currentTimeMillis() - startTimeF));
