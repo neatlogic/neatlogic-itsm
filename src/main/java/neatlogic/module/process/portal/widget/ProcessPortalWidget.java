@@ -15,10 +15,9 @@ import neatlogic.framework.portal.widget.core.IPortalWidget;
 public enum ProcessPortalWidget implements IPortalWidget {
     processingOfMineProcessTask("processingOfMineProcessTask", "我的待办", 1),
     draftProcessTask("draftProcessTask", "我的草稿", 2),
-    processSlaRisk("processSlaRisk", "SLA 风险", 3),
-    processTaskSearch("processTaskSearch", "工单列表", 4),
-    processFavoriteService("processFavoriteService", "收藏服务", 5),
-    personalProcessTaskOverview("personalProcessTaskOverview", "个人工单状态概览", 6),
+    processTaskSearch("processTaskSearch", "工单列表", 3),
+    processFavoriteService("processFavoriteService", "收藏服务", 4),
+    personalProcessTaskOverview("personalProcessTaskOverview", "个人工单状态概览", 5),
     ;
 
     private final String value;
