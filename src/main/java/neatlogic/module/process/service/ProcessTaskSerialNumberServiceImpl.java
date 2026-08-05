@@ -32,6 +32,7 @@ import java.text.DateFormat;
 import java.util.*;
 import java.util.function.Function;
 
+import neatlogic.framework.util.$;
 @Service
 public class ProcessTaskSerialNumberServiceImpl implements ProcessTaskSerialNumberService {
 
@@ -58,11 +59,11 @@ public class ProcessTaskSerialNumberServiceImpl implements ProcessTaskSerialNumb
             jsonObj.put("defaultValue", 1);
             jsonObj.put("width", 200);
             jsonObj.put("maxlength", 5);
-            jsonObj.put("label", "起始位");
+            jsonObj.put("label", $.t("nmps.processtaskserialnumberserviceimpl.runtime.label.1"));
             jsonObj.put("validateList", Arrays.asList("required", new JSONObject() {
                 {
                     this.put("name", "integer_p");
-                    this.put("message", "请输入正整数");
+                    this.put("message", $.t("nmps.processtaskserialnumberserviceimpl.positiveintegerrequired"));
                 }
             }));
             jsonObj.put("placeholder", "1-99999");
@@ -76,7 +77,7 @@ public class ProcessTaskSerialNumberServiceImpl implements ProcessTaskSerialNumb
             jsonObj.put("value", "");
             jsonObj.put("defaultValue", "");
             jsonObj.put("width", 200);
-            jsonObj.put("label", "工单号位数");
+            jsonObj.put("label", $.t("nmps.processtaskserialnumberserviceimpl.runtime.label.2"));
             jsonObj.put("maxlength", 5);
             jsonObj.put("validateList", Arrays.asList("required"));
             ArrayList<ValueTextVo> digitList = new ArrayList<>();

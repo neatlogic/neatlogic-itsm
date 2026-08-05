@@ -37,6 +37,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 
+import neatlogic.framework.util.$;
 @Service
 public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
     private Logger logger = LoggerFactory.getLogger(DateTimeAndAutoIncrementPolicy.class);
@@ -46,7 +47,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
     @Override
     public String getName() {
-        return "年月日 + 自增序列";
+        return $.t("nmpph.datetimeandautoincrementpolicy.getname");
     }
 
     @SuppressWarnings("serial")
@@ -81,7 +82,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
     private static class ProcessTaskSerialNumberSeedResetJob extends JobBase {
         @Override
         public String getName() {
-            return "工单每日流水号重置";
+            return $.t("nmpph.datetimeandautoincrementpolicy.getname_2");
         }
 
         private String cron = "0 0 0 * * ?";

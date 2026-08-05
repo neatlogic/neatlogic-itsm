@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Service
 public class HandlerLeaderDispatcher extends WorkerDispatcherBase {
 
@@ -53,7 +54,7 @@ public class HandlerLeaderDispatcher extends WorkerDispatcherBase {
         JSONObject preStepJsonObj = new JSONObject();
         preStepJsonObj.put("type", "select");
         preStepJsonObj.put("name", "preStepList");
-        preStepJsonObj.put("label", "前置步骤");
+        preStepJsonObj.put("label", $.t("nmpwh.handlerleaderdispatcher.runtime.label.1"));
         preStepJsonObj.put("validateList", Collections.singletonList("required"));
         preStepJsonObj.put("multiple", true);
         preStepJsonObj.put("policy", "preStepList");
@@ -64,7 +65,7 @@ public class HandlerLeaderDispatcher extends WorkerDispatcherBase {
         jsonObj.put("name", "teamUserTitle");
         jsonObj.put("search", true);
         jsonObj.put("dynamicUrl", "api/rest/user/title/search");
-        jsonObj.put("label", "头衔");
+        jsonObj.put("label", $.t("nmpwh.handlerleaderdispatcher.runtime.label.2"));
         jsonObj.put("validateList", Collections.singletonList("required"));
         jsonObj.put("multiple", false);
         jsonObj.put("textName", "name");
@@ -78,7 +79,7 @@ public class HandlerLeaderDispatcher extends WorkerDispatcherBase {
 
     @Override
     public String getHelp() {
-        return "在前置步骤处理人所在的组及父组中，找出第一个与选择头衔相同的用户作为当前步骤的处理人";
+        return $.t("nmpwh.handlerleaderdispatcher.gethelp");
     }
 
     @Override

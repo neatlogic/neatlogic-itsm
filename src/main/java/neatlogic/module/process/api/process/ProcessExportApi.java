@@ -40,7 +40,7 @@ public class ProcessExportApi extends PrivateBinaryStreamApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "流程导出";
+		return "nmpap.processexportapi.getname";
 	}
 
 	@Override
@@ -49,9 +49,9 @@ public class ProcessExportApi extends PrivateBinaryStreamApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "流程uuid")
+		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processexportapi.input.param.desc.uuid")
 	})
-	@Description(desc = "流程导出")
+	@Description(desc = "nmpap.processexportapi.getname")
 	@Override
 	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String uuid = paramObj.getString("uuid");

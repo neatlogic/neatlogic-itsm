@@ -39,6 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -55,7 +56,7 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 
     @Override
     public String getDisplayName() {
-        return "上报人";
+        return $.t("nmpch.processtaskownercondition.getdisplayname");
     }
 
     @Override

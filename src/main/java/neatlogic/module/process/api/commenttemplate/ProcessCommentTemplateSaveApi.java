@@ -52,8 +52,8 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
     @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "common.id"),
             @Param(name = "name", type = ApiParamType.STRING, desc = "common.name", isRequired = true),
             @Param(name = "content", type = ApiParamType.STRING, desc = "common.content", isRequired = true),
-            @Param(name = "type", type = ApiParamType.ENUM, rule = "system,custom", desc = "common.type", help = "新增时必填(system:系统模版;custom:自定义模版)"),
-            @Param(name = "authList", type = ApiParamType.JSONARRAY, desc = "common.authlist", help = "可多选，type为system时必填，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]")
+            @Param(name = "type", type = ApiParamType.ENUM, rule = "system,custom", desc = "common.type", help = "nmpac.processcommenttemplatesaveapi.input.param.help.type"),
+            @Param(name = "authList", type = ApiParamType.JSONARRAY, desc = "common.authlist", help = "nmpac.processcommenttemplatesaveapi.input.param.help.authlist")
     })
     @Output({
             @Param(name = "id", type = ApiParamType.LONG, desc = "common.id")

@@ -34,7 +34,7 @@ public class ChannelTypeRelationIsActiveUpdateApi extends PrivateApiComponentBas
 
 	@Override
 	public String getName() {
-		return "启用或禁用服务类型关系";
+		return "nmpacr.channeltyperelationisactiveupdateapi.getname";
 	}
 
 	@Override
@@ -43,13 +43,13 @@ public class ChannelTypeRelationIsActiveUpdateApi extends PrivateApiComponentBas
 	}
 
 	@Input({
-			@Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id")
+			@Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "nmpacr.channeltyperelationisactiveupdateapi.input.param.desc.channeltyperelationid")
 
 	})
 	@Output({
-			@Param(name = "Return", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否激活")
+			@Param(name = "Return", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "nmpacr.channeltyperelationisactiveupdateapi.output.param.desc.return.name")
 	})
-	@Description(desc = "启用或禁用服务类型关系")
+	@Description(desc = "nmpacr.channeltyperelationisactiveupdateapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 	    Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");    

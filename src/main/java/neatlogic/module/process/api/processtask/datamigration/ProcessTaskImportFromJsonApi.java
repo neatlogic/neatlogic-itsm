@@ -1,5 +1,7 @@
 package neatlogic.module.process.api.processtask.datamigration;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONReader;
 import neatlogic.framework.auth.core.AuthAction;
@@ -77,7 +79,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
 
     @Override
     public String getName() {
-        return "导入工单数据(通过固定格式json文件)";
+        return "nmpapd.processtaskimportfromjsonapi.getname";
     }
 
     @Override
@@ -86,12 +88,12 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
     }
 
     @Input({
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpapd.processtaskimportfromjsonapi.input.param.desc.source"),
     })
     @Output({
 
     })
-    @Description(desc = "目前用于同步老工单数据到本系统")
+    @Description(desc = "nmpapd.processtaskimportfromjsonapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, JSONReader jsonReader) throws Exception {
         String source = paramObj.getString("source");
@@ -127,7 +129,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         ProcessVo process = processMapper.getProcessByName(taskValue);
                         if(process == null) {
                             isContinute = true;
-                            String errorTask = processTask.getId()+" 工单的 '"+taskValue+"' 流程不存在";
+                            String errorTask = $.t("nmpapd.processtaskimportfromjsonapi.error.workflownotfound", processTask.getId(), taskValue);
                             logger.error(errorTask);
                             errorTaskList.add(errorTask);
                             break;
@@ -144,7 +146,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         ChannelVo channel = channelMapper.getChannelByName(taskValue);
                         if(channel == null) {
                             isContinute = true;
-                            String errorTask = processTask.getId()+" 工单的 '"+taskValue+"' 服务不存在";
+                            String errorTask = $.t("nmpapd.processtaskimportfromjsonapi.error.servicenotfound", processTask.getId(), taskValue);
                             logger.error(errorTask);
                             errorTaskList.add(errorTask);
                             break;
@@ -166,7 +168,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         PriorityVo priority = priorityMapper.getPriorityByName(taskValue);
                         if(priority == null) {
                             isContinute = true;
-                            String errorTask = processTask.getId()+" 工单的 '"+taskValue+"' 优先级不存在";
+                            String errorTask = $.t("nmpapd.processtaskimportfromjsonapi.error.prioritynotfound", processTask.getId(), taskValue);
                             logger.error(errorTask);
                             errorTaskList.add(errorTask);
                             break;

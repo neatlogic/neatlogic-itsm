@@ -26,6 +26,7 @@ import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskTagCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     @Resource
@@ -41,7 +42,7 @@ public class ProcessTaskTagCondition extends ProcessTaskConditionBase implements
 
     @Override
     public String getDisplayName() {
-        return "标签";
+        return $.t("nmpch.processtasktagcondition.getdisplayname");
     }
 
     @Override

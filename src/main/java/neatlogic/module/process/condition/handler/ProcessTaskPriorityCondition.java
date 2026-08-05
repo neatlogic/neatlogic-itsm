@@ -24,6 +24,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     @Resource
@@ -41,7 +42,7 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
 
     @Override
     public String getDisplayName() {
-        return "优先级";
+        return $.t("nmpch.processtaskprioritycondition.getdisplayname");
     }
 
 	@Override

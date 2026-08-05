@@ -12,6 +12,8 @@
 
 package neatlogic.module.process.thread;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -206,7 +208,7 @@ public class ProcessTaskActionThread extends NeatLogicThread {
                                     isSucceed = ConditionUtil.predicate(curentValueList, expression, targetValueList);
                                     if (!isSucceed) {
                                         String expressionName = Expression.getExpressionName(expression);
-                                        failedReason = String.format("不满足成功条件：%s%s%s", name, expressionName, value);
+                                        failedReason = $.t("nmpt.processtaskactionthread.successconditionnotmet", name, expressionName, value);
                                     }
                                 }
                             } else {

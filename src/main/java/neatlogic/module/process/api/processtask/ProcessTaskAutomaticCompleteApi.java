@@ -40,7 +40,7 @@ public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "流转外部调用步骤接口";
+		return "nmpap.processtaskautomaticcompleteapi.getname";
 	}
 
 	@Override
@@ -49,15 +49,15 @@ public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "当前步骤Id"),
-		@Param(name = "action", type = ApiParamType.ENUM, rule = "back,complete", isRequired = true, desc = "操作类型，complete：流转,back：回退"),
-		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskautomaticcompleteapi.input.param.desc.processtaskstepid"),
+		@Param(name = "action", type = ApiParamType.ENUM, rule = "back,complete", isRequired = true, desc = "nmpap.processtaskautomaticcompleteapi.input.param.desc.action"),
+		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskautomaticcompleteapi.input.param.desc.source")
 	})
 	@Output({
-		@Param(name = "Status", type = ApiParamType.STRING, desc = "状态"),
-		@Param(name = "Message", type = ApiParamType.STRING, desc = "异常信息"),
+		@Param(name = "Status", type = ApiParamType.STRING, desc = "nmpap.processtaskautomaticcompleteapi.output.param.desc.status"),
+		@Param(name = "Message", type = ApiParamType.STRING, desc = "nmpap.processtaskautomaticcompleteapi.output.param.desc.message"),
 	})
-	@Description(desc = "流转外部调用步骤接口")
+	@Description(desc = "nmpap.processtaskautomaticcompleteapi.getname")
 	@ResubmitInterval(3)
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

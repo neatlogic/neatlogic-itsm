@@ -50,7 +50,7 @@ public class ProcessTaskStepTaskListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取工单步骤任务列表";
+        return "nmpapt.processtasksteptasklistapi.getname";
     }
 
     @Override
@@ -59,12 +59,12 @@ public class ProcessTaskStepTaskListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskStepId", isRequired = true, type = ApiParamType.LONG, desc = "工单步骤id")
+            @Param(name = "processTaskStepId", isRequired = true, type = ApiParamType.LONG, desc = "nmpapt.processtasksteptasklistapi.input.param.desc.processtaskstepid")
     })
     @Output({
-            @Param(name = "Return", explode = TaskConfigVo[].class, desc = "任务列表")
+            @Param(name = "Return", explode = TaskConfigVo[].class, desc = "nmpapt.processtasksteptasklistapi.output.param.desc.return.name")
     })
-    @Description(desc = "获取工单步骤任务列表接口")
+    @Description(desc = "nmpapt.processtasksteptasklistapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");

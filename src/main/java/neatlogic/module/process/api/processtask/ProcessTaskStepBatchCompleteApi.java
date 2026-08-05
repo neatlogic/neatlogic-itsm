@@ -42,7 +42,7 @@ public class ProcessTaskStepBatchCompleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "批量完成工单步骤";
+        return "nmpap.processtaskstepbatchcompleteapi.getname";
     }
 
     @Override
@@ -51,12 +51,12 @@ public class ProcessTaskStepBatchCompleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "工单Id列表"),
-            @Param(name = "tag", type = ApiParamType.STRING, desc = "步骤标签"),
-            @Param(name = "content", type = ApiParamType.STRING, desc = "处理意见"),
-            @Param(name = "userId", type = ApiParamType.STRING, isRequired = true, desc = "处理人userId"),
+            @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "nmpap.processtaskstepbatchcompleteapi.input.param.desc.processtaskidlist"),
+            @Param(name = "tag", type = ApiParamType.STRING, desc = "nmpap.processtaskstepbatchcompleteapi.input.param.desc.tag"),
+            @Param(name = "content", type = ApiParamType.STRING, desc = "nmpap.processtaskstepbatchcompleteapi.input.param.desc.content"),
+            @Param(name = "userId", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processtaskstepbatchcompleteapi.input.param.desc.userid"),
     })
-    @Description(desc = "批量完成工单步骤")
+    @Description(desc = "nmpap.processtaskstepbatchcompleteapi.getname")
     @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

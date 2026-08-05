@@ -34,7 +34,7 @@ public class ScoreTemplateRefProcessListApi extends PrivateApiComponentBase{
 
 	@Override
 	public String getName() {
-		return "查询评分模版关联的流程";
+		return "nmpas.scoretemplaterefprocesslistapi.getname";
 	}
 
 	@Override
@@ -44,16 +44,16 @@ public class ScoreTemplateRefProcessListApi extends PrivateApiComponentBase{
 
 
 	@Input({
-			@Param(name = "id", type = ApiParamType.LONG, isRequired = true,desc = "评分模版ID"),
-			@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-			@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
-			@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true")
+			@Param(name = "id", type = ApiParamType.LONG, isRequired = true,desc = "nmpas.scoretemplaterefprocesslistapi.input.param.desc.id"),
+			@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpas.scoretemplaterefprocesslistapi.input.param.desc.currentpage"),
+			@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpas.scoretemplaterefprocesslistapi.input.param.desc.pagesize"),
+			@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpas.scoretemplaterefprocesslistapi.input.param.desc.needpage")
 	})
 	@Output({@Param(name = "processList",
 			type = ApiParamType.JSONARRAY,
 			explode = ValueTextVo[].class,
-			desc = "关联的流程列表")})
-	@Description(desc = "查询评分模版关联的流程")
+			desc = "nmpas.scoretemplaterefprocesslistapi.output.param.desc.processlist")})
+	@Description(desc = "nmpas.scoretemplaterefprocesslistapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject returnObj = new JSONObject();

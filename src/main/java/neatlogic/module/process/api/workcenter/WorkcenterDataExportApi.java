@@ -109,7 +109,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 
     @Override
     public String getName() {
-        return "导出工单中心数据";
+        return "nmpaw.workcenterdataexportapi.getname";
     }
 
     @Override
@@ -118,15 +118,15 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = true),
-            @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "条件设置，为空则使用数据库中保存的条件")
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpaw.workcenterdataexportapi.input.param.desc.uuid", isRequired = true),
+            @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "nmpaw.workcenterdataexportapi.input.param.desc.conditionconfig")
     })
     @Output({})
-    @Description(desc = "导出工单中心数据")
+    @Description(desc = "nmpaw.workcenterdataexportapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         ExportFileManager exportFileManager = new ExportFileManager(ProcessUserExportFileType.WORKCENTER_DATA)
-                .withName("工单数据.xlsx")
+                .withName($.t("nmpaw.workcenterdataexportapi.filename"))
                 .withMimeType(MimeType.XLS)
                 .withAwait(5, TimeUnit.SECONDS)
 //                .withUniqueKey(RequestContext.get().getUrl())
@@ -435,9 +435,9 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                 }
                 if (!processTaskErrorMap.isEmpty()) {
                     StringBuilder stringBuilder = new StringBuilder();
-                    stringBuilder.append("导出以下工单时发生错误：\n");
+                    stringBuilder.append($.t("nmpaw.workcenterdataexportapi.exporterror.header"));
                     for (Map.Entry<Long, String> entry : processTaskErrorMap.entrySet()) {
-                        stringBuilder.append("工单ID：").append(entry.getKey()).append("；错误：").append(entry.getValue()).append("\n");
+                        stringBuilder.append($.t("nmpaw.workcenterdataexportapi.exporterror.item", entry.getKey(), entry.getValue()));
                     }
                     logger.error(stringBuilder.toString());
                     processTaskErrorMap.clear();

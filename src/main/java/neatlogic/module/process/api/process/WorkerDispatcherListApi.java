@@ -27,7 +27,7 @@ public class WorkerDispatcherListApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "处理人分派器列表接口";
+		return "nmpap.workerdispatcherlistapi.getname";
 	}
 
 	@Override
@@ -39,8 +39,8 @@ public class WorkerDispatcherListApi extends PrivateApiComponentBase {
 	@Output({
 			@Param(name = "workerDispatcherList",
 					explode = WorkerDispatcherVo[].class,
-					desc = "处理人分派器列表") })
-	@Description(desc = "处理人分派器列表接口")
+					desc = "nmpap.workerdispatcherlistapi.output.param.desc.workerdispatcherlist") })
+	@Description(desc = "nmpap.workerdispatcherlistapi.getname")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		return WorkerDispatcherFactory.getAllActiveWorkerDispatcher();
 	}

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
     @Autowired
@@ -37,7 +38,7 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
 
     @Override
     public String getDisplayName() {
-        return "优先级";
+        return $.t("nmpwch.processtaskprioritycolumn.getdisplayname");
     }
 
     @Override

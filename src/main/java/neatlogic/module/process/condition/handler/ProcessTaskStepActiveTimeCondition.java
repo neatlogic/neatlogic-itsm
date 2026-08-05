@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStepActiveTimeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -36,7 +37,7 @@ public class ProcessTaskStepActiveTimeCondition extends ProcessTaskConditionBase
 
     @Override
     public String getDisplayName() {
-        return "激活时间";
+        return $.t("nmpch.processtaskstepactivetimecondition.getdisplayname");
     }
 
     @Override

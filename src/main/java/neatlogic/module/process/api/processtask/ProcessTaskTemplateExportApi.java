@@ -63,7 +63,7 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
 
     @Override
     public String getName() {
-        return "导出工单表格模版";
+        return "nmpap.processtasktemplateexportapi.getname";
     }
 
     @Override
@@ -71,9 +71,9 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
         return null;
     }
 
-    @Input({@Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务uuid")})
+    @Input({@Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processtasktemplateexportapi.input.param.desc.channeluuid")})
     @Output({})
-    @Description(desc = "导出工单表格模版")
+    @Description(desc = "nmpap.processtasktemplateexportapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         String channelUuid = paramObj.getString("channelUuid");

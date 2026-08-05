@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
 
@@ -29,7 +30,7 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
 
     @Override
     public String getDisplayName() {
-        return "代报人";
+        return $.t("nmpwch.processtaskreportercolumn.getdisplayname");
     }
 
     @Override

@@ -46,7 +46,7 @@ public class ProcessStepHandlerSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "流程节点组件检索接口";
+        return "nmpap.processstephandlersearchapi.getname";
     }
 
     @Override
@@ -55,12 +55,12 @@ public class ProcessStepHandlerSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param( name = "keywork", type = ApiParamType.STRING, xss = true, desc = "流程节点组件名称")
+            @Param( name = "keywork", type = ApiParamType.STRING, xss = true, desc = "nmpap.processstephandlersearchapi.input.param.desc.keywork")
     })
     @Output({
-            @Param( name = "stepHandlerList", explode = ProcessStepHandlerVo[].class, desc = "流程节点组件列表")
+            @Param( name = "stepHandlerList", explode = ProcessStepHandlerVo[].class, desc = "nmpap.processstephandlersearchapi.output.param.desc.stephandlerlist")
     })
-    @Description(desc = "流程节点组件检索接口")
+    @Description(desc = "nmpap.processstephandlersearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();

@@ -40,6 +40,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStepOnlyTeamCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     @Resource
@@ -52,12 +53,12 @@ public class ProcessTaskStepOnlyTeamCondition extends ProcessTaskConditionBase i
 
     @Override
     public String getDisplayName() {
-        return "步骤处理组";
+        return $.t("nmpch.processtasksteponlyteamcondition.getdisplayname");
     }
 
     @Override
     public String getDesc() {
-        return "过滤出分派到该组的工单（指定抢单包含该组的工单）";
+        return $.t("nmpch.processtasksteponlyteamcondition.getdesc");
     }
 
     @Override

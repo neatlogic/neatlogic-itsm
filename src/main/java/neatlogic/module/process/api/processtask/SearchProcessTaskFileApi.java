@@ -65,7 +65,7 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单附件列表";
+        return "nmpap.searchprocesstaskfileapi.getname";
     }
 
     @Override
@@ -74,16 +74,16 @@ public class SearchProcessTaskFileApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单ID"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.searchprocesstaskfileapi.input.param.desc.processtaskid"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpap.searchprocesstaskfileapi.input.param.desc.needpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpap.searchprocesstaskfileapi.input.param.desc.pagesize"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpap.searchprocesstaskfileapi.input.param.desc.currentpage")
     })
     @Output({
             @Param(explode = BasePageVo.class),
             @Param(name = "tbodyList", explode = FileVo[].class)
     })
-    @Description(desc = "工单附件列表")
+    @Description(desc = "nmpap.searchprocesstaskfileapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject result = new JSONObject();

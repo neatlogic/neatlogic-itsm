@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStatusCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -31,7 +32,7 @@ public class ProcessTaskStatusCondition extends ProcessTaskConditionBase impleme
 
     @Override
     public String getDisplayName() {
-        return "工单状态";
+        return $.t("nmpch.processtaskstatuscondition.getdisplayname");
     }
 
     @Override

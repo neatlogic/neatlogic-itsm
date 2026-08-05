@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 
@@ -36,7 +37,7 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 
 	@Override
 	public String getDisplayName() {
-		return "服务类型";
+		return $.t("nmpwch.processtaskchanneltypecolumn.getdisplayname");
 	}
 
 	@Override

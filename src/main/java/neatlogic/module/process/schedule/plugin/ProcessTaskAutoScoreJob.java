@@ -44,6 +44,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import neatlogic.framework.util.$;
 /**
  * 工单自动评分定时类
  */
@@ -52,7 +53,7 @@ import java.util.concurrent.TimeUnit;
 public class ProcessTaskAutoScoreJob extends JobBase {
 	@Override
 	public String getName() {
-		return "工单自动评分";
+		return $.t("nmpsp.processtaskautoscorejob.getname");
 	}
 
 
@@ -180,7 +181,7 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 		JSONObject paramObj = new JSONObject();
 		paramObj.put("scoreTemplateId", scoreTemplateId);
 		paramObj.put("scoreDimensionList", dimensionList);
-		paramObj.put("content", new I18n("系统自动评价").toString());
+		paramObj.put("content", new I18n("nmpsp.processtaskautoscorejob.text.for").toString());
 		task.setParamObj(paramObj);
 		/** 执行转交前，设置当前用户为system,用于权限校验 **/
 		UserContext.init(SystemUser.SYSTEM);

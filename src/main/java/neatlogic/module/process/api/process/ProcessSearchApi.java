@@ -44,7 +44,7 @@ public class ProcessSearchApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword", help = "匹配名称"),
+		@Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword", help = "nmpap.processsearchapi.input.param.help.keyword"),
 		@Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "common.defaultvalue"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "common.isactive", rule = "0,1"),
 		@Param(name = "isICreated", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "nmpap.processsearchapi.input.param.desc.isicreated"),

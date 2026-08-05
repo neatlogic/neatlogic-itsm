@@ -12,6 +12,7 @@ import neatlogic.framework.process.dto.ProcessTaskStepTaskVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import org.springframework.stereotype.Component;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStepTaskIdCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -22,7 +23,7 @@ public class ProcessTaskStepTaskIdCondition extends ProcessTaskConditionBase imp
 
     @Override
     public String getDisplayName() {
-        return "子任务id";
+        return $.t("nmpch.processtasksteptaskidcondition.getdisplayname");
     }
 
     @Override

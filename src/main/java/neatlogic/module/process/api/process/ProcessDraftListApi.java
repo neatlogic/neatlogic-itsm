@@ -30,7 +30,7 @@ public class ProcessDraftListApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "流程草稿列表接口";
+		return "nmpap.processdraftlistapi.getname";
 	}
 
 	@Override
@@ -39,12 +39,12 @@ public class ProcessDraftListApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "processUuid", type = ApiParamType.STRING, desc = "流程uuid，获取已正式保存的当前流程的草稿列表，如不传，获取未正式保存的所有草稿列表")
+		@Param(name = "processUuid", type = ApiParamType.STRING, desc = "nmpap.processdraftlistapi.input.param.desc.processuuid")
 	})
 	@Output({
-		@Param(name="Return",explode=ProcessDraftVo[].class,desc="流程草稿列表")
+		@Param(name="Return",explode=ProcessDraftVo[].class,desc="nmpap.processdraftlistapi.output.param.desc.return.name")
 	})
-	@Description(desc = "流程草稿列表接口，最后更新时间2020-02-18 14:55，修改参数说明及输出参数列表")
+	@Description(desc = "nmpap.processdraftlistapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String processUuid = jsonObj.getString("processUuid");

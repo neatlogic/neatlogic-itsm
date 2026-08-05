@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 /**
  * @author linbq
  * @since 2021/10/29 16:22
@@ -63,7 +64,7 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
 
     @Override
     public String getName() {
-        return "自动审批";
+        return $.t("nmpah.autoapprovalhandler.getname");
     }
 
     @Override

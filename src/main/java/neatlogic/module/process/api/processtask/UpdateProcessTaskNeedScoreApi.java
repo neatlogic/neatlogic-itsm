@@ -49,7 +49,7 @@ public class UpdateProcessTaskNeedScoreApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "批量更新工单的needScore字段值";
+        return "nmpap.updateprocesstaskneedscoreapi.getname";
     }
 
     @Override
@@ -58,10 +58,10 @@ public class UpdateProcessTaskNeedScoreApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "idList", type = ApiParamType.JSONARRAY, desc = "工单ID列表")
+            @Param(name = "idList", type = ApiParamType.JSONARRAY, desc = "nmpap.updateprocesstaskneedscoreapi.input.param.desc.idlist")
     })
     @Output({})
-    @Description(desc = "批量更新工单的needScore字段值")
+    @Description(desc = "nmpap.updateprocesstaskneedscoreapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONArray idArray = paramObj.getJSONArray("idList");

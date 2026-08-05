@@ -26,7 +26,7 @@ public class EsProcessTaskSyncApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "更新es工单数据";
+        return "nmpawe.esprocesstasksyncapi.getname";
     }
 
     @Override
@@ -34,14 +34,14 @@ public class EsProcessTaskSyncApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "fromDate", type = ApiParamType.STRING, desc = "创建时间>=fromDate"),
-        @Param(name = "toDate", type = ApiParamType.STRING, desc = "创建时间<toDate"),
-        @Param(name = "documentIdList", type = ApiParamType.JSONARRAY, desc = "documentId数组"),
+    @Input({@Param(name = "fromDate", type = ApiParamType.STRING, desc = "nmpawe.esprocesstasksyncapi.input.param.desc.fromdate"),
+        @Param(name = "toDate", type = ApiParamType.STRING, desc = "nmpawe.esprocesstasksyncapi.input.param.desc.todate"),
+        @Param(name = "documentIdList", type = ApiParamType.JSONARRAY, desc = "nmpawe.esprocesstasksyncapi.input.param.desc.documentidlist"),
         @Param(name = "action", type = ApiParamType.STRING, desc = "delete,refresh")})
     @Output({
 
     })
-    @Description(desc = "修改工单数据到es")
+    @Description(desc = "nmpawe.esprocesstasksyncapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
        /* List<Object> taskIds = jsonObj.getJSONArray("processTaskIds");

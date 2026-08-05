@@ -140,7 +140,7 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "随机创建|执行工单";
+        return "nmpapt.randomcreateprocesstaskapi.getname";
     }
 
     @Override
@@ -150,8 +150,8 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
 
     @Override
     @Input({
-            @Param(name = "count", type = ApiParamType.INTEGER, desc = "需要随机创建|执行工单数", isRequired = true),
-            @Param(name = "type", type = ApiParamType.STRING, desc = "create:创建工单，execute:执行工单(因为异步原因，在create后需延迟50s后再执行工单)", isRequired = true)
+            @Param(name = "count", type = ApiParamType.INTEGER, desc = "nmpapt.randomcreateprocesstaskapi.input.param.desc.count", isRequired = true),
+            @Param(name = "type", type = ApiParamType.STRING, desc = "nmpapt.randomcreateprocesstaskapi.input.param.desc.type", isRequired = true)
     })
     public Object myDoService(JSONObject paramJson) throws Exception {
         String type = paramJson.getString("type");

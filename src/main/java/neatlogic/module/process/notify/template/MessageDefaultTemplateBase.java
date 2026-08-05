@@ -3,6 +3,7 @@ package neatlogic.module.process.notify.template;
 import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.process.notify.core.IDefaultTemplate;
 
+import neatlogic.framework.util.$;
 public abstract class MessageDefaultTemplateBase implements IDefaultTemplate {
 
     @Override
@@ -14,20 +15,20 @@ public abstract class MessageDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return "步骤激活提醒——" + PROCESSTASK_SERIALNUMBER_TITLE;
+            return $.t("nmpnt.messagedefaulttemplatebase.active.gettitle.1") + PROCESSTASK_SERIALNUMBER_TITLE;
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单" + PROCESSTASK_SERIALNUMBER_TITLE + "已流转至【${DATA.step.name}】；<br>")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.messagedefaulttemplatebase.active.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.messagedefaulttemplatebase.active.getcontent.2"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
         @Override
         public String description() {
-            return "消息通知步骤激活默认模板";
+            return $.t("nmpnt.messagedefaulttemplatebase.active.description.1");
         }
 
     }
@@ -36,20 +37,20 @@ public abstract class MessageDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return "处理人响应提醒——" + PROCESSTASK_SERIALNUMBER_TITLE;
+            return $.t("nmpnt.messagedefaulttemplatebase.start.gettitle.1") + PROCESSTASK_SERIALNUMBER_TITLE;
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单" + PROCESSTASK_SERIALNUMBER_TITLE + "的【${DATA.step.name}】步骤已由处理人【${DATA.step.majorUser.userName}】受理；<br>")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.messagedefaulttemplatebase.start.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.messagedefaulttemplatebase.start.getcontent.2"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
         @Override
         public String description() {
-            return "消息通知步骤激活默认模板";
+            return $.t("nmpnt.messagedefaulttemplatebase.start.description.1");
         }
 
     }
@@ -58,21 +59,21 @@ public abstract class MessageDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return "步骤转交提醒——" + PROCESSTASK_SERIALNUMBER_TITLE;
+            return $.t("nmpnt.messagedefaulttemplatebase.transfer.gettitle.1") + PROCESSTASK_SERIALNUMBER_TITLE;
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单" + PROCESSTASK_SERIALNUMBER_TITLE + "中，【${DATA.currentUserName}】已将【${DATA.step.name}】步骤转交给" + PROCESSTASK_STEP_WORKER + "处理；<br>")
-                    .append("原因：【${DATA.content}】 ；<br>")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.messagedefaulttemplatebase.transfer.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.messagedefaulttemplatebase.transfer.getcontent.2") + PROCESSTASK_STEP_WORKER + $.t("nmpnt.messagedefaulttemplatebase.transfer.getcontent.3"))
+                    .append($.t("nmpnt.messagedefaulttemplatebase.transfer.getcontent.4"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
         @Override
         public String description() {
-            return "消息通知步骤激活默认模板";
+            return $.t("nmpnt.messagedefaulttemplatebase.transfer.description.1");
         }
 
     }
@@ -81,20 +82,20 @@ public abstract class MessageDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return "您收到了一条催办提醒——" + PROCESSTASK_SERIALNUMBER_TITLE;
+            return $.t("nmpnt.messagedefaulttemplatebase.urge.gettitle.1") + PROCESSTASK_SERIALNUMBER_TITLE;
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单" + PROCESSTASK_SERIALNUMBER_TITLE + "中，【${DATA.currentUserName}】发起了一条催办通知，请尽快处理；<br>")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.messagedefaulttemplatebase.urge.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.messagedefaulttemplatebase.urge.getcontent.2"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
         @Override
         public String description() {
-            return "消息通知催办默认模板";
+            return $.t("nmpnt.messagedefaulttemplatebase.urge.description.1");
         }
     }
 
@@ -102,20 +103,20 @@ public abstract class MessageDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return "步骤完成提醒——" + PROCESSTASK_SERIALNUMBER_TITLE;
+            return $.t("nmpnt.messagedefaulttemplatebase.succeed.gettitle.1") + PROCESSTASK_SERIALNUMBER_TITLE;
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单" + PROCESSTASK_SERIALNUMBER_TITLE + "的【${DATA.step.name}】步骤已处理完成；<br>")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.messagedefaulttemplatebase.succeed.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.messagedefaulttemplatebase.succeed.getcontent.2"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
         @Override
         public String description() {
-            return "消息通知成功默认模板";
+            return $.t("nmpnt.messagedefaulttemplatebase.succeed.description.1");
         }
     }
 
@@ -123,21 +124,21 @@ public abstract class MessageDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return "步骤退回提醒——" + PROCESSTASK_SERIALNUMBER_TITLE;
+            return $.t("nmpnt.messagedefaulttemplatebase.back.gettitle.1") + PROCESSTASK_SERIALNUMBER_TITLE;
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单" + PROCESSTASK_SERIALNUMBER_TITLE + "已回退至【${DATA.step.name}】；<br>")
-                    .append("原因：【${DATA.content}】 ；<br>")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.messagedefaulttemplatebase.back.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.messagedefaulttemplatebase.back.getcontent.2"))
+                    .append($.t("nmpnt.messagedefaulttemplatebase.back.getcontent.3"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
         @Override
         public String description() {
-            return "消息通知退回默认模板";
+            return $.t("nmpnt.messagedefaulttemplatebase.back.description.1");
         }
     }
 
@@ -145,21 +146,21 @@ public abstract class MessageDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return "步骤撤回提醒——" + PROCESSTASK_SERIALNUMBER_TITLE;
+            return $.t("nmpnt.messagedefaulttemplatebase.retreat.gettitle.1") + PROCESSTASK_SERIALNUMBER_TITLE;
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("【${DATA.currentUserName}】已将工单" + PROCESSTASK_SERIALNUMBER_TITLE + "的【${DATA.step.name}】步骤撤回；<br>")
-                    .append("原因：【${DATA.content}】 ；<br>")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.messagedefaulttemplatebase.retreat.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.messagedefaulttemplatebase.retreat.getcontent.2"))
+                    .append($.t("nmpnt.messagedefaulttemplatebase.retreat.getcontent.3"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
         @Override
         public String description() {
-            return "消息通知撤回默认模板";
+            return $.t("nmpnt.messagedefaulttemplatebase.retreat.description.1");
         }
     }
 
@@ -167,21 +168,21 @@ public abstract class MessageDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return "步骤挂起提醒——" + PROCESSTASK_SERIALNUMBER_TITLE;
+            return $.t("nmpnt.messagedefaulttemplatebase.hang.gettitle.1") + PROCESSTASK_SERIALNUMBER_TITLE;
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单" + PROCESSTASK_SERIALNUMBER_TITLE + "中，【${DATA.step.name}】步骤已挂起；<br>")
-                    .append("原因：因【步骤名称】步骤回退导致  ；<br>")//TODO linbq步骤名称有替换成变量
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.messagedefaulttemplatebase.hang.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.messagedefaulttemplatebase.hang.getcontent.2"))
+                    .append($.t("nmpnt.messagedefaulttemplatebase.hang.getcontent.3"))//TODO linbq步骤名称有替换成变量
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
         @Override
         public String description() {
-            return "消息通知挂起默认模板";
+            return $.t("nmpnt.messagedefaulttemplatebase.hang.description.1");
         }
     }
 
@@ -189,20 +190,20 @@ public abstract class MessageDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return "取消工单——" + PROCESSTASK_SERIALNUMBER_TITLE;
+            return $.t("nmpnt.messagedefaulttemplatebase.abort.gettitle.1") + PROCESSTASK_SERIALNUMBER_TITLE;
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("【${DATA.currentUser}】取消了工单" + PROCESSTASK_SERIALNUMBER_TITLE + "；<br>")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.messagedefaulttemplatebase.abort.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + "；<br>")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
         @Override
         public String description() {
-            return "消息通知取消默认模板";
+            return $.t("nmpnt.messagedefaulttemplatebase.abort.description.1");
         }
     }
 
@@ -210,20 +211,20 @@ public abstract class MessageDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return "恢复工单——" + PROCESSTASK_SERIALNUMBER_TITLE;
+            return $.t("nmpnt.messagedefaulttemplatebase.recover.gettitle.1") + PROCESSTASK_SERIALNUMBER_TITLE;
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("【${DATA.currentUser}】恢复了工单" + PROCESSTASK_SERIALNUMBER_TITLE + "；<br>")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.messagedefaulttemplatebase.recover.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + "；<br>")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
         @Override
         public String description() {
-            return "消息通知恢复默认模板";
+            return $.t("nmpnt.messagedefaulttemplatebase.recover.description.1");
         }
     }
 
@@ -231,21 +232,21 @@ public abstract class MessageDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return "步骤失败提醒——" + PROCESSTASK_SERIALNUMBER_TITLE;
+            return $.t("nmpnt.messagedefaulttemplatebase.failed.gettitle.1") + PROCESSTASK_SERIALNUMBER_TITLE;
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单" + PROCESSTASK_SERIALNUMBER_TITLE + "中，【${DATA.step.name}】步骤流转失败；<br>")
-                    .append("原因：【${DATA.step.error}】  ；<br>")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.messagedefaulttemplatebase.failed.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.messagedefaulttemplatebase.failed.getcontent.2"))
+                    .append($.t("nmpnt.messagedefaulttemplatebase.failed.getcontent.3"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
         @Override
         public String description() {
-            return "消息通知失败默认模板";
+            return $.t("nmpnt.messagedefaulttemplatebase.failed.description.1");
         }
     }
 

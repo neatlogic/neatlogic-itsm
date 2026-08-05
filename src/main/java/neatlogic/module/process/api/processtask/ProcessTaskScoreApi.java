@@ -28,7 +28,7 @@ public class ProcessTaskScoreApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "工单评分接口";
+		return "nmpap.processtaskscoreapi.getname";
 	}
 
 	@Override
@@ -37,15 +37,15 @@ public class ProcessTaskScoreApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-		@Param(name = "scoreTemplateId", type = ApiParamType.LONG, isRequired = true, desc = "评分模版ID"),
+		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskscoreapi.input.param.desc.processtaskid"),
+		@Param(name = "scoreTemplateId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskscoreapi.input.param.desc.scoretemplateid"),
 		@Param(name = "scoreDimensionList", type = ApiParamType.JSONARRAY, isRequired = true,
-				desc = "评分维度及分数，格式[{\"id\":133018403841111,\"name\":\"dim\",\"description\":\"see\",\"score\":3}]"),
-		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-		@Param(name = "content", type = ApiParamType.STRING, desc = "评价内容")
+				desc = "nmpap.processtaskscoreapi.input.param.desc.scoredimensionlist"),
+		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskscoreapi.input.param.desc.source"),
+		@Param(name = "content", type = ApiParamType.STRING, desc = "nmpap.processtaskscoreapi.input.param.desc.content")
 	})
 	@Output({})
-	@Description(desc = "工单评分接口")
+	@Description(desc = "nmpap.processtaskscoreapi.getname")
 	@ResubmitInterval(3)
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

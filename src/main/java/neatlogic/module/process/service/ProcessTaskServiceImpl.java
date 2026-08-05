@@ -657,7 +657,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 for (ProcessUserType processUserType : operatorProcessUserTypeList) {
                     operatorProcessUserTypeTextList.add(processUserType.getText());
                 }
-                processTaskStepReplyVo.setOperatorRole(String.join("、", operatorProcessUserTypeTextList));
+                processTaskStepReplyVo.setOperatorRole(String.join($.t("nmps.processtaskserviceimpl.listseparator"), operatorProcessUserTypeTextList));
                 processTaskStepReplyList.add(processTaskStepReplyVo);
             }
         }
@@ -2474,9 +2474,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                 }
                 if (Objects.equals(processTaskActionVo.getStatus(), "succeed")) {
                     processTaskActionVo.setSucceed(true);
-                    processTaskActionVo.setStatusText("已成功");
+                    processTaskActionVo.setStatusText($.t("nmps.processtaskserviceimpl.actionstatus.succeeded"));
                 } else {
-                    processTaskActionVo.setStatusText("已失败");
+                    processTaskActionVo.setStatusText($.t("nmps.processtaskserviceimpl.actionstatus.failed"));
                 }
                 String triggerText = NotifyTriggerTypeFactory.getText(processTaskActionVo.getTrigger());
                 if(StringUtils.isNotBlank(triggerText)) {

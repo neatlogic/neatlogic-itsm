@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
     @Autowired
@@ -29,7 +30,7 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
 
     @Override
     public String getDisplayName() {
-        return "服务目录";
+        return $.t("nmpwch.processtaskcatalogcolumn.getdisplayname");
     }
 
     @Override
@@ -68,10 +69,10 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
             if (processTaskVo.getChannelVo().getParent() != null) {
                 return processTaskVo.getChannelVo().getParent().getName();
             } else {
-                return "服务目录已被删除";
+                return $.t("nmpwch.processtaskcatalogcolumn.deletedcatalog");
             }
         }
-        return "服务已被删除";
+        return $.t("nmpwch.processtaskcatalogcolumn.deletedservice");
     }
 
     @Override

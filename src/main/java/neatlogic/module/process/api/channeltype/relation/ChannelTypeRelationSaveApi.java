@@ -38,7 +38,7 @@ public class ChannelTypeRelationSaveApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "添加服务类型关系";
+		return "nmpacr.channeltyperelationsaveapi.getname";
 	}
 
 	@Override
@@ -47,16 +47,16 @@ public class ChannelTypeRelationSaveApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "id", type = ApiParamType.LONG, desc = "服务类型关系id"),
-		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "名称"),
-        @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否激活"),
-		@Param(name = "sourceList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "来源服务类型uuid列表"),
-		@Param(name = "targetList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "目标服务类型uuid列表")
+		@Param(name = "id", type = ApiParamType.LONG, desc = "nmpacr.channeltyperelationsaveapi.input.param.desc.id"),
+		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "nmpacr.channeltyperelationsaveapi.input.param.desc.name"),
+        @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "nmpacr.channeltyperelationsaveapi.input.param.desc.isactive"),
+		@Param(name = "sourceList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "nmpacr.channeltyperelationsaveapi.input.param.desc.sourcelist"),
+		@Param(name = "targetList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "nmpacr.channeltyperelationsaveapi.input.param.desc.targetlist")
 	})
 	@Output({
-		@Param(name = "Return", type = ApiParamType.LONG, desc = "服务类型关系id")
+		@Param(name = "Return", type = ApiParamType.LONG, desc = "nmpacr.channeltyperelationsaveapi.output.param.desc.return.name")
 	})
-	@Description(desc = "添加服务类型关系")
+	@Description(desc = "nmpacr.channeltyperelationsaveapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 	    ChannelTypeRelationVo channelTypeRelationVo = JSON.toJavaObject(jsonObj, ChannelTypeRelationVo.class);

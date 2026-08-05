@@ -50,7 +50,7 @@ public class TaskSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "搜索子任务";
+        return "nmpat.tasksearchapi.getname";
     }
 
     @Override
@@ -59,20 +59,20 @@ public class TaskSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
-            @Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "nmpat.tasksearchapi.input.param.desc.keyword"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, desc = "nmpat.tasksearchapi.input.param.desc.isactive", rule = "0,1"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpat.tasksearchapi.input.param.desc.needpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpat.tasksearchapi.input.param.desc.pagesize"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpat.tasksearchapi.input.param.desc.currentpage")
     })
     @Output({
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "当前页码"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = true, desc = "页大小"),
-            @Param(name = "pageCount", type = ApiParamType.INTEGER, isRequired = true, desc = "总页数"),
-            @Param(name = "rowNum", type = ApiParamType.INTEGER, isRequired = true, desc = "总行数"),
-            @Param(name = "tbodyList", explode = TaskConfigVo[].class, desc = "优先级列表")
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpat.tasksearchapi.output.param.desc.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpat.tasksearchapi.output.param.desc.pagesize"),
+            @Param(name = "pageCount", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpat.tasksearchapi.output.param.desc.pagecount"),
+            @Param(name = "rowNum", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpat.tasksearchapi.output.param.desc.rownum"),
+            @Param(name = "tbodyList", explode = TaskConfigVo[].class, desc = "nmpat.tasksearchapi.output.param.desc.tbodylist")
     })
-    @Description(desc = "搜索任务接口")
+    @Description(desc = "nmpat.tasksearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         TaskConfigVo taskConfigVo = JSONObject.toJavaObject(jsonObj, TaskConfigVo.class);

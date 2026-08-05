@@ -53,7 +53,7 @@ public class WorkcenterConditionSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单中心分类条件修改接口";
+        return "nmpaw.workcenterconditionsaveapi.getname";
     }
 
     @Override
@@ -62,10 +62,10 @@ public class WorkcenterConditionSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = true),
-            @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "分类过滤配置，json格式", isRequired = true)
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpaw.workcenterconditionsaveapi.input.param.desc.uuid", isRequired = true),
+            @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "nmpaw.workcenterconditionsaveapi.input.param.desc.conditionconfig", isRequired = true)
     })
-    @Description(desc = "工单中心分类条件修改接口")
+    @Description(desc = "nmpaw.workcenterconditionsaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");

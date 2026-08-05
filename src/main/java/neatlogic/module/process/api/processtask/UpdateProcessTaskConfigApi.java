@@ -10,6 +10,8 @@
 
 package neatlogic.module.process.api.processtask;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -100,7 +102,7 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
         setProcessUuidAndName(oldConfig, processUuid, processName);
         setProcessUuidAndName(newConfig, processUuid, processName);
         if (Objects.equals(JSON.toJSONString(oldConfig, SerializerFeature.MapSortField), JSON.toJSONString(newConfig, SerializerFeature.MapSortField))) {
-            resultObj.put("message", "没有修改工单流程图快照");
+            resultObj.put("message", $.t("nmpapm.updateprocesstaskconfigapi.message.unchanged"));
             return resultObj;
         }
         ProcessVo oldProcessVo = processMapper.getProcessByUuid(processTaskVo.getProcessUuid());
@@ -118,7 +120,7 @@ public class UpdateProcessTaskConfigApi extends PrivateApiComponentBase {
         processMapper.deleteProcessByUuid(processUuid);
 
         processService.saveOrDeleteProcessDependency(oldProcessVo, "save");
-        resultObj.put("message", "已修改工单流程图快照");
+        resultObj.put("message", $.t("nmpapm.updateprocesstaskconfigapi.message.updated"));
 
         List<ProcessTaskSlaVo> newProcessTaskSlaList = processTaskSlaMapper.getProcessTaskSlaListByProcessTaskId(processTaskId);
         if (oldProcessTaskSlaList.size() != newProcessTaskSlaList.size()

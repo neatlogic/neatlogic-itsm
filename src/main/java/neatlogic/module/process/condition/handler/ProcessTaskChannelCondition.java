@@ -19,6 +19,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskChannelCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -32,7 +33,7 @@ public class ProcessTaskChannelCondition extends ProcessTaskConditionBase implem
 
     @Override
     public String getDisplayName() {
-        return "服务";
+        return $.t("nmpch.processtaskchannelcondition.getdisplayname");
     }
 
 	@Override

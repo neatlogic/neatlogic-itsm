@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskOwnerRoleCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -41,7 +42,7 @@ public class ProcessTaskOwnerRoleCondition extends ProcessTaskConditionBase impl
 
     @Override
     public String getDisplayName() {
-        return "上报人角色";
+        return $.t("nmpch.processtaskownerrolecondition.getdisplayname");
     }
 
     @Override

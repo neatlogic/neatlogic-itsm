@@ -55,7 +55,7 @@ public class SearchProcessTaskListForOwnerApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询用户上报工单列表";
+        return "nmpap.searchprocesstasklistforownerapi.getname";
     }
 
     @Override
@@ -64,14 +64,14 @@ public class SearchProcessTaskListForOwnerApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "owner", type = ApiParamType.STRING, isRequired = true, desc = "上报人"),
-            @Param(name = "excludeId", type = ApiParamType.LONG, isRequired = true, desc = "排除的工单ID"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
+            @Param(name = "owner", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.searchprocesstasklistforownerapi.input.param.desc.owner"),
+            @Param(name = "excludeId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.searchprocesstasklistforownerapi.input.param.desc.excludeid"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpap.searchprocesstasklistforownerapi.input.param.desc.pagesize"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpap.searchprocesstasklistforownerapi.input.param.desc.currentpage"),
     })
     @Output({
             @Param(explode = BasePageVo.class),
-            @Param(name = "tbodyList", explode = ProcessTaskVo[].class, desc = "工单列表")
+            @Param(name = "tbodyList", explode = ProcessTaskVo[].class, desc = "nmpap.searchprocesstasklistforownerapi.output.param.desc.tbodylist")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {

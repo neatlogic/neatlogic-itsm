@@ -4,6 +4,7 @@ import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.process.notify.core.IDefaultTemplate;
 import org.springframework.stereotype.Component;
 
+import neatlogic.framework.util.$;
 public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
 
@@ -15,14 +16,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "工单上报完成提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.startprocess.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("【${DATA.ownername}】上报工单" + PROCESSTASK_SERIALNUMBER_TITLE + "。\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.startprocess.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + "。\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -42,14 +43,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "催办工单提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.urge.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(OPERATOR + "对工单" + PROCESSTASK_SERIALNUMBER_TITLE + "发起催办。\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(OPERATOR + $.t("nmpnt.emaildefaulttemplatebase.urge.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.urge.getcontent.2"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -69,14 +70,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "取消工单提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.abortprocesstask.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(OPERATOR + "取消了工单" + PROCESSTASK_SERIALNUMBER_TITLE + "\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(OPERATOR + $.t("nmpnt.emaildefaulttemplatebase.abortprocesstask.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + "\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -96,14 +97,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "恢复工单提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.recoverprocesstask.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(OPERATOR + "恢复了工单" + PROCESSTASK_SERIALNUMBER_TITLE + "\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(OPERATOR + $.t("nmpnt.emaildefaulttemplatebase.recoverprocesstask.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + "\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -123,14 +124,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "工单完成提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.completeprocesstask.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(OPERATOR + "完成了工单" + PROCESSTASK_SERIALNUMBER_TITLE + "\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(OPERATOR + $.t("nmpnt.emaildefaulttemplatebase.completeprocesstask.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + "\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -150,14 +151,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "重新打开提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.reopenprocesstask.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(OPERATOR + "重新打开了工单" + PROCESSTASK_SERIALNUMBER_TITLE + "\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(OPERATOR + $.t("nmpnt.emaildefaulttemplatebase.reopenprocesstask.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + "\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -177,14 +178,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "工单评分提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.scoreprocesstask.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(OPERATOR + "对工单" + PROCESSTASK_SERIALNUMBER_TITLE + "进行了评分。\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(OPERATOR + $.t("nmpnt.emaildefaulttemplatebase.scoreprocesstask.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.scoreprocesstask.getcontent.2"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -208,14 +209,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "步骤激活提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.active.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单" + PROCESSTASK_SERIALNUMBER_TITLE + "已流转至" + PROCESSTASK_STEP_NAME + "\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.active.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.active.getcontent.2") + PROCESSTASK_STEP_NAME + "\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -235,14 +236,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "步骤分配处理人提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.assign.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("系统已为工单步骤" + PROCESSTASK_STEP_NAME + "分配处理人" + PROCESSTASK_STEP_WORKER + "\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.assign.getcontent.1") + PROCESSTASK_STEP_NAME + $.t("nmpnt.emaildefaulttemplatebase.assign.getcontent.2") + PROCESSTASK_STEP_WORKER + "\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -262,14 +263,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "步骤处理人分配异常提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.assignexception.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单步骤" + PROCESSTASK_STEP_NAME + "分配处理人异常，原因：根据分配策略没有找到处理人")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.assignexception.getcontent.1") + PROCESSTASK_STEP_NAME + $.t("nmpnt.emaildefaulttemplatebase.assignexception.getcontent.2"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -289,14 +290,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "处理人响应提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.start.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单步骤" + PROCESSTASK_STEP_NAME + "已由" + PROCESSTASK_STEP_WORKER + "受理。\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.start.getcontent.1") + PROCESSTASK_STEP_NAME + $.t("nmpnt.emaildefaulttemplatebase.start.getcontent.2") + PROCESSTASK_STEP_WORKER + $.t("nmpnt.emaildefaulttemplatebase.start.getcontent.3"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -316,14 +317,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "步骤转交提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.transfer.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(OPERATOR + "已将" + PROCESSTASK_STEP_NAME + "转交给" + PROCESSTASK_STEP_WORKER + "处理。\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(OPERATOR + $.t("nmpnt.emaildefaulttemplatebase.transfer.getcontent.1") + PROCESSTASK_STEP_NAME + $.t("nmpnt.emaildefaulttemplatebase.transfer.getcontent.2") + PROCESSTASK_STEP_WORKER + $.t("nmpnt.emaildefaulttemplatebase.transfer.getcontent.3"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -343,14 +344,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "步骤完成提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.succeed.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(PROCESSTASK_STEP_WORKER + "完成步骤" + PROCESSTASK_STEP_NAME + "。\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(PROCESSTASK_STEP_WORKER + $.t("nmpnt.emaildefaulttemplatebase.succeed.getcontent.1") + PROCESSTASK_STEP_NAME + "。\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -370,15 +371,15 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "步骤回退提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.back.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(OPERATOR + "回退步骤至" + PROCESSTASK_STEP_NAME + "\n")
-                    .append(",原因：" + REASON + "\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(OPERATOR + $.t("nmpnt.emaildefaulttemplatebase.back.getcontent.1") + PROCESSTASK_STEP_NAME + "\n")
+                    .append($.t("nmpnt.emaildefaulttemplatebase.back.getcontent.2") + REASON + "\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -398,15 +399,15 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "步骤撤回提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.retreat.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(OPERATOR + "撤回步骤至" + PROCESSTASK_STEP_NAME + "\n")
-                    .append("，原因：" + REASON)
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(OPERATOR + $.t("nmpnt.emaildefaulttemplatebase.retreat.getcontent.1") + PROCESSTASK_STEP_NAME + "\n")
+                    .append($.t("nmpnt.emaildefaulttemplatebase.retreat.getcontent.2") + REASON)
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -426,15 +427,15 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "步骤挂起提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.hang.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单步骤" + PROCESSTASK_STEP_NAME + "已挂起\n")
-                    .append("，原因：" + REASON)//TODO linbq步骤名称有替换成变量
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.hang.getcontent.1") + PROCESSTASK_STEP_NAME + $.t("nmpnt.emaildefaulttemplatebase.hang.getcontent.2"))
+                    .append($.t("nmpnt.emaildefaulttemplatebase.hang.getcontent.3") + REASON)//TODO linbq步骤名称有替换成变量
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -454,15 +455,15 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "步骤暂停提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.pause.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单步骤" + PROCESSTASK_STEP_NAME + "已暂停\n")
-                    .append("，原因：" + REASON)
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.pause.getcontent.1") + PROCESSTASK_STEP_NAME + $.t("nmpnt.emaildefaulttemplatebase.pause.getcontent.2"))
+                    .append($.t("nmpnt.emaildefaulttemplatebase.pause.getcontent.3") + REASON)
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -482,15 +483,15 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "步骤失败提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.failed.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单步骤" + PROCESSTASK_STEP_NAME + "已失败\n")
-                    .append("，原因：" + REASON)
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.failed.getcontent.1") + PROCESSTASK_STEP_NAME + $.t("nmpnt.emaildefaulttemplatebase.failed.getcontent.2"))
+                    .append($.t("nmpnt.emaildefaulttemplatebase.failed.getcontent.3") + REASON)
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -515,16 +516,16 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + "创建提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + $.t("nmpnt.emaildefaulttemplatebase.createtask.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(PROCESSTASK_STEP_WORKER + "为工单步骤" + PROCESSTASK_STEP_NAME + "创建" + TASK_CONFIG_NAME + "：\n")
-                    .append("内容:" + TASK_CONTENT + "\n")
-                    .append(TASK_CONFIG_NAME + "处理人:" + TASK_WORKER + "\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(PROCESSTASK_STEP_WORKER + $.t("nmpnt.emaildefaulttemplatebase.createtask.getcontent.1") + PROCESSTASK_STEP_NAME + $.t("nmpnt.emaildefaulttemplatebase.createtask.getcontent.2") + TASK_CONFIG_NAME + "：\n")
+                    .append($.t("nmpnt.emaildefaulttemplatebase.createtask.getcontent.3") + TASK_CONTENT + "\n")
+                    .append(TASK_CONFIG_NAME + $.t("nmpnt.emaildefaulttemplatebase.createtask.getcontent.4") + TASK_WORKER + "\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -544,16 +545,16 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + "跟新提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + $.t("nmpnt.emaildefaulttemplatebase.edittask.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(PROCESSTASK_STEP_WORKER + "更新了" + TASK_CONFIG_NAME + "：\n")
-                    .append("内容:" + TASK_CONTENT + "\n")
-                    .append(TASK_CONFIG_NAME + "处理人:" + TASK_WORKER + "\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(PROCESSTASK_STEP_WORKER + $.t("nmpnt.emaildefaulttemplatebase.edittask.getcontent.1") + TASK_CONFIG_NAME + "：\n")
+                    .append($.t("nmpnt.emaildefaulttemplatebase.edittask.getcontent.2") + TASK_CONTENT + "\n")
+                    .append(TASK_CONFIG_NAME + $.t("nmpnt.emaildefaulttemplatebase.edittask.getcontent.3") + TASK_WORKER + "\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -573,15 +574,15 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + "删除提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + $.t("nmpnt.emaildefaulttemplatebase.deletetask.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(PROCESSTASK_STEP_WORKER + "删除了" + TASK_CONFIG_NAME + "：\n")
-                    .append("内容:" + TASK_CONTENT + "\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(PROCESSTASK_STEP_WORKER + $.t("nmpnt.emaildefaulttemplatebase.deletetask.getcontent.1") + TASK_CONFIG_NAME + "：\n")
+                    .append($.t("nmpnt.emaildefaulttemplatebase.deletetask.getcontent.2") + TASK_CONTENT + "\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -601,15 +602,15 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + "回复提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + $.t("nmpnt.emaildefaulttemplatebase.completetask.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(TASK_WORKER + "回复" + TASK_CONFIG_NAME + "\n")
-                    .append("回复内容:" + TASK_USER_CONTENT + "\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(TASK_WORKER + $.t("nmpnt.emaildefaulttemplatebase.completetask.getcontent.1") + TASK_CONFIG_NAME + "\n")
+                    .append($.t("nmpnt.emaildefaulttemplatebase.completetask.getcontent.2") + TASK_USER_CONTENT + "\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -629,14 +630,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "所有任务已满足完成条件提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.completealltask.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("所有任务已满足完成条件\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.completealltask.getcontent.1"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -660,14 +661,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "工单超时提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.timeout.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("工单" + PROCESSTASK_SERIALNUMBER_TITLE + "即将超时\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.timeout.getcontent.1") + PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.timeout.getcontent.2"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -691,14 +692,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "变更步骤处理人响应提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.startchangestep.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("变更步骤" + CHANGE_STEP_NAME + "已由" + CHANGE_STEP_WORKER + "开始处理\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.startchangestep.getcontent.1") + CHANGE_STEP_NAME + $.t("nmpnt.emaildefaulttemplatebase.startchangestep.getcontent.2") + CHANGE_STEP_WORKER + $.t("nmpnt.emaildefaulttemplatebase.startchangestep.getcontent.3"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -718,14 +719,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "变更步骤完成提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.completechangestep.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(CHANGE_STEP_WORKER + "完成变更步骤" + CHANGE_STEP_NAME + "\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(CHANGE_STEP_WORKER + $.t("nmpnt.emaildefaulttemplatebase.completechangestep.getcontent.1") + CHANGE_STEP_NAME + "\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -745,14 +746,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "变更步骤取消提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.abortchangestep.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(CHANGE_STEP_WORKER + "取消变更步骤" + CHANGE_STEP_NAME + "\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(CHANGE_STEP_WORKER + $.t("nmpnt.emaildefaulttemplatebase.abortchangestep.getcontent.1") + CHANGE_STEP_NAME + "\n")
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -772,14 +773,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "变更步骤新增评论提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.commentchangestep.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(CHANGE_STEP_WORKER + "新增了一条评论\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append(CHANGE_STEP_WORKER + $.t("nmpnt.emaildefaulttemplatebase.commentchangestep.getcontent.1"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -799,14 +800,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "所有变更步骤完成提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.completeallchangestep.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("所有变更步骤已完成\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.completeallchangestep.getcontent.1"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -826,14 +827,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "变更开始提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.startchange.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("【${DATA.ownername}】开始了变更\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.startchange.getcontent.1"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -853,14 +854,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "变更暂停提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.pausechange.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("【${DATA.ownername}】暂停了变更\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.pausechange.getcontent.1"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -880,14 +881,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "变更恢复提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.recoverchange.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("【${DATA.ownername}】恢复了变更\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.recoverchange.getcontent.1"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 
@@ -907,14 +908,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "变更重新开始提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + $.t("nmpnt.emaildefaulttemplatebase.restartchange.gettitle.1");
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("【${DATA.ownername}】重新开始了变更\n")
-                    .append(PROCESSTASK_DETAILS_LINK)
+                    .append($.t("nmpnt.emaildefaulttemplatebase.restartchange.getcontent.1"))
+                    .append(getProcessTaskDetailsLink())
                     .toString();
         }
 

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskIdColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 
@@ -23,7 +24,7 @@ public class ProcessTaskIdColumn extends ProcessTaskColumnBase implements IProce
 
 	@Override
 	public String getDisplayName() {
-		return "工单id";
+		return $.t("nmpwch.processtaskidcolumn.getdisplayname");
 	}
 
 	/*@Override

@@ -28,7 +28,7 @@ public class ScoreTemplateGetApi extends PrivateApiComponentBase{
 
 	@Override
 	public String getName() {
-		return "获取评分模版";
+		return "nmpas.scoretemplategetapi.getname";
 	}
 
 	@Override
@@ -38,12 +38,12 @@ public class ScoreTemplateGetApi extends PrivateApiComponentBase{
 
 
 	@Input({
-			@Param( name = "id", type = ApiParamType.LONG, isRequired = true,desc = "评分模版ID")
+			@Param( name = "id", type = ApiParamType.LONG, isRequired = true,desc = "nmpas.scoretemplategetapi.input.param.desc.id")
 	})
 	@Output({
-			@Param(explode = ScoreTemplateVo.class, desc = "评分模版")
+			@Param(explode = ScoreTemplateVo.class, desc = "nmpas.scoretemplategetapi.output.param.desc.scoretemplatevo")
 	})
-	@Description(desc = "获取评分模版")
+	@Description(desc = "nmpas.scoretemplategetapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
         Long scoreTemplateId = jsonObj.getLong("id");

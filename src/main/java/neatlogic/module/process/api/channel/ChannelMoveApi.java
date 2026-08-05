@@ -55,7 +55,7 @@ public class ChannelMoveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "服务通道移动位置";
+        return "nmpac.channelmoveapi.getname";
     }
 
     @Override
@@ -64,11 +64,11 @@ public class ChannelMoveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "被移动的服务通道uuid"),
-            @Param(name = "targetUuid", type = ApiParamType.STRING, isRequired = true, desc = "目标节点uuid"),
-            @Param(name = "moveType", type = ApiParamType.ENUM, rule = "inner,prev,next", isRequired = true, desc = "移动类型")
+            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpac.channelmoveapi.input.param.desc.uuid"),
+            @Param(name = "targetUuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpac.channelmoveapi.input.param.desc.targetuuid"),
+            @Param(name = "moveType", type = ApiParamType.ENUM, rule = "inner,prev,next", isRequired = true, desc = "nmpac.channelmoveapi.input.param.desc.movetype")
     })
-    @Description(desc = "服务通道移动位置")
+    @Description(desc = "nmpac.channelmoveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");

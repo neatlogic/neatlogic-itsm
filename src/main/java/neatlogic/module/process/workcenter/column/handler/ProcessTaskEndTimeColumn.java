@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskEndTimeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 	static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -24,7 +25,7 @@ public class ProcessTaskEndTimeColumn extends ProcessTaskColumnBase implements I
 
 	@Override
 	public String getDisplayName() {
-		return "结束时间";
+		return $.t("nmpwch.processtaskendtimecolumn.getdisplayname");
 	}
 
 	@Override

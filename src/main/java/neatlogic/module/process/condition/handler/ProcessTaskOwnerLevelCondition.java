@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -32,7 +33,7 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
 
     @Override
     public String getDisplayName() {
-        return "上报人是否VIP";
+        return $.t("nmpch.processtaskownerlevelcondition.getdisplayname");
     }
 
     @Override
@@ -50,8 +51,8 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
         JSONObject config = new JSONObject();
         config.put("type", FormHandlerType.SELECT.toString());
         JSONArray dataList = new JSONArray();
-        dataList.add(new ValueTextVo("1", "是"));
-        dataList.add(new ValueTextVo("0", "否"));
+        dataList.add(new ValueTextVo("1", $.t("nmpch.processtaskownerlevelcondition.runtime.label.1")));
+        dataList.add(new ValueTextVo("0", $.t("nmpch.processtaskownerlevelcondition.runtime.label.2")));
         config.put("dataList", dataList);
         return config;
     }
@@ -69,9 +70,9 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
     @Override
     public Object valueConversionText(Object value, JSONObject config) {
         if (Objects.equals(value, "1")) {
-            return "是";
+            return $.t("nmpch.processtaskownerlevelcondition.runtime.label.1");
         } else if (Objects.equals(value, "0")) {
-            return "否";
+            return $.t("nmpch.processtaskownerlevelcondition.runtime.label.2");
         }
         return value;
     }

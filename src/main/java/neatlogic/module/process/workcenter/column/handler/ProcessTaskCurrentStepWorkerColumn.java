@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
     @Resource
@@ -28,7 +29,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
 
     @Override
     public String getDisplayName() {
-        return "当前步骤处理对象";
+        return $.t("nmpwch.processtaskcurrentstepworkercolumn.getdisplayname");
     }
 
 

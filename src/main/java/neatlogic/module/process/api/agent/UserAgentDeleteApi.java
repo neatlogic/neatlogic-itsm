@@ -41,7 +41,7 @@ public class UserAgentDeleteApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "删除用户授权代理";
+		return "nmpaa.useragentdeleteapi.getname";
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class UserAgentDeleteApi extends PrivateApiComponentBase {
 
 	@Input({})
 	@Output({})
-	@Description(desc = "删除用户授权代理")
+	@Description(desc = "nmpaa.useragentdeleteapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 //		userMapper.deleteUserAgent(UserContext.get().getUserUuid());

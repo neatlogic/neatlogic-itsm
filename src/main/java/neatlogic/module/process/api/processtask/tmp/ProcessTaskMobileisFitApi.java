@@ -1,5 +1,7 @@
 package neatlogic.module.process.api.processtask.tmp;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -33,7 +35,7 @@ public class ProcessTaskMobileisFitApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查看工单是否支持移动端";
+        return "nmpapt.processtaskmobileisfitapi.getname";
     }
 
     @Override
@@ -42,12 +44,12 @@ public class ProcessTaskMobileisFitApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpapt.processtaskmobileisfitapi.input.param.desc.processtaskid")
     })
     @Output({
-            @Param(name = "Return", type = ApiParamType.BOOLEAN, desc = "工单是否支持移动端，1：支持，0：不支持;不支持则移动端提示不支持")
+            @Param(name = "Return", type = ApiParamType.BOOLEAN, desc = "nmpapt.processtaskmobileisfitapi.output.param.desc.return.name")
     })
-    @Description(desc = "临时屏蔽移动端工单查看处理接口")
+    @Description(desc = "nmpapt.processtaskmobileisfitapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject result = new JSONObject();
@@ -58,7 +60,7 @@ public class ProcessTaskMobileisFitApi extends PrivateApiComponentBase {
             List<ProcessStepHandlerVo> processStepHandlerVos = ProcessStepHandlerFactory.getActiveProcessStepHandler();
             if (processStepHandlerVos.stream().noneMatch(o -> Objects.equals(o.getHandler(), handler) && o.getFitMobile())) {
                 result.put("isfit", false);
-                result.put("msg", String.format("抱歉！移动端暂时不支持处理含有‘%s’步骤节点的工单", ProcessStepHandlerTypeFactory.getName(handler)));
+                result.put("msg", $.t("nmpapt.processtaskmobileisfitapi.unsupportedstep", ProcessStepHandlerTypeFactory.getName(handler)));
                 break;
             }
         }

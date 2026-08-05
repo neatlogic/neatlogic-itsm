@@ -28,7 +28,7 @@ public class WorkcenterCatalogDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "删除工单中心菜单类型";
+        return "nmpaw.workcentercatalogdeleteapi.getname";
     }
 
     @Override
@@ -42,11 +42,11 @@ public class WorkcenterCatalogDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "类型id")
+            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "nmpaw.workcentercatalogdeleteapi.input.param.desc.id")
     })
     @Output({
     })
-    @Description(desc = "删除工单中心菜单类型接口")
+    @Description(desc = "nmpaw.workcentercatalogdeleteapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");

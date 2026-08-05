@@ -53,7 +53,7 @@ public class ListWorkcenterApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取工单中心分类列表接口";
+        return "nmpaw.listworkcenterapi.getname";
     }
 
     @Override
@@ -62,8 +62,8 @@ public class ListWorkcenterApi extends PrivateApiComponentBase {
     }
 
     @Input({})
-    @Output({@Param(name = "workcenter", explode = WorkcenterVo.class, desc = "分类信息")})
-    @Description(desc = "获取工单中心分类列表接口")
+    @Output({@Param(name = "workcenter", explode = WorkcenterVo.class, desc = "nmpaw.listworkcenterapi.output.param.desc.workcenter")})
+    @Description(desc = "nmpaw.listworkcenterapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject workcenterJson = new JSONObject();

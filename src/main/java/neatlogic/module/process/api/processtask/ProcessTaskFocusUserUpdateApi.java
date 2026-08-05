@@ -46,7 +46,7 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "更新工单关注人";
+        return "nmpap.processtaskfocususerupdateapi.getname";
     }
 
     @Override
@@ -55,11 +55,11 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-            @Param(name = "focusUserUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "工单关注人列表")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskfocususerupdateapi.input.param.desc.processtaskid"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskfocususerupdateapi.input.param.desc.source"),
+            @Param(name = "focusUserUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "nmpap.processtaskfocususerupdateapi.input.param.desc.focususeruuidlist")
     })
-    @Description(desc = "更新工单关注人")
+    @Description(desc = "nmpap.processtaskfocususerupdateapi.getname")
     @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

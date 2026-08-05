@@ -12,6 +12,8 @@
 
 package neatlogic.module.process.dependency.handler;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
@@ -86,7 +88,7 @@ public class FormScene2ProcessStepDependencyHandler extends DefaultDependencyHan
             dependencyInfoConfig.put("processUuid", processUuid);
             dependencyInfoConfig.put("stepUuid", stepUuid);
             List<String> pathList = new ArrayList<>();
-            pathList.add("流程管理");
+        pathList.add($.t("nmpdh.path.workflowmanagement"));
             pathList.add(processVo.getName());
             String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/flow-edit?uuid=${DATA.processUuid}&stepUuid=${DATA.stepUuid}";
             return new DependencyInfoVo(stepUuid, dependencyInfoConfig, stepObj.getString("name"), pathList, urlFormat, this.getGroupName());

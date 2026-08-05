@@ -34,7 +34,7 @@ public class ProcessDraftClearApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "流程草稿清空";
+		return "nmpap.processdraftclearapi.getname";
 	}
 
 	@Override
@@ -43,9 +43,9 @@ public class ProcessDraftClearApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "processUuid", type = ApiParamType.STRING, isRequired = true, desc = "流程uuid，清空当前流程的草稿")
+		@Param(name = "processUuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processdraftclearapi.input.param.desc.processuuid")
 	})
-	@Description(desc = "流程草稿清空，最后更新时间2020-02-18 15:01，修改参数说明")
+	@Description(desc = "nmpap.processdraftclearapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessDraftVo processDraftVo = new ProcessDraftVo();

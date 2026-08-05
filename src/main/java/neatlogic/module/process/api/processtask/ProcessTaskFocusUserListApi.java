@@ -46,7 +46,7 @@ public class ProcessTaskFocusUserListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取工单关注人列表";
+        return "nmpap.processtaskfocususerlistapi.getname";
     }
 
     @Override
@@ -54,12 +54,12 @@ public class ProcessTaskFocusUserListApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")})
+    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskfocususerlistapi.input.param.desc.processtaskid")})
     @Output({
-            @Param(name = "focusUserUuidList", type = ApiParamType.JSONARRAY, desc = "工单关注人uuid列表"),
-            @Param(name = "isFocus", type = ApiParamType.INTEGER, desc = "当前用户是否关注了当前工单(1:是;0:否)")
+            @Param(name = "focusUserUuidList", type = ApiParamType.JSONARRAY, desc = "nmpap.processtaskfocususerlistapi.output.param.desc.focususeruuidlist"),
+            @Param(name = "isFocus", type = ApiParamType.INTEGER, desc = "nmpap.processtaskfocususerlistapi.output.param.desc.isfocus")
     })
-    @Description(desc = "获取工单关注人列表")
+    @Description(desc = "nmpap.processtaskfocususerlistapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");

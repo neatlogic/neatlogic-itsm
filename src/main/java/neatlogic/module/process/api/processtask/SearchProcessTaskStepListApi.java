@@ -1,5 +1,7 @@
 package neatlogic.module.process.api.processtask;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -98,7 +100,7 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单步骤列表接口";
+        return "nmpap.searchprocesstasksteplistapi.getname";
     }
 
     @Override
@@ -117,7 +119,7 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "common.tbodylist")
     })
-    @Description(desc = "工单步骤列表接口")
+    @Description(desc = "nmpap.searchprocesstasksteplistapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
@@ -495,7 +497,7 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
                     for (ProcessUserType processUserType : operatorProcessUserTypeList) {
                         operatorProcessUserTypeTextList.add(processUserType.getText());
                     }
-                    processTaskStepReplyVo.setOperatorRole(String.join("、", operatorProcessUserTypeTextList));
+                    processTaskStepReplyVo.setOperatorRole(String.join($.t("nmpaps.searchprocesstasksteplistapi.listseparator"), operatorProcessUserTypeTextList));
                 }
             }
         }
@@ -600,9 +602,9 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
                 }
                 if (Objects.equals(processTaskActionVo.getStatus(), "succeed")) {
                     processTaskActionVo.setSucceed(true);
-                    processTaskActionVo.setStatusText("已成功");
+                    processTaskActionVo.setStatusText($.t("nmpaps.searchprocesstasksteplistapi.actionstatus.succeeded"));
                 } else {
-                    processTaskActionVo.setStatusText("已失败");
+                    processTaskActionVo.setStatusText($.t("nmpaps.searchprocesstasksteplistapi.actionstatus.failed"));
                 }
                 String triggerText = NotifyTriggerTypeFactory.getText(processTaskActionVo.getTrigger());
                 if(StringUtils.isNotBlank(triggerText)) {

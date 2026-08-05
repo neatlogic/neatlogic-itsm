@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 /**
  * @author linbq
  * @since 2021/12/27 18:51
@@ -40,7 +41,7 @@ import java.util.Objects;
 public class ProcessTaskStepTimerCompleteJob extends JobBase {
     @Override
     public String getName() {
-        return "工单步骤定时完成";
+        return $.t("nmpsp.processtasksteptimercompletejob.getname");
     }
 
 

@@ -22,6 +22,7 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
 
@@ -35,7 +36,7 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
 
     @Override
     public String getDisplayName() {
-        return "服务";
+        return $.t("nmpwch.processtaskchannelcolumn.getdisplayname");
     }
 
     @Override
@@ -69,7 +70,7 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
         if (processTaskVo.getChannelVo() != null) {
             return processTaskVo.getChannelVo().getName();
         }
-        return "服务已被删除";
+        return $.t("nmpwch.processtaskchannelcolumn.deletedservice");
     }
 
     @Override

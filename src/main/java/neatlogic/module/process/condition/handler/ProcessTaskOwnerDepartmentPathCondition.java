@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.*;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskOwnerDepartmentPathCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -51,7 +52,7 @@ public class ProcessTaskOwnerDepartmentPathCondition extends ProcessTaskConditio
 
     @Override
     public String getDisplayName() {
-        return "上报人部门(完整)";
+        return $.t("nmpch.processtaskownerdepartmentpathcondition.getdisplayname");
     }
 
 	@Override

@@ -25,15 +25,15 @@ public class WorkerPolicyListApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "指派策略列表";
+		return "nmpap.workerpolicylistapi.getname";
 	}
 
 	@Override
 	public String getConfig() {
 		return null;
 	}
-	@Output({@Param(name="Return", explode = WorkerPolicyVo[].class, desc = "指派策略列表")})
-	@Description(desc = "指派策略列表")
+	@Output({@Param(name="Return", explode = WorkerPolicyVo[].class, desc = "nmpap.workerpolicylistapi.output.param.desc.return.name")})
+	@Description(desc = "nmpap.workerpolicylistapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		return WorkerPolicyHandlerFactory.getAllActiveWorkerPolicy();

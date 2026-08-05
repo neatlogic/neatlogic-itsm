@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Objects;
 
 
+import neatlogic.framework.util.$;
 /**
  * @author linbq
  * @since 2021/10/29 16:20
@@ -63,7 +64,7 @@ public class AutoCompleteHandler implements IAutoCompleteRuleHandler {
 
     @Override
     public String getName() {
-        return "自动流转";
+        return $.t("nmpah.autocompletehandler.getname");
     }
 
     @Override

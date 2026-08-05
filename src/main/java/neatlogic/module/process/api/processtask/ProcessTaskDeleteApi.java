@@ -72,7 +72,7 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "删除工单";
+        return "nmpap.processtaskdeleteapi.getname";
     }
 
     @Override
@@ -80,8 +80,8 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id", isRequired = true)})
-    @Description(desc = "删除工单")
+    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "nmpap.processtaskdeleteapi.input.param.desc.processtaskid", isRequired = true)})
+    @Description(desc = "nmpap.processtaskdeleteapi.getname")
     @Override
     @ResubmitInterval(3)
     public Object myDoService(JSONObject jsonObj) throws Exception {

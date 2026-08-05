@@ -1,5 +1,7 @@
 package neatlogic.module.process.service;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -254,7 +256,7 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
         Integer maxRhtCode = catalogMapper.getMaxRhtCode();
         CatalogVo rootCatalog = new CatalogVo();
         rootCatalog.setUuid(CatalogVo.ROOT_UUID);
-        rootCatalog.setName("所有");
+        rootCatalog.setName($.t("nmps.catalogserviceimpl.all"));
         rootCatalog.setParentUuid(CatalogVo.ROOT_PARENTUUID);
         rootCatalog.setLft(1);
         rootCatalog.setRht(maxRhtCode == null ? 2 : maxRhtCode + 1);

@@ -31,7 +31,7 @@ public class ProcessTaskStepDataGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取工单步骤数据";
+        return "nmpap.processtaskstepdatagetapi.getname";
     }
 
     @Override
@@ -49,7 +49,7 @@ public class ProcessTaskStepDataGetApi extends PrivateApiComponentBase {
     @Output({
             @Param(type = ApiParamType.JSONOBJECT)
     })
-    @Description(desc = "获取工单步骤数据接口")
+    @Description(desc = "nmpap.processtaskstepdatagetapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");

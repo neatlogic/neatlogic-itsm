@@ -41,7 +41,7 @@ public class GetWorkcenterProcessTaskApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单中心获取具工单接口";
+        return "nmpaw.getworkcenterprocesstaskapi.getname";
     }
 
     @Override
@@ -49,13 +49,13 @@ public class GetWorkcenterProcessTaskApi extends PrivateApiComponentBase {
         return null;
     }
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id", isRequired = true),
-            @Param(name = "workcenterUuid", type = ApiParamType.STRING, desc = "工单中心分类uuid", isRequired = true)
+            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "nmpaw.getworkcenterprocesstaskapi.input.param.desc.processtaskid", isRequired = true),
+            @Param(name = "workcenterUuid", type = ApiParamType.STRING, desc = "nmpaw.getworkcenterprocesstaskapi.input.param.desc.workcenteruuid", isRequired = true)
 
     })
     @Output({
     })
-    @Description(desc = "工单中心获取具工单，目前用于移动端刷新单个工单的场景")
+    @Description(desc = "nmpaw.getworkcenterprocesstaskapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");

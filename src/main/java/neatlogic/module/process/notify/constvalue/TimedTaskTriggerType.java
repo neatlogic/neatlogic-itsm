@@ -20,7 +20,7 @@ import neatlogic.framework.util.I18n;
  * @since: 2021/4/8 17:40
  **/
 public enum TimedTaskTriggerType implements INotifyTriggerType {
-    PENDINGPROCESSTASK("pendingprocesstask", new I18n("待我处理的工单"), new I18n("定时任务触发通知"));
+    PENDINGPROCESSTASK("pendingprocesstask", new I18n("nmpnc.timedtasktriggertype.text.pendingprocesstask"), new I18n("nmpnc.timedtasktriggertype.text.pendingprocesstask_2"));
 
     private String trigger;
     private I18n text;

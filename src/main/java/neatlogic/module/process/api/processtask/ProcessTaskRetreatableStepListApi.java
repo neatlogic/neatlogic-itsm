@@ -42,7 +42,7 @@ public class ProcessTaskRetreatableStepListApi extends PrivateApiComponentBase i
 
 	@Override
 	public String getName() {
-		return "当前用户可撤回的步骤列表接口";
+		return "nmpap.processtaskretreatablesteplistapi.getname";
 	}
 
 	@Override
@@ -50,12 +50,12 @@ public class ProcessTaskRetreatableStepListApi extends PrivateApiComponentBase i
 		return null;
 	}
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true)
+		@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "nmpap.processtaskretreatablesteplistapi.input.param.desc.processtaskid", isRequired = true)
 	})
 	@Output({
-		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表")
+		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "nmpap.processtaskretreatablesteplistapi.output.param.desc.return.name")
 	})
-	@Description(desc = "当前用户可撤回的步骤列表接口")
+	@Description(desc = "nmpap.processtaskretreatablesteplistapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");

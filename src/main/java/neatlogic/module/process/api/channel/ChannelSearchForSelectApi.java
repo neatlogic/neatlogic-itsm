@@ -40,7 +40,7 @@ public class ChannelSearchForSelectApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询服务通道_下拉框";
+        return "nmpac.channelsearchforselectapi.getname";
     }
 
     @Override
@@ -49,26 +49,26 @@ public class ChannelSearchForSelectApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
-            @Param(name = "parentUuid", type = ApiParamType.STRING, desc = "服务目录uuid"),
-            @Param(name = "formUuid", type = ApiParamType.STRING, desc = "表单uuid"),
-            @Param(name = "uuidList", type = ApiParamType.JSONARRAY, desc = "服务uuid列表"),
-            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "用于回显的参数列表", xss = true),
-            @Param(name = "isFavorite", type = ApiParamType.ENUM, desc = "是否只查询已收藏的数据，1：已收藏，0：全部", rule = "0,1"),
-            @Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
-            @Param(name = "isAuthenticate", type = ApiParamType.ENUM, desc = "是否需要鉴权", rule = "0,1"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "nmpac.channelsearchforselectapi.input.param.desc.keyword"),
+            @Param(name = "parentUuid", type = ApiParamType.STRING, desc = "nmpac.channelsearchforselectapi.input.param.desc.parentuuid"),
+            @Param(name = "formUuid", type = ApiParamType.STRING, desc = "nmpac.channelsearchforselectapi.input.param.desc.formuuid"),
+            @Param(name = "uuidList", type = ApiParamType.JSONARRAY, desc = "nmpac.channelsearchforselectapi.input.param.desc.uuidlist"),
+            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "nmpac.channelsearchforselectapi.input.param.desc.defaultvalue", xss = true),
+            @Param(name = "isFavorite", type = ApiParamType.ENUM, desc = "nmpac.channelsearchforselectapi.input.param.desc.isfavorite", rule = "0,1"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, desc = "nmpac.channelsearchforselectapi.input.param.desc.isactive", rule = "0,1"),
+            @Param(name = "isAuthenticate", type = ApiParamType.ENUM, desc = "nmpac.channelsearchforselectapi.input.param.desc.isauthenticate", rule = "0,1"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpac.channelsearchforselectapi.input.param.desc.needpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpac.channelsearchforselectapi.input.param.desc.pagesize"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpac.channelsearchforselectapi.input.param.desc.currentpage")
     })
     @Output({
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "当前页码"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = true, desc = "页大小"),
-            @Param(name = "pageCount", type = ApiParamType.INTEGER, isRequired = true, desc = "总页数"),
-            @Param(name = "rowNum", type = ApiParamType.INTEGER, isRequired = true, desc = "总行数"),
-            @Param(name = "list", explode = ValueTextVo[].class, desc = "服务通道列表")
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpac.channelsearchforselectapi.output.param.desc.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpac.channelsearchforselectapi.output.param.desc.pagesize"),
+            @Param(name = "pageCount", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpac.channelsearchforselectapi.output.param.desc.pagecount"),
+            @Param(name = "rowNum", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpac.channelsearchforselectapi.output.param.desc.rownum"),
+            @Param(name = "list", explode = ValueTextVo[].class, desc = "nmpac.channelsearchforselectapi.output.param.desc.list")
     })
-    @Description(desc = "查询服务通道_下拉框")
+    @Description(desc = "nmpac.channelsearchforselectapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();

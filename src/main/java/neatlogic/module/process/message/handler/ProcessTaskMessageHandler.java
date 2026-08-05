@@ -23,12 +23,12 @@ public class ProcessTaskMessageHandler extends MessageHandlerBase {
 
     @Override
     public String getName() {
-        return "IT服务";
+        return $.t("nmpmh.processtaskmessagehandler.getname");
     }
 
     @Override
     public String getDescription() {
-        return "实时显示待处理工单信息，支持快速审批";
+        return $.t("nmpmh.processtaskmessagehandler.getdescription");
     }
 
     @Override
@@ -56,7 +56,7 @@ public class ProcessTaskMessageHandler extends MessageHandlerBase {
         }
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("<p>");
-        stringBuilder.append($.t("IT服务"));
+        stringBuilder.append($.t("nmpmh.processtaskmessagehandler.servicename"));
         stringBuilder.append("-");
         stringBuilder.append($.t(policyHandlerName));
         stringBuilder.append("-");
@@ -80,7 +80,7 @@ public class ProcessTaskMessageHandler extends MessageHandlerBase {
                 stepName = taskStepVo.getName();
             }
         }
-        stringBuilder.append($.t("工单号：{0}、步骤名：{1}({2})", processTaskIdStr, stepName, stepIdStr));
+        stringBuilder.append($.t("nmpmh.processtaskmessagehandler.callermessage", processTaskIdStr, stepName, stepIdStr));
         return stringBuilder.toString();
     }
 }

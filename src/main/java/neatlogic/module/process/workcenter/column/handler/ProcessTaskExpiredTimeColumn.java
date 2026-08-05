@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.*;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
     @Resource
@@ -33,7 +34,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 
     @Override
     public String getDisplayName() {
-        return "剩余时间";
+        return $.t("nmpwch.processtaskexpiredtimecolumn.getdisplayname");
     }
 
     @Override
@@ -73,16 +74,10 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
                 long time;
                 if (willOverTime != null && System.currentTimeMillis() > willOverTime) {
                     time = System.currentTimeMillis() - willOverTime;
-                    sb.append(object.getString("slaName"))
-                            .append("距离超时：")
-                            .append(Math.floor(time / (1000 * 60 * 60 * 24)))
-                            .append("天;");
+                    sb.append($.t("nmpwch.processtaskexpiredtimecolumn.willoverdue", object.getString("slaName"), Math.floor(time / (1000 * 60 * 60 * 24))));
                 } else if (expireTime != null && System.currentTimeMillis() > expireTime) {
                     time = System.currentTimeMillis() - expireTime;
-                    sb.append(object.getString("slaName"))
-                            .append("已超时：")
-                            .append(Math.floor(time / (1000 * 60 * 60 * 24)))
-                            .append("天;");
+                    sb.append($.t("nmpwch.processtaskexpiredtimecolumn.overdue", object.getString("slaName"), Math.floor(time / (1000 * 60 * 60 * 24))));
                 }
             }
         }

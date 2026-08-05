@@ -50,7 +50,7 @@ public class ChannelDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "服务通道删除接口";
+        return "nmpac.channeldeleteapi.getname";
     }
 
     @Override
@@ -59,9 +59,9 @@ public class ChannelDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "服务通道uuid")
+            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpac.channeldeleteapi.input.param.desc.uuid")
     })
-    @Description(desc = "服务通道删除接口")
+    @Description(desc = "nmpac.channeldeleteapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");

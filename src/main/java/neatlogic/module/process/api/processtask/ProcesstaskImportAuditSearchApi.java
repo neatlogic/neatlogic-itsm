@@ -39,7 +39,7 @@ public class ProcesstaskImportAuditSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询工单导入记录";
+        return "nmpap.processtaskimportauditsearchapi.getname";
     }
 
     @Override
@@ -50,29 +50,29 @@ public class ProcesstaskImportAuditSearchApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "keyword",
                     type = ApiParamType.STRING,
-                    desc = "关键词",
+                    desc = "nmpap.processtaskimportauditsearchapi.input.param.desc.keyword",
                     xss = true),
             @Param(name = "status",
                     type = ApiParamType.INTEGER,
-                    desc = "上报状态"),
+                    desc = "nmpap.processtaskimportauditsearchapi.input.param.desc.status"),
             @Param(name = "currentPage",
                     type = ApiParamType.INTEGER,
-                    desc = "当前页"),
+                    desc = "nmpap.processtaskimportauditsearchapi.input.param.desc.currentpage"),
             @Param(name = "pageSize",
                     type = ApiParamType.INTEGER,
-                    desc = "每页数据条目"),
+                    desc = "nmpap.processtaskimportauditsearchapi.input.param.desc.pagesize"),
             @Param(name = "needPage",
                     type = ApiParamType.BOOLEAN,
-                    desc = "是否需要分页，默认true")
+                    desc = "nmpap.processtaskimportauditsearchapi.input.param.desc.needpage")
     })
     @Output({
             @Param(name = "auditList",
                     type = ApiParamType.JSONARRAY,
                     explode = ProcessTaskImportAuditVo[].class,
-                    desc = "工单导入记录"),
+                    desc = "nmpap.processtaskimportauditsearchapi.output.param.desc.auditlist"),
             @Param(explode = BasePageVo.class)
     })
-    @Description(desc = "查询工单导入记录")
+    @Description(desc = "nmpap.processtaskimportauditsearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessTaskImportAuditVo auditVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessTaskImportAuditVo>() {

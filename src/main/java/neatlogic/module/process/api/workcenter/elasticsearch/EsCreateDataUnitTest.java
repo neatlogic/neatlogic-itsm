@@ -1,5 +1,7 @@
 package neatlogic.module.process.api.workcenter.elasticsearch;
 
+import neatlogic.framework.util.$;
+
 // import org.junit.Test;
 
 public class EsCreateDataUnitTest {
@@ -61,7 +63,7 @@ public class EsCreateDataUnitTest {
                 JSONArray stepArray = new JSONArray();
                 JSONObject stepJson = new JSONObject();
                 stepJson.put("isactive", new Double(Math.random() * 10 / 2).intValue());
-                stepJson.put("name", "通用节点" + new Double(Math.random() * 10 / 2).intValue());
+                stepJson.put("name", $.t("nmpawe.escreatedataunittest.runtime.label.1") + new Double(Math.random() * 10 / 2).intValue());
                 stepJson.put("status", arrayList.get(new Double(Math.random() * 10 / 2).intValue()));
                 JSONArray usertypelist = new JSONArray();
                 JSONObject userJson = new JSONObject();
@@ -75,7 +77,7 @@ public class EsCreateDataUnitTest {
                 stepArray.add(stepJson);
                 JSONObject stepJson1 = new JSONObject();
                 stepJson1.put("isactive", new Double(Math.random() * 10 / 2).intValue());
-                stepJson1.put("name", "通用节点" + new Double(Math.random() * 10 / 2).intValue());
+                stepJson1.put("name", $.t("nmpawe.escreatedataunittest.runtime.label.2") + new Double(Math.random() * 10 / 2).intValue());
                 stepJson1.put("status", arrayList.get(new Double(Math.random() * 10 / 2).intValue()));
                 JSONArray usertypelist1 = new JSONArray();
                 JSONObject userJson1 = new JSONObject();

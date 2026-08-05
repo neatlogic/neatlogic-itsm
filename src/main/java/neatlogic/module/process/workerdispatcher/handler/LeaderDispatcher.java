@@ -20,6 +20,7 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Service
 public class LeaderDispatcher extends WorkerDispatcherBase {
 
@@ -80,7 +81,7 @@ public class LeaderDispatcher extends WorkerDispatcherBase {
 
     @Override
     public String getHelp() {
-        return "在选择的组中，找出与选择头衔相同的用户作为当前步骤的处理人";
+        return $.t("nmpwh.leaderdispatcher.gethelp");
     }
 
     @Override
@@ -91,7 +92,7 @@ public class LeaderDispatcher extends WorkerDispatcherBase {
             JSONObject jsonObj = new JSONObject();
             jsonObj.put("type", WorkerDispatcherForm.USER_SELECT.getValue());
             jsonObj.put("name", "team");
-            jsonObj.put("label", "处理组");
+            jsonObj.put("label", $.t("nmpwh.leaderdispatcher.runtime.label.1"));
             jsonObj.put("validateList", Collections.singletonList("required"));
             jsonObj.put("multiple", false);
             jsonObj.put("value", "");
@@ -106,7 +107,7 @@ public class LeaderDispatcher extends WorkerDispatcherBase {
             jsonObj.put("name", "teamUserTitle");
             jsonObj.put("search", true);
             jsonObj.put("dynamicUrl", "api/rest/user/title/search");
-            jsonObj.put("label", "头衔");
+            jsonObj.put("label", $.t("nmpwh.leaderdispatcher.runtime.label.2"));
             jsonObj.put("validateList", Collections.singletonList("required"));
             jsonObj.put("multiple", false);
             jsonObj.put("value", "");

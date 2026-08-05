@@ -71,9 +71,9 @@ public class SaveWorkcenterApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.typeuuid"),
             @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, desc = "nmpaw.editworkcenterapi.input.param.desc.name", xss = true),
-            @Param(name = "type", type = ApiParamType.STRING, desc = "nmpaw.saveworkcenterapi.input.param.desc.type，system|custom 默认custom"),
+            @Param(name = "type", type = ApiParamType.STRING, desc = "nmpaw.saveworkcenterapi.input.param.desc.type"),
             @Param(name = "catalogName", type = ApiParamType.STRING, desc = "nmpaw.editworkcenterapi.input.param.desc.catalogname"),
-            @Param(name = "support", type = ApiParamType.ENUM, rule = "all,mobile,pc", desc = "使用范围，all|pc|mobile，默认值是：all"),
+            @Param(name = "support", type = ApiParamType.ENUM, rule = "all,mobile,pc", desc = "nmpaw.saveworkcenterapi.input.param.desc.support"),
             @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "nmpaw.saveworkcenterapi.input.param.desc.conditionconfig", isRequired = true),
             @Param(name = "authList", type = ApiParamType.JSONARRAY, desc = "nmpaw.saveworkcenterapi.input.param.desc.authlist"),
             @Param(name = "theadList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "nmpaw.editworkcenterapi.input.param.desc.workcentertheadlist"),

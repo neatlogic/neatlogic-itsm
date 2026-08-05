@@ -34,7 +34,7 @@ public class ProcessCustomButtonStatusList extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "获取流程步骤自定义按钮及状态列表";
+		return "nmpap.processcustombuttonstatuslist.getname";
 	}
 
 	@Override
@@ -43,13 +43,13 @@ public class ProcessCustomButtonStatusList extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "步骤节点处理器")
+		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processcustombuttonstatuslist.input.param.desc.handler")
 	})
 	@Output({
-		@Param(name = "customButtonList", type = ApiParamType.JSONARRAY, desc = "按钮列表"),
-		@Param(name = "customStatusList", type = ApiParamType.JSONARRAY, desc = "状态列表")
+		@Param(name = "customButtonList", type = ApiParamType.JSONARRAY, desc = "nmpap.processcustombuttonstatuslist.output.param.desc.custombuttonlist"),
+		@Param(name = "customStatusList", type = ApiParamType.JSONARRAY, desc = "nmpap.processcustombuttonstatuslist.output.param.desc.customstatuslist")
 	})
-	@Description(desc = "获取流程步骤自定义按钮及状态列表")
+	@Description(desc = "nmpap.processcustombuttonstatuslist.getname")
 	@SuppressWarnings("serial")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

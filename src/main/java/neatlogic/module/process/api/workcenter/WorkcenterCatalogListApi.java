@@ -27,7 +27,7 @@ public class WorkcenterCatalogListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询工单中心菜单类型列表";
+        return "nmpaw.workcentercataloglistapi.getname";
     }
 
     @Override
@@ -41,12 +41,12 @@ public class WorkcenterCatalogListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字")
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "nmpaw.workcentercataloglistapi.input.param.desc.keyword")
     })
     @Output({
-            @Param(explode = WorkcenterCatalogVo.class,desc = "工单中心菜单类型列表")
+            @Param(explode = WorkcenterCatalogVo.class,desc = "nmpaw.workcentercataloglistapi.output.param.desc.workcentercatalogvo")
     })
-    @Description(desc = "查询工单中心菜单类型列表接口")
+    @Description(desc = "nmpaw.workcentercataloglistapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         return workcenterMapper.getWorkcenterCatalogListByName(paramObj.getString("keyword"));

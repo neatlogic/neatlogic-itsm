@@ -47,7 +47,7 @@ public class ProcessTaskAgentDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "删除用户任务授权信息";
+        return "nmpapa.processtaskagentdeleteapi.getname";
     }
 
     @Override
@@ -57,7 +57,7 @@ public class ProcessTaskAgentDeleteApi extends PrivateApiComponentBase {
 
     @Input({})
     @Output({})
-    @Description(desc = "删除用户任务授权信息")
+    @Description(desc = "nmpapa.processtaskagentdeleteapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String fromUserUuid = UserContext.get().getUserUuid(true);

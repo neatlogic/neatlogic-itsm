@@ -33,7 +33,7 @@ public class PrioritySearchForSelectApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "查询优先级列表_下拉框";
+		return "nmpap.prioritysearchforselectapi.getname";
 	}
 
 	@Override
@@ -42,21 +42,21 @@ public class PrioritySearchForSelectApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
-		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
-		@Param(name = "channelUuid", type = ApiParamType.STRING, desc = "服务uuid"),
-		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+		@Param(name = "keyword", type = ApiParamType.STRING, desc = "nmpap.prioritysearchforselectapi.input.param.desc.keyword"),
+		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "nmpap.prioritysearchforselectapi.input.param.desc.isactive", rule = "0,1"),
+		@Param(name = "channelUuid", type = ApiParamType.STRING, desc = "nmpap.prioritysearchforselectapi.input.param.desc.channeluuid"),
+		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpap.prioritysearchforselectapi.input.param.desc.needpage"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpap.prioritysearchforselectapi.input.param.desc.pagesize"),
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpap.prioritysearchforselectapi.input.param.desc.currentpage")
 		})
 	@Output({
-		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=true,desc="当前页码"),
-		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
-		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
-		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="list",explode=ValueTextVo[].class,desc="优先级列表")
+		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=true,desc="nmpap.prioritysearchforselectapi.output.param.desc.currentpage"),
+		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="nmpap.prioritysearchforselectapi.output.param.desc.pagesize"),
+		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="nmpap.prioritysearchforselectapi.output.param.desc.pagecount"),
+		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="nmpap.prioritysearchforselectapi.output.param.desc.rownum"),
+		@Param(name="list",explode=ValueTextVo[].class,desc="nmpap.prioritysearchforselectapi.output.param.desc.list")
 	})
-	@Description(desc = "查询优先级列表_下拉框")
+	@Description(desc = "nmpap.prioritysearchforselectapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		PriorityVo priorityVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<PriorityVo>() {});

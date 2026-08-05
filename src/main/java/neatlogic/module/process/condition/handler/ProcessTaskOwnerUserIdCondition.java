@@ -35,6 +35,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskOwnerUserIdCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -51,7 +52,7 @@ public class ProcessTaskOwnerUserIdCondition extends ProcessTaskConditionBase im
 
     @Override
     public String getDisplayName() {
-        return "上报人用户ID";
+        return $.t("nmpch.processtaskowneruseridcondition.getdisplayname");
     }
 
     @Override

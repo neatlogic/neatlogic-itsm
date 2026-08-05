@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskIsShowCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -31,7 +32,7 @@ public class ProcessTaskIsShowCondition extends ProcessTaskConditionBase impleme
 
     @Override
     public String getDisplayName() {
-        return "是否隐藏";
+        return $.t("nmpch.processtaskisshowcondition.getdisplayname");
     }
 
     @Override
@@ -52,8 +53,8 @@ public class ProcessTaskIsShowCondition extends ProcessTaskConditionBase impleme
     @Override
     public JSONObject getConfig(ConditionConfigType type) {
         JSONArray dataList = new JSONArray();
-        dataList.add(new ValueTextVo("0", "是"));
-        dataList.add(new ValueTextVo("1", "否"));
+        dataList.add(new ValueTextVo("0", $.t("nmpch.processtaskisshowcondition.runtime.label.1")));
+        dataList.add(new ValueTextVo("1", $.t("nmpch.processtaskisshowcondition.runtime.label.2")));
 
         JSONObject config = new JSONObject();
         config.put("type", formHandlerType);

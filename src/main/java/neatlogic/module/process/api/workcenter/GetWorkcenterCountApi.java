@@ -43,7 +43,7 @@ public class GetWorkcenterCountApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取工单中心分类工单数接口";
+        return "nmpaw.getworkcentercountapi.getname";
     }
 
     @Override
@@ -52,10 +52,10 @@ public class GetWorkcenterCountApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "uuid",isRequired = true)
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpaw.getworkcentercountapi.input.param.desc.uuid",isRequired = true)
     })
     @Output({})
-    @Description(desc = "获取工单中心分类工单数接口")
+    @Description(desc = "nmpaw.getworkcentercountapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");

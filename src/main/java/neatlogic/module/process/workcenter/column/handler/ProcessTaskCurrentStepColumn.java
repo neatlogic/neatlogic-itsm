@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 	@Resource
@@ -32,7 +33,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 
 	@Override
 	public String getDisplayName() {
-		return "当前步骤";
+		return $.t("nmpwch.processtaskcurrentstepcolumn.getdisplayname");
 	}
 
 	@Override

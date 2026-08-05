@@ -47,7 +47,7 @@ public class ProcessDraftSaveApi extends PrivateApiComponentBase {
 			@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "common.config", isRequired = true)
 	})
 	@Output({
-			@Param(name = "uuid", type = ApiParamType.STRING, desc = "草稿uuid")
+			@Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpap.processdraftsaveapi.output.param.desc.uuid")
 	})
 	@Description(desc = "nmpap.processdraftsaveapi.getname")
 	@Override

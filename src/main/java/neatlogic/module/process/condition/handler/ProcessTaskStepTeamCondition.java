@@ -42,6 +42,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.*;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     @Resource
@@ -60,7 +61,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
 
     @Override
     public String getDisplayName() {
-        return "处理组";
+        return $.t("nmpch.processtaskstepteamcondition.getdisplayname");
     }
 
     @Override

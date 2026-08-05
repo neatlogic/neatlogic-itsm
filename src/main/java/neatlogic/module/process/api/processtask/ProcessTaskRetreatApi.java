@@ -31,7 +31,7 @@ public class ProcessTaskRetreatApi extends PrivateApiComponentBase implements IP
 
 	@Override
 	public String getName() {
-		return "上一步发起的撤回动作接口";
+		return "nmpap.processtaskretreatapi.getname";
 	}
 
 	@Override
@@ -40,12 +40,12 @@ public class ProcessTaskRetreatApi extends PrivateApiComponentBase implements IP
 	}
 
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源"),
-		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述")
+		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskretreatapi.input.param.desc.processtaskid"),
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskretreatapi.input.param.desc.processtaskstepid"),
+		@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskretreatapi.input.param.desc.source"),
+		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processtaskretreatapi.input.param.desc.content")
 	})
-	@Description(desc = "上一步发起的撤回动作接口")
+	@Description(desc = "nmpap.processtaskretreatapi.getname")
 	@Override
 	@ResubmitInterval(3)
 	public Object myDoService(JSONObject jsonObj) throws Exception {

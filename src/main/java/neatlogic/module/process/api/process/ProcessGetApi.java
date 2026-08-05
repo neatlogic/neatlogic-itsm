@@ -1,5 +1,7 @@
 package neatlogic.module.process.api.process;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
@@ -72,7 +74,7 @@ public class ProcessGetApi extends PrivateApiComponentBase {
                     processVo.setName("");
                     processVo.setIsActive(1);
                 }
-                processVo.setName(processVo.getName() + "【工单：" + processTaskVo.getTitle()+ "】");
+                processVo.setName($.t("nmpap.processgetapi.taskworkflowname", processVo.getName(), processTaskVo.getTitle()));
                 JSONObject config = JSON.parseObject(configStr);
 //                processVo.setConfig(configStr);
                 try {

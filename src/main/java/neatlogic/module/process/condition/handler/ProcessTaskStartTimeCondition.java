@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -40,7 +41,7 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
 
     @Override
     public String getDisplayName() {
-        return "上报时间";
+        return $.t("nmpch.processtaskstarttimecondition.getdisplayname");
     }
 
     @Override

@@ -72,7 +72,7 @@ public class WorkcenterDataExportToCSVApi extends PrivateBinaryStreamApiComponen
 
     @Override
     public String getName() {
-        return "导出工单中心数据";
+        return "nmpaw.workcenterdataexporttocsvapi.getname";
     }
 
     @Override
@@ -81,11 +81,11 @@ public class WorkcenterDataExportToCSVApi extends PrivateBinaryStreamApiComponen
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = true),
-            @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "条件设置，为空则使用数据库中保存的条件")
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpaw.workcenterdataexporttocsvapi.input.param.desc.uuid", isRequired = true),
+            @Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, desc = "nmpaw.workcenterdataexporttocsvapi.input.param.desc.conditionconfig")
     })
     @Output({})
-    @Description(desc = "导出工单中心数据")
+    @Description(desc = "nmpaw.workcenterdataexporttocsvapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         String uuid = jsonObj.getString("uuid");
@@ -110,7 +110,7 @@ public class WorkcenterDataExportToCSVApi extends PrivateBinaryStreamApiComponen
             workcenterVo.setTheadVoList(theadList);
         }
         try (OutputStream os = response.getOutputStream()) {
-            String fileNameEncode = FileUtil.getEncodedFileName("工单数据" + ".csv");
+            String fileNameEncode = FileUtil.getEncodedFileName($.t("nmpaw.workcenterdataexporttocsvapi.filename"));
             response.setContentType("application/text;charset=GBK");
             response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
 

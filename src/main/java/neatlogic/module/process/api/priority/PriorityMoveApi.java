@@ -34,7 +34,7 @@ public class PriorityMoveApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "移动动优先级接口";
+		return "nmpap.prioritymoveapi.getname";
 	}
 
 	@Override
@@ -43,10 +43,10 @@ public class PriorityMoveApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "被移动的优先级uuid"),
-		@Param(name = "sort", type = ApiParamType.INTEGER, isRequired = true, desc = "移动后的序号")
+		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.prioritymoveapi.input.param.desc.uuid"),
+		@Param(name = "sort", type = ApiParamType.INTEGER, isRequired = true, desc = "nmpap.prioritymoveapi.input.param.desc.sort")
 	})
-	@Description(desc = "移动动优先级接口")
+	@Description(desc = "nmpap.prioritymoveapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");

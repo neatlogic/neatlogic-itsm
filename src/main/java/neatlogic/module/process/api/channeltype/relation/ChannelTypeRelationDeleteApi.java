@@ -34,7 +34,7 @@ public class ChannelTypeRelationDeleteApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "删除服务类型关系";
+		return "nmpacr.channeltyperelationdeleteapi.getname";
 	}
 
 	@Override
@@ -43,9 +43,9 @@ public class ChannelTypeRelationDeleteApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id")
+		@Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "nmpacr.channeltyperelationdeleteapi.input.param.desc.channeltyperelationid")
 	})
-	@Description(desc = "删除服务类型关系")
+	@Description(desc = "nmpacr.channeltyperelationdeleteapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 	    Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");

@@ -46,14 +46,14 @@ public class ProcessTaskFulltextIndexRebuildApi extends PrivateApiComponentBase 
 
     @Override
     public String getName() {
-        return "重建工单索引";
+        return "nmpapf.processtaskfulltextindexrebuildapi.getname";
     }
 
     @Override
     public String getConfig() {
         return null;
     }
-    @Input({@Param(name = "idList", type = ApiParamType.JSONARRAY, desc = "工单idList") })
+    @Input({@Param(name = "idList", type = ApiParamType.JSONARRAY, desc = "nmpapf.processtaskfulltextindexrebuildapi.input.param.desc.idlist") })
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray idArray = jsonObj.getJSONArray("idList");

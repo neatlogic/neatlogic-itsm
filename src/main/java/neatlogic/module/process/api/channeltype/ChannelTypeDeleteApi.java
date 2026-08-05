@@ -1,5 +1,7 @@
 package neatlogic.module.process.api.channeltype;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -36,7 +38,7 @@ public class ChannelTypeDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "服务类型信息删除";
+        return "nmpac.channeltypedeleteapi.getname";
     }
 
     @Override
@@ -44,9 +46,9 @@ public class ChannelTypeDeleteApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "服务类型uuid")})
+    @Input({@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpac.channeltypedeleteapi.input.param.desc.uuid")})
     @Output({})
-    @Description(desc = "服务类型信息删除")
+    @Description(desc = "nmpac.channeltypedeleteapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
@@ -55,7 +57,7 @@ public class ChannelTypeDeleteApi extends PrivateApiComponentBase {
         }
         if (channelTypeMapper.checkChannelTypeHasReference(uuid) > 0) {
             ChannelTypeVo type = channelTypeMapper.getChannelTypeByUuid(uuid);
-            throw new ChannelTypeHasReferenceException(type.getName(), "删除");
+            throw new ChannelTypeHasReferenceException(type.getName(), $.t("nmpac.channeltypedeleteapi.operation.delete"));
         }
         channelTypeMapper.deleteChannelTypeByUuid(uuid);
         processTaskSerialNumberMapper.deleteProcessTaskSerialNumberPolicyByChannelTypeUuid(uuid);

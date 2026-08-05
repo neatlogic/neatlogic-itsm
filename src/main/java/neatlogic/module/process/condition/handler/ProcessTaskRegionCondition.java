@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskRegionCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -53,7 +54,7 @@ public class ProcessTaskRegionCondition extends ProcessTaskConditionBase impleme
 
     @Override
     public String getDisplayName() {
-        return "地域";
+        return $.t("nmpch.processtaskregioncondition.getdisplayname");
     }
 
 	@Override

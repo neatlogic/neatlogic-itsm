@@ -57,7 +57,7 @@ public class ProcessTaskFormDataListForEmailApi extends PrivateApiComponentBase 
 
     @Override
     public String getName() {
-        return "查询工单表单数据列表（邮件）";
+        return "nmpap.processtaskformdatalistforemailapi.getname";
     }
 
     @Override
@@ -71,12 +71,12 @@ public class ProcessTaskFormDataListForEmailApi extends PrivateApiComponentBase 
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskformdatalistforemailapi.input.param.desc.processtaskid")
     })
     @Output({
-            @Param(explode = ProcessTaskFormAttributeDataVo[].class, desc = "数据")
+            @Param(explode = ProcessTaskFormAttributeDataVo[].class, desc = "nmpap.processtaskformdatalistforemailapi.output.param.desc.processtaskformattributedatavo")
     })
-    @Description(desc = "查询工单步骤表单数据")
+    @Description(desc = "nmpap.processtaskformdatalistforemailapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long processTaskId = paramObj.getLong("processTaskId");

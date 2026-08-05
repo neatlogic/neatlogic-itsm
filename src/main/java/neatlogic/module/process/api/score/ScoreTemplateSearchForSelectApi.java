@@ -33,7 +33,7 @@ public class ScoreTemplateSearchForSelectApi extends PrivateApiComponentBase{
 
 	@Override
 	public String getName() {
-		return "查询评分模版_下拉框";
+		return "nmpas.scoretemplatesearchforselectapi.getname";
 	}
 
 	@Override
@@ -43,16 +43,16 @@ public class ScoreTemplateSearchForSelectApi extends PrivateApiComponentBase{
 
 
 	@Input({
-			@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字", xss=true),
-			@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-			@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
-			@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true")
+			@Param(name = "keyword", type = ApiParamType.STRING, desc = "nmpas.scoretemplatesearchforselectapi.input.param.desc.keyword", xss=true),
+			@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpas.scoretemplatesearchforselectapi.input.param.desc.currentpage"),
+			@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpas.scoretemplatesearchforselectapi.input.param.desc.pagesize"),
+			@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpas.scoretemplatesearchforselectapi.input.param.desc.needpage")
 	})
 	@Output({@Param(name = "scoreTemplateList",
 			type = ApiParamType.JSONARRAY,
 			explode = ValueTextVo[].class,
-			desc = "选项列表")})
-	@Description(desc = "查询评分模版_下拉框")
+			desc = "nmpas.scoretemplatesearchforselectapi.output.param.desc.scoretemplatelist")})
+	@Description(desc = "nmpas.scoretemplatesearchforselectapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 

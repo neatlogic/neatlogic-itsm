@@ -55,7 +55,7 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工单活动列表接口";
+        return "nmpap.processtaskauditlistapi.getname";
     }
 
     @Override
@@ -69,14 +69,14 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "processTaskStepIdList", type = ApiParamType.JSONARRAY, desc = "工单步骤id列表"),
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskauditlistapi.input.param.desc.processtaskid"),
+            @Param(name = "processTaskStepIdList", type = ApiParamType.JSONARRAY, desc = "nmpap.processtaskauditlistapi.input.param.desc.processtaskstepidlist"),
     })
     @Output({
-            @Param(name = "Return", explode = ProcessTaskStepAuditVo[].class, desc = "工单活动列表"),
-            @Param(name = "Return[n].auditDetailList", explode = ProcessTaskStepAuditDetailVo[].class, desc = "工单活动详情列表")
+            @Param(name = "Return", explode = ProcessTaskStepAuditVo[].class, desc = "nmpap.processtaskauditlistapi.output.param.desc.return.name"),
+            @Param(name = "Return[n].auditDetailList", explode = ProcessTaskStepAuditDetailVo[].class, desc = "nmpap.processtaskauditlistapi.output.param.desc.return.n.auditdetaillist")
     })
-    @Description(desc = "工单活动列表接口")
+    @Description(desc = "nmpap.processtaskauditlistapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<ProcessTaskStepAuditVo> resultList = new ArrayList<>();

@@ -47,7 +47,7 @@ public class ProcessTaskAutomaticRetryApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "工单automatic步骤重试接口";
+		return "nmpap.processtaskautomaticretryapi.getname";
 	}
 
 	@Override
@@ -57,10 +57,10 @@ public class ProcessTaskAutomaticRetryApi extends PrivateApiComponentBase {
 
 	@Override
 	@Input({
-			@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤Id", isRequired = true)
+			@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "nmpap.processtaskautomaticretryapi.input.param.desc.processtaskstepid", isRequired = true)
 	})
 	@Output({})
-	@Description(desc = "工单automatic步骤重试接口")
+	@Description(desc = "nmpap.processtaskautomaticretryapi.getname")
 	@ResubmitInterval(3)
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");

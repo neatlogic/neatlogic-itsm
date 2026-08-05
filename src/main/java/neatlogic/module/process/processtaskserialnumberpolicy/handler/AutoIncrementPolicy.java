@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.List;
 
+import neatlogic.framework.util.$;
 @Service
 public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
 
@@ -37,7 +38,7 @@ public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandle
 
     @Override
     public String getName() {
-        return "自增序列";
+        return $.t("nmpph.autoincrementpolicy.getname");
     }
 
     @SuppressWarnings("serial")

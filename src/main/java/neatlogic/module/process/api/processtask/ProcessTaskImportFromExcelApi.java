@@ -72,7 +72,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
 
     @Override
     public String getName() {
-        return "导入工单数据(通过固定格式excel文件)";
+        return "nmpap.processtaskimportfromexcelapi.getname";
     }
 
     @Override
@@ -82,10 +82,10 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
 
     @Input({})
     @Output({
-            @Param(name = "successCount", type = ApiParamType.INTEGER, desc = "导入成功的工单数"),
-            @Param(name = "totalCount", type = ApiParamType.INTEGER, desc = "导入的总工单数")
+            @Param(name = "successCount", type = ApiParamType.INTEGER, desc = "nmpap.processtaskimportfromexcelapi.output.param.desc.successcount"),
+            @Param(name = "totalCount", type = ApiParamType.INTEGER, desc = "nmpap.processtaskimportfromexcelapi.output.param.desc.totalcount")
     })
-    @Description(desc = "导入工单数据(通过固定格式excel文件)")
+    @Description(desc = "nmpap.processtaskimportfromexcelapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         /**

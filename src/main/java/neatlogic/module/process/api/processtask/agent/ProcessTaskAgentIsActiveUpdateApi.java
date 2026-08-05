@@ -42,7 +42,7 @@ public class ProcessTaskAgentIsActiveUpdateApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "启用或禁用用户任务授权信息";
+        return "nmpapa.processtaskagentisactiveupdateapi.getname";
     }
 
     @Override
@@ -52,7 +52,7 @@ public class ProcessTaskAgentIsActiveUpdateApi extends PrivateApiComponentBase {
 
     @Input({})
     @Output({})
-    @Description(desc = "启用或禁用用户任务授权信息")
+    @Description(desc = "nmpapa.processtaskagentisactiveupdateapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         processTaskAgentMapper.updateProcessTaskAgentIsActiveByFromUserUuid(UserContext.get().getUserUuid(true));

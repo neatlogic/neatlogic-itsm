@@ -14,6 +14,7 @@ import neatlogic.framework.process.constvalue.ProcessFieldType;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import org.springframework.stereotype.Component;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskActionTriggerUserIdCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -24,7 +25,7 @@ public class ProcessTaskActionTriggerUserIdCondition extends ProcessTaskConditio
 
     @Override
     public String getDisplayName() {
-        return "动作触发人用户ID";
+        return $.t("nmpch.processtaskactiontriggeruseridcondition.getdisplayname");
     }
 
     @Override

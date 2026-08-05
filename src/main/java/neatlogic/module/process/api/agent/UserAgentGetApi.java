@@ -41,7 +41,7 @@ public class UserAgentGetApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "获取用户授权代理";
+		return "nmpaa.useragentgetapi.getname";
 	}
 
 	@Override
@@ -50,21 +50,21 @@ public class UserAgentGetApi extends PrivateApiComponentBase {
 	}
 
 	@Output({
-			@Param(name = "uuid", type = ApiParamType.STRING, desc = "用户uuid"),
-			@Param(name = "userId", type = ApiParamType.STRING, desc = "用户userId"),
-			@Param(name = "userName", type = ApiParamType.STRING, desc = "用户名"),
-			@Param(name = "email", type = ApiParamType.STRING, desc = "邮箱"),
-			@Param(name = "phone", type = ApiParamType.STRING, desc = "电话"),
-			@Param(name = "pinyin", type = ApiParamType.STRING, desc = "拼音"),
-			@Param(name = "isActive", type = ApiParamType.STRING, desc = "是否激活"),
-			@Param(name = "userInfo", type = ApiParamType.STRING, desc = "额外属性"),
-			@Param(name = "teamList", type = ApiParamType.STRING, desc = "分组列表"),
-			@Param(name = "roleList", type = ApiParamType.STRING, desc = "角色列表"),
-			@Param(name = "userAuthList", type = ApiParamType.STRING, desc = "权限列表"),
-			@Param(name = "roleUuidList", type = ApiParamType.STRING, desc = "角色uuid列表"),
-			@Param(name = "teamUuidList", type = ApiParamType.STRING, desc = "分组uuid列表")
+			@Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpaa.useragentgetapi.output.param.desc.uuid"),
+			@Param(name = "userId", type = ApiParamType.STRING, desc = "nmpaa.useragentgetapi.output.param.desc.userid"),
+			@Param(name = "userName", type = ApiParamType.STRING, desc = "nmpaa.useragentgetapi.output.param.desc.username"),
+			@Param(name = "email", type = ApiParamType.STRING, desc = "nmpaa.useragentgetapi.output.param.desc.email"),
+			@Param(name = "phone", type = ApiParamType.STRING, desc = "nmpaa.useragentgetapi.output.param.desc.phone"),
+			@Param(name = "pinyin", type = ApiParamType.STRING, desc = "nmpaa.useragentgetapi.output.param.desc.pinyin"),
+			@Param(name = "isActive", type = ApiParamType.STRING, desc = "nmpaa.useragentgetapi.output.param.desc.isactive"),
+			@Param(name = "userInfo", type = ApiParamType.STRING, desc = "nmpaa.useragentgetapi.output.param.desc.userinfo"),
+			@Param(name = "teamList", type = ApiParamType.STRING, desc = "nmpaa.useragentgetapi.output.param.desc.teamlist"),
+			@Param(name = "roleList", type = ApiParamType.STRING, desc = "nmpaa.useragentgetapi.output.param.desc.rolelist"),
+			@Param(name = "userAuthList", type = ApiParamType.STRING, desc = "nmpaa.useragentgetapi.output.param.desc.userauthlist"),
+			@Param(name = "roleUuidList", type = ApiParamType.STRING, desc = "nmpaa.useragentgetapi.output.param.desc.roleuuidlist"),
+			@Param(name = "teamUuidList", type = ApiParamType.STRING, desc = "nmpaa.useragentgetapi.output.param.desc.teamuuidlist")
 	})
-	@Description(desc = "获取用户授权代理")
+	@Description(desc = "nmpaa.useragentgetapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 //		UserVo agent = userMapper.getUserAgent(UserContext.get().getUserUuid());

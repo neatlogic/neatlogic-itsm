@@ -27,7 +27,7 @@ public class ProcessTaskSerialNumberPolicyListApi extends PrivateApiComponentBas
 
     @Override
     public String getName() {
-        return "查询工单号生成规则列表";
+        return "nmpap.processtaskserialnumberpolicylistapi.getname";
     }
 
     @Override
@@ -35,8 +35,8 @@ public class ProcessTaskSerialNumberPolicyListApi extends PrivateApiComponentBas
         return null;
     }
 
-    @Output({@Param(explode = ValueTextVo[].class, desc = "工单号生成规则列表")})
-    @Description(desc = "查询工单号生成规则列表")
+    @Output({@Param(explode = ValueTextVo[].class, desc = "nmpap.processtaskserialnumberpolicylistapi.output.param.desc.valuetextvo")})
+    @Description(desc = "nmpap.processtaskserialnumberpolicylistapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         return ProcessTaskSerialNumberPolicyHandlerFactory.getPolicyHandlerList();

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStepTaskCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -24,7 +25,7 @@ public class ProcessTaskStepTaskCondition extends ProcessTaskConditionBase imple
 
     @Override
     public String getDisplayName() {
-        return "子任务";
+        return $.t("nmpch.processtasksteptaskcondition.getdisplayname");
     }
 
     @Override

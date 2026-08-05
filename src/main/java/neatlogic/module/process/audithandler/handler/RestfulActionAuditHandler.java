@@ -1,5 +1,7 @@
 package neatlogic.module.process.audithandler.handler;
 
+import neatlogic.framework.util.$;
+
 import neatlogic.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +40,9 @@ public class RestfulActionAuditHandler implements IProcessTaskStepAuditDetailHan
 				actionVo.setTriggerText(triggerText);
 			}
 			if(actionVo.isSucceed()) {
-				actionVo.setStatusText("已成功");
+                actionVo.setStatusText($.t("nmpah.restfulactionaudithandler.statustext.succeeded"));
 			}else {
-				actionVo.setStatusText("已失败");
+                actionVo.setStatusText($.t("nmpah.restfulactionaudithandler.statustext.failed"));
 			}
 			processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(actionVo));
 		}

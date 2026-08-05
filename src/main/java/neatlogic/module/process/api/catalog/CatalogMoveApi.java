@@ -48,7 +48,7 @@ public class CatalogMoveApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "服务目录移动位置接口";
+		return "nmpac.catalogmoveapi.getname";
 	}
 
 	@Override
@@ -57,11 +57,11 @@ public class CatalogMoveApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "被移动的服务目录uuid"),
-		@Param(name = "targetUuid", type = ApiParamType.STRING, isRequired = true, desc = "目标节点uuid"),
-		@Param(name = "moveType", type = ApiParamType.ENUM, rule = "inner,prev,next", isRequired = true, desc = "移动类型")
+		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpac.catalogmoveapi.input.param.desc.uuid"),
+		@Param(name = "targetUuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpac.catalogmoveapi.input.param.desc.targetuuid"),
+		@Param(name = "moveType", type = ApiParamType.ENUM, rule = "inner,prev,next", isRequired = true, desc = "nmpac.catalogmoveapi.input.param.desc.movetype")
 	})
-	@Description(desc = "服务目录移动位置接口")
+	@Description(desc = "nmpac.catalogmoveapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");

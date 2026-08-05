@@ -32,7 +32,7 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "流程编辑获取条件接口";
+        return "nmpaw.workcentergetconditionapi.getname";
     }
 
     @Override
@@ -41,19 +41,19 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "conditionModel", type = ApiParamType.STRING, desc = "条件模型 simple|custom,  simple:目前用于用于工单中心条件过滤简单模式, custom:目前用于用于工单中心条件过自定义模式;默认custom"),
-            @Param(name = "workcenterUuid", type = ApiParamType.STRING, isRequired = true, desc = "draftProcessTask 非草稿的时候，过滤条件：工单状态去掉”未提交“"),
+            @Param(name = "conditionModel", type = ApiParamType.STRING, desc = "nmpaw.workcentergetconditionapi.input.param.desc.conditionmodel"),
+            @Param(name = "workcenterUuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpaw.workcentergetconditionapi.input.param.desc.workcenteruuid"),
     })
     @Output({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "组件uuid"),
-            @Param(name = "handler", type = ApiParamType.STRING, desc = "处理器"),
-            @Param(name = "handlerName", type = ApiParamType.STRING, desc = "处理器名"),
-            @Param(name = "handlerType", type = ApiParamType.STRING, desc = "控件类型 select|input|radio|userselect|date|area|time"),
-            @Param(name = "type", type = ApiParamType.STRING, desc = "类型  form|common"),
-            @Param(name = "expressionList[0].expression", type = ApiParamType.STRING, desc = "表达式"),
-            @Param(name = "expressionList[0].expressionName", type = ApiParamType.STRING, desc = "表达式名")
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpaw.workcentergetconditionapi.output.param.desc.uuid"),
+            @Param(name = "handler", type = ApiParamType.STRING, desc = "nmpaw.workcentergetconditionapi.output.param.desc.handler"),
+            @Param(name = "handlerName", type = ApiParamType.STRING, desc = "nmpaw.workcentergetconditionapi.output.param.desc.handlername"),
+            @Param(name = "handlerType", type = ApiParamType.STRING, desc = "nmpaw.workcentergetconditionapi.output.param.desc.handlertype"),
+            @Param(name = "type", type = ApiParamType.STRING, desc = "nmpaw.workcentergetconditionapi.output.param.desc.type"),
+            @Param(name = "expressionList[0].expression", type = ApiParamType.STRING, desc = "nmpaw.workcentergetconditionapi.output.param.desc.expressionlist.0.expression"),
+            @Param(name = "expressionList[0].expressionName", type = ApiParamType.STRING, desc = "nmpaw.workcentergetconditionapi.output.param.desc.expressionlist.0.expressionname")
     })
-    @Description(desc = "流程编辑获取条件接口，目前用于流程编辑，初始化条件使用")
+    @Description(desc = "nmpaw.workcentergetconditionapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray resultArray = new JSONArray();

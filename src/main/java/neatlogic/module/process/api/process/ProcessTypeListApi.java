@@ -31,7 +31,7 @@ public class ProcessTypeListApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "流程类型列表接口";
+		return "nmpap.processtypelistapi.getname";
 	}
 
 	@Override
@@ -39,8 +39,8 @@ public class ProcessTypeListApi extends PrivateApiComponentBase {
 		return null;
 	}
 
-	@Output({@Param(name="Return", explode = ProcessTypeVo[].class, desc = "流程类型列表")})
-	@Description(desc = "流程类型列表接口")
+	@Output({@Param(name="Return", explode = ProcessTypeVo[].class, desc = "nmpap.processtypelistapi.output.param.desc.return.name")})
+	@Description(desc = "nmpap.processtypelistapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		

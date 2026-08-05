@@ -48,7 +48,7 @@ public class FavoriteChannelListForMobileApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取收藏的服务列表(移动端)";
+        return "nmpac.favoritechannellistformobileapi.getname";
     }
 
     @Override
@@ -58,9 +58,9 @@ public class FavoriteChannelListForMobileApi extends PrivateApiComponentBase {
 
     @Input({})
     @Output({
-            @Param(name = "favoriteList", explode = ChannelVo[].class, desc = "收藏的服务列表")
+            @Param(name = "favoriteList", explode = ChannelVo[].class, desc = "nmpac.favoritechannellistformobileapi.output.param.desc.favoritelist")
     })
-    @Description(desc = "获取收藏的服务列表(移动端)")
+    @Description(desc = "nmpac.favoritechannellistformobileapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();

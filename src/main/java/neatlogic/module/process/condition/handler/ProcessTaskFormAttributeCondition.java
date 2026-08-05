@@ -12,6 +12,8 @@
 
 package neatlogic.module.process.condition.handler;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -155,7 +157,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
         }
         ConditionVo channelCondition = new ConditionVo();
         channelCondition.setName("channel");
-        channelCondition.setLabel("服务");
+        channelCondition.setLabel($.t("term.itsm.channel"));
         channelCondition.setType("common");
         channelCondition.setExpression(Expression.INCLUDE.getExpression());
         channelCondition.setValueList(channelUuidList);

@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskOwnerGroupCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -54,7 +55,7 @@ public class ProcessTaskOwnerGroupCondition extends ProcessTaskConditionBase imp
 
     @Override
     public String getDisplayName() {
-        return "上报人集团";
+        return $.t("nmpch.processtaskownergroupcondition.getdisplayname");
     }
 
 	@Override

@@ -29,7 +29,7 @@ public class PriorityGetApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "优先级信息获取";
+		return "nmpap.prioritygetapi.getname";
 	}
 
 	@Override
@@ -38,12 +38,12 @@ public class PriorityGetApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "优先级uuid")
+		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.prioritygetapi.input.param.desc.uuid")
 	})
 	@Output({
-		@Param(name="Return", explode = PriorityVo.class, desc="优先级信息")
+		@Param(name="Return", explode = PriorityVo.class, desc="nmpap.prioritygetapi.output.param.desc.return.name")
 	})
-	@Description(desc = "优先级信息获取")
+	@Description(desc = "nmpap.prioritygetapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");

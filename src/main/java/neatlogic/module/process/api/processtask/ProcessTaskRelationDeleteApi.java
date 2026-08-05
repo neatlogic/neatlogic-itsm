@@ -42,7 +42,7 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "删除工单关联";
+        return "nmpap.processtaskrelationdeleteapi.getname";
     }
 
     @Override
@@ -51,10 +51,10 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskRelationId", type = ApiParamType.LONG, isRequired = true, desc = "工单关联id"),
-            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+            @Param(name = "processTaskRelationId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskrelationdeleteapi.input.param.desc.processtaskrelationid"),
+            @Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskrelationdeleteapi.input.param.desc.source")
     })
-    @Description(desc = "删除工单关联")
+    @Description(desc = "nmpap.processtaskrelationdeleteapi.getname")
     @ResubmitInterval(3)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

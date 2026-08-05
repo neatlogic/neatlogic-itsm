@@ -31,7 +31,7 @@ public class ProcessTaskBackApi extends PrivateApiComponentBase {
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return "工单回退接口";
+		return "nmpap.processtaskbackapi.getname";
 	}
 
 	@Override
@@ -44,15 +44,15 @@ public class ProcessTaskBackApi extends PrivateApiComponentBase {
 	@Input({
 			@Param(name = "processTaskId",
 					type = ApiParamType.LONG,
-					desc = "工单Id",
+					desc = "nmpap.processtaskbackapi.input.param.desc.processtaskid",
 					isRequired = true),
 			@Param(name = "processTaskStepId",
 			type = ApiParamType.LONG,
-			desc = "工单步骤Id",
+			desc = "nmpap.processtaskbackapi.input.param.desc.processtaskstepid",
 			isRequired = true)
 	})
 	@Output({})
-	@Description(desc = "工单回退接口")
+	@Description(desc = "nmpap.processtaskbackapi.getname")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject result = new JSONObject();
 		Long processTaskStepId = jsonObj.getLong("processtaskStepId");

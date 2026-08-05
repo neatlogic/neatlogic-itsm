@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import neatlogic.framework.util.$;
 @Component
 public class ProcessFileHandler extends FileTypeHandlerBase {
 
@@ -69,7 +70,7 @@ public class ProcessFileHandler extends FileTypeHandlerBase {
     }
     @Override
     public String getDisplayName() {
-        return "IT服务附件";
+        return $.t("nmpf.processfilehandler.getdisplayname");
     }
 
 

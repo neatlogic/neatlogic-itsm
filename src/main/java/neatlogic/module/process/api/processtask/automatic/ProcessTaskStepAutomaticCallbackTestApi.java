@@ -44,7 +44,7 @@ public class ProcessTaskStepAutomaticCallbackTestApi extends PrivateApiComponent
 
     @Override
     public String getName() {
-        return "自动处理步骤回调测试接口";
+        return "nmpapa.processtaskstepautomaticcallbacktestapi.getname";
     }
 
     @Override
@@ -53,15 +53,15 @@ public class ProcessTaskStepAutomaticCallbackTestApi extends PrivateApiComponent
     }
 
     @Input({
-            @Param(name = "inputParam1", type = ApiParamType.STRING, isRequired = true, desc = "入参1"),
-            @Param(name = "inputParam2", type = ApiParamType.LONG, isRequired = true, desc = "入参2")
+            @Param(name = "inputParam1", type = ApiParamType.STRING, isRequired = true, desc = "nmpapa.processtaskstepautomaticcallbacktestapi.input.param.desc.inputparam1"),
+            @Param(name = "inputParam2", type = ApiParamType.LONG, isRequired = true, desc = "nmpapa.processtaskstepautomaticcallbacktestapi.input.param.desc.inputparam2")
     })
     @Output({
-            @Param(name = "outputParam1", type = ApiParamType.STRING, desc = "出参1"),
-            @Param(name = "outputParam2", type = ApiParamType.LONG, desc = "出参2"),
-            @Param(name = "error", type = ApiParamType.STRING, desc = "异常信息")
+            @Param(name = "outputParam1", type = ApiParamType.STRING, desc = "nmpapa.processtaskstepautomaticcallbacktestapi.output.param.desc.outputparam1"),
+            @Param(name = "outputParam2", type = ApiParamType.LONG, desc = "nmpapa.processtaskstepautomaticcallbacktestapi.output.param.desc.outputparam2"),
+            @Param(name = "error", type = ApiParamType.STRING, desc = "nmpapa.processtaskstepautomaticcallbacktestapi.output.param.desc.error")
     })
-    @Description(desc = "自动处理步骤回调测试接口")
+    @Description(desc = "nmpapa.processtaskstepautomaticcallbacktestapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String inputParam1 = paramObj.getString("inputParam1");

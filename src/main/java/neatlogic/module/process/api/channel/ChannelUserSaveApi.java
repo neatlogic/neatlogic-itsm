@@ -34,7 +34,7 @@ public class ChannelUserSaveApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "服务通道收藏控制接口";
+		return "nmpac.channelusersaveapi.getname";
 	}
 
 	@Override
@@ -43,10 +43,10 @@ public class ChannelUserSaveApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务通道uuid"),
-		@Param(name = "action", type = ApiParamType.ENUM, isRequired = true, desc = "1:收藏，0：取消", rule = "0,1")
+		@Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpac.channelusersaveapi.input.param.desc.channeluuid"),
+		@Param(name = "action", type = ApiParamType.ENUM, isRequired = true, desc = "nmpac.channelusersaveapi.input.param.desc.action", rule = "0,1")
 		})
-	@Description(desc = "服务通道收藏控制接口")
+	@Description(desc = "nmpac.channelusersaveapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String channelUuid = jsonObj.getString("channelUuid");

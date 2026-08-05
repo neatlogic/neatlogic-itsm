@@ -37,7 +37,7 @@ public class ProcessDeleteApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "删除流程";
+		return "nmpap.processdeleteapi.getname";
 	}
 
 	@Override
@@ -46,12 +46,12 @@ public class ProcessDeleteApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "流程uuid")
+		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processdeleteapi.input.param.desc.uuid")
 	})
 	@Output({
-		@Param(name = "uuid", type = ApiParamType.STRING, desc = "流程uuid")
+		@Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpap.processdeleteapi.output.param.desc.uuid")
 	})
-	@Description(desc = "删除流程")
+	@Description(desc = "nmpap.processdeleteapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");

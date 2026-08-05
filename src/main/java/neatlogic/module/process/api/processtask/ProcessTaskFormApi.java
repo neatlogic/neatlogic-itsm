@@ -38,7 +38,7 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询工单步骤表单数据";
+        return "nmpap.processtaskformapi.getname";
     }
 
     @Override
@@ -46,11 +46,11 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")})
-    @Output({@Param(name = "formAttributeDataMap", type = ApiParamType.JSONOBJECT, desc = "工单信息"),
-        @Param(name = "formConfig", type = ApiParamType.JSONOBJECT, desc = "工单信息")})
-    @Description(desc = "查询工单步骤表单数据")
+    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskformapi.input.param.desc.processtaskid"),
+        @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "nmpap.processtaskformapi.input.param.desc.processtaskstepid")})
+    @Output({@Param(name = "formAttributeDataMap", type = ApiParamType.JSONOBJECT, desc = "nmpap.processtaskformapi.output.param.desc.formattributedatamap"),
+        @Param(name = "formConfig", type = ApiParamType.JSONOBJECT, desc = "nmpap.processtaskformapi.output.param.desc.formconfig")})
+    @Description(desc = "nmpap.processtaskformapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();

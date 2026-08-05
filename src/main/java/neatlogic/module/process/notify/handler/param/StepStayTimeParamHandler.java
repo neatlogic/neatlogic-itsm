@@ -12,6 +12,8 @@
 
 package neatlogic.module.process.notify.handler.param;
 
+import neatlogic.framework.util.$;
+
 import neatlogic.framework.notify.core.INotifyTriggerType;
 import neatlogic.framework.process.constvalue.ProcessTaskStepStatus;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
@@ -75,12 +77,12 @@ public class StepStayTimeParamHandler extends ProcessTaskNotifyParamHandlerBase 
             long day = milliseconds / (24 * 60 * 60 * 1000);
             milliseconds = milliseconds % (24 * 60 * 60 * 1000);
             if (milliseconds < (60 * 60 * 1000)) {
-                return day + " 天";
+                return $.t("nmpnh.stepstaytimeparamhandler.duration.days", day);
             }
             long hour = milliseconds / (60 * 60 * 1000);
-            return day + " 天" + hour + "小时";
+            return $.t("nmpnh.stepstaytimeparamhandler.duration.dayshours", day, hour);
         } else if (milliseconds >= (60 * 60 * 1000)) {
-            return (milliseconds / (60 * 60 * 1000)) + " 小时";
+            return $.t("nmpnh.stepstaytimeparamhandler.duration.hours", milliseconds / (60 * 60 * 1000));
         }
         return null;
     }

@@ -45,7 +45,7 @@ public class ProcessTaskStepExecuteSortComparatorTestApi extends PrivateApiCompo
 
     @Override
     public String getName() {
-        return "测试工单步骤执行排序比较器";
+        return "nmpapt.processtaskstepexecutesortcomparatortestapi.getname";
     }
 
     @Input({
@@ -54,7 +54,7 @@ public class ProcessTaskStepExecuteSortComparatorTestApi extends PrivateApiCompo
     @Output({
             @Param(name = "tbodyList", explode = ProcessTaskStepVo.class, desc = "common.tbodylist")
     })
-    @Description(desc = "测试工单步骤执行排序比较器")
+    @Description(desc = "nmpapt.processtaskstepexecutesortcomparatortestapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long processTaskId = paramObj.getLong("processTaskId");

@@ -41,7 +41,7 @@ public class ProcessSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "保存流程";
+        return "nmpap.processsaveapi.getname";
     }
 
     @Override
@@ -51,14 +51,14 @@ public class ProcessSaveApi extends PrivateApiComponentBase {
 
     @Override
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "流程uuid", isRequired = true),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "流程名称"),
-            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "流程配置内容", minSize = 1, isRequired = true)
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpap.processsaveapi.input.param.desc.uuid", isRequired = true),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "nmpap.processsaveapi.input.param.desc.name"),
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "nmpap.processsaveapi.input.param.desc.config", minSize = 1, isRequired = true)
     })
     @Output({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "流程uuid")
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "nmpap.processsaveapi.output.param.desc.uuid")
     })
-    @Description(desc = "保存流程")
+    @Description(desc = "nmpap.processsaveapi.getname")
     @ResubmitInterval(value = 2)
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessVo processVo = JSON.toJavaObject(jsonObj, ProcessVo.class);

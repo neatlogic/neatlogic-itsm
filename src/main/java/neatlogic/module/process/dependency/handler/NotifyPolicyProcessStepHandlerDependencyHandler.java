@@ -12,6 +12,8 @@
 
 package neatlogic.module.process.dependency.handler;
 
+import neatlogic.framework.util.$;
+
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
@@ -87,7 +89,7 @@ public class NotifyPolicyProcessStepHandlerDependencyHandler extends CustomDepen
 //                dependencyInfoConfig.put("handler", handler);
 //                dependencyInfoConfig.put("handlerName", name);
                 List<String> pathList = new ArrayList<>();
-                pathList.add("节点管理");
+        pathList.add($.t("nmpdh.path.stepmanagement"));
                 String lastName = name;
 //                String pathFormat = "节点管理-${DATA.handlerName}";
                 String urlFormat = "/" + TenantContext.get().getTenantUuid() + "/process.html#/node-manage";

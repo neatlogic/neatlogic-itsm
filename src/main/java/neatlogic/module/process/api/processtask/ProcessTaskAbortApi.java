@@ -28,7 +28,7 @@ public class ProcessTaskAbortApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "工单取消接口";
+		return "nmpap.processtaskabortapi.getname";
 	}
 
 	@Override
@@ -38,12 +38,12 @@ public class ProcessTaskAbortApi extends PrivateApiComponentBase {
 
 	@Override
 	@Input({
-			@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true),
-			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述"),
-			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+			@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "nmpap.processtaskabortapi.input.param.desc.processtaskid", isRequired = true),
+			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "nmpap.processtaskabortapi.input.param.desc.content"),
+			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskabortapi.input.param.desc.source")
 	})
 	@Output({})
-	@Description(desc = "工单取消接口")
+	@Description(desc = "nmpap.processtaskabortapi.getname")
 	@ResubmitInterval(3)
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");

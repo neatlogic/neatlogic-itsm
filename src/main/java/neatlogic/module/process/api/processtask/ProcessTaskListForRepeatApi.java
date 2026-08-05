@@ -62,7 +62,7 @@ public class ProcessTaskListForRepeatApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询工单列表（重复工单专用）";
+        return "nmpap.processtasklistforrepeatapi.getname";
     }
 
     @Override
@@ -71,17 +71,17 @@ public class ProcessTaskListForRepeatApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "模糊查询"),
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "nmpap.processtasklistforrepeatapi.input.param.desc.keyword"),
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtasklistforrepeatapi.input.param.desc.processtaskid"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpap.processtasklistforrepeatapi.input.param.desc.needpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpap.processtasklistforrepeatapi.input.param.desc.pagesize"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpap.processtasklistforrepeatapi.input.param.desc.currentpage")
     })
     @Output({
-            @Param(name = "tbodyList", explode = ProcessTaskVo[].class, desc = "工单列表"),
+            @Param(name = "tbodyList", explode = ProcessTaskVo[].class, desc = "nmpap.processtasklistforrepeatapi.output.param.desc.tbodylist"),
             @Param(explode = BasePageVo.class)
     })
-    @Description(desc = "查询工单列表（重复工单专用）")
+    @Description(desc = "nmpap.processtasklistforrepeatapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long processTaskId = paramObj.getLong("processTaskId");

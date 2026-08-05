@@ -43,7 +43,7 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
 		@Param(name = "parentUuid", type = ApiParamType.STRING, desc = "term.itsm.cataloguuid"),
-		@Param(name = "isFavorite", type = ApiParamType.ENUM, desc = "nmpac.channelsearchapi.input.param.desc.isfavorite", rule = "0,1", help = "1：已收藏，0：全部"),
+		@Param(name = "isFavorite", type = ApiParamType.ENUM, desc = "nmpac.channelsearchapi.input.param.desc.isfavorite", rule = "0,1", help = "nmpac.channelsearchapi.input.param.help.isfavorite"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "common.isactive", rule = "0,1"),
 		@Param(name = "isAuthenticate", type = ApiParamType.ENUM, desc = "common.isauthenticate", rule = "0,1"),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "common.isneedpage"),

@@ -49,7 +49,7 @@ public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "工单回复删除接口";
+		return "nmpap.processtaskcommentdeleteapi.getname";
 	}
 
 	@Override
@@ -58,13 +58,13 @@ public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "回复id"),
-			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "来源")
+		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskcommentdeleteapi.input.param.desc.id"),
+			@Param(name = "source", type = ApiParamType.STRING, defaultValue = "pc", desc = "nmpap.processtaskcommentdeleteapi.input.param.desc.source")
 	})
 	@Output({
-		@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "当前步骤评论列表")
+		@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "nmpap.processtaskcommentdeleteapi.output.param.desc.commentlist")
 	})
-	@Description(desc = "工单回复删除接口")
+	@Description(desc = "nmpap.processtaskcommentdeleteapi.getname")
 	@Override
 	@ResubmitInterval(3)
 	public Object myDoService(JSONObject jsonObj) throws Exception {

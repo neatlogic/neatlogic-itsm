@@ -38,7 +38,7 @@ public class ProcessTaskOldFormPropGetApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "查询旧工单表单信息";
+		return "nmpap.processtaskoldformpropgetapi.getname";
 	}
 
 	@Override
@@ -48,13 +48,13 @@ public class ProcessTaskOldFormPropGetApi extends PrivateApiComponentBase {
 
 	@Override
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true)
+		@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "nmpap.processtaskoldformpropgetapi.input.param.desc.processtaskid", isRequired = true)
 	})
 	@Output({
-	    @Param(name = "form", type = ApiParamType.JSONOBJECT, desc = "表单信息"),
-	    @Param(name = "prop", type = ApiParamType.JSONOBJECT, desc = "自定义属性信息")
+	    @Param(name = "form", type = ApiParamType.JSONOBJECT, desc = "nmpap.processtaskoldformpropgetapi.output.param.desc.form"),
+	    @Param(name = "prop", type = ApiParamType.JSONOBJECT, desc = "nmpap.processtaskoldformpropgetapi.output.param.desc.prop")
 	})
-	@Description(desc = "查询旧工单表单信息")
+	@Description(desc = "nmpap.processtaskoldformpropgetapi.getname")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		Map<String,String> oldFormProp= processTaskMapper.getProcessTaskOldFormAndPropByTaskId(processTaskId);

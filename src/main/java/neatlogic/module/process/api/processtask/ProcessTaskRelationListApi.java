@@ -51,7 +51,7 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询关联工单列表";
+        return "nmpap.processtaskrelationlistapi.getname";
     }
 
     @Override
@@ -59,13 +59,13 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-        @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-        @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")})
-    @Output({@Param(name = "processTaskRelationList", explode = ProcessTaskRelationVo[].class, desc = "关联工单列表"),
+    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskrelationlistapi.input.param.desc.processtaskid"),
+        @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmpap.processtaskrelationlistapi.input.param.desc.needpage"),
+        @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmpap.processtaskrelationlistapi.input.param.desc.pagesize"),
+        @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmpap.processtaskrelationlistapi.input.param.desc.currentpage")})
+    @Output({@Param(name = "processTaskRelationList", explode = ProcessTaskRelationVo[].class, desc = "nmpap.processtaskrelationlistapi.output.param.desc.processtaskrelationlist"),
         @Param(explode = BasePageVo.class)})
-    @Description(desc = "查询关联工单列表")
+    @Description(desc = "nmpap.processtaskrelationlistapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessTaskRelationVo processTaskRelationVo = JSON.toJavaObject(jsonObj, ProcessTaskRelationVo.class);

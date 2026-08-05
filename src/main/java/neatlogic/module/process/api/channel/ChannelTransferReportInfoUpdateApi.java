@@ -37,7 +37,7 @@ public class ChannelTransferReportInfoUpdateApi extends PrivateApiComponentBase 
 
     @Override
     public String getName() {
-        return "服务转报设置信息更新";
+        return "nmpac.channeltransferreportinfoupdateapi.getname";
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ChannelTransferReportInfoUpdateApi extends PrivateApiComponentBase 
     }
 
 
-    @Description(desc = "服务转报设置信息更新")
+    @Description(desc = "nmpac.channeltransferreportinfoupdateapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<ChannelVo> channelList = channelMapper.getAllChannelList();
