@@ -58,10 +58,10 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
             }
         }
         int myTaskCount = 0;
-        int todoCount = 0;
-        int doingCount = 0;
-        int riskCount = 0;
-        int doneCount = 0;
+        int pendingCount = 0;
+        int runningCount = 0;
+        int timeoutCount = 0;
+        int succeedCount = 0;
         AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
         List<Long> doingProcessTaskStepIdList = processTaskMapper.getProcessTaskWorkerProcessTaskStepIdListByAuthenticationInfoVoAndStartTimeAndEndTime(
                 authenticationInfoVo,
@@ -85,12 +85,12 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
                         if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
                             myTaskCount++;
                             if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.PENDING.getValue())) {
-                                todoCount++;
+                                pendingCount++;
                             } else if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())) {
-                                doingCount++;
+                                runningCount++;
                             }
                             if (timeoutProcessTaskStepIdList.contains(processTaskStepVo.getId())) {
-                                riskCount++;
+                                timeoutCount++;
                             }
                         }
                     }
@@ -117,23 +117,18 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
                     ProcessTaskVo processTaskVo = processTaskMap.get(processTaskStepVo.getProcessTaskId());
                     if (processTaskVo != null && Objects.equals(processTaskVo.getIsDeleted(), 0)) {
                         if (Objects.equals(processTaskStepVo.getIsActive(), 2)) {
-                            doneCount++;
+                            succeedCount++;
                         }
                     }
                 }
             }
         }
         JSONObject resultObj = new JSONObject();
-        // 我的待办
-        resultObj.put("myTask", myTaskCount);
-        // 可抢单
-        resultObj.put("todo", todoCount);
-        // 处理中
-        resultObj.put("doing", doingCount);
-        // 已超时
-        resultObj.put("risk", riskCount);
-        // 已完成
-        resultObj.put("done", doneCount);
+        resultObj.put("myTaskCount", myTaskCount);
+        resultObj.put("pendingCount", pendingCount);
+        resultObj.put("runningCount", runningCount);
+        resultObj.put("timeoutCount", timeoutCount);
+        resultObj.put("succeedCount", succeedCount);
         return resultObj;
     }
 }
