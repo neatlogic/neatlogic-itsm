@@ -200,6 +200,18 @@
         SELECT `processtask_step_id` FROM `processtask_step_sla` WHERE `sla_id` = #{value}
     </select>
 
+    <select id="getHasSlaProcessTaskStepIdListByProcessTaskStepIdList" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT
+            DISTINCT a.`processtask_step_id`
+        FROM `processtask_step_sla` a
+        JOIN `processtask_sla_time` b ON b.`sla_id` = a.`sla_id`
+        JOIN `processtask_sla` c ON c.`id` = a.`sla_id`
+        WHERE a.`processtask_step_id` IN
+        <foreach collection="list" item="processTaskStepId" open="(" separator="," close=")">
+            #{processTaskStepId}
+        </foreach>
+    </select>
+
     <select id="getDoingOrPauseSlaIdCountByWorktimeUuid" resultType="int">
         SELECT
             count(1)

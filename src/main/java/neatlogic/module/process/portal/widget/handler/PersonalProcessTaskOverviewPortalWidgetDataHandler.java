@@ -21,6 +21,7 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskSlaMapper;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +36,9 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private ProcessTaskSlaMapper processTaskSlaMapper;
 
     @Resource
     private ProcessTaskService processTaskService;
@@ -64,21 +68,35 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
         {
             AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
 //            long startTimeA = System.currentTimeMillis();
-            List<Long> processTaskStepIdList = processTaskMapper.getProcessTaskWorkerProcessTaskStepIdListByAuthenticationInfoVo(authenticationInfoVo);
+            List<Long> allProcessTaskStepIdList = processTaskMapper.getProcessTaskWorkerProcessTaskStepIdListByAuthenticationInfoVo(authenticationInfoVo);
 //            System.out.println("costTimeA = " + (System.currentTimeMillis() - startTimeA));
 //            System.out.println("processTaskStepIdList.size() = " + processTaskStepIdList.size());
-            if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
+            if (CollectionUtils.isNotEmpty(allProcessTaskStepIdList)) {
                 int count = 0;
-                long startTimeB = System.currentTimeMillis();
-                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
-//                System.out.println("costTimeB = " + (System.currentTimeMillis() - startTimeB));
-//                System.out.println("processTaskStepList.size() = " + processTaskStepList.size());
-                Set<Long> processTaskIdSet = processTaskStepList.stream().map(ProcessTaskStepVo::getProcessTaskId).collect(Collectors.toSet());
-//                long startTimeC = System.currentTimeMillis();
-                List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
-//                System.out.println("costTimeC = " + (System.currentTimeMillis() - startTimeC));
-                Map<Long, ProcessTaskVo> processTaskMap = processTaskList.stream().collect(Collectors.toMap(ProcessTaskVo::getId, e -> e));
-                for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+                Map<Long, ProcessTaskVo> processTaskMap = new HashMap<>();
+                List<Long> allHasSlaProcessTaskStepIdList = new ArrayList<>();
+                List<ProcessTaskStepVo> allProcessTaskStepList = new ArrayList<>();
+                int pageSize = 1000;
+                for (int fromIndex = 0; fromIndex < allProcessTaskStepIdList.size(); fromIndex += pageSize) {
+//                    long startTimeB = System.currentTimeMillis();
+                    int toIndex = fromIndex + pageSize;
+                    List<Long> processTaskStepIdList = allProcessTaskStepIdList.subList(fromIndex, Math.min(toIndex, allProcessTaskStepIdList.size()));
+                    List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
+                    allProcessTaskStepList.addAll(processTaskStepList);
+//                    System.out.println("costTimeB = " + (System.currentTimeMillis() - startTimeB));
+//                    System.out.println("processTaskStepList.size() = " + processTaskStepList.size());
+                    Set<Long> processTaskIdSet = processTaskStepList.stream().map(ProcessTaskStepVo::getProcessTaskId).collect(Collectors.toSet());
+//                    long startTimeC = System.currentTimeMillis();
+                    List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
+//                    System.out.println("costTimeC = " + (System.currentTimeMillis() - startTimeC));
+                    for (ProcessTaskVo processTaskVo : processTaskList) {
+                        processTaskMap.put(processTaskVo.getId(), processTaskVo);
+                    }
+                    List<Long> hasSlaProcessTaskStepIdList = processTaskSlaMapper.getHasSlaProcessTaskStepIdListByProcessTaskStepIdList(processTaskStepIdList);
+                    allHasSlaProcessTaskStepIdList.addAll(hasSlaProcessTaskStepIdList);
+                }
+
+                for (ProcessTaskStepVo processTaskStepVo : allProcessTaskStepList) {
                     ProcessTaskVo processTaskVo = processTaskMap.get(processTaskStepVo.getProcessTaskId());
                     if (processTaskVo != null && Objects.equals(processTaskVo.getIsDeleted(), 0) && Objects.equals(processTaskVo.getStatus(), ProcessTaskStatus.RUNNING.getValue())) {
                         if (Objects.equals(processTaskStepVo.getIsActive(), 1)) {
@@ -92,18 +110,20 @@ public class PersonalProcessTaskOverviewPortalWidgetDataHandler extends PortalWi
                                 continue;
                             }
                             count++;
+                            if (allHasSlaProcessTaskStepIdList.contains(processTaskStepVo.getId())) {
 //                            long startTimeD = System.currentTimeMillis();
-                            List<ProcessTaskSlaTimeVo> slaTimeList = processTaskService.getSlaTimeListByProcessTaskStepId(processTaskStepVo.getId());
+                                List<ProcessTaskSlaTimeVo> slaTimeList = processTaskService.getSlaTimeListByProcessTaskStepId(processTaskStepVo.getId());
 //                            System.out.println("costTimeD = " + (System.currentTimeMillis() - startTimeD));
-                            if (CollectionUtils.isNotEmpty(slaTimeList)) {
-                                for (ProcessTaskSlaTimeVo processTaskSlaTimeVo : slaTimeList) {
-                                    if (Objects.equals(processTaskSlaTimeVo.getSlaTimeDisplayMode(), "naturalTime")) {
-                                        if (processTaskSlaTimeVo.getRealTimeLeft() < 0) {
-                                            riskCount++;
-                                        }
-                                    } else if (Objects.equals(processTaskSlaTimeVo.getSlaTimeDisplayMode(), "naturalTime")) {
-                                        if (processTaskSlaTimeVo.getTimeLeft() < 0) {
-                                            riskCount++;
+                                if (CollectionUtils.isNotEmpty(slaTimeList)) {
+                                    for (ProcessTaskSlaTimeVo processTaskSlaTimeVo : slaTimeList) {
+                                        if (Objects.equals(processTaskSlaTimeVo.getSlaTimeDisplayMode(), "naturalTime")) {
+                                            if (processTaskSlaTimeVo.getRealTimeLeft() < 0) {
+                                                riskCount++;
+                                            }
+                                        } else if (Objects.equals(processTaskSlaTimeVo.getSlaTimeDisplayMode(), "naturalTime")) {
+                                            if (processTaskSlaTimeVo.getTimeLeft() < 0) {
+                                                riskCount++;
+                                            }
                                         }
                                     }
                                 }
