@@ -14,8 +14,11 @@ package neatlogic.module.process.service;
 
 import neatlogic.framework.process.dto.ChannelVo;
 
+import java.util.List;
+
 public interface ChannelService {
 
     String saveChannel(ChannelVo channelVo);
 
+    List<ChannelVo> searchChannelList(ChannelVo channelVo, Integer isAuthenticate, String channelUuid, Long channelTypeRelationId);
 }

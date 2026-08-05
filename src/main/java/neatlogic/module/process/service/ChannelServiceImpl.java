@@ -14,7 +14,9 @@ package neatlogic.module.process.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
+import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.AuthorityVo;
 import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
 import neatlogic.framework.process.crossover.IChannelCrossoverService;
@@ -25,17 +27,22 @@ import neatlogic.framework.process.dto.ChannelRelationVo;
 import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.process.exception.catalog.CatalogNotFoundException;
 import neatlogic.framework.process.exception.channel.ChannelNameRepeatException;
+import neatlogic.framework.process.exception.channel.ChannelNotFoundException;
 import neatlogic.framework.process.exception.channel.ChannelParentUuidCannotBeZeroException;
 import neatlogic.framework.process.exception.channel.ChannelRelationSettingException;
+import neatlogic.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 import neatlogic.framework.process.exception.priority.PriorityNotFoundException;
 import neatlogic.framework.process.exception.process.ProcessNotFoundException;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.framework.worktime.exception.WorktimeNotFoundException;
 import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
+import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -58,6 +65,12 @@ public class ChannelServiceImpl implements ChannelService, IChannelCrossoverServ
 
     @Resource
     private WorktimeMapper worktimeMapper;
+
+    @Resource
+    private ChannelTypeMapper channelTypeMapper;
+
+    @Resource
+    private CatalogService catalogService;
 
     @Override
     public String saveChannel(ChannelVo channelVo) {
@@ -169,5 +182,50 @@ public class ChannelServiceImpl implements ChannelService, IChannelCrossoverServ
             }
         }
         return channelVo.getUuid();
+    }
+
+    @Override
+    public List<ChannelVo> searchChannelList(ChannelVo channelVo, Integer isAuthenticate, String channelUuid, Long channelTypeRelationId) {
+        /* 查询所有收藏的服务时，parentUuid设为空即可 **/
+        if (Objects.equals(channelVo.getIsFavorite(), 1) && Objects.equals(channelVo.getParentUuid(), "0")) {
+            channelVo.setParentUuid(null);
+        }
+        channelVo.setUserUuid(UserContext.get().getUserUuid(true));
+        boolean hasData = true;
+//        Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");
+        if (com.google.common.base.Objects.equal(isAuthenticate, 1)) {
+            AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
+            List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), CatalogChannelAuthorityAction.REPORT.getValue(), null);
+            if (CollectionUtils.isNotEmpty(authorizedChannelUuidList)) {
+//                String channelUuid = jsonObj.getString("channelUuid");
+                if (StringUtils.isNotBlank(channelUuid) && channelMapper.checkChannelIsExists(channelUuid) == 0) {
+                    throw new ChannelNotFoundException(channelUuid);
+                }
+//                Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
+                if (channelTypeRelationId != null && channelTypeMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
+                    throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
+                }
+                if (StringUtils.isNotBlank(channelUuid) && channelTypeRelationId != null) {
+                    List<String> channelRelationTargetChannelUuidList = catalogService.getChannelRelationTargetChannelUuidList(channelUuid, channelTypeRelationId);
+                    if (CollectionUtils.isNotEmpty(channelRelationTargetChannelUuidList)) {
+                        channelVo.setAuthorizedUuidList(ListUtils.retainAll(authorizedChannelUuidList, channelRelationTargetChannelUuidList));
+                    }
+                } else {
+                    channelVo.setAuthorizedUuidList(authorizedChannelUuidList);
+                }
+            }
+            //查出当前用户已授权的服务
+//			channelVo.setAuthorizedUuidList(catalogService.getCurrentUserAuthorizedChannelUuidList());
+            channelVo.setIsActive(1);
+            hasData = CollectionUtils.isNotEmpty(channelVo.getAuthorizedUuidList());
+        }
+        if (hasData) {
+            int rowNum = channelMapper.searchChannelCount(channelVo);
+            if (rowNum > 0) {
+                channelVo.setRowNum(rowNum);
+                return channelMapper.searchChannelList(channelVo);
+            }
+        }
+        return List.of();
     }
 }
