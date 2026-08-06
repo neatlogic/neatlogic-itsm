@@ -39,7 +39,6 @@ public class ProcessingOfMineProcessTaskPortalWidgetDataHandler extends PortalWi
     @Override
     protected JSONObject getMyData(JSONObject paramObj) {
         WorkcenterVo workcenterVo = paramObj.toJavaObject(WorkcenterVo.class);
-//        System.out.println("aaworkcenterVo = " + JSONObject.toJSONString(workcenterVo));
         JSONObject startTimeCondition = null;
         if (MapUtils.isNotEmpty(workcenterVo.getConditionConfig())) {
             startTimeCondition = workcenterVo.getConditionConfig().getJSONObject("startTimeCondition");
@@ -51,9 +50,7 @@ public class ProcessingOfMineProcessTaskPortalWidgetDataHandler extends PortalWi
         conditionConfig.put("isProcessingOfMine", 1);
         conditionConfig.put("startTimeCondition", startTimeCondition);
         workcenterVo.setConditionConfig(conditionConfig);
-//        System.out.println("bbworkcenterVo = " + JSONObject.toJSONString(workcenterVo));
         JSONObject workcenterResult = newWorkcenterService.doSearch(workcenterVo);
-//        System.out.println("workcenterResult = " + workcenterResult);
         return workcenterResult;
     }
 }

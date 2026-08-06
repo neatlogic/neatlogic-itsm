@@ -44,12 +44,6 @@ public class ProcessTaskTheadListWidgetDataHandler extends PortalWidgetDataHandl
                     .filter(data -> column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
                 theadList.add(new WorkcenterTheadVo(column));
             }
-            // 如果需要排序
-            //if (sortColumnList != null && column.get //if (sortColumnList != null && column.getIsSort()) {
-            //            //     sortColumnList.add(column.getName());
-            //            //}IsSort()) {
-            //     sortColumnList.add(column.getName());
-            //}
         }
         resultObj.put("theadList", theadList);
         return resultObj;
