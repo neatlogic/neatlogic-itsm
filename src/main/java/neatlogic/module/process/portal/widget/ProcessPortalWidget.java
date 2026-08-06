@@ -18,11 +18,11 @@ import neatlogic.module.process.portal.widget.handler.*;
 import java.util.List;
 
 public enum ProcessPortalWidget implements IPortalWidget {
-    PROCESSING_OF_MINE_PROCESSTASK("processingOfMineProcessTask", "我的待办", 1, List.of(ProcessingOfMineProcessTaskPortalWidgetDataHandler.class, ProcessTaskTheadListWidgetDataHandler.class)),
-    DRAFT_PROCESS_TASK("draftProcessTask", "我的草稿", 2, List.of(DraftProcessTaskPortalWidgetDataHandler.class, ProcessTaskTheadListWidgetDataHandler.class)),
-    PROCESS_TASK_SEARCH("processTaskSearch", "工单列表", 3, List.of(ProcessTaskSearchPortalWidgetDataHandler.class, ProcessTaskTheadListWidgetDataHandler.class)),
-    PROCESS_FAVORITE_SERVICE("processFavoriteService", "收藏服务", 4, List.of(FavoritedServiceListPortalWidgetDataHandler.class)),
-    PERSONAL_PROCESS_TASK_OVERVIEW("personalProcessTaskOverview", "个人工单状态概览", 5, List.of(PersonalProcessTaskOverviewPortalWidgetDataHandler.class)),
+    PROCESSING_OF_MINE_PROCESSTASK("processingOfMineProcessTask", "nfpc.processworkcenterinittype.text.processing_of_mine_processtask", 1, List.of(ProcessingOfMineProcessTaskPortalWidgetDataHandler.class, ProcessTaskTheadListWidgetDataHandler.class)),
+    DRAFT_PROCESS_TASK("draftProcessTask", "nfpc.processworkcenterinittype.text.draft_processtask", 2, List.of(DraftProcessTaskPortalWidgetDataHandler.class, ProcessTaskTheadListWidgetDataHandler.class)),
+    PROCESS_TASK_SEARCH("processTaskSearch", "nmpap.processtasklistforrelationapi.output.param.desc.tbodylist", 3, List.of(ProcessTaskSearchPortalWidgetDataHandler.class, ProcessTaskTheadListWidgetDataHandler.class)),
+    PROCESS_FAVORITE_SERVICE("processFavoriteService", "nmppw.processportalwidget.text.processfavoriteservice", 4, List.of(FavoritedServiceListPortalWidgetDataHandler.class)),
+    PERSONAL_PROCESS_TASK_OVERVIEW("personalProcessTaskOverview", "nmppw.processportalwidget.text.personalprocesstaskoverview", 5, List.of(PersonalProcessTaskOverviewPortalWidgetDataHandler.class)),
     ;
 
     private final String value;
