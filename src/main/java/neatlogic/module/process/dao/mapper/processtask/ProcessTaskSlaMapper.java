@@ -59,6 +59,11 @@ public interface ProcessTaskSlaMapper extends IProcessTaskSlaCrossoverMapper {
 
     List<Long> getProcessTaskStepIdListBySlaId(Long slaId);
 
+    List<Long> getTimeoutProcessTaskStepIdListByProcessTaskStepIdListAndSlaTimeDisplayMode(
+            @Param("processTaskStepIdList") List<Long> processTaskStepIdList,
+            @Param("slaTimeDisplayMode") String slaTimeDisplayMode
+    );
+
     int getDoingOrPauseSlaIdCountByWorktimeUuid(String worktimeUuid);
 
     List<Long> getDoingOrPauseSlaIdListByWorktimeUuid(@Param("worktimeUuid") String worktimeUuid, @Param("startNum") int startNum, @Param("pageSize") int pageSize);

@@ -22,6 +22,7 @@ import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.dto.automatic.ProcessTaskStepAutomaticRequestVo;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -171,6 +172,12 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     Set<Long> getProcessTaskIdSetByChannelUuidListAndAuthenticationInfo(@Param("channelUuidList") List<String> channelUuidList, @Param("authenticationInfoVo") AuthenticationInfoVo authenticationInfoVo);
 
+    List<Long> getProcessTaskWorkerProcessTaskStepIdListByAuthenticationInfoVoAndStartTimeAndEndTime(
+            @Param("authenticationInfoVo") AuthenticationInfoVo authenticationInfoVo,
+            @Param("startTime") Date startTime,
+            @Param("endTime") Date endTime
+    );
+
     int checkIsWorker(@Param("processTaskId") Long processTaskId,
                       @Param("processTaskStepId") Long processTaskStepId, @Param("userType") String userType,
                       @Param("authenticationInfoVo") AuthenticationInfoVo authenticationInfoVo);
@@ -205,6 +212,14 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
     List<ProcessTaskStepUserVo> getProcessTaskStepUserListByProcessTaskIdList(List<Long> processTaskIdList);
 
     List<ProcessTaskStepUserVo> getProcessTaskStepUserListByProcessTaskIdListAndStatusList(@Param("processTaskIdList") List<Long> processTaskIdList, @Param("statusList") List<String> statusList);
+
+    List<Long> getProcessTaskStepUserProcessTaskStepIdListByUserUuidAndStatusAndStartTimeAndEndTime(
+            @Param("userUuid") String userUuid,
+            @Param("userTypeList") List<String> userTypeList,
+            @Param("statusList") List<String> statusList,
+            @Param("startTime") Date startTime,
+            @Param("endTime") Date endTime
+    );
 
     String getProcessTaskScoreInfoById(Long processtaskId);
 
@@ -337,7 +352,7 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     List<ProcessTaskStepVo> getCurrentProcessTaskStepListByProcessTaskIdListAndTag(@Param("list") List<Long> processTaskIdList, @Param("tag") String tag);
 
-    List<ProcessTaskFormVo> getProcessTaskFormContentListByContentLikeKeyword(String formstaticlist);
+//    List<ProcessTaskFormVo> getProcessTaskFormContentListByContentLikeKeyword(String formstaticlist);
 
     List<ProcessTaskFormVo> getProcessTaskFormContentList();
 

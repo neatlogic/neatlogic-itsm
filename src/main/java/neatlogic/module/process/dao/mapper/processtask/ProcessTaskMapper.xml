@@ -1114,6 +1114,30 @@
         </if>
     </select>
 
+    <select id="getProcessTaskWorkerProcessTaskStepIdListByAuthenticationInfoVoAndStartTimeAndEndTime" parameterType="neatlogic.framework.dto.AuthenticationInfoVo" resultType="java.lang.Long">
+        SELECT
+            DISTINCT a.`processtask_step_id`
+        FROM `processtask_step_worker` a
+        JOIN `processtask` b on b.`id` = a.`processtask_id`
+        WHERE ((a.`type` = 'user' AND a.`uuid` = #{authenticationInfoVo.userUuid})
+        <if test="authenticationInfoVo.teamUuidList != null and authenticationInfoVo.teamUuidList.size() > 0">
+            OR (a.`type` = 'team' AND a.`uuid` IN
+            <foreach collection="authenticationInfoVo.teamUuidList" item="teamUuid" open="(" separator="," close=")">
+                #{teamUuid}
+            </foreach>
+            )
+        </if>
+        <if test="authenticationInfoVo.roleUuidList != null and authenticationInfoVo.roleUuidList.size() > 0">
+            OR (a.`type` = 'role' AND a.`uuid` IN
+            <foreach collection="authenticationInfoVo.roleUuidList" item="roleUuid" open="(" separator="," close=")">
+                #{roleUuid}
+            </foreach>
+            )
+        </if>
+        )
+        AND b.`start_time` BETWEEN #{startTime} AND #{endTime}
+    </select>
+
     <select id="checkIsWorker" resultType="int">
         SELECT
         COUNT(1)
@@ -1415,6 +1439,24 @@
         <foreach collection="statusList" item="status" open="(" separator="," close=")">
             #{status}
         </foreach>
+    </select>
+
+    <select id="getProcessTaskStepUserProcessTaskStepIdListByUserUuidAndStatusAndStartTimeAndEndTime"
+            resultType="java.lang.Long">
+        SELECT
+            DISTINCT a.`processtask_step_id`
+        FROM `processtask_step_user` a
+        JOIN `processtask` b on b.`id` = a.`processtask_id`
+        WHERE a.`user_uuid` = #{userUuid}
+        AND a.`user_type` IN
+        <foreach collection="userTypeList" item="userType" open="(" separator="," close=")">
+            #{userType}
+        </foreach>
+        AND a.`status` IN
+        <foreach collection="statusList" item="status" open="(" separator="," close=")">
+            #{status}
+        </foreach>
+        AND b.`start_time` BETWEEN #{startTime} AND #{endTime}
     </select>
 
     <select id="getProcessTaskScoreInfoById" parameterType="java.lang.Long" resultType="java.lang.String">
