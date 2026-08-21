@@ -1,13 +1,20 @@
 package neatlogic.module.process.api.processtask;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
+import neatlogic.framework.process.dto.ProcessTaskVo;
+import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.service.CatalogService;
 import neatlogic.module.process.service.ProcessTaskService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -20,6 +27,11 @@ public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
     @Resource
     private ProcessTaskService processTaskService;
 
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private CatalogService catalogService;
 
     @Override
     public String getToken() {
@@ -46,6 +58,15 @@ public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
     @Override
     @ResubmitInterval(3)
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        // 提交时再次校验代报授权，防止调用者绕过前端直接提交他人的工单。
+        Long processTaskId = jsonObj.getLong("processTaskId");
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
+        String currentUserUuid = UserContext.get().getUserUuid(true);
+        if (processTaskVo != null && StringUtils.isNotBlank(processTaskVo.getOwner())
+                && !currentUserUuid.equals(processTaskVo.getOwner())
+                && !catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), currentUserUuid, CatalogChannelAuthorityAction.DELEGATE)) {
+            throw new PermissionDeniedException();
+        }
 //		Long processTaskId = jsonObj.getLong("processTaskId");
 //        Long nextStepId = jsonObj.getLong("nextStepId");
 //        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, null, nextStepId);

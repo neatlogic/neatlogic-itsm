@@ -64,11 +64,11 @@ public class ProcessTaskStepStartIfNecessaryApi extends PrivateApiComponentBase 
         if (CollectionUtils.isNotEmpty(processTaskOperationTypeList)) {
             if (processTaskOperationTypeList.contains(ProcessTaskStepOperationType.STEP_ACCEPT)) {
                 jsonObj.put("action", ProcessTaskStepOperationType.STEP_ACCEPT.getValue());
-                System.out.println("jsonObj = " + jsonObj);
+//                System.out.println("jsonObj = " + jsonObj);
                 processTaskService.startProcessTaskStep(jsonObj);
             } else if (processTaskOperationTypeList.contains(ProcessTaskStepOperationType.STEP_START)) {
                 jsonObj.put("action", ProcessTaskStepOperationType.STEP_START.getValue());
-                System.out.println("jsonObj = " + jsonObj);
+//                System.out.println("jsonObj = " + jsonObj);
                 processTaskService.startProcessTaskStep(jsonObj);
             }
         }

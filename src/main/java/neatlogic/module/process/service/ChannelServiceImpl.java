@@ -137,6 +137,14 @@ public class ChannelServiceImpl implements ChannelService, IChannelCrossoverServ
                 channelMapper.insertChannelAuthority(authorityVo, channelVo.getUuid());
             }
         }
+        // 代报授权与上报、查看授权共用 channel_authority 表，通过 action 区分。
+        List<String> delegateAuthorityList = channelVo.getDelegateAuthorityList();
+        if (CollectionUtils.isNotEmpty(delegateAuthorityList)) {
+            List<AuthorityVo> delegateAuthorityVoList = AuthorityVo.getAuthorityVoList(delegateAuthorityList, CatalogChannelAuthorityAction.DELEGATE.getValue());
+            for (AuthorityVo authorityVo : delegateAuthorityVoList) {
+                channelMapper.insertChannelAuthority(authorityVo, channelVo.getUuid());
+            }
+        }
         List<String> viewAuthorityList = channelVo.getViewAuthorityList();
         if (CollectionUtils.isNotEmpty(viewAuthorityList)) {
             List<AuthorityVo> viewAuthorityVoList = AuthorityVo.getAuthorityVoList(viewAuthorityList, CatalogChannelAuthorityAction.VIEW.getValue());
