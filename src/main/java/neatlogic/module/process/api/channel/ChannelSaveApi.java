@@ -77,6 +77,8 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
             @Param(name = "defaultPriorityUuid", type = ApiParamType.STRING, desc = "common.defaultpriorityuuid"),
             @Param(name = "priorityUuidList", type = ApiParamType.JSONARRAY, desc = "nmrap.updateprioritysortapi.input.param.desc.prioritylist"),
             @Param(name = "reportAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.reportauthoritylist", help = "nmpac.channelsaveapi.input.param.help.reportauthoritylist"),
+            // 代报授权与上报、查看授权使用相同的授权对象格式。
+            @Param(name = "delegateAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.delegateauthoritylist"),
             @Param(name = "viewAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.viewauthoritylist", help = "nmpac.channelsaveapi.input.param.help.viewauthoritylist"),
             @Param(name = "channelTypeUuid", type = ApiParamType.STRING, isRequired = true, desc = "term.itsm.channeltypeuuid"),
             @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "common.config")

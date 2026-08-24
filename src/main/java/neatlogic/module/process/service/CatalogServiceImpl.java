@@ -117,13 +117,13 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
     @Override
     public boolean channelIsAuthority(String channelUuid, String userUuid, CatalogChannelAuthorityAction action) {
         Integer isActive = null;
-        if (action == CatalogChannelAuthorityAction.REPORT) {
+        if (action == CatalogChannelAuthorityAction.REPORT || action == CatalogChannelAuthorityAction.DELEGATE) {
             isActive = 1;
         }
         AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
         /* 查出当前用户所有已授权的服务uuid集合  **/
         List<String> channelUuidList = null;
-        if (action == CatalogChannelAuthorityAction.REPORT) {
+        if (action == CatalogChannelAuthorityAction.REPORT || action == CatalogChannelAuthorityAction.DELEGATE) {
             channelUuidList = channelMapper.getActiveAuthorizedChannelUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), action.getValue(), channelUuid);
         } else {
             channelUuidList = channelMapper.getAuthorizedChannelUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), action.getValue(), channelUuid);

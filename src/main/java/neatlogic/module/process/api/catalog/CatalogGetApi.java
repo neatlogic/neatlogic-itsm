@@ -69,6 +69,9 @@ public class CatalogGetApi extends PrivateApiComponentBase {
 		catalog.setViewAuthorityList(AuthorityVo.getAuthorityList(viewAuthorityVoList));
 		List<AuthorityVo> reportAuthorityVoList = authorityVoList.stream().filter(e -> Objects.equals(e.getAction(), CatalogChannelAuthorityAction.REPORT.getValue())).collect(Collectors.toList());
 		catalog.setReportAuthorityList(AuthorityVo.getAuthorityList(reportAuthorityVoList));
+		// 单独回显 action=delegate 的授权数据，避免与上报授权混用。
+		List<AuthorityVo> delegateAuthorityVoList = authorityVoList.stream().filter(e -> Objects.equals(e.getAction(), CatalogChannelAuthorityAction.DELEGATE.getValue())).collect(Collectors.toList());
+		catalog.setDelegateAuthorityList(AuthorityVo.getAuthorityList(delegateAuthorityVoList));
 		return catalog;
 	}
 

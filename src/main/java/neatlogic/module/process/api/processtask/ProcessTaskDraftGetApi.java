@@ -273,7 +273,10 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         if (channel == null) {
             throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
         }
+        // 返回当前用户的有效代报权限，供已暂存工单的上报人控件使用。
+        channel.setIsDelegateAuthority(catalogService.channelIsAuthority(channel.getUuid(), UserContext.get().getUserUuid(true), CatalogChannelAuthorityAction.DELEGATE));
         processTaskService.setProcessTaskDetail(processTaskVo);
+        processTaskVo.setChannelVo(channel);
         String owner = processTaskVo.getOwner();
         if (StringUtils.isNotBlank(owner)) {
             owner = GroupSearch.USER.getValuePlugin() + owner;
@@ -423,6 +426,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         if (channel == null) {
             throw new ChannelNotFoundException(channelUuid);
         }
+        // 返回当前用户的有效代报权限，前端不得仅依据是否拥有上报权限放开上报人选择。
+        channel.setIsDelegateAuthority(catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true), CatalogChannelAuthorityAction.DELEGATE));
         ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
         if (channelTypeVo == null) {
             throw new ChannelTypeNotFoundException(channel.getChannelTypeUuid());

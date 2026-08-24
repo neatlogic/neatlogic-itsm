@@ -59,6 +59,8 @@ public class CatalogSaveApi extends PrivateApiComponentBase {
 			@Param(name = "color", type = ApiParamType.STRING, isRequired= false, desc = "common.color"),
 			@Param(name = "desc", type = ApiParamType.STRING, isRequired= false, desc = "common.description", maxLength = 200, xss = true),
 			@Param(name = "reportAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.reportauthoritylist", help = "nmpac.catalogsaveapi.input.param.help.reportauthoritylist"),
+			// 代报授权与上报、查看授权使用相同的授权对象格式。
+			@Param(name = "delegateAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.delegateauthoritylist"),
 			@Param(name = "viewAuthorityList", type = ApiParamType.JSONARRAY, desc = "common.viewauthoritylist", help = "nmpac.catalogsaveapi.input.param.help.viewauthoritylist")
 	})
 	@Output({
@@ -101,6 +103,14 @@ public class CatalogSaveApi extends PrivateApiComponentBase {
 		if (CollectionUtils.isNotEmpty(reportAuthorityList)) {
 			List<AuthorityVo> authorityVoList = AuthorityVo.getAuthorityVoList(reportAuthorityList, CatalogChannelAuthorityAction.REPORT.getValue());
 			for(AuthorityVo authorityVo : authorityVoList) {
+				catalogMapper.insertCatalogAuthority(authorityVo, catalogVo.getUuid());
+			}
+		}
+		// 代报授权与上报、查看授权共用 catalog_authority 表，通过 action 区分。
+		List<String> delegateAuthorityList = catalogVo.getDelegateAuthorityList();
+		if (CollectionUtils.isNotEmpty(delegateAuthorityList)) {
+			List<AuthorityVo> delegateAuthorityVoList = AuthorityVo.getAuthorityVoList(delegateAuthorityList, CatalogChannelAuthorityAction.DELEGATE.getValue());
+			for (AuthorityVo authorityVo : delegateAuthorityVoList) {
 				catalogMapper.insertCatalogAuthority(authorityVo, catalogVo.getUuid());
 			}
 		}
