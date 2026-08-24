@@ -20,6 +20,7 @@ public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
     @Resource
     private ProcessTaskService processTaskService;
 
+
     @Override
     public String getToken() {
         return "processtask/startprocess";
