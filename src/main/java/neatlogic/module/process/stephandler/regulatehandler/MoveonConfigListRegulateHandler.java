@@ -26,11 +26,14 @@ import neatlogic.framework.process.stephandler.core.ProcessMessageManager;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class MoveonConfigListRegulateHandler implements IRegulateHandler {
@@ -50,7 +53,7 @@ public class MoveonConfigListRegulateHandler implements IRegulateHandler {
             for(int i = 0; i < moveonConfigArray.size(); i++){
                 MoveonConfigVo moveonConfigVo = moveonConfigArray.getObject(i, MoveonConfigVo.class);
                 if(moveonConfigVo != null){
-                    regulateConditionRelList(moveonConfigVo);
+                    validateConditionGroupRelList(moveonConfigVo);
                     List<String> targetStepList = moveonConfigVo.getTargetStepList();
                     if (CollectionUtils.isNotEmpty(targetStepList)) {
                         List<String> list = ListUtils.removeAll(targetStepList, effectiveStepUuidList);
@@ -65,63 +68,50 @@ public class MoveonConfigListRegulateHandler implements IRegulateHandler {
         newConfigObj.put("moveonConfigList", moveonConfigList);
     }
 
-    private void regulateConditionRelList(MoveonConfigVo moveonConfigVo) {
+    private void validateConditionGroupRelList(MoveonConfigVo moveonConfigVo) {
         List<ConditionGroupVo> conditionGroupList = moveonConfigVo.getConditionGroupList();
-        if (conditionGroupList == null) {
-            conditionGroupList = new ArrayList<>();
-            moveonConfigVo.setConditionGroupList(conditionGroupList);
-        } else {
-            conditionGroupList.removeIf(Objects::isNull);
-        }
-        for (ConditionGroupVo conditionGroupVo : conditionGroupList) {
-            List<ConditionVo> conditionList = conditionGroupVo.getConditionList();
-            if (conditionList == null) {
-                conditionList = new ArrayList<>();
-                conditionGroupVo.setConditionList(conditionList);
-            } else {
-                conditionList.removeIf(Objects::isNull);
+        Set<String> conditionGroupUuidSet = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(conditionGroupList)) {
+            for (ConditionGroupVo conditionGroupVo : conditionGroupList) {
+                if (conditionGroupVo == null || StringUtils.isBlank(conditionGroupVo.getUuid())) {
+                    throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
+                }
+                conditionGroupUuidSet.add(conditionGroupVo.getUuid());
+                validateConditionRelList(conditionGroupVo);
             }
-            List<ConditionRelVo> oldConditionRelList = conditionGroupVo.getConditionRelList();
-            List<ConditionRelVo> conditionRelList = new ArrayList<>();
-            for (int i = 0; i < conditionList.size() - 1; i++) {
-                ConditionRelVo conditionRelVo = new ConditionRelVo();
-                conditionRelVo.setFrom(conditionList.get(i).getUuid());
-                conditionRelVo.setTo(conditionList.get(i + 1).getUuid());
-                conditionRelVo.setJoinType(getConditionJoinType(oldConditionRelList, i));
-                conditionRelList.add(conditionRelVo);
+        }
+        List<ConditionGroupRelVo> conditionGroupRelList = moveonConfigVo.getConditionGroupRelList();
+        if (CollectionUtils.isNotEmpty(conditionGroupRelList)) {
+            for (ConditionGroupRelVo conditionGroupRelVo : conditionGroupRelList) {
+                if (conditionGroupRelVo == null
+                        || !conditionGroupUuidSet.contains(conditionGroupRelVo.getFrom())
+                        || !conditionGroupUuidSet.contains(conditionGroupRelVo.getTo())) {
+                    throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
+                }
             }
-            conditionGroupVo.setConditionRelList(conditionRelList);
         }
-
-        List<ConditionGroupRelVo> oldConditionGroupRelList = moveonConfigVo.getConditionGroupRelList();
-        List<ConditionGroupRelVo> conditionGroupRelList = new ArrayList<>();
-        for (int i = 0; i < conditionGroupList.size() - 1; i++) {
-            ConditionGroupRelVo conditionGroupRelVo = new ConditionGroupRelVo();
-            conditionGroupRelVo.setFrom(conditionGroupList.get(i).getUuid());
-            conditionGroupRelVo.setTo(conditionGroupList.get(i + 1).getUuid());
-            conditionGroupRelVo.setJoinType(getConditionGroupJoinType(oldConditionGroupRelList, i));
-            conditionGroupRelList.add(conditionGroupRelVo);
-        }
-        moveonConfigVo.setConditionGroupRelList(conditionGroupRelList);
     }
 
-    private String getConditionJoinType(List<ConditionRelVo> conditionRelList, int index) {
-        if (CollectionUtils.isNotEmpty(conditionRelList) && index < conditionRelList.size()) {
-            ConditionRelVo conditionRelVo = conditionRelList.get(index);
-            if (conditionRelVo != null && conditionRelVo.getJoinType() != null) {
-                return conditionRelVo.getJoinType();
+    private void validateConditionRelList(ConditionGroupVo conditionGroupVo) {
+        Set<String> conditionUuidSet = new HashSet<>();
+        List<ConditionVo> conditionList = conditionGroupVo.getConditionList();
+        if (CollectionUtils.isNotEmpty(conditionList)) {
+            for (ConditionVo conditionVo : conditionList) {
+                if (conditionVo == null || StringUtils.isBlank(conditionVo.getUuid())) {
+                    throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
+                }
+                conditionUuidSet.add(conditionVo.getUuid());
             }
         }
-        return "and";
-    }
-
-    private String getConditionGroupJoinType(List<ConditionGroupRelVo> conditionGroupRelList, int index) {
-        if (CollectionUtils.isNotEmpty(conditionGroupRelList) && index < conditionGroupRelList.size()) {
-            ConditionGroupRelVo conditionGroupRelVo = conditionGroupRelList.get(index);
-            if (conditionGroupRelVo != null && conditionGroupRelVo.getJoinType() != null) {
-                return conditionGroupRelVo.getJoinType();
+        List<ConditionRelVo> conditionRelList = conditionGroupVo.getConditionRelList();
+        if (CollectionUtils.isNotEmpty(conditionRelList)) {
+            for (ConditionRelVo conditionRelVo : conditionRelList) {
+                if (conditionRelVo == null
+                        || !conditionUuidSet.contains(conditionRelVo.getFrom())
+                        || !conditionUuidSet.contains(conditionRelVo.getTo())) {
+                    throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
+                }
             }
         }
-        return "and";
     }
 }
