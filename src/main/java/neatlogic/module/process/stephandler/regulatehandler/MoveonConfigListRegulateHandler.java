@@ -14,6 +14,10 @@ package neatlogic.module.process.stephandler.regulatehandler;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.dto.condition.ConditionGroupRelVo;
+import neatlogic.framework.dto.condition.ConditionGroupVo;
+import neatlogic.framework.dto.condition.ConditionRelVo;
+import neatlogic.framework.dto.condition.ConditionVo;
 import neatlogic.framework.process.dto.processconfig.MoveonConfigVo;
 import neatlogic.framework.process.exception.process.ProcessConfigException;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
@@ -46,6 +50,7 @@ public class MoveonConfigListRegulateHandler implements IRegulateHandler {
             for(int i = 0; i < moveonConfigArray.size(); i++){
                 MoveonConfigVo moveonConfigVo = moveonConfigArray.getObject(i, MoveonConfigVo.class);
                 if(moveonConfigVo != null){
+                    regulateConditionRelList(moveonConfigVo);
                     List<String> targetStepList = moveonConfigVo.getTargetStepList();
                     if (CollectionUtils.isNotEmpty(targetStepList)) {
                         List<String> list = ListUtils.removeAll(targetStepList, effectiveStepUuidList);
@@ -58,5 +63,65 @@ public class MoveonConfigListRegulateHandler implements IRegulateHandler {
             }
         }
         newConfigObj.put("moveonConfigList", moveonConfigList);
+    }
+
+    private void regulateConditionRelList(MoveonConfigVo moveonConfigVo) {
+        List<ConditionGroupVo> conditionGroupList = moveonConfigVo.getConditionGroupList();
+        if (conditionGroupList == null) {
+            conditionGroupList = new ArrayList<>();
+            moveonConfigVo.setConditionGroupList(conditionGroupList);
+        } else {
+            conditionGroupList.removeIf(Objects::isNull);
+        }
+        for (ConditionGroupVo conditionGroupVo : conditionGroupList) {
+            List<ConditionVo> conditionList = conditionGroupVo.getConditionList();
+            if (conditionList == null) {
+                conditionList = new ArrayList<>();
+                conditionGroupVo.setConditionList(conditionList);
+            } else {
+                conditionList.removeIf(Objects::isNull);
+            }
+            List<ConditionRelVo> oldConditionRelList = conditionGroupVo.getConditionRelList();
+            List<ConditionRelVo> conditionRelList = new ArrayList<>();
+            for (int i = 0; i < conditionList.size() - 1; i++) {
+                ConditionRelVo conditionRelVo = new ConditionRelVo();
+                conditionRelVo.setFrom(conditionList.get(i).getUuid());
+                conditionRelVo.setTo(conditionList.get(i + 1).getUuid());
+                conditionRelVo.setJoinType(getConditionJoinType(oldConditionRelList, i));
+                conditionRelList.add(conditionRelVo);
+            }
+            conditionGroupVo.setConditionRelList(conditionRelList);
+        }
+
+        List<ConditionGroupRelVo> oldConditionGroupRelList = moveonConfigVo.getConditionGroupRelList();
+        List<ConditionGroupRelVo> conditionGroupRelList = new ArrayList<>();
+        for (int i = 0; i < conditionGroupList.size() - 1; i++) {
+            ConditionGroupRelVo conditionGroupRelVo = new ConditionGroupRelVo();
+            conditionGroupRelVo.setFrom(conditionGroupList.get(i).getUuid());
+            conditionGroupRelVo.setTo(conditionGroupList.get(i + 1).getUuid());
+            conditionGroupRelVo.setJoinType(getConditionGroupJoinType(oldConditionGroupRelList, i));
+            conditionGroupRelList.add(conditionGroupRelVo);
+        }
+        moveonConfigVo.setConditionGroupRelList(conditionGroupRelList);
+    }
+
+    private String getConditionJoinType(List<ConditionRelVo> conditionRelList, int index) {
+        if (CollectionUtils.isNotEmpty(conditionRelList) && index < conditionRelList.size()) {
+            ConditionRelVo conditionRelVo = conditionRelList.get(index);
+            if (conditionRelVo != null && conditionRelVo.getJoinType() != null) {
+                return conditionRelVo.getJoinType();
+            }
+        }
+        return "and";
+    }
+
+    private String getConditionGroupJoinType(List<ConditionGroupRelVo> conditionGroupRelList, int index) {
+        if (CollectionUtils.isNotEmpty(conditionGroupRelList) && index < conditionGroupRelList.size()) {
+            ConditionGroupRelVo conditionGroupRelVo = conditionGroupRelList.get(index);
+            if (conditionGroupRelVo != null && conditionGroupRelVo.getJoinType() != null) {
+                return conditionGroupRelVo.getJoinType();
+            }
+        }
+        return "and";
     }
 }
