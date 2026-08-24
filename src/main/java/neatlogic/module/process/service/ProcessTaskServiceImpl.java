@@ -2775,6 +2775,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true), CatalogChannelAuthorityAction.REPORT)) {
                 throw new PermissionDeniedException();
             }
+            String currentUserUuid = UserContext.get().getUserUuid(true);
+            /* 判断当前用户是否拥有channelUuid服务的代报权限 **/
+            if (!Objects.equals(currentUserUuid, owner)) {
+                if (!catalogService.channelIsAuthority(channelUuid, currentUserUuid, CatalogChannelAuthorityAction.DELEGATE)) {
+                    throw new ProcessTaskNotDelegateReportPermissionException(channelVo.getName());
+                }
+            }
             startProcessTaskStepVo = new ProcessTaskStepVo();
             startProcessTaskStepVo.setProcessUuid(processUuid);
             ProcessStepVo startProcessStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
