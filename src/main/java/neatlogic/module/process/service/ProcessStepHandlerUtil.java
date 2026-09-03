@@ -30,9 +30,7 @@ import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.form.attribute.core.FormAttributeDataConversionHandlerFactory;
-import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeDataConversionHandler;
-import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.AttributeDataVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
@@ -1131,19 +1129,19 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
             needSaveProcessTaskFormAttributeDataList.add(dataVo);
         }
         if (CollectionUtils.isNotEmpty(needSaveProcessTaskFormAttributeDataList)) {
-            Map<String, FormAttributeVo> mainSceneFormAttributeMap = new HashMap<>();
-            for (FormAttributeVo formAttributeVo : mainSceneFormAttributeList) {
-                mainSceneFormAttributeMap.put(formAttributeVo.getUuid(), formAttributeVo);
-            }
-            for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : needSaveProcessTaskFormAttributeDataList) {
-                FormAttributeVo formAttributeVo = mainSceneFormAttributeMap.get(processTaskFormAttributeDataVo.getAttributeUuid());
-                if (formAttributeVo != null) {
-                    IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                    if (formAttributeHandler != null) {
-                        formAttributeHandler.beforeSaveData(processTaskFormAttributeDataVo, formAttributeVo, processTaskFormAttributeDataVo.getProcessTaskId(), "processTask");
-                    }
-                }
-            }
+//            Map<String, FormAttributeVo> mainSceneFormAttributeMap = new HashMap<>();
+//            for (FormAttributeVo formAttributeVo : mainSceneFormAttributeList) {
+//                mainSceneFormAttributeMap.put(formAttributeVo.getUuid(), formAttributeVo);
+//            }
+//            for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : needSaveProcessTaskFormAttributeDataList) {
+//                FormAttributeVo formAttributeVo = mainSceneFormAttributeMap.get(processTaskFormAttributeDataVo.getAttributeUuid());
+//                if (formAttributeVo != null) {
+//                    IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+//                    if (formAttributeHandler != null) {
+//                        formAttributeHandler.beforeSaveData(processTaskFormAttributeDataVo, formAttributeVo, processTaskFormAttributeDataVo.getProcessTaskId(), "processTask");
+//                    }
+//                }
+//            }
             formMapper.insertFormAttributeDataList(needSaveProcessTaskFormAttributeDataList);
             processTaskMapper.insertProcessTaskFormAttributeList(needSaveProcessTaskFormAttributeDataList);
         }
