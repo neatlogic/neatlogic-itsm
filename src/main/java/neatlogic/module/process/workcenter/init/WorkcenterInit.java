@@ -26,7 +26,6 @@ import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -40,7 +39,7 @@ import java.util.stream.Stream;
  * @Author: 89770
  * @Date: 2021/1/5 17:55
  **/
-@Component
+
 public class WorkcenterInit extends StartupBase implements ITenantInit {
 
     public List<WorkcenterVo> workcenterList = new ArrayList<>();
