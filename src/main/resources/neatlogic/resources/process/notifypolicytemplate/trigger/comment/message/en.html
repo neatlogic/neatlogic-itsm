@@ -1,0 +1,25 @@
+<!--Copyright (C) $today.year  深圳极向量科技有限公司 All Rights Reserved.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Step Reply: [${DATA.serialNumber}]${DATA.title}</title>
+</head>
+<body>
+${DATA.channelTypeName} task [${DATA.serialNumber}]${DATA.title}: User ${DATA.stepCommentUser} replied on step ${DATA.stepName}: ${DATA.stepComment}. View details: <a href=${DATA.homeUrl}process.html#/task-detail?processTaskId=${DATA.id}>${DATA.title}</a>
+</body>
+</html>
