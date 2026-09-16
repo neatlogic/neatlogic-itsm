@@ -74,7 +74,12 @@ public class MoveonConfigListRegulateHandler implements IRegulateHandler {
         if (CollectionUtils.isNotEmpty(conditionGroupList)) {
             for (ConditionGroupVo conditionGroupVo : conditionGroupList) {
                 if (conditionGroupVo == null || StringUtils.isBlank(conditionGroupVo.getUuid())) {
-                    throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
+                    if (ProcessMessageManager.getOperationType() == OperationTypeEnum.UPDATE) {
+                        throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
+                    }
+                }
+                if (conditionGroupVo == null) {
+                    continue;
                 }
                 conditionGroupUuidSet.add(conditionGroupVo.getUuid());
                 validateConditionRelList(conditionGroupVo);
@@ -86,7 +91,9 @@ public class MoveonConfigListRegulateHandler implements IRegulateHandler {
                 if (conditionGroupRelVo == null
                         || !conditionGroupUuidSet.contains(conditionGroupRelVo.getFrom())
                         || !conditionGroupUuidSet.contains(conditionGroupRelVo.getTo())) {
-                    throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
+                    if (ProcessMessageManager.getOperationType() == OperationTypeEnum.UPDATE) {
+                        throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
+                    }
                 }
             }
         }
@@ -98,7 +105,12 @@ public class MoveonConfigListRegulateHandler implements IRegulateHandler {
         if (CollectionUtils.isNotEmpty(conditionList)) {
             for (ConditionVo conditionVo : conditionList) {
                 if (conditionVo == null || StringUtils.isBlank(conditionVo.getUuid())) {
-                    throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
+                    if (ProcessMessageManager.getOperationType() == OperationTypeEnum.UPDATE) {
+                        throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
+                    }
+                }
+                if (conditionVo == null) {
+                    continue;
                 }
                 conditionUuidSet.add(conditionVo.getUuid());
             }
@@ -109,7 +121,9 @@ public class MoveonConfigListRegulateHandler implements IRegulateHandler {
                 if (conditionRelVo == null
                         || !conditionUuidSet.contains(conditionRelVo.getFrom())
                         || !conditionUuidSet.contains(conditionRelVo.getTo())) {
-                    throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
+                    if (ProcessMessageManager.getOperationType() == OperationTypeEnum.UPDATE) {
+                        throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
+                    }
                 }
             }
         }
