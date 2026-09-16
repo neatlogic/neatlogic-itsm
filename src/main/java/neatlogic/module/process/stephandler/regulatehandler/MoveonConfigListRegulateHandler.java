@@ -78,6 +78,9 @@ public class MoveonConfigListRegulateHandler implements IRegulateHandler {
                         throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
                     }
                 }
+                if (conditionGroupVo == null) {
+                    continue;
+                }
                 conditionGroupUuidSet.add(conditionGroupVo.getUuid());
                 validateConditionRelList(conditionGroupVo);
             }
@@ -105,6 +108,9 @@ public class MoveonConfigListRegulateHandler implements IRegulateHandler {
                     if (ProcessMessageManager.getOperationType() == OperationTypeEnum.UPDATE) {
                         throw new ProcessConfigException(ProcessConfigException.Type.CONDITION, ProcessMessageManager.getStepName());
                     }
+                }
+                if (conditionVo == null) {
+                    continue;
                 }
                 conditionUuidSet.add(conditionVo.getUuid());
             }
