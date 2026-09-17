@@ -1,5 +1,6 @@
 package neatlogic.module.process.notify.handler;
 
+import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.dto.ConditionParamVo;
 import neatlogic.framework.notify.dto.NotifyTriggerVo;
 import neatlogic.framework.process.auth.PROCESS_MODIFY;
@@ -40,8 +41,8 @@ public class OmnipotentNotifyPolicyHandler extends ProcessTaskNotifyHandlerBase 
 	}
 
     @Override
-    public String getAuthName() {
-        return PROCESS_MODIFY.class.getSimpleName();
+    public Class<? extends AuthBase> getAuthClass() {
+        return PROCESS_MODIFY.class;
     }
 
 //    @Override

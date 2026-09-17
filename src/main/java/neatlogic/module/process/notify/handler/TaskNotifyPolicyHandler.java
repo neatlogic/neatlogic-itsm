@@ -2,6 +2,7 @@ package neatlogic.module.process.notify.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.common.constvalue.Expression;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.condition.core.IConditionHandler;
@@ -89,8 +90,8 @@ public class TaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	}
 
     @Override
-    public String getAuthName() {
-        return PROCESS_MODIFY.class.getSimpleName();
+    public Class<? extends AuthBase> getAuthClass() {
+        return PROCESS_MODIFY.class;
     }
 
 }

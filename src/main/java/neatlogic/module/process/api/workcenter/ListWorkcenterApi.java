@@ -87,7 +87,7 @@ public class ListWorkcenterApi extends PrivateApiComponentBase {
             workcenterList = workcenterMapper.getAuthorizedWorkcenterListByUuidList(workcenterUuidList);
             WorkcenterUserProfileVo userProfile = workcenterMapper.getWorkcenterUserProfileByUserUuid(userUuid);
             Map<String, Integer> workcenterUserSortMap = new HashMap<>();
-            boolean isWorkcenterManager = AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName());
+            boolean isWorkcenterManager = AuthActionChecker.check(WORKCENTER_MODIFY.class);
             if (userProfile != null) {
                 JSONObject userConfig = JSON.parseObject(userProfile.getConfig());
                 if (userConfig.containsKey("viewType")) {
@@ -116,7 +116,7 @@ public class ListWorkcenterApi extends PrivateApiComponentBase {
                 } else if (workcenter.getType().equals(ProcessWorkcenterType.CUSTOM.getValue())) {
                     if (UserContext.get().getUserUuid(true).equalsIgnoreCase(workcenter.getOwner())) {
                         workcenter.setIsCanEdit(1);
-                        if (AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName())) {
+                        if (AuthActionChecker.check(WORKCENTER_MODIFY.class)) {
                             workcenter.setIsCanRole(1);
                         } else {
                             workcenter.setIsCanRole(0);

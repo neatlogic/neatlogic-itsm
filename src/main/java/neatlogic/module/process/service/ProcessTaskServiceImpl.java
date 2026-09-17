@@ -570,7 +570,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         if (processTaskVo == null) {
             throw new ProcessTaskNotFoundException(processTaskId);
         }
-//        if (processTaskVo.getIsShow() != 1 && !AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName())) {
+//        if (processTaskVo.getIsShow() != 1 && !AuthActionChecker.check(PROCESSTASK_MODIFY.class)) {
 //            throw new PermissionDeniedException(PROCESSTASK_MODIFY.class);
 //        }
         if (processTaskStepId != null) {

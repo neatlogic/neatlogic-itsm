@@ -91,7 +91,7 @@ public class ProcessTaskIsShowCondition extends ProcessTaskConditionBase impleme
     @Override
     public boolean isShow(JSONObject jsonObj, String type) {
         if(Objects.equals(type, ProcessTaskConditionType.WORKCENTER.getValue())){
-            return AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
+            return AuthActionChecker.check(PROCESSTASK_MODIFY.class);
         }
         return true;
     }

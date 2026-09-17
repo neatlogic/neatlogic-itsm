@@ -90,7 +90,7 @@ public class WorkcenterSaveAuthApi extends PrivateApiComponentBase {
         }};
         if (systemAuthSet.contains(workcenterVo.getType()) || systemAuthSet.contains(oldWorkcenterVo.getType())) {
             //判断是否有管理员权限
-            if (!AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName())) {
+            if (!AuthActionChecker.check(WORKCENTER_MODIFY.class)) {
                 throw new WorkcenterNoModifyAuthException();
             }
             workcenterMapper.deleteWorkcenterAuthorityByUuid(uuid);

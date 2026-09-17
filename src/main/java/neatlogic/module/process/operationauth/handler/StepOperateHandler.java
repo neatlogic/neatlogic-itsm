@@ -54,7 +54,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             //1.判断工单是否被隐藏，如果isShow=0，则提示“工单已隐藏”；
             if (processTaskVo.getIsShow() == 0) {
                 //判断当前用户是否有“工单管理权限”或者是系统用户，如果两者都没有，则提示“工单已隐藏”；
-                if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName()) && !SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                if (!AuthActionChecker.check(userUuid, PROCESSTASK_MODIFY.class) && !SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
                     operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                             .put(operationType, new ProcessTaskHiddenException());
                     return PredicateResult.DENY;
@@ -1078,7 +1078,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     }
                     if (Objects.equals(processTaskStepVo.getHandler(), ProcessStepHandlerType.CONDITION.getHandler())) {
                         if (Objects.equals(processTaskStepVo.getStatus(), ProcessTaskStepStatus.FAILED.getValue())) {
-                            if (AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
+                            if (AuthActionChecker.check(userUuid, PROCESSTASK_MODIFY.class)) {
                                 return PredicateResult.ACCEPT;
                             }
                         }

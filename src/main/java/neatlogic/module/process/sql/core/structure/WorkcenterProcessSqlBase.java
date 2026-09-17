@@ -180,7 +180,7 @@ public abstract class WorkcenterProcessSqlBase extends ProcessSqlBase<Workcenter
             }
         }
         //隐藏工单 过滤
-        Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
+        Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class);
         if (!isHasProcessTaskAuth) {
             sqlSb.append(" and pt.is_show = 1 ");
         }

@@ -13,6 +13,7 @@
 package neatlogic.module.process.notify.handler;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.dto.ConditionParamVo;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerBase;
 import neatlogic.framework.notify.dto.NotifyTriggerVo;
@@ -63,7 +64,7 @@ public class TimedTaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
      * 绑定权限，每种handler对应不同的权限
      */
     @Override
-    public String getAuthName() {
+    public Class<? extends AuthBase> getAuthClass() {
         return null;
     }
 

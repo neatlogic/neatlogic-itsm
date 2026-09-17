@@ -69,13 +69,13 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
                 throw new ProcessCommentTemplateNotFoundException(id);
             }
             /* 没有权限则不允许编辑系统模版 */
-            if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(_vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())) {
+            if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(_vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class)) {
                 throw new PermissionDeniedException(PROCESS_COMMENT_TEMPLATE_MODIFY.class);
             }
         } else {
             String type = jsonObj.getString("type");
             /* 没有权限则不允许创建系统模版 */
-            if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(type) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())) {
+            if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(type) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class)) {
                 throw new PermissionDeniedException(PROCESS_COMMENT_TEMPLATE_MODIFY.class);
             }
         }

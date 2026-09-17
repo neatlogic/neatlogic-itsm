@@ -60,7 +60,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     //1.判断工单是否被隐藏
                     if (processTaskVo.getIsShow() == 0) {
                         //判断当前用户是否有“工单管理权限”或者是系统用户，如果两者都没有，则提示“工单已隐藏”；
-                        if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName()) && !SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
+                        if (!AuthActionChecker.check(userUuid, PROCESSTASK_MODIFY.class) && !SystemUser.SYSTEM.getUserUuid().equals(userUuid)) {
                             operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                     .put(operationType, new ProcessTaskHiddenException());
                             return PredicateResult.DENY;
@@ -793,7 +793,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return PredicateResult.ACCEPT;
             }
             //2.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
-            if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
+            if (!AuthActionChecker.check(userUuid, PROCESSTASK_MODIFY.class)) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskNotProcessTaskModifyException());
                 return PredicateResult.DENY;
@@ -817,7 +817,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return PredicateResult.ACCEPT;
             }
             //2.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
-            if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
+            if (!AuthActionChecker.check(userUuid, PROCESSTASK_MODIFY.class)) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskNotProcessTaskModifyException());
                 return PredicateResult.DENY;
@@ -840,7 +840,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return PredicateResult.ACCEPT;
             }
             //2.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
-            if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
+            if (!AuthActionChecker.check(userUuid, PROCESSTASK_MODIFY.class)) {
                 operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                         .put(operationType, new ProcessTaskNotProcessTaskModifyException());
                 return PredicateResult.DENY;
@@ -888,7 +888,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     }
 
                     //4.判断当前用户是否有“工单管理权限”，如果没有，则提示“没有工单管理权限”；
-                    if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
+                    if (!AuthActionChecker.check(userUuid, PROCESSTASK_MODIFY.class)) {
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskNotProcessTaskModifyException());
                         return PredicateResult.DENY;
@@ -1003,7 +1003,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                         }
                         if (Objects.equals(processTaskStep.getHandler(), ProcessStepHandlerType.CONDITION.getHandler())) {
                             if (Objects.equals(processTaskStep.getStatus(), ProcessTaskStepStatus.FAILED.getValue())) {
-                                if (AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
+                                if (AuthActionChecker.check(userUuid, PROCESSTASK_MODIFY.class)) {
                                     return PredicateResult.ACCEPT;
                                 }
                             }

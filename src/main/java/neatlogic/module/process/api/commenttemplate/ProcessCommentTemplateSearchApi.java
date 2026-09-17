@@ -86,7 +86,7 @@ public class ProcessCommentTemplateSearchApi extends PrivateApiComponentBase {
             //有系统模版管理权限才能编辑系统模版
             for (ProcessCommentTemplateVo processCommentTemplateVo : tbodyList) {
                 if (ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(processCommentTemplateVo.getType())) {
-                    if (AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())) {
+                    if (AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class)) {
                         processCommentTemplateVo.setIsEditable(1);
                     } else {
                         processCommentTemplateVo.setIsEditable(0);

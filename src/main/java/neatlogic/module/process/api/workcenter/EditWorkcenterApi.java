@@ -80,7 +80,7 @@ public class EditWorkcenterApi extends PrivateApiComponentBase {
         }
         workcenterVo.setType(oldWorkcenterVo.getType());
         workcenterVo.setSupport(oldWorkcenterVo.getSupport());
-        if (Arrays.asList(ProcessWorkcenterType.FACTORY.getValue(),ProcessWorkcenterType.SYSTEM.getValue()).contains(oldWorkcenterVo.getType()) && Boolean.TRUE.equals(!AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName()))) {
+        if (Arrays.asList(ProcessWorkcenterType.FACTORY.getValue(),ProcessWorkcenterType.SYSTEM.getValue()).contains(oldWorkcenterVo.getType()) && Boolean.TRUE.equals(!AuthActionChecker.check(WORKCENTER_MODIFY.class))) {
             throw new WorkcenterNoModifyAuthException();
         }
 

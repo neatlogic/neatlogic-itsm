@@ -55,7 +55,7 @@ public class ProcessCommentTemplateDeleteApi extends PrivateApiComponentBase {
             throw new ProcessCommentTemplateNotFoundException(id);
         }
         /* 没有权限则不允许删除系统模版 */
-        if(ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())){
+        if(ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class)){
             throw new PermissionDeniedException(PROCESS_COMMENT_TEMPLATE_MODIFY.class);
         }
         commentTemplateMapper.deleteTemplate(id);

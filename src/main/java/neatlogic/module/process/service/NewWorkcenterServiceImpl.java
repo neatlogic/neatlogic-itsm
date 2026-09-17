@@ -202,7 +202,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     public JSONObject doSearch(List<Long> processTaskIdList) throws ParseException {
         ConcurrentMap<String, JSONObject> concurrentMap = new ConcurrentHashMap<>();
         JSONObject operationJson = new JSONObject();
-        Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
+        Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class);
         BatchRunner<Long> runner = new BatchRunner<>();
         runner.execute(processTaskIdList, 3, (threadIndex, dataIndex, processtaskId) -> {
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskAndStepById(processtaskId);

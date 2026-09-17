@@ -87,7 +87,7 @@ public class SaveWorkcenterApi extends PrivateApiComponentBase {
         List<String> systemAuthList = Arrays.asList(ProcessWorkcenterType.FACTORY.getValue(), ProcessWorkcenterType.SYSTEM.getValue());
         if (systemAuthList.contains(workcenterVo.getType())) {
             //判断是否有管理员权限
-            if (Boolean.FALSE.equals(AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName()))) {
+            if (Boolean.FALSE.equals(AuthActionChecker.check(WORKCENTER_MODIFY.class))) {
                 throw new WorkcenterNoModifyAuthException();
             }
             if (CollectionUtils.isEmpty(workcenterVo.getAuthList())) {
@@ -102,7 +102,7 @@ public class SaveWorkcenterApi extends PrivateApiComponentBase {
         } else {
             workcenterMapper.insertWorkcenterOwner(UserContext.get().getUserUuid(true), workcenterVo.getUuid());
             //如果是个人工单分类，则需要校验数量限制
-            if (Objects.equals(workcenterVo.getType(), ProcessWorkcenterType.CUSTOM.getValue()) && Boolean.FALSE.equals(AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName()))) {
+            if (Objects.equals(workcenterVo.getType(), ProcessWorkcenterType.CUSTOM.getValue()) && Boolean.FALSE.equals(AuthActionChecker.check(WORKCENTER_MODIFY.class))) {
                 int count = workcenterMapper.getCustomWorkcenterCountByOwner(UserContext.get().getUserUuid(true));
                 String workcenterCustomLimit = ConfigManager.getConfig(ItsmTenantConfig.WORKCENTER_CUSTOM_LIMIT);
                 if (StringUtils.isNotBlank(workcenterCustomLimit)) {

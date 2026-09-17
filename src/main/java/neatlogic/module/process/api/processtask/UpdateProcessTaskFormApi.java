@@ -91,8 +91,7 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         // 锁定当前流程
         processTaskMapper.getProcessTaskLockById(processTaskId);
-        String userUuid = UserContext.get().getUserUuid();
-        if (!AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
+        if (!AuthActionChecker.check(PROCESSTASK_MODIFY.class)) {
             new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_UPDATE)
                     .build()
                     .checkAndNoPermissionThrowException();

@@ -60,7 +60,7 @@ public class WorkcenterDeleteApi extends PrivateApiComponentBase {
         if (workcenterVo != null) {
             if (ProcessWorkcenterType.FACTORY.getValue().equals(workcenterVo.getType())) {
                 throw new WorkcenterCanNotEditFactoryException();
-            } else if (ProcessWorkcenterType.SYSTEM.getValue().equals(workcenterVo.getType()) && !AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName())) {
+            } else if (ProcessWorkcenterType.SYSTEM.getValue().equals(workcenterVo.getType()) && !AuthActionChecker.check(WORKCENTER_MODIFY.class)) {
                 throw new WorkcenterNoModifyAuthException();
             } else if (ProcessWorkcenterType.CUSTOM.getValue().equals(workcenterVo.getType()) && !workcenterVo.getOwner().equalsIgnoreCase(UserContext.get().getUserUuid(true))) {
                 throw new WorkcenterNoCustomAuthException();
