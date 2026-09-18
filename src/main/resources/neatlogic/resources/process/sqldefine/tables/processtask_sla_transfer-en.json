@@ -1,0 +1,56 @@
+{
+  "moduleId": "process",
+  "name": "processtask_sla_transfer",
+  "label": "Work Order Step Time-to-Handover Configuration Table",
+  "description": "The settings table for transferring work orders by time period is designed for related queries in process-related reporting scenarios.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "sla_id",
+      "type": "bigint",
+      "description": "SLA ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "hash",
+      "type": "char(32)",
+      "description": "Hash."
+    },
+    {
+      "name": "trigger_time",
+      "type": "timestamp(3)",
+      "description": "Trigger time."
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "Config."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "sla_id_hash_idx",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "sla_id",
+        "hash"
+      ],
+      "description": "Unique index covering the sla_id, hash fields, suitable for exact-match retrieval, uniqueness checks, and duplicate detection."
+    }
+  ]
+}

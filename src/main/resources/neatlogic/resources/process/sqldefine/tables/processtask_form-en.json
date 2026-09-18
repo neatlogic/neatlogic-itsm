@@ -1,0 +1,41 @@
+{
+  "moduleId": "process",
+  "name": "processtask_form",
+  "label": "Work Order Associated Forms",
+  "description": "The forms associated with the work orders can be used for querying related associations in workflow scenarios and reporting scenarios.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "form_uuid",
+      "type": "char(32)",
+      "description": "The UUID of the form bound to the work order, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "form_name",
+      "type": "varchar(100)",
+      "description": "Form name associated with the work order."
+    },
+    {
+      "name": "form_content_hash",
+      "type": "char(32)",
+      "description": "Configuration of the form bound to the work order."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "form_uuid"
+      ],
+      "description": "Primary key index covering the processtask_id, form_uuid fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

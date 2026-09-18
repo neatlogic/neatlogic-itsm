@@ -1,0 +1,62 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_worker_policy",
+  "label": "Work Order Step Assignment Policy Table",
+  "description": "The workflow-related association query scenarios, including but not limited to, the allocation of work orders to steps in the process.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "process_step_uuid",
+      "type": "char(32)",
+      "description": "Step UUID."
+    },
+    {
+      "name": "policy",
+      "type": "enum('manual','automatic','assign','copy','fromer','form','attribute','prestepassign')",
+      "description": "Strategy, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "sort",
+      "type": "int",
+      "description": "Sort."
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "Strategy configuration, a JSON."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id",
+        "policy"
+      ],
+      "description": "Primary key index covering the processtask_id, processtask_step_id, policy fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_processtask_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "Standard index covering the processtask_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

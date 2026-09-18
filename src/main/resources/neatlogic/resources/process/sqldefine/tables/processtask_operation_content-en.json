@@ -1,0 +1,85 @@
+{
+  "moduleId": "process",
+  "name": "processtask_operation_content",
+  "label": "Work Order Operation Content Table",
+  "description": "The work order operation content table is used for time dimension statistical queries and association queries related to workflow scenarios.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "content_hash",
+      "type": "char(32)",
+      "description": "Hash. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "type",
+      "type": "varchar(50)",
+      "description": "Type."
+    },
+    {
+      "name": "source",
+      "type": "varchar(100)",
+      "description": "SOURCE."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Creation time."
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "Creator."
+    },
+    {
+      "name": "lcd",
+      "type": "timestamp(3)",
+      "description": "Update the timestamp."
+    },
+    {
+      "name": "lcu",
+      "type": "char(32)",
+      "description": "Updated by."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_contentid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "content_hash"
+      ],
+      "description": "Standard index covering the content_hash field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_processtask_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "Standard index covering the processtask_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

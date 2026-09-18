@@ -1,0 +1,60 @@
+{
+  "moduleId": "process",
+  "name": "processtask_sla_time",
+  "label": "SLA Schedule",
+  "description": "The SLA schedule can be used for tracking related statuses of workflows and for querying related queries.",
+  "fields": [
+    {
+      "name": "sla_id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "time_sum",
+      "type": "bigint",
+      "description": "Total time, milliseconds."
+    },
+    {
+      "name": "expire_time",
+      "type": "timestamp(3)",
+      "description": "Timeout (calculated based on the calendar)."
+    },
+    {
+      "name": "realexpire_time",
+      "type": "timestamp(3)",
+      "description": "Timeout (calculated directly)."
+    },
+    {
+      "name": "time_left",
+      "type": "bigint",
+      "description": "Remaining time, milliseconds, calculated based on the calendar."
+    },
+    {
+      "name": "realtime_left",
+      "type": "bigint",
+      "description": "Remaining time, milliseconds, calculated directly."
+    },
+    {
+      "name": "status",
+      "type": "enum('doing','pause','done')",
+      "description": "Status."
+    },
+    {
+      "name": "calculation_time",
+      "type": "timestamp(3)",
+      "description": "Last time spent calculation time point."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "sla_id"
+      ],
+      "description": "Primary key index covering the sla_id field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

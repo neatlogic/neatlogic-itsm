@@ -1,0 +1,31 @@
+{
+  "moduleId": "process",
+  "name": "process_form",
+  "label": "Workflow Forms",
+  "description": "The process forms are used for querying, filtering, and reporting on process-related data.",
+  "fields": [
+    {
+      "name": "process_uuid",
+      "type": "char(32)",
+      "description": "Workflow UUID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "form_uuid",
+      "type": "char(32)",
+      "description": "The UUID of the associated form, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "process_uuid",
+        "form_uuid"
+      ],
+      "description": "Primary key index covering the process_uuid, form_uuid fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

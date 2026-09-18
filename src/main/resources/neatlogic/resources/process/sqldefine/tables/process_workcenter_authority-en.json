@@ -1,0 +1,58 @@
+{
+  "moduleId": "process",
+  "name": "process_workcenter_authority",
+  "label": "Work Order Center Classification Authorization Table",
+  "description": "Work order center classification authorization table used for querying, filtering, and reporting of Process-Related data.",
+  "fields": [
+    {
+      "name": "workcenter_uuid",
+      "type": "char(32)",
+      "description": "Work order UUID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "type",
+      "type": "enum('common','user','role','team')",
+      "description": "Type, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "uuid",
+      "type": "varchar(32)",
+      "description": "UUID, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "workcenter_uuid",
+        "type",
+        "uuid"
+      ],
+      "description": "Primary key index covering the workcenter_uuid, type, UUID fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "index_role",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "uuid"
+      ],
+      "description": "Standard index covering the UUID field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "index_user",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "type",
+        "uuid"
+      ],
+      "description": "Standard index covering the type, UUID fields, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

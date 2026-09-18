@@ -1,0 +1,55 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_cost_worker",
+  "label": "Work Order Step Operation Time Handling Table",
+  "description": "Work order steps processing time table can be used for related queries in workflow scenarios.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "operate_type",
+      "type": "enum('start','end')",
+      "description": "Start/end operation."
+    },
+    {
+      "name": "cost_id",
+      "type": "bigint",
+      "description": "Duration ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "type",
+      "type": "enum('user','team','role')",
+      "description": "Type."
+    },
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "UUID."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_cost_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "cost_id"
+      ],
+      "description": "Standard index covering the cost_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

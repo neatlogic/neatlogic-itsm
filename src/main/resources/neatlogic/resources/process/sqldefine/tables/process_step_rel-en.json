@@ -1,0 +1,65 @@
+{
+  "moduleId": "process",
+  "name": "process_step_rel",
+  "label": "Table Linking Steps Between Workflows",
+  "description": "The table connects the steps of the workflow and is used for querying, filtering, and reporting of workflow-related data.",
+  "fields": [
+    {
+      "name": "process_uuid",
+      "type": "char(32)",
+      "description": "Workflow UUID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "Global unique identifier, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "from_step_uuid",
+      "type": "char(32)",
+      "description": "Source step UUID."
+    },
+    {
+      "name": "to_step_uuid",
+      "type": "char(32)",
+      "description": "Target UUID."
+    },
+    {
+      "name": "condition",
+      "type": "varchar(500)",
+      "description": "Conditions."
+    },
+    {
+      "name": "name",
+      "type": "varchar(50)",
+      "description": "Name."
+    },
+    {
+      "name": "type",
+      "type": "enum('forward','backward')",
+      "description": "Type."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "uuid"
+      ],
+      "description": "Primary key index covering the UUID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_process_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "process_uuid"
+      ],
+      "description": "Standard index covering the process_uuid field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

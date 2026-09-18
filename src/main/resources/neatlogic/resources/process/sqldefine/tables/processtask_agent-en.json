@@ -1,0 +1,71 @@
+{
+  "moduleId": "process",
+  "name": "processtask_agent",
+  "label": "Work Order Proxy",
+  "description": "The work order proxy can be used for filtering by workflow status and other reporting scenarios.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Primary key ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "from_user_uuid",
+      "type": "char(32)",
+      "description": "The source user's UUID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "to_user_uuid",
+      "type": "char(32)",
+      "description": "The target user's UUID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "begin_time",
+      "type": "timestamp(3)",
+      "description": "Start time."
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "End time."
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint(1)",
+      "description": "Enable."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_from_to_user_uuid",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "from_user_uuid",
+        "to_user_uuid"
+      ],
+      "description": "Unique index covering the from_user_uuid, to_user_uuid fields, suitable for exact-match retrieval, uniqueness checks, and duplicate detection."
+    },
+    {
+      "name": "idx_to_user_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "to_user_uuid"
+      ],
+      "description": "Standard index covering the to_user_uuid field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

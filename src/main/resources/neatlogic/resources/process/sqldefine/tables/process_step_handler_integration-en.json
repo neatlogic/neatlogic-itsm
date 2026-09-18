@@ -1,0 +1,41 @@
+{
+  "moduleId": "process",
+  "name": "process_step_handler_integration",
+  "label": "Process Component Reference Integration Table",
+  "description": "The table for integrating process components with integration can be used for querying, filtering, and reporting on process-related data.",
+  "fields": [
+    {
+      "name": "handler",
+      "type": "varchar(50)",
+      "description": "Node component type, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "integration_uuid",
+      "type": "char(32)",
+      "description": "Integration with UUID, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "handler",
+        "integration_uuid"
+      ],
+      "description": "Primary key index covering the handler, integration_uuid fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_integration_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "integration_uuid"
+      ],
+      "description": "Standard index covering the integration_uuid field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

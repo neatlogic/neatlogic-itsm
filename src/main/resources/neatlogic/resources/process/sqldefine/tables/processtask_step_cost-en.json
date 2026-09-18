@@ -1,0 +1,128 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_cost",
+  "label": "Work Order Step Operation Time Table",
+  "description": "Work order step operation time table used for related queries in process-related reports.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "start_operate",
+      "type": "varchar(100)",
+      "description": "Start operation type. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "start_status",
+      "type": "varchar(100)",
+      "description": "Start operation status."
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp(3)",
+      "description": "Start operation time."
+    },
+    {
+      "name": "start_user_uuid",
+      "type": "char(32)",
+      "description": "Start operator."
+    },
+    {
+      "name": "end_operate",
+      "type": "varchar(100)",
+      "description": "End operation type. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "end_status",
+      "type": "varchar(100)",
+      "description": "End operation status."
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "End operation time."
+    },
+    {
+      "name": "end_user_uuid",
+      "type": "char(32)",
+      "description": "End operator."
+    },
+    {
+      "name": "time_cost",
+      "type": "bigint",
+      "description": "Work time consumed."
+    },
+    {
+      "name": "realtime_cost",
+      "type": "bigint",
+      "description": "Natural time spent."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_endoperateuser",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "end_operate",
+        "end_user_uuid"
+      ],
+      "description": "Standard index covering the end_operate, end_user_uuid fields, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_processtask_id_processtask_step_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id"
+      ],
+      "description": "Standard index covering the processtask_id, processtask_step_id fields, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_processtask_step_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "Standard index covering the processtask_step_id field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_startoperateuser",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "start_operate",
+        "start_user_uuid"
+      ],
+      "description": "Standard index covering the start_operate, start_user_uuid fields, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

@@ -39,12 +39,13 @@ import neatlogic.framework.util.$;
 @Component
 public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDataSourceHandler {
 
+    private final JSONArray attributeDefinedList = new JSONArray();
+
     private final List<MatrixAttributeVo> matrixAttributeList = new ArrayList<>();
 
     private final Map<String , String> columnsMap = new HashMap<>();
 
     {
-        JSONArray attributeDefinedList = new JSONArray();
         {
             JSONObject jsonObj = new JSONObject();
             jsonObj.put("name", "uuid");
@@ -55,7 +56,7 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
         }
         {
             JSONObject jsonObj = new JSONObject();
-            jsonObj.put("name", $.t("nmpmh.prioritymatrixprivatedatasourcehandler.runtime.label.1"));
+            jsonObj.put("name", "nmpmh.prioritymatrixprivatedatasourcehandler.runtime.label.1");
             jsonObj.put("label", "name");
             jsonObj.put("isPrimaryKey", 0);
             jsonObj.put("isSearchable", 1);
@@ -86,7 +87,7 @@ public class PriorityMatrixPrivateDataSourceHandler implements IMatrixPrivateDat
 
     @Override
     public List<MatrixAttributeVo> getAttributeList() {
-        return matrixAttributeList;
+        return getLocalizedAttributeList(attributeDefinedList);
     }
 
 

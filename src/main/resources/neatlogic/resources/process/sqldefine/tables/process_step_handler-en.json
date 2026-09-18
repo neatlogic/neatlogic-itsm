@@ -1,0 +1,30 @@
+{
+  "moduleId": "process",
+  "name": "process_step_handler",
+  "label": "Global Configuration Information Table for Process Components",
+  "description": "The global configuration information table for process components is used for querying, filtering, and reporting of related process data.",
+  "fields": [
+    {
+      "name": "handler",
+      "type": "varchar(50)",
+      "description": "Node components, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "Component configuration information."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "handler"
+      ],
+      "description": "Primary key index covering the handler field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

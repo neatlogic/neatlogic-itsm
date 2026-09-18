@@ -1,0 +1,55 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_task_user",
+  "label": "processtask_step_task_user",
+  "description": "Processtask_step_task_user is used for tracking process states, query associations, and reporting scenarios.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_step_task_id",
+      "type": "bigint",
+      "description": "Task ID."
+    },
+    {
+      "name": "user_uuid",
+      "type": "char(32)",
+      "description": "Task user."
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "Task completion time."
+    },
+    {
+      "name": "status",
+      "type": "char(20)",
+      "description": "Status."
+    },
+    {
+      "name": "is_delete",
+      "type": "tinyint(1)",
+      "description": "Is it deleted."
+    },
+    {
+      "name": "button",
+      "type": "varchar(100)",
+      "description": "Operation button."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

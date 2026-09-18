@@ -1,0 +1,47 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_auth",
+  "label": "process_task_collection_auth Table",
+  "description": "The `processtask_collection_auth` table, belonging to the process module, is used for related queries and report scenarios involving process-related data.",
+  "fields": [
+    {
+      "name": "collection_id",
+      "type": "bigint",
+      "description": "Collection_id, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "auth_id",
+      "type": "char(32)",
+      "description": "Authorization association ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "auth_type",
+      "type": "varchar(50)",
+      "description": "The `processtask_collection_auth` table's `auth_type` field, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "collection_id",
+        "auth_id",
+        "auth_type"
+      ],
+      "description": "Primary key index covering the collection_id, auth_id, auth_type fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_user_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "auth_id"
+      ],
+      "description": "Standard index covering the auth_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

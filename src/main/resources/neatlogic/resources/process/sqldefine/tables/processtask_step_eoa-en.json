@@ -1,0 +1,57 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_eoa",
+  "label": "Work Order Steps and Eoa Relationship Table",
+  "description": "The workflow steps and eoa relationship table can be used for related queries in process-related reports.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Work order step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "eoa_id",
+      "type": "bigint",
+      "description": "The ID of the eoa, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "template_id",
+      "type": "bigint",
+      "description": "The ID of the eoa template."
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "Configuration information."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id",
+        "eoa_id"
+      ],
+      "description": "Primary key index covering the processtask_id, processtask_step_id, eoa_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_eoa_id",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "eoa_id"
+      ],
+      "description": "Unique index covering the eoa_id field, suitable for exact-match retrieval, uniqueness checks, and duplicate detection."
+    }
+  ]
+}

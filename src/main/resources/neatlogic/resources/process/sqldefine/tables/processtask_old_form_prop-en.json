@@ -1,0 +1,35 @@
+{
+  "moduleId": "process",
+  "name": "processtask_old_form_prop",
+  "label": "processtask_old_form_prop",
+  "description": "The `processtask_old_form_prop` can be used for related queries in process-related reporting scenarios.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "form",
+      "type": "longtext",
+      "description": "Work order form HTML."
+    },
+    {
+      "name": "prop",
+      "type": "longtext",
+      "description": "Custom attributes for work orders in JSON format."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "Primary key index covering the processtask_id field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

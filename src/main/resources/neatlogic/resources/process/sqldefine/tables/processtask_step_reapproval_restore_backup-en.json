@@ -1,0 +1,46 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_reapproval_restore_backup",
+  "label": "Revert Backup After Approval of Work Order Step",
+  "description": "Restoring backups for workflow-related queries and reporting scenarios.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "backup_step_id",
+      "type": "bigint",
+      "description": "Backup step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "config",
+      "type": "text",
+      "description": "Backup information."
+    },
+    {
+      "name": "sort",
+      "type": "int",
+      "description": "Sequence."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "backup_step_id",
+        "processtask_step_id"
+      ],
+      "description": "Primary key index covering the backup_step_id, processtask_step_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

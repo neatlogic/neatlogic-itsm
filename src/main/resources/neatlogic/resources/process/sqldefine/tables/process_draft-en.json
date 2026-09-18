@@ -1,0 +1,55 @@
+{
+  "moduleId": "process",
+  "name": "process_draft",
+  "label": "Draft Workflow Information Table",
+  "description": "Draft information table for process-related time dimension statistics and query scenarios.",
+  "fields": [
+    {
+      "name": "uuid",
+      "type": "varchar(50)",
+      "description": "Global unique identifier, cross-environment import use, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "process_uuid",
+      "type": "varchar(50)",
+      "description": "Workflow UUID."
+    },
+    {
+      "name": "name",
+      "type": "varchar(100)",
+      "description": "Name."
+    },
+    {
+      "name": "config",
+      "type": "longtext",
+      "description": "Process diagram configuration."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Creation time."
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "Create user."
+    },
+    {
+      "name": "md5",
+      "type": "varchar(100)",
+      "description": "MD5."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "uuid"
+      ],
+      "description": "Primary key index covering the UUID field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

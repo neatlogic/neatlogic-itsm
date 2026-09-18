@@ -1,0 +1,50 @@
+{
+  "moduleId": "process",
+  "name": "processtask_invoke",
+  "label": "Work Order Source",
+  "description": "Work orders can be used for related queries and report queries related to workflow associations.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "source",
+      "type": "varchar(50)",
+      "description": "SOURCE."
+    },
+    {
+      "name": "type",
+      "type": "varchar(50)",
+      "description": "Source type."
+    },
+    {
+      "name": "invoke_id",
+      "type": "bigint",
+      "description": "Source ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "Primary key index covering the processtask_id field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_invokeid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "invoke_id"
+      ],
+      "description": "Standard index covering the invoke_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_phase_task",
+  "label": "process_task_collection_phase_task",
+  "description": "The process task_collection_phase_task table, which belongs to the process module, is used for related queries and report queries related to the process.",
+  "fields": [
+    {
+      "name": "phase_id",
+      "type": "bigint",
+      "description": "Stage_id, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "preparation_id",
+      "type": "bigint",
+      "description": "DR plan ID. An empty value indicates that no DR plan is assigned."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "phase_id",
+        "processtask_id"
+      ],
+      "description": "Primary key index covering the phase_id, processtask_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

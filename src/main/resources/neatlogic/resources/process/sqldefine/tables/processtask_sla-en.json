@@ -1,0 +1,55 @@
+{
+  "moduleId": "process",
+  "name": "processtask_sla",
+  "label": "Work Order SLA Table",
+  "description": "The work order SLA table is used for filtering and querying related statuses in process-related scenarios, such as reporting.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "name",
+      "type": "varchar(100)",
+      "description": "Name."
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint(1)",
+      "description": "Indicates whether it is active."
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "Config."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_pt_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "Standard index covering the processtask_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

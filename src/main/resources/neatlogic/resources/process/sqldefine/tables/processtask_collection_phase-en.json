@@ -1,0 +1,75 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_phase",
+  "label": "process_task_collection_phase",
+  "description": "The process task collection phase table, which belongs to the process module, is used for tracking process-related statuses, enabling status filtering, and performing association queries.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "UUID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "collection_id",
+      "type": "bigint",
+      "description": "Task set ID."
+    },
+    {
+      "name": "sort",
+      "type": "int",
+      "description": "Sequence."
+    },
+    {
+      "name": "name",
+      "type": "varchar(255)",
+      "description": "Name."
+    },
+    {
+      "name": "status",
+      "type": "enum('pending','doing','done')",
+      "description": "Status."
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint(1)",
+      "description": "Indicates whether it is active."
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp",
+      "description": "Start time."
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp",
+      "description": "End time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "uuid"
+      ],
+      "description": "Standard index covering the UUID field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

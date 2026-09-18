@@ -1,0 +1,30 @@
+{
+  "moduleId": "process",
+  "name": "processtask_config",
+  "label": "Work Order Configuration Information Compressed Table",
+  "description": "The configuration table for work order information is designed for querying, filtering, and presenting data related to workflow processes.",
+  "fields": [
+    {
+      "name": "hash",
+      "type": "char(32)",
+      "description": "Generate MD5 hash of the unique identifier from the process table, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "config",
+      "type": "longtext",
+      "description": "Historical workflow configuration."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "hash"
+      ],
+      "description": "Primary key index covering the hash field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

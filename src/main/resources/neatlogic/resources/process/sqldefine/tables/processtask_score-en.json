@@ -1,0 +1,57 @@
+{
+  "moduleId": "process",
+  "name": "processtask_score",
+  "label": "Work Order Scorecard",
+  "description": "The work order scoring table is designed for statistical reporting scenarios related to time dimensions in the workflow, such as querying related data.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "score_template_id",
+      "type": "bigint",
+      "description": "Template ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "score_dimension_id",
+      "type": "bigint",
+      "description": "Score dimension ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "score",
+      "type": "int",
+      "description": "Fractions."
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "Evaluator."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Score time."
+    },
+    {
+      "name": "is_auto",
+      "type": "tinyint",
+      "description": "IsAutomatedRating (0: no, 1: yes)."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "score_template_id",
+        "score_dimension_id"
+      ],
+      "description": "Primary key index covering the processtask_id, score_template_id, score_dimension_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

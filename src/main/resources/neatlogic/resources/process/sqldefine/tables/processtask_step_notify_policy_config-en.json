@@ -1,0 +1,30 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_notify_policy_config",
+  "label": "Work Order Step Notification Policy Configuration Table",
+  "description": "Work order step notification policy configuration table used for querying, filtering, and reporting on Process-Related data.",
+  "fields": [
+    {
+      "name": "hash",
+      "type": "char(32)",
+      "description": "Hash, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "Config."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "hash"
+      ],
+      "description": "Primary key index covering the hash field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

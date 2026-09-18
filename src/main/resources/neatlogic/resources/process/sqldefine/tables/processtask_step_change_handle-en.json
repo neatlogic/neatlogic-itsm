@@ -1,0 +1,45 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_change_handle",
+  "label": "Work Order Steps and Change Handling Relationship Table",
+  "description": "The table is used for querying related associations in process-related scenarios, such as reporting.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID. This value must be unique in the database and is suitable for exact-match queries and duplicate detection."
+    },
+    {
+      "name": "change_id",
+      "type": "bigint",
+      "description": "Change ID, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "change_id"
+      ],
+      "description": "Primary key index covering the change_id field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_processtask_step_id",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "Unique index covering the processtask_step_id field, suitable for exact-match retrieval, uniqueness checks, and duplicate detection."
+    }
+  ]
+}

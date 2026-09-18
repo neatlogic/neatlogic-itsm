@@ -1,0 +1,41 @@
+{
+  "moduleId": "process",
+  "name": "processtask_history_confighash",
+  "label": "Work Order Workflow History Data",
+  "description": "The historical data of the workflow process diagram can be used for time dimension statistical queries and association queries related to the process.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "config_hash",
+      "type": "char(32)",
+      "description": "MD5 hash of workflow configuration, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "Creator."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Creation time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "config_hash"
+      ],
+      "description": "Primary key index covering the processtask_id, config_hash fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

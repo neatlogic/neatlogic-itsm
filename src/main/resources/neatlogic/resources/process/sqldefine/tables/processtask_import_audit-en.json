@@ -1,0 +1,60 @@
+{
+  "moduleId": "process",
+  "name": "processtask_import_audit",
+  "label": "Batch Import Audit Log for Work Orders",
+  "description": "Batch import of audit logs for work orders can be used for tracking the status of workflows and querying related data.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Primary key, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID."
+    },
+    {
+      "name": "title",
+      "type": "varchar(255)",
+      "description": "Work order title."
+    },
+    {
+      "name": "channel_uuid",
+      "type": "varchar(50)",
+      "description": "Service UUID."
+    },
+    {
+      "name": "status",
+      "type": "tinyint",
+      "description": "Is the report successful (1 for yes, 0 for no)."
+    },
+    {
+      "name": "error_reason",
+      "type": "text",
+      "description": "Error reason for the report failure."
+    },
+    {
+      "name": "owner",
+      "type": "varchar(50)",
+      "description": "Reporter."
+    },
+    {
+      "name": "import_time",
+      "type": "timestamp(3)",
+      "description": "Import time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

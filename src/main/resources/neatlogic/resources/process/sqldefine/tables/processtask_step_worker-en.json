@@ -1,0 +1,78 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_worker",
+  "label": "Who Can Handle the Current Workflow",
+  "description": "Track who can handle the current workflow. This feature is used for related queries on workflow-related data and reporting scenarios.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "type",
+      "type": "enum('user','team','role')",
+      "description": "Type. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "uuid",
+      "type": "varchar(32)",
+      "description": "The unique identifier of the handler, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "user_type",
+      "type": "varchar(50)",
+      "description": "Task type, to distinguish step handlers from sub-task handlers, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id",
+        "uuid",
+        "user_type"
+      ],
+      "description": "Primary key index covering the processtask_id, processtask_step_id, UUID, user_type fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_processtask_step_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "Standard index covering the processtask_step_id field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_type",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "type"
+      ],
+      "description": "Standard index covering the type field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "uuid"
+      ],
+      "description": "Standard index covering the UUID field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

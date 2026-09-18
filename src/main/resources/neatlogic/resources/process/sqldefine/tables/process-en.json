@@ -1,0 +1,60 @@
+{
+  "moduleId": "process",
+  "name": "process",
+  "label": "Workflow Information Table",
+  "description": "The process information table is used for filtering enabled states of workflows and time dimension statistics in report queries.",
+  "fields": [
+    {
+      "name": "uuid",
+      "type": "varchar(50)",
+      "description": "Global unique identifier, cross-environment import use, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "name",
+      "type": "varchar(100)",
+      "description": "Name."
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint",
+      "description": "Indicates whether it is active."
+    },
+    {
+      "name": "config",
+      "type": "longtext",
+      "description": "Process diagram configuration."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Creation time."
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "Create user."
+    },
+    {
+      "name": "lcd",
+      "type": "timestamp(3)",
+      "description": "Update the timestamp."
+    },
+    {
+      "name": "lcu",
+      "type": "char(32)",
+      "description": "Update user."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "uuid"
+      ],
+      "description": "Primary key index covering the UUID field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

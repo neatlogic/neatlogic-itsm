@@ -1,0 +1,111 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_rel",
+  "label": "Table of Connections Between Steps of Work Orders",
+  "description": "The table linking workflow steps for use in queries related to process associations and reporting scenarios.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "from_process_step_uuid",
+      "type": "char(32)",
+      "description": "Source step UUID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "to_process_step_uuid",
+      "type": "char(32)",
+      "description": "The target step UUID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "from_processtask_step_id",
+      "type": "bigint",
+      "description": "Source step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "to_processtask_step_id",
+      "type": "bigint",
+      "description": "Target step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "condition",
+      "type": "varchar(500)",
+      "description": "Conditions."
+    },
+    {
+      "name": "is_hit",
+      "type": "tinyint",
+      "description": "0: No flow transition was triggered; -1: A flow transition was triggered, but its conditions were not met; 1: A flow transition was triggered and its conditions were met."
+    },
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "UUID."
+    },
+    {
+      "name": "name",
+      "type": "varchar(50)",
+      "description": "Name."
+    },
+    {
+      "name": "type",
+      "type": "enum('forward','backward')",
+      "description": "Type."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "from_processtask_step_id",
+        "to_processtask_step_id"
+      ],
+      "description": "Primary key index covering the from_processtask_step_id, to_processtask_step_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_from_process_step_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "from_process_step_uuid"
+      ],
+      "description": "Standard index covering the from_process_step_uuid field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_process_task_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "Standard index covering the processtask_id field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_to_process_step_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "to_process_step_uuid"
+      ],
+      "description": "Standard index covering the to_process_step_uuid field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_to_processtask_step_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "to_processtask_step_id"
+      ],
+      "description": "Standard index covering the to_processtask_step_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

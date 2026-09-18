@@ -1,0 +1,41 @@
+{
+  "moduleId": "process",
+  "name": "processtask_score_content",
+  "label": "Work Order Evaluation Content Table",
+  "description": "The table for evaluating work orders can be used for time dimension statistical queries and association queries related to workflow scenarios.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "content_hash",
+      "type": "char(32)",
+      "description": "Evaluation content hash, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "Evaluator."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Evaluation time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "content_hash"
+      ],
+      "description": "Primary key index covering the processtask_id, content_hash fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

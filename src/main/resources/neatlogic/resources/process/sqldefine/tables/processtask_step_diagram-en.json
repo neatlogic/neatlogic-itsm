@@ -1,0 +1,117 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_diagram",
+  "label": "Work Order and Architecture Diagram Relationship",
+  "description": "Work orders are related to the architecture diagrams and can be used for association queries related to workflows and other reporting scenarios.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Work order step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "catalog_id",
+      "type": "bigint",
+      "description": "Directory ID."
+    },
+    {
+      "name": "template_id",
+      "type": "bigint",
+      "description": "Template ID."
+    },
+    {
+      "name": "cientity_id",
+      "type": "bigint",
+      "description": "Configuration item ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "diagram_id",
+      "type": "bigint",
+      "description": "Architecture diagram ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "diagram_version_id",
+      "type": "bigint",
+      "description": "Architecture version ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "request",
+      "type": "varchar(200)",
+      "description": "Associated requirements. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "system",
+      "type": "varchar(200)",
+      "description": "Application system. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id",
+        "diagram_version_id"
+      ],
+      "description": "Primary key index covering the processtask_id, processtask_step_id, diagram_version_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_cientity_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "cientity_id"
+      ],
+      "description": "Standard index covering the cientity_id field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_diagram_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "diagram_id"
+      ],
+      "description": "Standard index covering the diagram_id field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_request",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "request"
+      ],
+      "description": "Standard index covering the request field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_system",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "system"
+      ],
+      "description": "Standard index covering the system field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_version_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "diagram_version_id"
+      ],
+      "description": "Standard index covering the diagram_version_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

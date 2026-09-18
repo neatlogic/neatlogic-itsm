@@ -1,0 +1,40 @@
+{
+  "moduleId": "process",
+  "name": "process_sla",
+  "label": "Workflow Timelines",
+  "description": "The process timetables are designed to facilitate querying, filtering, and reporting of data related to processes.",
+  "fields": [
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "UUID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "process_uuid",
+      "type": "char(32)",
+      "description": "Workflow UUID."
+    },
+    {
+      "name": "name",
+      "type": "varchar(100)",
+      "description": "Name."
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "Configuration rules, in JSON format."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "uuid"
+      ],
+      "description": "Primary key index covering the UUID field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

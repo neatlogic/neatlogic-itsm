@@ -1,0 +1,30 @@
+{
+  "moduleId": "process",
+  "name": "process_workcenter_user_profile",
+  "label": "workcenter_user_profile Workflow Table",
+  "description": "The process_workcenter_user_profile can be used for querying, filtering, and reporting on process-related data.",
+  "fields": [
+    {
+      "name": "user_uuid",
+      "type": "char(32)",
+      "description": "User_uuid, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "User-specific configuration, such as sorting, etc."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "user_uuid"
+      ],
+      "description": "Primary key index covering the user_uuid field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

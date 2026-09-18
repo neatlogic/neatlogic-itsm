@@ -1,0 +1,73 @@
+{
+  "moduleId": "process",
+  "name": "processtask_file",
+  "label": "Work Order File Table",
+  "description": "The work order file table is used for related query scenarios in workflow-related operations and reporting.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "file_id",
+      "type": "bigint",
+      "description": "File ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "content_id",
+      "type": "bigint",
+      "description": "Content ID, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id",
+        "file_id",
+        "content_id"
+      ],
+      "description": "Primary key index covering the processtask_id, processtask_step_id, file_id, content_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_content_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "content_id"
+      ],
+      "description": "Standard index covering the content_id field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_file_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "file_id"
+      ],
+      "description": "Standard index covering the file_id field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_processtask_step_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "Standard index covering the processtask_step_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

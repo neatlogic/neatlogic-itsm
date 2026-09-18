@@ -1,0 +1,37 @@
+{
+  "moduleId": "process",
+  "name": "processtask_urge",
+  "label": "processtask_urge Table",
+  "description": "The process task_urge table, which belongs to the process module, is used for time dimension statistical queries and association queries related to process scenarios.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "lcu",
+      "type": "char(32)",
+      "description": "Reminder user, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "lcd",
+      "type": "timestamp(3)",
+      "description": "Reminder time, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "lcu",
+        "lcd"
+      ],
+      "description": "Primary key index covering the processtask_id, lcu, lcd fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

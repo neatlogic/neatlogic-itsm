@@ -1,0 +1,82 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_sla_delay",
+  "label": "Work Order Latency Table",
+  "description": "The delayed work order times table is designed for statistical reporting and query scenarios related to time dimensions in the workflow.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID."
+    },
+    {
+      "name": "target_processtask_id",
+      "type": "bigint",
+      "description": "Work order ID."
+    },
+    {
+      "name": "target_processtask_step_id",
+      "type": "bigint",
+      "description": "Target step ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "sla_id",
+      "type": "bigint",
+      "description": "SLA ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "time",
+      "type": "bigint",
+      "description": "Add time."
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "Creator."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Creation time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_sla_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "sla_id"
+      ],
+      "description": "Standard index covering the sla_id field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_unique",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "target_processtask_step_id",
+        "sla_id",
+        "processtask_id"
+      ],
+      "description": "Unique index covering the target_processtask_step_id, sla_id, processtask_id fields, suitable for exact-match retrieval, uniqueness checks, and duplicate detection."
+    }
+  ]
+}

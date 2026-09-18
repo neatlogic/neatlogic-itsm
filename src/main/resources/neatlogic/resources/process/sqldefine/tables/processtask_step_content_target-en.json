@@ -1,0 +1,36 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_content_target",
+  "label": "Work Order Step Response Target Object Table",
+  "description": "The target object table for work order steps is used for related query scenarios in process-related associations and reporting.",
+  "fields": [
+    {
+      "name": "content_id",
+      "type": "bigint",
+      "description": "Work order step response ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "type",
+      "type": "enum('user','team','role')",
+      "description": "Object type."
+    },
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "The unique identifier of the object, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "content_id",
+        "uuid"
+      ],
+      "description": "Primary key index covering the content_id, UUID fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

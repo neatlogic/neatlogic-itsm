@@ -1,0 +1,37 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_tag",
+  "label": "process_task_collection_tag Table",
+  "description": "The process task collection tag table, which belongs to the process module, is used for related queries and report queries related to workflows.",
+  "fields": [
+    {
+      "name": "collection_id",
+      "type": "bigint",
+      "description": "Collection ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "tag_name",
+      "type": "varchar(255)",
+      "description": "Tag name, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "tag_value",
+      "type": "varchar(255)",
+      "description": "Label value, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "collection_id",
+        "tag_name",
+        "tag_value"
+      ],
+      "description": "Primary key index covering the collection_id, tag_name, tag_value fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

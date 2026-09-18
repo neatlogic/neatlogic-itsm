@@ -1,0 +1,65 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_task_user_content",
+  "label": "process_task_step_task_user_content Table",
+  "description": "Processtask_step_task_user_content is used for time dimension statistical queries and association queries related to workflow scenarios.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_step_task_id",
+      "type": "bigint",
+      "description": "Task ID."
+    },
+    {
+      "name": "processtask_step_task_user_id",
+      "type": "bigint",
+      "description": "Task user ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "user_uuid",
+      "type": "char(32)",
+      "description": "User_uuid."
+    },
+    {
+      "name": "content_hash",
+      "type": "char(32)",
+      "description": "Reply content hash."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Response time."
+    },
+    {
+      "name": "lcd",
+      "type": "timestamp(3)",
+      "description": "Update the reply time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_user_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_step_task_user_id"
+      ],
+      "description": "Standard index covering the processtask_step_task_user_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

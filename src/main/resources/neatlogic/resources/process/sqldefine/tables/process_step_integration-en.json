@@ -1,0 +1,41 @@
+{
+  "moduleId": "process",
+  "name": "process_step_integration",
+  "label": "Integration Table for Process Step References",
+  "description": "The integration table for process steps is used for querying, filtering, and presenting data related to the process.",
+  "fields": [
+    {
+      "name": "process_step_uuid",
+      "type": "char(32)",
+      "description": "The unique identifier for the step, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "integration_uuid",
+      "type": "char(32)",
+      "description": "Integration configuration UUID, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "process_step_uuid",
+        "integration_uuid"
+      ],
+      "description": "Primary key index covering the process_step_uuid, integration_uuid fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_integration_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "integration_uuid"
+      ],
+      "description": "Standard index covering the integration_uuid field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

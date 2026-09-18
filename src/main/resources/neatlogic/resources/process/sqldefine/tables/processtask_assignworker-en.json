@@ -1,0 +1,63 @@
+{
+  "moduleId": "process",
+  "name": "processtask_assignworker",
+  "label": "Work Order Assigned Handler Table",
+  "description": "Work order assigned to the handler table can be used for time dimension statistical queries and association queries related to workflow scenarios.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID assigned, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "from_processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID assigned, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "from_process_step_uuid",
+      "type": "char(32)",
+      "description": "Step ID, task ID, workflow ID, UUID."
+    },
+    {
+      "name": "type",
+      "type": "enum('user','team','role')",
+      "description": "Assigning object type."
+    },
+    {
+      "name": "uuid",
+      "type": "varchar(50)",
+      "description": "Assigning object, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "Creator."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Creation time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id",
+        "from_processtask_step_id",
+        "uuid"
+      ],
+      "description": "Primary key index covering the processtask_id, processtask_step_id, from_processtask_step_id, UUID fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "moduleId": "process",
+  "name": "process_workcenter",
+  "label": "Work Order Center Classification Table",
+  "description": "Work order center classification table is used for filtering enabled states in workflows, time dimension statistics, and association queries.",
+  "fields": [
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "Unique identifier for category, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "name",
+      "type": "varchar(100)",
+      "description": "Category name."
+    },
+    {
+      "name": "type",
+      "type": "enum('factory','system','custom')",
+      "description": "Factory: default system: system category custom: custom category. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "sort",
+      "type": "int",
+      "description": "Sort by size, smaller ID first. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "condition_config",
+      "type": "mediumtext",
+      "description": "Configuration for classification conditions."
+    },
+    {
+      "name": "support",
+      "type": "enum('all','mobile','pc')",
+      "description": "Use display range. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "catalog_id",
+      "type": "bigint",
+      "description": "Menu_id."
+    },
+    {
+      "name": "is_show_total",
+      "type": "tinyint(1)",
+      "description": "Should the total count be displayed, by default, the pending count should be shown."
+    },
+    {
+      "name": "thead_config_hash",
+      "type": "char(32)",
+      "description": "Default table header configuration hash. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Creation time."
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "Creator."
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint(1)",
+      "description": "Is disabled."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "uuid"
+      ],
+      "description": "Primary key index covering the UUID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_sort",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "sort"
+      ],
+      "description": "Standard index covering the sort field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_support",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "support"
+      ],
+      "description": "Standard index covering the support field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_thead_config_hash",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "thead_config_hash"
+      ],
+      "description": "Standard index covering the thead_config_hash field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_type",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "type"
+      ],
+      "description": "Standard index covering the type field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

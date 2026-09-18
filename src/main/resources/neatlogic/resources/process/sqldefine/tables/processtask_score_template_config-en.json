@@ -1,0 +1,30 @@
+{
+  "moduleId": "process",
+  "name": "processtask_score_template_config",
+  "label": "Work Order Score Template Configuration Table",
+  "description": "Work order score template configuration table used for querying, filtering, and reporting of Process-Related data.",
+  "fields": [
+    {
+      "name": "hash",
+      "type": "char(32)",
+      "description": "Content hash, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "config",
+      "type": "mediumtext",
+      "description": "Configuration."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "hash"
+      ],
+      "description": "Primary key index covering the hash field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

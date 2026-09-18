@@ -19,13 +19,14 @@ import neatlogic.framework.util.$;
 @Component
 public class ProcessTaskStatusMatrixPrivateDataSourceHandler implements IMatrixPrivateDataSourceHandler {
 
+    private final JSONArray attributeDefinedList = new JSONArray();
+
     private final List<MatrixAttributeVo> matrixAttributeList = new ArrayList<>();
     private final Map<String , String> columnsMap = new HashMap<>();
     {
-        JSONArray attributeDefinedList = new JSONArray();
         {
             JSONObject jsonObj = new JSONObject();
-            jsonObj.put("name", $.t("nmpmh.processtaskstatusmatrixprivatedatasourcehandler.runtime.label.1"));
+            jsonObj.put("name", "nmpmh.processtaskstatusmatrixprivatedatasourcehandler.runtime.label.1");
             jsonObj.put("label", "status");
             jsonObj.put("isPrimaryKey", 1);
             jsonObj.put("isSearchable", 1);
@@ -33,7 +34,7 @@ public class ProcessTaskStatusMatrixPrivateDataSourceHandler implements IMatrixP
         }
         {
             JSONObject jsonObj = new JSONObject();
-            jsonObj.put("name", $.t("nmpmh.processtaskstatusmatrixprivatedatasourcehandler.runtime.label.2"));
+            jsonObj.put("name", "nmpmh.processtaskstatusmatrixprivatedatasourcehandler.runtime.label.2");
             jsonObj.put("label", "statusText");
             jsonObj.put("isPrimaryKey", 0);
             jsonObj.put("isSearchable", 1);
@@ -61,7 +62,7 @@ public class ProcessTaskStatusMatrixPrivateDataSourceHandler implements IMatrixP
 
     @Override
     public List<MatrixAttributeVo> getAttributeList() {
-        return matrixAttributeList;
+        return getLocalizedAttributeList(attributeDefinedList);
     }
 
     @Override

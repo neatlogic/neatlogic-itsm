@@ -1,0 +1,127 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step",
+  "label": "Work Order Steps Table",
+  "description": "The work order steps table is used for tracking process-related statuses, enabling status filtering, and querying related data.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "name",
+      "type": "varchar(50)",
+      "description": "Step name."
+    },
+    {
+      "name": "process_step_uuid",
+      "type": "char(32)",
+      "description": "Step UUID."
+    },
+    {
+      "name": "status",
+      "type": "enum('pending','running','succeed','failed','back','hang','draft')",
+      "description": "Status."
+    },
+    {
+      "name": "result",
+      "type": "varchar(100)",
+      "description": "Handle results."
+    },
+    {
+      "name": "type",
+      "type": "enum('start','process','end','converge','timer')",
+      "description": "Node types, with different types of nodes having different flow behaviors."
+    },
+    {
+      "name": "handler",
+      "type": "varchar(50)",
+      "description": "Processor."
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint",
+      "description": "Status: 1 for activated, 0 for not handled, -1 for not processed, 2 for completed."
+    },
+    {
+      "name": "active_time",
+      "type": "timestamp(3)",
+      "description": "Activation time. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp(3)",
+      "description": "Start time."
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "End time."
+    },
+    {
+      "name": "error",
+      "type": "mediumtext",
+      "description": "Error message."
+    },
+    {
+      "name": "expire_time",
+      "type": "timestamp(3)",
+      "description": "Timeout."
+    },
+    {
+      "name": "config_hash",
+      "type": "char(32)",
+      "description": "Set the configuration hash value."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_active_time",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "active_time"
+      ],
+      "description": "Standard index covering the active_time field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_processtask_id_active",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id",
+        "is_active"
+      ],
+      "description": "Standard index covering the processtask_id, is_active fields, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_processtask_id_status",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id",
+        "status"
+      ],
+      "description": "Standard index covering the processtask_id, status fields, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

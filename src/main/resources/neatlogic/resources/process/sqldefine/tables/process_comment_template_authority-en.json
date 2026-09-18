@@ -1,0 +1,37 @@
+{
+  "moduleId": "process",
+  "name": "process_comment_template_authority",
+  "label": "System Response Template Authorization Table",
+  "description": "The system response template authorization table is used for related query scenarios such as process-related association queries and report queries.",
+  "fields": [
+    {
+      "name": "comment_template_id",
+      "type": "bigint",
+      "description": "Reply template ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "type",
+      "type": "enum('common','user','team','role')",
+      "description": "Authorization object type, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "The UUID of the authorized object, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "comment_template_id",
+        "type",
+        "uuid"
+      ],
+      "description": "Primary key index covering the comment_template_id, type, UUID fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

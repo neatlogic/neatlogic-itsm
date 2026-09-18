@@ -1,0 +1,35 @@
+{
+  "moduleId": "process",
+  "name": "processtask_time_cost",
+  "label": "Work Order Duration Table",
+  "description": "The work order duration report is designed for use in scenarios related to process association queries and report generation.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "time_cost",
+      "type": "bigint",
+      "description": "Time, milliseconds, calculated based on the calendar."
+    },
+    {
+      "name": "realtime_cost",
+      "type": "bigint",
+      "description": "Time, milliseconds, direct calculation."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "Primary key index covering the processtask_id field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

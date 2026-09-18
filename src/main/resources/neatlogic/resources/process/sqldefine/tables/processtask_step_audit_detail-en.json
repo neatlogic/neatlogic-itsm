@@ -1,0 +1,41 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_audit_detail",
+  "label": "Work Order Step Activity Details Table",
+  "description": "Work order steps activities table used for related association queries and reporting scenarios related to process workflow.",
+  "fields": [
+    {
+      "name": "audit_id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "type",
+      "type": "varchar(50)",
+      "description": "Type, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "old_content",
+      "type": "mediumtext",
+      "description": "Old content."
+    },
+    {
+      "name": "new_content",
+      "type": "mediumtext",
+      "description": "New content."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "audit_id",
+        "type"
+      ],
+      "description": "Primary key index covering the audit_id, type fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

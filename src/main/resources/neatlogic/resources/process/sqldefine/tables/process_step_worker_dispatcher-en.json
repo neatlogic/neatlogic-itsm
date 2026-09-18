@@ -1,0 +1,45 @@
+{
+  "moduleId": "process",
+  "name": "process_step_worker_dispatcher",
+  "label": "Work Order Distributor Table",
+  "description": "The workflow step dispatcher table is used for filtering enabled states in various reporting scenarios related to workflow steps.",
+  "fields": [
+    {
+      "name": "name",
+      "type": "varchar(50)",
+      "description": "Name, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "handler",
+      "type": "varchar(255)",
+      "description": "Processor."
+    },
+    {
+      "name": "config",
+      "type": "varchar(255)",
+      "description": "Configuration."
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint(1)",
+      "description": "Indicates whether it is active."
+    },
+    {
+      "name": "help",
+      "type": "mediumtext",
+      "description": "Help."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "name"
+      ],
+      "description": "Primary key index covering the name field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

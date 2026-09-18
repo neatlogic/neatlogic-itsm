@@ -1,0 +1,85 @@
+{
+  "moduleId": "process",
+  "name": "processtask_async_create",
+  "label": "Asynchronous Creation of Work Order Table",
+  "description": "Asynchronous creation of work order table for use in process-related state tracking, time dimension statistics, and query scenarios involving associations.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Primary key ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID. This value must be unique in the database and is suitable for exact-match queries and duplicate detection."
+    },
+    {
+      "name": "title",
+      "type": "varchar(255)",
+      "description": "Title."
+    },
+    {
+      "name": "status",
+      "type": "enum('doing','done','failed','aborted','redo')",
+      "description": "Status."
+    },
+    {
+      "name": "config",
+      "type": "longtext",
+      "description": "Configuration information."
+    },
+    {
+      "name": "error",
+      "type": "longtext",
+      "description": "Alert information."
+    },
+    {
+      "name": "try_count",
+      "type": "int",
+      "description": "Attempts."
+    },
+    {
+      "name": "server_id",
+      "type": "int",
+      "description": "Server ID."
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "Creator."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Creation time."
+    },
+    {
+      "name": "lcd",
+      "type": "timestamp(3)",
+      "description": "Update the timestamp."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_processtask_id",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "Unique index covering the processtask_id field, suitable for exact-match retrieval, uniqueness checks, and duplicate detection."
+    }
+  ]
+}

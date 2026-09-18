@@ -1,0 +1,40 @@
+{
+  "moduleId": "process",
+  "name": "processtask_repeat",
+  "label": "Work Order Table",
+  "description": "Recreate the work order table for use in workflow-related association queries and reporting scenarios.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "repeat_group_id",
+      "type": "bigint",
+      "description": "Unique identifier of the group. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "Primary key index covering the processtask_id field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_repeat_group_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "repeat_group_id"
+      ],
+      "description": "Standard index covering the repeat_group_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

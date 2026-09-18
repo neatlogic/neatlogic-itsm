@@ -1,0 +1,60 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_definition",
+  "label": "Work Order Collection Node for Work Order Collection Definition Data",
+  "description": "The node for the collection of work orders defines the data used for related queries in process-related scenarios, such as reporting.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Primary key ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "collection_data",
+      "type": "longtext",
+      "description": "Work order collection data."
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Work order step ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_processtask_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "Standard index covering the processtask_id field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_processtask_step_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "Standard index covering the processtask_step_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

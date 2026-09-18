@@ -1,0 +1,70 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_preparation_channel",
+  "label": "process_task_collection_preparation_channel",
+  "description": "The process task collection preparation channel table, which belongs to the process module, is used for related queries and report queries related to the process.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "title",
+      "type": "varchar(255)",
+      "description": "Work order title."
+    },
+    {
+      "name": "priority_uuid",
+      "type": "char(32)",
+      "description": "Priority UUID."
+    },
+    {
+      "name": "condition",
+      "type": "text",
+      "description": "Condition settings."
+    },
+    {
+      "name": "channel_uuid",
+      "type": "char(32)",
+      "description": "Unique identifier of the lane. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "preparation_id",
+      "type": "bigint",
+      "description": "DR plan ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_channel_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "channel_uuid"
+      ],
+      "description": "Standard index covering the channel_uuid field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_preparation_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "preparation_id"
+      ],
+      "description": "Standard index covering the preparation_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

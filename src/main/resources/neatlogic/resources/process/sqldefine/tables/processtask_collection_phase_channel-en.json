@@ -1,0 +1,75 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_phase_channel",
+  "label": "When the Conditions Are Not Met to Create the Corresponding Service, an Appropriate Work Order Is Not Created",
+  "description": "When conditions are not met to create the corresponding service, the failure channel information should be recorded for use in related queries in process-related reporting scenarios.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "title",
+      "type": "varchar(255)",
+      "description": "Work order title."
+    },
+    {
+      "name": "priority_uuid",
+      "type": "char(32)",
+      "description": "Priority UUID."
+    },
+    {
+      "name": "condition",
+      "type": "text",
+      "description": "Condition settings."
+    },
+    {
+      "name": "channel_uuid",
+      "type": "char(32)",
+      "description": "Unique identifier of the lane. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "phase_id",
+      "type": "bigint",
+      "description": "Stage_id. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "preparation_id",
+      "type": "bigint",
+      "description": "DR plan ID."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_channel_uuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "channel_uuid"
+      ],
+      "description": "Standard index covering the channel_uuid field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_phase_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "phase_id"
+      ],
+      "description": "Standard index covering the phase_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "moduleId": "process",
+  "name": "process_step",
+  "label": "Process Steps Information Table",
+  "description": "The process steps information table is used for querying, filtering, and presenting data related to workflows.",
+  "fields": [
+    {
+      "name": "process_uuid",
+      "type": "char(32)",
+      "description": "Workflow UUID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "uuid",
+      "type": "char(32)",
+      "description": "UUID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "name",
+      "type": "varchar(100)",
+      "description": "Name."
+    },
+    {
+      "name": "type",
+      "type": "enum('start','end','process','converge','auto','timer')",
+      "description": "Type."
+    },
+    {
+      "name": "handler",
+      "type": "varchar(50)",
+      "description": "Processor."
+    },
+    {
+      "name": "config",
+      "type": "longtext",
+      "description": "Additional configuration, in JSON format."
+    },
+    {
+      "name": "description",
+      "type": "mediumtext",
+      "description": "Description."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "uuid"
+      ],
+      "description": "Primary key index covering the UUID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_process_step",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "process_uuid"
+      ],
+      "description": "Standard index covering the process_uuid field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

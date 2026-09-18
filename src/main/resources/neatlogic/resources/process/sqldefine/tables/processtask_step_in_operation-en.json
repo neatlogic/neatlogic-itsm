@@ -1,0 +1,65 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_in_operation",
+  "label": "Work Order Steps Are Executing Operation Records in the Background",
+  "description": "Work order steps are executing in the background and can be used for related queries in workflow scenarios or report queries.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Primary key ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID."
+    },
+    {
+      "name": "operation_type",
+      "type": "varchar(50)",
+      "description": "Operation type."
+    },
+    {
+      "name": "operation_time",
+      "type": "timestamp(3)",
+      "description": "Operation time."
+    },
+    {
+      "name": "expire_time",
+      "type": "timestamp(3)",
+      "description": "Expiration time."
+    },
+    {
+      "name": "server_id",
+      "type": "bigint",
+      "description": "Server ID."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_processtask_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "Standard index covering the processtask_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

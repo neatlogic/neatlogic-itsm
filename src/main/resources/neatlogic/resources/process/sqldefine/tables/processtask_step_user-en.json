@@ -1,0 +1,113 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_user",
+  "label": "Work Order Step Handler Table",
+  "description": "The work order step handler table is used for tracking the status of workflows and for querying related data.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "user_uuid",
+      "type": "char(32)",
+      "description": "The unique identifier of the handler, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "user_type",
+      "type": "enum('major','minor','history_major')",
+      "description": "Major users must handle, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "user_name",
+      "type": "varchar(100)",
+      "description": "Worker name."
+    },
+    {
+      "name": "status",
+      "type": "enum('doing','done','transferred','someonetransferred')",
+      "description": "Status, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "action",
+      "type": "varchar(20)",
+      "description": "Actions. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp(3)",
+      "description": "Start time."
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "End time."
+    },
+    {
+      "name": "active_time",
+      "type": "timestamp(3)",
+      "description": "Activation time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_step_id",
+        "user_uuid",
+        "user_type",
+        "status"
+      ],
+      "description": "Primary key index covering the processtask_step_id, user_uuid, user_type, status fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_action",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "action"
+      ],
+      "description": "Standard index covering the action field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_processtask_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "Standard index covering the processtask_id field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_type",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "user_type"
+      ],
+      "description": "Standard index covering the user_type field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_useruuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "user_uuid"
+      ],
+      "description": "Standard index covering the user_uuid field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

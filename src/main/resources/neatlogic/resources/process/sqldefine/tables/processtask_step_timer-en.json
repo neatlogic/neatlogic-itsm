@@ -1,0 +1,35 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_timer",
+  "label": "Work Order Steps Scheduling",
+  "description": "Work order steps for scheduled execution are applicable to queries related to process associations and reporting scenarios.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "trigger_time",
+      "type": "timestamp",
+      "description": "Trigger time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "Primary key index covering the processtask_step_id field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

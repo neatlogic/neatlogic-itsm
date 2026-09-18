@@ -1,0 +1,45 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_automatic_request",
+  "label": "Automatic Node Requests for Work Order Steps",
+  "description": "The workflow step auto-node request can be used for related queries in process-related scenarios such as report queries.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Primary key ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID."
+    },
+    {
+      "name": "type",
+      "type": "varchar(50)",
+      "description": "Request or callback."
+    },
+    {
+      "name": "trigger_time",
+      "type": "timestamp",
+      "description": "Next trigger time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

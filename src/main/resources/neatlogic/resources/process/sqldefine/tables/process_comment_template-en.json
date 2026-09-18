@@ -1,0 +1,71 @@
+{
+  "moduleId": "process",
+  "name": "process_comment_template",
+  "label": "System Response Template Table",
+  "description": "The system response template table is used for time dimension statistical queries related to workflow scenarios.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Primary key, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "name",
+      "type": "varchar(50)",
+      "description": "Name. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "content",
+      "type": "text",
+      "description": "Reply."
+    },
+    {
+      "name": "type",
+      "type": "enum('system','custom')",
+      "description": "System: system template; custom: custom template."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Creation time."
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "Creator."
+    },
+    {
+      "name": "lcd",
+      "type": "timestamp(3)",
+      "description": "Update the timestamp."
+    },
+    {
+      "name": "lcu",
+      "type": "char(32)",
+      "description": "Updated by."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "uk_name_fcu",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "name",
+        "fcd"
+      ],
+      "description": "Unique index covering the name, fcd fields, suitable for exact-match retrieval, uniqueness checks, and duplicate detection."
+    }
+  ]
+}

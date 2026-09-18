@@ -1,0 +1,30 @@
+{
+  "moduleId": "process",
+  "name": "process_workcenter_thead_config",
+  "label": "workcenter_thead_config Table",
+  "description": "The workcenter_thead_config table is a data table within the process module, used for querying, filtering, and reporting on process-related data.",
+  "fields": [
+    {
+      "name": "hash",
+      "type": "char(32)",
+      "description": "Configuration hash, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "config",
+      "type": "text",
+      "description": "Configuration."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "hash"
+      ],
+      "description": "Primary key index covering the hash field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

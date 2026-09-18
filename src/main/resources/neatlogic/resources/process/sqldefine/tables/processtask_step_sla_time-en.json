@@ -1,0 +1,72 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_sla_time",
+  "label": "SLA Duration Table",
+  "description": "The SLA duration table can be used for related queries in process-related reports.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "sla_id",
+      "type": "bigint",
+      "description": "SLA ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "type",
+      "type": "varchar(50)",
+      "description": "Type, response, handling, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "time_sum",
+      "type": "bigint",
+      "description": "Total processing time."
+    },
+    {
+      "name": "time_cost",
+      "type": "bigint",
+      "description": "Time, milliseconds, calculated based on the calendar."
+    },
+    {
+      "name": "realtime_cost",
+      "type": "bigint",
+      "description": "Time, milliseconds, direct calculation."
+    },
+    {
+      "name": "is_timeout",
+      "type": "tinyint(1)",
+      "description": "Is the timeout exceeded?"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_step_id",
+        "sla_id",
+        "type"
+      ],
+      "description": "Primary key index covering the processtask_step_id, sla_id, type fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_sla_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "sla_id"
+      ],
+      "description": "Standard index covering the sla_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

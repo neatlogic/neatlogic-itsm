@@ -1,0 +1,30 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_config",
+  "label": "Work Order Configuration Table",
+  "description": "The work order configuration table is used for querying, filtering, and presenting data related to workflow processes.",
+  "fields": [
+    {
+      "name": "hash",
+      "type": "char(32)",
+      "description": "Hash, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "config",
+      "type": "longtext",
+      "description": "Config."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "hash"
+      ],
+      "description": "Primary key index covering the hash field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

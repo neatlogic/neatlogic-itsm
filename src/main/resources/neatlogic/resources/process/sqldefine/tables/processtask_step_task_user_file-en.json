@@ -1,0 +1,51 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_task_user_file",
+  "label": "process_task_step_task_user_file Table",
+  "description": "Processtask_step_task_user_content is used for time dimension statistical queries and association queries related to workflow scenarios.",
+  "fields": [
+    {
+      "name": "processtask_step_task_id",
+      "type": "bigint",
+      "description": "Task ID."
+    },
+    {
+      "name": "processtask_step_task_user_id",
+      "type": "bigint",
+      "description": "Task user ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "file_id",
+      "type": "bigint",
+      "description": "Attachment_id, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp",
+      "description": "Upload time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_step_task_user_id",
+        "file_id"
+      ],
+      "description": "Primary key index covering the processtask_step_task_user_id, file_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_file_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "file_id"
+      ],
+      "description": "Standard index covering the file_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

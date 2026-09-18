@@ -1,0 +1,46 @@
+{
+  "moduleId": "process",
+  "name": "process_score_template",
+  "label": "Rating Template -- Workflow Association Table",
+  "description": "Score template - workflow association table is used for filtering enabled states of workflows and for querying related data in reporting scenarios.",
+  "fields": [
+    {
+      "name": "score_template_id",
+      "type": "bigint",
+      "description": "Template ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "process_uuid",
+      "type": "char(32)",
+      "description": "Workflow UUID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint",
+      "description": "Do you want to enable ratings (0: no, 1: yes)?"
+    },
+    {
+      "name": "is_auto",
+      "type": "tinyint(1)",
+      "description": "Is automatic scoring."
+    },
+    {
+      "name": "config",
+      "type": "longtext",
+      "description": "Rating settings."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "score_template_id",
+        "process_uuid"
+      ],
+      "description": "Primary key index covering the score_template_id, process_uuid fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

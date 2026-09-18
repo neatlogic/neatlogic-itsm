@@ -1,0 +1,70 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_timeaudit",
+  "label": "Work Order Step Operation Time Audit Table",
+  "description": "The audit table for work order steps operation time is used for related queries in process-related scenarios.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Work order ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "active_time",
+      "type": "timestamp(3)",
+      "description": "Activation time."
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp(3)",
+      "description": "Start time."
+    },
+    {
+      "name": "abort_time",
+      "type": "timestamp(3)",
+      "description": "Give up time."
+    },
+    {
+      "name": "complete_time",
+      "type": "timestamp(3)",
+      "description": "Include success or failure."
+    },
+    {
+      "name": "back_time",
+      "type": "timestamp(3)",
+      "description": "Rollback time."
+    },
+    {
+      "name": "pause_time",
+      "type": "timestamp(3)",
+      "description": "Hang time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_processtask_step_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "Standard index covering the processtask_step_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

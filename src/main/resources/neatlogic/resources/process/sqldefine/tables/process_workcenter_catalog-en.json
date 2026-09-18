@@ -1,0 +1,40 @@
+{
+  "moduleId": "process",
+  "name": "process_workcenter_catalog",
+  "label": "Work Order Center Menu Type Table",
+  "description": "Work order center menu type table used for querying, filtering, and reporting of process-related data.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "varchar(32)",
+      "description": "Menu_type_unique_identifier, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "name",
+      "type": "varchar(255)",
+      "description": "Menu name. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_name",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "name"
+      ],
+      "description": "Standard index covering the name field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_event",
+  "label": "Work Order Step -- Event Association Table",
+  "description": "Work order steps - event association table used for querying related associations in process-related reports.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "event_id",
+      "type": "bigint",
+      "description": "Event ID. This value must be unique in the database and is suitable for exact-match queries and duplicate detection."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "Primary key index covering the processtask_step_id field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_event_id",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "event_id"
+      ],
+      "description": "Unique index covering the event_id field, suitable for exact-match retrieval, uniqueness checks, and duplicate detection."
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_data",
+  "label": "Work Order Step Data Table",
+  "description": "Work order steps data table used for association queries and reporting related to workflow.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Unique identifier, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Work order step ID."
+    },
+    {
+      "name": "data",
+      "type": "longtext",
+      "description": "Data."
+    },
+    {
+      "name": "type",
+      "type": "varchar(50)",
+      "description": "Function type."
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "Creator."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "task_step_type_fcu_idx",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id",
+        "type",
+        "fcu"
+      ],
+      "description": "Unique index covering the processtask_id, processtask_step_id, type, fcu fields, suitable for exact-match retrieval, uniqueness checks, and duplicate detection."
+    }
+  ]
+}

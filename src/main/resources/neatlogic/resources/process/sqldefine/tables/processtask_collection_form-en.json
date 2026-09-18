@@ -1,0 +1,56 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_form",
+  "label": "Work Order Associated Forms",
+  "description": "The forms associated with the work orders can be used for querying related associations in workflow scenarios and reporting scenarios.",
+  "fields": [
+    {
+      "name": "collection_id",
+      "type": "bigint",
+      "description": "Work order collection ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "form_uuid",
+      "type": "char(32)",
+      "description": "The UUID of the form bound to the work order, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "form_scene_uuid",
+      "type": "char(32)",
+      "description": "Form scenario UUID."
+    },
+    {
+      "name": "form_name",
+      "type": "varchar(100)",
+      "description": "Form name associated with the work order."
+    },
+    {
+      "name": "form_content_hash",
+      "type": "char(32)",
+      "description": "Bind the form configuration to the work order. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "collection_id",
+        "form_uuid"
+      ],
+      "description": "Primary key index covering the collection_id, form_uuid fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_hash",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "form_content_hash"
+      ],
+      "description": "Standard index covering the form_content_hash field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

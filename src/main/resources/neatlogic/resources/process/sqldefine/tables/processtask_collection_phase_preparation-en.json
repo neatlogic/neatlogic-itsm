@@ -1,0 +1,46 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_phase_preparation",
+  "label": "process_task_collection_phase_preparation",
+  "description": "The process task collection phase preparation table, which belongs to the process module, is used for related queries and report queries related to the process.",
+  "fields": [
+    {
+      "name": "phase_id",
+      "type": "bigint",
+      "description": "Stage_id, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "preparation_id",
+      "type": "bigint",
+      "description": "DR plan ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "form_data",
+      "type": "text",
+      "description": "Form data."
+    },
+    {
+      "name": "form_uuid",
+      "type": "char(32)",
+      "description": "Form UUID."
+    },
+    {
+      "name": "scene_uuid",
+      "type": "char(32)",
+      "description": "Work order UUID."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "phase_id",
+        "preparation_id"
+      ],
+      "description": "Primary key index covering the phase_id, preparation_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

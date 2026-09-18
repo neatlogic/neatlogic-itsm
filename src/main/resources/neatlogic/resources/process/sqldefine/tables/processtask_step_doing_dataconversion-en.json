@@ -1,0 +1,40 @@
+{
+  "moduleId": "process",
+  "name": "processtask_step_doing_dataconversion",
+  "label": "Data Transformation Step Log",
+  "description": "The current step of data transformation is recorded for use in time dimension statistical queries related to the workflow and association queries.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "server_id",
+      "type": "int",
+      "description": "Server ID."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Creation time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "Primary key index covering the processtask_step_id field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "moduleId": "process",
+  "name": "processtask_agent_target",
+  "label": "Work Order Agent Target",
+  "description": "The agent targets are used for related queries in workflow scenarios and report queries.",
+  "fields": [
+    {
+      "name": "processtask_agent_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "target",
+      "type": "char(32)",
+      "description": "Target UUID, directory, or service, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "type",
+      "type": "enum('catalog','channel')",
+      "description": "Target type."
+    },
+    {
+      "name": "path_list",
+      "type": "text",
+      "description": "Path."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_agent_id",
+        "target"
+      ],
+      "description": "Primary key index covering the processtask_agent_id, target fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

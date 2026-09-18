@@ -1,0 +1,220 @@
+{
+  "moduleId": "process",
+  "name": "processtask",
+  "label": "Work Order Information Table",
+  "description": "The work order information table is used for tracking the status of workflows and for querying related information.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "title",
+      "type": "varchar(255)",
+      "description": "Title."
+    },
+    {
+      "name": "process_uuid",
+      "type": "char(32)",
+      "description": "Workflow UUID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "channel_uuid",
+      "type": "char(32)",
+      "description": "Service UUID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "config_hash",
+      "type": "char(32)",
+      "description": "MD5 hash of the workflow configuration."
+    },
+    {
+      "name": "priority_uuid",
+      "type": "char(32)",
+      "description": "Priority UID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "status",
+      "type": "enum('pending','draft','running','aborted','succeed','failed','hang','scored')",
+      "description": "Work order status. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp(3)",
+      "description": "Reporting time. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "Close date."
+    },
+    {
+      "name": "owner",
+      "type": "varchar(50)",
+      "description": "Reporter. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "reporter",
+      "type": "varchar(50)",
+      "description": "The reporter. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "expire_time",
+      "type": "timestamp(3)",
+      "description": "Timeout."
+    },
+    {
+      "name": "worktime_uuid",
+      "type": "varchar(32)",
+      "description": "Work time window UUID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "error",
+      "type": "mediumtext",
+      "description": "Flow-level exceptions."
+    },
+    {
+      "name": "is_show",
+      "type": "tinyint(1)",
+      "description": "Show 1: display; 0: hide. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "serial_number",
+      "type": "varchar(100)",
+      "description": "Work order sequence number. A standard index is defined on this field, making it suitable for filtering, joining, and sorting queries."
+    },
+    {
+      "name": "source",
+      "type": "varchar(50)",
+      "description": "SOURCE."
+    },
+    {
+      "name": "is_deleted",
+      "type": "tinyint(1)",
+      "description": "Is it deleted."
+    },
+    {
+      "name": "need_score",
+      "type": "tinyint(1)",
+      "description": "Is scoring enabled."
+    },
+    {
+      "name": "region_id",
+      "type": "bigint",
+      "description": "Region_id."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_channel",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "channel_uuid"
+      ],
+      "description": "Standard index covering the channel_uuid field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_isshow",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "is_show"
+      ],
+      "description": "Standard index covering the is_show field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_owner",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "owner"
+      ],
+      "description": "Standard index covering the owner field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_priority",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "priority_uuid"
+      ],
+      "description": "Standard index covering the priority_uuid field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_processuuid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "process_uuid"
+      ],
+      "description": "Standard index covering the process_uuid field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_reporter",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "reporter"
+      ],
+      "description": "Standard index covering the reporter field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_serialnum",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "serial_number"
+      ],
+      "description": "Standard index covering the serial_number field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_starttime",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "start_time"
+      ],
+      "description": "Standard index covering the start_time field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_status",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "status"
+      ],
+      "description": "Standard index covering the status field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_worktime",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "worktime_uuid"
+      ],
+      "description": "Standard index covering the worktime_uuid field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

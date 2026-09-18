@@ -1,0 +1,40 @@
+{
+  "moduleId": "process",
+  "name": "process_step_handler_notify_policy",
+  "label": "Reference Notification Policy Table for Process Component",
+  "description": "The process component references the notification policy table, which can be used for related queries in process-related reports.",
+  "fields": [
+    {
+      "name": "handler",
+      "type": "varchar(50)",
+      "description": "Node component type, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "notify_policy_id",
+      "type": "bigint",
+      "description": "Notification strategy ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "handler"
+      ],
+      "description": "Primary key index covering the handler field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_notify_policy_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "notify_policy_id"
+      ],
+      "description": "Standard index covering the notify_policy_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

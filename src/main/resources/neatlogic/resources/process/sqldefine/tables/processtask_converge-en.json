@@ -1,0 +1,62 @@
+{
+  "moduleId": "process",
+  "name": "processtask_converge",
+  "label": "Work Order Step Consolidation Table",
+  "description": "The work order step consolidation table is designed for use in reporting scenarios related to process associations, such as query operations.",
+  "fields": [
+    {
+      "name": "converge_id",
+      "type": "bigint",
+      "description": "Collect, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Job step ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Job ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "is_check",
+      "type": "tinyint(1)",
+      "description": "Are you sure."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "processtask_step_id",
+        "converge_id"
+      ],
+      "description": "Primary key index covering the processtask_id, processtask_step_id, converge_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_convergeid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "converge_id"
+      ],
+      "description": "Standard index covering the converge_id field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_stepid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "Standard index covering the processtask_step_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "moduleId": "process",
+  "name": "process_sla_notify_policy",
+  "label": "Workflow Timeliness Notification Policy Table",
+  "description": "The process timeliness alert policy table is used for related queries in process-related scenarios, such as reporting.",
+  "fields": [
+    {
+      "name": "sla_uuid",
+      "type": "char(32)",
+      "description": "The unique identifier for the timestamp, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "notify_policy_id",
+      "type": "bigint",
+      "description": "Notification strategy ID, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "sla_uuid",
+        "notify_policy_id"
+      ],
+      "description": "Primary key index covering the sla_uuid, notify_policy_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_notify_policy_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "notify_policy_id"
+      ],
+      "description": "Standard index covering the notify_policy_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

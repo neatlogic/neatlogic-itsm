@@ -1,0 +1,60 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_template",
+  "label": "process_task_collection_template Table",
+  "description": "The processtask_collection_template table is a data table within the process module, used for filtering enabled states in process-related reporting scenarios and time dimension statistics.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Primary key ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "name",
+      "type": "varchar(255)",
+      "description": "Unique identifier."
+    },
+    {
+      "name": "template",
+      "type": "longtext",
+      "description": "The template field in the processtask_collection_template table."
+    },
+    {
+      "name": "fcu",
+      "type": "char(32)",
+      "description": "Creator."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp",
+      "description": "Creation time."
+    },
+    {
+      "name": "lcu",
+      "type": "char(32)",
+      "description": "Updated by."
+    },
+    {
+      "name": "lcd",
+      "type": "timestamp",
+      "description": "Update the timestamp."
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint(1)",
+      "description": "Indicates whether it is active."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

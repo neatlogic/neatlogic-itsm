@@ -1,0 +1,70 @@
+{
+  "moduleId": "process",
+  "name": "processtask_relation",
+  "label": "Work Order Association Table",
+  "description": "Work order relationship table for use in workflow-related queries and reporting scenarios.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Unique identifier, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "channel_type_relation_id",
+      "type": "bigint",
+      "description": "Relationship type. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "source",
+      "type": "bigint",
+      "description": "Work order ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "target",
+      "type": "bigint",
+      "description": "Work order ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_channel_type_relation_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "channel_type_relation_id"
+      ],
+      "description": "Standard index covering the channel_type_relation_id field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_source",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "source"
+      ],
+      "description": "Standard index covering the source field, suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "idx_target",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "target"
+      ],
+      "description": "Standard index covering the target field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

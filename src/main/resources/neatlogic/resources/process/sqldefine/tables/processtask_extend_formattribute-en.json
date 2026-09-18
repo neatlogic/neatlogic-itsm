@@ -1,0 +1,36 @@
+{
+  "moduleId": "process",
+  "name": "processtask_extend_formattribute",
+  "label": "Work Order and Form Extension Attribute Value Relationship Table",
+  "description": "The table connects workflow-related association queries and report queries to the extended attribute values of forms and work orders.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "form_attribute_data_id",
+      "type": "bigint",
+      "description": "Form attribute values ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "tag",
+      "type": "varchar(50)",
+      "description": "Tags."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "form_attribute_data_id"
+      ],
+      "description": "Primary key index covering the processtask_id, form_attribute_data_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

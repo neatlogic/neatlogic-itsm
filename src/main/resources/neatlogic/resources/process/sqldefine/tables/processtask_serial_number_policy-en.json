@@ -1,0 +1,50 @@
+{
+  "moduleId": "process",
+  "name": "processtask_serial_number_policy",
+  "label": "Work Order Generation Policy Table",
+  "description": "Work order generation policy table for querying, filtering, and reporting on process-related data.",
+  "fields": [
+    {
+      "name": "channel_type_uuid",
+      "type": "char(32)",
+      "description": "Service type UUID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "handler",
+      "type": "varchar(200)",
+      "description": "Work order generation strategy class name."
+    },
+    {
+      "name": "config",
+      "type": "text",
+      "description": "Configuration information."
+    },
+    {
+      "name": "serial_number_seed",
+      "type": "bigint",
+      "description": "Serial_number_seed."
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp(3)",
+      "description": "Last update time of work order ID."
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp(3)",
+      "description": "Last update of the end time of the work order number."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "channel_type_uuid"
+      ],
+      "description": "Primary key index covering the channel_type_uuid field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

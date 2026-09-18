@@ -1,0 +1,80 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection",
+  "label": "process_task_collection Table",
+  "description": "The processtask_collection table is a data table belonging to the process module. It is used for reporting scenarios such as tracking process states, filtering enabled states, and statistical time dimensions.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "title",
+      "type": "varchar(255)",
+      "description": "Title."
+    },
+    {
+      "name": "status",
+      "type": "enum('pending','doing','done')",
+      "description": "Status."
+    },
+    {
+      "name": "create_user",
+      "type": "char(32)",
+      "description": "Creator."
+    },
+    {
+      "name": "create_time",
+      "type": "timestamp",
+      "description": "Create an event."
+    },
+    {
+      "name": "content",
+      "type": "longtext",
+      "description": "Content."
+    },
+    {
+      "name": "config",
+      "type": "longtext",
+      "description": "Temporary content is saved and cleared upon startup."
+    },
+    {
+      "name": "is_active",
+      "type": "tinyint",
+      "description": "Indicates whether it is active."
+    },
+    {
+      "name": "start_user",
+      "type": "char(32)",
+      "description": "Activate users."
+    },
+    {
+      "name": "start_time",
+      "type": "timestamp",
+      "description": "Activation time."
+    },
+    {
+      "name": "error",
+      "type": "longtext",
+      "description": "Alert."
+    },
+    {
+      "name": "end_time",
+      "type": "timestamp",
+      "description": "End time."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

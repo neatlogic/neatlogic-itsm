@@ -1,0 +1,75 @@
+{
+  "moduleId": "process",
+  "name": "processtask_action",
+  "label": "Work Order Actions Table",
+  "description": "The work order action table is used for tracking the status of workflows and for querying related data.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Primary key ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID."
+    },
+    {
+      "name": "processtask_step_id",
+      "type": "bigint",
+      "description": "Step ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "trigger",
+      "type": "varchar(100)",
+      "description": "Trigger point."
+    },
+    {
+      "name": "trigger_time",
+      "type": "timestamp(3)",
+      "description": "Trigger time."
+    },
+    {
+      "name": "integration_uuid",
+      "type": "char(32)",
+      "description": "Integrate UUID."
+    },
+    {
+      "name": "status",
+      "type": "varchar(100)",
+      "description": "Status."
+    },
+    {
+      "name": "error",
+      "type": "longtext",
+      "description": "Failure information."
+    },
+    {
+      "name": "config",
+      "type": "longtext",
+      "description": "Configuration information."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_processtask_step_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "processtask_step_id"
+      ],
+      "description": "Standard index covering the processtask_step_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

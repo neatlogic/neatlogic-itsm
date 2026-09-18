@@ -1,0 +1,40 @@
+{
+  "moduleId": "process",
+  "name": "processtask_score_template",
+  "label": "Work Order Score Template Table",
+  "description": "Work order score template table used for related queries and reporting scenarios in process-related operations.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "score_template_id",
+      "type": "bigint",
+      "description": "Score template ID."
+    },
+    {
+      "name": "is_auto",
+      "type": "tinyint(1)",
+      "description": "Is automatic scoring."
+    },
+    {
+      "name": "config_hash",
+      "type": "char(32)",
+      "description": "Configuration hash."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id"
+      ],
+      "description": "Primary key index covering the processtask_id field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

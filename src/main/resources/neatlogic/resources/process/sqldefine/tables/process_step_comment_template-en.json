@@ -1,0 +1,31 @@
+{
+  "moduleId": "process",
+  "name": "process_step_comment_template",
+  "label": "Process Step -- Reply Template Association Table",
+  "description": "The table is used for querying related queries in process-related scenarios, such as reporting.",
+  "fields": [
+    {
+      "name": "process_step_uuid",
+      "type": "char(32)",
+      "description": "Workflow step UUID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "comment_template_id",
+      "type": "bigint",
+      "description": "Reply template ID, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "process_step_uuid",
+        "comment_template_id"
+      ],
+      "description": "Primary key index covering the process_step_uuid, comment_template_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

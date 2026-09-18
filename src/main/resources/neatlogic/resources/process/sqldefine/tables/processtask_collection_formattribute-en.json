@@ -1,0 +1,31 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_formattribute",
+  "label": "Work Order and Form Attribute Value Relationship Table",
+  "description": "The table connects work orders to form attribute values, suitable for querying related associations in workflow scenarios.",
+  "fields": [
+    {
+      "name": "collection_id",
+      "type": "bigint",
+      "description": "Work order collection ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "form_attribute_data_id",
+      "type": "bigint",
+      "description": "Form attribute values ID, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "collection_id",
+        "form_attribute_data_id"
+      ],
+      "description": "Primary key index covering the collection_id, form_attribute_data_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

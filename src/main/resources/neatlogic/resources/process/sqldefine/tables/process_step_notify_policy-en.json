@@ -1,0 +1,40 @@
+{
+  "moduleId": "process",
+  "name": "process_step_notify_policy",
+  "label": "Notification Strategy Table for Process Steps",
+  "description": "The process step reference notification strategy table is used for related queries related to the process, such as reporting scenarios.",
+  "fields": [
+    {
+      "name": "process_step_uuid",
+      "type": "char(32)",
+      "description": "Workflow step UUID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "notify_policy_id",
+      "type": "bigint",
+      "description": "Notification strategy ID. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "process_step_uuid"
+      ],
+      "description": "Primary key index covering the process_step_uuid field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_notify_policy_id",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "notify_policy_id"
+      ],
+      "description": "Standard index covering the notify_policy_id field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

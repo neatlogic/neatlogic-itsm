@@ -1,0 +1,42 @@
+{
+  "moduleId": "process",
+  "name": "processtask_tag",
+  "label": "Work Order Tag Table",
+  "description": "Work order tagging table for use in workflow-related association queries and reporting scenarios.",
+  "fields": [
+    {
+      "name": "processtask_id",
+      "type": "bigint",
+      "description": "Work order ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "tag_id",
+      "type": "bigint",
+      "description": "Tag_id, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "processtask_id",
+        "tag_id"
+      ],
+      "description": "Primary key index covering the processtask_id, tag_id fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_tagid_processtaskid",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "tag_id",
+        "processtask_id"
+      ],
+      "description": "Standard index covering the tag_id, processtask_id fields, suitable for filtering, join, and sort queries."
+    }
+  ]
+}

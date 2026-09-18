@@ -1,0 +1,30 @@
+{
+  "moduleId": "process",
+  "name": "processtask_collection_form_content",
+  "label": "Work Order Table Content Table",
+  "description": "The work order form contains data that can be queried, filtered, and displayed in reports related to workflows.",
+  "fields": [
+    {
+      "name": "hash",
+      "type": "char(32)",
+      "description": "Hash, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "content",
+      "type": "longtext",
+      "description": "Content."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "hash"
+      ],
+      "description": "Primary key index covering the hash field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

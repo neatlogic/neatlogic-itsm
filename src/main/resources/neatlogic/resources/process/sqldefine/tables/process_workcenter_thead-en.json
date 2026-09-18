@@ -1,0 +1,46 @@
+{
+  "moduleId": "process",
+  "name": "process_workcenter_thead",
+  "label": "User-defined Thead",
+  "description": "Users can customize the `thead` to sort by custom fields, which can be used for querying, filtering, and reporting on process-related data.",
+  "fields": [
+    {
+      "name": "workcenter_uuid",
+      "type": "char(32)",
+      "description": "Unique identifier for category, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "user_uuid",
+      "type": "char(32)",
+      "description": "User, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "config_hash",
+      "type": "char(32)",
+      "description": "The user-defined `config_hash` field in the `thead` table. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "workcenter_uuid",
+        "user_uuid"
+      ],
+      "description": "Primary key index covering the workcenter_uuid, user_uuid fields, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_hash",
+      "type": "BTREE",
+      "unique": false,
+      "primary": false,
+      "columns": [
+        "config_hash"
+      ],
+      "description": "Standard index covering the config_hash field, suitable for filtering, join, and sort queries."
+    }
+  ]
+}
