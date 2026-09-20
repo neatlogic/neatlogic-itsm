@@ -20,8 +20,6 @@ import neatlogic.framework.process.constvalue.ProcessWorkcenterInitType;
 import neatlogic.framework.process.constvalue.ProcessWorkcenterType;
 import neatlogic.framework.process.workcenter.dto.WorkcenterAuthorityVo;
 import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
-import neatlogic.framework.startup.StartupBase;
-import neatlogic.framework.tenantinit.ITenantInit;
 import neatlogic.module.process.dao.mapper.workcenter.WorkcenterMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -39,8 +37,9 @@ import java.util.stream.Stream;
  * @Author: 89770
  * @Date: 2021/1/5 17:55
  **/
-
-public class WorkcenterInit extends StartupBase implements ITenantInit {
+//TODO 翻译问题导致先注释掉
+@Deprecated
+public class WorkcenterInit {
 
     public List<WorkcenterVo> workcenterList = new ArrayList<>();
 
@@ -188,27 +187,27 @@ public class WorkcenterInit extends StartupBase implements ITenantInit {
         workcenterList.add(processingOfMine());
     }
 
-    @Override
-    public String getName() {
-        return "初始化工单中心出厂分类";
-    }
-
-    @Override
-    public int executeForCurrentTenant() {
-        executeService();
-        return 0;
-    }
-
-
-    @Override
-    public int sort() {
-        return 0;
-    }
-
-    @Override
-    public void execute() {
-        executeService();
-    }
+//    @Override
+//    public String getName() {
+//        return "初始化工单中心出厂分类";
+//    }
+//
+//    @Override
+//    public int executeForCurrentTenant() {
+//        executeService();
+//        return 0;
+//    }
+//
+//
+//    @Override
+//    public int sort() {
+//        return 0;
+//    }
+//
+//    @Override
+//    public void execute() {
+//        executeService();
+//    }
 
     private void executeService() {
         if (CollectionUtils.isNotEmpty(workcenterList)) {
