@@ -144,7 +144,7 @@ public class WorkcenterDataExportToCSVApi extends PrivateBinaryStreamApiComponen
                         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                             IProcessTaskColumn column = entry.getValue();
                             if (column.getIsShow() && column.getIsExport() && !column.getDisabled()) {
-                                map.put($.t(column.getDisplayName()), column.getSimpleValue(taskVo));
+                                map.put(column.getDisplayName(), column.getSimpleValue(taskVo));
                             }
                         }
                         for (String head : headList) {

@@ -310,10 +310,10 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                             IProcessTaskColumn column = entry.getValue();
                             if (publicHeadList.contains(column.getDisplayName())) {
-                                map.put($.t(column.getDisplayName()), column.getSimpleValue(taskVo));
+                                map.put(column.getDisplayName(), column.getSimpleValue(taskVo));
                             }
 //                            if (column.getIsShow() && column.getIsExport() && !column.getDisabled()) {
-//                                map.put($.t(column.getDisplayName()), column.getSimpleValue(taskVo));
+//                                map.put(column.getDisplayName(), column.getSimpleValue(taskVo));
 //                            }
                         }
                         // 填充工单属性&记录每个工单属性的单元格合并

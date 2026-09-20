@@ -1,0 +1,3878 @@
+{
+  "nmpaa": {
+    "useragentdeleteapi": {
+      "getname": "删除用户授权代理"
+    },
+    "useragentgetapi": {
+      "getname": "获取用户授权代理",
+      "output": {
+        "param": {
+          "desc": {
+            "email": "邮箱",
+            "isactive": "是否激活",
+            "phone": "电话",
+            "pinyin": "拼音",
+            "rolelist": "角色列表",
+            "roleuuidlist": "角色uuid列表",
+            "teamlist": "分组列表",
+            "teamuuidlist": "分组uuid列表",
+            "userauthlist": "权限列表",
+            "userid": "用户userId",
+            "userinfo": "额外属性",
+            "username": "用户名",
+            "uuid": "用户uuid"
+          }
+        }
+      }
+    },
+    "useragentsaveapi": {
+      "getname": "保存用户授权代理",
+      "input": {
+        "param": {
+          "desc": {
+            "agentuuid": "代理人uuid"
+          }
+        }
+      }
+    }
+  },
+  "nmpac": {
+    "catalogchannelgetapi": {
+      "getname": "查看子目录及服务列表",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "keyword": "关键字，匹配名称",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "treelist": "目录及服务列表"
+          }
+        }
+      }
+    },
+    "catalogchannelsearchapi": {
+      "getname": "目录及服务列表搜索接口",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "keyword": "关键字，匹配名称",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "treelist": "目录及服务列表"
+          }
+        }
+      }
+    },
+    "catalogchannelsearchformobileapi": {
+      "getname": "查看目录及服务列表(移动端)",
+      "input": {
+        "param": {
+          "desc": {
+            "cataloguuid": "服务目录uuid,0：所有"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "treelist": "目录及服务列表"
+          }
+        }
+      }
+    },
+    "catalogchanneltreesearchapi": {
+      "getname": "服务目录及通道树查询接口",
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "服务目录及通道树"
+            }
+          }
+        }
+      }
+    },
+    "catalogdeteleapi": {
+      "getname": "服务目录删除接口",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "服务目录uuid"
+          }
+        }
+      }
+    },
+    "cataloggetapi": {
+      "getname": "获取服务目录信息"
+    },
+    "catalogmoveapi": {
+      "getname": "服务目录移动位置接口",
+      "input": {
+        "param": {
+          "desc": {
+            "movetype": "移动类型",
+            "targetuuid": "目标节点uuid",
+            "uuid": "被移动的服务目录uuid"
+          }
+        }
+      }
+    },
+    "catalogsaveapi": {
+      "getname": "保存服务目录信息",
+      "input": {
+        "param": {
+          "help": {
+            "reportauthoritylist": "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]",
+            "viewauthoritylist": "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"
+          }
+        }
+      }
+    },
+    "channeldeleteapi": {
+      "getname": "服务通道删除接口",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "服务通道uuid"
+          }
+        }
+      }
+    },
+    "channelformgetapi": {
+      "getname": "服务绑定的表单属性信息获取接口",
+      "input": {
+        "param": {
+          "desc": {
+            "channeluuidlist": "服务uuidList",
+            "conditionmodel": "条件模型 simple|custom|all  ,  simple:目前用于用于工单中心条件过滤简单模式, custom:目前用于用于工单中心条件过自定义模式、条件分流和sla条件;默认custom"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "表单属性列表"
+            }
+          }
+        }
+      }
+    },
+    "channelgetapi": {
+      "getname": "获取服务通道信息"
+    },
+    "channelmoveapi": {
+      "getname": "服务通道移动位置",
+      "input": {
+        "param": {
+          "desc": {
+            "movetype": "移动类型",
+            "targetuuid": "目标节点uuid",
+            "uuid": "被移动的服务通道uuid"
+          }
+        }
+      }
+    },
+    "channelsaveapi": {
+      "getname": "保存服务信息",
+      "input": {
+        "param": {
+          "desc": {
+            "isactivepriority": "是否启用优先级",
+            "isdisplaypriority": "是否显示优先级"
+          },
+          "help": {
+            "reportauthoritylist": "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]",
+            "viewauthoritylist": "可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"
+          }
+        }
+      }
+    },
+    "channelsearchapi": {
+      "getname": "服务通道搜索接口",
+      "input": {
+        "param": {
+          "desc": {
+            "isfavorite": "是否只查询已收藏的数据"
+          },
+          "help": {
+            "isfavorite": "1：已收藏，0：全部"
+          }
+        }
+      }
+    },
+    "channelsearchforselectapi": {
+      "getname": "查询服务通道_下拉框",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "defaultvalue": "用于回显的参数列表",
+            "formuuid": "表单uuid",
+            "isactive": "是否激活",
+            "isauthenticate": "是否需要鉴权",
+            "isfavorite": "是否只查询已收藏的数据，1：已收藏，0：全部",
+            "keyword": "关键字，匹配名称",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目",
+            "parentuuid": "服务目录uuid",
+            "uuidlist": "服务uuid列表"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页码",
+            "list": "服务通道列表",
+            "pagecount": "总页数",
+            "pagesize": "页大小",
+            "rownum": "总行数"
+          }
+        }
+      }
+    },
+    "channeltransferreportinfoupdateapi": {
+      "getname": "服务转报设置信息更新"
+    },
+    "channeltypedeleteapi": {
+      "getname": "服务类型信息删除",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "服务类型uuid"
+          }
+        }
+      },
+      "operation": {
+        "delete": "删除"
+      }
+    },
+    "channeltypegetapi": {
+      "getname": "服务类型信息获取",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "服务类型uuid"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "服务类型信息"
+            }
+          }
+        }
+      }
+    },
+    "channeltypesaveapi": {
+      "getname": "服务类型信息保存",
+      "input": {
+        "param": {
+          "desc": {
+            "color": "颜色",
+            "description": "描述",
+            "handler": "工单号策略",
+            "isactive": "状态",
+            "name": "名称",
+            "prefix": "工单号前缀",
+            "uuid": "服务类型uuid"
+          }
+        }
+      },
+      "operation": {
+        "disable": "禁用"
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "服务类型uuid"
+            }
+          }
+        }
+      }
+    },
+    "channeltypesearchapi": {
+      "getname": "服务类型列表搜索",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "isactive": "是否激活",
+            "keyword": "关键字，匹配名称",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页码",
+            "pagecount": "总页数",
+            "pagesize": "页大小",
+            "rownum": "总行数",
+            "tbodylist": "服务类型列表"
+          }
+        }
+      }
+    },
+    "channeltypesearchforselectapi": {
+      "getname": "查询服务类型列表_下拉框",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "isactive": "是否激活",
+            "keyword": "关键字，匹配名称",
+            "needalloption": "是否需要“所有”选项",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页码",
+            "list": "服务类型列表",
+            "pagecount": "总页数",
+            "pagesize": "页大小",
+            "rownum": "总行数"
+          }
+        }
+      },
+      "runtime": {
+        "label": {
+          "1": "所有"
+        }
+      }
+    },
+    "channelusersaveapi": {
+      "getname": "服务通道收藏控制接口",
+      "input": {
+        "param": {
+          "desc": {
+            "action": "1:收藏，0：取消",
+            "channeluuid": "服务通道uuid"
+          }
+        }
+      }
+    },
+    "favoritechannellistformobileapi": {
+      "getname": "获取收藏的服务列表(移动端)",
+      "output": {
+        "param": {
+          "desc": {
+            "favoritelist": "收藏的服务列表"
+          }
+        }
+      }
+    },
+    "processcommenttemplatedeleteapi": {
+      "getname": "删除回复模版",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "回复模版ID"
+          }
+        }
+      }
+    },
+    "processcommenttemplategetapi": {
+      "getname": "获取回复模版"
+    },
+    "processcommenttemplatesaveapi": {
+      "getname": "保存回复模版",
+      "input": {
+        "param": {
+          "help": {
+            "authlist": "可多选，type为system时必填，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]",
+            "type": "新增时必填(system:系统模版;custom:自定义模版)"
+          }
+        }
+      }
+    },
+    "processcommenttemplatesearchapi": {
+      "getname": "查询回复模版列表",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "keyword": "关键字",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目",
+            "type": "类型"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "回复模版集合"
+          }
+        }
+      }
+    },
+    "rebuidleftrightcodeapi": {
+      "getname": "用户组重建左右编码接口"
+    }
+  },
+  "nmpacr": {
+    "calalogbreadcrumbapi": {
+      "getname": "获取某个服务目录下的所有服务目录路径接口"
+    },
+    "catalogchanneltreeapi": {
+      "getname": "查询服务目录及通道树",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltyperelationid": "服务类型关系id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "服务目录及通道树"
+            }
+          }
+        }
+      }
+    },
+    "catalogtreeapi": {
+      "getname": "获取所有服务目录（包含层级关系）接口"
+    },
+    "channeltyperelationdeleteapi": {
+      "getname": "删除服务类型关系",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltyperelationid": "服务类型关系id"
+          }
+        }
+      }
+    },
+    "channeltyperelationgetapi": {
+      "getname": "查询服务类型关系",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltyperelationid": "服务类型关系id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "服务类型关系信息"
+            }
+          }
+        }
+      }
+    },
+    "channeltyperelationisactiveupdateapi": {
+      "getname": "启用或禁用服务类型关系",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltyperelationid": "服务类型关系id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "是否激活"
+            }
+          }
+        }
+      }
+    },
+    "channeltyperelationlistapi": {
+      "all": "所有",
+      "getname": "查询服务类型关系列表",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "isactive": "是否激活",
+            "keyword": "关系名称，关键字搜索",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "服务类型关系列表"
+          }
+        }
+      }
+    },
+    "channeltyperelationlistforselectapi": {
+      "getname": "查询服务类型关系列表（下拉框专用）"
+    },
+    "channeltyperelationsaveapi": {
+      "getname": "添加服务类型关系",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "服务类型关系id",
+            "isactive": "是否激活",
+            "name": "名称",
+            "sourcelist": "来源服务类型uuid列表",
+            "targetlist": "目标服务类型uuid列表"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "服务类型关系id"
+            }
+          }
+        }
+      }
+    }
+  },
+  "nmpaf": {
+    "formattributecheckapi": {
+      "configinvalid": "config 参数中必须包含 processTaskId 或 channelUuid",
+      "getname": "表单属性值校验接口",
+      "input": {
+        "param": {
+          "desc": {
+            "attributeuuid": "表单属性uuid",
+            "config": "校验用到的相关数据",
+            "data": "属性值"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "校验结果"
+            }
+          }
+        }
+      }
+    },
+    "processtaskformdataapi": {
+      "getname": "查询工单表单数据",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "processtaskformattributedatavo": "表单数据列表"
+          }
+        }
+      }
+    },
+    "processtaskformpassworddecryptapi": {
+      "formattributeuuid": "表单密码组件UUID",
+      "getname": "解密工单中表单的密码组件值",
+      "nopermissiontoviewpassword": "没有权限查看密码",
+      "otherparamconfig": "其他参数配置"
+    }
+  },
+  "nmpah": {
+    "autoapprovalhandler": {
+      "getname": "自动审批"
+    },
+    "autocompletehandler": {
+      "getname": "自动流转"
+    },
+    "restfulactionaudithandler": {
+      "statustext": {
+        "failed": "已失败",
+        "succeeded": "已成功"
+      }
+    }
+  },
+  "nmpap": {
+    "batchabortprocesstaskapi": {
+      "getname": "批量取消工单"
+    },
+    "batchdeleteprocesstaskapi": {
+      "getname": "批量删除工单"
+    },
+    "batchhideprocesstaskapi": {
+      "getname": "批量隐藏工单"
+    },
+    "batchpauseprocesstaskapi": {
+      "getname": "批量暂停工单"
+    },
+    "batchurgeprocesstaskapi": {
+      "getname": "批量催办工单"
+    },
+    "delayprocesstaskstepslaapi": {
+      "getname": "延迟工单步骤时效",
+      "input": {
+        "param": {
+          "help": {
+            "unit": "day:天,hour:小时,minute:分钟，默认为minute"
+          }
+        }
+      }
+    },
+    "deleteprocesstaskstepinoperationapi": {
+      "getname": "根据工单ID删除processtask_step_in_operation表数据"
+    },
+    "exportprocesstaskdataapi": {
+      "getname": "工单相关表数据导出",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单ID"
+          }
+        }
+      }
+    },
+    "importprocesstaskdataapi": {
+      "getname": "导入工单相关表数据"
+    },
+    "listprocessstepapi": {
+      "getname": "获取流程步骤列表",
+      "input": {
+        "param": {
+          "desc": {
+            "channeluuid": "服务uuid，优先使用服务内定义的流程",
+            "defaultvalue": "选中值",
+            "processuuid": "流程uuid"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "processstepvo": "流程节点列表"
+          }
+        }
+      }
+    },
+    "listprocesstaskslatimeapi": {
+      "getname": "工单时效列表",
+      "input": {
+        "param": {
+          "desc": {
+            "slaidlist": "时效ID列表"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "时效列表"
+          }
+        }
+      }
+    },
+    "prioritydeleteapi": {
+      "getname": "优先级信息删除",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "优先级uuid"
+          }
+        }
+      }
+    },
+    "prioritygetapi": {
+      "getname": "优先级信息获取",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "优先级uuid"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "优先级信息"
+            }
+          }
+        }
+      }
+    },
+    "prioritymoveapi": {
+      "getname": "移动动优先级接口",
+      "input": {
+        "param": {
+          "desc": {
+            "sort": "移动后的序号",
+            "uuid": "被移动的优先级uuid"
+          }
+        }
+      }
+    },
+    "prioritysaveapi": {
+      "getname": "优先级信息保存接口",
+      "input": {
+        "param": {
+          "desc": {
+            "color": "颜色",
+            "desc": "描述",
+            "isactive": "状态",
+            "name": "名称",
+            "uuid": "优先级uuid"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "优先级uuid"
+            }
+          }
+        }
+      }
+    },
+    "prioritysearchapi": {
+      "getname": "优先级列表搜索",
+      "input": {
+        "param": {
+          "desc": {
+            "channeluuid": "服务uuid",
+            "currentpage": "当前页",
+            "isactive": "是否激活",
+            "keyword": "关键字，匹配名称",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页码",
+            "pagecount": "总页数",
+            "pagesize": "页大小",
+            "rownum": "总行数",
+            "tbodylist": "优先级列表"
+          }
+        }
+      }
+    },
+    "prioritysearchforselectapi": {
+      "getname": "查询优先级列表_下拉框",
+      "input": {
+        "param": {
+          "desc": {
+            "channeluuid": "服务uuid",
+            "currentpage": "当前页",
+            "isactive": "是否激活",
+            "keyword": "关键字，匹配名称",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页码",
+            "list": "优先级列表",
+            "pagecount": "总页数",
+            "pagesize": "页大小",
+            "rownum": "总行数"
+          }
+        }
+      }
+    },
+    "processautomaticinitapi": {
+      "getname": "获取automatic初始化数据接口",
+      "output": {
+        "param": {
+          "desc": {
+            "callbacklist": {
+              "text": "回调类型名",
+              "value": "回调类型"
+            },
+            "failpolicylist": {
+              "text": "失败策略名",
+              "value": "失败策略"
+            }
+          }
+        }
+      }
+    },
+    "processconditionlist": {
+      "getname": "流程条件列表",
+      "input": {
+        "param": {
+          "isneedcomplexattr": "是否需要复杂属性"
+        }
+      }
+    },
+    "processconfigcheckapi": {
+      "getname": "检查流程图config与表(process_为前缀)数据是否一致",
+      "input": {
+        "param": {
+          "desc": {
+            "allprocess": "所有流程"
+          }
+        }
+      },
+      "message": {
+        "connectioncountmismatch": "工作流步骤连线数量不一致",
+        "connectiondatamismatch": "步骤连线数据不一致",
+        "processformmissing": "`process_form` 表缺少数据",
+        "processformuuidmismatch": "`process_form` 表的 `form_uuid` 字段值不一致",
+        "processscoretemplatemissing": "`process_score_template` 表缺少数据",
+        "processslainvalid": "`process_sla` 表数据不正确",
+        "processslamissing": "`process_sla` 表缺少数据",
+        "processstepslainvalid": "`process_step_sla` 表中 `sla_uuid` 为 {0} 的数据不正确",
+        "processtaskformmissing": "`processtask_form` 表缺少数据",
+        "processtaskformuuidmismatch": "`processtask_form` 表的 `form_uuid` 字段值不一致",
+        "processtaskscoretemplatemissing": "`processtask_score_template` 表缺少数据",
+        "remainingconnectiondata": "比较后仍有未匹配的步骤连线数据",
+        "remainingstepdata": "比较后仍有未匹配的步骤数据",
+        "scoresettingmismatch": "评分设置数据不一致",
+        "stepcountmismatch": "工作流步骤数量不一致",
+        "stepdatamismatch": "步骤数据不一致"
+      }
+    },
+    "processcopyapi": {
+      "getname": "流程复制",
+      "input": {
+        "param": {
+          "desc": {
+            "name": "新流程名称",
+            "uuid": "被复制流程的uuid"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "新流程信息"
+            }
+          }
+        }
+      }
+    },
+    "processcustombuttonstatuslist": {
+      "getname": "获取流程步骤自定义按钮及状态列表",
+      "input": {
+        "param": {
+          "desc": {
+            "handler": "步骤节点处理器"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "custombuttonlist": "按钮列表",
+            "customstatuslist": "状态列表"
+          }
+        }
+      }
+    },
+    "processdeleteapi": {
+      "getname": "删除流程",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "流程uuid"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "uuid": "流程uuid"
+          }
+        }
+      }
+    },
+    "processdraftclearapi": {
+      "getname": "流程草稿清空",
+      "input": {
+        "param": {
+          "desc": {
+            "processuuid": "流程uuid，清空当前流程的草稿"
+          }
+        }
+      }
+    },
+    "processdraftgetapi": {
+      "getname": "获取流程草稿信息"
+    },
+    "processdraftlistapi": {
+      "getname": "流程草稿列表接口",
+      "input": {
+        "param": {
+          "desc": {
+            "processuuid": "流程uuid，获取已正式保存的当前流程的草稿列表，如不传，获取未正式保存的所有草稿列表"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "流程草稿列表"
+            }
+          }
+        }
+      }
+    },
+    "processdraftsaveapi": {
+      "getname": "保存流程草稿",
+      "output": {
+        "param": {
+          "desc": {
+            "uuid": "草稿uuid"
+          }
+        }
+      }
+    },
+    "processexportapi": {
+      "getname": "流程导出",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "流程uuid"
+          }
+        }
+      }
+    },
+    "processformgetapi": {
+      "getname": "获取表单信息",
+      "input": {
+        "param": {
+          "desc": {
+            "currentversionuuid": "选择表单版本uuid",
+            "uuid": "表单uuid"
+          }
+        }
+      }
+    },
+    "processgetapi": {
+      "getname": "获取单个流程图数据接口",
+      "taskworkflowname": "{0}【工单：{1}】"
+    },
+    "processimportapi": {
+      "getname": "导入流程",
+      "result": {
+        "created": "新建工作流：“{0}”",
+        "updated": "更新工作流：“{0}”"
+      }
+    },
+    "processparamlist": {
+      "getname": "流程参数列表"
+    },
+    "processreferencelistapi": {
+      "getname": "流程引用列表"
+    },
+    "processsaveapi": {
+      "getname": "保存流程",
+      "input": {
+        "param": {
+          "desc": {
+            "config": "流程配置内容",
+            "name": "流程名称",
+            "uuid": "流程uuid"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "uuid": "流程uuid"
+          }
+        }
+      }
+    },
+    "processsearchapi": {
+      "getname": "流程列表搜索接口",
+      "input": {
+        "param": {
+          "desc": {
+            "isicreated": "是否只查询我创建的"
+          },
+          "help": {
+            "keyword": "匹配名称"
+          }
+        }
+      }
+    },
+    "processsearchforselectapi": {
+      "getname": "查询流程列表_下拉框",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "isactive": "是否激活",
+            "isicreated": "是否只查询我创建的",
+            "keyword": "关键字，匹配名称",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页码",
+            "list": "流程列表",
+            "pagecount": "总页数",
+            "pagesize": "页大小",
+            "rownum": "总行数"
+          }
+        }
+      }
+    },
+    "processstephandleconfigsaveapi": {
+      "getname": "流程节点组件配置保存接口",
+      "input": {
+        "param": {
+          "desc": {
+            "processstephandlerlist": "流程节点组件配置信息列表"
+          }
+        }
+      }
+    },
+    "processstephandlerlistapi": {
+      "getname": "流程组件列表",
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "流程组件列表"
+            }
+          }
+        }
+      }
+    },
+    "processstephandlersearchapi": {
+      "getname": "流程节点组件检索接口",
+      "input": {
+        "param": {
+          "desc": {
+            "keywork": "流程节点组件名称"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "stephandlerlist": "流程节点组件列表"
+          }
+        }
+      }
+    },
+    "processtaggetapi": {
+      "getname": "获取标签_下拉",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "defaultvalue": "默认值列表",
+            "keyword": "关键字，匹配名称",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "list": "流程列表"
+          }
+        }
+      }
+    },
+    "processtaskabortapi": {
+      "getname": "工单取消接口",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "描述",
+            "processtaskid": "工单Id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtaskauditlistapi": {
+      "getname": "工单活动列表接口",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id",
+            "processtaskstepidlist": "工单步骤id列表"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "n": {
+                "auditdetaillist": "工单活动详情列表"
+              },
+              "name": "工单活动列表"
+            }
+          }
+        }
+      }
+    },
+    "processtaskautomaticcompleteapi": {
+      "getname": "流转外部调用步骤接口",
+      "input": {
+        "param": {
+          "desc": {
+            "action": "操作类型，complete：流转,back：回退",
+            "processtaskstepid": "当前步骤Id",
+            "source": "来源"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "message": "异常信息",
+            "status": "状态"
+          }
+        }
+      }
+    },
+    "processtaskautomaticretryapi": {
+      "getname": "工单automatic步骤重试接口",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskstepid": "工单步骤Id"
+          }
+        }
+      }
+    },
+    "processtaskbackapi": {
+      "getname": "工单回退接口",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单Id",
+            "processtaskstepid": "工单步骤Id"
+          }
+        }
+      }
+    },
+    "processtaskcanreactivatesteplistapi": {
+      "getname": "当前用户可以重新激活的步骤列表"
+    },
+    "processtaskcommentapi": {
+      "getname": "工单回复接口",
+      "input": {
+        "param": {
+          "desc": {
+            "commenttemplateid": "回复模版ID",
+            "content": "描述",
+            "fileidlist": "附件id列表",
+            "processtaskid": "工单id",
+            "processtaskstepid": "步骤id",
+            "source": "来源"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "commentlist": "当前步骤评论列表"
+          }
+        }
+      }
+    },
+    "processtaskcommentdeleteapi": {
+      "getname": "工单回复删除接口",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "回复id",
+            "source": "来源"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "commentlist": "当前步骤评论列表"
+          }
+        }
+      }
+    },
+    "processtaskcommenteditapi": {
+      "getname": "工单回复编辑接口",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "描述",
+            "fileidlist": "附件id列表",
+            "id": "回复id",
+            "source": "来源"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "commentlist": "当前步骤评论列表"
+          }
+        }
+      }
+    },
+    "processtaskcompleteapi": {
+      "getname": "流转工单",
+      "input": {
+        "param": {
+          "desc": {
+            "action": "操作类型",
+            "assignworkerlist": "分配步骤处理人信息列表，格式[{\"processTaskStepId\":1, \"workerList\":[\"user#xxx\",\"team#xxx\",\"role#xxx\"]}]",
+            "content": "原因",
+            "nextstepid": "激活下一步骤Id（如果有且仅有一个下一节点，则可以不传这个参数）",
+            "processtaskstepid": "当前步骤Id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtaskcreateapi": {
+      "getname": "上报工单(供第三方使用)",
+      "input": {
+        "param": {
+          "desc": {
+            "focususeridlist": "工单关注人userId列表",
+            "isasync": "是否异步模式",
+            "newprocesstaskid": "指定工单id，则会使用该id作为工单id",
+            "region": "地域, 全路径or地域id"
+          },
+          "help": {
+            "channel": "支持channelUuid和channelName入参",
+            "owner": "上报人uuid和上报人id入参"
+          }
+        }
+      }
+    },
+    "processtaskcurrentusertasklistapi": {
+      "getname": "当前用户任务列表接口"
+    },
+    "processtaskdeleteapi": {
+      "getname": "删除工单",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id"
+          }
+        }
+      }
+    },
+    "processtaskdraftgetapi": {
+      "getname": "工单草稿数据获取接口",
+      "input": {
+        "param": {
+          "desc": {
+            "parentprocesstaskstepid": "父工单步骤id"
+          },
+          "help": {
+            "channeltyperelationid": "从转报进入上报页时，传channelTypeRelationId",
+            "channeluuid": "从服务目录进入上报页时，传channelUuid",
+            "copyprocesstaskid": "从复制上报进入上报页时，传copyProcessTaskId",
+            "fromprocesstaskid": "从转报进入上报页时，传fromProcessTaskId",
+            "fromprocesstaskstepid": "从转报进入上报页时，传fromProcessTaskStepId",
+            "parentprocesstaskstepid": "创建子流程时，传parentProcessTaskStepId",
+            "processtaskid": "从工单中心进入上报页时，传processTaskId"
+          }
+        }
+      }
+    },
+    "processtaskdraftsaveapi": {
+      "getname": "工单上报暂存接口",
+      "input": {
+        "param": {
+          "desc": {
+            "invoke": "关联类型"
+          },
+          "help": {
+            "channeltyperelationid": "从转报进入上报页时，传channelTypeRelationId",
+            "fromprocesstaskid": "从转报进入上报页时，传fromProcessTaskId",
+            "invoke": "subprocess :子流程",
+            "parentprocesstaskstepid": "创建子流程时，传parentProcessTaskStepId",
+            "reporter": "如果当前登录人和owner不一样则需要额外传reporter。没有代报人，则数据库对应reporter直接null"
+          }
+        }
+      }
+    },
+    "processtaskflowchartapi": {
+      "getname": "工单流程图",
+      "input": {
+        "param": {
+          "desc": {
+            "channeluuid": "工单id",
+            "processtaskid": "工单id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "config": "流程图信息",
+            "processtasksteplist": "步骤状态列表",
+            "processtasksteprellist": "连线状态列表"
+          }
+        }
+      }
+    },
+    "processtaskfocusupdateapi": {
+      "getname": "切换工单关注状态",
+      "input": {
+        "param": {
+          "desc": {
+            "isfocus": "是否关注工单(1：关注；0：取消关注)",
+            "processtaskid": "工单Id",
+            "source": "来源"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "isfocus": "是否关注工单"
+          }
+        }
+      }
+    },
+    "processtaskfocususerlistapi": {
+      "getname": "获取工单关注人列表",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "focususeruuidlist": "工单关注人uuid列表",
+            "isfocus": "当前用户是否关注了当前工单(1:是;0:否)"
+          }
+        }
+      }
+    },
+    "processtaskfocususerupdateapi": {
+      "getname": "更新工单关注人",
+      "input": {
+        "param": {
+          "desc": {
+            "focususeruuidlist": "工单关注人列表",
+            "processtaskid": "工单id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtaskformapi": {
+      "getname": "查询工单步骤表单数据",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id",
+            "processtaskstepid": "工单步骤id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "formattributedatamap": "工单信息",
+            "formconfig": "工单信息"
+          }
+        }
+      }
+    },
+    "processtaskformdatalistforemailapi": {
+      "getname": "查询工单表单数据列表（邮件）",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "processtaskformattributedatavo": "数据"
+          }
+        }
+      }
+    },
+    "processtaskimportauditsearchapi": {
+      "getname": "查询工单导入记录",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "keyword": "关键词",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页数据条目",
+            "status": "上报状态"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "auditlist": "工单导入记录"
+          }
+        }
+      }
+    },
+    "processtaskimportfromexcelapi": {
+      "getname": "导入工单数据(通过固定格式excel文件)",
+      "output": {
+        "param": {
+          "desc": {
+            "successcount": "导入成功的工单数",
+            "totalcount": "导入的总工单数"
+          }
+        }
+      }
+    },
+    "processtasklistforrelationapi": {
+      "getname": "查询工单列表(关联工单专用)",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltyperelationid": "服务类型关系id",
+            "channeluuid": "服务uuid",
+            "currentpage": "当前页",
+            "keyword": "模糊匹配，支持标题",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目",
+            "processtaskid": "工单id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "工单列表"
+          }
+        }
+      }
+    },
+    "processtasklistforrepeatapi": {
+      "getname": "查询工单列表（重复工单专用）",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "keyword": "模糊查询",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目",
+            "processtaskid": "工单id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "工单列表"
+          }
+        }
+      }
+    },
+    "processtasknextsteplistapi": {
+      "getname": "下一可流转步骤列表接口",
+      "input": {
+        "param": {
+          "desc": {
+            "action": "操作类型",
+            "processtaskid": "工单Id",
+            "processtaskstepid": "当前步骤Id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "下一可流转步骤列表"
+            }
+          }
+        }
+      }
+    },
+    "processtaskoldformpropgetapi": {
+      "getname": "查询旧工单表单信息",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单Id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "form": "表单信息",
+            "prop": "自定义属性信息"
+          }
+        }
+      }
+    },
+    "processtaskprocessablesteplist": {
+      "getname": "当前用户可处理的步骤列表接口"
+    },
+    "processtaskreapprovalapi": {
+      "getname": "工单步骤重审接口",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id",
+            "processtaskstepid": "步骤id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtaskrecoverapi": {
+      "getname": "工单恢复接口",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "描述",
+            "processtaskid": "工单Id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtaskrelationdeleteapi": {
+      "getname": "删除工单关联",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskrelationid": "工单关联id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtaskrelationlistapi": {
+      "getname": "查询关联工单列表",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目",
+            "processtaskid": "工单id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "processtaskrelationlist": "关联工单列表"
+          }
+        }
+      }
+    },
+    "processtaskrelationsaveapi": {
+      "getname": "保存工单关联",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltyperelationid": "服务类型关系id",
+            "processtaskid": "工单id",
+            "relationprocesstaskidlist": "被关联的工单id列表",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtaskrepeatdeleteapi": {
+      "getname": "解绑重复工单"
+    },
+    "processtaskrepeatlistapi": {
+      "getname": "查询重复工单列表",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "重复工单列表"
+          }
+        }
+      }
+    },
+    "processtaskrepeatsaveapi": {
+      "getname": "标记重复工单接口"
+    },
+    "processtaskretreatablesteplistapi": {
+      "getname": "当前用户可撤回的步骤列表接口",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单Id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "步骤信息列表"
+            }
+          }
+        }
+      }
+    },
+    "processtaskretreatapi": {
+      "getname": "上一步发起的撤回动作接口",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "描述",
+            "processtaskid": "工单id",
+            "processtaskstepid": "步骤id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtaskscoreapi": {
+      "getname": "工单评分接口",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "评价内容",
+            "processtaskid": "工单id",
+            "scoredimensionlist": "评分维度及分数，格式[{\"id\":133018403841111,\"name\":\"dim\",\"description\":\"see\",\"score\":3}]",
+            "scoretemplateid": "评分模版ID",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtaskserialnumberpolicylistapi": {
+      "getname": "查询工单号生成规则列表",
+      "output": {
+        "param": {
+          "desc": {
+            "valuetextvo": "工单号生成规则列表"
+          }
+        }
+      }
+    },
+    "processtaskserialnumberupdateapi": {
+      "getname": "更新历史工单的工单号",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltypeuuid": "服务类型uuid"
+          }
+        }
+      }
+    },
+    "processtaskshowhideapi": {
+      "getname": "隐藏显示工单",
+      "input": {
+        "param": {
+          "desc": {
+            "isshow": "是否 1显示/0隐藏",
+            "processtaskid": "工单id"
+          }
+        }
+      }
+    },
+    "processtaskstartapi": {
+      "getname": "开始工单步骤"
+    },
+    "processtaskstartprocessapi": {
+      "getname": "工单上报提交接口",
+      "input": {
+        "param": {
+          "desc": {
+            "assignworkerlist": "分配步骤处理人信息列表，格式[{\"processTaskStepId\":1, \"processStepUuid\":\"abc\", \"workerList\":[\"user#xxx\",\"team#xxx\",\"role#xxx\"]}]",
+            "nextstepid": "激活下一步骤Id（如果有且仅有一个下一节点，则可以不传这个参数）",
+            "processtaskid": "工单Id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtaskstepactionlistapi": {
+      "getname": "获取工单步骤当前用户操作权限列表",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id",
+            "processtaskstepid": "工单步骤id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "当前用户操作权限列表"
+            }
+          }
+        }
+      }
+    },
+    "processtaskstepbatchcompleteapi": {
+      "getname": "批量完成工单步骤",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "处理意见",
+            "processtaskidlist": "工单Id列表",
+            "tag": "步骤标签",
+            "userid": "处理人userId"
+          }
+        }
+      }
+    },
+    "processtaskstepdatagetapi": {
+      "getname": "获取工单步骤数据"
+    },
+    "processtaskstepdraftsaveapi": {
+      "getname": "工单步骤暂存接口"
+    },
+    "processtaskstepgetapi": {
+      "description": {
+        "desc": "工单步骤基本信息获取接口，当前步骤名称、激活时间、状态、处理人、协助处理人、处理时效、表单属性显示控制等"
+      },
+      "getname": "工单步骤基本信息获取接口"
+    },
+    "processtasksteplistapi": {
+      "getname": "工单步骤列表接口",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "步骤信息列表"
+            }
+          }
+        }
+      }
+    },
+    "processtasksteppauseapi": {
+      "getname": "暂停工单步骤",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "描述",
+            "processtaskid": "工单id",
+            "processtaskstepid": "工单步骤id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtasksteprecoverapi": {
+      "getname": "恢复工单步骤",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "描述",
+            "processtaskid": "工单id",
+            "processtaskstepid": "工单步骤id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtaskstepredoapi": {
+      "getname": "打回重做步骤",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "原因",
+            "processtaskid": "工单Id",
+            "processtaskstepid": "激活步骤Id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtaskstepslatimelistapi": {
+      "getname": "查询工单步骤sla信息列表",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskstepid": "工单步骤id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "slatimelist": "sla信息列表"
+          }
+        }
+      }
+    },
+    "processtaskstepstartifnecessaryapi": {
+      "getname": "如果需要，开始工单步骤"
+    },
+    "processtaskstepstatuslistapi": {
+      "getname": "工单全部步骤状态列表接口",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "步骤状态列表"
+            }
+          }
+        }
+      }
+    },
+    "processtasktemplateexportapi": {
+      "getname": "导出工单表格模版",
+      "input": {
+        "param": {
+          "desc": {
+            "channeluuid": "服务uuid"
+          }
+        }
+      }
+    },
+    "processtasktransferablesteplistapi": {
+      "getname": "当前用户可转交的步骤列表接口",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单Id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "步骤信息列表"
+            }
+          }
+        }
+      }
+    },
+    "processtasktransferapi": {
+      "getname": "转交工单",
+      "input": {
+        "param": {
+          "desc": {
+            "issavedata": "是否保存数据",
+            "workerlist": "转交目标对象列表"
+          }
+        }
+      }
+    },
+    "processtasktransferknowledgeauditapi": {
+      "getname": "记录工单转知识活动",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id",
+            "source": "来源",
+            "title": "知识标题"
+          }
+        }
+      }
+    },
+    "processtaskupdateapi": {
+      "getname": "更新工单信息",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "描述",
+            "fileidlist": "附件id列表",
+            "priorityuuid": "优先级uuid",
+            "processtaskid": "工单id",
+            "processtaskstepid": "步骤id",
+            "source": "来源",
+            "taglist": "标签列表",
+            "title": "标题"
+          }
+        }
+      }
+    },
+    "processtaskurgeapi": {
+      "getname": "催办工单",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单Id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtaskwhichcurrentstepistagstepofmineapi": {
+      "getname": "我的待办的工单中当前处理节点是打了某个标签的节点的工单列表",
+      "input": {
+        "param": {
+          "desc": {
+            "tag": "标签名称",
+            "userid": "用户ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "channelname": "服务名称",
+            "id": "工单ID",
+            "rolename": "当前步骤处理角色",
+            "status": "工单状态",
+            "stepname": "当前步骤",
+            "stepstatus": "当前步骤状态",
+            "teamname": "当前步骤处理组",
+            "title": "工单标题",
+            "userid": "当前步骤处理人id",
+            "username": "当前步骤处理人名称"
+          }
+        }
+      }
+    },
+    "processtypelistapi": {
+      "getname": "流程类型列表接口",
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "流程类型列表"
+            }
+          }
+        }
+      }
+    },
+    "processupdateapi": {
+      "getname": "流程基本信息更新接口",
+      "input": {
+        "param": {
+          "desc": {
+            "name": "流程名称",
+            "uuid": "流程uuid"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "uuid": "流程uuid"
+          }
+        }
+      }
+    },
+    "redoasynccreateprocesstaskapi": {
+      "getname": "重做异步创建工单"
+    },
+    "searchprocesstaskfileapi": {
+      "getname": "工单附件列表",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目",
+            "processtaskid": "工单ID"
+          }
+        }
+      }
+    },
+    "searchprocesstasklistforownerapi": {
+      "getname": "查询用户上报工单列表",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "excludeid": "排除的工单ID",
+            "owner": "上报人",
+            "pagesize": "每页条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "工单列表"
+          }
+        }
+      }
+    },
+    "searchprocesstasksteplistapi": {
+      "getname": "工单步骤列表接口"
+    },
+    "updateprocesstaskformapi": {
+      "getname": "修改工单表单数据"
+    },
+    "updateprocesstaskneedscoreapi": {
+      "getname": "批量更新工单的needScore字段值",
+      "input": {
+        "param": {
+          "desc": {
+            "idlist": "工单ID列表"
+          }
+        }
+      }
+    },
+    "workerdispatcherlistapi": {
+      "getname": "处理人分派器列表接口",
+      "output": {
+        "param": {
+          "desc": {
+            "workerdispatcherlist": "处理人分派器列表"
+          }
+        }
+      }
+    },
+    "workerpolicylistapi": {
+      "getname": "指派策略列表",
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "指派策略列表"
+            }
+          }
+        }
+      }
+    }
+  },
+  "nmpapa": {
+    "processtaskagentdeleteapi": {
+      "getname": "删除用户任务授权信息"
+    },
+    "processtaskagentgetapi": {
+      "getname": "获取用户任务授权信息",
+      "output": {
+        "param": {
+          "desc": {
+            "processtaskagentinfovo": "任务授权信息"
+          }
+        }
+      }
+    },
+    "processtaskagentisactiveupdateapi": {
+      "getname": "启用或禁用用户任务授权信息"
+    },
+    "processtaskagentsaveapi": {
+      "getname": "保存用户任务授权信息",
+      "input": {
+        "param": {
+          "desc": {
+            "begintime": "开始时间",
+            "compoblist": "授权对象列表",
+            "endtime": "结束时间",
+            "isactive": "启用"
+          }
+        }
+      }
+    },
+    "processtaskstepautomaticcallbacktestapi": {
+      "getname": "自动处理步骤回调测试接口",
+      "input": {
+        "param": {
+          "desc": {
+            "inputparam1": "入参1",
+            "inputparam2": "入参2"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "error": "异常信息",
+            "outputparam1": "出参1",
+            "outputparam2": "出参2"
+          }
+        }
+      }
+    },
+    "processtaskstepautomaticfirstrequesttestapi": {
+      "getname": "自动处理步骤请求测试接口",
+      "input": {
+        "param": {
+          "desc": {
+            "inputparam1": "入参1",
+            "inputparam2": "入参2"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "error": "异常信息",
+            "outputparam1": "出参1",
+            "outputparam2": "出参2"
+          }
+        }
+      }
+    },
+    "redoasynccreateprocesstaskapi": {
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID"
+          }
+        }
+      }
+    },
+    "searchasynccreateprocesstaskapi": {
+      "getname": "查询异步创建工单数据列表",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID"
+          }
+        }
+      }
+    },
+    "updateasynccreateprocesstaskapi": {
+      "getname": "修改异步创建工单数据",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID"
+          }
+        }
+      }
+    }
+  },
+  "nmpapd": {
+    "processtaskimportfromjsonapi": {
+      "error": {
+        "prioritynotfound": "工单 {0} 的优先级“{1}”不存在",
+        "servicenotfound": "工单 {0} 的服务“{1}”不存在",
+        "workflownotfound": "工单 {0} 的工作流“{1}”不存在"
+      },
+      "getname": "导入工单数据(通过固定格式json文件)",
+      "input": {
+        "param": {
+          "desc": {
+            "source": "来源"
+          }
+        }
+      }
+    }
+  },
+  "nmpapf": {
+    "processtaskfulltextindexrebuildapi": {
+      "getname": "重建工单索引",
+      "input": {
+        "param": {
+          "desc": {
+            "idlist": "工单idList"
+          }
+        }
+      }
+    }
+  },
+  "nmpapm": {
+    "activeprocesstaskstepapi": {
+      "getname": "激活工单步骤"
+    },
+    "enableprocesstaskformdebugmodeapi": {
+      "getname": "启用工单表单debug模式"
+    },
+    "updateprocesstaskconfigapi": {
+      "getname": "更新工单流程图配置",
+      "message": {
+        "unchanged": "工单工作流快照未发生变化",
+        "updated": "工单工作流快照已更新"
+      }
+    },
+    "updateprocesstaskformconfigapi": {
+      "getname": "更新工单表单配置"
+    },
+    "updateprocesstaskstepstatusapi": {
+      "getname": "更新工单步骤状态",
+      "input": {
+        "param": {
+          "help": {
+            "processtasknextstepid": "待激活的下一步骤名称重复时需要填此参数。此参数存在时，无需填processTaskNextStepName",
+            "processtasknextstepname": "更改步骤状态为succeed时需要填此参数",
+            "processtaskstepid": "待更改状态的步骤名称重复时需要填此参数。此参数存在时，无需填processTaskId与processTaskStepName"
+          }
+        }
+      }
+    }
+  },
+  "nmpaps": {
+    "searchprocesstasksteplistapi": {
+      "actionstatus": {
+        "failed": "已失败",
+        "succeeded": "已成功"
+      },
+      "listseparator": "、"
+    }
+  },
+  "nmpapt": {
+    "converworkcenterconditionconfigapi": {
+      "getname": "转换工单中心配置数据"
+    },
+    "processtaskmobileisfitapi": {
+      "getname": "查看工单是否支持移动端",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "工单是否支持移动端，1：支持，0：不支持;不支持则移动端提示不支持"
+            }
+          }
+        }
+      },
+      "unsupportedstep": "抱歉，移动端暂不支持处理包含“{0}”步骤节点的工单"
+    },
+    "processtaskstepexecutesortcomparatortestapi": {
+      "getname": "测试工单步骤执行排序比较器"
+    },
+    "processtasksteptaskcompleteapi": {
+      "getname": "任务完成接口",
+      "input": {
+        "param": {
+          "desc": {
+            "button": "按钮",
+            "content": "描述",
+            "id": "任务id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtasksteptaskdeleteapi": {
+      "getname": "删除任务",
+      "input": {
+        "param": {
+          "desc": {
+            "processtasksteptaskid": "任务id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtasksteptaskfiledeleteapi": {
+      "getname": "任务删除附件接口",
+      "input": {
+        "param": {
+          "desc": {
+            "fileid": "附件id",
+            "id": "任务id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtasksteptaskfilesaveapi": {
+      "getname": "任务上传附件接口",
+      "input": {
+        "param": {
+          "desc": {
+            "fileid": "附件id",
+            "id": "任务id",
+            "source": "来源"
+          }
+        }
+      }
+    },
+    "processtasksteptaskgetapi": {
+      "getname": "获取工单步骤任务",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "工单步骤id"
+          }
+        }
+      }
+    },
+    "processtasksteptasklistapi": {
+      "getname": "获取工单步骤任务列表",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskstepid": "工单步骤id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "任务列表"
+            }
+          }
+        }
+      }
+    },
+    "processtasksteptasksaveapi": {
+      "getname": "保存任务",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "描述",
+            "id": "任务id，如果不为空则是编辑，为空则新增",
+            "processtaskstepid": "步骤id",
+            "source": "来源",
+            "steptaskuservolist": "任务处理人列表",
+            "taskconfigid": "任务策略id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "任务id"
+            }
+          }
+        }
+      }
+    },
+    "randomcreateprocesstaskapi": {
+      "getname": "随机创建|执行工单",
+      "input": {
+        "param": {
+          "desc": {
+            "count": "需要随机创建|执行工单数",
+            "type": "create:创建工单，execute:执行工单(因为异步原因，在create后需延迟50s后再执行工单)"
+          }
+        }
+      }
+    },
+    "testasynccreateprocesstaskapi": {
+      "getname": "测试异步创建工单",
+      "input": {
+        "param": {
+          "desc": {
+            "newprocesstaskid": "指定工单id，则会使用该id作为工单id"
+          },
+          "help": {
+            "channel": "支持channelUuid和channelName入参",
+            "owner": "上报人uuid和上报人id入参",
+            "region": "全路径or地域id"
+          }
+        }
+      }
+    }
+  },
+  "nmpas": {
+    "scoretemplatedeleteapi": {
+      "getname": "删除评分模版",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "评分模版ID"
+          }
+        }
+      }
+    },
+    "scoretemplategetapi": {
+      "getname": "获取评分模版",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "评分模版ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "scoretemplatevo": "评分模版"
+          }
+        }
+      }
+    },
+    "scoretemplaterefprocesslistapi": {
+      "getname": "查询评分模版关联的流程",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "id": "评分模版ID",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页数据条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "processlist": "关联的流程列表"
+          }
+        }
+      }
+    },
+    "scoretemplatesaveapi": {
+      "getname": "保存评分模版",
+      "input": {
+        "param": {
+          "help": {
+            "dimensionarray": "格式:[{\"name\":\"t1\",\"description\":\"d1\"},{\"name\":\"t2\",\"description\":\"d2\"}]"
+          }
+        }
+      }
+    },
+    "scoretemplatesearchapi": {
+      "getname": "查询评分模版",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "keyword": "关键字",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页数据条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "scoretemplatelist": "评分模版列表"
+          }
+        }
+      }
+    },
+    "scoretemplatesearchforselectapi": {
+      "getname": "查询评分模版_下拉框",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "keyword": "关键字",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页数据条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "scoretemplatelist": "选项列表"
+          }
+        }
+      }
+    },
+    "scoretemplatestatusupdateapi": {
+      "getname": "修改评分模版激活状态",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "评分模版ID",
+            "isactive": "是否激活"
+          }
+        }
+      }
+    }
+  },
+  "nmpasc": {
+    "automaticprocesscomponent": {
+      "defaultsuccesscondition": "默认按状态码判断，2xx 和 3xx 表示成功"
+    }
+  },
+  "nmpat": {
+    "taskdeleteapi": {
+      "getname": "删除子任务",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "任务id"
+          }
+        }
+      }
+    },
+    "taskreferencelistapi": {
+      "getname": "获取子任务被引用的流程列表",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "id": "子任务策略id",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页码",
+            "pagecount": "总页数",
+            "pagesize": "页大小",
+            "rownum": "总行数",
+            "tbodylist": "流程列表"
+          }
+        }
+      }
+    },
+    "tasksaveapi": {
+      "getname": "新增|更新子任务",
+      "input": {
+        "param": {
+          "desc": {
+            "config": "配置信息",
+            "id": "任务id,存在则修改，否则新增",
+            "isactive": "是否激活,激活：1，禁用：0",
+            "name": "关键字，匹配名称",
+            "num": "参与人数。-1：不做限制",
+            "policy": "其中一个人完成即可：any,所有人完成：all"
+          }
+        }
+      }
+    },
+    "tasksearchapi": {
+      "getname": "搜索子任务",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "isactive": "是否激活",
+            "keyword": "关键字，匹配名称",
+            "needpage": "是否需要分页，默认true",
+            "pagesize": "每页条目"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页码",
+            "pagecount": "总页数",
+            "pagesize": "页大小",
+            "rownum": "总行数",
+            "tbodylist": "优先级列表"
+          }
+        }
+      }
+    }
+  },
+  "nmpaw": {
+    "deleteworkcentertheadapi": {
+      "getname": "删除工单中心用户自定义表头数据接口"
+    },
+    "editworkcenterapi": {
+      "getname": "修改工单中心分类",
+      "input": {
+        "param": {
+          "desc": {
+            "catalogname": "菜单分类",
+            "isshowtotal": "是否显示总数，默认0：显示待办数",
+            "name": "分类名",
+            "workcentertheadlist": "默认表头"
+          }
+        }
+      }
+    },
+    "getworkcenterapi": {
+      "getname": "获取工单中心分类接口",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "分类uuid"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "workcenter": "分类信息"
+          }
+        }
+      }
+    },
+    "getworkcentercountapi": {
+      "getname": "获取工单中心分类工单数接口",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "getworkcenterprocesstaskapi": {
+      "getname": "工单中心获取具工单接口",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "工单id",
+            "workcenteruuid": "工单中心分类uuid"
+          }
+        }
+      }
+    },
+    "listworkcenterapi": {
+      "getname": "获取工单中心分类列表接口",
+      "output": {
+        "param": {
+          "desc": {
+            "workcenter": "分类信息"
+          }
+        }
+      }
+    },
+    "listworkcentertheadapi": {
+      "getname": "获取工单中心分类表头列表接口",
+      "output": {
+        "param": {
+          "desc": "表头列表"
+        }
+      }
+    },
+    "saveworkcenterapi": {
+      "getname": "工单中心分类保存接口",
+      "input": {
+        "param": {
+          "desc": {
+            "authlist": "授权列表，如果type是system,则必填",
+            "conditionconfig": "分类过滤配置，json格式",
+            "support": "使用范围，all|pc|mobile，默认值是：all",
+            "type": "分类类型"
+          }
+        }
+      }
+    },
+    "saveworkcentertheadapi": {
+      "description": {
+        "desc": "工单中心thead保存接口，用于用户自定义保存字段显示与排序"
+      },
+      "getname": "工单中心thead用户自定义保存接口",
+      "input": {
+        "param": {
+          "desc": {
+            "isshow": "字段是否展示",
+            "name": "字段名",
+            "sort": "字段排序",
+            "type": "字段类型",
+            "width": "字段宽度"
+          }
+        }
+      }
+    },
+    "searchworkcenterapi": {
+      "description": {
+        "desc": "工单中心搜索接口"
+      },
+      "getname": "工单中心搜索",
+      "input": {
+        "param": {
+          "desc": {
+            "conditionconfig": "条件设置，为空则使用数据库中保存的条件",
+            "headerlist": "显示的字段"
+          }
+        }
+      }
+    },
+    "workcentercatalogdeleteapi": {
+      "getname": "删除工单中心菜单类型",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "类型id"
+          }
+        }
+      }
+    },
+    "workcentercataloglistapi": {
+      "getname": "查询工单中心菜单类型列表",
+      "input": {
+        "param": {
+          "desc": {
+            "keyword": "关键字"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "workcentercatalogvo": "工单中心菜单类型列表"
+          }
+        }
+      }
+    },
+    "workcentercatalogsaveapi": {
+      "getname": "保存工单中心菜单类型",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "类型id",
+            "name": "类型名"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "workcentercatalogvo": "工单中心菜单类型"
+          }
+        }
+      }
+    },
+    "workcenterconditionsaveapi": {
+      "getname": "工单中心分类条件修改接口",
+      "input": {
+        "param": {
+          "desc": {
+            "conditionconfig": "分类过滤配置，json格式",
+            "uuid": "分类uuid"
+          }
+        }
+      }
+    },
+    "workcenterdataexportapi": {
+      "exporterror": {
+        "header": "导出以下工单时发生错误：\n",
+        "item": "工单 ID：{0}；错误：{1}\n"
+      },
+      "filename": "工单数据.xlsx",
+      "getname": "导出工单中心数据",
+      "input": {
+        "param": {
+          "desc": {
+            "conditionconfig": "条件设置，为空则使用数据库中保存的条件",
+            "uuid": "分类uuid"
+          }
+        }
+      }
+    },
+    "workcenterdataexporttocsvapi": {
+      "filename": "工单数据.csv",
+      "getname": "导出工单中心数据",
+      "input": {
+        "param": {
+          "desc": {
+            "conditionconfig": "条件设置，为空则使用数据库中保存的条件",
+            "uuid": "分类uuid"
+          }
+        }
+      }
+    },
+    "workcenterdeleteapi": {
+      "getname": "工单中心分类删除接口",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "分类uuid"
+          }
+        }
+      }
+    },
+    "workcentergetconditionapi": {
+      "getname": "流程编辑获取条件接口",
+      "input": {
+        "param": {
+          "desc": {
+            "conditionmodel": "条件模型 simple|custom,  simple:目前用于用于工单中心条件过滤简单模式, custom:目前用于用于工单中心条件过自定义模式;默认custom",
+            "workcenteruuid": "draftProcessTask 非草稿的时候，过滤条件：工单状态去掉”未提交“"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "expressionlist": {
+              "0": {
+                "expression": "表达式",
+                "expressionname": "表达式名"
+              }
+            },
+            "handler": "处理器",
+            "handlername": "处理器名",
+            "handlertype": "控件类型 select|input|radio|userselect|date|area|time",
+            "type": "类型  form|common",
+            "uuid": "组件uuid"
+          }
+        }
+      }
+    },
+    "workcenterkeywordsearchapi": {
+      "getname": "搜索工单中心关键字提示",
+      "input": {
+        "param": {
+          "desc": {
+            "iscombine": "分开：1（pc端）；融合：0（移动端）；  默认1；",
+            "keyword": "关键字",
+            "pagesize": "选项显示数量"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "datalist": "展示的值"
+          }
+        }
+      }
+    },
+    "workcenteroperationlistapi": {
+      "getname": "搜索工单中心操作",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskidlist": "工单id列表"
+          }
+        }
+      }
+    },
+    "workcentersaveauthapi": {
+      "getname": "修改工单中心分类授权",
+      "input": {
+        "param": {
+          "desc": {
+            "authlist": "授权列表，如果type是system,则必填",
+            "support": "使用范围，all|pc|mobile，默认值是：all",
+            "type": "分类类型，system|custom 默认custom",
+            "uuid": "分类uuid"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": "分类uuid"
+          }
+        }
+      }
+    },
+    "workcenteruserprofilesaveapi": {
+      "getname": "工单中心分类用户设置保存接口",
+      "input": {
+        "param": {
+          "desc": {
+            "viewtype": "数据展示类型：table|card",
+            "workcenterlist": {
+              "0": {
+                "sort": "分类排序",
+                "uuid": "分类uuid"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "nmpawe": {
+    "escreatedataunittest": {
+      "runtime": {
+        "label": {
+          "1": "通用节点",
+          "2": "通用节点"
+        }
+      }
+    },
+    "esprocesstasksyncapi": {
+      "getname": "更新es工单数据",
+      "input": {
+        "param": {
+          "desc": {
+            "documentidlist": "documentId数组",
+            "fromdate": "创建时间>=fromDate",
+            "todate": "创建时间<toDate"
+          }
+        }
+      }
+    }
+  },
+  "nmpch": {
+    "processstepidcondition": {
+      "getdisplayname": "步骤id"
+    },
+    "processtaskaboutmecondition": {
+      "getdisplayname": "与我相关",
+      "runtime": {
+        "label": {
+          "1": "已办",
+          "2": "已关注",
+          "3": "待评分",
+          "4": "已评分",
+          "5": "已转交"
+        }
+      },
+      "text": {
+        "doneofmine": "已办",
+        "focusofmine": "已关注",
+        "needscoreofmine": "待评分",
+        "scoredofmine": "已评分",
+        "transferredofmine": "已转交"
+      }
+    },
+    "processtaskactiontriggerusercondition": {
+      "getdisplayname": "动作触发人"
+    },
+    "processtaskactiontriggeruseridcondition": {
+      "getdisplayname": "动作触发人用户ID"
+    },
+    "processtaskchannelcondition": {
+      "getdisplayname": "服务"
+    },
+    "processtaskchanneltypecondition": {
+      "getdisplayname": "服务类型"
+    },
+    "processtaskcontentcondition": {
+      "getdisplayname": "上报内容"
+    },
+    "processtaskexpiretimecondition": {
+      "getdisplayname": "是否超时",
+      "runtime": {
+        "label": {
+          "1": "是"
+        }
+      }
+    },
+    "processtaskidcondition": {
+      "getdisplayname": "工单id"
+    },
+    "processtaskinvokecondition": {
+      "getdisplayname": "工单来源"
+    },
+    "processtaskisshowcondition": {
+      "getdisplayname": "是否隐藏",
+      "runtime": {
+        "label": {
+          "1": "是",
+          "2": "否"
+        }
+      }
+    },
+    "processtaskownercentercondition": {
+      "getdisplayname": "上报人中心"
+    },
+    "processtaskownercompanycondition": {
+      "getdisplayname": "上报人公司"
+    },
+    "processtaskownercondition": {
+      "getdisplayname": "上报人"
+    },
+    "processtaskownerdepartmentcondition": {
+      "getdisplayname": "上报人部门"
+    },
+    "processtaskownerdepartmentpathcondition": {
+      "getdisplayname": "上报人部门(完整)"
+    },
+    "processtaskownergroupcondition": {
+      "getdisplayname": "上报人集团"
+    },
+    "processtaskownerlevelcondition": {
+      "getdisplayname": "上报人是否VIP",
+      "runtime": {
+        "label": {
+          "1": "是",
+          "2": "否"
+        }
+      }
+    },
+    "processtaskownerrolecondition": {
+      "getdisplayname": "上报人角色"
+    },
+    "processtaskownerteamcondition": {
+      "getdisplayname": "上报人组"
+    },
+    "processtaskowneruseridcondition": {
+      "getdisplayname": "上报人用户ID"
+    },
+    "processtaskprioritycondition": {
+      "getdisplayname": "优先级"
+    },
+    "processtaskprocessingofminecondition": {
+      "getdisplayname": "我的待办"
+    },
+    "processtaskprocessstepcondition": {
+      "getdesc": "筛选已激活的步骤",
+      "getdisplayname": "流程步骤"
+    },
+    "processtaskregioncondition": {
+      "getdisplayname": "地域"
+    },
+    "processtaskserialnumbercondition": {
+      "getdisplayname": "工单号"
+    },
+    "processtaskstarttimecondition": {
+      "getdisplayname": "上报时间"
+    },
+    "processtaskstatuscondition": {
+      "getdisplayname": "工单状态"
+    },
+    "processtaskstepactivetimecondition": {
+      "getdisplayname": "激活时间"
+    },
+    "processtaskstepnamecondition": {
+      "getdisplayname": "步骤名"
+    },
+    "processtasksteponlyteamcondition": {
+      "getdesc": "筛选已分派给该组的工单，包括指定抢单组中包含该组的工单",
+      "getdisplayname": "步骤处理组"
+    },
+    "processtasksteponlyusercondition": {
+      "getdesc": "筛选已分派给该用户或正由该用户处理的工单，不包含分派给该用户所在组或角色的抢单工单",
+      "getdisplayname": "步骤处理人"
+    },
+    "processtaskstepstatuscondition": {
+      "getdisplayname": "步骤状态"
+    },
+    "processtasksteptaskcondition": {
+      "getdisplayname": "子任务"
+    },
+    "processtasksteptaskidcondition": {
+      "getdisplayname": "子任务id"
+    },
+    "processtaskstepteamcondition": {
+      "getdisplayname": "处理组"
+    },
+    "processtaskstepusercondition": {
+      "getdesc": "筛选该用户待处理、正在处理或处理过的工单，包括分派给该用户所在组或角色的抢单工单",
+      "getdisplayname": "处理人"
+    },
+    "processtaskstepuseridcondition": {
+      "getdisplayname": "步骤处理人用户ID"
+    },
+    "processtasktagcondition": {
+      "getdisplayname": "标签"
+    },
+    "processtasktitlecondition": {
+      "getdisplayname": "标题"
+    }
+  },
+  "nmpdh": {
+    "path": {
+      "servicecatalogmanagement": "服务目录管理",
+      "stepmanagement": "节点管理",
+      "workflowmanagement": "工作流管理"
+    }
+  },
+  "nmpf": {
+    "processfilehandler": {
+      "getdisplayname": "IT服务附件"
+    }
+  },
+  "nmpmh": {
+    "prioritymatrixprivatedatasourcehandler": {
+      "getname": "优先级",
+      "runtime": {
+        "label": {
+          "1": "名称"
+        }
+      }
+    },
+    "processtaskmessagehandler": {
+      "callermessage": "工单号：{0}、步骤名：{1}（{2}）",
+      "getdescription": "实时显示待处理工单信息，支持快速审批",
+      "getname": "IT服务",
+      "servicename": "IT服务"
+    },
+    "processtaskstatusmatrixprivatedatasourcehandler": {
+      "getname": "流程状态",
+      "runtime": {
+        "label": {
+          "1": "状态码",
+          "2": "状态名称"
+        }
+      }
+    },
+    "processtaskstepstatusmatrixprivatedatasourcehandler": {
+      "getname": "流程步骤状态",
+      "runtime": {
+        "label": {
+          "1": "状态码",
+          "2": "状态名称"
+        }
+      }
+    }
+  },
+  "nmpnc": {
+    "processingtaskofminehandler": {
+      "content": {
+        "withouturl": "您有 <span style=\"color:red\">{0}</span> 条待处理工单，请前往【IT服务->工单中心->所有】，点击【我的待办】按钮查看",
+        "withurl": "您有 <span style=\"color:red\">{0}</span> 条待处理工单，请前往<a href=\"{1}\" target=\"_blank\">【工单中心】</a>，点击【我的待办】按钮查看"
+      },
+      "getname": "待我处理的工单",
+      "preview": {
+        "withouturl": "您有 <span style=\"color:red\">5</span> 条待处理工单，请前往【IT服务->工单中心->所有】，点击【我的待办】按钮查看",
+        "withurl": "您有 <span style=\"color:red\">5</span> 条待处理工单，请前往<a href=\"{0}\" target=\"_blank\">【工单中心】</a>，点击【我的待办】按钮查看"
+      },
+      "runtime": {
+        "label": {
+          "1": "标题",
+          "2": "内容",
+          "3": "接收人",
+          "4": "标题",
+          "5": "内容",
+          "6": "接收人",
+          "7": "工单内容对应的处理人",
+          "8": "工单内容对应的处理人"
+        }
+      },
+      "sample": {
+        "assignee": "张三",
+        "catalog": "机房",
+        "region": "广东省/深圳市",
+        "remainingtime": "距离超时：3 天",
+        "service": "机房进出申请",
+        "servicetype": "事件",
+        "stepname": "机房监督",
+        "title": "机房进出申请-202101080000",
+        "worktime": "工作日"
+      },
+      "text": {
+        "stepteam": "处理组"
+      }
+    },
+    "timedtasktriggertype": {
+      "description": {
+        "pendingprocesstask": "定时任务触发通知"
+      },
+      "text": {
+        "pendingprocesstask": "待我处理的工单",
+        "pendingprocesstask_2": "定时任务触发通知"
+      }
+    }
+  },
+  "nmpnh": {
+    "stepstaytimeparamhandler": {
+      "duration": {
+        "days": "{0} 天",
+        "dayshours": "{0} 天 {1} 小时",
+        "hours": "{0} 小时"
+      }
+    },
+    "timedtasknotifypolicyhandler": {
+      "getname": "定时任务"
+    }
+  },
+  "nmpnt": {
+    "emaildefaulttemplatebase": {
+      "abortchangestep": {
+        "getcontent": {
+          "1": "取消变更步骤"
+        },
+        "gettitle": {
+          "1": "变更步骤取消提醒"
+        }
+      },
+      "abortprocesstask": {
+        "getcontent": {
+          "1": "取消了工单"
+        },
+        "gettitle": {
+          "1": "取消工单提醒"
+        }
+      },
+      "active": {
+        "getcontent": {
+          "1": "工单",
+          "2": "已流转至"
+        },
+        "gettitle": {
+          "1": "步骤激活提醒"
+        }
+      },
+      "assign": {
+        "getcontent": {
+          "1": "系统已为工单步骤",
+          "2": "分配处理人"
+        },
+        "gettitle": {
+          "1": "步骤分配处理人提醒"
+        }
+      },
+      "assignexception": {
+        "getcontent": {
+          "1": "工单步骤",
+          "2": "分配处理人异常，原因：根据分配策略没有找到处理人"
+        },
+        "gettitle": {
+          "1": "步骤处理人分配异常提醒"
+        }
+      },
+      "back": {
+        "getcontent": {
+          "1": "回退步骤至",
+          "2": ",原因："
+        },
+        "gettitle": {
+          "1": "步骤回退提醒"
+        }
+      },
+      "commentchangestep": {
+        "getcontent": {
+          "1": "新增了一条评论\n"
+        },
+        "gettitle": {
+          "1": "变更步骤新增评论提醒"
+        }
+      },
+      "completeallchangestep": {
+        "getcontent": {
+          "1": "所有变更步骤已完成\n"
+        },
+        "gettitle": {
+          "1": "所有变更步骤完成提醒"
+        }
+      },
+      "completealltask": {
+        "getcontent": {
+          "1": "所有任务已满足完成条件\n"
+        },
+        "gettitle": {
+          "1": "所有任务已满足完成条件提醒"
+        }
+      },
+      "completechangestep": {
+        "getcontent": {
+          "1": "完成变更步骤"
+        },
+        "gettitle": {
+          "1": "变更步骤完成提醒"
+        }
+      },
+      "completeprocesstask": {
+        "getcontent": {
+          "1": "完成了工单"
+        },
+        "gettitle": {
+          "1": "工单完成提醒"
+        }
+      },
+      "completetask": {
+        "getcontent": {
+          "1": "回复",
+          "2": "回复内容:"
+        },
+        "gettitle": {
+          "1": "回复提醒"
+        }
+      },
+      "createtask": {
+        "getcontent": {
+          "1": "为工单步骤",
+          "2": "创建",
+          "3": "内容:",
+          "4": "处理人:"
+        },
+        "gettitle": {
+          "1": "创建提醒"
+        }
+      },
+      "deletetask": {
+        "getcontent": {
+          "1": "删除了",
+          "2": "内容:"
+        },
+        "gettitle": {
+          "1": "删除提醒"
+        }
+      },
+      "edittask": {
+        "getcontent": {
+          "1": "更新了",
+          "2": "内容:",
+          "3": "处理人:"
+        },
+        "gettitle": {
+          "1": "跟新提醒"
+        }
+      },
+      "failed": {
+        "getcontent": {
+          "1": "工单步骤",
+          "2": "已失败\n",
+          "3": "，原因："
+        },
+        "gettitle": {
+          "1": "步骤失败提醒"
+        }
+      },
+      "hang": {
+        "getcontent": {
+          "1": "工单步骤",
+          "2": "已挂起\n",
+          "3": "，原因："
+        },
+        "gettitle": {
+          "1": "步骤挂起提醒"
+        }
+      },
+      "pause": {
+        "getcontent": {
+          "1": "工单步骤",
+          "2": "已暂停\n",
+          "3": "，原因："
+        },
+        "gettitle": {
+          "1": "步骤暂停提醒"
+        }
+      },
+      "pausechange": {
+        "getcontent": {
+          "1": "【${DATA.ownername}】暂停了变更\n"
+        },
+        "gettitle": {
+          "1": "变更暂停提醒"
+        }
+      },
+      "recoverchange": {
+        "getcontent": {
+          "1": "【${DATA.ownername}】恢复了变更\n"
+        },
+        "gettitle": {
+          "1": "变更恢复提醒"
+        }
+      },
+      "recoverprocesstask": {
+        "getcontent": {
+          "1": "恢复了工单"
+        },
+        "gettitle": {
+          "1": "恢复工单提醒"
+        }
+      },
+      "reopenprocesstask": {
+        "getcontent": {
+          "1": "重新打开了工单"
+        },
+        "gettitle": {
+          "1": "重新打开提醒"
+        }
+      },
+      "restartchange": {
+        "getcontent": {
+          "1": "【${DATA.ownername}】重新开始了变更\n"
+        },
+        "gettitle": {
+          "1": "变更重新开始提醒"
+        }
+      },
+      "retreat": {
+        "getcontent": {
+          "1": "撤回步骤至",
+          "2": "，原因："
+        },
+        "gettitle": {
+          "1": "步骤撤回提醒"
+        }
+      },
+      "scoreprocesstask": {
+        "getcontent": {
+          "1": "对工单",
+          "2": "进行了评分。\n"
+        },
+        "gettitle": {
+          "1": "工单评分提醒"
+        }
+      },
+      "start": {
+        "getcontent": {
+          "1": "工单步骤",
+          "2": "已由",
+          "3": "受理。\n"
+        },
+        "gettitle": {
+          "1": "处理人响应提醒"
+        }
+      },
+      "startchange": {
+        "getcontent": {
+          "1": "【${DATA.ownername}】开始了变更\n"
+        },
+        "gettitle": {
+          "1": "变更开始提醒"
+        }
+      },
+      "startchangestep": {
+        "getcontent": {
+          "1": "变更步骤",
+          "2": "已由",
+          "3": "开始处理\n"
+        },
+        "gettitle": {
+          "1": "变更步骤处理人响应提醒"
+        }
+      },
+      "startprocess": {
+        "getcontent": {
+          "1": "【${DATA.ownername}】上报工单"
+        },
+        "gettitle": {
+          "1": "工单上报完成提醒"
+        }
+      },
+      "succeed": {
+        "getcontent": {
+          "1": "完成步骤"
+        },
+        "gettitle": {
+          "1": "步骤完成提醒"
+        }
+      },
+      "timeout": {
+        "getcontent": {
+          "1": "工单",
+          "2": "即将超时\n"
+        },
+        "gettitle": {
+          "1": "工单超时提醒"
+        }
+      },
+      "transfer": {
+        "getcontent": {
+          "1": "已将",
+          "2": "转交给",
+          "3": "处理。\n"
+        },
+        "gettitle": {
+          "1": "步骤转交提醒"
+        }
+      },
+      "urge": {
+        "getcontent": {
+          "1": "对工单",
+          "2": "发起催办。\n"
+        },
+        "gettitle": {
+          "1": "催办工单提醒"
+        }
+      }
+    },
+    "messagedefaulttemplatebase": {
+      "abort": {
+        "description": {
+          "1": "消息通知取消默认模板"
+        },
+        "getcontent": {
+          "1": "【${DATA.currentUser}】取消了工单"
+        },
+        "gettitle": {
+          "1": "取消工单——"
+        }
+      },
+      "active": {
+        "description": {
+          "1": "消息通知步骤激活默认模板"
+        },
+        "getcontent": {
+          "1": "工单",
+          "2": "已流转至【${DATA.step.name}】；<br>"
+        },
+        "gettitle": {
+          "1": "步骤激活提醒——"
+        }
+      },
+      "back": {
+        "description": {
+          "1": "消息通知退回默认模板"
+        },
+        "getcontent": {
+          "1": "工单",
+          "2": "已回退至【${DATA.step.name}】；<br>",
+          "3": "原因：【${DATA.content}】 ；<br>"
+        },
+        "gettitle": {
+          "1": "步骤退回提醒——"
+        }
+      },
+      "failed": {
+        "description": {
+          "1": "消息通知失败默认模板"
+        },
+        "getcontent": {
+          "1": "工单",
+          "2": "中，【${DATA.step.name}】步骤流转失败；<br>",
+          "3": "原因：【${DATA.step.error}】  ；<br>"
+        },
+        "gettitle": {
+          "1": "步骤失败提醒——"
+        }
+      },
+      "hang": {
+        "description": {
+          "1": "消息通知挂起默认模板"
+        },
+        "getcontent": {
+          "1": "工单",
+          "2": "中，【${DATA.step.name}】步骤已挂起；<br>",
+          "3": "原因：因【步骤名称】步骤回退导致  ；<br>"
+        },
+        "gettitle": {
+          "1": "步骤挂起提醒——"
+        }
+      },
+      "recover": {
+        "description": {
+          "1": "消息通知恢复默认模板"
+        },
+        "getcontent": {
+          "1": "【${DATA.currentUser}】恢复了工单"
+        },
+        "gettitle": {
+          "1": "恢复工单——"
+        }
+      },
+      "retreat": {
+        "description": {
+          "1": "消息通知撤回默认模板"
+        },
+        "getcontent": {
+          "1": "【${DATA.currentUserName}】已将工单",
+          "2": "的【${DATA.step.name}】步骤撤回；<br>",
+          "3": "原因：【${DATA.content}】 ；<br>"
+        },
+        "gettitle": {
+          "1": "步骤撤回提醒——"
+        }
+      },
+      "start": {
+        "description": {
+          "1": "消息通知步骤激活默认模板"
+        },
+        "getcontent": {
+          "1": "工单",
+          "2": "的【${DATA.step.name}】步骤已由处理人【${DATA.step.majorUser.userName}】受理；<br>"
+        },
+        "gettitle": {
+          "1": "处理人响应提醒——"
+        }
+      },
+      "succeed": {
+        "description": {
+          "1": "消息通知成功默认模板"
+        },
+        "getcontent": {
+          "1": "工单",
+          "2": "的【${DATA.step.name}】步骤已处理完成；<br>"
+        },
+        "gettitle": {
+          "1": "步骤完成提醒——"
+        }
+      },
+      "transfer": {
+        "description": {
+          "1": "消息通知步骤激活默认模板"
+        },
+        "getcontent": {
+          "1": "工单",
+          "2": "中，【${DATA.currentUserName}】已将【${DATA.step.name}】步骤转交给",
+          "3": "处理；<br>",
+          "4": "原因：【${DATA.content}】 ；<br>"
+        },
+        "gettitle": {
+          "1": "步骤转交提醒——"
+        }
+      },
+      "urge": {
+        "description": {
+          "1": "消息通知催办默认模板"
+        },
+        "getcontent": {
+          "1": "工单",
+          "2": "中，【${DATA.currentUserName}】发起了一条催办通知，请尽快处理；<br>"
+        },
+        "gettitle": {
+          "1": "您收到了一条催办提醒——"
+        }
+      }
+    }
+  },
+  "nmpph": {
+    "autoincrementpolicy": {
+      "getname": "自增序列"
+    },
+    "datetimeandautoincrementpolicy": {
+      "getname": "年月日 + 自增序列",
+      "getname_2": "工单每日流水号重置"
+    },
+    "yearmonthandautoincrementpolicy": {
+      "getname": "年月 + 自增序列",
+      "getname_2": "工单月度流水号重置"
+    }
+  },
+  "nmppw": {
+    "processportalwidget": {
+      "text": {
+        "personalprocesstaskoverview": "个人工单状态概览",
+        "processfavoriteservice": "收藏服务"
+      }
+    }
+  },
+  "nmps": {
+    "catalogserviceimpl": {
+      "all": "所有"
+    },
+    "processtaskautomaticserviceimpl": {
+      "defaultfailurecondition": "默认按状态码判断，4xx 和 5xx 表示失败",
+      "defaultsuccesscondition": "默认按状态码判断，2xx 和 3xx 表示成功",
+      "failureconditionmet": "满足失败条件：{0}{1}{2}",
+      "successconditionnotmet": "不满足成功条件：{0}{1}{2}"
+    },
+    "processtaskserialnumberserviceimpl": {
+      "positiveintegerrequired": "请输入正整数",
+      "runtime": {
+        "label": {
+          "1": "起始位",
+          "2": "工单号位数"
+        }
+      }
+    },
+    "processtaskserviceimpl": {
+      "actionstatus": {
+        "failed": "已失败",
+        "succeeded": "已成功"
+      },
+      "listseparator": "、"
+    }
+  },
+  "nmpsh": {
+    "clearprocesstaskstepinoperationstartuphandler": {
+      "getname": "清除工单步骤后台执行记录表数据"
+    },
+    "defaultslacalculatehandler": {
+      "description": "1. 正常情况下，步骤处理耗时为完成时间减去激活时间。<br>2. 如果步骤处理期间发生暂停，则暂停到恢复之间的时间不计入耗时。<br>3. 如果步骤被多次重新激活，则累计每个处理时间段。<br>4. 如果两个或多个步骤的处理时间段重叠，则重叠部分仅计算一次。",
+      "getdescription": "耗时计算规则如下：<br>",
+      "getname": "处理时效计算规则（出厂默认）"
+    }
+  },
+  "nmpsp": {
+    "processtaskautomaticjob": {
+      "getname": "工单自动处理回调"
+    },
+    "processtaskautoscorejob": {
+      "getname": "工单自动评分",
+      "text": {
+        "for": "系统自动评价"
+      }
+    },
+    "processtaskslanotifyjob": {
+      "getname": "工单SLA定时通知"
+    },
+    "processtaskslatransferjob": {
+      "getname": "工单SLA定时转交"
+    },
+    "processtasksteptimercompletejob": {
+      "getname": "工单步骤定时完成"
+    }
+  },
+  "nmpt": {
+    "processtaskactionthread": {
+      "successconditionnotmet": "不满足成功条件：{0}{1}{2}"
+    }
+  },
+  "nmpwch": {
+    "processtaskcatalogcolumn": {
+      "deletedcatalog": "服务目录已被删除",
+      "deletedservice": "服务已被删除",
+      "getdisplayname": "服务目录"
+    },
+    "processtaskchannelcolumn": {
+      "deletedservice": "服务已被删除",
+      "getdisplayname": "服务"
+    },
+    "processtaskchanneltypecolumn": {
+      "getdisplayname": "服务类型"
+    },
+    "processtaskcurrentstepcolumn": {
+      "getdisplayname": "当前步骤"
+    },
+    "processtaskcurrentstepnamecolumn": {
+      "getdisplayname": "当前步骤名"
+    },
+    "processtaskcurrentstepworkercolumn": {
+      "getdisplayname": "当前步骤处理对象"
+    },
+    "processtaskendtimecolumn": {
+      "getdisplayname": "结束时间"
+    },
+    "processtaskexpiredtimecolumn": {
+      "getdisplayname": "剩余时间",
+      "overdue": "{0} 已超时：{1} 天；",
+      "willoverdue": "{0} 距离超时：{1} 天；"
+    },
+    "processtaskidcolumn": {
+      "getdisplayname": "工单id"
+    },
+    "processtaskownercolumn": {
+      "getdisplayname": "上报人"
+    },
+    "processtaskprioritycolumn": {
+      "getdisplayname": "优先级"
+    },
+    "processtaskregioncolumn": {
+      "getdisplayname": "地域"
+    },
+    "processtaskreportercolumn": {
+      "getdisplayname": "代报人"
+    },
+    "processtaskserialnumbercolumn": {
+      "getdisplayname": "工单号"
+    },
+    "processtaskstarttimecolumn": {
+      "getdisplayname": "上报时间"
+    },
+    "processtaskstatuscolumn": {
+      "getdisplayname": "工单状态"
+    },
+    "processtaskstepnamecolumn": {
+      "getdisplayname": "步骤名"
+    },
+    "processtaskstepstatuscolumn": {
+      "getdisplayname": "步骤状态"
+    },
+    "processtaskstepusercolumn": {
+      "getdisplayname": "步骤处理人"
+    },
+    "processtasktagcolumn": {
+      "getdisplayname": "标签"
+    },
+    "processtasktitlecolumn": {
+      "getdisplayname": "标题"
+    },
+    "processtaskworktimecolumn": {
+      "getdisplayname": "时间窗口"
+    }
+  },
+  "nmpwh": {
+    "handlerleaderdispatcher": {
+      "gethelp": "在前置步骤处理人所在的组及父组中，找出第一个与选择头衔相同的用户作为当前步骤的处理人",
+      "getname": "处理人领导分派器",
+      "runtime": {
+        "label": {
+          "1": "前置步骤",
+          "2": "头衔"
+        }
+      }
+    },
+    "leaderdispatcher": {
+      "gethelp": "在选择的组中，找出与选择头衔相同的用户作为当前步骤的处理人",
+      "getname": "分组领导分派器",
+      "runtime": {
+        "label": {
+          "1": "处理组",
+          "2": "头衔"
+        }
+      }
+    },
+    "ownerleaderdispatcher": {
+      "gethelp": "在上报人所在的组及父组中，找出与选择头衔相同的用户作为当前步骤的处理人",
+      "getname": "上报人领导分派器",
+      "runtime": {
+        "label": {
+          "1": "职务"
+        }
+      }
+    },
+    "workloaddispatcher": {
+      "gethelp": "在选择的组中，找出工作量最少（只看待处理和处理中的任务数量）的用户作为当前步骤的处理人",
+      "getname": "根据工作量分配处理人",
+      "runtime": {
+        "label": {
+          "1": "处理组"
+        }
+      }
+    }
+  },
+  "nmpwo": {
+    "workcenteroperatebuilder": {
+      "runtime": {
+        "label": {
+          "1": "处理"
+        }
+      }
+    }
+  },
+  "term": {
+    "itsm": {
+      "cataloginfo": "服务目录信息",
+      "cataloguuid": "服务目录uuid",
+      "channel": "服务",
+      "channeltyperelationid": "关系类型id",
+      "copyprocesstaskid": "复制工单id",
+      "currentprocesstaskid": "当前工单id",
+      "delaytime": "延时时间",
+      "focususeruuidlist": "工单关注人列表",
+      "formextendattributedatalist": "表单扩展属性数据列表",
+      "fromprocesstaskid": "来源工单id",
+      "fromprocesstaskstepid": "来源步骤id",
+      "handlerstepinfo": "处理器特有的步骤信息",
+      "name": "ITSM",
+      "owner": "工单上报人",
+      "previousstep": "上一步",
+      "processtaskidlist": "工单Id列表",
+      "processtaskinfo": "工单信息",
+      "processtasknextstepid": "下一步工单步骤Id",
+      "processtasknextstepname": "下一步工单步骤名称",
+      "processtaskstepname": "工单步骤名称",
+      "readcomponentlist": "只读表单属性列表",
+      "repeatprocesstaskid": "重复事件工单id",
+      "repeatprocesstaskidlist": "重复工单id列表",
+      "reporter": "代报人",
+      "scoretemplatedimensionlist": "评分维度列表",
+      "sourcechanneltypeuuid": "来源服务类型uuid",
+      "sourcechanneluuid": "来源服务uuid",
+      "targetprocesstaskstepid": "目标步骤ID"
+    }
+  }
+}

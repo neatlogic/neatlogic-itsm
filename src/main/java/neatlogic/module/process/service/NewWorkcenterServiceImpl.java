@@ -41,7 +41,6 @@ import neatlogic.framework.process.workcenter.dto.WorkcenterTheadVo;
 import neatlogic.framework.process.workcenter.dto.WorkcenterVo;
 import neatlogic.framework.process.workcenter.table.ProcessTaskSqlTable;
 import neatlogic.framework.process.workcenter.table.constvalue.ProcessSqlTypeEnum;
-import neatlogic.framework.util.$;
 import neatlogic.framework.util.TableResultUtil;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
@@ -286,7 +285,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                     it.remove();
                 } else {
                     thead.setDisabled(Boolean.TRUE.equals(columnComponentMap.get(thead.getName()).getDisabled()) ? 1 : 0);
-                    thead.setDisplayName($.t(columnComponentMap.get(thead.getName()).getDisplayName()));
+                    thead.setDisplayName(columnComponentMap.get(thead.getName()).getDisplayName());
                     thead.setClassName(columnComponentMap.get(thead.getName()).getClassName());
                     thead.setIsExport(Boolean.TRUE.equals(columnComponentMap.get(thead.getName()).getIsExport()) ? 1 : 0);
                 }

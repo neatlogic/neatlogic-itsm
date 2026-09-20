@@ -1,0 +1,3878 @@
+{
+  "nmpaa": {
+    "useragentdeleteapi": {
+      "getname": "User Agent Delete"
+    },
+    "useragentgetapi": {
+      "getname": "User Agent Get",
+      "output": {
+        "param": {
+          "desc": {
+            "email": "Email",
+            "isactive": "Is Active",
+            "phone": "Phone",
+            "pinyin": "Pinyin",
+            "rolelist": "Role List",
+            "roleuuidlist": "Role UUID List",
+            "teamlist": "Team List",
+            "teamuuidlist": "Team UUID List",
+            "userauthlist": "User Auth List",
+            "userid": "User ID",
+            "userinfo": "User Info",
+            "username": "User Name",
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "useragentsaveapi": {
+      "getname": "User Agent Save",
+      "input": {
+        "param": {
+          "desc": {
+            "agentuuid": "Agent UUID"
+          }
+        }
+      }
+    }
+  },
+  "nmpac": {
+    "catalogchannelgetapi": {
+      "getname": "Catalog Service Get",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "treelist": "Tree List"
+          }
+        }
+      }
+    },
+    "catalogchannelsearchapi": {
+      "getname": "Catalog Service Search",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "treelist": "Tree List"
+          }
+        }
+      }
+    },
+    "catalogchannelsearchformobileapi": {
+      "getname": "Catalog Service Search For Mobile",
+      "input": {
+        "param": {
+          "desc": {
+            "cataloguuid": "Catalog UUID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "treelist": "Tree List"
+          }
+        }
+      }
+    },
+    "catalogchanneltreesearchapi": {
+      "getname": "Catalog Service Tree Search",
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "catalogdeteleapi": {
+      "getname": "Catalog Detele",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "cataloggetapi": {
+      "getname": "Get Catalog"
+    },
+    "catalogmoveapi": {
+      "getname": "Catalog Move",
+      "input": {
+        "param": {
+          "desc": {
+            "movetype": "Move Type",
+            "targetuuid": "Target UUID",
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "catalogsaveapi": {
+      "getname": "Save Catalog",
+      "input": {
+        "param": {
+          "help": {
+            "reportauthoritylist": "[\"User#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]",
+            "viewauthoritylist": "[\"User#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"
+          }
+        }
+      }
+    },
+    "channeldeleteapi": {
+      "getname": "Service Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "channelformgetapi": {
+      "getname": "Service Form Get",
+      "input": {
+        "param": {
+          "desc": {
+            "channeluuidlist": "Service UUID List",
+            "conditionmodel": "Condition Model"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "channelgetapi": {
+      "getname": "Get Service"
+    },
+    "channelmoveapi": {
+      "getname": "Service Move",
+      "input": {
+        "param": {
+          "desc": {
+            "movetype": "Move Type",
+            "targetuuid": "Target UUID",
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "channelsaveapi": {
+      "getname": "Save Service",
+      "input": {
+        "param": {
+          "desc": {
+            "isactivepriority": "Is Active Priority",
+            "isdisplaypriority": "Is Display Priority"
+          },
+          "help": {
+            "reportauthoritylist": "[\"User#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]",
+            "viewauthoritylist": "[\"User#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"
+          }
+        }
+      }
+    },
+    "channelsearchapi": {
+      "getname": "Search Service",
+      "input": {
+        "param": {
+          "desc": {
+            "isfavorite": "Do you want to only query the collected data"
+          },
+          "help": {
+            "isfavorite": "Isfavorite"
+          }
+        }
+      }
+    },
+    "channelsearchforselectapi": {
+      "getname": "Service Search For Select",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "defaultvalue": "Default Value",
+            "formuuid": "Form UUID",
+            "isactive": "Is Active",
+            "isauthenticate": "Is Authenticate",
+            "isfavorite": "Is Favorite",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size",
+            "parentuuid": "Parent UUID",
+            "uuidlist": "UUID List"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "list": "List",
+            "pagecount": "Page Count",
+            "pagesize": "Page Size",
+            "rownum": "Row Num"
+          }
+        }
+      }
+    },
+    "channeltransferreportinfoupdateapi": {
+      "getname": "Service Transfer Report Info Update"
+    },
+    "channeltypedeleteapi": {
+      "getname": "Service Type Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      },
+      "operation": {
+        "delete": "Delete"
+      }
+    },
+    "channeltypegetapi": {
+      "getname": "Service Type Get",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "channeltypesaveapi": {
+      "getname": "Service Type Save",
+      "input": {
+        "param": {
+          "desc": {
+            "color": "Color",
+            "description": "Description",
+            "handler": "Handler",
+            "isactive": "Status",
+            "name": "Name",
+            "prefix": "Prefix",
+            "uuid": "UUID"
+          }
+        }
+      },
+      "operation": {
+        "disable": "Disable"
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "channeltypesearchapi": {
+      "getname": "Service Type Search",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "isactive": "Is Active",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "pagecount": "Page Count",
+            "pagesize": "Page Size",
+            "rownum": "Row Num",
+            "tbodylist": "Tbody List"
+          }
+        }
+      }
+    },
+    "channeltypesearchforselectapi": {
+      "getname": "Service Type Search For Select",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "isactive": "Is Active",
+            "keyword": "Keyword",
+            "needalloption": "Need All Option",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "list": "List",
+            "pagecount": "Page Count",
+            "pagesize": "Page Size",
+            "rownum": "Row Num"
+          }
+        }
+      },
+      "runtime": {
+        "label": {
+          "1": "All"
+        }
+      }
+    },
+    "channelusersaveapi": {
+      "getname": "Service User Save",
+      "input": {
+        "param": {
+          "desc": {
+            "action": "Action",
+            "channeluuid": "Service UUID"
+          }
+        }
+      }
+    },
+    "favoritechannellistformobileapi": {
+      "getname": "Favorite Service List For Mobile",
+      "output": {
+        "param": {
+          "desc": {
+            "favoritelist": "Favorite List"
+          }
+        }
+      }
+    },
+    "processcommenttemplatedeleteapi": {
+      "getname": "Process Comment Template Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID"
+          }
+        }
+      }
+    },
+    "processcommenttemplategetapi": {
+      "getname": "Get Workflow Comment Template"
+    },
+    "processcommenttemplatesaveapi": {
+      "getname": "Save Workflow Comment Template",
+      "input": {
+        "param": {
+          "help": {
+            "authlist": "Type is system when, [\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]",
+            "type": "Add when (system:;custom:)"
+          }
+        }
+      }
+    },
+    "processcommenttemplatesearchapi": {
+      "getname": "Process Comment Template Search",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size",
+            "type": "Type"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "Tbody List"
+          }
+        }
+      }
+    },
+    "rebuidleftrightcodeapi": {
+      "getname": "Rebuid Left Right Code"
+    }
+  },
+  "nmpacr": {
+    "calalogbreadcrumbapi": {
+      "getname": "Calalogbreadcrumbapi"
+    },
+    "catalogchanneltreeapi": {
+      "getname": "Catalog Service Tree",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltyperelationid": "Service Type Relation ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "catalogtreeapi": {
+      "getname": "Catalogtreeapi"
+    },
+    "channeltyperelationdeleteapi": {
+      "getname": "Service Type Relation Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltyperelationid": "Service Type Relation ID"
+          }
+        }
+      }
+    },
+    "channeltyperelationgetapi": {
+      "getname": "Service Type Relation Get",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltyperelationid": "Service Type Relation ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "channeltyperelationisactiveupdateapi": {
+      "getname": "Service Type Relation Is Active Update",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltyperelationid": "Service Type Relation ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "channeltyperelationlistapi": {
+      "all": "All",
+      "getname": "Service Type Relation List",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "isactive": "Is Active",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "Tbody List"
+          }
+        }
+      }
+    },
+    "channeltyperelationlistforselectapi": {
+      "getname": "Channeltyperelationlistforselectapi"
+    },
+    "channeltyperelationsaveapi": {
+      "getname": "Service Type Relation Save",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID",
+            "isactive": "Is Active",
+            "name": "Name",
+            "sourcelist": "Source List",
+            "targetlist": "Target List"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    }
+  },
+  "nmpaf": {
+    "formattributecheckapi": {
+      "configinvalid": "The config parameter must contain processTaskId or channelUuid.",
+      "getname": "Form Attribute Check",
+      "input": {
+        "param": {
+          "desc": {
+            "attributeuuid": "Attribute UUID",
+            "config": "Config",
+            "data": "Data"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "processtaskformdataapi": {
+      "getname": "Task Form Data",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "processtaskformattributedatavo": "Form Data List"
+          }
+        }
+      }
+    },
+    "processtaskformpassworddecryptapi": {
+      "formattributeuuid": "UUID of form password component",
+      "getname": "Task in Form",
+      "nopermissiontoviewpassword": "No permission to view password",
+      "otherparamconfig": "Other parameter configurations"
+    }
+  },
+  "nmpah": {
+    "autoapprovalhandler": {
+      "getname": "Automatic Approval"
+    },
+    "autocompletehandler": {
+      "getname": "Automatic Transition"
+    },
+    "restfulactionaudithandler": {
+      "statustext": {
+        "failed": "Failed",
+        "succeeded": "Succeeded"
+      }
+    }
+  },
+  "nmpap": {
+    "batchabortprocesstaskapi": {
+      "getname": "Batchabortprocesstaskapi"
+    },
+    "batchdeleteprocesstaskapi": {
+      "getname": "Batchdeleteprocesstaskapi"
+    },
+    "batchhideprocesstaskapi": {
+      "getname": "Batchhideprocesstaskapi"
+    },
+    "batchpauseprocesstaskapi": {
+      "getname": "Batchpauseprocesstaskapi"
+    },
+    "batchurgeprocesstaskapi": {
+      "getname": "Batchurgeprocesstaskapi"
+    },
+    "delayprocesstaskstepslaapi": {
+      "getname": "Delayprocesstaskstepslaapi",
+      "input": {
+        "param": {
+          "help": {
+            "unit": "Day:,hour: when,minute:, default is minute"
+          }
+        }
+      }
+    },
+    "deleteprocesstaskstepinoperationapi": {
+      "getname": "Delete Task Step In Operation"
+    },
+    "exportprocesstaskdataapi": {
+      "getname": "Export Task Data",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID"
+          }
+        }
+      }
+    },
+    "importprocesstaskdataapi": {
+      "getname": "Import Task Data"
+    },
+    "listprocessstepapi": {
+      "getname": "List Process Step",
+      "input": {
+        "param": {
+          "desc": {
+            "channeluuid": "Service UUID",
+            "defaultvalue": "Default Value",
+            "processuuid": "Process UUID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "processstepvo": "Workflow List"
+          }
+        }
+      }
+    },
+    "listprocesstaskslatimeapi": {
+      "getname": "List Task SLA Time",
+      "input": {
+        "param": {
+          "desc": {
+            "slaidlist": "SLA ID List"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "Tbody List"
+          }
+        }
+      }
+    },
+    "prioritydeleteapi": {
+      "getname": "Priority Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "prioritygetapi": {
+      "getname": "Priority Get",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "prioritymoveapi": {
+      "getname": "Priority Move",
+      "input": {
+        "param": {
+          "desc": {
+            "sort": "Sort",
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "prioritysaveapi": {
+      "getname": "Priority Save",
+      "input": {
+        "param": {
+          "desc": {
+            "color": "Color",
+            "desc": "Description",
+            "isactive": "Status",
+            "name": "Name",
+            "uuid": "UUID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "prioritysearchapi": {
+      "getname": "Priority Search",
+      "input": {
+        "param": {
+          "desc": {
+            "channeluuid": "Service UUID",
+            "currentpage": "Current Page",
+            "isactive": "Is Active",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "pagecount": "Page Count",
+            "pagesize": "Page Size",
+            "rownum": "Row Num",
+            "tbodylist": "Tbody List"
+          }
+        }
+      }
+    },
+    "prioritysearchforselectapi": {
+      "getname": "Priority Search For Select",
+      "input": {
+        "param": {
+          "desc": {
+            "channeluuid": "Service UUID",
+            "currentpage": "Current Page",
+            "isactive": "Is Active",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "list": "List",
+            "pagecount": "Page Count",
+            "pagesize": "Page Size",
+            "rownum": "Row Num"
+          }
+        }
+      }
+    },
+    "processautomaticinitapi": {
+      "getname": "Process Automatic Init",
+      "output": {
+        "param": {
+          "desc": {
+            "callbacklist": {
+              "text": "Text",
+              "value": "Value"
+            },
+            "failpolicylist": {
+              "text": "Text",
+              "value": "Value"
+            }
+          }
+        }
+      }
+    },
+    "processconditionlist": {
+      "getname": "List Workflow Condition",
+      "input": {
+        "param": {
+          "isneedcomplexattr": "Do you need complex attributes"
+        }
+      }
+    },
+    "processconfigcheckapi": {
+      "getname": "Process Config Check",
+      "input": {
+        "param": {
+          "desc": {
+            "allprocess": "All Process"
+          }
+        }
+      },
+      "message": {
+        "connectioncountmismatch": "The Workflow Step connection counts do not match.",
+        "connectiondatamismatch": "The Step connection data does not match.",
+        "processformmissing": "Data is missing from the `process_form` table.",
+        "processformuuidmismatch": "The `form_uuid` values in the `process_form` table do not match.",
+        "processscoretemplatemissing": "Data is missing from the `process_score_template` table.",
+        "processslainvalid": "Data in the `process_sla` table is invalid.",
+        "processslamissing": "Data is missing from the `process_sla` table.",
+        "processstepslainvalid": "Data in the `process_step_sla` table is invalid when `sla_uuid` is {0}.",
+        "processtaskformmissing": "Data is missing from the `processtask_form` table.",
+        "processtaskformuuidmismatch": "The `form_uuid` values in the `processtask_form` table do not match.",
+        "processtaskscoretemplatemissing": "Data is missing from the `processtask_score_template` table.",
+        "remainingconnectiondata": "Unmatched Step connection data remains after comparison.",
+        "remainingstepdata": "Unmatched Step data remains after comparison.",
+        "scoresettingmismatch": "The rating configuration data does not match.",
+        "stepcountmismatch": "The Workflow Step counts do not match.",
+        "stepdatamismatch": "The Step data does not match."
+      }
+    },
+    "processcopyapi": {
+      "getname": "Process Copy",
+      "input": {
+        "param": {
+          "desc": {
+            "name": "Name",
+            "uuid": "UUID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "processcustombuttonstatuslist": {
+      "getname": "Process Custom Button Status List",
+      "input": {
+        "param": {
+          "desc": {
+            "handler": "Handler"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "custombuttonlist": "Custom Button List",
+            "customstatuslist": "Custom Status List"
+          }
+        }
+      }
+    },
+    "processdeleteapi": {
+      "getname": "Process Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "processdraftclearapi": {
+      "getname": "Process Draft Clear",
+      "input": {
+        "param": {
+          "desc": {
+            "processuuid": "Process UUID"
+          }
+        }
+      }
+    },
+    "processdraftgetapi": {
+      "getname": "Get Workflow Draft"
+    },
+    "processdraftlistapi": {
+      "getname": "Process Draft List",
+      "input": {
+        "param": {
+          "desc": {
+            "processuuid": "Process UUID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "processdraftsaveapi": {
+      "getname": "Save Workflow Draft",
+      "output": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "processexportapi": {
+      "getname": "Process Export",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "processformgetapi": {
+      "getname": "Process Form Get",
+      "input": {
+        "param": {
+          "desc": {
+            "currentversionuuid": "Current Version UUID",
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "processgetapi": {
+      "getname": "Get Workflow",
+      "taskworkflowname": "{0} [Task: {1}]"
+    },
+    "processimportapi": {
+      "getname": "Process Import",
+      "result": {
+        "created": "Created Workflow: {0}",
+        "updated": "Updated Workflow: {0}"
+      }
+    },
+    "processparamlist": {
+      "getname": "List Workflow Parameter"
+    },
+    "processreferencelistapi": {
+      "getname": "List Workflow Reference"
+    },
+    "processsaveapi": {
+      "getname": "Process Save",
+      "input": {
+        "param": {
+          "desc": {
+            "config": "Config",
+            "name": "Name",
+            "uuid": "UUID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "processsearchapi": {
+      "getname": "Search Workflow",
+      "input": {
+        "param": {
+          "desc": {
+            "isicreated": "Do you want to only query the ones I created"
+          },
+          "help": {
+            "keyword": "Name"
+          }
+        }
+      }
+    },
+    "processsearchforselectapi": {
+      "getname": "Process Search For Select",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "isactive": "Is Active",
+            "isicreated": "Is I Created",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "list": "List",
+            "pagecount": "Page Count",
+            "pagesize": "Page Size",
+            "rownum": "Row Num"
+          }
+        }
+      }
+    },
+    "processstephandleconfigsaveapi": {
+      "getname": "Process Step Handle Config Save",
+      "input": {
+        "param": {
+          "desc": {
+            "processstephandlerlist": "Process Step Handler List"
+          }
+        }
+      }
+    },
+    "processstephandlerlistapi": {
+      "getname": "Process Step Handler List",
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "processstephandlersearchapi": {
+      "getname": "Process Step Handler Search",
+      "input": {
+        "param": {
+          "desc": {
+            "keywork": "Keywork"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "stephandlerlist": "Step Handler List"
+          }
+        }
+      }
+    },
+    "processtaggetapi": {
+      "getname": "Process Tag Get",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "defaultvalue": "Default Value",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "list": "List"
+          }
+        }
+      }
+    },
+    "processtaskabortapi": {
+      "getname": "Task Abort",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "Description",
+            "processtaskid": "Task ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtaskauditlistapi": {
+      "getname": "Task Audit List",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID",
+            "processtaskstepidlist": "Task Step ID List"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "n": {
+                "auditdetaillist": "Audit Detail List"
+              },
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "processtaskautomaticcompleteapi": {
+      "getname": "Task Automatic Complete",
+      "input": {
+        "param": {
+          "desc": {
+            "action": "Action",
+            "processtaskstepid": "Task Step ID",
+            "source": "Source"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "message": "Message",
+            "status": "Status"
+          }
+        }
+      }
+    },
+    "processtaskautomaticretryapi": {
+      "getname": "Task Automatic Retry",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskstepid": "Task Step ID"
+          }
+        }
+      }
+    },
+    "processtaskbackapi": {
+      "getname": "Task Back",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID",
+            "processtaskstepid": "Task Step ID"
+          }
+        }
+      }
+    },
+    "processtaskcanreactivatesteplistapi": {
+      "getname": "Current User Activate Step List"
+    },
+    "processtaskcommentapi": {
+      "getname": "Task Comment",
+      "input": {
+        "param": {
+          "desc": {
+            "commenttemplateid": "Comment Template ID",
+            "content": "Description",
+            "fileidlist": "File ID List",
+            "processtaskid": "Task ID",
+            "processtaskstepid": "Task Step ID",
+            "source": "Source"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "commentlist": "Comment List"
+          }
+        }
+      }
+    },
+    "processtaskcommentdeleteapi": {
+      "getname": "Task Comment Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID",
+            "source": "Source"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "commentlist": "Comment List"
+          }
+        }
+      }
+    },
+    "processtaskcommenteditapi": {
+      "getname": "Task Comment Edit",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "Description",
+            "fileidlist": "File ID List",
+            "id": "ID",
+            "source": "Source"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "commentlist": "Comment List"
+          }
+        }
+      }
+    },
+    "processtaskcompleteapi": {
+      "getname": "Complete Task",
+      "input": {
+        "param": {
+          "desc": {
+            "action": "Action",
+            "assignworkerlist": "Assign Assignee List",
+            "content": "Reason",
+            "nextstepid": "Next Step ID",
+            "processtaskstepid": "Task Step ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtaskcreateapi": {
+      "getname": "Create Task",
+      "input": {
+        "param": {
+          "desc": {
+            "focususeridlist": "Focus User ID List",
+            "isasync": "Is Async",
+            "newprocesstaskid": "New Task ID",
+            "region": "Region"
+          },
+          "help": {
+            "channel": "ChannelUuid and channelName",
+            "owner": "Requester UUID and Requester ID"
+          }
+        }
+      }
+    },
+    "processtaskcurrentusertasklistapi": {
+      "getname": "List Task Current User Task"
+    },
+    "processtaskdeleteapi": {
+      "getname": "Task Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID"
+          }
+        }
+      }
+    },
+    "processtaskdraftgetapi": {
+      "getname": "Get Task Draft",
+      "input": {
+        "param": {
+          "desc": {
+            "parentprocesstaskstepid": "Parent Task step ID"
+          },
+          "help": {
+            "channeltyperelationid": "Submit when, channelTypeRelationId",
+            "channeluuid": "Service Catalog Submit when, channelUuid",
+            "copyprocesstaskid": "Submit Submit when, copyProcessTaskId",
+            "fromprocesstaskid": "Submit when, fromProcessTaskId",
+            "fromprocesstaskstepid": "Submit when, fromProcessTaskStepId",
+            "parentprocesstaskstepid": "Workflow when, parentProcessTaskStepId",
+            "processtaskid": "Work Center Submit when, processTaskId"
+          }
+        }
+      }
+    },
+    "processtaskdraftsaveapi": {
+      "getname": "Save Task Draft",
+      "input": {
+        "param": {
+          "desc": {
+            "invoke": "Association type"
+          },
+          "help": {
+            "channeltyperelationid": "Submit when, channelTypeRelationId",
+            "fromprocesstaskid": "Submit when, fromProcessTaskId",
+            "invoke": "Subprocess: Workflow",
+            "parentprocesstaskstepid": "Workflow when, parentProcessTaskStepId",
+            "reporter": "Current and owner reporter. no Reporter, Data reporter null"
+          }
+        }
+      }
+    },
+    "processtaskflowchartapi": {
+      "getname": "Task Flow Chart",
+      "input": {
+        "param": {
+          "desc": {
+            "channeluuid": "Service UUID",
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "config": "Config",
+            "processtasksteplist": "Task Step List",
+            "processtasksteprellist": "Task Step Rel List"
+          }
+        }
+      }
+    },
+    "processtaskfocusupdateapi": {
+      "getname": "Task Focus Update",
+      "input": {
+        "param": {
+          "desc": {
+            "isfocus": "Is Focus",
+            "processtaskid": "Task ID",
+            "source": "Source"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "isfocus": "Is Focus"
+          }
+        }
+      }
+    },
+    "processtaskfocususerlistapi": {
+      "getname": "Task Focus User List",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "focususeruuidlist": "Focus User UUID List",
+            "isfocus": "Is Focus"
+          }
+        }
+      }
+    },
+    "processtaskfocususerupdateapi": {
+      "getname": "Task Focus User Update",
+      "input": {
+        "param": {
+          "desc": {
+            "focususeruuidlist": "Focus User UUID List",
+            "processtaskid": "Task ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtaskformapi": {
+      "getname": "Task Form",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID",
+            "processtaskstepid": "Task Step ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "formattributedatamap": "Form Attribute Data Map",
+            "formconfig": "Form Config"
+          }
+        }
+      }
+    },
+    "processtaskformdatalistforemailapi": {
+      "getname": "Task Form Data List For Email",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "processtaskformattributedatavo": "Data"
+          }
+        }
+      }
+    },
+    "processtaskimportauditsearchapi": {
+      "getname": "Task Import Audit Search",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size",
+            "status": "Status"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "auditlist": "Audit List"
+          }
+        }
+      }
+    },
+    "processtaskimportfromexcelapi": {
+      "getname": "Task Import From Excel",
+      "output": {
+        "param": {
+          "desc": {
+            "successcount": "Success Count",
+            "totalcount": "Total Count"
+          }
+        }
+      }
+    },
+    "processtasklistforrelationapi": {
+      "getname": "Task List For Relation",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltyperelationid": "Service Type Relation ID",
+            "channeluuid": "Service UUID",
+            "currentpage": "Current Page",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size",
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "Tbody List"
+          }
+        }
+      }
+    },
+    "processtasklistforrepeatapi": {
+      "getname": "Task List For Repeat",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size",
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "Tbody List"
+          }
+        }
+      }
+    },
+    "processtasknextsteplistapi": {
+      "getname": "Task Next Step List",
+      "input": {
+        "param": {
+          "desc": {
+            "action": "Action",
+            "processtaskid": "Task ID",
+            "processtaskstepid": "Task Step ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "processtaskoldformpropgetapi": {
+      "getname": "Task Old Form Prop Get",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "form": "Form",
+            "prop": "Prop"
+          }
+        }
+      }
+    },
+    "processtaskprocessablesteplist": {
+      "getname": "List Task Processable Step"
+    },
+    "processtaskreapprovalapi": {
+      "getname": "Task Reapproval",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID",
+            "processtaskstepid": "Task Step ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtaskrecoverapi": {
+      "getname": "Task Recover",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "Description",
+            "processtaskid": "Task ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtaskrelationdeleteapi": {
+      "getname": "Task Relation Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskrelationid": "Task Relation ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtaskrelationlistapi": {
+      "getname": "Task Relation List",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "needpage": "Need Page",
+            "pagesize": "Page Size",
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "processtaskrelationlist": "Task Relation List"
+          }
+        }
+      }
+    },
+    "processtaskrelationsaveapi": {
+      "getname": "Task Relation Save",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltyperelationid": "Service Type Relation ID",
+            "processtaskid": "Task ID",
+            "relationprocesstaskidlist": "Relation Task ID List",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtaskrepeatdeleteapi": {
+      "getname": "Delete Task Duplicate"
+    },
+    "processtaskrepeatlistapi": {
+      "getname": "Task Repeat List",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "Tbody List"
+          }
+        }
+      }
+    },
+    "processtaskrepeatsaveapi": {
+      "getname": "Save Task Duplicate"
+    },
+    "processtaskretreatablesteplistapi": {
+      "getname": "Task Retreatable Step List",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "processtaskretreatapi": {
+      "getname": "Task Retreat",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "Description",
+            "processtaskid": "Task ID",
+            "processtaskstepid": "Task Step ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtaskscoreapi": {
+      "getname": "Task Score",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "Content",
+            "processtaskid": "Task ID",
+            "scoredimensionlist": "Score Dimension List",
+            "scoretemplateid": "Score Template ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtaskserialnumberpolicylistapi": {
+      "getname": "Task Serial Number Policy List",
+      "output": {
+        "param": {
+          "desc": {
+            "valuetextvo": "Task Number List"
+          }
+        }
+      }
+    },
+    "processtaskserialnumberupdateapi": {
+      "getname": "Task Serial Number Update",
+      "input": {
+        "param": {
+          "desc": {
+            "channeltypeuuid": "Service Type UUID"
+          }
+        }
+      }
+    },
+    "processtaskshowhideapi": {
+      "getname": "Task Show Hide",
+      "input": {
+        "param": {
+          "desc": {
+            "isshow": "Is Show",
+            "processtaskid": "Task ID"
+          }
+        }
+      }
+    },
+    "processtaskstartapi": {
+      "getname": "Start Task"
+    },
+    "processtaskstartprocessapi": {
+      "getname": "Task Start Process",
+      "input": {
+        "param": {
+          "desc": {
+            "assignworkerlist": "Assign Assignee List",
+            "nextstepid": "Next Step ID",
+            "processtaskid": "Task ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtaskstepactionlistapi": {
+      "getname": "Task Step Action List",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID",
+            "processtaskstepid": "Task Step ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "processtaskstepbatchcompleteapi": {
+      "getname": "Task Step Batch Complete",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "Content",
+            "processtaskidlist": "Task ID List",
+            "tag": "Tag",
+            "userid": "User ID"
+          }
+        }
+      }
+    },
+    "processtaskstepdatagetapi": {
+      "getname": "Task Step Data Get"
+    },
+    "processtaskstepdraftsaveapi": {
+      "getname": "Save Task Step Draft"
+    },
+    "processtaskstepgetapi": {
+      "description": {
+        "desc": "Interface for obtaining basic information of Task steps, including current step name, activation time, status, handler, assistance handler, processing time, form attribute display control, etc"
+      },
+      "getname": "Get Task Step"
+    },
+    "processtasksteplistapi": {
+      "getname": "Task Step List",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "processtasksteppauseapi": {
+      "getname": "Task Step Pause",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "Description",
+            "processtaskid": "Task ID",
+            "processtaskstepid": "Task Step ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtasksteprecoverapi": {
+      "getname": "Task Step Recover",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "Description",
+            "processtaskid": "Task ID",
+            "processtaskstepid": "Task Step ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtaskstepredoapi": {
+      "getname": "Task Step Redo",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "Reason",
+            "processtaskid": "Task ID",
+            "processtaskstepid": "Task Step ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtaskstepslatimelistapi": {
+      "getname": "Task Step SLA Time List",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskstepid": "Task Step ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "slatimelist": "SLA Time List"
+          }
+        }
+      }
+    },
+    "processtaskstepstartifnecessaryapi": {
+      "getname": "Start Task Step"
+    },
+    "processtaskstepstatuslistapi": {
+      "getname": "Task Step Status List",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "processtasktemplateexportapi": {
+      "getname": "Task Template Export",
+      "input": {
+        "param": {
+          "desc": {
+            "channeluuid": "Service UUID"
+          }
+        }
+      }
+    },
+    "processtasktransferablesteplistapi": {
+      "getname": "Task Transferable Step List",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "processtasktransferapi": {
+      "getname": "Task Transfer",
+      "input": {
+        "param": {
+          "desc": {
+            "issavedata": "Do you want to save the data",
+            "workerlist": "Transfer the target object list"
+          }
+        }
+      }
+    },
+    "processtasktransferknowledgeauditapi": {
+      "getname": "Task Transfer Knowledge Audit",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID",
+            "source": "Source",
+            "title": "Title"
+          }
+        }
+      }
+    },
+    "processtaskupdateapi": {
+      "getname": "Task Update",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "Description",
+            "fileidlist": "File ID List",
+            "priorityuuid": "Priority UUID",
+            "processtaskid": "Task ID",
+            "processtaskstepid": "Task Step ID",
+            "source": "Source",
+            "taglist": "Tag List",
+            "title": "Title"
+          }
+        }
+      }
+    },
+    "processtaskurgeapi": {
+      "getname": "Task Urge",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtaskwhichcurrentstepistagstepofmineapi": {
+      "getname": "Task Which Current Step Is Tag Step Of Mine",
+      "input": {
+        "param": {
+          "desc": {
+            "tag": "Tag",
+            "userid": "User ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "channelname": "Service Name",
+            "id": "ID",
+            "rolename": "Role Name",
+            "status": "Task Status",
+            "stepname": "Current Step",
+            "stepstatus": "Step Status",
+            "teamname": "Team Name",
+            "title": "Title",
+            "userid": "User ID",
+            "username": "User Name"
+          }
+        }
+      }
+    },
+    "processtypelistapi": {
+      "getname": "Process Type List",
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "processupdateapi": {
+      "getname": "Process Update",
+      "input": {
+        "param": {
+          "desc": {
+            "name": "Name",
+            "uuid": "UUID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "redoasynccreateprocesstaskapi": {
+      "getname": "Redoasynccreateprocesstaskapi"
+    },
+    "searchprocesstaskfileapi": {
+      "getname": "Search Task File",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "needpage": "Need Page",
+            "pagesize": "Page Size",
+            "processtaskid": "Task ID"
+          }
+        }
+      }
+    },
+    "searchprocesstasklistforownerapi": {
+      "getname": "Search Task List For Requester",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "excludeid": "Exclude ID",
+            "owner": "Requester",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "Tbody List"
+          }
+        }
+      }
+    },
+    "searchprocesstasksteplistapi": {
+      "getname": "Search Task Step List"
+    },
+    "updateprocesstaskformapi": {
+      "getname": "Update Task Form"
+    },
+    "updateprocesstaskneedscoreapi": {
+      "getname": "Update Task Need Score",
+      "input": {
+        "param": {
+          "desc": {
+            "idlist": "ID List"
+          }
+        }
+      }
+    },
+    "workerdispatcherlistapi": {
+      "getname": "Assignee Dispatcher List",
+      "output": {
+        "param": {
+          "desc": {
+            "workerdispatcherlist": "Assignee Dispatcher List"
+          }
+        }
+      }
+    },
+    "workerpolicylistapi": {
+      "getname": "Assignee Policy List",
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    }
+  },
+  "nmpapa": {
+    "processtaskagentdeleteapi": {
+      "getname": "Task Agent Delete"
+    },
+    "processtaskagentgetapi": {
+      "getname": "Task Agent Get",
+      "output": {
+        "param": {
+          "desc": {
+            "processtaskagentinfovo": "Step Task Information"
+          }
+        }
+      }
+    },
+    "processtaskagentisactiveupdateapi": {
+      "getname": "Task Agent Is Active Update"
+    },
+    "processtaskagentsaveapi": {
+      "getname": "Task Agent Save",
+      "input": {
+        "param": {
+          "desc": {
+            "begintime": "Begin Time",
+            "compoblist": "Compob List",
+            "endtime": "End Time",
+            "isactive": "Enable"
+          }
+        }
+      }
+    },
+    "processtaskstepautomaticcallbacktestapi": {
+      "getname": "Task Step Automatic Callback Test",
+      "input": {
+        "param": {
+          "desc": {
+            "inputparam1": "Input Param 1",
+            "inputparam2": "Input Param 2"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "error": "Error",
+            "outputparam1": "Output Param 1",
+            "outputparam2": "Output Param 2"
+          }
+        }
+      }
+    },
+    "processtaskstepautomaticfirstrequesttestapi": {
+      "getname": "Task Step Automatic First Request Test",
+      "input": {
+        "param": {
+          "desc": {
+            "inputparam1": "Input Param 1",
+            "inputparam2": "Input Param 2"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "error": "Error",
+            "outputparam1": "Output Param 1",
+            "outputparam2": "Output Param 2"
+          }
+        }
+      }
+    },
+    "redoasynccreateprocesstaskapi": {
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID"
+          }
+        }
+      }
+    },
+    "searchasynccreateprocesstaskapi": {
+      "getname": "Searchasynccreateprocesstaskapi",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID"
+          }
+        }
+      }
+    },
+    "updateasynccreateprocesstaskapi": {
+      "getname": "Updateasynccreateprocesstaskapi",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID"
+          }
+        }
+      }
+    }
+  },
+  "nmpapd": {
+    "processtaskimportfromjsonapi": {
+      "error": {
+        "prioritynotfound": "Priority {1} for Task {0} does not exist.",
+        "servicenotfound": "Service {1} for Task {0} does not exist.",
+        "workflownotfound": "Workflow {1} for Task {0} does not exist."
+      },
+      "getname": "Task Import From JSON",
+      "input": {
+        "param": {
+          "desc": {
+            "source": "Source"
+          }
+        }
+      }
+    }
+  },
+  "nmpapf": {
+    "processtaskfulltextindexrebuildapi": {
+      "getname": "Task Fulltext Index Rebuild",
+      "input": {
+        "param": {
+          "desc": {
+            "idlist": "ID List"
+          }
+        }
+      }
+    }
+  },
+  "nmpapm": {
+    "activeprocesstaskstepapi": {
+      "getname": "Active Task Step"
+    },
+    "enableprocesstaskformdebugmodeapi": {
+      "getname": "Enableprocesstaskformdebugmodeapi"
+    },
+    "updateprocesstaskconfigapi": {
+      "getname": "Update Task Configuration",
+      "message": {
+        "unchanged": "The Task Workflow snapshot was not changed.",
+        "updated": "The Task Workflow snapshot was updated."
+      }
+    },
+    "updateprocesstaskformconfigapi": {
+      "getname": "Update Task Form Configuration"
+    },
+    "updateprocesstaskstepstatusapi": {
+      "getname": "Update Task Step Status",
+      "input": {
+        "param": {
+          "help": {
+            "processtasknextstepid": "Activate Step Name when Parameter. Parameter in when, processTaskNextStepName",
+            "processtasknextstepname": "Step Status is succeed when Parameter",
+            "processtaskstepid": "Status Step Name when Parameter. Parameter in when, processTaskId and processTaskStepName"
+          }
+        }
+      }
+    }
+  },
+  "nmpaps": {
+    "searchprocesstasksteplistapi": {
+      "actionstatus": {
+        "failed": "Failed",
+        "succeeded": "Succeeded"
+      },
+      "listseparator": ", "
+    }
+  },
+  "nmpapt": {
+    "converworkcenterconditionconfigapi": {
+      "getname": "Conver Work Center Condition Config"
+    },
+    "processtaskmobileisfitapi": {
+      "getname": "Task Mobileis Fit",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      },
+      "unsupportedstep": "The mobile client does not currently support Tasks containing the {0} Step type."
+    },
+    "processtaskstepexecutesortcomparatortestapi": {
+      "getname": "Task Step Execute Sort Comparator Test"
+    },
+    "processtasksteptaskcompleteapi": {
+      "getname": "Task Step Step Task Complete",
+      "input": {
+        "param": {
+          "desc": {
+            "button": "Button",
+            "content": "Description",
+            "id": "ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtasksteptaskdeleteapi": {
+      "getname": "Task Step Step Task Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "processtasksteptaskid": "Task Step Step Task ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtasksteptaskfiledeleteapi": {
+      "getname": "Task Step Step Task File Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "fileid": "File ID",
+            "id": "ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtasksteptaskfilesaveapi": {
+      "getname": "Task Step Step Task File Save",
+      "input": {
+        "param": {
+          "desc": {
+            "fileid": "File ID",
+            "id": "ID",
+            "source": "Source"
+          }
+        }
+      }
+    },
+    "processtasksteptaskgetapi": {
+      "getname": "Task Step Step Task Get",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID"
+          }
+        }
+      }
+    },
+    "processtasksteptasklistapi": {
+      "getname": "Task Step Step Task List",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskstepid": "Task Step ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "processtasksteptasksaveapi": {
+      "getname": "Task Step Step Task Save",
+      "input": {
+        "param": {
+          "desc": {
+            "content": "Description",
+            "id": "ID",
+            "processtaskstepid": "Task Step ID",
+            "source": "Source",
+            "steptaskuservolist": "Step Task User Vo List",
+            "taskconfigid": "Task Config ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": {
+              "name": "Return"
+            }
+          }
+        }
+      }
+    },
+    "randomcreateprocesstaskapi": {
+      "getname": "Random Create Task",
+      "input": {
+        "param": {
+          "desc": {
+            "count": "Count",
+            "type": "Type"
+          }
+        }
+      }
+    },
+    "testasynccreateprocesstaskapi": {
+      "getname": "Testasynccreateprocesstaskapi",
+      "input": {
+        "param": {
+          "desc": {
+            "newprocesstaskid": "New Task ID"
+          },
+          "help": {
+            "channel": "ChannelUuid and channelName",
+            "owner": "Requester UUID and Requester ID",
+            "region": "Or ID"
+          }
+        }
+      }
+    }
+  },
+  "nmpas": {
+    "scoretemplatedeleteapi": {
+      "getname": "Score Template Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID"
+          }
+        }
+      }
+    },
+    "scoretemplategetapi": {
+      "getname": "Score Template Get",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "scoretemplatevo": "Scoretemplatevo"
+          }
+        }
+      }
+    },
+    "scoretemplaterefprocesslistapi": {
+      "getname": "Score Template Ref Process List",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "id": "ID",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "processlist": "Process List"
+          }
+        }
+      }
+    },
+    "scoretemplatesaveapi": {
+      "getname": "Save Rating Template",
+      "input": {
+        "param": {
+          "help": {
+            "dimensionarray": ":[{\"Name\":\"t1\",\"description\":\"d1\"},{\"name\":\"t2\",\"description\":\"d2\"}]"
+          }
+        }
+      }
+    },
+    "scoretemplatesearchapi": {
+      "getname": "Score Template Search",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "scoretemplatelist": "Score Template List"
+          }
+        }
+      }
+    },
+    "scoretemplatesearchforselectapi": {
+      "getname": "Score Template Search For Select",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "scoretemplatelist": "Score Template List"
+          }
+        }
+      }
+    },
+    "scoretemplatestatusupdateapi": {
+      "getname": "Score Template Status Update",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID",
+            "isactive": "Is Active"
+          }
+        }
+      }
+    }
+  },
+  "nmpasc": {
+    "automaticprocesscomponent": {
+      "defaultsuccesscondition": "By default, HTTP 2xx and 3xx status codes indicate success"
+    }
+  },
+  "nmpat": {
+    "taskdeleteapi": {
+      "getname": "Task Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID"
+          }
+        }
+      }
+    },
+    "taskreferencelistapi": {
+      "getname": "Task Reference List",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "id": "ID",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "pagecount": "Page Count",
+            "pagesize": "Page Size",
+            "rownum": "Row Num",
+            "tbodylist": "Tbody List"
+          }
+        }
+      }
+    },
+    "tasksaveapi": {
+      "getname": "Task Save",
+      "input": {
+        "param": {
+          "desc": {
+            "config": "Config",
+            "id": "ID",
+            "isactive": "Is Active",
+            "name": "Name",
+            "num": "Num",
+            "policy": "Policy"
+          }
+        }
+      }
+    },
+    "tasksearchapi": {
+      "getname": "Task Search",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "isactive": "Is Active",
+            "keyword": "Keyword",
+            "needpage": "Need Page",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "pagecount": "Page Count",
+            "pagesize": "Page Size",
+            "rownum": "Row Num",
+            "tbodylist": "Tbody List"
+          }
+        }
+      }
+    }
+  },
+  "nmpaw": {
+    "deleteworkcentertheadapi": {
+      "getname": "Deleteworkcentertheadapi"
+    },
+    "editworkcenterapi": {
+      "getname": "Edit Work Center",
+      "input": {
+        "param": {
+          "desc": {
+            "catalogname": "Menu classification",
+            "isshowtotal": "Display Total Count; 0 Displays the Pending Task Count by Default",
+            "name": "Classification Name",
+            "workcentertheadlist": "Default header"
+          }
+        }
+      }
+    },
+    "getworkcenterapi": {
+      "getname": "Get Work Center",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "workcenter": "Work Center"
+          }
+        }
+      }
+    },
+    "getworkcentercountapi": {
+      "getname": "Get Work Center Count",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "getworkcenterprocesstaskapi": {
+      "getname": "Get Work Center Task",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskid": "Task ID",
+            "workcenteruuid": "Work Center UUID"
+          }
+        }
+      }
+    },
+    "listworkcenterapi": {
+      "getname": "List Work Center",
+      "output": {
+        "param": {
+          "desc": {
+            "workcenter": "Work Center"
+          }
+        }
+      }
+    },
+    "listworkcentertheadapi": {
+      "getname": "Listworkcentertheadapi",
+      "output": {
+        "param": {
+          "desc": "Table header list"
+        }
+      }
+    },
+    "saveworkcenterapi": {
+      "getname": "Save Work Center",
+      "input": {
+        "param": {
+          "desc": {
+            "authlist": "Authorization list, mandatory if type is system",
+            "conditionconfig": "Classification filtering configuration, JSON format",
+            "support": "Support",
+            "type": "Type"
+          }
+        }
+      }
+    },
+    "saveworkcentertheadapi": {
+      "description": {
+        "desc": "The Work Center topic save interface is used for users to customize the display and sorting of saved fields"
+      },
+      "getname": "Saveworkcentertheadapi",
+      "input": {
+        "param": {
+          "desc": {
+            "isshow": "Is the field displayed",
+            "name": "Field Name",
+            "sort": "Field order",
+            "type": "Field type",
+            "width": "Field width"
+          }
+        }
+      }
+    },
+    "searchworkcenterapi": {
+      "description": {
+        "desc": "Work Order Center Search Interface"
+      },
+      "getname": "Search Work Center",
+      "input": {
+        "param": {
+          "desc": {
+            "conditionconfig": "Condition settings, if left blank, use the conditions saved in the database",
+            "headerlist": "Displayed Fields"
+          }
+        }
+      }
+    },
+    "workcentercatalogdeleteapi": {
+      "getname": "Work Center Catalog Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID"
+          }
+        }
+      }
+    },
+    "workcentercataloglistapi": {
+      "getname": "Work Center Catalog List",
+      "input": {
+        "param": {
+          "desc": {
+            "keyword": "Keyword"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "workcentercatalogvo": "Work Center List"
+          }
+        }
+      }
+    },
+    "workcentercatalogsaveapi": {
+      "getname": "Work Center Catalog Save",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "ID",
+            "name": "Name"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "workcentercatalogvo": "Work Center"
+          }
+        }
+      }
+    },
+    "workcenterconditionsaveapi": {
+      "getname": "Work Center Condition Save",
+      "input": {
+        "param": {
+          "desc": {
+            "conditionconfig": "Condition Config",
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "workcenterdataexportapi": {
+      "exporterror": {
+        "header": "Errors occurred while exporting the following Tasks:\n",
+        "item": "Task ID: {0}; Error: {1}\n"
+      },
+      "filename": "Task Data.xlsx",
+      "getname": "Work Center Data Export",
+      "input": {
+        "param": {
+          "desc": {
+            "conditionconfig": "Condition Config",
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "workcenterdataexporttocsvapi": {
+      "filename": "Task Data.csv",
+      "getname": "Work Center Data Export To CSV",
+      "input": {
+        "param": {
+          "desc": {
+            "conditionconfig": "Condition Config",
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "workcenterdeleteapi": {
+      "getname": "Work Center Delete",
+      "input": {
+        "param": {
+          "desc": {
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "workcentergetconditionapi": {
+      "getname": "Work Center Get Condition",
+      "input": {
+        "param": {
+          "desc": {
+            "conditionmodel": "Condition Model",
+            "workcenteruuid": "Work Center UUID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "expressionlist": {
+              "0": {
+                "expression": "Expression",
+                "expressionname": "Expression Name"
+              }
+            },
+            "handler": "Handler",
+            "handlername": "Handler Name",
+            "handlertype": "Handler Type",
+            "type": "Type",
+            "uuid": "UUID"
+          }
+        }
+      }
+    },
+    "workcenterkeywordsearchapi": {
+      "getname": "Work Center Keyword Search",
+      "input": {
+        "param": {
+          "desc": {
+            "iscombine": "Is Combine",
+            "keyword": "Keyword",
+            "pagesize": "Page Size"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "datalist": "Data List"
+          }
+        }
+      }
+    },
+    "workcenteroperationlistapi": {
+      "getname": "Work Center Operation List",
+      "input": {
+        "param": {
+          "desc": {
+            "processtaskidlist": "Task ID List"
+          }
+        }
+      }
+    },
+    "workcentersaveauthapi": {
+      "getname": "Work Center Save Auth",
+      "input": {
+        "param": {
+          "desc": {
+            "authlist": "Auth List",
+            "support": "Support",
+            "type": "Type",
+            "uuid": "UUID"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "return": "Type UUID"
+          }
+        }
+      }
+    },
+    "workcenteruserprofilesaveapi": {
+      "getname": "Work Center User Profile Save",
+      "input": {
+        "param": {
+          "desc": {
+            "viewtype": "View Type",
+            "workcenterlist": {
+              "0": {
+                "sort": "Sort",
+                "uuid": "UUID"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "nmpawe": {
+    "escreatedataunittest": {
+      "runtime": {
+        "label": {
+          "1": "Omnipotent",
+          "2": "Omnipotent"
+        }
+      }
+    },
+    "esprocesstasksyncapi": {
+      "getname": "Es Task Sync",
+      "input": {
+        "param": {
+          "desc": {
+            "documentidlist": "Document ID List",
+            "fromdate": "From Date",
+            "todate": "To Date"
+          }
+        }
+      }
+    }
+  },
+  "nmpch": {
+    "processstepidcondition": {
+      "getdisplayname": "Task Step ID"
+    },
+    "processtaskaboutmecondition": {
+      "getdisplayname": "Aboutme",
+      "runtime": {
+        "label": {
+          "1": "1",
+          "2": "2",
+          "3": "To Be Rated",
+          "4": "Rated",
+          "5": "Transferred"
+        }
+      },
+      "text": {
+        "doneofmine": "Handled",
+        "focusofmine": "Followed",
+        "needscoreofmine": "Pending Rating",
+        "scoredofmine": "Rated",
+        "transferredofmine": "Transferred"
+      }
+    },
+    "processtaskactiontriggerusercondition": {
+      "getdisplayname": "Actiontriggeruser"
+    },
+    "processtaskactiontriggeruseridcondition": {
+      "getdisplayname": "Actiontriggeruserid"
+    },
+    "processtaskchannelcondition": {
+      "getdisplayname": "Service"
+    },
+    "processtaskchanneltypecondition": {
+      "getdisplayname": "Service Type"
+    },
+    "processtaskcontentcondition": {
+      "getdisplayname": "Update"
+    },
+    "processtaskexpiretimecondition": {
+      "getdisplayname": "Overdue",
+      "runtime": {
+        "label": {
+          "1": "1"
+        }
+      }
+    },
+    "processtaskidcondition": {
+      "getdisplayname": "Task ID"
+    },
+    "processtaskinvokecondition": {
+      "getdisplayname": "Task"
+    },
+    "processtaskisshowcondition": {
+      "getdisplayname": "Hidden",
+      "runtime": {
+        "label": {
+          "1": "1",
+          "2": "2"
+        }
+      }
+    },
+    "processtaskownercentercondition": {
+      "getdisplayname": "Requester Center"
+    },
+    "processtaskownercompanycondition": {
+      "getdisplayname": "Requester Company"
+    },
+    "processtaskownercondition": {
+      "getdisplayname": "Requester"
+    },
+    "processtaskownerdepartmentcondition": {
+      "getdisplayname": "Ownerdepartment"
+    },
+    "processtaskownerdepartmentpathcondition": {
+      "getdisplayname": "Ownerdepartmentpath"
+    },
+    "processtaskownergroupcondition": {
+      "getdisplayname": "Ownergroup"
+    },
+    "processtaskownerlevelcondition": {
+      "getdisplayname": "Requester Is VIP",
+      "runtime": {
+        "label": {
+          "1": "Yes",
+          "2": "No"
+        }
+      }
+    },
+    "processtaskownerrolecondition": {
+      "getdisplayname": "Ownerrole"
+    },
+    "processtaskownerteamcondition": {
+      "getdisplayname": "Ownerteam"
+    },
+    "processtaskowneruseridcondition": {
+      "getdisplayname": "Owneruserid"
+    },
+    "processtaskprioritycondition": {
+      "getdisplayname": "Priority"
+    },
+    "processtaskprocessingofminecondition": {
+      "getdisplayname": "Task"
+    },
+    "processtaskprocessstepcondition": {
+      "getdesc": "Filter activated steps.",
+      "getdisplayname": "Workflow Step"
+    },
+    "processtaskregioncondition": {
+      "getdisplayname": "Region"
+    },
+    "processtaskserialnumbercondition": {
+      "getdisplayname": "Task Number"
+    },
+    "processtaskstarttimecondition": {
+      "getdisplayname": "Submit When"
+    },
+    "processtaskstatuscondition": {
+      "getdisplayname": "Task Status"
+    },
+    "processtaskstepactivetimecondition": {
+      "getdisplayname": "Activetime"
+    },
+    "processtaskstepnamecondition": {
+      "getdisplayname": "Step Name"
+    },
+    "processtasksteponlyteamcondition": {
+      "getdesc": "Filter Tasks assigned to this team, including Tasks whose designated claiming teams include this team.",
+      "getdisplayname": "Team"
+    },
+    "processtasksteponlyusercondition": {
+      "getdesc": "Filter Tasks assigned to or currently handled by this user. Tasks assigned to the user's team or role for claiming are excluded.",
+      "getdisplayname": "Step Assignee"
+    },
+    "processtaskstepstatuscondition": {
+      "getdisplayname": "Status"
+    },
+    "processtasksteptaskcondition": {
+      "getdisplayname": "Steptask"
+    },
+    "processtasksteptaskidcondition": {
+      "getdisplayname": "Subtask ID"
+    },
+    "processtaskstepteamcondition": {
+      "getdisplayname": "Treatment Group"
+    },
+    "processtaskstepusercondition": {
+      "getdesc": "Filter Tasks pending for, being handled by, or previously handled by this user, including claimable Tasks assigned to the user's team or role.",
+      "getdisplayname": "Assignee"
+    },
+    "processtaskstepuseridcondition": {
+      "getdisplayname": "Stepuserid"
+    },
+    "processtasktagcondition": {
+      "getdisplayname": "Tag"
+    },
+    "processtasktitlecondition": {
+      "getdisplayname": "Title"
+    }
+  },
+  "nmpdh": {
+    "path": {
+      "servicecatalogmanagement": "Service Catalog Management",
+      "stepmanagement": "Step Management",
+      "workflowmanagement": "Workflow Management"
+    }
+  },
+  "nmpf": {
+    "processfilehandler": {
+      "getdisplayname": "IT Service Attachment"
+    }
+  },
+  "nmpmh": {
+    "prioritymatrixprivatedatasourcehandler": {
+      "getname": "Priority",
+      "runtime": {
+        "label": {
+          "1": "Name"
+        }
+      }
+    },
+    "processtaskmessagehandler": {
+      "callermessage": "Task Number: {0}, Step Name: {1} ({2})",
+      "getdescription": "When Task Information",
+      "getname": "ITSM",
+      "servicename": "IT Services"
+    },
+    "processtaskstatusmatrixprivatedatasourcehandler": {
+      "getname": "Workflow Status",
+      "runtime": {
+        "label": {
+          "1": "Status",
+          "2": "Status Name"
+        }
+      }
+    },
+    "processtaskstepstatusmatrixprivatedatasourcehandler": {
+      "getname": "Workflow Step Status",
+      "runtime": {
+        "label": {
+          "1": "Status",
+          "2": "Status Name"
+        }
+      }
+    }
+  },
+  "nmpnc": {
+    "processingtaskofminehandler": {
+      "content": {
+        "withouturl": "You have <span style=\"color:red\">{0}</span> pending Tasks. Go to [IT Services -> Work Center -> All] and select [My Pending Tasks].",
+        "withurl": "You have <span style=\"color:red\">{0}</span> pending Tasks. Go to <a href=\"{1}\" target=\"_blank\">[Work Center]</a> and select [My Pending Tasks]."
+      },
+      "getname": "Task",
+      "preview": {
+        "withouturl": "You have <span style=\"color:red\">5</span> pending Tasks. Go to [IT Services -> Work Center -> All] and select [My Pending Tasks].",
+        "withurl": "You have <span style=\"color:red\">5</span> pending Tasks. Go to <a href=\"{0}\" target=\"_blank\">[Work Center]</a> and select [My Pending Tasks]."
+      },
+      "runtime": {
+        "label": {
+          "1": "Title",
+          "2": "Content",
+          "3": "3",
+          "4": "Title",
+          "5": "Content",
+          "6": "3",
+          "7": "Task Content Assignee",
+          "8": "Task Content Assignee"
+        }
+      },
+      "sample": {
+        "assignee": "Alex",
+        "catalog": "Data Center",
+        "region": "Guangdong/Shenzhen",
+        "remainingtime": "3 Days Until Overdue",
+        "service": "Data Center Access Request",
+        "servicetype": "Incident",
+        "stepname": "Data Center Supervision",
+        "title": "Data Center Access Request-202101080000",
+        "worktime": "Business Days"
+      },
+      "text": {
+        "stepteam": "Stepteam"
+      }
+    },
+    "timedtasktriggertype": {
+      "description": {
+        "pendingprocesstask": "When Step Task"
+      },
+      "text": {
+        "pendingprocesstask": "Pendingprocesstask",
+        "pendingprocesstask_2": "When Step Task"
+      }
+    }
+  },
+  "nmpnh": {
+    "stepstaytimeparamhandler": {
+      "duration": {
+        "days": "{0} Days",
+        "dayshours": "{0} Days {1} Hours",
+        "hours": "{0} Hours"
+      }
+    },
+    "timedtasknotifypolicyhandler": {
+      "getname": "Scheduled Task"
+    }
+  },
+  "nmpnt": {
+    "emaildefaulttemplatebase": {
+      "abortchangestep": {
+        "getcontent": {
+          "1": "Cancel Step"
+        },
+        "gettitle": {
+          "1": "Step Cancel"
+        }
+      },
+      "abortprocesstask": {
+        "getcontent": {
+          "1": "Cancel Task"
+        },
+        "gettitle": {
+          "1": "Cancel Task"
+        }
+      },
+      "active": {
+        "getcontent": {
+          "1": "Task",
+          "2": "Transition"
+        },
+        "gettitle": {
+          "1": "Step Activate"
+        }
+      },
+      "assign": {
+        "getcontent": {
+          "1": "Is Task Step",
+          "2": "Assign Handler"
+        },
+        "gettitle": {
+          "1": "Step Assignee"
+        }
+      },
+      "assignexception": {
+        "getcontent": {
+          "1": "Task Step",
+          "2": "Assign."
+        },
+        "gettitle": {
+          "1": "Assign."
+        }
+      },
+      "back": {
+        "getcontent": {
+          "1": "Roll Back Step",
+          "2": ", Reason:"
+        },
+        "gettitle": {
+          "1": "Step Roll Back"
+        }
+      },
+      "commentchangestep": {
+        "getcontent": {
+          "1": "Add Comment"
+        },
+        "gettitle": {
+          "1": "Step Add Comment"
+        }
+      },
+      "completeallchangestep": {
+        "getcontent": {
+          "1": "All Step Complete"
+        },
+        "gettitle": {
+          "1": "All Step Complete"
+        }
+      },
+      "completealltask": {
+        "getcontent": {
+          "1": "All Step Task Complete"
+        },
+        "gettitle": {
+          "1": "All Step Task Complete"
+        }
+      },
+      "completechangestep": {
+        "getcontent": {
+          "1": "Complete Step"
+        },
+        "gettitle": {
+          "1": "Step Complete"
+        }
+      },
+      "completeprocesstask": {
+        "getcontent": {
+          "1": "Complete Task"
+        },
+        "gettitle": {
+          "1": "Task Complete"
+        }
+      },
+      "completetask": {
+        "getcontent": {
+          "1": "Comment",
+          "2": "Reply Content:"
+        },
+        "gettitle": {
+          "1": "Reply"
+        }
+      },
+      "createtask": {
+        "getcontent": {
+          "1": "Is Task Step",
+          "2": "Establish",
+          "3": "Content:",
+          "4": "Assignee:"
+        },
+        "gettitle": {
+          "1": "1"
+        }
+      },
+      "deletetask": {
+        "getcontent": {
+          "1": "Delete",
+          "2": "Content:"
+        },
+        "gettitle": {
+          "1": "Delete"
+        }
+      },
+      "edittask": {
+        "getcontent": {
+          "1": "Update",
+          "2": "Content:",
+          "3": "Assignee:"
+        },
+        "gettitle": {
+          "1": "1"
+        }
+      },
+      "failed": {
+        "getcontent": {
+          "1": "Task Step",
+          "2": "Failed",
+          "3": ", Reason:"
+        },
+        "gettitle": {
+          "1": "Step Failed"
+        }
+      },
+      "hang": {
+        "getcontent": {
+          "1": "Task Step",
+          "2": "Suspend",
+          "3": ", Reason:"
+        },
+        "gettitle": {
+          "1": "Step Suspend"
+        }
+      },
+      "pause": {
+        "getcontent": {
+          "1": "Task Step",
+          "2": "2",
+          "3": ", Reason:"
+        },
+        "gettitle": {
+          "1": "Step"
+        }
+      },
+      "pausechange": {
+        "getcontent": {
+          "1": "[${DATA.ownername}]"
+        },
+        "gettitle": {
+          "1": "1"
+        }
+      },
+      "recoverchange": {
+        "getcontent": {
+          "1": "[${DATA.ownername}] Recover"
+        },
+        "gettitle": {
+          "1": "Recover"
+        }
+      },
+      "recoverprocesstask": {
+        "getcontent": {
+          "1": "Recover Task"
+        },
+        "gettitle": {
+          "1": "Recover Task"
+        }
+      },
+      "reopenprocesstask": {
+        "getcontent": {
+          "1": "Reopen Task"
+        },
+        "gettitle": {
+          "1": "Reopen"
+        }
+      },
+      "restartchange": {
+        "getcontent": {
+          "1": "[${DATA.ownername}] Start"
+        },
+        "gettitle": {
+          "1": "Start"
+        }
+      },
+      "retreat": {
+        "getcontent": {
+          "1": "Withdraw Step",
+          "2": ", Reason:"
+        },
+        "gettitle": {
+          "1": "Step Withdraw"
+        }
+      },
+      "scoreprocesstask": {
+        "getcontent": {
+          "1": "Task",
+          "2": "2"
+        },
+        "gettitle": {
+          "1": "Task"
+        }
+      },
+      "start": {
+        "getcontent": {
+          "1": "Task Step",
+          "2": "2",
+          "3": "Accept."
+        },
+        "gettitle": {
+          "1": "Assignee"
+        }
+      },
+      "startchange": {
+        "getcontent": {
+          "1": "[${DATA.ownername}] Start"
+        },
+        "gettitle": {
+          "1": "Start"
+        }
+      },
+      "startchangestep": {
+        "getcontent": {
+          "1": "Step",
+          "2": "2",
+          "3": "Start"
+        },
+        "gettitle": {
+          "1": "Step Assignee"
+        }
+      },
+      "startprocess": {
+        "getcontent": {
+          "1": "[${DATA.ownername}] Submit Task"
+        },
+        "gettitle": {
+          "1": "Task Submit Complete"
+        }
+      },
+      "succeed": {
+        "getcontent": {
+          "1": "Complete Step"
+        },
+        "gettitle": {
+          "1": "Step Complete"
+        }
+      },
+      "timeout": {
+        "getcontent": {
+          "1": "Task",
+          "2": "When"
+        },
+        "gettitle": {
+          "1": "Task When"
+        }
+      },
+      "transfer": {
+        "getcontent": {
+          "1": "1",
+          "2": "Transfer",
+          "3": "3"
+        },
+        "gettitle": {
+          "1": "Step Transfer"
+        }
+      },
+      "urge": {
+        "getcontent": {
+          "1": "Task",
+          "2": "Reminder."
+        },
+        "gettitle": {
+          "1": "Reminder Task"
+        }
+      }
+    },
+    "messagedefaulttemplatebase": {
+      "abort": {
+        "description": {
+          "1": "Cancel default"
+        },
+        "getcontent": {
+          "1": "[${DATA.currentUser}] Cancel Task"
+        },
+        "gettitle": {
+          "1": "Cancel Task ——"
+        }
+      },
+      "active": {
+        "description": {
+          "1": "Step Activate default"
+        },
+        "getcontent": {
+          "1": "Task",
+          "2": "Transition [${DATA.step.name}]; <br>"
+        },
+        "gettitle": {
+          "1": "Step Activate ——"
+        }
+      },
+      "back": {
+        "description": {
+          "1": "Default"
+        },
+        "getcontent": {
+          "1": "Task",
+          "2": "Roll Back [${DATA.step.name}]; <br>",
+          "3": "Reason: [${DATA.content}]; <br>"
+        },
+        "gettitle": {
+          "1": "Step ——"
+        }
+      },
+      "failed": {
+        "description": {
+          "1": "Failed default"
+        },
+        "getcontent": {
+          "1": "Task",
+          "2": "In, [${DATA.step.name}] Step Transition Failed; <br>",
+          "3": "Reason: [${DATA.step.error}]; <br>"
+        },
+        "gettitle": {
+          "1": "Step Failed ——"
+        }
+      },
+      "hang": {
+        "description": {
+          "1": "Suspend default"
+        },
+        "getcontent": {
+          "1": "Task",
+          "2": "In, [${DATA.step.name}] Step Suspend; <br>",
+          "3": "Reason: [Step Name ] Step Roll Back; <br>"
+        },
+        "gettitle": {
+          "1": "Step Suspend ——"
+        }
+      },
+      "recover": {
+        "description": {
+          "1": "Recover default"
+        },
+        "getcontent": {
+          "1": "[${DATA.currentUser}] Recover Task"
+        },
+        "gettitle": {
+          "1": "Recover Task ——"
+        }
+      },
+      "retreat": {
+        "description": {
+          "1": "Withdraw default"
+        },
+        "getcontent": {
+          "1": "[${DATA.currentUserName}] Task",
+          "2": "[${DATA.step.name}] Step Withdraw; <br>",
+          "3": "Reason: [${DATA.content}]; <br>"
+        },
+        "gettitle": {
+          "1": "Step Withdraw ——"
+        }
+      },
+      "start": {
+        "description": {
+          "1": "Step Activate default"
+        },
+        "getcontent": {
+          "1": "Task",
+          "2": "[${DATA.step.name}] Step Assignee [${DATA.step.majorUser.userName}] Accept; <br>"
+        },
+        "gettitle": {
+          "1": "Assignee ——"
+        }
+      },
+      "succeed": {
+        "description": {
+          "1": "Succeeded default"
+        },
+        "getcontent": {
+          "1": "Task",
+          "2": "[${DATA.step.name}] Step Complete; <br>"
+        },
+        "gettitle": {
+          "1": "Step Complete ——"
+        }
+      },
+      "transfer": {
+        "description": {
+          "1": "Step Activate default"
+        },
+        "getcontent": {
+          "1": "Task",
+          "2": "In, [${DATA.currentUserName}] [${DATA.step.name}] Step Transfer",
+          "3": "<Br>",
+          "4": "Reason: [${DATA.content}]; <br>"
+        },
+        "gettitle": {
+          "1": "Step Transfer ——"
+        }
+      },
+      "urge": {
+        "description": {
+          "1": "Reminder default"
+        },
+        "getcontent": {
+          "1": "Task",
+          "2": "In, [${DATA.currentUserName}] Reminder,; <br>"
+        },
+        "gettitle": {
+          "1": "Reminder ——"
+        }
+      }
+    }
+  },
+  "nmpph": {
+    "autoincrementpolicy": {
+      "getname": "Getname"
+    },
+    "datetimeandautoincrementpolicy": {
+      "getname": "Getname",
+      "getname_2": "Task"
+    },
+    "yearmonthandautoincrementpolicy": {
+      "getname": "Getname",
+      "getname_2": "Task"
+    }
+  },
+  "nmppw": {
+    "processportalwidget": {
+      "text": {
+        "personalprocesstaskoverview": "Overview of Personal Work Order Status",
+        "processfavoriteservice": "Collection service"
+      }
+    }
+  },
+  "nmps": {
+    "catalogserviceimpl": {
+      "all": "All"
+    },
+    "processtaskautomaticserviceimpl": {
+      "defaultfailurecondition": "By default, HTTP 4xx and 5xx status codes indicate failure",
+      "defaultsuccesscondition": "By default, HTTP 2xx and 3xx status codes indicate success",
+      "failureconditionmet": "Failure condition met: {0}{1}{2}",
+      "successconditionnotmet": "Success condition not met: {0}{1}{2}"
+    },
+    "processtaskserialnumberserviceimpl": {
+      "positiveintegerrequired": "Enter a positive integer.",
+      "runtime": {
+        "label": {
+          "1": "1",
+          "2": "Task Number"
+        }
+      }
+    },
+    "processtaskserviceimpl": {
+      "actionstatus": {
+        "failed": "Failed",
+        "succeeded": "Succeeded"
+      },
+      "listseparator": ", "
+    }
+  },
+  "nmpsh": {
+    "clearprocesstaskstepinoperationstartuphandler": {
+      "getname": "Clearprocesstaskstepinoperationstartuphandler"
+    },
+    "defaultslacalculatehandler": {
+      "description": "1. Normally, Step handling time is the completion time minus the activation time.<br>2. If a Step is paused, the interval from pause to recovery is excluded.<br>3. If a Step is reactivated multiple times, all handling intervals are accumulated.<br>4. If handling intervals for two or more Steps overlap, the overlap is counted only once.",
+      "getdescription": "When: <br>",
+      "getname": "SLA (Default)"
+    }
+  },
+  "nmpsp": {
+    "processtaskautomaticjob": {
+      "getname": "Task"
+    },
+    "processtaskautoscorejob": {
+      "getname": "Task",
+      "text": {
+        "for": "For"
+      }
+    },
+    "processtaskslanotifyjob": {
+      "getname": "Task SLA When"
+    },
+    "processtaskslatransferjob": {
+      "getname": "Task SLA When Transfer"
+    },
+    "processtasksteptimercompletejob": {
+      "getname": "Task Step When Complete"
+    }
+  },
+  "nmpt": {
+    "processtaskactionthread": {
+      "successconditionnotmet": "Success condition not met: {0}{1}{2}"
+    }
+  },
+  "nmpwch": {
+    "processtaskcatalogcolumn": {
+      "deletedcatalog": "Service Catalog Deleted",
+      "deletedservice": "Service Deleted",
+      "getdisplayname": "Service Catalog"
+    },
+    "processtaskchannelcolumn": {
+      "deletedservice": "Service Deleted",
+      "getdisplayname": "Service"
+    },
+    "processtaskchanneltypecolumn": {
+      "getdisplayname": "Service Type"
+    },
+    "processtaskcurrentstepcolumn": {
+      "getdisplayname": "Current Step"
+    },
+    "processtaskcurrentstepnamecolumn": {
+      "getdisplayname": "Current Step Name"
+    },
+    "processtaskcurrentstepworkercolumn": {
+      "getdisplayname": "Current Step"
+    },
+    "processtaskendtimecolumn": {
+      "getdisplayname": "End Time"
+    },
+    "processtaskexpiredtimecolumn": {
+      "getdisplayname": "Remaining Time",
+      "overdue": "{0}: overdue by {1} days; ",
+      "willoverdue": "{0}: {1} days until overdue; "
+    },
+    "processtaskidcolumn": {
+      "getdisplayname": "Task ID"
+    },
+    "processtaskownercolumn": {
+      "getdisplayname": "Requester"
+    },
+    "processtaskprioritycolumn": {
+      "getdisplayname": "Priority"
+    },
+    "processtaskregioncolumn": {
+      "getdisplayname": "Region"
+    },
+    "processtaskreportercolumn": {
+      "getdisplayname": "Reporter"
+    },
+    "processtaskserialnumbercolumn": {
+      "getdisplayname": "Task Number"
+    },
+    "processtaskstarttimecolumn": {
+      "getdisplayname": "Submit When"
+    },
+    "processtaskstatuscolumn": {
+      "getdisplayname": "Task Status"
+    },
+    "processtaskstepnamecolumn": {
+      "getdisplayname": "Step Name"
+    },
+    "processtaskstepstatuscolumn": {
+      "getdisplayname": "Status"
+    },
+    "processtaskstepusercolumn": {
+      "getdisplayname": "Step Assignee"
+    },
+    "processtasktagcolumn": {
+      "getdisplayname": "Tag"
+    },
+    "processtasktitlecolumn": {
+      "getdisplayname": "Title"
+    },
+    "processtaskworktimecolumn": {
+      "getdisplayname": "Work Time Window"
+    }
+  },
+  "nmpwh": {
+    "handlerleaderdispatcher": {
+      "gethelp": "In before Step Assignee in and in, and User is current Step Assignee",
+      "getname": "Handlerleaderdispatcher",
+      "runtime": {
+        "label": {
+          "1": "Before Step",
+          "2": "2"
+        }
+      }
+    },
+    "leaderdispatcher": {
+      "gethelp": "In in, and User is current Step Assignee",
+      "getname": "Leaderdispatcher",
+      "runtime": {
+        "label": {
+          "1": "Treatment Group",
+          "2": "2"
+        }
+      }
+    },
+    "ownerleaderdispatcher": {
+      "gethelp": "In Requester in and in, and User is current Step Assignee",
+      "getname": "Ownerleaderdispatcher",
+      "runtime": {
+        "label": {
+          "1": "1"
+        }
+      }
+    },
+    "workloaddispatcher": {
+      "gethelp": "In in, (and in Step Task Count) User is current Step Assignee",
+      "getname": "Workloaddispatcher",
+      "runtime": {
+        "label": {
+          "1": "Treatment Group"
+        }
+      }
+    }
+  },
+  "nmpwo": {
+    "workcenteroperatebuilder": {
+      "runtime": {
+        "label": {
+          "1": "Handle"
+        }
+      }
+    }
+  },
+  "term": {
+    "itsm": {
+      "cataloginfo": "Catalog Information",
+      "cataloguuid": "Catalog UUID",
+      "channel": "Service",
+      "channeltyperelationid": "Service Type Relation ID",
+      "copyprocesstaskid": "Copyprocesstaskid",
+      "currentprocesstaskid": "Current Task ID",
+      "delaytime": "Delaytime",
+      "focususeruuidlist": "Follow User UUID List",
+      "formextendattributedatalist": "Formextendattributedatalist",
+      "fromprocesstaskid": "Fromprocesstaskid",
+      "fromprocesstaskstepid": "Fromprocesstaskstepid",
+      "handlerstepinfo": "Handler Step Information",
+      "name": "ITSM",
+      "owner": "Requester",
+      "previousstep": "Previousstep",
+      "processtaskidlist": "Task ID List",
+      "processtaskinfo": "Task Information",
+      "processtasknextstepid": "Task Next Step ID",
+      "processtasknextstepname": "Task Next Step Name",
+      "processtaskstepname": "Task Step Name",
+      "readcomponentlist": "Readcomponentlist",
+      "repeatprocesstaskid": "Duplicate Task ID",
+      "repeatprocesstaskidlist": "Duplicate Task ID List",
+      "reporter": "Reporter",
+      "scoretemplatedimensionlist": "Scoretemplatedimensionlist",
+      "sourcechanneltypeuuid": "Source Service Type UUID",
+      "sourcechanneluuid": "Source Service UUID",
+      "targetprocesstaskstepid": "Targetprocesstaskstepid"
+    }
+  }
+}

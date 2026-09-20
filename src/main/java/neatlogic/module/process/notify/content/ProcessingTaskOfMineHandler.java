@@ -197,7 +197,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				JSONArray dataColumnList = config.getJSONArray("dataColumnList");
 				List<String> columnNameList = new ArrayList<>();
 				Map<String, String> collect = ProcessTaskColumnFactory.columnComponentMap.values()
-						.stream().collect(Collectors.toMap(IProcessTaskColumn::getName, e -> $.t(e.getDisplayName())));
+						.stream().collect(Collectors.toMap(IProcessTaskColumn::getName, IProcessTaskColumn::getDisplayName));
 				for(Object column : dataColumnList){
 					columnNameList.add(collect.get(column.toString()));
 				}
@@ -265,10 +265,10 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 					JSONArray dataColumns = config.getJSONArray("dataColumnList");
 					List<String> columnList = new ArrayList<>();
 					if(CollectionUtils.isNotEmpty(dataColumns)){
-						dataColumns.forEach(o -> columnList.add($.t(ProcessTaskColumnFactory.columnComponentMap.get(o.toString()).getDisplayName())));
+						dataColumns.forEach(o -> columnList.add(ProcessTaskColumnFactory.columnComponentMap.get(o.toString()).getDisplayName()));
 					}else{
 						for(Map.Entry<String, IProcessTaskColumn> entry : ProcessTaskColumnFactory.columnComponentMap.entrySet()){
-							columnList.add($.t(entry.getValue().getDisplayName()));
+							columnList.add(entry.getValue().getDisplayName());
 						}
 					}
 					/** 获取按用户分好类的工单列表 **/
@@ -550,7 +550,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			Collection<IProcessTaskColumn> values = ProcessTaskColumnFactory.columnComponentMap.values();
 			values.stream().sorted(Comparator.comparing(IProcessTaskColumn::getSort)).forEach(o -> {
 				if(!o.getDisabled() && o.getIsShow() && o.getIsExport()){
-					result.add(new ValueTextVo(o.getName(),$.t(o.getDisplayName())));
+					result.add(new ValueTextVo(o.getName(), o.getDisplayName()));
 				}
 			});
 		}

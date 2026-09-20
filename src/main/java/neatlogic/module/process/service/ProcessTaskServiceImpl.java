@@ -1815,7 +1815,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                         Map<String, Object> map = new HashMap<>();
                         for (IProcessTaskColumn column : ProcessTaskColumnFactory.columnComponentMap.values()) {
                             if (!column.getDisabled() && column.getIsShow() && column.getIsExport()) {
-                                map.put($.t(column.getDisplayName()), column.getSimpleValue(processTaskVo));
+                                map.put(column.getDisplayName(), column.getSimpleValue(processTaskVo));
                             }
                         }
                         taskList.add(map);
