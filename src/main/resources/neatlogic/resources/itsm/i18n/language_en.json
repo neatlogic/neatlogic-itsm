@@ -3640,15 +3640,15 @@
   },
   "nmpph": {
     "autoincrementpolicy": {
-      "getname": "Getname"
+      "getname": "Auto-Increment Sequence"
     },
     "datetimeandautoincrementpolicy": {
-      "getname": "Getname",
-      "getname_2": "Task"
+      "getname": "Year-Month-Day + Auto-Increment Sequence",
+      "getname_2": "Reset Daily Ticket Sequence"
     },
     "yearmonthandautoincrementpolicy": {
-      "getname": "Getname",
-      "getname_2": "Task"
+      "getname": "Year-Month + Auto-Increment Sequence",
+      "getname_2": "Reset Monthly Ticket Sequence"
     }
   },
   "nmppw": {
