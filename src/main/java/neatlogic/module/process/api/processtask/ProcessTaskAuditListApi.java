@@ -1,10 +1,10 @@
 package neatlogic.module.process.api.processtask;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
+import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.dto.WorkAssignmentUnitVo;
@@ -20,14 +20,15 @@ import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.TableResultUtil;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,16 +37,16 @@ import java.util.stream.Collectors;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ProcessTaskMapper processTaskMapper;
 
-    @Autowired
+    @Resource
     private ProcessTaskService processTaskService;
 
-    @Autowired
+    @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
     @Override
@@ -71,39 +72,69 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "nmpap.processtaskauditlistapi.input.param.desc.processtaskid"),
             @Param(name = "processTaskStepIdList", type = ApiParamType.JSONARRAY, desc = "nmpap.processtaskauditlistapi.input.param.desc.processtaskstepidlist"),
+            @Param(name = "sortDirection", type = ApiParamType.ENUM, rule="asc,desc", desc = "排序方向"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
     })
     @Output({
-            @Param(name = "Return", explode = ProcessTaskStepAuditVo[].class, desc = "nmpap.processtaskauditlistapi.output.param.desc.return.name"),
-            @Param(name = "Return[n].auditDetailList", explode = ProcessTaskStepAuditDetailVo[].class, desc = "nmpap.processtaskauditlistapi.output.param.desc.return.n.auditdetaillist")
+            @Param(explode = BasePageVo.class),
+            @Param(name = "tbodyList", explode = ProcessTaskStepAuditVo[].class, desc = "common.tbodylist"),
     })
     @Description(desc = "nmpap.processtaskauditlistapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        List<ProcessTaskStepAuditVo> resultList = new ArrayList<>();
-        Long processTaskId = jsonObj.getLong("processTaskId");
+        ProcessTaskStepAuditSearchVo searchVo = jsonObj.toJavaObject(ProcessTaskStepAuditSearchVo.class);
+//        List<ProcessTaskStepAuditVo> resultList = new ArrayList<>();
+        Long processTaskId = searchVo.getProcessTaskId();
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        List<Long> processTaskStepIdList = searchVo.getProcessTaskStepIdList();
+//        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
+        if (CollectionUtils.isEmpty(processTaskStepIdList)) {
+//            List<Long> processTaskStepIdList = processTaskStepList.stream().map(ProcessTaskStepVo::getId).collect(Collectors.toList());
+            processTaskStepIdList = processTaskMapper.getHasAuditProcessTaskStepIdListByProcessTaskId(processTaskId);
+//            searchVo.setProcessTaskStepIdList(processTaskStepIdList);
+        }
         ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder().addProcessTaskId(processTaskId).addOperationType(ProcessTaskOperationType.PROCESSTASK_VIEW);
-        List<Long> processTaskStepIdList = new ArrayList<>();
+//        List<Long> processTaskStepIdList = new ArrayList<>();
         Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
-        JSONArray processTaskStepIdArray = jsonObj.getJSONArray("processTaskStepIdList");
-        if (CollectionUtils.isNotEmpty(processTaskStepIdArray)) {
-            processTaskStepIdList = processTaskStepIdArray.toJavaList(Long.class);
+//        JSONArray processTaskStepIdArray = jsonObj.getJSONArray("processTaskStepIdList");
+//        if (CollectionUtils.isNotEmpty(processTaskStepIdArray)) {
+//            processTaskStepIdList = processTaskStepIdArray.toJavaList(Long.class);
+//        }
+//        List<Long> processTaskStepIdList = processTaskStepAuditList.stream().map(ProcessTaskStepAuditVo::getProcessTaskStepId).collect(Collectors.toList());
+        List<ProcessTaskStepVo> processTaskStepList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
+            Long[] processTaskStepIds = new Long[processTaskStepIdList.size()];
+            processTaskStepIdList.toArray(processTaskStepIds);
+            builder.addProcessTaskStepId(processTaskStepIds).addOperationType(ProcessTaskStepOperationType.STEP_VIEW);
+            processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
+            processTaskStepMap = processTaskStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getId, e -> e));
         }
-        List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskId, processTaskStepIdList);
-        if (CollectionUtils.isEmpty(processTaskStepAuditList)) {
-            return resultList;
-        }
-        processTaskStepIdList = processTaskStepAuditList.stream().map(ProcessTaskStepAuditVo::getProcessTaskStepId).collect(Collectors.toList());
-        Long[] processTaskStepIds = new Long[processTaskStepIdList.size()];
-        processTaskStepIdList.toArray(processTaskStepIds);
-        builder.addProcessTaskStepId(processTaskStepIds)
-                .addOperationType(ProcessTaskStepOperationType.STEP_VIEW);
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
-        processTaskStepMap = processTaskStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getId, e -> e));
         Map<Long, Set<IOperationType>> operateMap = builder.build().getOperateMap();
         if (!operateMap.computeIfAbsent(processTaskId, k -> new HashSet<>()).contains(ProcessTaskOperationType.PROCESSTASK_VIEW)) {
-            return resultList;
+            return TableResultUtil.getResult(new ArrayList(), searchVo);
         }
+        if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
+            List<Long> noViewProcessTaskStepIdList = new ArrayList<>();
+            for (Long processTaskStepId : processTaskStepIdList) {
+                // 判断当前用户是否有权限查看该节点信息
+                if (!operateMap.computeIfAbsent(processTaskStepId, k -> new HashSet<>()).contains(ProcessTaskStepOperationType.STEP_VIEW)) {
+                    noViewProcessTaskStepIdList.add(processTaskStepId);
+                }
+            }
+            searchVo.setNoViewProcessTaskStepIdList(noViewProcessTaskStepIdList);
+            if (CollectionUtils.isNotEmpty(searchVo.getProcessTaskStepIdList())) {
+                searchVo.getProcessTaskStepIdList().removeAll(noViewProcessTaskStepIdList);
+            }
+        }
+        List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(searchVo);
+        if (CollectionUtils.isEmpty(processTaskStepAuditList)) {
+            return TableResultUtil.getResult(processTaskStepAuditList, searchVo);
+        }
+        int rowNum = processTaskMapper.getProcessTaskStepAuditCount(searchVo);
+        searchVo.setRowNum(rowNum);
+        List<Long> auditIdList = processTaskStepAuditList.stream().map(ProcessTaskStepAuditVo::getId).collect(Collectors.toList());
+        List<ProcessTaskStepAuditDetailVo> allProcessTaskStepAuditDetailList = processTaskMapper.getProcessTaskStepAuditDetailListByAuditIdList(auditIdList);
         Map<String, String> hash2ConfigMap = new HashMap<>();
         List<String> configHashList = processTaskStepList.stream().map(ProcessTaskStepVo::getConfigHash).filter(Objects::nonNull).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(configHashList)) {
@@ -132,8 +163,12 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
             if (!Objects.equals(processTaskStepAudit.getOriginalUser(), SystemUser.SYSTEM.getUserUuid())) {
                 userUuidSet.add(processTaskStepAudit.getOriginalUser());
             }
-            List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAudit.getAuditDetailList();
-            for (ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditDetailList) {
+            List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = new ArrayList<>();
+            for (ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : allProcessTaskStepAuditDetailList) {
+                if (!Objects.equals(processTaskStepAuditDetailVo.getAuditId(), processTaskStepAudit.getId())) {
+                    continue;
+                }
+                processTaskStepAuditDetailList.add(processTaskStepAuditDetailVo);
                 if (ProcessTaskAuditDetailTypeFactory.getNeedCompression(processTaskStepAuditDetailVo.getType())) {
                     String oldContent = processTaskStepAuditDetailVo.getOldContent();
                     if (StringUtils.isNotBlank(oldContent)) {
@@ -145,6 +180,7 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
                     }
                 }
             }
+            processTaskStepAudit.setAuditDetailList(processTaskStepAuditDetailList);
         }
         Map<String, UserVo> userMap = new HashMap<>();
         Map<String, String> hashToContentMap = new HashMap<>();
@@ -155,16 +191,17 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
         }
         List<String> contentHashList = contentHashSet.stream().filter(Objects::nonNull).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(contentHashList)) {
-            List<ProcessTaskContentVo> processTaskContentList = selectContentByHashMapper.getProcessTaskContentListByHashList(new ArrayList<>(contentHashSet));
+            System.out.println("contentHashList.size() = " + contentHashList.size());
+            List<ProcessTaskContentVo> processTaskContentList = selectContentByHashMapper.getProcessTaskContentListByHashList(contentHashList);
             hashToContentMap = processTaskContentList.stream().collect(Collectors.toMap(ProcessTaskContentVo::getHash, ProcessTaskContentVo::getContent));
         }
 
         for (ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
             if (processTaskStepAudit.getProcessTaskStepId() != null) {
                 // 判断当前用户是否有权限查看该节点信息
-                if (!operateMap.computeIfAbsent(processTaskStepAudit.getProcessTaskStepId(), k -> new HashSet<>()).contains(ProcessTaskStepOperationType.STEP_VIEW)) {
-                    continue;
-                }
+//                if (!operateMap.computeIfAbsent(processTaskStepAudit.getProcessTaskStepId(), k -> new HashSet<>()).contains(ProcessTaskStepOperationType.STEP_VIEW)) {
+//                    continue;
+//                }
                 ProcessTaskStepVo processTaskStepVo = processTaskStepMap.get(processTaskStepAudit.getProcessTaskStepId());
                 if (processTaskStepVo != null) {
                     processTaskStepAudit.setFormSceneUuid(processTaskStepVo.getFormSceneUuid());
@@ -215,12 +252,12 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
                     }
                 }
             }
-            resultList.add(processTaskStepAudit);
+//            resultList.add(processTaskStepAudit);
         }
-        if(CollectionUtils.isNotEmpty(resultList)){
-            resultList.sort((e1, e2) -> e2.getId().compareTo(e1.getId()));
-        }
-        return resultList;
+//        if(CollectionUtils.isNotEmpty(resultList)){
+//            resultList.sort((e1, e2) -> e2.getId().compareTo(e1.getId()));
+//        }
+        return TableResultUtil.getResult(processTaskStepAuditList, searchVo);
 
 //        for (ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
 //            if (processTaskStepAudit.getProcessTaskStepId() != null) {
