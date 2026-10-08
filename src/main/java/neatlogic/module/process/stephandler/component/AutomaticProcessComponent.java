@@ -242,7 +242,6 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 //
 //        @Override
 //        protected void execute() {
-//            UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
 //            AutomaticConfigVo automaticConfigVo = new AutomaticConfigVo(automaticConfig);
 //            JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
 //            automaticConfigVo.setIsRequest(true);

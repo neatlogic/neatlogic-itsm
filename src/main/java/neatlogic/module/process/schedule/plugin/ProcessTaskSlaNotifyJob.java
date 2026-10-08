@@ -47,13 +47,13 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import neatlogic.framework.util.$;
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskSlaNotifyJob extends JobBase {
+    /** 返回工单 SLA 通知作业的语言 key。 */
     @Override
     public String getName() {
-        return $.t("nmpsp.processtaskslanotifyjob.getname");
+        return "nmpsp.processtaskslanotifyjob.getname";
     }
 
 

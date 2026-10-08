@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.GroupSearch;
-import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dao.mapper.region.RegionMapper;
 import neatlogic.framework.dto.AuthenticationInfoVo;
@@ -299,11 +298,13 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
             }
             AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userVo.getUuid());
             JwtVo jwtVo = UserContext.get().getJwtVo();
-            UserContext.get().init(reporterUserVo, authenticationInfoVo, SystemUser.SYSTEM.getTimezone()).setJwtVo(jwtVo);
+            // 切换执行身份时保留当前上下文的时区。
+            UserContext.init(reporterUserVo, authenticationInfoVo, UserContext.get().getTimezone()).setJwtVo(jwtVo);
         } else {
             AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userVo.getUuid());
             JwtVo jwtVo = UserContext.get().getJwtVo();
-            UserContext.get().init(userVo, authenticationInfoVo, SystemUser.SYSTEM.getTimezone()).setJwtVo(jwtVo);
+            // 切换执行身份时保留当前上下文的时区。
+            UserContext.init(userVo, authenticationInfoVo, UserContext.get().getTimezone()).setJwtVo(jwtVo);
         }
 
         Long processTaskId = null;

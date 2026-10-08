@@ -44,16 +44,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import neatlogic.framework.util.$;
 /**
  * 工单自动评分定时类
  */
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskAutoScoreJob extends JobBase {
+	/** 返回工单自动评分作业的语言 key。 */
 	@Override
 	public String getName() {
-		return $.t("nmpsp.processtaskautoscorejob.getname");
+		return "nmpsp.processtaskautoscorejob.getname";
 	}
 
 

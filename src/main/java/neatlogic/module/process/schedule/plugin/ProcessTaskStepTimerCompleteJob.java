@@ -31,7 +31,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import neatlogic.framework.util.$;
 /**
  * @author linbq
  * @since 2021/12/27 18:51
@@ -39,9 +38,10 @@ import neatlogic.framework.util.$;
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskStepTimerCompleteJob extends JobBase {
+    /** 返回工单步骤定时完成作业的语言 key。 */
     @Override
     public String getName() {
-        return $.t("nmpsp.processtasksteptimercompletejob.getname");
+        return "nmpsp.processtasksteptimercompletejob.getname";
     }
 
 

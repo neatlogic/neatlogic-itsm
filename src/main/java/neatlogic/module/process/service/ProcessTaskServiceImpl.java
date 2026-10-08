@@ -3072,10 +3072,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
                             } else {
                                 param.put("action", "start");
                             }
-                            UserContext.init(user, authenticationInfo, SystemUser.SYSTEM.getTimezone());
+                            // 切换执行身份时保留当前上下文的时区。
+                            UserContext.init(user, authenticationInfo, UserContext.get().getTimezone());
                             startProcessTaskStep(param);
                         }
-                        UserContext.init(user, authenticationInfo, SystemUser.SYSTEM.getTimezone());
+                        // 切换执行身份时保留当前上下文的时区。
+                        UserContext.init(user, authenticationInfo, UserContext.get().getTimezone());
                         completeProcessTaskStep(currentStep, content);
                     } catch (Exception ex) {
                         exceptionMap.put(currentStep.getProcessTaskId(), ex.getMessage());
@@ -3107,7 +3109,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
      * @param processTaskStepVo  工单步骤
      */
     private Map<Long, Set<IOperationType>> checkProcessTaskStepCompleteAuth(UserVo user, AuthenticationInfoVo authenticationInfo, ProcessTaskStepVo processTaskStepVo) {
-        UserContext.init(user, authenticationInfo, SystemUser.SYSTEM.getTimezone());
+        // 切换执行身份时保留当前上下文的时区。
+        UserContext.init(user, authenticationInfo, UserContext.get().getTimezone());
         ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
         builder.addProcessTaskId(processTaskStepVo.getProcessTaskId());
         builder.addProcessTaskStepId(processTaskStepVo.getId());

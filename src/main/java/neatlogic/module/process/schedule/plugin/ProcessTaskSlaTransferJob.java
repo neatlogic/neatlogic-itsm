@@ -48,13 +48,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import neatlogic.framework.util.$;
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskSlaTransferJob extends JobBase {
+    /** 返回工单 SLA 转交作业的语言 key。 */
     @Override
     public String getName() {
-        return $.t("nmpsp.processtaskslatransferjob.getname");
+        return "nmpsp.processtaskslatransferjob.getname";
     }
 
     static Logger logger = LoggerFactory.getLogger(ProcessTaskSlaTransferJob.class);

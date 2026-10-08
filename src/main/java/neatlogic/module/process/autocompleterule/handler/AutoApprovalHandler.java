@@ -14,7 +14,6 @@ package neatlogic.module.process.autocompleterule.handler;
 
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.asynchronization.threadpool.TransactionSynchronizationPool;
-import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.UserVo;
@@ -124,7 +123,8 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
                     @Override
                     public void myExecute() {
                         AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(currentUserVo.getUuid());
-                        UserContext.init(currentUserVo, authenticationInfoVo, SystemUser.SYSTEM.getTimezone());
+                        // 切换执行身份时保留当前上下文的时区。
+                        UserContext.init(currentUserVo, authenticationInfoVo, UserContext.get().getTimezone());
                         currentProcessTaskStepVo.getParamObj().put("action", "complete");
                         handler.autoComplete(currentProcessTaskStepVo);
                     }

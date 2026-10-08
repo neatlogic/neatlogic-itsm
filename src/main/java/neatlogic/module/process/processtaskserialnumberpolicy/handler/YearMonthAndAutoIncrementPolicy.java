@@ -38,7 +38,6 @@ import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 
-import neatlogic.framework.util.$;
 @Service
 public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
     private Logger logger = LoggerFactory.getLogger(YearMonthAndAutoIncrementPolicy.class);
@@ -46,9 +45,10 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
     @Resource
     private ProcessTaskSerialNumberService processTaskSerialNumberService;
 
+    /** 返回流水号策略的语言 key，实际文案由读取方按当前语言解析。 */
     @Override
     public String getName() {
-        return $.t("nmpph.yearmonthandautoincrementpolicy.getname");
+        return "nmpph.yearmonthandautoincrementpolicy.getname";
     }
 
     @SuppressWarnings("serial")
@@ -81,9 +81,10 @@ public class YearMonthAndAutoIncrementPolicy implements IProcessTaskSerialNumber
     @Component
     @DisallowConcurrentExecution
     private static class ProcessTaskSerialNumberSeedResetJob extends JobBase {
+        /** 返回月度流水号重置作业的语言 key。 */
         @Override
         public String getName() {
-            return $.t("nmpph.yearmonthandautoincrementpolicy.getname_2");
+            return "nmpph.yearmonthandautoincrementpolicy.getname_2";
         }
 
         private String cron = "0 0 0 1 * ?"; // 每月1日0时0分0秒
