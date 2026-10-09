@@ -3479,7 +3479,7 @@
 
     <insert id="insertIgnoreProcessTaskContent" parameterType="neatlogic.framework.process.dto.ProcessTaskContentVo">
         INSERT IGNORE INTO `processtask_content` (`content`, `hash`)
-        VALUES (#{content}, #{hash})
+        VALUES (#{content, typeHandler=CompressHandler}, #{hash})
     </insert>
 
     <insert id="batchInsertIgnoreProcessTaskContent" parameterType="neatlogic.framework.process.dto.ProcessTaskContentVo">
@@ -3487,7 +3487,7 @@
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
-            #{item.content},
+            #{item.content, typeHandler=CompressHandler},
             #{item.hash}
             )
         </foreach>
