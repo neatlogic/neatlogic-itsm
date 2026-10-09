@@ -84,24 +84,14 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessTaskStepAuditSearchVo searchVo = jsonObj.toJavaObject(ProcessTaskStepAuditSearchVo.class);
-//        List<ProcessTaskStepAuditVo> resultList = new ArrayList<>();
         Long processTaskId = searchVo.getProcessTaskId();
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         List<Long> processTaskStepIdList = searchVo.getProcessTaskStepIdList();
-//        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
         if (CollectionUtils.isEmpty(processTaskStepIdList)) {
-//            List<Long> processTaskStepIdList = processTaskStepList.stream().map(ProcessTaskStepVo::getId).collect(Collectors.toList());
             processTaskStepIdList = processTaskMapper.getHasAuditProcessTaskStepIdListByProcessTaskId(processTaskId);
-//            searchVo.setProcessTaskStepIdList(processTaskStepIdList);
         }
         ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder().addProcessTaskId(processTaskId).addOperationType(ProcessTaskOperationType.PROCESSTASK_VIEW);
-//        List<Long> processTaskStepIdList = new ArrayList<>();
         Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
-//        JSONArray processTaskStepIdArray = jsonObj.getJSONArray("processTaskStepIdList");
-//        if (CollectionUtils.isNotEmpty(processTaskStepIdArray)) {
-//            processTaskStepIdList = processTaskStepIdArray.toJavaList(Long.class);
-//        }
-//        List<Long> processTaskStepIdList = processTaskStepAuditList.stream().map(ProcessTaskStepAuditVo::getProcessTaskStepId).collect(Collectors.toList());
         List<ProcessTaskStepVo> processTaskStepList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(processTaskStepIdList)) {
             Long[] processTaskStepIds = new Long[processTaskStepIdList.size()];
@@ -191,17 +181,12 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
         }
         List<String> contentHashList = contentHashSet.stream().filter(Objects::nonNull).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(contentHashList)) {
-            System.out.println("contentHashList.size() = " + contentHashList.size());
             List<ProcessTaskContentVo> processTaskContentList = processTaskService.getProcessTaskContentListByHashList(contentHashList);
             hashToContentMap = processTaskContentList.stream().collect(Collectors.toMap(ProcessTaskContentVo::getHash, ProcessTaskContentVo::getContent));
         }
 
         for (ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
             if (processTaskStepAudit.getProcessTaskStepId() != null) {
-                // 判断当前用户是否有权限查看该节点信息
-//                if (!operateMap.computeIfAbsent(processTaskStepAudit.getProcessTaskStepId(), k -> new HashSet<>()).contains(ProcessTaskStepOperationType.STEP_VIEW)) {
-//                    continue;
-//                }
                 ProcessTaskStepVo processTaskStepVo = processTaskStepMap.get(processTaskStepAudit.getProcessTaskStepId());
                 if (processTaskStepVo != null) {
                     processTaskStepAudit.setFormSceneUuid(processTaskStepVo.getFormSceneUuid());
@@ -252,77 +237,8 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
                     }
                 }
             }
-//            resultList.add(processTaskStepAudit);
         }
-//        if(CollectionUtils.isNotEmpty(resultList)){
-//            resultList.sort((e1, e2) -> e2.getId().compareTo(e1.getId()));
-//        }
         return TableResultUtil.getResult(processTaskStepAuditList, searchVo);
-
-//        for (ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-//            if (processTaskStepAudit.getProcessTaskStepId() != null) {
-//                // 判断当前用户是否有权限查看该节点信息
-//                if (!operateMap.computeIfAbsent(processTaskStepAudit.getProcessTaskStepId(), k -> new HashSet<>()).contains(ProcessTaskStepOperationType.STEP_VIEW)) {
-//                    continue;
-//                }
-//                ProcessTaskStepVo processTaskStepVo = processTaskStepMap.get(processTaskStepAudit.getProcessTaskStepId());
-//                if (processTaskStepVo != null) {
-//                    processTaskStepAudit.setFormSceneUuid(processTaskStepVo.getFormSceneUuid());
-//                }
-//            }
-//
-//            if(StringUtils.isNotBlank(processTaskStepAudit.getDescriptionHash())){
-//                String description = selectContentByHashMapper.getProcessTaskContentStringByHash(processTaskStepAudit.getDescriptionHash());
-//                processTaskStepAudit.setDescription(description);
-//            }
-//            if(SystemUser.SYSTEM.getUserUuid().equals(processTaskStepAudit.getUserUuid())){
-//                processTaskStepAudit.setUserVo(new WorkAssignmentUnitVo(SystemUser.SYSTEM.getUserVo()));
-//            }else {
-//                UserVo userVo = userMapper.getUserBaseInfoByUuid(processTaskStepAudit.getUserUuid());
-//                if(userVo == null){
-//                    userVo = new UserVo(processTaskStepAudit.getUserUuid());
-//                }
-//                processTaskStepAudit.setUserVo(new WorkAssignmentUnitVo(userVo));
-//            }
-//
-//            if(SystemUser.SYSTEM.getUserUuid().equals(processTaskStepAudit.getOriginalUser())){
-//                processTaskStepAudit.setOriginalUserVo(new WorkAssignmentUnitVo(SystemUser.SYSTEM.getUserVo()));
-//            }else if(StringUtils.isNotBlank(processTaskStepAudit.getOriginalUser())) {
-//                UserVo userVo = userMapper.getUserBaseInfoByUuid(processTaskStepAudit.getOriginalUser());
-//                if(userVo == null){
-//                    userVo = new UserVo(processTaskStepAudit.getOriginalUser());
-//                }
-//                processTaskStepAudit.setOriginalUserVo(new WorkAssignmentUnitVo(userVo));
-//            }
-//            List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAudit.getAuditDetailList();
-//            processTaskStepAuditDetailList.sort(ProcessTaskStepAuditDetailVo::compareTo);
-//            Iterator<ProcessTaskStepAuditDetailVo> iterator = processTaskStepAuditDetailList.iterator();
-//            while (iterator.hasNext()) {
-//                ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo = iterator.next();
-//                if(ProcessTaskAuditDetailTypeFactory.getNeedCompression(processTaskStepAuditDetailVo.getType())){
-//                    String oldContent = processTaskStepAuditDetailVo.getOldContent();
-//                    if(StringUtils.isNotBlank(oldContent)) {
-//                        processTaskStepAuditDetailVo.setOldContent(selectContentByHashMapper.getProcessTaskContentStringByHash(oldContent));
-//                    }
-//                    String newContent = processTaskStepAuditDetailVo.getNewContent();
-//                    if(StringUtils.isNotBlank(newContent)) {
-//                        processTaskStepAuditDetailVo.setNewContent(selectContentByHashMapper.getProcessTaskContentStringByHash(newContent));
-//                    }
-//                }
-//                IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
-//                if (auditDetailHandler != null) {
-//                    int isShow = auditDetailHandler.handle(processTaskStepAuditDetailVo);
-//                    if (isShow == 0) {
-//                        iterator.remove();
-//                    }
-//                }
-//            }
-//            resultList.add(processTaskStepAudit);
-//        }
-//        if(CollectionUtils.isNotEmpty(resultList)){
-//            resultList.sort((e1, e2) -> e2.getId().compareTo(e1.getId()));
-//        }
-//        return resultList;
     }
 
 }
