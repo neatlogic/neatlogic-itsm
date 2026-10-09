@@ -21,8 +21,8 @@ import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
 import neatlogic.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
-import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
+import neatlogic.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -39,7 +39,7 @@ public class StepCommentListParamHandler extends ProcessTaskNotifyParamHandlerBa
     private ProcessTaskMapper processTaskMapper;
 
     @Resource
-    private SelectContentByHashMapper selectContentByHashMapper;
+    private ProcessTaskService processTaskService;
 
     @Resource
     private UserMapper userMapper;
@@ -69,7 +69,7 @@ public class StepCommentListParamHandler extends ProcessTaskNotifyParamHandlerBa
             List<UserVo> userList = userMapper.getUserByUserUuidList(new ArrayList<>(userUuidSet));
             userMap = userList.stream().collect(Collectors.toMap(e -> e.getUuid(), e -> e));
         }
-        List<ProcessTaskContentVo> processTaskContentList = selectContentByHashMapper.getProcessTaskContentListByHashList(new ArrayList<>(contentHashSet));
+        List<ProcessTaskContentVo> processTaskContentList = processTaskService.getProcessTaskContentListByHashList(new ArrayList<>(contentHashSet));
         Map<String, String> hashToContentMap = processTaskContentList.stream().collect(Collectors.toMap(ProcessTaskContentVo::getHash, ProcessTaskContentVo::getContent));
         for (ProcessTaskStepContentVo contentVo : processTaskStepContentList) {
             String content = hashToContentMap.get(contentVo.getContentHash());
