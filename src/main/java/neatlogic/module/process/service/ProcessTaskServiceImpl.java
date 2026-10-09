@@ -3932,4 +3932,26 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         }
         return startProcessTaskStepId;
     }
+
+    @Override
+    public List<ProcessTaskContentVo> getProcessTaskContentListByHashList(List<String> contentHashList) {
+        List<ProcessTaskContentVo> processTaskContentList = new ArrayList<>();
+        List<String> hashList = new ArrayList<>();
+        for (String contentHash : contentHashList) {
+            if (contentHash != null) {
+                hashList.add(contentHash);
+            }
+            if (hashList.size() >= 10) {
+                List<ProcessTaskContentVo> list = selectContentByHashMapper.getProcessTaskContentListByHashList(hashList);
+                processTaskContentList.addAll(list);
+                hashList.clear();
+            }
+        }
+        if (CollectionUtils.isNotEmpty(hashList)) {
+            List<ProcessTaskContentVo> list = selectContentByHashMapper.getProcessTaskContentListByHashList(hashList);
+            processTaskContentList.addAll(list);
+            hashList.clear();
+        }
+        return processTaskContentList;
+    }
 }

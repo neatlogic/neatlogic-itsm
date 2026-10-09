@@ -943,6 +943,36 @@
         WHERE `processtask_id` = #{value}
     </select>
 
+    <select id="getHasAuditProcessTaskStepIdListByProcessTaskId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT DISTINCT `processtask_step_id`
+        FROM `processtask_step_audit`
+        WHERE `processtask_step_id` IS NOT NULL
+          AND `processtask_id` = #{processTaskId}
+    </select>
+
+    <sql id="getProcessTaskStepAuditWhere">
+        WHERE `processtask_id` = #{processTaskId}
+        <if test="processTaskStepIdList != null and processTaskStepIdList.size() > 0">
+            AND `processtask_step_id` IN
+            <foreach collection="processTaskStepIdList" item="processTaskStepId" open="(" separator="," close=")">
+                #{processTaskStepId}
+            </foreach>
+        </if>
+        <if test="noViewProcessTaskStepIdList != null and noViewProcessTaskStepIdList.size() > 0">
+            AND `processtask_step_id` NOT IN
+            <foreach collection="noViewProcessTaskStepIdList" item="noViewProcessTaskStepId" open="(" separator="," close=")">
+                #{noViewProcessTaskStepId}
+            </foreach>
+        </if>
+    </sql>
+
+    <select id="getProcessTaskStepAuditCount" parameterType="neatlogic.framework.process.dto.ProcessTaskStepAuditSearchVo" resultType="int">
+        SELECT
+            COUNT(1)
+        FROM `processtask_step_audit`
+        <include refid="getProcessTaskStepAuditWhere"/>
+    </select>
+
     <resultMap type="neatlogic.framework.process.dto.ProcessTaskStepAuditVo" id="processTaskStepAuditMap">
         <id column="id" property="id"/>
         <result column="processtask_id" property="processTaskId"/>
@@ -954,39 +984,43 @@
         <result column="description_hash" property="descriptionHash"/>
         <result column="original_user" property="originalUser"/>
         <result column="source" property="source"/>
-        <collection property="auditDetailList" ofType="neatlogic.framework.process.dto.ProcessTaskStepAuditDetailVo">
+        <!--<collection property="auditDetailList" ofType="neatlogic.framework.process.dto.ProcessTaskStepAuditDetailVo">
             <result column="audit_id" property="auditId"/>
             <result column="type" property="type"/>
             <result column="old_content" property="oldContent"/>
             <result column="new_content" property="newContent"/>
-        </collection>
+        </collection>-->
     </resultMap>
-    <select id="getProcessTaskStepAuditList" parameterType="java.util.HashMap"
+    <select id="getProcessTaskStepAuditList" parameterType="neatlogic.framework.process.dto.ProcessTaskStepAuditSearchVo"
             resultMap="processTaskStepAuditMap">
         SELECT
-        a.`id`,
-        a.`processtask_id`,
-        a.`processtask_step_id`,
-        a.`user_uuid`,
-        a.`action_time`,
-        a.`action`,
-        a.`step_status`,
-        a.`original_user`,
-        a.`description_hash`,
-        a.`source`,
-        b.`audit_id`,
-        b.`type`,
-        b.`old_content`,
-        b.`new_content`
-        FROM `processtask_step_audit` a
-        LEFT JOIN `processtask_step_audit_detail` b ON b.`audit_id` = a.`id`
-        WHERE a.`processtask_id` = #{processTaskId}
-        <if test="processTaskStepIdList != null and processTaskStepIdList.size() > 0">
-            AND a.`processtask_step_id` IN
-          <foreach collection="processTaskStepIdList" item="processTaskStepId" open="(" separator="," close=")">
-              #{processTaskStepId}
-          </foreach>
-        </if>
+        `id`,
+        `processtask_id`,
+        `processtask_step_id`,
+        `user_uuid`,
+        `action_time`,
+        `action`,
+        `step_status`,
+        `original_user`,
+        `description_hash`,
+        `source`
+        FROM `processtask_step_audit`
+        <include refid="getProcessTaskStepAuditWhere"/>
+        ORDER BY `id` ${sortDirection}
+        LIMIT #{startNum}, #{pageSize}
+    </select>
+
+    <select id="getProcessTaskStepAuditDetailListByAuditIdList" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskStepAuditDetailVo">
+        SELECT
+            `audit_id` AS auditId,
+            `type`,
+            `old_content` AS oldContent,
+            `new_content` AS newContent
+        FROM `processtask_step_audit_detail`
+        WHERE `audit_id` IN
+        <foreach collection="list" item="auditId" open="(" separator="," close=")">
+            #{auditId}
+        </foreach>
     </select>
 
     <resultMap type="neatlogic.framework.process.dto.ProcessTaskStepVo" id="processTaskStepMap">
@@ -3445,7 +3479,7 @@
 
     <insert id="insertIgnoreProcessTaskContent" parameterType="neatlogic.framework.process.dto.ProcessTaskContentVo">
         INSERT IGNORE INTO `processtask_content` (`content`, `hash`)
-        VALUES (#{content}, #{hash})
+        VALUES (#{content, typeHandler=CompressHandler}, #{hash})
     </insert>
 
     <insert id="batchInsertIgnoreProcessTaskContent" parameterType="neatlogic.framework.process.dto.ProcessTaskContentVo">
@@ -3453,7 +3487,7 @@
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
-            #{item.content},
+            #{item.content, typeHandler=CompressHandler},
             #{item.hash}
             )
         </foreach>

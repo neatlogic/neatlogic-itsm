@@ -425,7 +425,7 @@ public class SearchProcessTaskStepListApi extends PrivateApiComponentBase {
             }
             Map<String, String> hash2ContentMap = new HashMap<>();
             if (CollectionUtils.isNotEmpty(contentHashSet)) {
-                List<ProcessTaskContentVo> processTaskContentList = selectContentByHashMapper.getProcessTaskContentListByHashList(new ArrayList<>(contentHashSet));
+                List<ProcessTaskContentVo> processTaskContentList = processTaskService.getProcessTaskContentListByHashList(new ArrayList<>(contentHashSet));
                 hash2ContentMap = processTaskContentList.stream().collect(Collectors.toMap(ProcessTaskContentVo::getHash, ProcessTaskContentVo::getContent));
             }
             for (ProcessTaskStepContentVo processTaskStepContentVo : processTaskStepContentList) {

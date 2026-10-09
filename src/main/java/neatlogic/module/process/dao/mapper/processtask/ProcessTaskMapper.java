@@ -158,7 +158,13 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     List<ProcessTaskVo> getProcessTaskBySerialNumberList(List<String> serialNumberList);
 
-    List<ProcessTaskStepAuditVo> getProcessTaskStepAuditList(@Param("processTaskId") Long processTaskId, @Param("processTaskStepIdList") List<Long> processTaskStepIdList);
+    List<Long> getHasAuditProcessTaskStepIdListByProcessTaskId(Long processTaskId);
+
+    int getProcessTaskStepAuditCount(ProcessTaskStepAuditSearchVo searchVo);
+
+    List<ProcessTaskStepAuditVo> getProcessTaskStepAuditList(ProcessTaskStepAuditSearchVo searchVo);
+
+    List<ProcessTaskStepAuditDetailVo> getProcessTaskStepAuditDetailListByAuditIdList(List<Long> auditIdList);
 
     List<ProcessTaskStepVo> getProcessTaskStepListByProcessTaskId(Long processTaskId);
 

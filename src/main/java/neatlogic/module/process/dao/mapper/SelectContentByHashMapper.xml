@@ -50,8 +50,7 @@
 		SELECT
 		`hash`,
 		`content`
-		FROM
-		`processtask_content`
+		FROM `processtask_content`
 		WHERE
 		`hash` = #{value}
 	</select>
@@ -60,8 +59,7 @@
 		SELECT
 			`hash`,
 			`content`
-		FROM
-			`processtask_content`
+		FROM `processtask_content`
 		WHERE
 			`hash` IN
 		<foreach collection="list" item="hash" open="(" separator="," close=")">
