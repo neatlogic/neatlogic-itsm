@@ -192,7 +192,7 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
         List<String> contentHashList = contentHashSet.stream().filter(Objects::nonNull).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(contentHashList)) {
             System.out.println("contentHashList.size() = " + contentHashList.size());
-            List<ProcessTaskContentVo> processTaskContentList = selectContentByHashMapper.getProcessTaskContentListByHashList(contentHashList);
+            List<ProcessTaskContentVo> processTaskContentList = processTaskService.getProcessTaskContentListByHashList(contentHashList);
             hashToContentMap = processTaskContentList.stream().collect(Collectors.toMap(ProcessTaskContentVo::getHash, ProcessTaskContentVo::getContent));
         }
 
