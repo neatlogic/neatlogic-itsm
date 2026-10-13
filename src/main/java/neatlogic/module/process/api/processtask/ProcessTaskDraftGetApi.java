@@ -506,11 +506,17 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         ProcessTaskStepVo startProcessTaskStepVo = new ProcessTaskStepVo(startProcessStepVo);
         startProcessTaskStepVo.setIsAutoGenerateId(false);
 
-        startProcessTaskStepVo.setIsRequired((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isRequired"));
-        startProcessTaskStepVo.setIsAllowProcessOnMobile((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isAllowProcessOnMobile"));
-        startProcessTaskStepVo.setIsNeedContent((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isNeedContent"));
-        startProcessTaskStepVo.setIsNeedUploadFile((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isNeedUploadFile"));
-        startProcessTaskStepVo.setFormSceneUuid((String) JSONPath.read(startProcessStepVo.getConfig(), "formSceneUuid"));
+        JSONObject stepConfig = StringUtils.isBlank(startProcessStepVo.getConfig())
+                ? new JSONObject() : JSON.parseObject(startProcessStepVo.getConfig());
+        if (stepConfig == null) {
+            stepConfig = new JSONObject();
+        }
+        startProcessTaskStepVo.setIsRequired(stepConfig.getInteger("isRequired"));
+        startProcessTaskStepVo.setIsAllowProcessOnMobile(stepConfig.getInteger("isAllowProcessOnMobile"));
+        startProcessTaskStepVo.setIsNeedContent(stepConfig.getInteger("isNeedContent"));
+        startProcessTaskStepVo.setIsNeedUploadFile(stepConfig.getInteger("isNeedUploadFile"));
+        startProcessTaskStepVo.setFormSceneUuid(stepConfig.getString("formSceneUuid"));
+        startProcessTaskStepVo.setFileTypeHandler(stepConfig.getString("fileTypeHandler"));
         startProcessTaskStepVo.setContentHelp(channel.getContentHelp());
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 
