@@ -500,9 +500,6 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         }
 
         ProcessStepVo startProcessStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
-        // 上报初始化通过原节点字段及限定的配置对象提供附件上传类型。
-//        ProcessTaskStepVo startProcessTaskStepVo = createStartProcessTaskStep(startProcessStepVo);
-
         ProcessTaskStepVo startProcessTaskStepVo = new ProcessTaskStepVo(startProcessStepVo);
         startProcessTaskStepVo.setIsAutoGenerateId(false);
 
@@ -522,27 +519,6 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
         processTaskService.setProcessTaskFormInfo(processTaskVo);
         return processTaskVo;
-    }
-
-    /** 构造待上报的首节点，仅向嵌套 config 补充附件类型，不暴露其他节点配置。 */
-    ProcessTaskStepVo createStartProcessTaskStep(ProcessStepVo startProcessStepVo) {
-        ProcessTaskStepVo startProcessTaskStepVo = new ProcessTaskStepVo(startProcessStepVo);
-        startProcessTaskStepVo.setIsAutoGenerateId(false);
-        JSONObject stepConfig = StringUtils.isBlank(startProcessStepVo.getConfig())
-                ? new JSONObject() : JSON.parseObject(startProcessStepVo.getConfig());
-        if (stepConfig == null) {
-            stepConfig = new JSONObject();
-        }
-        // 原有首节点控制字段继续按发布配置返回，不改变上报表单行为。
-        startProcessTaskStepVo.setIsRequired((Integer) stepConfig.get("isRequired"));
-        startProcessTaskStepVo.setIsAllowProcessOnMobile((Integer) stepConfig.get("isAllowProcessOnMobile"));
-        startProcessTaskStepVo.setIsNeedContent((Integer) stepConfig.get("isNeedContent"));
-        startProcessTaskStepVo.setIsNeedUploadFile((Integer) stepConfig.get("isNeedUploadFile"));
-        startProcessTaskStepVo.setFormSceneUuid((String) stepConfig.get("formSceneUuid"));
-        startProcessTaskStepVo.setFileTypeHandler((String) stepConfig.get("fileTypeHandler"));
-//        startProcessTaskStepVo.setConfig(new JSONObject().fluentPut("fileTypeHandler",
-//                StringUtils.trimToEmpty(stepConfig.getString("fileTypeHandler"))));
-        return startProcessTaskStepVo;
     }
 
     private ProcessTaskVo getProcessTaskVoByChannelUuid(String channelUuid, Long fromProcessTaskId, Long fromProcessTaskStepId, Long channelTypeRelationId) {
