@@ -48,7 +48,6 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.service.RegionService;
-import neatlogic.framework.util.FreemarkerUtil;
 import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
@@ -525,8 +524,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         startProcessTaskStepVo.setIsNeedContent((Integer) stepConfig.get("isNeedContent"));
         startProcessTaskStepVo.setIsNeedUploadFile((Integer) stepConfig.get("isNeedUploadFile"));
         startProcessTaskStepVo.setFormSceneUuid((String) stepConfig.get("formSceneUuid"));
-        startProcessTaskStepVo.setConfig(new JSONObject().fluentPut("fileTypeHandler",
-                StringUtils.trimToEmpty(stepConfig.getString("fileTypeHandler"))));
+        startProcessTaskStepVo.setFileTypeHandler((String) stepConfig.get("fileTypeHandler"));
+//        startProcessTaskStepVo.setConfig(new JSONObject().fluentPut("fileTypeHandler",
+//                StringUtils.trimToEmpty(stepConfig.getString("fileTypeHandler"))));
         return startProcessTaskStepVo;
     }
 
