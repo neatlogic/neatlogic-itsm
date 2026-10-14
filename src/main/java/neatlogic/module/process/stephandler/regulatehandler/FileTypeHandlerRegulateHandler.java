@@ -13,8 +13,14 @@
 package neatlogic.module.process.stephandler.regulatehandler;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.exception.file.FileTypeHandlerNotFoundException;
+import neatlogic.framework.file.core.FileTypeHandlerFactory;
+import neatlogic.framework.file.core.IFileTypeHandler;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.IRegulateHandler;
+import neatlogic.framework.process.stephandler.core.ProcessMessageManager;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /** 保留节点配置的附件类型处理器，空值由调用方沿用所属节点的原附件类型。 */
@@ -31,6 +37,14 @@ public class FileTypeHandlerRegulateHandler implements IRegulateHandler {
     @Override
     public void regulateConfig(IProcessStepInternalHandler processStepInternalHandler, JSONObject oldConfigObj, JSONObject newConfigObj) {
         String fileTypeHandler = oldConfigObj == null ? null : oldConfigObj.getString("fileTypeHandler");
+        if (ProcessMessageManager.getOperationType() == OperationTypeEnum.UPDATE) {
+            if (StringUtils.isNotBlank(fileTypeHandler)) {
+                IFileTypeHandler handler = FileTypeHandlerFactory.getHandler(fileTypeHandler);
+                if (handler == null) {
+                    throw new FileTypeHandlerNotFoundException(fileTypeHandler);
+                }
+            }
+        }
         newConfigObj.put("fileTypeHandler", fileTypeHandler == null ? "" : fileTypeHandler.trim());
     }
 }
