@@ -410,8 +410,12 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getNonStartStepInfo(oldStartProcessTaskStepVo));
         }
         if (list.contains("form")) {
+            String formSceneUuid = null;
             ProcessTaskStepVo startProcessTaskStepVo = processTaskVo.getStartProcessTaskStep();
-            String formSceneUuid = startProcessTaskStepVo == null ? null : startProcessTaskStepVo.getFormSceneUuid();
+            if (startProcessTaskStepVo != null) {
+                processTaskService.parseProcessTaskStepConfig(startProcessTaskStepVo);
+                formSceneUuid = startProcessTaskStepVo.getFormSceneUuid();
+            }
             processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(copyProcessTaskId, null, processTaskVo.getFormConfig(), formSceneUuid));
         }
         // 标签列表
@@ -512,6 +516,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         startProcessTaskStepVo.setIsAllowProcessOnMobile(stepConfig.getInteger("isAllowProcessOnMobile"));
         startProcessTaskStepVo.setIsNeedContent(stepConfig.getInteger("isNeedContent"));
         startProcessTaskStepVo.setIsNeedUploadFile(stepConfig.getInteger("isNeedUploadFile"));
+        startProcessTaskStepVo.setEnableReapproval(stepConfig.getInteger("enableReapproval"));
         startProcessTaskStepVo.setFormSceneUuid(stepConfig.getString("formSceneUuid"));
         startProcessTaskStepVo.setFileTypeHandler(stepConfig.getString("fileTypeHandler"));
         startProcessTaskStepVo.setContentHelp(channel.getContentHelp());
@@ -538,8 +543,12 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             }
             processTaskVo.getTranferReportProcessTaskList().add(fromProcessTaskVo);
             if (MapUtils.isNotEmpty(processTaskVo.getFormConfig())) {
+                String formSceneUuid = null;
                 ProcessTaskStepVo startProcessTaskStepVo = processTaskVo.getStartProcessTaskStep();
-                String formSceneUuid = startProcessTaskStepVo == null ? null : startProcessTaskStepVo.getFormSceneUuid();
+                if (startProcessTaskStepVo != null) {
+                    processTaskService.parseProcessTaskStepConfig(startProcessTaskStepVo);
+                    formSceneUuid = startProcessTaskStepVo.getFormSceneUuid();
+                }
                 processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(fromProcessTaskId, fromProcessTaskStepId, processTaskVo.getFormConfig(), formSceneUuid));
             }
             copyProcessTaskInfo(processTaskVo, fromProcessTaskId, Arrays.asList("title", "contentAndUploadFile"));

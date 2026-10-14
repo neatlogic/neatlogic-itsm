@@ -672,13 +672,15 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
 
     @Override
     public void checkContentIsRequired(ProcessTaskStepVo currentProcessTaskStepVo, IOperationType operationType) {
-        if (Objects.equals(currentProcessTaskStepVo.getIsNeedContent(), 0)) {
+        String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(currentProcessTaskStepVo.getConfigHash());
+        JSONObject stepConfig = StringUtils.isBlank(config) ? new JSONObject() : JSON.parseObject(config);
+        if (Objects.equals(stepConfig.getInteger("isNeedContent"), 0)) {
             return;
         }
         JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
         String content = paramObj.getString("content");
         if (StringUtils.isBlank(content)) {
-            if (operationType == ProcessTaskStepOperationType.STEP_BACK || Objects.equals(currentProcessTaskStepVo.getIsRequired(), 1)) {
+            if (operationType == ProcessTaskStepOperationType.STEP_BACK || Objects.equals(stepConfig.getInteger("isRequired"), 1)) {
                 throw new ProcessTaskStepContentIsEmptyException();
             }
         }
@@ -1011,7 +1013,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
                 currentProcessTaskStepVo.setConfigHash(stepVo.getConfigHash());
             }
-            formVersionVo.setSceneUuid(currentProcessTaskStepVo.getFormSceneUuid());
+            String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(currentProcessTaskStepVo.getConfigHash());
+            JSONObject stepConfig = StringUtils.isBlank(config) ? new JSONObject() : JSON.parseObject(config);
+            formVersionVo.setSceneUuid(stepConfig.getString("formSceneUuid"));
         } else {
             formVersionVo.setSceneUuid(mainSceneUuid);
         }

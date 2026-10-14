@@ -1575,6 +1575,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         startProcessTaskStepVo.setReplaceableTextList(getReplaceableTextList(startProcessTaskStepVo));
         startProcessTaskStepVo.setCustomStatusList(getCustomStatusList(startProcessTaskStepVo));
         startProcessTaskStepVo.setCustomButtonList(getCustomButtonList(startProcessTaskStepVo));
+
+        parseProcessTaskStepConfig(startProcessTaskStepVo);
         return startProcessTaskStepVo;
     }
 
@@ -1851,6 +1853,22 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             }
         }
         return userTaskMap;
+    }
+
+    @Override
+    public void parseProcessTaskStepConfig(ProcessTaskStepVo processTaskStepVo) {
+        String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+        JSONObject stepConfig = StringUtils.isBlank(config) ? new JSONObject() : JSON.parseObject(config);
+        if (stepConfig == null) {
+            stepConfig = new JSONObject();
+        }
+        processTaskStepVo.setIsRequired(stepConfig.getInteger("isRequired"));
+        processTaskStepVo.setIsAllowProcessOnMobile(stepConfig.getInteger("isAllowProcessOnMobile"));
+        processTaskStepVo.setIsNeedContent(stepConfig.getInteger("isNeedContent"));
+        processTaskStepVo.setIsNeedUploadFile(stepConfig.getInteger("isNeedUploadFile"));
+        processTaskStepVo.setEnableReapproval(stepConfig.getInteger("enableReapproval"));
+        processTaskStepVo.setFormSceneUuid(stepConfig.getString("formSceneUuid"));
+        processTaskStepVo.setFileTypeHandler(stepConfig.getString("fileTypeHandler"));
     }
 
     /**
@@ -2160,6 +2178,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         processTaskStepVo.setReplaceableTextList(getReplaceableTextList(processTaskStepVo));
         processTaskStepVo.setCustomStatusList(getCustomStatusList(processTaskStepVo));
         processTaskStepVo.setCustomButtonList(getCustomButtonList(processTaskStepVo));
+        parseProcessTaskStepConfig(processTaskStepVo);
 
         List<Long> tagIdList = processTaskMapper.getTagIdListByProcessTaskStepId(processTaskStepId);
         if (CollectionUtils.isNotEmpty(tagIdList)) {

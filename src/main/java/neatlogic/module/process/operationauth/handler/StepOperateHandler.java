@@ -815,6 +815,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                         return PredicateResult.DENY;
                     }
                     //13.判断当前步骤是否启用重审功能，如果没有，则提示“该步骤未启用重审功能”；
+                    processTaskService.parseProcessTaskStepConfig(processTaskStepVo);
                     if (!Objects.equals(processTaskStepVo.getEnableReapproval(), 1)){
                         operationTypePermissionDeniedExceptionMap.computeIfAbsent(id, key -> new HashMap<>())
                                 .put(operationType, new ProcessTaskStepReapprovalNotEnabledException());
