@@ -1857,8 +1857,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Override
     public void parseProcessTaskStepConfig(ProcessTaskStepVo processTaskStepVo) {
-        String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-        JSONObject stepConfig = StringUtils.isBlank(config) ? new JSONObject() : JSON.parseObject(config);
+        JSONObject stepConfig = processTaskStepVo.getConfig();
+        if (MapUtils.isEmpty(stepConfig) && StringUtils.isNotBlank(processTaskStepVo.getConfigHash())) {
+            String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+            stepConfig = StringUtils.isBlank(config) ? new JSONObject() : JSON.parseObject(config);
+        }
         if (stepConfig == null) {
             stepConfig = new JSONObject();
         }

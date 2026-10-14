@@ -507,18 +507,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         ProcessTaskStepVo startProcessTaskStepVo = new ProcessTaskStepVo(startProcessStepVo);
         startProcessTaskStepVo.setIsAutoGenerateId(false);
 
-        JSONObject stepConfig = StringUtils.isBlank(startProcessStepVo.getConfig())
-                ? new JSONObject() : JSON.parseObject(startProcessStepVo.getConfig());
-        if (stepConfig == null) {
-            stepConfig = new JSONObject();
-        }
-        startProcessTaskStepVo.setIsRequired(stepConfig.getInteger("isRequired"));
-        startProcessTaskStepVo.setIsAllowProcessOnMobile(stepConfig.getInteger("isAllowProcessOnMobile"));
-        startProcessTaskStepVo.setIsNeedContent(stepConfig.getInteger("isNeedContent"));
-        startProcessTaskStepVo.setIsNeedUploadFile(stepConfig.getInteger("isNeedUploadFile"));
-        startProcessTaskStepVo.setEnableReapproval(stepConfig.getInteger("enableReapproval"));
-        startProcessTaskStepVo.setFormSceneUuid(stepConfig.getString("formSceneUuid"));
-        startProcessTaskStepVo.setFileTypeHandler(stepConfig.getString("fileTypeHandler"));
+        JSONObject stepConfig = StringUtils.isBlank(startProcessStepVo.getConfig()) ? new JSONObject() : JSON.parseObject(startProcessStepVo.getConfig());
+        startProcessTaskStepVo.setConfig(stepConfig);
+        processTaskService.parseProcessTaskStepConfig(startProcessTaskStepVo);
         startProcessTaskStepVo.setContentHelp(channel.getContentHelp());
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 
