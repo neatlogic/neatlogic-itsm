@@ -189,6 +189,7 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
             if (processTaskStepAudit.getProcessTaskStepId() != null) {
                 ProcessTaskStepVo processTaskStepVo = processTaskStepMap.get(processTaskStepAudit.getProcessTaskStepId());
                 if (processTaskStepVo != null) {
+                    processTaskService.parseProcessTaskStepConfig(processTaskStepVo);
                     processTaskStepAudit.setFormSceneUuid(processTaskStepVo.getFormSceneUuid());
                 }
             }

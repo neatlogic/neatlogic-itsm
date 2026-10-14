@@ -277,6 +277,8 @@ public interface ProcessTaskService {
      */
     public Map<String, Integer> getProcessingUserTaskCountByCondition(Map<String, Object> conditionMap);
 
+    void parseProcessTaskStepConfig(ProcessTaskStepVo processTaskStepVo);
+
     /**
      * 获取该步骤可替换文本列表数据
      *

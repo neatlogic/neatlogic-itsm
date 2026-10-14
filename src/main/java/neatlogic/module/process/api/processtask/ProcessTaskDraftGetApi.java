@@ -48,7 +48,6 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.service.RegionService;
-import neatlogic.framework.util.FreemarkerUtil;
 import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
@@ -411,8 +410,12 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getNonStartStepInfo(oldStartProcessTaskStepVo));
         }
         if (list.contains("form")) {
+            String formSceneUuid = null;
             ProcessTaskStepVo startProcessTaskStepVo = processTaskVo.getStartProcessTaskStep();
-            String formSceneUuid = startProcessTaskStepVo == null ? null : startProcessTaskStepVo.getFormSceneUuid();
+            if (startProcessTaskStepVo != null) {
+                processTaskService.parseProcessTaskStepConfig(startProcessTaskStepVo);
+                formSceneUuid = startProcessTaskStepVo.getFormSceneUuid();
+            }
             processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(copyProcessTaskId, null, processTaskVo.getFormConfig(), formSceneUuid));
         }
         // 标签列表
@@ -504,11 +507,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         ProcessTaskStepVo startProcessTaskStepVo = new ProcessTaskStepVo(startProcessStepVo);
         startProcessTaskStepVo.setIsAutoGenerateId(false);
 
-        startProcessTaskStepVo.setIsRequired((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isRequired"));
-        startProcessTaskStepVo.setIsAllowProcessOnMobile((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isAllowProcessOnMobile"));
-        startProcessTaskStepVo.setIsNeedContent((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isNeedContent"));
-        startProcessTaskStepVo.setIsNeedUploadFile((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isNeedUploadFile"));
-        startProcessTaskStepVo.setFormSceneUuid((String) JSONPath.read(startProcessStepVo.getConfig(), "formSceneUuid"));
+        JSONObject stepConfig = StringUtils.isBlank(startProcessStepVo.getConfig()) ? new JSONObject() : JSON.parseObject(startProcessStepVo.getConfig());
+        startProcessTaskStepVo.setConfig(stepConfig);
+        processTaskService.parseProcessTaskStepConfig(startProcessTaskStepVo);
         startProcessTaskStepVo.setContentHelp(channel.getContentHelp());
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 
@@ -533,8 +534,12 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             }
             processTaskVo.getTranferReportProcessTaskList().add(fromProcessTaskVo);
             if (MapUtils.isNotEmpty(processTaskVo.getFormConfig())) {
+                String formSceneUuid = null;
                 ProcessTaskStepVo startProcessTaskStepVo = processTaskVo.getStartProcessTaskStep();
-                String formSceneUuid = startProcessTaskStepVo == null ? null : startProcessTaskStepVo.getFormSceneUuid();
+                if (startProcessTaskStepVo != null) {
+                    processTaskService.parseProcessTaskStepConfig(startProcessTaskStepVo);
+                    formSceneUuid = startProcessTaskStepVo.getFormSceneUuid();
+                }
                 processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(fromProcessTaskId, fromProcessTaskStepId, processTaskVo.getFormConfig(), formSceneUuid));
             }
             copyProcessTaskInfo(processTaskVo, fromProcessTaskId, Arrays.asList("title", "contentAndUploadFile"));

@@ -72,9 +72,10 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         return OmnipotentNotifyPolicyHandler.class;
     }
 
+    /** 补充缺省附件类型字段，避免发布流程时遗漏未填写的节点配置。 */
     @Override
     public String[] getRegulateKeyList() {
-        return new String[]{"authorityList", "notifyPolicyConfig", "actionConfig", "customButtonList", "customStatusList", "replaceableTextList", "workerPolicyConfig", "taskConfig", "enableReapproval", "autoComplete", "autoApproval", "showAutoApproval", "formSceneUuid", "formSceneName", "autoStart", "isNeedUploadFile", "isNeedContent", "isRequired", "commentTemplateId", "tagList", "isAllowProcessOnMobile"};
+        return new String[]{"authorityList", "notifyPolicyConfig", "actionConfig", "customButtonList", "customStatusList", "replaceableTextList", "workerPolicyConfig", "taskConfig", "enableReapproval", "autoComplete", "autoApproval", "showAutoApproval", "formSceneUuid", "formSceneName", "autoStart", "isNeedUploadFile", "isNeedContent", "isRequired", "commentTemplateId", "tagList", "isAllowProcessOnMobile", "fileTypeHandler"};
     }
 
     @Override
