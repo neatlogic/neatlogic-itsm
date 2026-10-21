@@ -24,8 +24,10 @@ import neatlogic.framework.process.auth.PROCESSTASK_MODIFY;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
 import neatlogic.framework.process.constvalue.ProcessTaskStepDataType;
+import neatlogic.framework.process.constvalue.ProcessTaskStatus;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -108,6 +110,8 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
         param.put("source", paramObj.getString("source"));
         processStepHandlerUtil.saveForm(processTaskStepVo);
 
+        // 仅将通过渠道校验且实际保存的优先级变化计入通知。
+        boolean priorityChanged = false;
         // 更新优先级
         String priorityUuid = paramObj.getString("priorityUuid");
         if (StringUtils.isNotBlank(priorityUuid) && !Objects.equals(processTaskVo.getPriorityUuid(), priorityUuid)) {
@@ -121,6 +125,7 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
                             if (Objects.equals(channelPriority.getPriorityUuid(), priorityUuid)) {
                                 processTaskVo.setPriorityUuid(priorityUuid);
                                 processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
+                                priorityChanged = true;
                                 break;
                             }
                         }
@@ -129,6 +134,7 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
                     if (processTaskVo.getPriorityUuid() != null) {
                         processTaskVo.setPriorityUuid(priorityUuid);
                         processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
+                        priorityChanged = true;
                     }
                 }
             }
@@ -147,6 +153,11 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
         IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getHandler(ProcessFullTextIndexType.PROCESSTASK);
         if (indexHandler != null) {
             indexHandler.createIndex(processTaskId);
+        }
+        // 正式工单的表单和优先级变化合并为一次事件，草稿不发送，复用事务提交后的通知机制。
+        if (!ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())
+                && (param.getBooleanValue("formDataChanged") || priorityChanged)) {
+            processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.UPDATEPROCESSTASK);
         }
         return null;
     }

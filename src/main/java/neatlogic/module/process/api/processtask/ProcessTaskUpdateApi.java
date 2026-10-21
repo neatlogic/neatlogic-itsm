@@ -22,9 +22,11 @@ import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditDetailType;
 import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
+import neatlogic.framework.process.constvalue.ProcessTaskStatus;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.process.exception.priority.PriorityNotFoundException;
 import neatlogic.framework.process.fulltextindex.ProcessFullTextIndexType;
+import neatlogic.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import neatlogic.framework.process.operationauth.core.ProcessAuthManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -204,10 +206,14 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
                     oldReplyVo = new ProcessTaskStepReplyVo();
                     oldReplyVo.setProcessTaskId(processTaskId);
                     oldReplyVo.setProcessTaskStepId(startProcessTaskStepId);
-                    isUpdate = processTaskService.saveProcessTaskStepReply(jsonObj, oldReplyVo);
+                    // 先保存描述和附件，再合并变化，防止覆盖标题、优先级及标签的修改结果。
+                    boolean replyChanged = processTaskService.saveProcessTaskStepReply(jsonObj, oldReplyVo);
+                    isUpdate = isUpdate || replyChanged;
                 }
             } else {
-                isUpdate = processTaskService.saveProcessTaskStepReply(jsonObj, oldReplyVo);
+                // 即使其他字段已修改，也必须执行描述和附件的保存。
+                boolean replyChanged = processTaskService.saveProcessTaskStepReply(jsonObj, oldReplyVo);
+                isUpdate = isUpdate || replyChanged;
             }
         }
 
@@ -227,6 +233,16 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getHandler(ProcessFullTextIndexType.PROCESSTASK);
         if (indexHandler != null) {
             indexHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
+        }
+        // 草稿不发送更新事件；正式工单操作成功后只发送一次，无当前步骤时不生成步骤 ID。
+        if (isUpdate && !ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+            ProcessTaskStepVo notifyStepVo = processTaskVo.getCurrentProcessTaskStep();
+            if (notifyStepVo == null) {
+                notifyStepVo = new ProcessTaskStepVo();
+                notifyStepVo.setIsAutoGenerateId(false);
+                notifyStepVo.setProcessTaskId(processTaskId);
+            }
+            processStepHandlerUtil.notify(notifyStepVo, ProcessTaskNotifyTriggerType.UPDATEPROCESSTASK);
         }
         return null;
     }

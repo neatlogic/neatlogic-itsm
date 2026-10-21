@@ -927,13 +927,15 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
      */
     @Override
     public void saveForm(ProcessTaskStepVo currentProcessTaskStepVo) {
+        // 每次保存独立判断实际变化，避免请求参数或上一次保存结果误触发通知。
+        JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+        paramObj.put("formDataChanged", false);
         Long processTaskId = currentProcessTaskStepVo.getProcessTaskId();
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
         if (processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContent())) {
             // 工单没有表单直接返回
             return;
         }
-        JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
         JSONArray formAttributeDataList = paramObj.getJSONArray("formAttributeDataList");
         if (formAttributeDataList == null) {
             /* 如果参数中没有formAttributeDataList字段，则不改变表单属性值，这样可以兼容自动节点自动完成场景 **/
@@ -1104,6 +1106,8 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         }
         // 判断是否修改了表单数据，如果是，则记录活动
         if (FormUtil.isModifiedFormData(mainSceneFormAttributeList, newProcessTaskFormAttributeDataList, oldProcessTaskFormAttributeDataList)) {
+            // 仅传递本次保存的变化结果，通知由成功完成操作的入口统一发送。
+            paramObj.put("formDataChanged", true);
             paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldProcessTaskFormAttributeDataList));
             paramObj.put(ProcessTaskAuditDetailType.FORM.getParamName(), JSON.toJSONString(newProcessTaskFormAttributeDataList));
         }
@@ -1195,6 +1199,12 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 processTaskExtendFormAttributeDataVo.setAttributeKey(formAttributeVo.getKey());
                 processTaskExtendFormAttributeDataVo.setAttributeLabel(formAttributeVo.getLabel());
                 processTaskExtendFormAttributeDataVo.setDataObj(data);
+                // 合法扩展字段按加密后的实际数据比较，新增空值与未提交字段不算修改。
+                if (FormUtil.isModifiedFormData(Collections.singletonList(formAttributeVo),
+                        Collections.singletonList(processTaskExtendFormAttributeDataVo),
+                        oldAttributeDataVo == null ? Collections.emptyList() : Collections.singletonList(oldAttributeDataVo))) {
+                    paramObj.put("formDataChanged", true);
+                }
 //                formMapper.insertFormExtendAttributeData(processTaskExtendFormAttributeDataVo);
                 processTaskExtendFormAttributeDataVo.setProcessTaskId(processTaskId);
 //                processTaskMapper.insertProcessTaskExtendFormAttribute(processTaskExtendFormAttributeDataVo);
