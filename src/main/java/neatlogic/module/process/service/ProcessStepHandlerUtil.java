@@ -923,23 +923,23 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
      * @Description: 保存表单属性值
      * @Author: linbq
      * @Date: 2021/1/27 11:42
-     * @Returns:void
+     * @return 本次成功保存的普通或扩展表单属性值是否实际发生变化
      */
     @Override
-    public void saveForm(ProcessTaskStepVo currentProcessTaskStepVo) {
-        // 每次保存独立判断实际变化，避免请求参数或上一次保存结果误触发通知。
+    public boolean saveForm(ProcessTaskStepVo currentProcessTaskStepVo) {
+        // 变化结果仅属于本次调用，通过返回值传递，避免请求参数或上次保存结果影响通知判断。
+        boolean formDataChanged = false;
         JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-        paramObj.put("formDataChanged", false);
         Long processTaskId = currentProcessTaskStepVo.getProcessTaskId();
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
         if (processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContent())) {
             // 工单没有表单直接返回
-            return;
+            return false;
         }
         JSONArray formAttributeDataList = paramObj.getJSONArray("formAttributeDataList");
         if (formAttributeDataList == null) {
             /* 如果参数中没有formAttributeDataList字段，则不改变表单属性值，这样可以兼容自动节点自动完成场景 **/
-            return;
+            return false;
         }
 
         /* 隐藏的属性uuid列表 **/
@@ -985,7 +985,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
             }
         }
         if (CollectionUtils.isEmpty(mainSceneFormAttributeList)) {
-            return;
+            return false;
         }
         Map<String, Object> formAttributeDataMap = new HashMap<>();
         for (int i = 0; i < formAttributeDataList.size(); i++) {
@@ -1106,8 +1106,8 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
         }
         // 判断是否修改了表单数据，如果是，则记录活动
         if (FormUtil.isModifiedFormData(mainSceneFormAttributeList, newProcessTaskFormAttributeDataList, oldProcessTaskFormAttributeDataList)) {
-            // 仅传递本次保存的变化结果，通知由成功完成操作的入口统一发送。
-            paramObj.put("formDataChanged", true);
+            // 累计本次保存的变化，全部持久化成功后再返回，通知仍由操作入口统一发送。
+            formDataChanged = true;
             paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldProcessTaskFormAttributeDataList));
             paramObj.put(ProcessTaskAuditDetailType.FORM.getParamName(), JSON.toJSONString(newProcessTaskFormAttributeDataList));
         }
@@ -1203,7 +1203,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 if (FormUtil.isModifiedFormData(Collections.singletonList(formAttributeVo),
                         Collections.singletonList(processTaskExtendFormAttributeDataVo),
                         oldAttributeDataVo == null ? Collections.emptyList() : Collections.singletonList(oldAttributeDataVo))) {
-                    paramObj.put("formDataChanged", true);
+                    formDataChanged = true;
                 }
 //                formMapper.insertFormExtendAttributeData(processTaskExtendFormAttributeDataVo);
                 processTaskExtendFormAttributeDataVo.setProcessTaskId(processTaskId);
@@ -1215,6 +1215,8 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 processTaskMapper.insertProcessTaskExtendFormAttributeList(needSaveProcessTaskFormExtendAttributeDataList);
             }
         }
+        // 只有普通和扩展字段全部保存完成，才向调用方返回本次变化结果；保存异常继续向外传播。
+        return formDataChanged;
     }
 
     @Override

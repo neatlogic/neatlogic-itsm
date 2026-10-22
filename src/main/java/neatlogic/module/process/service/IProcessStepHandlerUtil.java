@@ -183,8 +183,9 @@ public interface IProcessStepHandlerUtil {
     /**
      * 保存表单属性值
      * @param currentProcessTaskStepVo 当前步骤信息
+     * @return 本次成功保存的普通或扩展表单属性值是否实际发生变化
      */
-    void saveForm(ProcessTaskStepVo currentProcessTaskStepVo);
+    boolean saveForm(ProcessTaskStepVo currentProcessTaskStepVo);
 
     /**
      * 解析分配步骤处理人配置

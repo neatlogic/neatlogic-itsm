@@ -108,7 +108,8 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
         param.put("readcomponentList", paramObj.getJSONArray("readcomponentList"));
         param.put("needVerifyIsRequired", false);
         param.put("source", paramObj.getString("source"));
-        processStepHandlerUtil.saveForm(processTaskStepVo);
+        // 直接接收本次保存的实际变化结果，不通过请求上下文中的状态字段判断。
+        boolean formChanged = processStepHandlerUtil.saveForm(processTaskStepVo);
 
         // 仅将通过渠道校验且实际保存的优先级变化计入通知。
         boolean priorityChanged = false;
@@ -154,8 +155,8 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
         if (indexHandler != null) {
             indexHandler.createIndex(processTaskId);
         }
-        // 正式工单的表单和优先级变化合并为一次事件，草稿不发送，复用事务提交后的通知机制。
-        if (param.getBooleanValue("formDataChanged") || priorityChanged) {
+        // 表单和优先级变化合并为一次事件，复用事务提交后的通知机制。
+        if (formChanged || priorityChanged) {
             processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.UPDATEPROCESSTASK);
         }
         return null;
