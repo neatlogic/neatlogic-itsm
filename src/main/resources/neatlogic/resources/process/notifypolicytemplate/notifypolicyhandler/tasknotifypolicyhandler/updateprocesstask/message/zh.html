@@ -1,0 +1,13 @@
+<!-- 更新上报内容触发点站内消息默认模板，复用工单参数及详情地址。 -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>工单上报内容更新提醒：[${DATA.serialNumber}]${DATA.title}</title>
+</head>
+<body>
+<p>${DATA.channelTypeName}工单：[${DATA.serialNumber}]${DATA.title}的上报内容已更新。</p>
+<p>详情点击查看：<a target="_self" href="${DATA.homeUrl}process.html#/task-detail?processTaskId=${DATA.id}">${DATA.title}</a></p>
+</body>
+</html>
+
