@@ -155,8 +155,7 @@ public class UpdateProcessTaskFormApi extends PrivateApiComponentBase {
             indexHandler.createIndex(processTaskId);
         }
         // 正式工单的表单和优先级变化合并为一次事件，草稿不发送，复用事务提交后的通知机制。
-        if (!ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())
-                && (param.getBooleanValue("formDataChanged") || priorityChanged)) {
+        if (param.getBooleanValue("formDataChanged") || priorityChanged) {
             processStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.UPDATEPROCESSTASK);
         }
         return null;

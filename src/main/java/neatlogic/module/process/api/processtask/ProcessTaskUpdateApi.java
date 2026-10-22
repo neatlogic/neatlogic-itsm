@@ -222,20 +222,14 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
             ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
             if (processTaskStepVo == null) {
                 processTaskStepVo = new ProcessTaskStepVo();
+                processTaskStepVo.setIsAutoGenerateId(false);
                 processTaskStepVo.setProcessTaskId(processTaskId);
             }
             processTaskStepVo.getParamObj().putAll(jsonObj);
             processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
             processStepHandlerUtil.calculateSla(new ProcessTaskVo(processTaskId), false);
         }
-
-        //创建全文检索索引
-        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getHandler(ProcessFullTextIndexType.PROCESSTASK);
-        if (indexHandler != null) {
-            indexHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
-        }
-        // 草稿不发送更新事件；正式工单操作成功后只发送一次，无当前步骤时不生成步骤 ID。
-        if (isUpdate && !ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+        if (isUpdate) {
             ProcessTaskStepVo notifyStepVo = processTaskVo.getCurrentProcessTaskStep();
             if (notifyStepVo == null) {
                 notifyStepVo = new ProcessTaskStepVo();
@@ -243,6 +237,12 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
                 notifyStepVo.setProcessTaskId(processTaskId);
             }
             processStepHandlerUtil.notify(notifyStepVo, ProcessTaskNotifyTriggerType.UPDATEPROCESSTASK);
+        }
+
+        //创建全文检索索引
+        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getHandler(ProcessFullTextIndexType.PROCESSTASK);
+        if (indexHandler != null) {
+            indexHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
         }
         return null;
     }
