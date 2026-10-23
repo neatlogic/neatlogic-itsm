@@ -88,47 +88,14 @@ public class ProcessTaskReapprovalApi extends PrivateApiComponentBase {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }
 
+        JSONObject data = processTaskService.getProcessTaskStepStagingData(processTaskId, processTaskStepId);
+        processTaskStepVo.getParamObj().putAll(data);
+
         ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
         processTaskStepDataVo.setProcessTaskId(processTaskId);
         processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
         processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
         processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
-        ProcessTaskStepDataVo stepDraftSaveData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
-        if (stepDraftSaveData != null) {
-            JSONObject dataObj = stepDraftSaveData.getData();
-            if (MapUtils.isNotEmpty(dataObj)) {
-                JSONArray formAttributeDataList = dataObj.getJSONArray("formAttributeDataList");
-                if (CollectionUtils.isNotEmpty(formAttributeDataList)) {
-                    paramObj.put("formAttributeDataList", formAttributeDataList);
-                }
-                JSONArray hidecomponentList = dataObj.getJSONArray("hidecomponentList");
-                if (CollectionUtils.isNotEmpty(hidecomponentList)) {
-                    paramObj.put("hidecomponentList", hidecomponentList);
-                }
-                JSONArray readcomponentList = dataObj.getJSONArray("readcomponentList");
-                if (CollectionUtils.isNotEmpty(readcomponentList)) {
-                    paramObj.put("readcomponentList", readcomponentList);
-                }
-                JSONObject handlerStepInfo = dataObj.getJSONObject("handlerStepInfo");
-                if (MapUtils.isNotEmpty(handlerStepInfo)) {
-                    paramObj.put("handlerStepInfo", handlerStepInfo);
-                }
-                String priorityUuid = dataObj.getString("priorityUuid");
-                if (StringUtils.isNotBlank(priorityUuid)) {
-                    paramObj.put("priorityUuid", priorityUuid);
-                }
-                JSONArray fileIdList = dataObj.getJSONArray("fileIdList");
-                if (CollectionUtils.isNotEmpty(fileIdList)) {
-                    paramObj.put("fileIdList", fileIdList);
-                }
-                if (!paramObj.containsKey("content")) {
-                    String content = dataObj.getString("content");
-                    if (StringUtils.isNotBlank(content)) {
-                        paramObj.put("content", content);
-                    }
-                }
-            }
-        }
         processTaskStepVo.getParamObj().putAll(paramObj);
         handler.reapproval(processTaskStepVo);
         processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);

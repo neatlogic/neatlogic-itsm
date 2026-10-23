@@ -1,0 +1,13 @@
+<!-- 更新上报内容触发点站内消息默认模板，复用工单参数及详情地址。 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Reported Content Updated: [${DATA.serialNumber}]${DATA.title}</title>
+</head>
+<body>
+<p>The reported content of ${DATA.channelTypeName} task [${DATA.serialNumber}]${DATA.title} has been updated.</p>
+<p>View details: <a target="_self" href="${DATA.homeUrl}process.html#/task-detail?processTaskId=${DATA.id}">${DATA.title}</a></p>
+</body>
+</html>
+
