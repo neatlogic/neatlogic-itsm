@@ -44,24 +44,25 @@ public class ReasonParamHandler extends ProcessTaskNotifyParamHandlerBase {
         JSONObject paramObj = processTaskStepVo.getParamObj();
         if (MapUtils.isNotEmpty(paramObj)) {
             String content = paramObj.getString("content");
-            if (StringUtils.isNotBlank(content)) {
-                content = content.replace("<p>", "");
-                content = content.replace("</p>", "");
-                content = content.replace("<br>", "");
-                List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
-                String homeUrl = "";
-                String config = notifyConfigMapper.getConfigByType(NotifyHandlerType.EMAIL.getValue());
-                if (StringUtils.isNotBlank(config)) {
-                    MailServerVo mailServerVo = JSONObject.parseObject(config, MailServerVo.class);
-                    if (mailServerVo != null) {
-                        homeUrl = mailServerVo.getHomeUrl();
-                        if (StringUtils.isBlank(homeUrl)) {
-                            homeUrl = "";
-                        }
-                    }
-                }
-                content = HtmlUtil.urlReplace(content, urlInfoVoList, homeUrl);
-            }
+            content = processContent(content);
+//            if (StringUtils.isNotBlank(content)) {
+//                content = content.replace("<p>", "");
+//                content = content.replace("</p>", "");
+//                content = content.replace("<br>", "");
+//                List<UrlInfoVo> urlInfoVoList = HtmlUtil.getImgUrlInfoList(content);
+//                String homeUrl = "";
+//                String config = notifyConfigMapper.getConfigByType(NotifyHandlerType.EMAIL.getValue());
+//                if (StringUtils.isNotBlank(config)) {
+//                    MailServerVo mailServerVo = JSONObject.parseObject(config, MailServerVo.class);
+//                    if (mailServerVo != null) {
+//                        homeUrl = mailServerVo.getHomeUrl();
+//                        if (StringUtils.isBlank(homeUrl)) {
+//                            homeUrl = "";
+//                        }
+//                    }
+//                }
+//                content = HtmlUtil.urlReplace(content, urlInfoVoList, homeUrl);
+//            }
             return content;
         }
         return null;
