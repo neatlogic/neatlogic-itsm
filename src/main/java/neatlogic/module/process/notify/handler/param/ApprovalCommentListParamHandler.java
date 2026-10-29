@@ -88,8 +88,9 @@ public class ApprovalCommentListParamHandler extends ProcessTaskNotifyParamHandl
                         content = content.substring(0, content.length() - 4);
                     }
                     if (StringUtils.isNotBlank(content)) {
-                        List<UrlInfoVo> urlInfoVoList = HtmlUtil.getUrlInfoList(content, "<img src=\"", "\"");
-                        content = HtmlUtil.urlReplace(content, urlInfoVoList, homeUrl);
+//                        List<UrlInfoVo> urlInfoVoList = HtmlUtil.getImgUrlInfoList(content);
+//                        content = HtmlUtil.urlReplace(content, urlInfoVoList, homeUrl);
+                        content = processContent(content);
                         StringBuilder commentStringBuilder = new StringBuilder();
                         commentStringBuilder.append("<p>");
                         commentStringBuilder.append(content);
