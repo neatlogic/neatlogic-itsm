@@ -72,6 +72,7 @@ import neatlogic.framework.process.stepremind.core.ProcessTaskStepRemindTypeFact
 import neatlogic.framework.process.task.TaskConfigManager;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.service.AuthenticationInfoService;
+import neatlogic.framework.service.TeamService;
 import neatlogic.framework.util.$;
 import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.SnowflakeUtil;
@@ -131,6 +132,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 
     @Resource
     private TeamMapper teamMapper;
+
+    @Resource
+    private TeamService teamService;
 
     @Resource
     private RoleMapper roleMapper;
@@ -1532,6 +1536,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
             List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(owner);
             if (CollectionUtils.isNotEmpty(teamUuidList)) {
                 List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
+                for (TeamVo team : teamList) {
+                    List<String> pathNameList = teamService.getParentPathList(team);
+                    if (CollectionUtils.isNotEmpty(pathNameList)) {
+                        team.setFullPath(String.join("->", pathNameList));
+                        team.setParentPathList(pathNameList);
+                    }
+                }
                 ownerVo.setTeamList(teamList);
             }
             processTaskVo.setOwnerVo(ownerVo);
