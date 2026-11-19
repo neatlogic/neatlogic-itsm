@@ -38,6 +38,9 @@ public interface ProcessTaskService {
 //    public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo,
 //        Map<String, String> formAttributeActionMap, int mode);
 
+    /** 读取指定步骤可展示的已保存表单字段；调用方须先校验工单访问权限。 */
+    List<JSONObject> getVisibleFormFields(ProcessTaskVo task, ProcessTaskStepVo step);
+
     void setProcessTaskFormInfo(ProcessTaskVo processTaskVo);
 
     public List<String> getFormConfigAuthorityConfig(ProcessTaskVo processTaskVo);

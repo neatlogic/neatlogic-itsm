@@ -1927,18 +1927,6 @@
         }
       }
     },
-    "processtasktransferknowledgeauditapi": {
-      "getname": "Task Transfer Knowledge Audit",
-      "input": {
-        "param": {
-          "desc": {
-            "processtaskid": "Task ID",
-            "source": "Source",
-            "title": "Title"
-          }
-        }
-      }
-    },
     "processtaskupdateapi": {
       "getname": "Task Update",
       "input": {

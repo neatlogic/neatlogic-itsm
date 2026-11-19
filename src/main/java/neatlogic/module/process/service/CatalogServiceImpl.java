@@ -39,6 +39,21 @@ public class CatalogServiceImpl implements CatalogService, ICatalogCrossoverServ
     @Resource
     private AuthenticationInfoService authenticationInfoService;
 
+    /** 目录层次取自 ITSM 的左右编码，服务名作为路径末段。 */
+    @Override
+    public String getChannelPath(ChannelVo channel) {
+        CatalogVo parent = catalogMapper.getCatalogByUuid(channel.getParentUuid());
+        if (parent == null) {
+            return null;
+        }
+        List<String> names = new ArrayList<>();
+        for (CatalogVo catalog : catalogMapper.getAncestorsAndSelfByLftRht(parent.getLft(), parent.getRht())) {
+            names.add(catalog.getName());
+        }
+        names.add(channel.getName());
+        return String.join("/", names);
+    }
+
     @Override
     public void rebuildLeftRightCode() {
         rebuildLeftRightCode(CatalogVo.ROOT_UUID, 1);
