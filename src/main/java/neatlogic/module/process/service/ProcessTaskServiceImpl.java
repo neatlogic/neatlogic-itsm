@@ -83,7 +83,6 @@ import neatlogic.framework.worktime.dto.WorktimeVo;
 import neatlogic.framework.worktime.exception.WorktimeNotFoundException;
 import neatlogic.framework.worktime.exception.WorktimeRangeNotFoundException;
 import neatlogic.module.process.dao.mapper.SelectContentByHashMapper;
-import neatlogic.module.process.dao.mapper.catalog.CatalogMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelMapper;
 import neatlogic.module.process.dao.mapper.catalog.ChannelTypeMapper;
 import neatlogic.module.process.dao.mapper.catalog.PriorityMapper;
@@ -172,8 +171,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
     private ChannelMapper channelMapper;
     @Resource
     private ChannelTypeMapper channelTypeMapper;
-    @Resource
-    private CatalogMapper catalogMapper;
     @Resource
     private ProcessCommentTemplateMapper commentTemplateMapper;
     @Resource
@@ -295,6 +292,25 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
 //        }
 //
 //    }
+
+    /** 装载当前身份的表单权限，并按工单保存时的流程版本解析本步骤的隐藏规则。 */
+    @Override
+    public List<JSONObject> getVisibleFormFields(ProcessTaskVo task, ProcessTaskStepVo step) {
+        setProcessTaskFormInfo(task);
+        if (task.getFormConfig() == null || CollectionUtils.isEmpty(task.getProcessTaskFormAttributeDataList())) return List.of();
+        JSONArray rules = null;
+        if (step != null) {
+            parseProcessTaskStepConfig(step);
+            if (StringUtils.isNotBlank(task.getConfigHash())) {
+                String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(task.getConfigHash());
+                // 流程版本无法读取时不能确定步骤权限，仅提供工单基本信息。
+                if (StringUtils.isBlank(config)) return List.of();
+                rules = (JSONArray) JSONPath.read(config, "process.formConfig.authorityList");
+            }
+        }
+        return ProcessTaskFormDisplay.fields(task, step == null ? null : step.getFormSceneUuid(),
+                step == null ? null : step.getProcessStepUuid(), rules == null ? List.of() : rules.toJavaList(JSONObject.class));
+    }
 
     @Override
     public void setProcessTaskFormInfo(ProcessTaskVo processTaskVo) {
@@ -1433,12 +1449,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService, IProcessTaskC
         // 上报服务路径
         ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
         if (channelVo != null) {
-            CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channelVo.getParentUuid());
-            if (catalogVo != null) {
-                List<CatalogVo> catalogList = catalogMapper.getAncestorsAndSelfByLftRht(catalogVo.getLft(), catalogVo.getRht());
-                List<String> nameList = catalogList.stream().map(CatalogVo::getName).collect(Collectors.toList());
-                nameList.add(channelVo.getName());
-                processTaskVo.setChannelPath(String.join("/", nameList));
+            String channelPath = catalogService.getChannelPath(channelVo);
+            // 父目录缺失时保留工单已有的服务路径。
+            if (channelPath != null) {
+                processTaskVo.setChannelPath(channelPath);
             }
             ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
             if (channelTypeVo == null) {

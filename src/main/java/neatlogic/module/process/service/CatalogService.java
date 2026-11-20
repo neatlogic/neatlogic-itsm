@@ -2,11 +2,15 @@ package neatlogic.module.process.service;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.process.constvalue.CatalogChannelAuthorityAction;
+import neatlogic.framework.process.dto.ChannelVo;
 import neatlogic.framework.process.dto.CatalogVo;
 
 import java.util.List;
 
 public interface CatalogService {
+    /** 按目录顺序取得上报服务的展示路径；父目录缺失时返回 null。 */
+    String getChannelPath(ChannelVo channel);
+
     /**
      * @return Integer
      * @Description: 重建左右编码

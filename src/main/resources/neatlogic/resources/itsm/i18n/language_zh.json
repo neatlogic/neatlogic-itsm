@@ -1927,18 +1927,6 @@
         }
       }
     },
-    "processtasktransferknowledgeauditapi": {
-      "getname": "记录工单转知识活动",
-      "input": {
-        "param": {
-          "desc": {
-            "processtaskid": "工单id",
-            "source": "来源",
-            "title": "知识标题"
-          }
-        }
-      }
-    },
     "processtaskupdateapi": {
       "getname": "更新工单信息",
       "input": {
