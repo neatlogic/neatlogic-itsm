@@ -32,9 +32,6 @@ import neatlogic.framework.util.$;
 @Component
 public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
 
-//    @Resource
-//    private ProcessTaskMapper processTaskMapper;
-
     @Override
     public String getName() {
         return $.t("nmpsh.defaultslacalculatehandler.getname");
@@ -124,8 +121,6 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
         List<Map<String, Long>> timeList = new ArrayList<>();
         for (int i = 0; i < timeAuditList.size(); i++) {
             ProcessTaskStepTimeAuditVo auditVo = timeAuditList.get(i);
-//            ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(auditVo.getProcessTaskStepId());
-//            System.out.println(processTaskStepVo.getName() + ", auditVo = " + JSONObject.toJSON(auditVo));
             Long startTime = null;
             Long endTime = null;
             if (auditVo.getActiveTimeLong() != null) {
@@ -153,14 +148,11 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
                 Map<String, Long> stimeMap = new HashMap<>();
                 stimeMap.put("s", startTime);
                 timeList.add(stimeMap);
-//                if (i == timeAuditList.size() - 1) {
-                    Map<String, Long> etimeMap = new HashMap<>();
-                    etimeMap.put("e", getEndTime(auditVo, timeAuditList, currentTimeMillis));
-                    timeList.add(etimeMap);
-//                }
+                Map<String, Long> etimeMap = new HashMap<>();
+                etimeMap.put("e", getEndTime(auditVo, timeAuditList, currentTimeMillis));
+                timeList.add(etimeMap);
             }
         }
-//        System.out.println("timeList1 = " + JSONObject.toJSONString(timeList));
         timeList.sort((o1, o2) -> {
             Long t1 = o1.get("s");
             if (t1 == null) {
@@ -172,7 +164,6 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
             }
             return t1.compareTo(t2);
         });
-//        System.out.println("timeList2 = " + JSONObject.toJSONString(timeList));
         Stack<Long> timeStack = new Stack<>();
         List<Map<String, Long>> timePeriodList = new ArrayList<>();
         for (Map<String, Long> timeMap : timeList) {
@@ -180,12 +171,9 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
             Long e = timeMap.get("e");
             if (s != null) {
                 timeStack.push(s);
-//                System.out.println("push s = " + s);
             } else if (e != null) {
-//                System.out.println("e = " + e);
                 if (!timeStack.isEmpty()) {
                     Long currentStartTimeLong = timeStack.pop();
-//                    System.out.println("pop currentStartTimeLong = " + currentStartTimeLong);
                     if (timeStack.isEmpty()) {// 栈被清空时计算时间段
                         Map<String, Long> newTimeMap = new HashMap<>();
                         newTimeMap.put("s", currentStartTimeLong);
@@ -195,7 +183,6 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
                 }
             }
         }
-//        System.out.println("timePeriodList = " + JSONObject.toJSONString(timePeriodList));
         return timePeriodList;
     }
 
@@ -210,10 +197,10 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
         for (ProcessTaskStepTimeAuditVo processTaskStepTimeAuditVo : timeAuditList) {
             if (processTaskStepTimeAuditVo.getId() > currentAuditVo.getId()) {
                 if (Objects.equals(processTaskStepTimeAuditVo.getProcessTaskStepId(), currentAuditVo.getProcessTaskStepId())) {
-                    if (processTaskStepTimeAuditVo.getStartTimeLong() != null) {
-                        return processTaskStepTimeAuditVo.getStartTimeLong();
-                    } else if (processTaskStepTimeAuditVo.getActiveTimeLong() != null) {
+                    if (processTaskStepTimeAuditVo.getActiveTimeLong() != null) {
                         return processTaskStepTimeAuditVo.getActiveTimeLong();
+                    } else if (processTaskStepTimeAuditVo.getStartTimeLong() != null) {
+                        return processTaskStepTimeAuditVo.getStartTimeLong();
                     }
                 }
             }
