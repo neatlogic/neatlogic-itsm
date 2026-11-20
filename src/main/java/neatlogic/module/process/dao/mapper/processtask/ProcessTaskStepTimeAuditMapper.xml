@@ -5,7 +5,8 @@
 <mapper namespace="neatlogic.module.process.dao.mapper.processtask.ProcessTaskStepTimeAuditMapper">
 	<select id="getProcessTaskStepTimeAuditBySlaId" parameterType="java.lang.Long" resultType="neatlogic.framework.process.dto.ProcessTaskStepTimeAuditVo">
 		SELECT
-		`id`,
+		a.`id`,
+		a.`processtask_step_id` AS processTaskStepId,
 		UNIX_TIMESTAMP(a.`active_time`) * 1000 as activeTimeLong,
 		UNIX_TIMESTAMP(a.`start_time`) * 1000 as startTimeLong,
 		UNIX_TIMESTAMP(a.`complete_time`) * 1000 as completeTimeLong,
@@ -73,27 +74,23 @@
 		INSERT INTO `processtask_step_timeaudit` (
 		`id`,
 		`processtask_step_id`
-		<choose>
-			<when test="activeTime != null and activeTime == 'now'">,`active_time`</when>
-			<when test="startTime != null and startTime == 'now'">,`start_time`</when>
-			<when test="abortTime != null and abortTime == 'now'">,`abort_time`</when>
-			<when test="completeTime != null and completeTime == 'now'">,`complete_time`</when>
-			<when test="backTime != null and backTime == 'now'">,`back_time`</when>
-			<when test="pauseTime != null and pauseTime == 'now'">,`pause_time`</when>
-		</choose>
+		<if test="activeTime != null and activeTime == 'now'">,`active_time`</if>
+		<if test="startTime != null and startTime == 'now'">,`start_time`</if>
+		<if test="abortTime != null and abortTime == 'now'">,`abort_time`</if>
+		<if test="completeTime != null and completeTime == 'now'">,`complete_time`</if>
+		<if test="backTime != null and backTime == 'now'">,`back_time`</if>
+		<if test="pauseTime != null and pauseTime == 'now'">,`pause_time`</if>
 		)
 		VALUES
 		(
 		#{id},
 		#{processTaskStepId}
-		<choose>
-			<when test="activeTime != null and activeTime == 'now'">,NOW(3)</when>
-			<when test="startTime != null and startTime == 'now'">,NOW(3)</when>
-			<when test="abortTime != null and abortTime == 'now'">,NOW(3)</when>
-			<when test="completeTime != null and completeTime == 'now'">,NOW(3)</when>
-			<when test="backTime != null and backTime == 'now'">,NOW(3)</when>
-			<when test="pauseTime != null and pauseTime == 'now'">,NOW(3)</when>
-		</choose>
+		<if test="activeTime != null and activeTime == 'now'">,NOW(3)</if>
+		<if test="startTime != null and startTime == 'now'">,NOW(3)</if>
+		<if test="abortTime != null and abortTime == 'now'">,NOW(3)</if>
+		<if test="completeTime != null and completeTime == 'now'">,NOW(3)</if>
+		<if test="backTime != null and backTime == 'now'">,NOW(3)</if>
+		<if test="pauseTime != null and pauseTime == 'now'">,NOW(3)</if>
 		)
 	</insert>
 
@@ -125,8 +122,7 @@
 	</insert>
 
 	<update id="updateProcessTaskStepTimeAudit" parameterType="neatlogic.framework.process.dto.ProcessTaskStepTimeAuditVo">
-		UPDATE
-		`processtask_step_timeaudit`
+		UPDATE `processtask_step_timeaudit`
 		SET
 		`processtask_step_id` = #{processTaskStepId}
 		<choose>
