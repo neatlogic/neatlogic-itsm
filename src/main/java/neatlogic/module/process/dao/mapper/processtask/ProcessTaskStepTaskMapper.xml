@@ -295,6 +295,7 @@
           and `status` = #{status}
     </select>
 
+    <!-- 读取上次完成时的按钮，用于判断按钮是否变化，避免相同回复重复记录活动。 -->
     <select id="getStepTaskUserListByStepTaskId"
             resultType="neatlogic.framework.process.dto.ProcessTaskStepTaskUserVo" useCache="false">
         SELECT `id`,
@@ -302,6 +303,7 @@
                `user_uuid`                as userUuid,
                `end_time`                 as endTime,
                `status`,
+               `button`,
                `is_delete`                as isDelete
         FROM `processtask_step_task_user`
         where `processtask_step_task_id` = #{value}

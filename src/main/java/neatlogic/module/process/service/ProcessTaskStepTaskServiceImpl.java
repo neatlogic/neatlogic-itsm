@@ -512,7 +512,9 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                         isChangeContent = true;
                     }
                 }
-                if (isChangeContent || Objects.equals(oldProcessTaskStepTaskUserVo.getStatus(), ProcessTaskStepTaskUserStatus.PENDING.getValue()) || !Objects.equals(oldProcessTaskStepTaskUserVo.getUserUuid(), UserContext.get().getUserUuid())) {
+                // 描述未变化但操作按钮变化时，也按有效回复更新并记录完成活动。
+                boolean isChangeButton = !Objects.equals(oldProcessTaskStepTaskUserVo.getButton(), button);
+                if (isChangeContent || isChangeButton || Objects.equals(oldProcessTaskStepTaskUserVo.getStatus(), ProcessTaskStepTaskUserStatus.PENDING.getValue()) || !Objects.equals(oldProcessTaskStepTaskUserVo.getUserUuid(), UserContext.get().getUserUuid())) {
                     ProcessTaskStepTaskUserVo processTaskStepTaskUserVo = new ProcessTaskStepTaskUserVo();
                     processTaskStepTaskUserVo.setId(stepTaskUserId);
                     processTaskStepTaskUserVo.setUserUuid(UserContext.get().getUserUuid());
@@ -529,6 +531,10 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             JSONObject paramObj = new JSONObject();
             paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
             paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), content);
+            // 保存当次按钮名称快照；兼容未传按钮的调用，避免生成空白按钮明细。
+            if (StringUtils.isNotBlank(button)) {
+                paramObj.put(ProcessTaskAuditDetailType.BUTTON.getParamName(), button);
+            }
             paramObj.put("source", source);
             processTaskStepVo.getParamObj().putAll(paramObj);
             stepTaskVo.setStepTaskUserVoList(canHandleStepTaskUserList);
