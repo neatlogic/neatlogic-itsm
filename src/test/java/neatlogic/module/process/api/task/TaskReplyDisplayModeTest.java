@@ -1,18 +1,58 @@
 package neatlogic.module.process.api.task;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.RequestContext;
+import neatlogic.framework.common.constvalue.EnumFactory;
+import neatlogic.framework.common.constvalue.IEnum;
 import neatlogic.framework.exception.type.ParamIrregularException;
+import neatlogic.framework.process.constvalue.TaskReplyDisplayMode;
 import neatlogic.framework.process.dto.TaskConfigVo;
 import neatlogic.module.process.dao.mapper.task.TaskMapper;
 import org.junit.Test;
 
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 import static org.junit.Assert.*;
 
 /** 通过真实策略保存入口验证模式校验和配置共存，不写入数据库。 */
 public class TaskReplyDisplayModeTest {
+    /** 通用枚举工厂无需手工注册即可按完整类名发现新枚举。 */
+    @Test
+    public void enumFactoryFindsReplyDisplayMode() {
+        assertEquals(TaskReplyDisplayMode.class,
+                EnumFactory.getEnumClass("neatlogic.framework.process.constvalue.TaskReplyDisplayMode"));
+    }
+
+    /** 同一枚举实例切换请求语言时返回对应文字，配置值及两项顺序始终不变。 */
+    @Test
+    public void enumOptionsUseCurrentRequestLanguageInDeclarationOrder() {
+        RequestContext previous = RequestContext.get();
+        RequestContext context = RequestContext.init((RequestContext) null);
+        try {
+            IEnum<JSONObject> provider = TaskReplyDisplayMode.SEPARATE;
+            for (Locale locale : Arrays.asList(Locale.CHINESE, Locale.ENGLISH, Locale.CHINESE)) {
+                context.setLocale(locale);
+                List<JSONObject> options = provider.getValueTextList();
+                assertEquals(2, options.size());
+                assertEquals("separate", options.get(0).getString("value"));
+                assertEquals("combined", options.get(1).getString("value"));
+                boolean english = Locale.ENGLISH.equals(locale);
+                assertEquals(english ? "Show action and reply separately" : "操作按钮与回复内容分开显示",
+                        options.get(0).getString("text"));
+                assertEquals(english ? "Combine action and reply (separated by a full stop)" : "操作按钮与回复内容拼接显示（以句号分隔）",
+                        options.get(1).getString("text"));
+                assertEquals(options.get(0).getString("text"), TaskReplyDisplayMode.SEPARATE.getText());
+                assertEquals(options.get(1).getString("text"), TaskReplyDisplayMode.COMBINED.getText());
+            }
+        } finally {
+            if (previous == null) context.release();
+            else RequestContext.init(previous);
+        }
+    }
+
     /** 旧调用及空白值缺省为分开，合法模式保存时不丢失自定义按钮和其他配置。 */
     @Test
     public void saveNormalizesModesAndPreservesOtherConfig() throws Exception {
