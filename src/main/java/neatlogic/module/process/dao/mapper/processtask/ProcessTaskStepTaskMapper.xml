@@ -184,6 +184,8 @@
         <result column="endTime" property="endTime"/>
         <result column="status" property="status"/>
         <result column="isDelete" property="isDelete"/>
+        <!-- 子任务回复表格使用已保存的按钮名称，含用户关联的结果需显式映射。 -->
+        <result column="button" property="button"/>
         <association property="userVo" javaType="neatlogic.framework.dto.UserVo">
             <result property="id" column="userId"/>
             <result property="uuid" column="userUuid"/>
@@ -196,6 +198,7 @@
     </resultMap>
 
     <select id="getStepTaskUserByStepTaskIdList" resultMap="stepTaskUserMap" useCache="false">
+        <!-- 当前步骤与步骤日志共用此查询，返回每条回复实际保存的按钮名称。 -->
         SELECT pstu.`id`,
         pstu.`processtask_step_task_id` as processTaskStepTaskId,
         u.id as userId,
@@ -207,6 +210,7 @@
         u.uuid as userUuid,
         pstu.`end_time` as endTime,
         pstu.`status`,
+        pstu.`button`,
         pstu.`is_delete` as isDelete
         FROM `processtask_step_task_user` pstu
         left join `user` u on pstu.`user_uuid` = u.uuid
@@ -295,6 +299,7 @@
           and `status` = #{status}
     </select>
 
+    <!-- 读取上次完成时的按钮，用于判断按钮是否变化，避免相同回复重复记录活动。 -->
     <select id="getStepTaskUserListByStepTaskId"
             resultType="neatlogic.framework.process.dto.ProcessTaskStepTaskUserVo" useCache="false">
         SELECT `id`,
@@ -302,6 +307,7 @@
                `user_uuid`                as userUuid,
                `end_time`                 as endTime,
                `status`,
+               `button`,
                `is_delete`                as isDelete
         FROM `processtask_step_task_user`
         where `processtask_step_task_id` = #{value}
