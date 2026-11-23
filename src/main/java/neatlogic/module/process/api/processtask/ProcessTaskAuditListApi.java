@@ -171,6 +171,7 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
                 }
             }
             processTaskStepAudit.setAuditDetailList(processTaskStepAuditDetailList);
+            removeInternalReplyDisplayMode(processTaskStepAudit);
         }
         Map<String, UserVo> userMap = new HashMap<>();
         Map<String, String> hashToContentMap = new HashMap<>();
@@ -240,6 +241,20 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
             }
         }
         return TableResultUtil.getResult(processTaskStepAuditList, searchVo);
+    }
+
+    /** 兼容过滤旧版内部模式明细；不再对外返回模式或重写已有内容、操作。 */
+    static void removeInternalReplyDisplayMode(ProcessTaskStepAuditVo audit) {
+        if (audit.getAuditDetailList() == null) {
+            return;
+        }
+        Iterator<ProcessTaskStepAuditDetailVo> iterator = audit.getAuditDetailList().iterator();
+        while (iterator.hasNext()) {
+            ProcessTaskStepAuditDetailVo detail = iterator.next();
+            if ("replydisplaymode".equals(detail.getType())) {
+                iterator.remove();
+            }
+        }
     }
 
 }

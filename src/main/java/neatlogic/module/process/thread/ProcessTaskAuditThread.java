@@ -21,10 +21,13 @@ import neatlogic.framework.process.audithandler.core.IProcessTaskAuditDetailType
 import neatlogic.framework.process.audithandler.core.IProcessTaskAuditType;
 import neatlogic.framework.process.audithandler.core.ProcessTaskAuditDetailTypeFactory;
 import neatlogic.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
+import neatlogic.framework.process.constvalue.ProcessTaskAuditType;
+import neatlogic.framework.process.constvalue.TaskReplyDisplayMode;
 import neatlogic.framework.process.dto.*;
 import neatlogic.framework.util.FreemarkerUtil;
 import neatlogic.module.process.dao.mapper.processtask.ProcessTaskMapper;
 import neatlogic.module.process.service.ProcessTaskService;
+import neatlogic.module.process.service.SubtaskReplyOpinion;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,6 +90,7 @@ public class ProcessTaskAuditThread extends NeatLogicThread {
             }
             processTaskStepAuditVo.setActionTime(operateTime);
             String source = paramObj.getString("source");
+            System.out.println("source = " + source);
             if (StringUtils.isNotBlank(source)) {
                 processTaskStepAuditVo.setSource(source);
             }
@@ -141,9 +145,10 @@ public class ProcessTaskAuditThread extends NeatLogicThread {
             }
             processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
             /* 活动内容 **/
+            JSONObject detailParamObj = getDetailParams(paramObj, action);
             for (IProcessTaskAuditDetailType auditDetailType : ProcessTaskAuditDetailTypeFactory.getAuditDetailTypeList()) {
-                String newData = paramObj.getString(auditDetailType.getParamName());
-                String oldData = paramObj.getString(auditDetailType.getOldDataParamName());
+                String newData = detailParamObj.getString(auditDetailType.getParamName());
+                String oldData = detailParamObj.getString(auditDetailType.getOldDataParamName());
                 if (Objects.equals(oldData, newData)) {
                     continue;
                 }
@@ -166,5 +171,27 @@ public class ProcessTaskAuditThread extends NeatLogicThread {
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
+    }
+
+    /** 仅新完成事件使用独立参数副本筛选明细，避免污染异步通知与动作共用的原始参数。 */
+    static JSONObject getDetailParams(JSONObject paramObj, IProcessTaskAuditType action) {
+        if (!ProcessTaskAuditType.COMPLETETASK.getValue().equals(action.getValue()) || !paramObj.containsKey("replyOpinion")) {
+            return paramObj;
+        }
+        boolean combined = TaskReplyDisplayMode.COMBINED.getValue().equals(TaskReplyDisplayMode.normalize(paramObj.getString("replyDisplayMode")));
+        // JSONObject(Map) 会复用原 Map，必须创建空对象再复制键值。
+        JSONObject detailParams = new JSONObject();
+        detailParams.putAll(paramObj);
+        detailParams.remove("content");
+        detailParams.remove("oldContent");
+        detailParams.remove("replyDisplayMode");
+        detailParams.remove("oldReplyDisplayMode");
+        detailParams.remove("oldReplyOpinion");
+        // 拼接意见已包含操作；分开模式仅输出非空操作，不展示旧值比较。
+        detailParams.remove("oldButton");
+        if (combined || !SubtaskReplyOpinion.hasText(detailParams.getString("button"))) {
+            detailParams.remove("button");
+        }
+        return detailParams;
     }
 }

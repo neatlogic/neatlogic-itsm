@@ -10,6 +10,8 @@ import neatlogic.framework.process.dto.ProcessTaskStepTaskUserVo;
 import neatlogic.framework.process.dto.ProcessTaskStepTaskVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
+import neatlogic.framework.process.dto.TaskConfigVo;
+import neatlogic.module.process.dao.mapper.task.TaskMapper;
 import neatlogic.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
 import neatlogic.framework.process.stephandler.core.IProcessStepInternalHandler;
 import neatlogic.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
@@ -52,6 +54,7 @@ public class ProcessTaskStepTaskButtonAuditTest {
     private int contentInserts;
     private int contentUpdates;
     private int workerRefreshes;
+    private TaskConfigVo currentTaskConfig;
 
     /** 每次查询返回独立的步骤参数，模拟生产请求，不让上次审计参数污染下一次调用。 */
     @Before
@@ -78,6 +81,13 @@ public class ProcessTaskStepTaskButtonAuditTest {
                 // 测试用户直接处理自己的子任务，无需代办关系。
             }
         };
+        // 策略查询独立于历史回复，便于验证修改配置不会重写已保存快照。
+        currentTaskConfig = new TaskConfigVo();
+        currentTaskConfig.setConfig(new JSONObject());
+        service.taskMapper = proxy(TaskMapper.class, (target, method, args) -> {
+            if ("getTaskConfigById".equals(method.getName())) return currentTaskConfig;
+            throw new AssertionError("Unexpected strategy mapper call: " + method.getName());
+        });
         service.processTaskMapper = proxy(ProcessTaskMapper.class, (target, method, args) -> {
             switch (method.getName()) {
                 case "getProcessTaskLockById": return null;
@@ -252,6 +262,73 @@ public class ProcessTaskStepTaskButtonAuditTest {
         assertEquals(button, storedUser.getButton());
     }
 
+    /** 完成时生成当次回复意见，同时保留原始内容和按钮供业务流程使用。 */
+    @Test
+    public void firstCompletionBuildsCombinedOpinion() throws Exception {
+        currentTaskConfig.getConfig().put("replyDisplayMode", "combined");
+        service.completeTask(TASK_ID, "<p>意见</p>", "同意", "pc");
+        assertEquals("combined", auditSnapshots.get(0).getString("replyDisplayMode"));
+        assertFalse(auditSnapshots.get(0).containsKey("oldReplyDisplayMode"));
+        assertSnapshot(0, "<p>意见</p>", "同意");
+        assertEquals("<p>同意。意见</p>", auditSnapshots.get(0).getString("replyOpinion"));
+    }
+
+    /** 模式变化本身不触发完成，实际编辑采用新模式，原审计仍保留旧快照。 */
+    @Test
+    public void strategyChangeRequiresEffectiveReplyChange() throws Exception {
+        service.completeTask(TASK_ID, "first", "同意", "pc");
+        currentTaskConfig.getConfig().put("replyDisplayMode", "combined");
+        service.completeTask(TASK_ID, "first", "同意", "pc");
+        assertEquals(1, auditSnapshots.size());
+        assertNormalCompletionCount(1);
+        service.completeTask(TASK_ID, "second", "同意", "pc");
+        assertEquals("separate", auditSnapshots.get(0).getString("replyDisplayMode"));
+        assertEquals("combined", auditSnapshots.get(1).getString("replyDisplayMode"));
+        assertSnapshot(0, "first", "同意");
+        assertSnapshot(1, "second", "同意");
+        assertEquals("first", auditSnapshots.get(0).getString("replyOpinion"));
+        assertEquals("同意。second", auditSnapshots.get(1).getString("replyOpinion"));
+        assertNormalCompletionCount(2);
+    }
+
+    /** 缺失策略、旧配置和异常历史模式均采用兼容默认值。 */
+    @Test
+    public void missingAndLegacyStrategiesDefaultToSeparate() throws Exception {
+        currentTaskConfig = null;
+        service.completeTask(TASK_ID, "missing strategy", "回复", "pc");
+        currentTaskConfig = new TaskConfigVo();
+        service.completeTask(TASK_ID, "missing config", "回复", "pc");
+        currentTaskConfig.setConfig(JSONObject.parseObject("{\"replyDisplayMode\":\"unexpected\"}"));
+        service.completeTask(TASK_ID, "legacy value", "回复", "pc");
+        for (JSONObject snapshot : auditSnapshots) {
+            assertEquals("separate", snapshot.getString("replyDisplayMode"));
+            assertEquals(snapshot.getString("content"), snapshot.getString("replyOpinion"));
+        }
+    }
+
+    /** 同一子任务不同处理人的审计意见独立保存，原始按钮仍各自保留。 */
+    @Test
+    public void multipleRespondersRetainTheirOwnOpinions() throws Exception {
+        service.completeTask(TASK_ID, "first user", "确认", "pc");
+        ProcessTaskStepTaskUserVo firstUser = storedUser;
+        UserVo second = new UserVo();
+        second.setUuid("second-reply-user");
+        second.setUserId("second-reply-user");
+        UserContext.init(second, null, "+00:00");
+        storedUser = new ProcessTaskStepTaskUserVo(TASK_ID, second.getUuid(), ProcessTaskStepTaskUserStatus.PENDING.getValue());
+        storedUser.setId(402L);
+        storedUser.setIsDelete(0);
+        storedContent = null;
+        currentTaskConfig.getConfig().put("replyDisplayMode", "combined");
+        service.completeTask(TASK_ID, "second user", "回复", "pc");
+        assertEquals("separate", auditSnapshots.get(0).getString("replyDisplayMode"));
+        assertEquals("combined", auditSnapshots.get(1).getString("replyDisplayMode"));
+        assertEquals("first user", auditSnapshots.get(0).getString("replyOpinion"));
+        assertEquals("回复。second user", auditSnapshots.get(1).getString("replyOpinion"));
+        assertEquals("确认", firstUser.getButton());
+        assertEquals("回复", storedUser.getButton());
+    }
+
     /** 验证同一条操作的描述和按钮快照，不要求前端展示旧值比较。 */
     private void assertSnapshot(int index, String content, String button) {
         JSONObject snapshot = auditSnapshots.get(index);
@@ -275,6 +352,7 @@ public class ProcessTaskStepTaskButtonAuditTest {
         task.setId(TASK_ID);
         task.setProcessTaskId(PROCESS_ID);
         task.setProcessTaskStepId(STEP_ID);
+        task.setTaskConfigId(601L);
         task.setTaskConfigName("测试子任务");
         task.setTaskConfigPolicy("all");
         task.setStepTaskUserVoList(Collections.singletonList(copyUser()));
