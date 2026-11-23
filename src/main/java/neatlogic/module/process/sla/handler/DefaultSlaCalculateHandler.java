@@ -31,6 +31,7 @@ import neatlogic.framework.util.$;
  **/
 @Component
 public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
+
     @Override
     public String getName() {
         return $.t("nmpsh.defaultslacalculatehandler.getname");
@@ -75,6 +76,10 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
                 }
             } else if (Objects.equals(processTaskStepVo.getIsActive(), -1)) {
                 pause++;
+            } else if (Objects.equals(processTaskStepVo.getIsActive(), 0)) {
+                if (ProcessTaskStepStatus.HANG.getValue().equals(status)) {
+                    pause++;
+                }
             } else if (ProcessTaskStepStatus.SUCCEED.getValue().equals(status)) {
                 done++;
             }
@@ -111,7 +116,8 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
     /**
      * 将时效关联的步骤操作时间记录转换成时间段列表
      */
-    private static List<Map<String, Long>> timeAuditListToTimePeriodList(List<ProcessTaskStepTimeAuditVo> timeAuditList, long currentTimeMillis) {
+    private List<Map<String, Long>> timeAuditListToTimePeriodList(List<ProcessTaskStepTimeAuditVo> timeAuditList, long currentTimeMillis) {
+
         List<Map<String, Long>> timeList = new ArrayList<>();
         for (int i = 0; i < timeAuditList.size(); i++) {
             ProcessTaskStepTimeAuditVo auditVo = timeAuditList.get(i);
@@ -142,11 +148,9 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
                 Map<String, Long> stimeMap = new HashMap<>();
                 stimeMap.put("s", startTime);
                 timeList.add(stimeMap);
-                if (i == timeAuditList.size() - 1) {
-                    Map<String, Long> etimeMap = new HashMap<>();
-                    etimeMap.put("e", currentTimeMillis);
-                    timeList.add(etimeMap);
-                }
+                Map<String, Long> etimeMap = new HashMap<>();
+                etimeMap.put("e", getEndTime(auditVo, timeAuditList, currentTimeMillis));
+                timeList.add(etimeMap);
             }
         }
         timeList.sort((o1, o2) -> {
@@ -168,7 +172,7 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
             if (s != null) {
                 timeStack.push(s);
             } else if (e != null) {
-                while (!timeStack.isEmpty()) {
+                if (!timeStack.isEmpty()) {
                     Long currentStartTimeLong = timeStack.pop();
                     if (timeStack.isEmpty()) {// 栈被清空时计算时间段
                         Map<String, Long> newTimeMap = new HashMap<>();
@@ -180,5 +184,27 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
             }
         }
         return timePeriodList;
+    }
+
+    /**
+     *
+     * @param currentAuditVo
+     * @param timeAuditList
+     * @param currentTimeMillis
+     * @return
+     */
+    private long getEndTime(ProcessTaskStepTimeAuditVo currentAuditVo, List<ProcessTaskStepTimeAuditVo> timeAuditList, long currentTimeMillis) {
+        for (ProcessTaskStepTimeAuditVo processTaskStepTimeAuditVo : timeAuditList) {
+            if (processTaskStepTimeAuditVo.getId() > currentAuditVo.getId()) {
+                if (Objects.equals(processTaskStepTimeAuditVo.getProcessTaskStepId(), currentAuditVo.getProcessTaskStepId())) {
+                    if (processTaskStepTimeAuditVo.getActiveTimeLong() != null) {
+                        return processTaskStepTimeAuditVo.getActiveTimeLong();
+                    } else if (processTaskStepTimeAuditVo.getStartTimeLong() != null) {
+                        return processTaskStepTimeAuditVo.getStartTimeLong();
+                    }
+                }
+            }
+        }
+        return currentTimeMillis;
     }
 }

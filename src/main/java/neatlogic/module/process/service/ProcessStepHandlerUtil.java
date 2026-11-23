@@ -166,13 +166,17 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
      */
     @Override
     public void timeAudit(ProcessTaskStepVo currentProcessTaskStepVo, IOperationType action) {
-        ProcessTaskStepTimeAuditVo lastTimeAuditVo = processTaskStepTimeAuditMapper
-                .getLastProcessTaskStepTimeAuditByStepId(currentProcessTaskStepVo.getId());
+        ProcessTaskStepTimeAuditVo lastTimeAuditVo = processTaskStepTimeAuditMapper.getLastProcessTaskStepTimeAuditByStepId(currentProcessTaskStepVo.getId());
         ProcessTaskStepTimeAuditVo newAuditVo = new ProcessTaskStepTimeAuditVo();
         newAuditVo.setId(SnowflakeUtil.uniqueLong());
         newAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-        if (action == ProcessTaskStepOperationType.STEP_ACTIVE) {
-            newAuditVo.setActiveTime("now");
+        if (action == ProcessTaskStepOperationType.STEP_ACTIVE || action == ProcessTaskStepOperationType.STEP_REDO || action == ProcessTaskStepOperationType.STEP_RETREAT) {
+            if (Objects.equals(currentProcessTaskStepVo.getStatus(), ProcessTaskStepStatus.PENDING.getValue())) {
+                newAuditVo.setActiveTime("now");
+            } else if (Objects.equals(currentProcessTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())) {
+                newAuditVo.setActiveTime("now");
+                newAuditVo.setStartTime("now");
+            }
             processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
         } else if (action == ProcessTaskStepOperationType.STEP_START) {
             newAuditVo.setStartTime("now");
@@ -186,6 +190,8 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
             /* 如果找不到审计记录并且completetime不为空，则新建审计记录 **/
             newAuditVo.setCompleteTime("now");
             if (lastTimeAuditVo == null || StringUtils.isNotBlank(lastTimeAuditVo.getCompleteTime())) {
+                newAuditVo.setActiveTime("now");
+                newAuditVo.setStartTime("now");
                 processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
             } else if (StringUtils.isBlank(lastTimeAuditVo.getCompleteTime())) {// 如果completetime为空，则更新completetime
                 newAuditVo.setId(lastTimeAuditVo.getId());
@@ -233,6 +239,36 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil, IProcess
                 newAuditVo.setId(lastTimeAuditVo.getId());
                 processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(newAuditVo);
             }
+        } else if (action == ProcessTaskStepOperationType.STEP_HANG) {
+            /* 如果找不到审计记录并且pausetime不为空，则新建审计记录 **/
+            newAuditVo.setPauseTime("now");
+            if (lastTimeAuditVo != null) {
+                if (StringUtils.isBlank(lastTimeAuditVo.getPauseTime())) {// 如果pausetime为空，则更新pausetime
+                    newAuditVo.setId(lastTimeAuditVo.getId());
+                    processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(newAuditVo);
+                } else {
+                    processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
+                }
+            } else {
+                processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
+            }
+        } else if (action == ProcessTaskStepOperationType.STEP_TRANSFER) {
+            if (lastTimeAuditVo != null) {
+                if (StringUtils.isBlank(lastTimeAuditVo.getAbortTime())) {
+                    ProcessTaskStepTimeAuditVo updateAuditVo = new ProcessTaskStepTimeAuditVo();
+                    updateAuditVo.setAbortTime("now");
+                    updateAuditVo.setId(lastTimeAuditVo.getId());
+                    updateAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+                    processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(updateAuditVo);
+                }
+            }
+            if (Objects.equals(currentProcessTaskStepVo.getStatus(), ProcessTaskStepStatus.PENDING.getValue())) {
+                newAuditVo.setActiveTime("now");
+            } else if (Objects.equals(currentProcessTaskStepVo.getStatus(), ProcessTaskStepStatus.RUNNING.getValue())) {
+                newAuditVo.setActiveTime("now");
+                newAuditVo.setStartTime("now");
+            }
+            processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
         }
     }
 
