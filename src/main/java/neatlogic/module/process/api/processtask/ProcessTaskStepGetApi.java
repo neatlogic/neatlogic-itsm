@@ -9,9 +9,13 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.process.auth.PROCESS_BASE;
+import neatlogic.framework.process.constvalue.IProcessTaskSource;
 import neatlogic.framework.process.constvalue.ItsmTenantConfig;
 import neatlogic.framework.process.constvalue.ProcessTaskOperationType;
+import neatlogic.framework.process.constvalue.ProcessTaskSourceFactory;
 import neatlogic.framework.process.constvalue.ProcessTaskStepOperationType;
+import neatlogic.framework.process.dto.ProcessTaskInvokeVo;
+import neatlogic.framework.process.dto.ProcessTaskReportSourceVo;
 import neatlogic.framework.process.dto.ProcessTaskScoreTemplateVo;
 import neatlogic.framework.process.dto.ProcessTaskStepVo;
 import neatlogic.framework.process.dto.ProcessTaskVo;
@@ -69,6 +73,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         return null;
     }
 
+    /** 获取工单详情，并由所属来源模块解析当前用户可见的上报来源。 */
     @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "term.itsm.processtaskid"),
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "term.itsm.processtaskstepid")})
     @Output({@Param(name = "processTask", explode = ProcessTaskVo.class, desc = "term.itsm.processtaskinfo")})
@@ -223,6 +228,22 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             processTaskVo.setIsShowStepList(Integer.valueOf(processTaskStepListIsShow));
         }
         JSONObject resultObj = new JSONObject();
+        ProcessTaskInvokeVo invoke = processTaskMapper.getInvokeByProcessTaskId(processTaskId);
+        if (invoke != null && invoke.getSource() != null) {
+            IProcessTaskSource source = ProcessTaskSourceFactory.getHandler(invoke.getSource());
+            if (source != null) {
+                ProcessTaskReportSourceVo reportSource = source.getReportSource(invoke);
+                if (reportSource != null) {
+                    reportSource.setSourceText(source.getText());
+                }
+                processTaskVo.setReportSource(reportSource);
+            } else {
+                // 未安装来源模块时仍保留来源标识。
+                String sourceName = ProcessTaskSourceFactory.getSourceName(invoke.getSource());
+                processTaskVo.setReportSource(new ProcessTaskReportSourceVo(
+                        sourceName != null ? sourceName : invoke.getSource(), null, null));
+            }
+        }
         resultObj.put("processTask", processTaskVo);
         resultObj.put("processTaskRelationCount", processTaskMapper.getProcessTaskRelationCountByProcessTaskId(processTaskVo.getId()));
         JSONObject processTaskTabLayoutObj = new JSONObject();

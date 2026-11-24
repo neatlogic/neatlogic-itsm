@@ -109,8 +109,6 @@ public interface ProcessTaskMapper extends IProcessTaskCrossoverMapper {
 
     Long getProcessTaskLockById(Long processTaskId);
 
-    ProcessTaskVo getProcessTaskVoLockById(Long processTaskId);
-
     int checkProcessTaskConvergeIsExists(ProcessTaskConvergeVo processTaskStepConvergeVo);
 
     List<ProcessTaskConvergeVo> getProcessTaskConvergeListByStepId(Long processTaskStepId);

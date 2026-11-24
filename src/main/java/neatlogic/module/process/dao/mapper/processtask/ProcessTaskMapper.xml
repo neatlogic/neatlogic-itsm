@@ -2914,6 +2914,7 @@
            count(1)
         FROM `processtask` pt
         join `processtask_invoke` as pi on pt.id = pi.processtask_id and pi.invoke_id = #{value}
+            and pi.source = 'subprocesstask'
         WHERE  pt.`is_deleted` = 0
     </select>
 
@@ -2943,6 +2944,7 @@
             c.`name` as channelName
         FROM `processtask` pt
                  join `processtask_invoke` as pi on pt.id = pi.processtask_id and pi.invoke_id = #{value}
+                     and pi.source = 'subprocesstask'
                  left join `priority` pri on pt.`priority_uuid` = pri.`uuid`
                  left join `channel` c on pt.`channel_uuid` = c.`uuid`
         WHERE  pt.`is_deleted` = 0
@@ -2954,6 +2956,7 @@
         count(1)
         FROM `processtask` pt
         join `processtask_invoke` as pi on pt.id = pi.processtask_id and pi.invoke_id = #{processTaskStepId}
+            and pi.source = 'subprocesstask'
         WHERE  pt.`is_deleted` = 0
         and pt.status not in
         <foreach collection="statusList" item="status" close=")" open="(" separator="," >

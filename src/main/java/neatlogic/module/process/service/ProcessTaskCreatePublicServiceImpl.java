@@ -85,7 +85,7 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
     RegionService regionService;
 
     /**
-     * 创建工单
+     * 创建工单并将模块间调用来源交给首次保存钩子。
      *
      * @param processTaskCreateVo
      * @return
@@ -104,6 +104,10 @@ public class ProcessTaskCreatePublicServiceImpl implements ProcessTaskCreatePubl
         paramObj.put("fileIdList", processTaskCreateVo.getFileIdList());//
         paramObj.put("handlerStepInfo", processTaskCreateVo.getHandlerStepInfo());
         paramObj.put("source", processTaskCreateVo.getSource());
+        if (StringUtils.isNotBlank(processTaskCreateVo.getInvoke())) {
+            paramObj.put("invoke", processTaskCreateVo.getInvoke());
+            paramObj.put("invokeId", processTaskCreateVo.getInvokeId());
+        }
         if (CollectionUtils.isNotEmpty(processTaskCreateVo.getFocusUserIdList())) {
             List<String> userIdList = processTaskCreateVo.getFocusUserIdList().toJavaList(String.class);
             List<UserVo> userList = userMapper.getUserByUserIdList(userIdList);
