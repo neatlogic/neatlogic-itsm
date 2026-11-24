@@ -64,6 +64,7 @@ public class ProcessTaskStepTaskButtonMapperTest {
         String projection = sql.substring(sql.indexOf("select") + 6, sql.indexOf("from"));
         assertTrue("完成前查询必须读取已保存的 button: " + sql,
                 projection.replace("`", "").matches("(?s).*\\bbutton\\b.*"));
+        assertFalse("完成查询不能再引用已删除的显示字段", sql.contains("reply_display_mode"));
         assertEquals(ProcessTaskStepTaskUserVo.class, mapped.getResultMaps().get(0).getType());
         assertEquals(1, boundSql.getParameterMappings().size());
 
@@ -114,6 +115,7 @@ public class ProcessTaskStepTaskButtonMapperTest {
         assertTrue("表格查询必须读取每条回复的 button: " + sql,
                 projection.replace("`", "").matches("(?s).*\\bpstu\\.button\\b.*"));
         assertEquals(ProcessTaskStepTaskUserVo.class, mapped.getResultMaps().get(0).getType());
+        assertFalse("表格查询不能再引用已删除的显示字段", sql.contains("reply_display_mode"));
         assertEquals(2, boundSql.getParameterMappings().size());
         for (int i = 0; i < taskIds.size(); i++) {
             assertEquals(taskIds.get(i), boundSql.getAdditionalParameter(boundSql.getParameterMappings().get(i).getProperty()));
@@ -148,6 +150,33 @@ public class ProcessTaskStepTaskButtonMapperTest {
                 assertEquals(button, reply.getButton());
             }
         }
+    }
+
+    /** 回复更新仅保存原始按钮和状态，任何分支均不能引用已删除的模式列。 */
+    @Test
+    public void updateDoesNotWriteRemovedReplyMode() throws Exception {
+        String resource = "neatlogic/module/process/dao/mapper/processtask/ProcessTaskStepTaskMapper.xml";
+        Configuration configuration = new Configuration();
+        try (InputStream stream = getClass().getClassLoader().getResourceAsStream(resource)) {
+            assertNotNull(stream);
+            XPathParser parser = new XPathParser(stream, true, null, new XMLMapperEntityResolver());
+            XNode update = parser.evalNode("/mapper/update[@id='updateTaskUserById']");
+            String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                    + "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">"
+                    + "<mapper namespace=\"reply.mode.update.fixture\">" + toXml(update) + "</mapper>";
+            new XMLMapperBuilder(new StringReader(xml), configuration, resource + "#reply-mode-update-test", configuration.getSqlFragments()).parse();
+        }
+        MappedStatement mapped = configuration.getMappedStatement("reply.mode.update.fixture.updateTaskUserById");
+        ProcessTaskStepTaskUserVo reply = new ProcessTaskStepTaskUserVo(101L, "reply-user", "succeed");
+        reply.setId(201L);
+        reply.setButton("同意");
+        BoundSql completed = mapped.getBoundSql(reply);
+        assertFalse(completed.getSql().contains("reply_display_mode"));
+        assertFalse(completed.getParameterMappings().stream().anyMatch(parameter -> "replyDisplayMode".equals(parameter.getProperty())));
+        assertTrue(completed.getSql().contains("`button` = ?"));
+        assertEquals("同意", configuration.newMetaObject(completed.getParameterObject()).getValue("button"));
+        reply.setStatus(null);
+        assertFalse(mapped.getBoundSql(reply).getSql().contains("`button` = ?"));
     }
 
     /** DOM 序列化保留注释间的全部 SQL 文本和动态标签，避免 XNode.toString 丢失混合内容。 */

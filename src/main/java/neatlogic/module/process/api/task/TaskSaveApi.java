@@ -17,6 +17,8 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.FieldValidResultVo;
+import neatlogic.framework.exception.type.ParamIrregularException;
+import neatlogic.framework.process.constvalue.TaskReplyDisplayMode;
 import neatlogic.framework.process.auth.PROCESS_BASE;
 import neatlogic.framework.process.dto.TaskConfigVo;
 import neatlogic.framework.process.exception.processtask.task.TaskConfigButtonNameRepeatException;
@@ -78,6 +80,18 @@ public class TaskSaveApi extends PrivateApiComponentBase {
             throw new TaskConfigNameRepeatException(taskConfigVo.getName());
         }
         JSONObject config = taskConfigVo.getConfig();
+        // 新旧调用均兼容缺省模式，显式非法值必须在写入策略前拒绝。
+        if (config == null) {
+            config = new JSONObject();
+            taskConfigVo.setConfig(config);
+        }
+        String replyDisplayMode = config.getString("replyDisplayMode");
+        if (!TaskReplyDisplayMode.isValid(replyDisplayMode)) {
+            throw new ParamIrregularException("config.replyDisplayMode");
+        }
+        config.put("replyDisplayMode", TaskReplyDisplayMode.normalize(replyDisplayMode));
+        // 防止传入已序列化配置时沿用旧缓存，其他配置键保持原样。
+        taskConfigVo.setConfigStr(config.toJSONString());
         if (MapUtils.isNotEmpty(config)) {
             JSONArray customButtonList = config.getJSONArray("customButtonList");
             if (CollectionUtils.isNotEmpty(customButtonList)) {
