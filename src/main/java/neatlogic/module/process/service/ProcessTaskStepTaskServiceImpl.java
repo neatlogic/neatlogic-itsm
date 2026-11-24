@@ -475,6 +475,11 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
 
+        // 当次提交读取策略生成审计回复意见；模式变化本身不触发重复完成，也不写入回复行。
+        TaskConfigVo replyTaskConfig = taskMapper.getTaskConfigById(stepTaskVo.getTaskConfigId());
+        JSONObject replyConfig = replyTaskConfig == null ? null : replyTaskConfig.getConfig();
+        String replyDisplayMode = TaskReplyDisplayMode.normalize(replyConfig == null ? null : replyConfig.getString("replyDisplayMode"));
+
         //update 更新内容
         boolean isChange = false;
         ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
@@ -531,8 +536,11 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             JSONObject paramObj = new JSONObject();
             paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
             paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), content);
+            // 回复意见固定为当次展示内容；模式仅供审计筛选，通知和动作仍使用原始内容、按钮。
+            paramObj.put(ProcessTaskAuditDetailType.REPLYOPINION.getParamName(), SubtaskReplyOpinion.build(content, button, replyDisplayMode));
+            paramObj.put("replyDisplayMode", replyDisplayMode);
             // 保存当次按钮名称快照；兼容未传按钮的调用，避免生成空白按钮明细。
-            if (StringUtils.isNotBlank(button)) {
+            if (SubtaskReplyOpinion.hasText(button)) {
                 paramObj.put(ProcessTaskAuditDetailType.BUTTON.getParamName(), button);
             }
             paramObj.put("source", source);
