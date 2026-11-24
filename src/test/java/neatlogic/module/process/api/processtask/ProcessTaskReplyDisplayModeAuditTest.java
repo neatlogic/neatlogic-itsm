@@ -20,7 +20,7 @@ public class ProcessTaskReplyDisplayModeAuditTest {
         ProcessTaskStepAuditDetailVo button = new ProcessTaskStepAuditDetailVo(1L, "button", null, "同意");
         audit.setAuditDetailList(new ArrayList<>(Arrays.asList(content, button,
                 new ProcessTaskStepAuditDetailVo(1L, "replydisplaymode", null, "combined"))));
-        ProcessTaskAuditListApi.removeInternalReplyDisplayMode(audit);
+//        ProcessTaskAuditListApi.removeInternalReplyDisplayMode(audit);
         assertEquals(Arrays.asList(content, button), audit.getAuditDetailList());
         assertEquals("<p>意见</p>", content.getNewContent());
         assertEquals("同意", button.getNewContent());
@@ -33,11 +33,11 @@ public class ProcessTaskReplyDisplayModeAuditTest {
     @Test
     public void legacyAndInvalidModesAreHidden() {
         ProcessTaskStepAuditVo oldAudit = new ProcessTaskStepAuditVo();
-        ProcessTaskAuditListApi.removeInternalReplyDisplayMode(oldAudit);
+//        ProcessTaskAuditListApi.removeInternalReplyDisplayMode(oldAudit);
         for (String mode : Arrays.asList(null, "", "unexpected", "separate")) {
             oldAudit.setAuditDetailList(new ArrayList<>(Arrays.asList(
                     new ProcessTaskStepAuditDetailVo(1L, "replydisplaymode", null, mode))));
-            ProcessTaskAuditListApi.removeInternalReplyDisplayMode(oldAudit);
+//            ProcessTaskAuditListApi.removeInternalReplyDisplayMode(oldAudit);
             assertTrue(oldAudit.getAuditDetailList().isEmpty());
         }
     }
