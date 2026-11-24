@@ -90,7 +90,6 @@ public class ProcessTaskAuditThread extends NeatLogicThread {
             }
             processTaskStepAuditVo.setActionTime(operateTime);
             String source = paramObj.getString("source");
-            System.out.println("source = " + source);
             if (StringUtils.isNotBlank(source)) {
                 processTaskStepAuditVo.setSource(source);
             }
